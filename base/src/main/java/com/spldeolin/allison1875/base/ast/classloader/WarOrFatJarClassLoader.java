@@ -76,7 +76,8 @@ public class WarOrFatJarClassLoader {
                 }
             }
         }
-        log.info("Decompressed [{}] to [{}]", "../" + Config.getProjectPath().relativize(Config.getWarOrFatJarPath()), tempDir);
+        log.info("Decompressed [{}] to [{}]", "../" + Config.getProjectPath().relativize(Config.getWarOrFatJarPath()),
+                tempDir);
         return tempDir;
     }
 

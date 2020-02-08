@@ -1,11 +1,8 @@
 package com.spldeolin.allison1875.da;
 
 import java.util.Collection;
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.processor.ApiProcessor;
 import com.spldeolin.allison1875.da.core.processor.HandlerProcessor;
