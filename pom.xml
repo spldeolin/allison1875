@@ -13,6 +13,7 @@
         <module>base</module>
         <module>doc-analyzer</module>
         <module>snippet-transformer</module>
+        <module>standard-inspector</module>
     </modules>
 
     <name>Allison 1875</name>
