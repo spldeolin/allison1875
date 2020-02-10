@@ -3,8 +3,8 @@ package com.spldeolin.allison1875.si;
 import java.util.Collections;
 import java.util.List;
 import com.github.javaparser.Range;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -28,19 +28,21 @@ public class MethodLineNumberReporter {
 
     private void process() {
         List<LineNumber> lineNumbers = Lists.newArrayList();
-        StaticAstContainer.getClassOrInterfaceDeclarations().forEach(coid -> {
-            coid.findAll(MethodDeclaration.class, method -> method.getBody().isPresent()).forEach(method -> {
-                String qualifier = method.findAncestor(ClassOrInterfaceDeclaration.class)
-                        .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中")).getFullyQualifiedName()
-                        .orElseThrow(QualifierAbsentException::new) + method.getName();
-                Range range = References.getRangeOrElseThrow(method);
-                int number = range.end.line - range.begin.line + 1;
-                if (number > 80) {
-                    lineNumbers.add(new LineNumber(qualifier, number));
-                }
+        StaticAstContainer.getClassOrInterfaceDeclarations().forEach(
+                coid -> coid.findAll(MethodDeclaration.class, method -> method.getBody().isPresent())
+                        .forEach(method -> {
+                            String qualifier =
+                                    method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
+                                            .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中"))
+                                            .getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + method
+                                            .getName();
+                            Range range = References.getRangeOrElseThrow(method);
+                            int number = range.end.line - range.begin.line + 1;
+                            if (number > 80) {
+                                lineNumbers.add(new LineNumber(qualifier, number));
+                            }
 
-            });
-        });
+                        }));
         Collections.sort(lineNumbers);
         lineNumbers.forEach(LineNumber::report);
     }
