@@ -28,21 +28,18 @@ public class MethodLineNumberReporter {
 
     private void process() {
         List<LineNumber> lineNumbers = Lists.newArrayList();
-        StaticAstContainer.forEachClassOrInterfaceDeclarations(
-                coid -> coid.findAll(MethodDeclaration.class, method -> method.getBody().isPresent())
-                        .forEach(method -> {
-                            String qualifier =
-                                    method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
-                                            .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中"))
-                                            .getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + method
-                                            .getName();
-                            Range range = Locations.getRange(method);
-                            int number = range.end.line - range.begin.line + 1;
-                            if (number > 80) {
-                                lineNumbers.add(new LineNumber(qualifier, number));
-                            }
+        StaticAstContainer.forEachCompilationUnits(
+                cu -> cu.findAll(MethodDeclaration.class, method -> method.getBody().isPresent()).forEach(method -> {
+                    String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
+                            .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中"))
+                            .getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + method.getName();
+                    Range range = Locations.getRange(method);
+                    int number = range.end.line - range.begin.line + 1;
+                    if (number > 80) {
+                        lineNumbers.add(new LineNumber(qualifier, number));
+                    }
 
-                        }));
+                }));
         Collections.sort(lineNumbers);
         lineNumbers.forEach(LineNumber::report);
     }
