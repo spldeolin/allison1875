@@ -15,7 +15,7 @@ import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclar
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
-import com.spldeolin.allison1875.st.util.Cus;
+import com.spldeolin.allison1875.st.util.Saves;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -73,7 +73,7 @@ public class SerialVersionUIDInserter implements Serializable {
 
         updates.forEach(cu -> {
             try {
-                Cus.originalSave(cu);
+                Saves.originalSave(cu);
             } catch (Exception e) {
                 log.warn(cu.getStorage().orElseThrow(StorageAbsentException::new).getPath(), e);
             }
