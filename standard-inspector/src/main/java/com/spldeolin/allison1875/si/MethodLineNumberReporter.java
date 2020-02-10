@@ -8,7 +8,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.References;
+import com.spldeolin.allison1875.base.util.Locations;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -36,7 +36,7 @@ public class MethodLineNumberReporter {
                                             .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中"))
                                             .getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + method
                                             .getName();
-                            Range range = References.getRangeOrElseThrow(method);
+                            Range range = Locations.getRange(method);
                             int number = range.end.line - range.begin.line + 1;
                             if (number > 80) {
                                 lineNumbers.add(new LineNumber(qualifier, number));

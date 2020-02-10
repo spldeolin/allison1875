@@ -10,26 +10,31 @@ import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 
 /**
+ * 获取代码的位置
+ *
  * @author Deolin 2020-02-09
  */
-public class References {
+public class Locations {
 
+    /**
+     * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations
+     */
     public static Path getRelativePath(Node node) {
-        Storage storage = getStorageOrElseThrow(node);
+        Storage storage = getStorage(node);
         return Config.getProjectPath().relativize(storage.getPath());
     }
 
-    public static Storage getStorageOrElseThrow(Node node) {
+    public static Storage getStorage(Node node) {
         return node.findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
                 .orElseThrow(StorageAbsentException::new);
     }
 
-    public static Range getRangeOrElseThrow(Node node) {
+    public static Range getRange(Node node) {
         return node.getRange().orElseThrow(RangeAbsentException::new);
     }
 
     public static int getBeginLine(Node node) {
-        return getRangeOrElseThrow(node).begin.line;
+        return getRange(node).begin.line;
     }
 
 }

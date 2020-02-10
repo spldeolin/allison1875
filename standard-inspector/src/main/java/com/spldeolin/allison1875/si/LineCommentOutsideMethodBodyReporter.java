@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.si;
 
-import static com.spldeolin.allison1875.base.util.References.getRangeOrElseThrow;
-import static com.spldeolin.allison1875.base.util.References.getRelativePath;
+import static com.spldeolin.allison1875.base.util.Locations.getRange;
+import static com.spldeolin.allison1875.base.util.Locations.getRelativePath;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -30,7 +30,7 @@ public class LineCommentOutsideMethodBodyReporter {
                 // 忽略被注释掉的情况（这种情况往往开头都是空格）
                 if (!lineComment.getContent().startsWith("  ")) {
 
-                    log.info("{}:{}", getRelativePath(lineComment), getRangeOrElseThrow(lineComment).begin.line);
+                    log.info("{}:{}", getRelativePath(lineComment), getRange(lineComment).begin.line);
                 }
             }
         }));

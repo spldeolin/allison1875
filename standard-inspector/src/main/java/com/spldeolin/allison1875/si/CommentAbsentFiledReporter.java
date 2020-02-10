@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.si;
 
-import static com.spldeolin.allison1875.base.util.References.getRangeOrElseThrow;
-import static com.spldeolin.allison1875.base.util.References.getStorageOrElseThrow;
+import static com.spldeolin.allison1875.base.util.Locations.getRange;
+import static com.spldeolin.allison1875.base.util.Locations.getStorage;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
@@ -25,8 +25,8 @@ public class CommentAbsentFiledReporter {
         StaticAstContainer.getClassOrInterfaceDeclarations().stream().filter(this::isPojo)
                 .forEach(pojo -> pojo.getFields().forEach(field -> {
                     if (!field.getJavadoc().isPresent()) {
-                        log.info("{}:{}", getStorageOrElseThrow(field).getPath(),
-                                getRangeOrElseThrow(field).begin.line);
+                        log.info("{}:{}", getStorage(field).getPath(),
+                                getRange(field).begin.line);
                     }
                 }));
     }
