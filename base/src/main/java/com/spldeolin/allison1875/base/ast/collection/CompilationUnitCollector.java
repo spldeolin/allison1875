@@ -50,7 +50,7 @@ class CompilationUnitCollector {
             }
         }
 
-        if (count > 0) {
+        if (Config.getReportCollectorDetailOrNot() && count > 0) {
             log.info("(Detail) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", count,
                     "../" + Config.getProjectPath().relativize(sourceRoot.getRoot()),
                     System.currentTimeMillis() - start);

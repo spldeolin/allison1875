@@ -44,6 +44,10 @@ public class Config {
         commonPageTypeQualifier = map.commonPageTypeQualifier;
     }
 
+    public static Boolean getReportCollectorDetailOrNot() {
+        return instance.reportCollectorDetailOrNot;
+    }
+
     public static Path getProjectPath() {
         return instance.projectPath;
     }
