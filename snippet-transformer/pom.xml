@@ -10,13 +10,13 @@
     </parent>
 
     <artifactId>snippet-transformer</artifactId>
-    <version>${parent.version}</version>
+    <version>${project.parent.version}</version>
 
     <dependencies>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>base</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 

@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>doc-analyzer</artifactId>
-    <version>${parent.version}</version>
+    <version>${project.parent.version}</version>
 
     <dependencies>
         <dependency>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>base</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 

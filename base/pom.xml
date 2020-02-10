@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>base</artifactId>
-    <version>${parent.version}</version>
+    <version>${project.parent.version}</version>
 
     <dependencies>
         <!-- javaparser -->
