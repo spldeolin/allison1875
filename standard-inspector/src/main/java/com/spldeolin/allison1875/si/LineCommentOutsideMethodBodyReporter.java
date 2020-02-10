@@ -23,7 +23,7 @@ public class LineCommentOutsideMethodBodyReporter {
     }
 
     private void processor() {
-        StaticAstContainer.getCompilationUnits().forEach(cu -> cu.findAll(LineComment.class).forEach(lineComment -> {
+        StaticAstContainer.forEachCompilationUnits(cu -> cu.findAll(LineComment.class).forEach(lineComment -> {
 
             // 不在大括号内，或是在类型声明的大括号内
             if (isNotInBlock(lineComment) || isDirectlyInTypeBlock(lineComment)) {

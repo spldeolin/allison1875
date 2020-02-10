@@ -38,7 +38,7 @@ public class SerialVersionUIDInserter implements Serializable {
                 .setDoNotAssignCommentsPrecedingEmptyLines(false);
 
         Collection<CompilationUnit> updates = Lists.newLinkedList();
-        StaticAstContainer.getCompilationUnits().forEach(cu -> {
+        StaticAstContainer.forEachCompilationUnits(cu -> {
             MutableBoolean hasSetup = new MutableBoolean(false);
             cu.getTypes().stream().filter(this::isClassAndSerialVersionUIDAbsent)
                     .map(TypeDeclaration::asClassOrInterfaceDeclaration).forEach(coid -> {

@@ -28,7 +28,7 @@ public class MethodLineNumberReporter {
 
     private void process() {
         List<LineNumber> lineNumbers = Lists.newArrayList();
-        StaticAstContainer.getClassOrInterfaceDeclarations().forEach(
+        StaticAstContainer.forEachClassOrInterfaceDeclarations(
                 coid -> coid.findAll(MethodDeclaration.class, method -> method.getBody().isPresent())
                         .forEach(method -> {
                             String qualifier =

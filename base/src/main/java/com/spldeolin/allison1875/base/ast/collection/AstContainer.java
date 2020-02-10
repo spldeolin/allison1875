@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.base.ast.collection;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -44,6 +45,10 @@ public class AstContainer {
         return cus;
     }
 
+    public void forEachCompilationUnits(Consumer<CompilationUnit> action) {
+        cus.forEach(action);
+    }
+
     public Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
         if (coids == null) {
             TypeDeclarationCollector<ClassOrInterfaceDeclaration> collector = new TypeDeclarationCollector<>(
@@ -51,6 +56,10 @@ public class AstContainer {
             coids = collector.collectIntoCollection(cus);
         }
         return coids;
+    }
+
+    public void forEachClassOrInterfaceDeclarations(Consumer<ClassOrInterfaceDeclaration> action) {
+        getClassOrInterfaceDeclarations().forEach(action);
     }
 
     public ClassOrInterfaceDeclaration getClassOrInterfaceDeclaration(String qualifier) {
@@ -74,6 +83,10 @@ public class AstContainer {
         return enums;
     }
 
+    public void forEachEnumDeclarations(Consumer<EnumDeclaration> action) {
+        getEnumDeclarations().forEach(action);
+    }
+
     public EnumDeclaration getEnumDeclaration(String qualifier) {
         if (enumsByQualifier == null) {
             TypeDeclarationCollector<EnumDeclaration> collector = new TypeDeclarationCollector<>(EnumDeclaration.class);
@@ -92,6 +105,10 @@ public class AstContainer {
             fieldVars = collector.collectIntoCollection(cus);
         }
         return fieldVars;
+    }
+
+    public void forEachFieldVariableDeclarators(Consumer<VariableDeclarator> action) {
+        getFieldVariableDeclarators().forEach(action);
     }
 
     public VariableDeclarator getFieldVariableDeclarator(String qualifier) {

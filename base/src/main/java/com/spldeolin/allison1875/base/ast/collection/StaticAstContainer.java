@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.base.ast.collection;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -29,8 +30,16 @@ public class StaticAstContainer {
         return fromConfigPath.getCompilationUnits();
     }
 
+    public static void forEachCompilationUnits(Consumer<CompilationUnit> action) {
+        fromConfigPath.getCompilationUnits().forEach(action);
+    }
+
     public static Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
         return fromConfigPath.getClassOrInterfaceDeclarations();
+    }
+
+    public static void forEachClassOrInterfaceDeclarations(Consumer<ClassOrInterfaceDeclaration> action) {
+        fromConfigPath.getClassOrInterfaceDeclarations().forEach(action);
     }
 
     public static ClassOrInterfaceDeclaration getClassOrInterfaceDeclaration(String qualifier) {
@@ -41,12 +50,20 @@ public class StaticAstContainer {
         return fromConfigPath.getEnumDeclarations();
     }
 
+    public static void forEachEnumDeclarations(Consumer<EnumDeclaration> action) {
+        fromConfigPath.getEnumDeclarations().forEach(action);
+    }
+
     public static EnumDeclaration getEnumDeclaration(String qualifier) {
         return fromConfigPath.getEnumDeclaration(qualifier);
     }
 
     public static Collection<VariableDeclarator> getFieldVariableDeclarators() {
         return fromConfigPath.getFieldVariableDeclarators();
+    }
+
+    public static void forEachFieldVariableDeclarators(Consumer<VariableDeclarator> action) {
+        fromConfigPath.getFieldVariableDeclarators().forEach(action);
     }
 
     public static VariableDeclarator getFieldVariableDeclarator(String qualifier) {

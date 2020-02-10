@@ -35,9 +35,8 @@ public class HandlerProcessor {
             ResponseBodyTypeParser hanlderResultTypeParser) {
         Collection<HandlerProcessResult> result = Lists.newLinkedList();
 
-        Collection<ClassOrInterfaceDeclaration> coids = StaticAstContainer.getClassOrInterfaceDeclarations();
-//                CoidContainer.getInstance().getAll();
-        coids.stream().filter(coid -> isFilteredController(coid, handlerFilter)).forEach(controller -> {
+        StaticAstContainer.getClassOrInterfaceDeclarations().stream()
+                .filter(coid -> isFilteredController(coid, handlerFilter)).forEach(controller -> {
 
             // reflect controller
             Class<?> reflectController;
