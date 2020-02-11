@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.si;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import com.github.javaparser.Range;
@@ -8,7 +9,9 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.filter.GitAddedFilesFilter;
 import com.spldeolin.allison1875.base.util.Locations;
+import com.sun.org.apache.bcel.internal.classfile.LineNumber;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -27,19 +30,28 @@ public class MethodLineNumberReporter {
     }
 
     private void process() {
-        List<LineNumber> lineNumbers = Lists.newArrayList();
+
+        Collection<MethodDeclaration> methods = Lists.newLinkedList();
         StaticAstContainer.forEachCompilationUnits(
                 cu -> cu.findAll(MethodDeclaration.class, method -> method.getBody().isPresent()).forEach(method -> {
-                    String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
-                            .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中"))
-                            .getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + method.getName();
                     Range range = Locations.getRange(method);
                     int number = range.end.line - range.begin.line + 1;
                     if (number > 80) {
-                        lineNumbers.add(new LineNumber(qualifier, number));
+                        methods.add(method);
                     }
 
                 }));
+
+        List<LineNumber> lineNumbers = Lists.newArrayList();
+        new GitAddedFilesFilter().filter(methods).forEach(method -> {
+            String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
+                    .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中")).getFullyQualifiedName()
+                    .orElseThrow(QualifierAbsentException::new) + method.getName();
+            Range range = Locations.getRange(method);
+            int number = range.end.line - range.begin.line + 1;
+            lineNumbers.add(new LineNumber(qualifier, number));
+        });
+
         Collections.sort(lineNumbers);
         lineNumbers.forEach(LineNumber::report);
     }

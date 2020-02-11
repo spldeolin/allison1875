@@ -17,11 +17,18 @@ import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 public class Locations {
 
     /**
-     * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations
+     * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */
     public static Path getRelativePath(Node node) {
-        Storage storage = getStorage(node);
-        return Config.getProjectPath().relativize(storage.getPath());
+        return Config.getProjectPath().relativize(getAbsolutePath(node));
+    }
+
+    /**
+     * @return e.g.: /Users/deolin/Documents/allison1875/base/src/main/java/com/spldeolin/allison1875/base/util
+     * /Locations.java
+     */
+    public static Path getAbsolutePath(Node node) {
+        return getStorage(node).getPath();
     }
 
     public static Storage getStorage(Node node) {

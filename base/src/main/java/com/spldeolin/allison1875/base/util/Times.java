@@ -66,7 +66,7 @@ public class Times {
     }
 
     /**
-     * String -> LocalDateTime  （yyyy-MM-dd）
+     * String -> LocalDateTime  （yyyy-MM-dd HH:mm:ss）
      */
     public static LocalDateTime toLocalDateTime(String content) {
         return LocalDateTime.parse(content, DEFAULT_DATE_TIME_FORMATTER);
