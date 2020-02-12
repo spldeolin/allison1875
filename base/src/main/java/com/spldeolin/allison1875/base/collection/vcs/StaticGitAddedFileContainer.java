@@ -10,6 +10,8 @@ import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.util.Locations;
 
 /**
+ * Git新增文件集合的静态访问口
+ *
  * @author Deolin 2020-02-12
  */
 public class StaticGitAddedFileContainer {

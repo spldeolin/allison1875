@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.si;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import com.github.javaparser.Range;
@@ -29,28 +28,20 @@ public class MethodLineNumberReporter {
     }
 
     private void process() {
+        List<LineNumber> lineNumbers = Lists.newArrayList();
+        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getClassOrInterfaceDeclarations()).forEach(
 
-        Collection<MethodDeclaration> methods = Lists.newLinkedList();
-        StaticAstContainer.forEachCompilationUnits(
                 cu -> cu.findAll(MethodDeclaration.class, method -> method.getBody().isPresent()).forEach(method -> {
+                    String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
+                            .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中"))
+                            .getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + method.getName();
                     Range range = Locations.getRange(method);
                     int number = range.end.line - range.begin.line + 1;
                     if (number > 80) {
-                        methods.add(method);
+                        lineNumbers.add(new LineNumber(qualifier, number));
                     }
 
                 }));
-
-        List<LineNumber> lineNumbers = Lists.newArrayList();
-        StaticGitAddedFileContainer.removeIfNotContain(methods).forEach(method -> {
-            String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
-                    .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中")).getFullyQualifiedName()
-                    .orElseThrow(QualifierAbsentException::new) + method.getName();
-            Range range = Locations.getRange(method);
-            int number = range.end.line - range.begin.line + 1;
-            lineNumbers.add(new LineNumber(qualifier, number));
-        });
-
         Collections.sort(lineNumbers);
         lineNumbers.forEach(LineNumber::report);
     }
