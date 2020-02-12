@@ -12,7 +12,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;

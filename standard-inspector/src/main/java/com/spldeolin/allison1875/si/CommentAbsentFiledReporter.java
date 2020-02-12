@@ -4,7 +4,7 @@ import static com.spldeolin.allison1875.base.util.Locations.getBeginLine;
 import static com.spldeolin.allison1875.base.util.Locations.getRelativePath;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import lombok.extern.log4j.Log4j2;
 
 /**

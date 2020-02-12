@@ -17,7 +17,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.ast.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.da.core.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.domain.UriFieldDomain;

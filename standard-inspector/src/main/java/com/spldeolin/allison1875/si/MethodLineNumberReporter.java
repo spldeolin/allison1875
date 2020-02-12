@@ -7,11 +7,10 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.filter.GitAddedFilesFilter;
 import com.spldeolin.allison1875.base.util.Locations;
-import com.sun.org.apache.bcel.internal.classfile.LineNumber;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -43,7 +42,7 @@ public class MethodLineNumberReporter {
                 }));
 
         List<LineNumber> lineNumbers = Lists.newArrayList();
-        new GitAddedFilesFilter().filter(methods).forEach(method -> {
+        StaticGitAddedFileContainer.removeIfNotContain(methods).forEach(method -> {
             String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
                     .orElseThrow(() -> new RuntimeException(method.getName() + "没有声明在类中")).getFullyQualifiedName()
                     .orElseThrow(QualifierAbsentException::new) + method.getName();

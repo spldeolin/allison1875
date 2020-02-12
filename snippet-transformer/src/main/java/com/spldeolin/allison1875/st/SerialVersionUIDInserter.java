@@ -13,7 +13,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.st.util.Saves;
 import lombok.extern.log4j.Log4j2;

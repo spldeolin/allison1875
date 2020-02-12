@@ -7,7 +7,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import lombok.extern.log4j.Log4j2;
 
 /**

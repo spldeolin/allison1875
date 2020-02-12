@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.ast.collection;
+package com.spldeolin.allison1875.base.collection.ast;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -9,8 +9,8 @@ import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.Config;
-import com.spldeolin.allison1875.base.ast.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.allison1875.base.ast.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
 import lombok.extern.log4j.Log4j2;
 
 /**

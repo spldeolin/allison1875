@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.filter;
+package com.spldeolin.allison1875.base.collection.vcs;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-02-10
  */
 @Log4j2
-class GitAddedFilesCollector {
+class GitAddedFileCollector {
 
     /**
      * 获取 指定时间之前最近一次提交，与最近一次提交相比，Git新增的文件

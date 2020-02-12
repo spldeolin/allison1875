@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.ast.collection;
+package com.spldeolin.allison1875.base.collection.ast;
 
 import java.nio.file.Path;
 import java.util.Collection;

@@ -15,8 +15,8 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.ast.classloader.WarOrFatJarClassLoader;
-import com.spldeolin.allison1875.base.ast.collection.StaticAstContainer;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.da.core.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
