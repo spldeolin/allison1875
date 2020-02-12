@@ -5,6 +5,7 @@ import static com.spldeolin.allison1875.base.util.Locations.getRelativePath;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,12 +23,17 @@ public class CommentAbsentFiledReporter {
     }
 
     private void process() {
-        StaticAstContainer.getClassOrInterfaceDeclarations().stream().filter(this::isPojo)
-                .forEach(pojo -> pojo.getFields().forEach(field -> {
-                    if (!field.getJavadoc().isPresent()) {
-                        log.info("{}:{}", getRelativePath(field), getBeginLine(field));
+        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getClassOrInterfaceDeclarations())
+                .forEach(coid -> {
+                    if (!isPojo(coid)) {
+                        return;
                     }
-                }));
+                    coid.getFields().forEach(field -> {
+                        if (!field.getJavadoc().isPresent()) {
+                            log.info("{}:{}", getRelativePath(field), getBeginLine(field));
+                        }
+                    });
+                });
     }
 
     private boolean isPojo(ClassOrInterfaceDeclaration coid) {

@@ -29,7 +29,7 @@ public class MethodLineNumberReporter {
 
     private void process() {
         List<LineNumber> lineNumbers = Lists.newArrayList();
-        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getClassOrInterfaceDeclarations()).forEach(
+        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getCompilationUnits()).forEach(
 
                 cu -> cu.findAll(MethodDeclaration.class, method -> method.getBody().isPresent()).forEach(method -> {
                     String qualifier = method.findAncestor(TypeDeclaration.class).map(td -> (TypeDeclaration<?>) td)
