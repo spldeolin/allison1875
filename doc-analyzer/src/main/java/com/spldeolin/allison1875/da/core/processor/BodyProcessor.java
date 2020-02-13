@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.util.Strings;
-import com.spldeolin.allison1875.da.core.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.enums.FieldType;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
 import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;

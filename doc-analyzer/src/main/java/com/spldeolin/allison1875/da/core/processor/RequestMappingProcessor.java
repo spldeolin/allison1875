@@ -14,7 +14,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.da.core.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.enums.MethodType;
 import com.spldeolin.allison1875.da.core.processor.result.RequestMappingProcessResult;
 import lombok.Data;

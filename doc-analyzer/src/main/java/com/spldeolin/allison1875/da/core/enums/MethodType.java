@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.core.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

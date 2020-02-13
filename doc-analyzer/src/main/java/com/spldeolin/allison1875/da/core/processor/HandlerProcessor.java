@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
-import com.spldeolin.allison1875.da.core.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.HandlerFilter;

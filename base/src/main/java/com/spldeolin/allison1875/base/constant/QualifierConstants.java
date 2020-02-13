@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.core.constant;
+package com.spldeolin.allison1875.base.constant;
 
 /**
  * @author Deolin 2020-01-07
