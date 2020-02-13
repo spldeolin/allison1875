@@ -25,7 +25,7 @@ public class Locations {
 
     /**
      * @return e.g.: /Users/deolin/Documents/allison1875/base/src/main/java/com/spldeolin/allison1875/base/util
-     * /Locations.java
+     *         /Locations.java
      */
     public static Path getAbsolutePath(Node node) {
         return getStorage(node).getPath();
