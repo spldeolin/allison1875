@@ -9,12 +9,11 @@ import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.Config;
-import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * CompilationUnit对象的收集器
+ * CompilationUnit对象的收集器（基于GlobalCollectionStrategy提供的策略收集）
  *
  * @author Deolin 2020-02-03
  */
@@ -24,7 +23,8 @@ class CompilationUnitCollector {
     Collection<CompilationUnit> collect(Path path) {
         long start = System.currentTimeMillis();
         Collection<CompilationUnit> result = Lists.newLinkedList();
-        CollectionStrategy strategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoader.classLoader);
+        CollectionStrategy strategy = GlobalCollectionStrategy.getCollectionStrategy();
+        log.info("Colect CompilationUnit with {}.", strategy.getClass().getSimpleName());
         collectSoruceRoots(path, strategy).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
         log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", result.size(),
                 path.toAbsolutePath(), System.currentTimeMillis() - start);

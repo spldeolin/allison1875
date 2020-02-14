@@ -4,6 +4,7 @@ import static com.spldeolin.allison1875.base.util.Locations.getBeginLine;
 import static com.spldeolin.allison1875.base.util.Locations.getRelativePath;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import lombok.extern.log4j.Log4j2;
@@ -23,6 +24,7 @@ public class CommentAbsentFiledReporter {
     }
 
     private void process() {
+//        GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
         StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getClassOrInterfaceDeclarations())
                 .forEach(coid -> {
                     if (!isPojo(coid)) {
