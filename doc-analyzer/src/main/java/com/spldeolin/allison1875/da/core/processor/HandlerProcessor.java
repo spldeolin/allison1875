@@ -15,7 +15,7 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
@@ -42,7 +42,7 @@ public class HandlerProcessor {
             Class<?> reflectController;
             String name = this.qualifierForClassLoader(controller);
             try {
-                reflectController = WarOrFatJarClassLoader.classLoader.loadClass(name);
+                reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
             } catch (ClassNotFoundException e) {
                 log.warn("class[{}] not found", name);
                 return;

@@ -13,7 +13,7 @@ import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.Config;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
@@ -173,7 +173,7 @@ public class BodyProcessor {
 
                 @Override
                 public ClassLoader getClassLoader() {
-                    return WarOrFatJarClassLoader.classLoader;
+                    return WarOrFatJarClassLoaderFactory.getClassLoader();
                 }
             }.constructFromCanonical(qualifierForClassLoader);
         } catch (IllegalArgumentException e) {

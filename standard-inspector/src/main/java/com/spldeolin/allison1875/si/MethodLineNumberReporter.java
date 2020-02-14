@@ -6,6 +6,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -28,6 +29,7 @@ public class MethodLineNumberReporter {
     }
 
     private void process() {
+        GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
         List<LineNumber> lineNumbers = Lists.newArrayList();
         StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getCompilationUnits()).forEach(
 

@@ -21,16 +21,14 @@ import com.spldeolin.allison1875.base.Config;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * web app war or Spring Boot fat jar classloader.
+ * web app war or Spring Boot fat jar class loader.
  *
  * @author Deolin 2019-12-27
  */
 @Log4j2
-public class WarOrFatJarClassLoader {
+public class WarOrFatJarClassLoaderFactory {
 
-    public static final URLClassLoader classLoader;
-
-    static {
+    public static ClassLoader getClassLoader() {
         List<URL> urls = Lists.newLinkedList();
         try {
             Path tempDir = decompressToTempDir();
@@ -47,14 +45,14 @@ public class WarOrFatJarClassLoader {
 
             // extra
             urls.add(Paths.get(
-                    WarOrFatJarClassLoader.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
+                    WarOrFatJarClassLoaderFactory.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
                     "classpathex").toUri().toURL());
 
         } catch (IOException e) {
             log.error("something wasn't right here.", e);
             System.exit(-1);
         }
-        classLoader = new URLClassLoader(urls.toArray(new URL[0]));
+        return new URLClassLoader(urls.toArray(new URL[0]));
     }
 
     private static Path decompressToTempDir() throws IOException {

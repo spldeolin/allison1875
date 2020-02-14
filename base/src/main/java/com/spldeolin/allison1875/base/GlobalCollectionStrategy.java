@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.base;
 import com.github.javaparser.utils.CollectionStrategy;
 import com.github.javaparser.utils.ParserCollectionStrategy;
 import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 
 /**
  * 全局CU收集策略，每个工具都可以根据需要通过这个类进行配置（故没有通过config.yml进行配置）
@@ -32,7 +32,7 @@ public class GlobalCollectionStrategy {
             if (doNotCollectWithLoadingClass) {
                 collectionStrategy = new ParserCollectionStrategy();
             } else {
-                collectionStrategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoader.classLoader);
+                collectionStrategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoaderFactory.getClassLoader());
             }
         }
         return collectionStrategy;

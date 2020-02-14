@@ -17,7 +17,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.da.core.domain.UriFieldDomain;
@@ -130,7 +130,7 @@ public class RequestParamProcessor {
 
                 @Override
                 public ClassLoader getClassLoader() {
-                    return WarOrFatJarClassLoader.classLoader;
+                    return WarOrFatJarClassLoaderFactory.getClassLoader();
                 }
             }.constructFromCanonical(qualifierForClassLoader);
         } catch (IllegalArgumentException e) {

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,6 +24,7 @@ public class LineCommentOutsideMethodBodyReporter {
     }
 
     private void processor() {
+        GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
         StaticAstContainer.forEachCompilationUnits(cu -> cu.findAll(LineComment.class).forEach(lineComment -> {
 
             // 不在大括号内，或是在类型声明的大括号内

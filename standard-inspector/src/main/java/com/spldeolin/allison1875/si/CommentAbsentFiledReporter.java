@@ -24,7 +24,7 @@ public class CommentAbsentFiledReporter {
     }
 
     private void process() {
-//        GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
+        GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
         StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getClassOrInterfaceDeclarations())
                 .forEach(coid -> {
                     if (!isPojo(coid)) {
