@@ -28,7 +28,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class WarOrFatJarClassLoaderFactory {
 
+    private static ClassLoader cache;
+
     public static ClassLoader getClassLoader() {
+        if (cache != null) {
+            return cache;
+        }
         List<URL> urls = Lists.newLinkedList();
         try {
             Path tempDir = decompressToTempDir();
@@ -52,7 +57,8 @@ public class WarOrFatJarClassLoaderFactory {
             log.error("something wasn't right here.", e);
             System.exit(-1);
         }
-        return new URLClassLoader(urls.toArray(new URL[0]));
+        cache = new URLClassLoader(urls.toArray(new URL[0]));
+        return cache;
     }
 
     private static Path decompressToTempDir() throws IOException {
