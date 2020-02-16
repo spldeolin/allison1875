@@ -45,10 +45,6 @@ public class AstContainer {
         return cus;
     }
 
-    public void forEachCompilationUnits(Consumer<CompilationUnit> action) {
-        cus.forEach(action);
-    }
-
     public Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
         if (coids == null) {
             TypeDeclarationCollector<ClassOrInterfaceDeclaration> collector = new TypeDeclarationCollector<>(
@@ -56,10 +52,6 @@ public class AstContainer {
             coids = collector.collectIntoCollection(cus);
         }
         return coids;
-    }
-
-    public void forEachClassOrInterfaceDeclarations(Consumer<ClassOrInterfaceDeclaration> action) {
-        getClassOrInterfaceDeclarations().forEach(action);
     }
 
     public ClassOrInterfaceDeclaration getClassOrInterfaceDeclaration(String qualifier) {
@@ -81,10 +73,6 @@ public class AstContainer {
             enums = collector.collectIntoCollection(cus);
         }
         return enums;
-    }
-
-    public void forEachEnumDeclarations(Consumer<EnumDeclaration> action) {
-        getEnumDeclarations().forEach(action);
     }
 
     public EnumDeclaration getEnumDeclaration(String qualifier) {
