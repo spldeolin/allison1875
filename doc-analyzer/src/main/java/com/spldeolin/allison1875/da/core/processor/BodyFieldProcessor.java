@@ -28,10 +28,21 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BodyFieldProcessor {
 
+    private final boolean forRequestBodyNotNot;
+
+    public BodyFieldProcessor(boolean forRequestBodyNotNot) {
+        this.forRequestBodyNotNot = forRequestBodyNotNot;
+    }
+
     public void process(ObjectSchema objectSchema, ApiDomain api) {
         Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> pair = parseZeroFloorFields(objectSchema);
-        api.responseBodyFields(pair.getLeft());
-        api.responseBodyFieldsFlatly(pair.getRight());
+        if (forRequestBodyNotNot) {
+            api.requestBodyFields(pair.getLeft());
+            api.requestBodyFieldsFlatly(pair.getRight());
+        } else {
+            api.responseBodyFields(pair.getLeft());
+            api.responseBodyFieldsFlatly(pair.getRight());
+        }
     }
 
     private Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> parseZeroFloorFields(
