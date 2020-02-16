@@ -43,12 +43,7 @@ public class Config {
 
     private Config() {
         Yaml yaml = new Yaml();
-        InputStream is = null;
-        try {
-            is = org.apache.commons.io.FileUtils
-                    .openInputStream(new java.io.File("/Users/deolin/Documents/config.yml"));
-        } catch (java.io.IOException ignored) {
-        }
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.yml");
         Map<String, String> map = yaml.load(is);
         reportCollectorDetailOrNot = BooleanUtils.toBoolean(map.get("reportCollectorDetailOrNot"));
         projectPath = Paths.get(map.get("projectPath"));
