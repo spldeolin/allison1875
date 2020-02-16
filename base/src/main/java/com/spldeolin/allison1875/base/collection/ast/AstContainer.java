@@ -20,6 +20,8 @@ public class AstContainer {
 
     private Collection<CompilationUnit> cus;
 
+    private Map<Path, CompilationUnit> cusByPath;
+
     private Collection<ClassOrInterfaceDeclaration> coids;
 
     private Map<String, ClassOrInterfaceDeclaration> coidsByQualifier;
@@ -34,7 +36,7 @@ public class AstContainer {
 
     AstContainer(Path path) {
         this.path = path;
-        this.cus = new CompilationUnitCollector().collect(path);
+        this.cus = new CompilationUnitCollector().collectIntoCollection(path);
     }
 
     public Path getPath() {
@@ -43,6 +45,13 @@ public class AstContainer {
 
     public Collection<CompilationUnit> getCompilationUnits() {
         return cus;
+    }
+
+    public CompilationUnit getCompilationUnit(Path path) {
+        if (cusByPath == null) {
+            cusByPath = new CompilationUnitCollector().collectIntoMap(cus);
+        }
+        return cusByPath.get(path);
     }
 
     public Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
@@ -93,10 +102,6 @@ public class AstContainer {
             fieldVars = collector.collectIntoCollection(cus);
         }
         return fieldVars;
-    }
-
-    public void forEachFieldVariableDeclarators(Consumer<VariableDeclarator> action) {
-        getFieldVariableDeclarators().forEach(action);
     }
 
     public VariableDeclarator getFieldVariableDeclarator(String qualifier) {

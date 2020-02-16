@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.base.collection.ast;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.Consumer;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -30,12 +29,12 @@ public class StaticAstContainer {
         return fromConfigPath.getCompilationUnits();
     }
 
-    public static Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
-        return fromConfigPath.getClassOrInterfaceDeclarations();
+    public static CompilationUnit getCompilationUnit(Path path) {
+        return fromConfigPath.getCompilationUnit(path);
     }
 
-    public static void forEachClassOrInterfaceDeclarations(Consumer<ClassOrInterfaceDeclaration> action) {
-        fromConfigPath.getClassOrInterfaceDeclarations().forEach(action);
+    public static Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
+        return fromConfigPath.getClassOrInterfaceDeclarations();
     }
 
     public static ClassOrInterfaceDeclaration getClassOrInterfaceDeclaration(String qualifier) {

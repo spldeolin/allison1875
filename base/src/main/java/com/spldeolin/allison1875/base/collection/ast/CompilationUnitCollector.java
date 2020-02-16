@@ -2,12 +2,14 @@ package com.spldeolin.allison1875.base.collection.ast;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Map;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.CollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import lombok.extern.log4j.Log4j2;
@@ -20,17 +22,25 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class CompilationUnitCollector {
 
-    Collection<CompilationUnit> collect(Path path) {
+    Collection<CompilationUnit> collectIntoCollection(Path path) {
         long start = System.currentTimeMillis();
         Collection<CompilationUnit> result = Lists.newLinkedList();
         CollectionStrategy strategy = GlobalCollectionStrategy.getCollectionStrategy();
-        log.info("Colect CompilationUnit with {}.", strategy.getClass().getSimpleName());
+        log.info("Start collecting CompilationUnit with {}.", strategy.getClass().getSimpleName());
         collectSoruceRoots(path, strategy).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
         log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", result.size(),
                 path.toAbsolutePath(), System.currentTimeMillis() - start);
         return result;
     }
 
+    Map<Path, CompilationUnit> collectIntoMap(Collection<CompilationUnit> cus) {
+        Map<Path, CompilationUnit> result = Maps.newHashMap();
+        for (CompilationUnit cu : cus) {
+            cu.getStorage().ifPresent(storage -> result.put(storage.getPath(), cu));
+        }
+        log.info("(Summary) {} CompilationUnit has collected into Map.", result.size());
+        return result;
+    }
 
     private Collection<SourceRoot> collectSoruceRoots(Path path, CollectionStrategy collectionStrategy) {
         ProjectRoot projectRoot = collectionStrategy.collect(path);
