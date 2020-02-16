@@ -60,25 +60,28 @@ class FieldVariableDeclaratorCollector {
     }
 
     private void put(FieldDeclaration field, VariableDeclarator var, Map<String, VariableDeclarator> map) {
-        Node parent = field.getParentNode().orElseThrow(ParentAbsentException::new);
-        if (!(parent instanceof TypeDeclaration)) {
-            // 例如这个field在一个匿名内部类中，那么parent就是ObjectCreationExpr..
-            // 由于是在匿名类中，所有没有全限定名，无法通过byQuailfier的方式获取到，自然也不用收集
-            return;
-        }
+        try {
+            Node parent = field.getParentNode().orElseThrow(ParentAbsentException::new);
+            if (!(parent instanceof TypeDeclaration)) {
+                // 例如这个field在一个匿名内部类中，那么parent就是ObjectCreationExpr..
+                // 由于是在匿名类中，所有没有全限定名，无法通过byQuailfier的方式获取到，自然也不用收集
+                return;
+            }
 
-        String fieldVarQulifier = Joiner.on(".")
-                .join(((TypeDeclaration<?>) parent).getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
-                        var.getNameAsString());
+            String fieldVarQulifier = Joiner.on(".").join(((TypeDeclaration<?>) parent).getFullyQualifiedName()
+                    .orElseThrow(QualifierAbsentException::new), var.getNameAsString());
 
-        if (map.get(fieldVarQulifier) != null) {
-            // 多module的maven项目中，这样的不规范情况是可能发生的
-            log.warn("Qualifier [{}] is not unique, overwrite collected VariableDeclarator parsed form storage [{}].",
-                    fieldVarQulifier,
-                    map.get(fieldVarQulifier).findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
-                            .orElseThrow(StorageAbsentException::new).getPath());
+            if (map.get(fieldVarQulifier) != null) {
+                // 多module的maven项目中，这样的不规范情况是可能发生的
+                log.warn("Qualifier [{}] is not unique, overwrite collected VariableDeclarator parsed form storage "
+                                + "[{}].", fieldVarQulifier,
+                        map.get(fieldVarQulifier).findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
+                                .orElseThrow(StorageAbsentException::new).getPath());
+            }
+            map.put(fieldVarQulifier, var);
+        } catch (Exception e) {
+            log.error("collect exception.", e);
         }
-        map.put(fieldVarQulifier, var);
     }
 
 }
