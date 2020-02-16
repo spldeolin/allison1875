@@ -30,10 +30,6 @@ public class StaticAstContainer {
         return fromConfigPath.getCompilationUnits();
     }
 
-    public static void forEachCompilationUnits(Consumer<CompilationUnit> action) {
-        fromConfigPath.getCompilationUnits().forEach(action);
-    }
-
     public static Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
         return fromConfigPath.getClassOrInterfaceDeclarations();
     }
@@ -50,20 +46,12 @@ public class StaticAstContainer {
         return fromConfigPath.getEnumDeclarations();
     }
 
-    public static void forEachEnumDeclarations(Consumer<EnumDeclaration> action) {
-        fromConfigPath.getEnumDeclarations().forEach(action);
-    }
-
     public static EnumDeclaration getEnumDeclaration(String qualifier) {
         return fromConfigPath.getEnumDeclaration(qualifier);
     }
 
     public static Collection<VariableDeclarator> getFieldVariableDeclarators() {
         return fromConfigPath.getFieldVariableDeclarators();
-    }
-
-    public static void forEachFieldVariableDeclarators(Consumer<VariableDeclarator> action) {
-        fromConfigPath.getFieldVariableDeclarators().forEach(action);
     }
 
     public static VariableDeclarator getFieldVariableDeclarator(String qualifier) {

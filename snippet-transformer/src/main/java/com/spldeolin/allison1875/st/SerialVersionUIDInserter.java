@@ -14,6 +14,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.st.util.Saves;
 import lombok.extern.log4j.Log4j2;
@@ -38,7 +39,7 @@ public class SerialVersionUIDInserter implements Serializable {
                 .setDoNotAssignCommentsPrecedingEmptyLines(false);
 
         Collection<CompilationUnit> updates = Lists.newLinkedList();
-        StaticAstContainer.forEachCompilationUnits(cu -> {
+        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getCompilationUnits()).forEach(cu -> {
             MutableBoolean hasSetup = new MutableBoolean(false);
             cu.getTypes().stream().filter(this::isClassAndSerialVersionUIDAbsent)
                     .map(TypeDeclaration::asClassOrInterfaceDeclaration).forEach(coid -> {
