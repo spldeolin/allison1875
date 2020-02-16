@@ -9,6 +9,7 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -25,17 +26,18 @@ public class LineCommentOutsideMethodBodyReporter {
 
     private void processor() {
         GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
-        StaticAstContainer.forEachCompilationUnits(cu -> cu.findAll(LineComment.class).forEach(lineComment -> {
+        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getCompilationUnits())
+                .forEach(cu -> cu.findAll(LineComment.class).forEach(lineComment -> {
 
-            // 不在大括号内，或是在类型声明的大括号内
-            if (isNotInBlock(lineComment) || isDirectlyInTypeBlock(lineComment)) {
-                // 忽略被注释掉的情况（这种情况往往开头都是空格）
-                if (!lineComment.getContent().startsWith("  ")) {
+                    // 不在大括号内，或是在类型声明的大括号内
+                    if (isNotInBlock(lineComment) || isDirectlyInTypeBlock(lineComment)) {
+                        // 忽略被注释掉的情况（这种情况往往开头都是空格）
+                        if (!lineComment.getContent().startsWith("  ")) {
 
-                    log.info("{}:{}", getRelativePath(lineComment), getRange(lineComment).begin.line);
-                }
-            }
-        }));
+                            log.info("{}:{}", getRelativePath(lineComment), getRange(lineComment).begin.line);
+                        }
+                    }
+                }));
 
     }
 
