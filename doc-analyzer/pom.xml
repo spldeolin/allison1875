@@ -19,6 +19,13 @@
             <version>5.2.3.RELEASE</version>
         </dependency>
 
+        <!-- freemarker -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.29</version>
+        </dependency>
+
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>base</artifactId>
