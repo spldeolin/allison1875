@@ -8,5 +8,10 @@ import lombok.Data;
 @Data
 public class ResponseBodyFieldFtl {
 
+    private String linkName;
+
+    private String description;
+
+    private String jsonType;
 
 }
