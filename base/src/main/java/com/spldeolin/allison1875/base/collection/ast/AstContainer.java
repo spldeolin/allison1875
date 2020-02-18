@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.base.collection.ast;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.Consumer;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
