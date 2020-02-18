@@ -25,7 +25,7 @@ public class HandlerProcessResult {
 
     private Collection<Parameter> requestParams;
 
-    private ResolvedType requestBodyResolveType;
+    private ResolvedType requestBodyResolvedType;
 
     private ResolvedType responseBodyResolvedType;
 

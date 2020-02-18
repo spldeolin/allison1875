@@ -80,7 +80,7 @@ public class HandlerProcessor {
                             parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
                                     .filter(resolvedAnno -> QualifierConstants.REQUEST_BODY
                                             .equals(resolvedAnno.getId())).ifPresent(
-                                    resolvedAnno -> entry.requestBodyResolveType(parameter.getType().resolve()));
+                                    resolvedAnno -> entry.requestBodyResolvedType(parameter.getType().resolve()));
                             parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
                                     .filter(resolvedAnno -> QualifierConstants.REQUEST_PARAM
                                             .equals(resolvedAnno.getId()))

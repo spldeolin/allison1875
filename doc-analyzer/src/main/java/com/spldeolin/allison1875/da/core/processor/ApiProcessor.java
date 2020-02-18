@@ -42,7 +42,7 @@ public class ApiProcessor {
         api.requestParamFields(new RequestParamProcessor().processor(handlerProcessorResult.requestParams()));
 
         // request body
-        BodyProcessResult req = new BodyProcessor(handlerProcessorResult.requestBodyResolveType()).process();
+        BodyProcessResult req = new BodyProcessor(handlerProcessorResult.requestBodyResolvedType()).process();
         this.calcRequestBodyType(api, req);
         this.processRequestBodyFields(api, req);
 
