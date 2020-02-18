@@ -17,6 +17,8 @@ public class SimpleMdOutputVo {
 
     private Boolean isRequestBodyChaos;
 
+    private Boolean anyValidatorsExist;
+
     private Collection<RequestBodyFieldVo> requestBodyFields;
 
     private Boolean isResponseBodyNone;

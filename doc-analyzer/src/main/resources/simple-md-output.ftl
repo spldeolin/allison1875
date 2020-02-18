@@ -13,10 +13,10 @@ ${description}
 <#elseif isRequestBodyChaos>
 参数结构无法用表格表示，只提供JSON Schema
 <#else>
-| name                | 描述                 | JSON类型和格式                | 校验项               |
-| ------------------- | -------------------- | ---------------------------- | ------------------- |
+| name                | 描述                 | JSON类型和格式                <#if anyValidatorsExist>| 校验项             </#if> |
+| ------------------- | -------------------- | ---------------------------- <#if anyValidatorsExist>| ------------------</#if> |
 <#list requestBodyFields as field>
-| `${field.linkName}` | ${field.description} | `${field.jsonTypeAndFormat}` | ${field.validators} |
+| `${field.linkName}` | ${field.description} | `${field.jsonTypeAndFormat}` <#if anyValidatorsExist>| ${field.validators}</#if> |
 </#list>
 </#if>
 

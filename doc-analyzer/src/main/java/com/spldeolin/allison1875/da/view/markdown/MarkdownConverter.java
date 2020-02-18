@@ -39,6 +39,7 @@ public class MarkdownConverter {
                     fieldVos.add(fieldVo);
                 }
                 vo.setRequestBodyFields(fieldVos);
+                vo.setAnyValidatorsExist(fieldVos.stream().allMatch(fieldVo -> "".equals(fieldVo.getValidators())));
             }
             if (!vo.getIsResponseBodyChaos() && !vo.getIsResponseBodyNone()) {
                 Collection<ResponseBodyFieldVo> fieldVos = Lists.newArrayList();
@@ -81,7 +82,12 @@ public class MarkdownConverter {
             });
             Joiner.on("　").skipNulls().appendTo(result, parts);
         }
-        return result.toString();
+
+        if (result.length() == 0) {
+            return "";
+        } else {
+            return result.toString();
+        }
     }
 
     private String nullToEmpty(String s) {
