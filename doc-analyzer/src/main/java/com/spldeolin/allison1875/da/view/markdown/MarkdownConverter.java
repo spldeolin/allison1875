@@ -9,6 +9,8 @@ import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.domain.ValidatorDomain;
 import com.spldeolin.allison1875.da.core.enums.BodyType;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
+import com.spldeolin.allison1875.da.core.enums.StringFormatType;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -34,7 +36,7 @@ public class MarkdownConverter {
                     RequestBodyFieldVo fieldVo = new RequestBodyFieldVo();
                     fieldVo.setLinkName(nullToEmpty(field.fieldName()));
                     fieldVo.setDescription(nullToEmpty(field.description()));
-                    fieldVo.setJsonTypeAndFormat(converterTypeAndFormat(field));
+                    fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVo.setValidators(convertValidators(field.nullable(), field.validators()));
                     fieldVos.add(fieldVo);
                 }
@@ -47,7 +49,7 @@ public class MarkdownConverter {
                     ResponseBodyFieldVo fieldVo = new ResponseBodyFieldVo();
                     fieldVo.setLinkName(nullToEmpty(field.fieldName()));
                     fieldVo.setDescription(nullToEmpty(field.description()));
-                    fieldVo.setJsonTypeAndFormat(converterTypeAndFormat(field));
+                    fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVos.add(fieldVo);
                 }
                 vo.setResponseBodyFields(fieldVos);
@@ -62,8 +64,18 @@ public class MarkdownConverter {
 
     }
 
-    private String converterTypeAndFormat(BodyFieldDomain field) {
-        return Joiner.on(" ").skipNulls().join(field.jsonType().getValue(), field.stringFormat(), field.numberFormat());
+    private Collection<String> converterTypeAndFormat(BodyFieldDomain field) {
+        Collection<String> result = Lists.newArrayList();
+        result.add(field.jsonType().getValue());
+        String stringFormat = field.stringFormat();
+        if (stringFormat != null && !StringFormatType.normal.getValue().equals(stringFormat)) {
+            result.add(stringFormat);
+        }
+        NumberFormatType numberFormat = field.numberFormat();
+        if (numberFormat != null) {
+            result.add(numberFormat.getValue());
+        }
+        return result;
     }
 
     private String convertValidators(Boolean nullable, Collection<ValidatorDomain> validators) {

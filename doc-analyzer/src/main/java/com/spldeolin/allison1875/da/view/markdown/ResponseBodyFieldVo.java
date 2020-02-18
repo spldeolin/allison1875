@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.da.view.markdown;
 
+import java.util.Collection;
 import lombok.Data;
 
 /**
@@ -12,6 +13,6 @@ public class ResponseBodyFieldVo {
 
     private String description;
 
-    private String jsonTypeAndFormat;
+    private Collection<String> jsonTypeAndFormats;
 
 }
