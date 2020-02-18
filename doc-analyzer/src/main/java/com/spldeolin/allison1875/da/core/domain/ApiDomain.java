@@ -40,4 +40,6 @@ public class ApiDomain {
 
     private JsonSchema responseBodyChaosJsonSchema;
 
+    private String codeSourceLocation;
+
 }

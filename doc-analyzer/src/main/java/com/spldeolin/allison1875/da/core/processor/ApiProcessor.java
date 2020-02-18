@@ -4,6 +4,7 @@ import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.enums.BodyType;
@@ -50,6 +51,9 @@ public class ApiProcessor {
         BodyProcessResult resp = new BodyProcessor(handlerProcessorResult.responseBodyResolvedType()).process();
         this.calcResponseBodyType(api, resp);
         this.processResponseBodyFields(api, resp);
+
+        // code source location
+        api.codeSourceLocation(Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName()));
 
         return api;
     }

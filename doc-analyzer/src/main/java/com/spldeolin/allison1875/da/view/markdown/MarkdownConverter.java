@@ -28,7 +28,7 @@ public class MarkdownConverter {
             vo.setIsRequestBodyChaos(BodyType.chaos == api.requestBodyType());
             vo.setIsResponseBodyNone(BodyType.none == api.responseBodyType());
             vo.setIsResponseBodyChaos(BodyType.chaos == api.responseBodyType());
-            vo.setLocation("");
+            vo.setLocation(api.codeSourceLocation());
 
             if (!vo.getIsRequestBodyChaos() && !vo.getIsRequestBodyNone()) {
                 Collection<RequestBodyFieldVo> fieldVos = Lists.newArrayList();
