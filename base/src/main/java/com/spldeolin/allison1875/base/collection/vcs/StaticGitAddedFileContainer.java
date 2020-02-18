@@ -1,12 +1,13 @@
 package com.spldeolin.allison1875.base.collection.vcs;
 
+import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
+
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.ast.Node;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.util.Locations;
 
 /**
@@ -17,7 +18,7 @@ import com.spldeolin.allison1875.base.util.Locations;
 public class StaticGitAddedFileContainer {
 
     private static final Optional<Set<Path>> GIT_ADDED_FILES = new GitAddedFileCollector()
-            .collectSinceAssignedTime(Config.getProjectPath(), Config.getGiveUpResultAddedSinceTime());
+            .collectSinceAssignedTime(CONFIG.getProjectPath(), CONFIG.getGiveUpResultAddedSinceTime());
 
     public static boolean contain(Node node) {
         Path nodeCuPath = Locations.getAbsolutePath(node);

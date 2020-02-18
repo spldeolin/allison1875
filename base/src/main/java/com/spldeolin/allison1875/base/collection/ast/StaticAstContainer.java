@@ -1,5 +1,8 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
+
+import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
+
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
@@ -8,7 +11,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.Config;
 
 /**
  * 存放抽象语法树节点的容器的静态访问口
@@ -17,7 +19,7 @@ import com.spldeolin.allison1875.base.Config;
  */
 public class StaticAstContainer {
 
-    private static AstContainer fromConfigPath = new AstContainer(Config.getProjectPath());
+    private static AstContainer fromConfigPath = new AstContainer(CONFIG.getProjectPath());
 
     private static Map<Path, AstContainer> fromCustomPath = Maps.newHashMap();
 

@@ -1,5 +1,8 @@
 package com.spldeolin.allison1875.base.classloader;
 
+
+import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +20,6 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.Config;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -65,7 +67,7 @@ public class WarOrFatJarClassLoaderFactory {
         Path tempDir = Files.createTempDirectory("docgen" + LocalDateTime.now().toString());
         tempDir.toFile().deleteOnExit();
 
-        try (ZipFile zip = new ZipFile(Config.getWarOrFatJarPath().toFile())) {
+        try (ZipFile zip = new ZipFile(CONFIG.getWarOrFatJarPath().toFile())) {
             for (ZipEntry zipEntry : Collections.list(zip.entries())) {
                 File dest = tempDir.resolve(zipEntry.getName()).toFile();
                 // mkdir or copy
@@ -80,13 +82,12 @@ public class WarOrFatJarClassLoaderFactory {
                 }
             }
         }
-        log.info("Decompressed [{}] to [{}]", "../" + Config.getProjectPath().relativize(Config.getWarOrFatJarPath()),
-                tempDir);
+        log.info("Decompressed [{}] to [{}]", CONFIG.getProjectPath().relativize(CONFIG.getWarOrFatJarPath()), tempDir);
         return tempDir;
     }
 
     private static Path getWebInfPath(Path tempDir) {
-        String extension = FilenameUtils.getExtension(Config.getWarOrFatJarPath().getFileName().toString());
+        String extension = FilenameUtils.getExtension(CONFIG.getWarOrFatJarPath().getFileName().toString());
         if ("war".equalsIgnoreCase(extension)) {
             return tempDir.resolve("WEB-INF");
         } else if ("jar".equalsIgnoreCase(extension)) {

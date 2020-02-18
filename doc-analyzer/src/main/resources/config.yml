@@ -1,5 +1,7 @@
-reportCollectorDetailOrNot:
+# com.spldeolin.allison1875.base.BaseConfig
 projectPath:
 warOrFatJarPath:
-commonPageTypeQualifier:
 giveUpResultAddedSinceTime:
+
+# com.spldeolin.allison1875.da.DocAnalyzerConfig
+commonPageTypeQualifier:

@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
+import static com.spldeolin.allison1875.da.DocAnalyzerConfig.CONFIG;
+
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -12,7 +14,6 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
-import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
@@ -143,7 +144,7 @@ public class BodyProcessor {
 
     private boolean isPage(ResolvedType type) {
         if (type.isReferenceType()) {
-            return type.asReferenceType().getId().equals(Config.getCommonPageTypeQualifier());
+            return type.asReferenceType().getId().equals(CONFIG.getCommonPageTypeQualifier());
         }
         return false;
     }

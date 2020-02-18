@@ -1,5 +1,8 @@
 package com.spldeolin.allison1875.si;
 
+
+import static com.spldeolin.allison1875.si.StandardInspectorConfig.CONFIG;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,7 +13,6 @@ import org.eclipse.jgit.diff.DiffEntry;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.base.util.Locations;
@@ -29,7 +31,7 @@ class UncommittedModifiedFileReporter {
     }
 
     private void process() {
-        try (Git git = Git.open(Config.getProjectPath().toFile())) {
+        try (Git git = Git.open(CONFIG.getProjectPath().toFile())) {
             String projectPath = git.getRepository().getWorkTree().getPath();
             Collection<CompilationUnit> modifiedCus = Lists.newLinkedList();
             for (DiffEntry diff : git.diff().call()) {

@@ -1,10 +1,11 @@
 package com.spldeolin.allison1875.base.util;
 
+import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
+
 import java.nio.file.Path;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.Node;
-import com.spldeolin.allison1875.base.Config;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
@@ -20,7 +21,7 @@ public class Locations {
      * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */
     public static Path getRelativePath(Node node) {
-        return Config.getProjectPath().relativize(getAbsolutePath(node));
+        return CONFIG.getProjectPath().relativize(getAbsolutePath(node));
     }
 
     /**
