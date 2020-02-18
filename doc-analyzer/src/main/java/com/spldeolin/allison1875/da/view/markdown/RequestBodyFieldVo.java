@@ -12,7 +12,7 @@ public class RequestBodyFieldVo {
 
     private String description;
 
-    private String jsonType;
+    private String jsonTypeAndFormat;
 
     private String validators;
 

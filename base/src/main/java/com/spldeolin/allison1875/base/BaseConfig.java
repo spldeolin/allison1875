@@ -6,8 +6,10 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
+import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.Times;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Allison 1875的全局配置，只包含项目路径、Git增量起始时间等配置
@@ -45,11 +47,14 @@ public class BaseConfig {
 
     private void initLoad() {
         Yaml yaml = new Yaml();
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.yml");
-        rawData = yaml.load(is);
-        projectPath = Paths.get(rawData.get("projectPath"));
-        warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
-        giveUpResultAddedSinceTime = Times.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
+        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
+            rawData = yaml.load(is);
+            projectPath = Paths.get(rawData.get("projectPath"));
+            warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
+            giveUpResultAddedSinceTime = Times.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
+        } catch (Exception e) {
+            throw new ConfigLoadingException(e);
+        }
     }
 
 }

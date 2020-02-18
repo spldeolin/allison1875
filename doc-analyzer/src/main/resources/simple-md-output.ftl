@@ -13,10 +13,10 @@ ${description}
 <#elseif isRequestBodyChaos>
 参数结构无法用表格表示，只提供JSON Schema
 <#else>
-| name                | 描述                 | JSON类型和格式       | 校验项               |
-| ------------------- | -------------------- | ------------------- | ------------------- |
+| name                | 描述                 | JSON类型和格式                | 校验项               |
+| ------------------- | -------------------- | ---------------------------- | ------------------- |
 <#list requestBodyFields as field>
-| `${field.linkName}` | ${field.description} | `${field.jsonType}` | ${field.validators} |
+| `${field.linkName}` | ${field.description} | `${field.jsonTypeAndFormat}` | ${field.validators} |
 </#list>
 </#if>
 
@@ -29,10 +29,10 @@ ${description}
 <#elseif isResponseBodyChaos>
 返回值结构无法用表格表示，只提供JSON Schema
 <#else>
-| name                | 描述                 | JSON类型和格式       |
-| ------------------- | -------------------- | ------------------- |
+| name                | 描述                 | JSON类型和格式                |
+| ------------------- | -------------------- | ---------------------------- |
 <#list responseBodyFields as field>
-| `${field.linkName}` | ${field.description} | `${field.jsonType}` |
+| `${field.linkName}` | ${field.description} | `${field.jsonTypeAndFormat}` |
 </#list>
 </#if>
 

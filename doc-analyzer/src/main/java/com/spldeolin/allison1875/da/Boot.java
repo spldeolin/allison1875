@@ -9,6 +9,7 @@ import com.spldeolin.allison1875.da.core.processor.HandlerProcessor;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ReturnStmtBaseResponseBodyTypeParser;
+import com.spldeolin.allison1875.da.view.markdown.MarkdownConverter;
 import com.spldeolin.allison1875.da.view.rap.RapConverter;
 import lombok.extern.log4j.Log4j2;
 
@@ -33,8 +34,9 @@ public class Boot {
         handlerEntries.forEach(entry -> apis.add(new ApiProcessor(entry).process()));
 
         // convert to view
-        String result = new RapConverter().convert(apis);
-        log.info(result);
+//        String result = new RapConverter().convert(apis);
+//        log.info(result);
+        new MarkdownConverter().convert(apis);
     }
 
 }

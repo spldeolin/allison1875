@@ -12,6 +12,6 @@ public class ResponseBodyFieldVo {
 
     private String description;
 
-    private String jsonType;
+    private String jsonTypeAndFormat;
 
 }
