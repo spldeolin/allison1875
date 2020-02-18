@@ -41,7 +41,7 @@ public class MarkdownConverter {
                     fieldVos.add(fieldVo);
                 }
                 vo.setRequestBodyFields(fieldVos);
-                vo.setAnyValidatorsExist(fieldVos.stream().allMatch(fieldVo -> "".equals(fieldVo.getValidators())));
+                vo.setAnyValidatorsExist(fieldVos.stream().anyMatch(fieldVo -> !"".equals(fieldVo.getValidators())));
             }
             if (!vo.getIsResponseBodyChaos() && !vo.getIsResponseBodyNone()) {
                 Collection<ResponseBodyFieldVo> fieldVos = Lists.newArrayList();
