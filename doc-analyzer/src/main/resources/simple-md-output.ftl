@@ -1,6 +1,6 @@
-## URI和描述
+## 概要
 
-`${url}`
+`${uri}`
 
 ${description}
 
@@ -8,39 +8,39 @@ ${description}
 
 ## 参数
 
-#if(${isRequestBodyNone})
+<#if isRequestBodyNone>
 没有参数
-#elseif(${isRequestBodyChaos})
-参数结构无法用表格表示，只提供JSON Schema，详见**开发者备注**
-#else
+<#elseif isRequestBodyChaos>
+参数结构无法用表格表示，只提供JSON Schema
+<#else>
 | name                | 描述                 | JSON类型和格式       | 校验项               |
 | ------------------- | -------------------- | ------------------- | ------------------- |
-#foreach($field in ${requestBodyFields})
+<#list requestBodyFields as field>
 | `${field.linkName}` | ${field.description} | `${field.jsonType}` | ${field.validators} |
-#end
-#end
+</#list>
+</#if>
 
 
 
 ## 返回值
 
-#if(${isRequestBodyNone})
+<#if isResponseBodyNone>
 没有返回值
-#elseif(${isRequestBodyChaos})
-返回值结构无法用表格表示，只提供JSON Schema，详见**开发者备注**
-#else
+<#elseif isResponseBodyChaos>
+返回值结构无法用表格表示，只提供JSON Schema
+<#else>
 | name                | 描述                 | JSON类型和格式       |
 | ------------------- | -------------------- | ------------------- |
-#foreach($field in ${responseBodyFields})
+<#list responseBodyFields as field>
 | `${field.linkName}` | ${field.description} | `${field.jsonType}` |
-#end
-#end
+</#list>
+</#if>
 
 
 
 ## 开发者备注
 
-> 　
+>
 
 
 

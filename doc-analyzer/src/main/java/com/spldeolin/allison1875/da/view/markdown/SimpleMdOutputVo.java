@@ -7,7 +7,7 @@ import lombok.Data;
  * @author Deolin 2020-02-17
  */
 @Data
-public class SimpleMdOutputFtl {
+public class SimpleMdOutputVo {
 
     private String uri;
 
@@ -17,12 +17,14 @@ public class SimpleMdOutputFtl {
 
     private Boolean isRequestBodyChaos;
 
-    private Collection<RequestBodyFieldFtl> requestBodyFields;
+    private Collection<RequestBodyFieldVo> requestBodyFields;
 
-    private Boolean isResponseBodyNode;
+    private Boolean isResponseBodyNone;
 
     private Boolean isResponseBodyChaos;
 
-    private Collection<ResponseBodyFieldFtl> responseBodyFieldVms;
+    private Collection<ResponseBodyFieldVo> responseBodyFields;
+
+    private String location;
 
 }
