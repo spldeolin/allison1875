@@ -29,6 +29,7 @@ public class MarkdownConverter {
             vo.setIsRequestBodyChaos(BodyType.chaos == api.requestBodyType());
             vo.setIsResponseBodyNone(BodyType.none == api.responseBodyType());
             vo.setIsResponseBodyChaos(BodyType.chaos == api.responseBodyType());
+            vo.setAuthor(emptyToDefault(api.author(), "未知开发者"));
             vo.setLocation(api.codeSourceLocation());
 
             if (!vo.getIsRequestBodyChaos() && !vo.getIsRequestBodyNone()) {
@@ -117,6 +118,13 @@ public class MarkdownConverter {
     private String nullToEmpty(String s) {
         if (s == null) {
             s = "";
+        }
+        return s;
+    }
+
+    private String emptyToDefault(String s, String defaultString) {
+        if (StringUtils.isEmpty(s)) {
+            return defaultString;
         }
         return s;
     }

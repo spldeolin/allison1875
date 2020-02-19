@@ -55,6 +55,9 @@ public class ApiProcessor {
         // code source location
         api.codeSourceLocation(Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName()));
 
+        // authur
+        api.author(new AuthorProcessor().process(controller, handler));
+
         return api;
     }
 

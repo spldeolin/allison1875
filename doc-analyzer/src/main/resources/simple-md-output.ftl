@@ -38,12 +38,18 @@ ${description}
 
 
 
-## 开发者备注
+## 作者备注
 
 
+
+
+
+## 作者
+
+${author}
 
 
 
 ## 源码
 
-`${location}`
+${location}

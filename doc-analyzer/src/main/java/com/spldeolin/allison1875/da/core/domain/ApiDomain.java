@@ -38,6 +38,8 @@ public class ApiDomain {
 
     private JsonSchema responseBodyChaosJsonSchema;
 
+    private String author;
+
     private String codeSourceLocation;
 
     public Collection<BodyFieldDomain> listRequestBodyFieldsFlatly() {

@@ -27,6 +27,8 @@ public class SimpleMdOutputVo {
 
     private Collection<ResponseBodyFieldVo> responseBodyFields;
 
+    private String author;
+
     private String location;
 
 }
