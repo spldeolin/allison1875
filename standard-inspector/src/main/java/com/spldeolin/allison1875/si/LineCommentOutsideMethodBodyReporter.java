@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.si;
 
+import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
 import static com.spldeolin.allison1875.base.util.Locations.getRange;
 import static com.spldeolin.allison1875.base.util.Locations.getRelativePath;
 
@@ -7,7 +8,6 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import lombok.extern.log4j.Log4j2;
@@ -25,7 +25,7 @@ public class LineCommentOutsideMethodBodyReporter {
     }
 
     private void processor() {
-        GlobalCollectionStrategy.setDoNotCollectWithLoadingClass(false);
+        CONFIG.setDoNotCollectWithLoadingClass(true);
         StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getCompilationUnits())
                 .forEach(cu -> cu.findAll(LineComment.class).forEach(lineComment -> {
 

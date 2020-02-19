@@ -9,11 +9,13 @@ import java.util.Map;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.CollectionStrategy;
+import com.github.javaparser.utils.ParserCollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.GlobalCollectionStrategy;
+import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -27,9 +29,7 @@ class CompilationUnitCollector {
     Collection<CompilationUnit> collectIntoCollection(Path path) {
         long start = System.currentTimeMillis();
         Collection<CompilationUnit> result = Lists.newLinkedList();
-        CollectionStrategy strategy = GlobalCollectionStrategy.getCollectionStrategy();
-        log.info("Start collecting CompilationUnit with {}.", strategy.getClass().getSimpleName());
-        collectSoruceRoots(path, strategy).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
+        collectSoruceRoots(path, newCollectionStrategy()).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
         log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", result.size(),
                 path.toAbsolutePath(), System.currentTimeMillis() - start);
         return result;
@@ -42,6 +42,18 @@ class CompilationUnitCollector {
         }
         log.info("(Summary) {} CompilationUnit has collected into Map.", result.size());
         return result;
+    }
+
+    private CollectionStrategy newCollectionStrategy() {
+        CollectionStrategy collectionStrategy;
+        if (CONFIG.getDoNotCollectWithLoadingClass()) {
+            log.info("Start collecting CompilationUnit with ParserCollectionStrategy.");
+            collectionStrategy = new ParserCollectionStrategy();
+        } else {
+            log.info("Start collecting CompilationUnit with ClassLoaderCollectionStrategy.");
+            collectionStrategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoaderFactory.getClassLoader());
+        }
+        return collectionStrategy;
     }
 
     private Collection<SourceRoot> collectSoruceRoots(Path path, CollectionStrategy collectionStrategy) {

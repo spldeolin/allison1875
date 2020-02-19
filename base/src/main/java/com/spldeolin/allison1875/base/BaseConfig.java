@@ -9,7 +9,6 @@ import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.Times;
 import lombok.Data;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Allison 1875的全局配置，只包含项目路径、Git增量起始时间等配置
@@ -28,6 +27,12 @@ public class BaseConfig {
      * projectPath打包后的war文件或是Spring Boot fat jar文件的路径
      */
     private Path warOrFatJarPath;
+
+    /**
+     * 是否禁用类加载收集策略来收集CU
+     * 禁用后可以加快收集速度，但是AST node将会不再支持resolved、calculateResolvedType等方法
+     */
+    private Boolean doNotCollectWithLoadingClass;
 
     /**
      * 只将这个时间后在VCS中增量的文件作为目标对象（这个时间之前新增到VCS的文件将不被处理等）
