@@ -6,7 +6,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.domain.ValidatorDomain;
-import com.spldeolin.allison1875.da.core.enums.StringFormatType;
+import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import lombok.Data;
 
 /**
@@ -45,7 +45,8 @@ public class ParameterListDto {
         result.setParameterList(Lists.newArrayList());
 
         StringBuilder remark = new StringBuilder(64);
-        if (fieldDto.stringFormat() != null && !StringFormatType.normal.getValue().equals(fieldDto.stringFormat())) {
+        if (fieldDto.stringFormat() != null && !StringFormatTypeEnum.normal.getValue()
+                .equals(fieldDto.stringFormat())) {
             remark.append("格式：");
             remark.append(fieldDto.stringFormat());
             remark.append("　");

@@ -21,9 +21,9 @@ import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.da.core.domain.UriFieldDomain;
-import com.spldeolin.allison1875.da.core.enums.FieldType;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
-import com.spldeolin.allison1875.da.core.enums.StringFormatType;
+import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.util.ResolvedTypes;
 import lombok.extern.log4j.Log4j2;
 
@@ -62,46 +62,47 @@ public class RequestParamProcessor {
             }
             field.fieldName(name).required(required);
 
-            FieldType jsonType;
-            NumberFormatType numberFormat = null;
+            FieldTypeEnum jsonType;
+            NumberFormatTypeEnum numberFormat = null;
             StringBuilder stringFormat = new StringBuilder();
             ResolvedType type = parameter.getType().resolve();
             String describe = type.describe();
             JsonSchema jsonSchema = generateSchema(describe);
             if (jsonSchema != null && jsonSchema.isValueTypeSchema()) {
                 if (jsonSchema.isStringSchema()) {
-                    jsonType = FieldType.string;
+                    jsonType = FieldTypeEnum.string;
                     parameter.getAnnotationByClass(DateTimeFormat.class)
                             .ifPresent(dateTimeFormat -> dateTimeFormat.ifNormalAnnotationExpr(normal -> {
                                 normal.getPairs().forEach(pair -> {
                                     if (pair.getNameAsString().equals("pattern")) {
-                                        stringFormat.append(f(StringFormatType.datetime.getValue(), pair.getValue()));
+                                        stringFormat
+                                                .append(f(StringFormatTypeEnum.datetime.getValue(), pair.getValue()));
                                     }
                                 });
                             }));
                     if (stringFormat.length() == 0) {
-                        stringFormat.append(StringFormatType.normal.getValue());
+                        stringFormat.append(StringFormatTypeEnum.normal.getValue());
                     }
 
                 } else if (jsonSchema.isNumberSchema()) {
-                    jsonType = FieldType.number;
+                    jsonType = FieldTypeEnum.number;
 
                     if (!jsonSchema.isIntegerSchema()) {
-                        numberFormat = NumberFormatType.f1oat;
+                        numberFormat = NumberFormatTypeEnum.f1oat;
                     } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
-                        numberFormat = NumberFormatType.int32;
+                        numberFormat = NumberFormatTypeEnum.int32;
                     } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
-                        numberFormat = NumberFormatType.int64;
+                        numberFormat = NumberFormatTypeEnum.int64;
                     } else {
-                        numberFormat = NumberFormatType.inT;
+                        numberFormat = NumberFormatTypeEnum.inT;
                     }
                 } else if (jsonSchema.isBooleanSchema()) {
-                    jsonType = FieldType.bool;
+                    jsonType = FieldTypeEnum.bool;
                 } else {
                     throw new RuntimeException("impossible unless bug");
                 }
             } else if (ResolvedTypes.isOrLike(type, QualifierConstants.MULTIPART_FILE)) {
-                jsonType = FieldType.file;
+                jsonType = FieldTypeEnum.file;
             } else {
                 log.warn("暂不支持解析ValueSchema以外的@RequestParam [{}]", parameter);
                 continue;

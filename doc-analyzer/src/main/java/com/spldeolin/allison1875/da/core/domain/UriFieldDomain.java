@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.da.core.domain;
 
 import java.util.Collection;
-import com.spldeolin.allison1875.da.core.enums.FieldType;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
+import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,15 +16,15 @@ public class UriFieldDomain {
     private String fieldName;
 
     /**
-     * @see FieldType
+     * @see FieldTypeEnum
      * @see ApiDomain#pathVariableFields() string, number, boolean
      * @see ApiDomain#requestParamFields() string, number, boolean
      */
-    private FieldType jsonType;
+    private FieldTypeEnum jsonType;
 
     private String stringFormat;
 
-    private NumberFormatType numberFormat;
+    private NumberFormatTypeEnum numberFormat;
 
     private Boolean required;
 

@@ -15,9 +15,9 @@ import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
-import com.spldeolin.allison1875.da.core.enums.FieldType;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
-import com.spldeolin.allison1875.da.core.enums.StringFormatType;
+import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.util.Javadocs;
 import lombok.extern.log4j.Log4j2;
 
@@ -55,9 +55,9 @@ public class BodyFieldProcessor {
     private BodyFieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDomain parent,
             List<BodyFieldDomain> flatList) {
         if (isObjectInArray) {
-            parent.jsonType(FieldType.objectArray);
+            parent.jsonType(FieldTypeEnum.objectArray);
         } else {
-            parent.jsonType(FieldType.object);
+            parent.jsonType(FieldTypeEnum.object);
         }
 
         List<BodyFieldDomain> children = Lists.newArrayList();
@@ -119,18 +119,18 @@ public class BodyFieldProcessor {
                 return;
             }
 
-            if (childFieldDto.jsonType() == FieldType.number) {
+            if (childFieldDto.jsonType() == FieldTypeEnum.number) {
                 String javaType = fieldVar.getTypeAsString();
                 childFieldDto.numberFormat(calcNumberFormat(javaType));
             }
 
-            if (childFieldDto.jsonType() == FieldType.string) {
-                childFieldDto.stringFormat(StringFormatType.normal.getValue());
+            if (childFieldDto.jsonType() == FieldTypeEnum.string) {
+                childFieldDto.stringFormat(StringFormatTypeEnum.normal.getValue());
                 field.getAnnotationByClass(JsonFormat.class)
                         .ifPresent(jsonFormat -> jsonFormat.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                             if (pair.getNameAsString().equals("pattern")) {
                                 childFieldDto.stringFormat(
-                                        String.format(StringFormatType.datetime.getValue(), pair.getValue()));
+                                        String.format(StringFormatTypeEnum.datetime.getValue(), pair.getValue()));
                             }
                         }));
             }
@@ -145,37 +145,37 @@ public class BodyFieldProcessor {
     }
 
 
-    private FieldType calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
+    private FieldTypeEnum calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
         if (vSchema.isNumberSchema()) {
             if (isValueInArray) {
-                return FieldType.numberArray;
+                return FieldTypeEnum.numberArray;
             } else {
-                return FieldType.number;
+                return FieldTypeEnum.number;
             }
         } else if (vSchema.isStringSchema()) {
             if (isValueInArray) {
-                return FieldType.stringArray;
+                return FieldTypeEnum.stringArray;
             } else {
-                return FieldType.string;
+                return FieldTypeEnum.string;
             }
         } else if (vSchema.isBooleanSchema()) {
             if (isValueInArray) {
-                return FieldType.booleanArray;
+                return FieldTypeEnum.booleanArray;
             } else {
-                return FieldType.bool;
+                return FieldTypeEnum.bool;
             }
         } else {
             throw new IllegalArgumentException(vSchema.toString());
         }
     }
 
-    private NumberFormatType calcNumberFormat(String javaTypeName) {
+    private NumberFormatTypeEnum calcNumberFormat(String javaTypeName) {
         if (StringUtils.equalsAnyIgnoreCase(javaTypeName, "Float", "Double", "BigDecimal")) {
-            return NumberFormatType.f1oat;
+            return NumberFormatTypeEnum.f1oat;
         } else if (StringUtils.equalsAnyIgnoreCase(javaTypeName, "Long", "BigInteger")) {
-            return NumberFormatType.int64;
+            return NumberFormatTypeEnum.int64;
         } else {
-            return NumberFormatType.int32;
+            return NumberFormatTypeEnum.int32;
         }
     }
 

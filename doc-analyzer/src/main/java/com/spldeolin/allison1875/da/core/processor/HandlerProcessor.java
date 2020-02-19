@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.HandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ResponseBodyTypeParser;
-import com.spldeolin.allison1875.da.core.util.MethodQualifier;
+import com.spldeolin.allison1875.da.core.util.MethodQualifiers;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -57,7 +57,7 @@ public class HandlerProcessor {
                         entry.controller(controller);
 
                         // handler
-                        String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
+                        String shortestQualifiedSignature = MethodQualifiers.getShortestQualifiedSignature(handler);
                         entry.shortestQualifiedSignature(shortestQualifiedSignature);
                         entry.handler(handler);
                         Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
@@ -103,7 +103,7 @@ public class HandlerProcessor {
     private Map<String, Method> listDeclaredMethodAsMap(Class<?> reflectController) {
         Map<String, Method> declaredMethods = Maps.newHashMap();
         Arrays.stream(reflectController.getDeclaredMethods())
-                .forEach(method -> declaredMethods.put(MethodQualifier.getShortestQualifiedSignature(method), method));
+                .forEach(method -> declaredMethods.put(MethodQualifiers.getShortestQualifiedSignature(method), method));
         return declaredMethods;
     }
 

@@ -9,9 +9,9 @@ import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.domain.ValidatorDomain;
-import com.spldeolin.allison1875.da.core.enums.BodyType;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
-import com.spldeolin.allison1875.da.core.enums.StringFormatType;
+import com.spldeolin.allison1875.da.core.enums.BodyTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -25,10 +25,10 @@ public class MarkdownConverter {
             SimpleMdOutputVo vo = new SimpleMdOutputVo();
             vo.setUri(Iterables.getFirst(api.uri(), ""));
             vo.setDescription(api.description());
-            vo.setIsRequestBodyNone(BodyType.none == api.requestBodyType());
-            vo.setIsRequestBodyChaos(BodyType.chaos == api.requestBodyType());
-            vo.setIsResponseBodyNone(BodyType.none == api.responseBodyType());
-            vo.setIsResponseBodyChaos(BodyType.chaos == api.responseBodyType());
+            vo.setIsRequestBodyNone(BodyTypeEnum.none == api.requestBodyType());
+            vo.setIsRequestBodyChaos(BodyTypeEnum.chaos == api.requestBodyType());
+            vo.setIsResponseBodyNone(BodyTypeEnum.none == api.responseBodyType());
+            vo.setIsResponseBodyChaos(BodyTypeEnum.chaos == api.responseBodyType());
             vo.setAuthor(emptyToDefault(api.author(), "未知开发者"));
             vo.setLocation(api.codeSourceLocation());
 
@@ -81,10 +81,10 @@ public class MarkdownConverter {
         Collection<String> result = Lists.newArrayList();
         result.add(field.jsonType().getValue());
         String stringFormat = field.stringFormat();
-        if (stringFormat != null && !StringFormatType.normal.getValue().equals(stringFormat)) {
+        if (stringFormat != null && !StringFormatTypeEnum.normal.getValue().equals(stringFormat)) {
             result.add(stringFormat);
         }
-        NumberFormatType numberFormat = field.numberFormat();
+        NumberFormatTypeEnum numberFormat = field.numberFormat();
         if (numberFormat != null) {
             result.add(numberFormat.getValue());
         }

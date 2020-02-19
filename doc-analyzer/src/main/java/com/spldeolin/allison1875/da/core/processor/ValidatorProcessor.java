@@ -1,20 +1,20 @@
 package com.spldeolin.allison1875.da.core.processor;
 
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.enumValue;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.future;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.maxFloat;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.maxFractionalDigits;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.maxInteger;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.maxIntegralDigits;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.maxSize;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.minFloat;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.minInteger;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.minSize;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.notBlank;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.notEmpty;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.past;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.positive;
-import static com.spldeolin.allison1875.da.core.enums.ValidatorType.regex;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.enumValue;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.future;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxFloat;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxFractionalDigits;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxInteger;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxIntegralDigits;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxSize;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.minFloat;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.minInteger;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.minSize;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.notBlank;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.notEmpty;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.past;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.positive;
+import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.regex;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;

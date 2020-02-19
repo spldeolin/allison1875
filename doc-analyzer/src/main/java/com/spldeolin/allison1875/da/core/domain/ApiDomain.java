@@ -4,8 +4,8 @@ import java.util.Collection;
 import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.core.enums.BodyType;
-import com.spldeolin.allison1875.da.core.enums.MethodType;
+import com.spldeolin.allison1875.da.core.enums.BodyTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.MethodTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class ApiDomain {
 
-    private Collection<MethodType> method;
+    private Collection<MethodTypeEnum> method;
 
     private Collection<String> uri;
 
@@ -26,13 +26,13 @@ public class ApiDomain {
 
     private Collection<UriFieldDomain> requestParamFields;
 
-    private BodyType requestBodyType;
+    private BodyTypeEnum requestBodyType;
 
     private Collection<BodyFieldDomain> requestBodyFields;
 
     private JsonSchema requestBodyChaosJsonSchema;
 
-    private BodyType responseBodyType;
+    private BodyTypeEnum responseBodyType;
 
     private Collection<BodyFieldDomain> responseBodyFields;
 

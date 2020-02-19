@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor.result;
 
-import com.spldeolin.allison1875.da.core.enums.FieldType;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
+import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -21,11 +21,11 @@ public class ValueStructureBodyProcessResult extends BodyProcessResult {
     /**
      * struct=val时有效
      */
-    private FieldType valueStructureJsonType;
+    private FieldTypeEnum valueStructureJsonType;
 
     /**
      * struct=val时有效
      */
-    private NumberFormatType valueStructureNumberFormat;
+    private NumberFormatTypeEnum valueStructureNumberFormat;
 
 }

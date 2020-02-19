@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum StringFormatType {
+public enum StringFormatTypeEnum {
 
     normal("normal"),
 

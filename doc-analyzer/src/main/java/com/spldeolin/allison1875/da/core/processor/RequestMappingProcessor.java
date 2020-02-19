@@ -15,7 +15,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.da.core.enums.MethodType;
+import com.spldeolin.allison1875.da.core.enums.MethodTypeEnum;
 import com.spldeolin.allison1875.da.core.processor.result.RequestMappingProcessResult;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -33,7 +33,7 @@ public class RequestMappingProcessor {
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
 
         Set<String> combinePaths = Sets.newHashSet();
-        Set<MethodType> combineMethods = Sets.newHashSet();
+        Set<MethodTypeEnum> combineMethods = Sets.newHashSet();
         for (RequestMappingDto dto1 : fromController) {
             for (RequestMappingDto dto2 : fromHandler) {
                 combineMethods.addAll(dto1.getMethods());
@@ -80,7 +80,7 @@ public class RequestMappingProcessor {
             if (QualifierConstants.REQUEST_MAPPING.equals(annoQualifier)) {
                 dto = this.parseRequestMapping(annotation, false);
             } else {
-                Optional<MethodType> methodType = MethodType.ofAnnotationQualifier(annoQualifier);
+                Optional<MethodTypeEnum> methodType = MethodTypeEnum.ofAnnotationQualifier(annoQualifier);
                 if (methodType.isPresent()) {
                     dto = this.parseRequestMapping(annotation, true).setMethods(methodType.get().inCollection());
                 } else {
@@ -123,13 +123,13 @@ public class RequestMappingProcessor {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    private Collection<MethodType> collectionMethods(Expression memberValue) {
-        Collection<MethodType> result = Lists.newArrayList();
+    private Collection<MethodTypeEnum> collectionMethods(Expression memberValue) {
+        Collection<MethodTypeEnum> result = Lists.newArrayList();
         memberValue.ifArrayInitializerExpr(arrayInit -> arrayInit.getValues().forEach(arrayEle -> arrayEle
                 .ifFieldAccessExpr(
-                        fieldAccess -> MethodType.ofValue(fieldAccess.getNameAsString()).ifPresent(result::add))));
+                        fieldAccess -> MethodTypeEnum.ofValue(fieldAccess.getNameAsString()).ifPresent(result::add))));
         memberValue.ifFieldAccessExpr(
-                fieldAccess -> MethodType.ofValue(fieldAccess.getNameAsString()).ifPresent(result::add));
+                fieldAccess -> MethodTypeEnum.ofValue(fieldAccess.getNameAsString()).ifPresent(result::add));
         return result;
     }
 
@@ -137,7 +137,7 @@ public class RequestMappingProcessor {
     @Accessors(chain = true)
     private static class RequestMappingDto {
 
-        private Collection<MethodType> methods = Lists.newArrayList();
+        private Collection<MethodTypeEnum> methods = Lists.newArrayList();
 
         private Collection<String> paths = Lists.newArrayList();
 

@@ -18,8 +18,8 @@ import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
-import com.spldeolin.allison1875.da.core.enums.FieldType;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatType;
+import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.ChaosStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.KeyValueStructureBodyProcessResult;
@@ -89,24 +89,24 @@ public class BodyProcessor {
             return new KeyValueStructureBodyProcessResult().objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
-            FieldType jsonType;
-            NumberFormatType numberFormat = null;
+            FieldTypeEnum jsonType;
+            NumberFormatTypeEnum numberFormat = null;
             if (jsonSchema.isStringSchema()) {
-                jsonType = FieldType.string;
+                jsonType = FieldTypeEnum.string;
             } else if (jsonSchema.isNumberSchema()) {
-                jsonType = FieldType.number;
+                jsonType = FieldTypeEnum.number;
 
                 if (!jsonSchema.isIntegerSchema()) {
-                    numberFormat = NumberFormatType.f1oat;
+                    numberFormat = NumberFormatTypeEnum.f1oat;
                 } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
-                    numberFormat = NumberFormatType.int32;
+                    numberFormat = NumberFormatTypeEnum.int32;
                 } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
-                    numberFormat = NumberFormatType.int64;
+                    numberFormat = NumberFormatTypeEnum.int64;
                 } else {
-                    numberFormat = NumberFormatType.inT;
+                    numberFormat = NumberFormatTypeEnum.inT;
                 }
             } else if (jsonSchema.isBooleanSchema()) {
-                jsonType = FieldType.bool;
+                jsonType = FieldTypeEnum.bool;
             } else {
                 throw new RuntimeException("impossible unless bug");
             }

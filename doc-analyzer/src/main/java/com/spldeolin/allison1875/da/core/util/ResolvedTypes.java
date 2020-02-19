@@ -8,6 +8,12 @@ import com.github.javaparser.resolution.types.ResolvedType;
  */
 public class ResolvedTypes {
 
+    /**
+     * <pre>
+     *     e.g.1: List_String> isOrLike java.util.Collection
+     *     e.g.2: List_String> isOrLike java.util.List
+     * </pre>
+     */
     public static boolean isOrLike(ResolvedType resolvedType, String typeQualifier) {
         if (typeQualifier == null) {
             throw new IllegalArgumentException("typeQualifier must not be null.");

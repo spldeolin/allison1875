@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum NumberFormatType {
+public enum NumberFormatTypeEnum {
 
     int32("int32"),
 

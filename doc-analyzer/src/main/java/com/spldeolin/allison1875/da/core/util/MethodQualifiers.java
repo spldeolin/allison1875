@@ -6,7 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 /**
  * @author Deolin 2019-12-29
  */
-public class MethodQualifier {
+public class MethodQualifiers {
 
     /**
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature

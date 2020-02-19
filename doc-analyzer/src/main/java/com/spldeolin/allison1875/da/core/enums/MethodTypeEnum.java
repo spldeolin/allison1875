@@ -13,7 +13,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum MethodType {
+public enum MethodTypeEnum {
 
     DELETE("DELETE", QualifierConstants.DELETE_MAPPING, "RequestMethod.DELETE"),
 
@@ -32,20 +32,20 @@ public enum MethodType {
 
     private String fieldAccessExpr;
 
-    public Collection<MethodType> inCollection() {
+    public Collection<MethodTypeEnum> inCollection() {
         return Lists.newArrayList(this);
     }
 
-    public static Optional<MethodType> ofValue(String value) {
+    public static Optional<MethodTypeEnum> ofValue(String value) {
         return Arrays.stream(values()).filter(one -> one.getValue().equals(value)).findFirst();
     }
 
-    public static Optional<MethodType> ofAnnotationQualifier(String annotationQualifier) {
+    public static Optional<MethodTypeEnum> ofAnnotationQualifier(String annotationQualifier) {
         return Arrays.stream(values()).filter(one -> one.getAnnotationQualifier().equals(annotationQualifier))
                 .findFirst();
     }
 
-    public static Optional<MethodType> ofFieldAccessExpr(String fieldAccessExpr) {
+    public static Optional<MethodTypeEnum> ofFieldAccessExpr(String fieldAccessExpr) {
         return Arrays.stream(values()).filter(one -> one.getFieldAccessExpr().equals(fieldAccessExpr)).findFirst();
     }
 

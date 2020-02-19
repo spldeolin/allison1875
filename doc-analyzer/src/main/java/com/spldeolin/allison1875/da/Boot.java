@@ -4,13 +4,12 @@ import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
-import com.spldeolin.allison1875.da.core.processor.ApiProcessor;
 import com.spldeolin.allison1875.da.core.processor.HandlerProcessor;
+import com.spldeolin.allison1875.da.core.processor.MainProcessor;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ReturnStmtBaseResponseBodyTypeParser;
 import com.spldeolin.allison1875.da.view.markdown.MarkdownConverter;
-import com.spldeolin.allison1875.da.view.rap.RapConverter;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -31,7 +30,7 @@ public class Boot {
 
         // process
         Collection<ApiDomain> apis = Lists.newLinkedList();
-        handlerEntries.forEach(entry -> apis.add(new ApiProcessor(entry).process()));
+        handlerEntries.forEach(entry -> apis.add(new MainProcessor(entry).process()));
 
         // convert to view
 //        String result = new RapConverter().convert(apis);

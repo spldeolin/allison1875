@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum FieldType {
+public enum FieldTypeEnum {
 
     string("string"),
 
