@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.apache.commons.lang3.BooleanUtils;
 import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.Times;
@@ -56,6 +57,7 @@ public class BaseConfig {
             rawData = yaml.load(is);
             projectPath = Paths.get(rawData.get("projectPath"));
             warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
+            doNotCollectWithLoadingClass = BooleanUtils.toBoolean(rawData.get("doNotCollectWithLoadingClass"));
             giveUpResultAddedSinceTime = Times.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
         } catch (Exception e) {
             throw new ConfigLoadingException(e);
