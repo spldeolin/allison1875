@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.view.markdown;
 
 import java.util.Collection;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -65,7 +66,9 @@ public class MarkdownConverter {
     }
 
     private String surroundMdCodeStyleForListLinkNamePart(String linkName) {
-        linkName = nullToEmpty(linkName);
+        if (StringUtils.isEmpty(linkName)) {
+            return "`-`";
+        }
         int i = linkName.lastIndexOf('.');
         if (i == -1) {
             return "`" + linkName + "`";

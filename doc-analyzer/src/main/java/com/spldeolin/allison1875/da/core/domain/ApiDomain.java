@@ -42,6 +42,9 @@ public class ApiDomain {
 
     public Collection<BodyFieldDomain> listRequestBodyFieldsFlatly() {
         Collection<BodyFieldDomain> result = Lists.newArrayList();
+        if (requestBodyFields == null) {
+            return Lists.newArrayList();
+        }
         for (BodyFieldDomain field : requestBodyFields) {
             result.add(field);
             addAllChildren(field, result);
@@ -51,6 +54,9 @@ public class ApiDomain {
 
     public Collection<BodyFieldDomain> listResponseBodyFieldsFlatly() {
         Collection<BodyFieldDomain> result = Lists.newArrayList();
+        if (responseBodyFields == null) {
+            return Lists.newArrayList();
+        }
         for (BodyFieldDomain field : responseBodyFields) {
             result.add(field);
             addAllChildren(field, result);
