@@ -30,4 +30,8 @@ public enum FieldType {
 
     private String value;
 
+    public boolean isArrayLike() {
+        return stringArray == this || numberArray == this || booleanArray == this || objectArray == this;
+    }
+
 }

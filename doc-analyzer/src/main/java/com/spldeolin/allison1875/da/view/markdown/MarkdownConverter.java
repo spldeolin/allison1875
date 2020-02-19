@@ -32,9 +32,9 @@ public class MarkdownConverter {
 
             if (!vo.getIsRequestBodyChaos() && !vo.getIsRequestBodyNone()) {
                 Collection<RequestBodyFieldVo> fieldVos = Lists.newArrayList();
-                for (BodyFieldDomain field : api.requestBodyFieldsFlatly()) {
+                for (BodyFieldDomain field : api.listRequestBodyFieldsFlatly()) {
                     RequestBodyFieldVo fieldVo = new RequestBodyFieldVo();
-                    fieldVo.setLinkName(nullToEmpty(field.fieldName()));
+                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.linkName()));
                     fieldVo.setDescription(nullToEmpty(field.description()));
                     fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVo.setValidators(convertValidators(field.nullable(), field.validators()));
@@ -45,9 +45,9 @@ public class MarkdownConverter {
             }
             if (!vo.getIsResponseBodyChaos() && !vo.getIsResponseBodyNone()) {
                 Collection<ResponseBodyFieldVo> fieldVos = Lists.newArrayList();
-                for (BodyFieldDomain field : api.responseBodyFields()) {
+                for (BodyFieldDomain field : api.listResponseBodyFieldsFlatly()) {
                     ResponseBodyFieldVo fieldVo = new ResponseBodyFieldVo();
-                    fieldVo.setLinkName(nullToEmpty(field.fieldName()));
+                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.linkName()));
                     fieldVo.setDescription(nullToEmpty(field.description()));
                     fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVos.add(fieldVo);
@@ -62,6 +62,15 @@ public class MarkdownConverter {
             }
         }
 
+    }
+
+    private String surroundMdCodeStyleForListLinkNamePart(String linkName) {
+        linkName = nullToEmpty(linkName);
+        int i = linkName.lastIndexOf('.');
+        if (i == -1) {
+            return "`" + linkName + "`";
+        }
+        return Joiner.on("").join(linkName.substring(0, i + 1), "`", linkName.substring(i + 1), "`");
     }
 
     private Collection<String> converterTypeAndFormat(BodyFieldDomain field) {

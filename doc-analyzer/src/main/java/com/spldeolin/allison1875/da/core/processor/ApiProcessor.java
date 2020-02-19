@@ -93,7 +93,6 @@ public class ApiProcessor {
                     new BodyFieldDomain().jsonType(valueStruct.valueStructureJsonType())
                             .numberFormat(valueStruct.valueStructureNumberFormat()));
             api.requestBodyFields(field);
-            api.requestBodyFieldsFlatly(field);
         }
         if (req.isChaosStructure()) {
             api.requestBodyChaosJsonSchema(req.asChaosStructure().jsonSchema());
@@ -135,7 +134,6 @@ public class ApiProcessor {
                     new BodyFieldDomain().jsonType(valueStruct.valueStructureJsonType())
                             .numberFormat(valueStruct.valueStructureNumberFormat()));
             api.responseBodyFields(field);
-            api.responseBodyFieldsFlatly(field);
         }
         if (resp.isChaosStructure()) {
             api.responseBodyChaosJsonSchema(resp.asChaosStructure().jsonSchema());

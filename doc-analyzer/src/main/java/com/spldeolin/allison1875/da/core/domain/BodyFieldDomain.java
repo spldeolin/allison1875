@@ -15,7 +15,15 @@ import lombok.experimental.Accessors;
 @ToString(exclude = {"parentField"}) // StackOverflowError
 public class BodyFieldDomain {
 
+    /**
+     * e.g.: city
+     */
     private BodyFieldDomain parentField;
+
+    /**
+     * e.g.: userDetails[0].address.city
+     */
+    private String linkName;
 
     private String fieldName;
 

@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.da.core.processor;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
@@ -35,24 +34,22 @@ public class BodyFieldProcessor {
     }
 
     public void process(ObjectSchema objectSchema, ApiDomain api) {
-        Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> pair = parseZeroFloorFields(objectSchema);
+        Collection<BodyFieldDomain> zeroFloorFields = parseFirstFloorFields(objectSchema);
         if (forRequestBodyNotNot) {
-            api.requestBodyFields(pair.getLeft());
-            api.requestBodyFieldsFlatly(pair.getRight());
+            api.requestBodyFields(zeroFloorFields);
         } else {
-            api.responseBodyFields(pair.getLeft());
-            api.responseBodyFieldsFlatly(pair.getRight());
+            api.responseBodyFields(zeroFloorFields);
         }
+        api.setFieldLinkNames();
     }
 
-    private Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> parseZeroFloorFields(
-            ObjectSchema zeroSchema) {
+    private Collection<BodyFieldDomain> parseFirstFloorFields(ObjectSchema zeroSchema) {
         List<BodyFieldDomain> flatList = Lists.newArrayList();
         Collection<BodyFieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new BodyFieldDomain(),
                 flatList).fields();
         zeroFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
 
-        return Pair.of(zeroFloorFields, flatList);
+        return zeroFloorFields;
     }
 
     private BodyFieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDomain parent,
@@ -70,7 +67,6 @@ public class BodyFieldProcessor {
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
 
             VariableDeclarator fieldVar = StaticAstContainer.getFieldVariableDeclarator(fieldVarQualifier);
-//                    FieldVariableContainer.getInstance().getByQualifier().get(fieldVarQualifier);
             if (fieldVar == null) {
                 /*
                 被JsonSchema认为有这个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：

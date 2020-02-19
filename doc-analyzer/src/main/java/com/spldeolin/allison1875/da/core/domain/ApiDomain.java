@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.da.core.domain;
 
 import java.util.Collection;
+import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.da.core.enums.BodyType;
 import com.spldeolin.allison1875.da.core.enums.MethodType;
 import lombok.Data;
@@ -28,18 +30,67 @@ public class ApiDomain {
 
     private Collection<BodyFieldDomain> requestBodyFields;
 
-    private Collection<BodyFieldDomain> requestBodyFieldsFlatly;
-
     private JsonSchema requestBodyChaosJsonSchema;
 
     private BodyType responseBodyType;
 
     private Collection<BodyFieldDomain> responseBodyFields;
 
-    private Collection<BodyFieldDomain> responseBodyFieldsFlatly;
-
     private JsonSchema responseBodyChaosJsonSchema;
 
     private String codeSourceLocation;
+
+    public Collection<BodyFieldDomain> listRequestBodyFieldsFlatly() {
+        Collection<BodyFieldDomain> result = Lists.newArrayList();
+        for (BodyFieldDomain field : requestBodyFields) {
+            result.add(field);
+            addAllChildren(field, result);
+        }
+        return result;
+    }
+
+    public Collection<BodyFieldDomain> listResponseBodyFieldsFlatly() {
+        Collection<BodyFieldDomain> result = Lists.newArrayList();
+        for (BodyFieldDomain field : responseBodyFields) {
+            result.add(field);
+            addAllChildren(field, result);
+        }
+        return result;
+    }
+
+    /**
+     * 执行这个方法后，这个对象中每个BodyFieldDomain.linkName均会有值
+     */
+    public void setFieldLinkNames() {
+        for (BodyFieldDomain field : listRequestBodyFieldsFlatly()) {
+            String fieldName = field.fieldName();
+            if (fieldName != null) {
+                StringBuilder linkName = new StringBuilder(fieldName);
+                appendParentName(field, linkName);
+                field.linkName(linkName.toString());
+            }
+        }
+    }
+
+    private void appendParentName(BodyFieldDomain child, StringBuilder linkName) {
+        BodyFieldDomain parent = child.parentField();
+        if (parent != null) {
+            String linkPart = parent.fieldName();
+            if (parent.jsonType().isArrayLike()) {
+                linkPart += "[0]";
+            }
+            linkName.insert(0, linkPart + ".");
+            appendParentName(parent, linkName);
+        }
+    }
+
+    private void addAllChildren(BodyFieldDomain parent, Collection<BodyFieldDomain> container) {
+        if (!CollectionUtils.isEmpty(parent.fields())) {
+            for (BodyFieldDomain child : parent.fields()) {
+                container.add(child);
+                this.addAllChildren(child, container);
+            }
+        }
+    }
 
 }
