@@ -59,7 +59,7 @@ public class MainProcessor {
 
             // response body
             BodyProcessResult resp = new BodyProcessor(handlerInfo.responseBodyResolvedType()).process();
-            api.responseBodyType(req.calcBodyType());
+            api.responseBodyType(resp.calcBodyType());
             this.processResponseBodyFields(api, resp);
 
             // authur
