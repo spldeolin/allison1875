@@ -7,11 +7,12 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
-import com.spldeolin.allison1875.da.core.enums.BodyTypeEnum;
 import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.RequestMappingProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.ValueStructureBodyProcessResult;
+import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
+import com.spldeolin.allison1875.da.core.strategy.ReturnStmtBaseResponseBodyTypeParser;
 import com.spldeolin.allison1875.da.core.util.Javadocs;
 import lombok.AllArgsConstructor;
 
@@ -23,69 +24,55 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class MainProcessor {
 
-    private final HandlerProcessResult handlerProcessorResult;
-
-    public ApiDomain process() {
-        ClassOrInterfaceDeclaration controller = handlerProcessorResult.controller();
-        MethodDeclaration handler = handlerProcessorResult.handler();
-
-        ApiDomain api = new ApiDomain();
-
-        // method uri
-        RequestMappingProcessResult requestMappingProcessResult = new RequestMappingProcessor()
-                .process(controller, handler);
-        api.method(requestMappingProcessResult.methodTypes());
-        api.uri(requestMappingProcessResult.uris());
-
-        // description
-        api.description(Javadocs.extractFirstLine(handler));
-
-        // path query
-        api.pathVariableFields(new PathVariableProcessor().processor(handlerProcessorResult.pathVariables()));
-        api.requestParamFields(new RequestParamProcessor().processor(handlerProcessorResult.requestParams()));
-
-        // request body
-        BodyProcessResult req = new BodyProcessor(handlerProcessorResult.requestBodyResolvedType()).process();
-        this.calcRequestBodyType(api, req);
-        this.processRequestBodyFields(api, req);
-
-        // response body
-        BodyProcessResult resp = new BodyProcessor(handlerProcessorResult.responseBodyResolvedType()).process();
-        this.calcResponseBodyType(api, resp);
-        this.processResponseBodyFields(api, resp);
-
-        // authur
-        api.author(new AuthorProcessor().process(controller, handler));
-
-        // code source location
-        api.codeSourceLocation(Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName()));
-
-        return api;
-    }
-
-    private void calcRequestBodyType(ApiDomain api, BodyProcessResult req) {
-        if (req.isVoidStructure()) {
-            api.requestBodyType(BodyTypeEnum.none);
-        }
-        if (req.isChaosStructure()) {
-            api.requestBodyType(BodyTypeEnum.chaos);
-        }
-        if (req.isValueStructure()) {
-            if (req.inArray()) {
-                api.requestBodyType(BodyTypeEnum.valueArray);
-            } else {
-                api.requestBodyType(BodyTypeEnum.va1ue);
+    public Collection<ApiDomain> process() {
+        Collection<HandlerProcessResult> handlerInfos = new HandlerProcessor().process(new DefaultHandlerFilter() {
+            @Override
+            public boolean filter(ClassOrInterfaceDeclaration controller) {
+                return true;
             }
-        }
-        if (req.isKeyValueStructure()) {
-            if (req.inArray()) {
-                api.requestBodyType(BodyTypeEnum.keyValueArray);
-            } else if (req.inPage()) {
-                api.requestBodyType(BodyTypeEnum.keyValuePage);
-            } else {
-                api.requestBodyType(BodyTypeEnum.keyValue);
-            }
-        }
+        }, new ReturnStmtBaseResponseBodyTypeParser());
+
+        Collection<ApiDomain> apis = Lists.newLinkedList();
+        handlerInfos.forEach(handlerInfo -> {
+            ApiDomain api = new ApiDomain();
+
+            ClassOrInterfaceDeclaration controller = handlerInfo.controller();
+            MethodDeclaration handler = handlerInfo.handler();
+
+            // method uri
+            RequestMappingProcessResult requestMappingProcessResult = new RequestMappingProcessor()
+                    .process(controller, handler);
+            api.method(requestMappingProcessResult.methodTypes());
+            api.uri(requestMappingProcessResult.uris());
+
+            // description
+            api.description(Javadocs.extractFirstLine(handler));
+
+            // path query
+            api.pathVariableFields(new PathVariableProcessor().processor(handlerInfo.pathVariables()));
+            api.requestParamFields(new RequestParamProcessor().processor(handlerInfo.requestParams()));
+
+            // request body
+            BodyProcessResult req = new BodyProcessor(handlerInfo.requestBodyResolvedType()).process();
+            api.requestBodyType(req.calcBodyType());
+            this.processRequestBodyFields(api, req);
+
+            // response body
+            BodyProcessResult resp = new BodyProcessor(handlerInfo.responseBodyResolvedType()).process();
+            api.responseBodyType(req.calcBodyType());
+            this.processResponseBodyFields(api, resp);
+
+            // authur
+            api.author(new AuthorProcessor().process(controller, handler));
+
+            // code source location
+            api.codeSourceLocation(
+                    Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName()));
+
+            apis.add(api);
+        });
+
+        return apis;
     }
 
     private void processRequestBodyFields(ApiDomain api, BodyProcessResult req) {
@@ -101,31 +88,6 @@ public class MainProcessor {
         }
         if (req.isChaosStructure()) {
             api.requestBodyChaosJsonSchema(req.asChaosStructure().jsonSchema());
-        }
-    }
-
-    private void calcResponseBodyType(ApiDomain api, BodyProcessResult resp) {
-        if (resp.isVoidStructure()) {
-            api.responseBodyType(BodyTypeEnum.none);
-        }
-        if (resp.isChaosStructure()) {
-            api.responseBodyType(BodyTypeEnum.chaos);
-        }
-        if (resp.isValueStructure()) {
-            if (resp.inArray()) {
-                api.responseBodyType(BodyTypeEnum.valueArray);
-            } else {
-                api.responseBodyType(BodyTypeEnum.va1ue);
-            }
-        }
-        if (resp.isKeyValueStructure()) {
-            if (resp.inArray()) {
-                api.responseBodyType(BodyTypeEnum.keyValueArray);
-            } else if (resp.inPage()) {
-                api.responseBodyType(BodyTypeEnum.keyValuePage);
-            } else {
-                api.responseBodyType(BodyTypeEnum.keyValue);
-            }
         }
     }
 

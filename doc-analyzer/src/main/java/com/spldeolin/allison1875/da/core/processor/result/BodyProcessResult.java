@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.da.core.processor.result;
 
+import com.spldeolin.allison1875.da.core.enums.BodyTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -50,6 +51,32 @@ public abstract class BodyProcessResult {
 
     public VoidStructureBodyProcessResult asVoidStructure() {
         return (VoidStructureBodyProcessResult) this;
+    }
+
+    public BodyTypeEnum calcBodyType() {
+        if (this.isVoidStructure()) {
+            return BodyTypeEnum.none;
+        }
+        if (this.isChaosStructure()) {
+            return BodyTypeEnum.chaos;
+        }
+        if (this.isValueStructure()) {
+            if (this.inArray()) {
+                return BodyTypeEnum.valueArray;
+            } else {
+                return BodyTypeEnum.va1ue;
+            }
+        }
+        if (this.isKeyValueStructure()) {
+            if (this.inArray()) {
+                return BodyTypeEnum.keyValueArray;
+            } else if (this.inPage()) {
+                return BodyTypeEnum.keyValuePage;
+            } else {
+                return BodyTypeEnum.keyValue;
+            }
+        }
+        return null;
     }
 
 }
