@@ -39,8 +39,7 @@ public class MainProcessor {
             MethodDeclaration handler = handlerInfo.handler();
 
             // method uri
-            RequestMappingProcessor mappingProcessor = new RequestMappingProcessor().controller(controller)
-                    .handler(handler).process();
+            RouteProcessor mappingProcessor = new RouteProcessor().controller(controller).handler(handler).process();
             api.method(mappingProcessor.methodTypes());
             api.uri(mappingProcessor.uris());
 

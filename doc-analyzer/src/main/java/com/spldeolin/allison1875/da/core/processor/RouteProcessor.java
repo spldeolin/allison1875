@@ -24,11 +24,13 @@ import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * URI和请求方法等路由信息
+ *
  * @author Deolin 2019-12-23
  */
 @Log4j2
 @Accessors(fluent = true)
-public class RequestMappingProcessor {
+public class RouteProcessor {
 
     @Setter
     private ClassOrInterfaceDeclaration controller;
@@ -42,7 +44,7 @@ public class RequestMappingProcessor {
     @Getter
     private List<String> uris = Lists.newLinkedList();
 
-    RequestMappingProcessor process() {
+    RouteProcessor process() {
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         Collection<RequestMappingDto> fromController = parseRequestMappings(controller.getAnnotations());
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
