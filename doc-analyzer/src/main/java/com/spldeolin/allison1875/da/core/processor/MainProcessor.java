@@ -51,12 +51,12 @@ public class MainProcessor {
             api.requestParamFields(requestParamProcessor.fields());
 
             // request body
-            BodyProcessResult req = new BodyProcessor(handlerInfo.requestBodyResolvedType()).process();
+            BodyProcessResult req = new BodyProcessor().bodyType(handlerInfo.requestBodyResolvedType()).process();
             api.requestBodyType(req.calcBodyType());
             this.processRequestBodyFields(api, req);
 
             // response body
-            BodyProcessResult resp = new BodyProcessor(handlerInfo.responseBodyResolvedType()).process();
+            BodyProcessResult resp = new BodyProcessor().bodyType(handlerInfo.responseBodyResolvedType()).process();
             api.responseBodyType(resp.calcBodyType());
             this.processResponseBodyFields(api, resp);
 

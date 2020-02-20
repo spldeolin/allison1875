@@ -26,44 +26,53 @@ import com.spldeolin.allison1875.da.core.processor.result.KeyValueStructureBodyP
 import com.spldeolin.allison1875.da.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.VoidStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.util.ResolvedTypes;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-01-02
  */
-@AllArgsConstructor
 @Log4j2
-public class BodyProcessor {
+@Accessors(fluent = true)
+class BodyProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    private final ResolvedType type;
+    @Setter
+    private ResolvedType bodyType;
 
-    public BodyProcessResult process() {
-        if (type == null) {
+    @Getter
+    private boolean inArray = false;
+
+    @Getter
+    private boolean inPage = false;
+
+    BodyProcessResult process() {
+        if (bodyType == null) {
             return new VoidStructureBodyProcessResult();
         }
 
         BodyProcessResult result;
         try {
-            if (isArray(type)) {
+            if (isArray(bodyType)) {
                 // 最外层是 数组
-                result = tryProcessNonArrayLikeType(getArrayElementType(type)).inArray(true);
-            } else if (isJucAndElementTypeExplicit(type)) {
+                result = tryProcessNonArrayLikeType(getArrayElementType(bodyType)).inArray(true);
+            } else if (isJucAndElementTypeExplicit(bodyType)) {
                 // 最外层是 列表
-                result = tryProcessNonArrayLikeType(getJUCElementType(type)).inArray(true);
-            } else if (isPage(type)) {
+                result = tryProcessNonArrayLikeType(getJUCElementType(bodyType)).inArray(true);
+            } else if (isPage(bodyType)) {
                 // 最外层是 Page对象
-                result = tryProcessNonArrayLikeType(getPageElementType(type)).inPage(true);
+                result = tryProcessNonArrayLikeType(getPageElementType(bodyType)).inPage(true);
             } else {
                 // 单层
-                result = tryProcessNonArrayLikeType(type);
+                result = tryProcessNonArrayLikeType(bodyType);
             }
         } catch (Exception e) {
-            log.warn("type={}, cause={}", type.describe(), e.getMessage());
+            log.warn("type={}, cause={}", bodyType.describe(), e.getMessage());
             // as mazy mode
-            result = new ChaosStructureBodyProcessResult().jsonSchema(generateSchema(type.describe()));
+            result = new ChaosStructureBodyProcessResult().jsonSchema(generateSchema(bodyType.describe()));
         }
         return result;
     }
@@ -71,7 +80,6 @@ public class BodyProcessor {
     private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
         ClassOrInterfaceDeclaration coid = StaticAstContainer.getClassOrInterfaceDeclaration(describe);
-//                CoidContainer.getInstance().getByQualifier().get(describe);
 
         JsonSchema jsonSchema;
         if (coid == null) {
