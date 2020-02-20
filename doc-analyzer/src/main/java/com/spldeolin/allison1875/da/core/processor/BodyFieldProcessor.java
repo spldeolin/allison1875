@@ -40,7 +40,7 @@ public class BodyFieldProcessor {
         } else {
             api.responseBodyFields(zeroFloorFields);
         }
-        api.setFieldLinkNames();
+        api.setAllBodyFieldLinkNames();
     }
 
     private Collection<BodyFieldDomain> parseFirstFloorFields(ObjectSchema zeroSchema) {

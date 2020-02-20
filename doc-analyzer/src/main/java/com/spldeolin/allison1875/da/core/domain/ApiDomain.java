@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.core.domain;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
@@ -69,15 +70,17 @@ public class ApiDomain {
     /**
      * 执行这个方法后，这个对象中每个BodyFieldDomain.linkName均会有值
      */
-    public void setFieldLinkNames() {
-        for (BodyFieldDomain field : listRequestBodyFieldsFlatly()) {
+    public void setAllBodyFieldLinkNames() {
+        Consumer<BodyFieldDomain> action = field -> {
             String fieldName = field.fieldName();
             if (fieldName != null) {
                 StringBuilder linkName = new StringBuilder(fieldName);
                 appendParentName(field, linkName);
                 field.linkName(linkName.toString());
             }
-        }
+        };
+        listRequestBodyFieldsFlatly().forEach(action);
+        listResponseBodyFieldsFlatly().forEach(action);
     }
 
     private void appendParentName(BodyFieldDomain child, StringBuilder linkName) {
