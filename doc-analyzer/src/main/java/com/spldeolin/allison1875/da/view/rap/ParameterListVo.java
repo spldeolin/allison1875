@@ -13,7 +13,7 @@ import lombok.Data;
  * @author Deolin 2019-10-21
  */
 @Data
-public class ParameterListDto {
+public class ParameterListVo {
 
     private Long id;
 
@@ -23,7 +23,7 @@ public class ParameterListDto {
 
     private String remark;
 
-    private List<ParameterListDto> parameterList;
+    private List<ParameterListVo> parameterList;
 
     /**
      * unknown
@@ -35,8 +35,8 @@ public class ParameterListDto {
      */
     private String dataType;
 
-    public static ParameterListDto build(BodyFieldDomain fieldDto) {
-        ParameterListDto result = new ParameterListDto();
+    public static ParameterListVo build(BodyFieldDomain fieldDto) {
+        ParameterListVo result = new ParameterListVo();
         result.setId(-2333L);
         result.setIdentifier(fieldDto.fieldName());
         result.setName(fieldDto.description());

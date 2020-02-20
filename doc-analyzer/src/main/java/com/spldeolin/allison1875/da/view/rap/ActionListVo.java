@@ -9,7 +9,7 @@ import lombok.Data;
  * @author Deolin 2019-10-21
  */
 @Data
-public class ActionListDto {
+public class ActionListVo {
 
     private Long pageId;
 
@@ -25,12 +25,12 @@ public class ActionListDto {
 
     private String requestUrl;
 
-    private List<ParameterListDto> requestParameterList;
+    private List<ParameterListVo> requestParameterList;
 
-    private List<ParameterListDto> responseParameterList;
+    private List<ParameterListVo> responseParameterList;
 
-    public static ActionListDto build(ApiDomain apiDto) {
-        ActionListDto result = new ActionListDto();
+    public static ActionListVo build(ApiDomain apiDto) {
+        ActionListVo result = new ActionListVo();
         result.setPageId(389L);
         result.setId(-2333L);
         result.setRequestType("2");

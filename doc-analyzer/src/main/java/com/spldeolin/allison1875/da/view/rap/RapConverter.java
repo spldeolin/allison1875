@@ -27,10 +27,10 @@ public class RapConverter {
         return sb.toString();
     }
 
-    private Collection<ActionListDto> convertApis(Collection<ApiDomain> apis) {
-        Collection<ActionListDto> actions = Lists.newLinkedList();
+    private Collection<ActionListVo> convertApis(Collection<ApiDomain> apis) {
+        Collection<ActionListVo> actions = Lists.newLinkedList();
         apis.forEach(api -> {
-            ActionListDto action = ActionListDto.build(api);
+            ActionListVo action = ActionListVo.build(api);
             action.setRequestParameterList(convertFields(api.requestBodyFields()));
             action.setResponseParameterList(convertFields(api.responseBodyFields()));
             actions.add(action);
@@ -39,13 +39,13 @@ public class RapConverter {
         return actions;
     }
 
-    private List<ParameterListDto> convertFields(Collection<BodyFieldDomain> fields) {
-        List<ParameterListDto> firstFloor = Lists.newArrayList();
+    private List<ParameterListVo> convertFields(Collection<BodyFieldDomain> fields) {
+        List<ParameterListVo> firstFloor = Lists.newArrayList();
         if (fields == null) {
             return Lists.newArrayList();
         }
         for (BodyFieldDomain field : fields) {
-            ParameterListDto child = ParameterListDto.build(field);
+            ParameterListVo child = ParameterListVo.build(field);
             if (field.fields() != null && field.fields().size() > 0) {
                 this.convertFields(field.fields(), child);
             }
@@ -54,10 +54,10 @@ public class RapConverter {
         return firstFloor;
     }
 
-    private void convertFields(Collection<BodyFieldDomain> fields, ParameterListDto parent) {
-        List<ParameterListDto> childrent = Lists.newArrayList();
+    private void convertFields(Collection<BodyFieldDomain> fields, ParameterListVo parent) {
+        List<ParameterListVo> childrent = Lists.newArrayList();
         for (BodyFieldDomain field : fields) {
-            ParameterListDto child = ParameterListDto.build(field);
+            ParameterListVo child = ParameterListVo.build(field);
             if (field.fields() != null && field.fields().size() > 0) {
                 this.convertFields(field.fields(), child);
             }
