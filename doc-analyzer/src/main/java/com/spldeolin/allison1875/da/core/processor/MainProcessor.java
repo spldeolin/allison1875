@@ -9,7 +9,6 @@ import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
-import com.spldeolin.allison1875.da.core.processor.result.RequestMappingProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ReturnStmtBaseResponseBodyTypeParser;
@@ -40,10 +39,10 @@ public class MainProcessor {
             MethodDeclaration handler = handlerInfo.handler();
 
             // method uri
-            RequestMappingProcessResult requestMappingProcessResult = new RequestMappingProcessor()
-                    .process(controller, handler);
-            api.method(requestMappingProcessResult.methodTypes());
-            api.uri(requestMappingProcessResult.uris());
+            RequestMappingProcessor mappingProcessor = new RequestMappingProcessor().controller(controller)
+                    .handler(handler).process();
+            api.method(mappingProcessor.methodTypes());
+            api.uri(mappingProcessor.uris());
 
             // description
             api.description(Javadocs.extractFirstLine(handler));

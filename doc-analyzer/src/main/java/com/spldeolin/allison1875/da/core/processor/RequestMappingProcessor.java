@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,8 +17,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.enums.MethodTypeEnum;
-import com.spldeolin.allison1875.da.core.processor.result.RequestMappingProcessResult;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
@@ -25,44 +27,62 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-23
  */
 @Log4j2
+@Accessors(fluent = true)
 public class RequestMappingProcessor {
 
-    public RequestMappingProcessResult process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+    @Setter
+    private ClassOrInterfaceDeclaration controller;
+
+    @Setter
+    private MethodDeclaration handler;
+
+    @Getter
+    private Set<MethodTypeEnum> methodTypes = Sets.newHashSet();
+
+    @Getter
+    private List<String> uris = Lists.newLinkedList();
+
+    RequestMappingProcessor process() {
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         Collection<RequestMappingDto> fromController = parseRequestMappings(controller.getAnnotations());
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
 
-        Set<String> combinePaths = Sets.newHashSet();
-        Set<MethodTypeEnum> combineMethods = Sets.newHashSet();
         for (RequestMappingDto dto1 : fromController) {
             for (RequestMappingDto dto2 : fromHandler) {
-                combineMethods.addAll(dto1.getMethods());
-                combineMethods.addAll(dto2.getMethods());
+                methodTypes.addAll(dto1.getMethods());
+                methodTypes.addAll(dto2.getMethods());
                 for (String path1 : emptyToOne(dto1.getPaths())) {
                     for (String path2 : emptyToOne(dto2.getPaths())) {
-                        combinePaths.add(antPathMatcher.combine(path1, path2));
+                        uris.add(antPathMatcher.combine(path1, path2));
                     }
                 }
             }
         }
         if (fromController.size() == 0) {
             for (RequestMappingDto dto : fromHandler) {
-                combineMethods.addAll(dto.getMethods());
+                methodTypes.addAll(dto.getMethods());
                 for (String path : dto.getPaths()) {
-                    combinePaths.add(antPathMatcher.combine("", path));
+                    uris.add(antPathMatcher.combine("", path));
                 }
             }
         }
         if (fromHandler.size() == 0) {
             for (RequestMappingDto dto : fromController) {
-                combineMethods.addAll(dto.getMethods());
+                methodTypes.addAll(dto.getMethods());
                 for (String path : dto.getPaths()) {
-                    combinePaths.add(antPathMatcher.combine("", path));
+                    uris.add(antPathMatcher.combine("", path));
                 }
             }
         }
 
-        return new RequestMappingProcessResult().methodTypes(combineMethods).uris(combinePaths);
+        for (int i = 0; i < uris.size(); i++) {
+            String uri = uris.get(i);
+            if (!uri.startsWith("/")) {
+                uris.set(i, "/" + uri);
+            }
+        }
+
+        return this;
     }
 
     private Collection<String> emptyToOne(Collection<String> paths) {
