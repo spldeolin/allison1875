@@ -30,7 +30,7 @@ public class MarkdownConverter {
             vo.setIsResponseBodyNone(BodyTypeEnum.none == api.responseBodyType());
             vo.setIsResponseBodyChaos(BodyTypeEnum.chaos == api.responseBodyType());
             vo.setAuthor(emptyToDefault(api.author(), "未知开发者"));
-            vo.setLocation(api.codeSourceLocation());
+            vo.setCodeSource(api.codeSource());
 
             if (!vo.getIsRequestBodyChaos() && !vo.getIsRequestBodyNone()) {
                 Collection<RequestBodyFieldVo> fieldVos = Lists.newArrayList();

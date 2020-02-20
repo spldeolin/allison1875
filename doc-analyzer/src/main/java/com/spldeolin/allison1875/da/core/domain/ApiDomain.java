@@ -41,7 +41,7 @@ public class ApiDomain {
 
     private String author;
 
-    private String codeSourceLocation;
+    private String codeSource;
 
     public Collection<BodyFieldDomain> listRequestBodyFieldsFlatly() {
         Collection<BodyFieldDomain> result = Lists.newArrayList();

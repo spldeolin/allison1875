@@ -24,18 +24,27 @@ import com.spldeolin.allison1875.da.core.domain.UriFieldDomain;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-01-06
  */
 @Log4j2
-public class PathVariableProcessor {
+@Accessors(fluent = true)
+class PathVariableProcessor {
+
+    @Setter
+    private Collection<Parameter> parameters;
+
+    @Getter
+    private final Collection<UriFieldDomain> fields = Lists.newLinkedList();
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    public Collection<UriFieldDomain> processor(Collection<Parameter> parameters) {
-        Collection<UriFieldDomain> result = Lists.newLinkedList();
+    PathVariableProcessor process() {
         for (Parameter parameter : parameters) {
             UriFieldDomain field = new UriFieldDomain();
             AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
@@ -106,9 +115,9 @@ public class PathVariableProcessor {
             field.jsonType(jsonType).numberFormat(numberFormat).stringFormat(stringFormat.toString());
 
             field.validators(new ValidatorProcessor().process(parameter));
-            result.add(field);
+            fields.add(field);
         }
-        return result;
+        return this;
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {

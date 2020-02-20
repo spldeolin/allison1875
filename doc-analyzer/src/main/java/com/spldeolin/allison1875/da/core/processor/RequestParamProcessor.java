@@ -25,18 +25,27 @@ import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.util.ResolvedTypes;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-01-06
  */
 @Log4j2
-public class RequestParamProcessor {
+@Accessors(fluent = true)
+class RequestParamProcessor {
+
+    @Setter
+    private Collection<Parameter> parameters;
+
+    @Getter
+    private final Collection<UriFieldDomain> fields = Lists.newLinkedList();
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    public Collection<UriFieldDomain> processor(Collection<Parameter> parameters) {
-        Collection<UriFieldDomain> result = Lists.newLinkedList();
+    RequestParamProcessor process() {
         for (Parameter parameter : parameters) {
             UriFieldDomain field = new UriFieldDomain();
             AnnotationExpr requestParam = parameter.getAnnotationByName("RequestParam").get();
@@ -110,9 +119,9 @@ public class RequestParamProcessor {
             field.jsonType(jsonType).numberFormat(numberFormat);
 
             field.validators(new ValidatorProcessor().process(parameter));
-            result.add(field);
+            fields.add(field);
         }
-        return result;
+        return this;
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {

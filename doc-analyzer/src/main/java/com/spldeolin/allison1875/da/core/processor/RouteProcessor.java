@@ -30,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class RouteProcessor {
+class RouteProcessor {
 
     @Setter
     private ClassOrInterfaceDeclaration controller;

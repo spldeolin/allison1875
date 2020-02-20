@@ -4,7 +4,6 @@ import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;
@@ -12,7 +11,6 @@ import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ReturnStmtBaseResponseBodyTypeParser;
-import com.spldeolin.allison1875.da.core.util.Javadocs;
 import lombok.AllArgsConstructor;
 
 /**
@@ -33,22 +31,24 @@ public class MainProcessor {
 
         Collection<ApiDomain> apis = Lists.newLinkedList();
         handlerInfos.forEach(handlerInfo -> {
-            ApiDomain api = new ApiDomain();
-
             ClassOrInterfaceDeclaration controller = handlerInfo.controller();
             MethodDeclaration handler = handlerInfo.handler();
+            ApiDomain api = new ApiDomain();
 
-            // method uri
-            RouteProcessor mappingProcessor = new RouteProcessor().controller(controller).handler(handler).process();
-            api.method(mappingProcessor.methodTypes());
-            api.uri(mappingProcessor.uris());
+            RouteProcessor routeProcessor = new RouteProcessor().controller(controller).handler(handler).process();
+            api.method(routeProcessor.methodTypes());
+            api.uri(routeProcessor.uris());
 
-            // description
-            api.description(Javadocs.extractFirstLine(handler));
+            DescriptionProcessor descriptionProcessor = new DescriptionProcessor().handler(handler).process();
+            api.description(descriptionProcessor.description());
 
-            // path query
-            api.pathVariableFields(new PathVariableProcessor().processor(handlerInfo.pathVariables()));
-            api.requestParamFields(new RequestParamProcessor().processor(handlerInfo.requestParams()));
+            PathVariableProcessor pathVariableProcessor = new PathVariableProcessor()
+                    .parameters(handlerInfo.pathVariables()).process();
+            api.pathVariableFields(pathVariableProcessor.fields());
+
+            RequestParamProcessor requestParamProcessor = new RequestParamProcessor()
+                    .parameters(handlerInfo.requestParams()).process();
+            api.requestParamFields(requestParamProcessor.fields());
 
             // request body
             BodyProcessResult req = new BodyProcessor(handlerInfo.requestBodyResolvedType()).process();
@@ -60,12 +60,11 @@ public class MainProcessor {
             api.responseBodyType(resp.calcBodyType());
             this.processResponseBodyFields(api, resp);
 
-            // authur
-            api.author(new AuthorProcessor().process(controller, handler));
+            AuthorProcessor authorProcessor = new AuthorProcessor().controller(controller).handler(handler).process();
+            api.author(authorProcessor.author());
 
-            // code source location
-            api.codeSourceLocation(
-                    Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName()));
+            CodeSourceProcessor processor = new CodeSourceProcessor().handler(handler).process();
+            api.codeSource(processor.location());
 
             apis.add(api);
         });
