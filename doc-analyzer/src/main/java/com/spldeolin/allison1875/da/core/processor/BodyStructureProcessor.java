@@ -18,15 +18,11 @@ import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
-import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;
-import com.spldeolin.allison1875.da.core.processor.result.ChaosStructureBodyProcessResult;
-import com.spldeolin.allison1875.da.core.processor.result.KeyValueStructureBodyProcessResult;
-import com.spldeolin.allison1875.da.core.processor.result.ValueStructureBodyProcessResult;
-import com.spldeolin.allison1875.da.core.processor.result.VoidStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.util.ResolvedTypes;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -36,35 +32,47 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-class BodyProcessor {
+class BodyStructureProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     @Setter
     private ResolvedType bodyType;
 
-    @Getter
-    private boolean inArray = false;
+    @Setter
+    protected Boolean forRequestBodyOrNot;
 
-    @Getter
-    private boolean inPage = false;
+    protected Boolean inArray = false;
 
-    BodyProcessResult process() {
+    protected Boolean inPage = false;
+
+    BodyStructureEnum calcBodyStructure() {
+        throw new IllegalStateException("Cannot call this method before calling process method.");
+    }
+
+    BodyStructureProcessor moreProcess(ApiDomain api) {
+        throw new IllegalStateException("Cannot call this method before calling process method.");
+    }
+
+    BodyStructureProcessor process() {
         if (bodyType == null) {
-            return new VoidStructureBodyProcessResult();
+            return new VoidBodyProcessor();
         }
 
-        BodyProcessResult result;
+        BodyStructureProcessor result;
         try {
             if (isArray(bodyType)) {
                 // 最外层是 数组
-                result = tryProcessNonArrayLikeType(getArrayElementType(bodyType)).inArray(true);
+                result = tryProcessNonArrayLikeType(getArrayElementType(bodyType));
+                result.inArray = true;
             } else if (isJucAndElementTypeExplicit(bodyType)) {
                 // 最外层是 列表
-                result = tryProcessNonArrayLikeType(getJUCElementType(bodyType)).inArray(true);
+                result = tryProcessNonArrayLikeType(getJUCElementType(bodyType));
+                result.inArray = true;
             } else if (isPage(bodyType)) {
                 // 最外层是 Page对象
-                result = tryProcessNonArrayLikeType(getPageElementType(bodyType)).inPage(true);
+                result = tryProcessNonArrayLikeType(getPageElementType(bodyType));
+                result.inPage = true;
             } else {
                 // 单层
                 result = tryProcessNonArrayLikeType(bodyType);
@@ -72,12 +80,14 @@ class BodyProcessor {
         } catch (Exception e) {
             log.warn("type={}, cause={}", bodyType.describe(), e.getMessage());
             // as mazy mode
-            result = new ChaosStructureBodyProcessResult().jsonSchema(generateSchema(bodyType.describe()));
+            result = new ChaosBodyProcessor().jsonSchema(generateSchema(bodyType.describe()));
         }
-        return result;
+
+        // 新对象调用fillProcessResultToApi时需要用到forRequestBodyOrNot属性
+        return result.forRequestBodyOrNot(forRequestBodyOrNot);
     }
 
-    private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
+    private BodyStructureProcessor tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
         ClassOrInterfaceDeclaration coid = StaticAstContainer.getClassOrInterfaceDeclaration(describe);
 
@@ -91,10 +101,10 @@ class BodyProcessor {
 
         if (jsonSchema == null) {
             log.info("Cannot generate json schema [{}]", describe);
-            return new VoidStructureBodyProcessResult();
+            return new VoidBodyProcessor();
 
         } else if (jsonSchema.isObjectSchema()) {
-            return new KeyValueStructureBodyProcessResult().objectSchema(jsonSchema.asObjectSchema());
+            return new KeyValueBodyProcessor().objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
             FieldTypeEnum jsonType;
@@ -118,11 +128,10 @@ class BodyProcessor {
             } else {
                 throw new RuntimeException("impossible unless bug");
             }
-            return new ValueStructureBodyProcessResult().valueStructureJsonType(jsonType)
-                    .valueStructureNumberFormat(numberFormat);
+            return new ValueBodyProcessor().valueStructureJsonType(jsonType).valueStructureNumberFormat(numberFormat);
 
         } else {
-            return new ChaosStructureBodyProcessResult().jsonSchema(jsonSchema);
+            return new ChaosBodyProcessor().jsonSchema(jsonSchema);
         }
     }
 

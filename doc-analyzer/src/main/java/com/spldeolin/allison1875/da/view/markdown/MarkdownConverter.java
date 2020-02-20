@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.domain.ValidatorDomain;
-import com.spldeolin.allison1875.da.core.enums.BodyTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import lombok.extern.log4j.Log4j2;
@@ -25,10 +25,10 @@ public class MarkdownConverter {
             SimpleMdOutputVo vo = new SimpleMdOutputVo();
             vo.setUri(Iterables.getFirst(api.uri(), ""));
             vo.setDescription(api.description());
-            vo.setIsRequestBodyNone(BodyTypeEnum.none == api.requestBodyType());
-            vo.setIsRequestBodyChaos(BodyTypeEnum.chaos == api.requestBodyType());
-            vo.setIsResponseBodyNone(BodyTypeEnum.none == api.responseBodyType());
-            vo.setIsResponseBodyChaos(BodyTypeEnum.chaos == api.responseBodyType());
+            vo.setIsRequestBodyNone(BodyStructureEnum.none == api.requestBodyStructure());
+            vo.setIsRequestBodyChaos(BodyStructureEnum.chaos == api.requestBodyStructure());
+            vo.setIsResponseBodyNone(BodyStructureEnum.none == api.responseBodyStructure());
+            vo.setIsResponseBodyChaos(BodyStructureEnum.chaos == api.responseBodyStructure());
             vo.setAuthor(emptyToDefault(api.author(), "未知开发者"));
             vo.setCodeSource(api.codeSource());
 

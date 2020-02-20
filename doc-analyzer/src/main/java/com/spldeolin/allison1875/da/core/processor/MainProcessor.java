@@ -5,10 +5,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.da.core.domain.ApiDomain;
-import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
-import com.spldeolin.allison1875.da.core.processor.result.BodyProcessResult;
 import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
-import com.spldeolin.allison1875.da.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ReturnStmtBaseResponseBodyTypeParser;
 import lombok.AllArgsConstructor;
@@ -35,34 +32,40 @@ public class MainProcessor {
             MethodDeclaration handler = handlerInfo.handler();
             ApiDomain api = new ApiDomain();
 
+            // uri、请求方法
             RouteProcessor routeProcessor = new RouteProcessor().controller(controller).handler(handler).process();
             api.method(routeProcessor.methodTypes());
             api.uri(routeProcessor.uris());
 
+            // 描述
             DescriptionProcessor descriptionProcessor = new DescriptionProcessor().handler(handler).process();
             api.description(descriptionProcessor.description());
 
+            // @PathVariable
             PathVariableProcessor pathVariableProcessor = new PathVariableProcessor()
                     .parameters(handlerInfo.pathVariables()).process();
             api.pathVariableFields(pathVariableProcessor.fields());
 
+            // @RequestParam
             RequestParamProcessor requestParamProcessor = new RequestParamProcessor()
                     .parameters(handlerInfo.requestParams()).process();
             api.requestParamFields(requestParamProcessor.fields());
 
-            // request body
-            BodyProcessResult req = new BodyProcessor().bodyType(handlerInfo.requestBodyResolvedType()).process();
-            api.requestBodyType(req.calcBodyType());
-            this.processRequestBodyFields(api, req);
+            // @RequestBody
+            BodyStructureProcessor requestBodyP = new BodyStructureProcessor().forRequestBodyOrNot(true)
+                    .bodyType(handlerInfo.requestBodyResolvedType()).process().moreProcess(api);
+            api.requestBodyStructure(requestBodyP.calcBodyStructure());
 
-            // response body
-            BodyProcessResult resp = new BodyProcessor().bodyType(handlerInfo.responseBodyResolvedType()).process();
-            api.responseBodyType(resp.calcBodyType());
-            this.processResponseBodyFields(api, resp);
+            // 返回类型
+            BodyStructureProcessor responseBodyP = new BodyStructureProcessor().forRequestBodyOrNot(false)
+                    .bodyType(handlerInfo.responseBodyResolvedType()).process().moreProcess(api);
+            api.responseBodyStructure(responseBodyP.calcBodyStructure());
 
+            // 作者
             AuthorProcessor authorProcessor = new AuthorProcessor().controller(controller).handler(handler).process();
             api.author(authorProcessor.author());
 
+            // 源码位置
             CodeSourceProcessor processor = new CodeSourceProcessor().handler(handler).process();
             api.codeSource(processor.location());
 
@@ -70,38 +73,6 @@ public class MainProcessor {
         });
 
         return apis;
-    }
-
-    private void processRequestBodyFields(ApiDomain api, BodyProcessResult req) {
-        if (req.isKeyValueStructure()) {
-            new BodyFieldProcessor(true).process(req.asKeyValueStructure().objectSchema(), api);
-        }
-        if (req.isValueStructure()) {
-            ValueStructureBodyProcessResult valueStruct = req.asValueStructure();
-            Collection<BodyFieldDomain> field = Lists.newArrayList(
-                    new BodyFieldDomain().jsonType(valueStruct.valueStructureJsonType())
-                            .numberFormat(valueStruct.valueStructureNumberFormat()));
-            api.requestBodyFields(field);
-        }
-        if (req.isChaosStructure()) {
-            api.requestBodyChaosJsonSchema(req.asChaosStructure().jsonSchema());
-        }
-    }
-
-    private void processResponseBodyFields(ApiDomain api, BodyProcessResult resp) {
-        if (resp.isKeyValueStructure()) {
-            new BodyFieldProcessor(false).process(resp.asKeyValueStructure().objectSchema(), api);
-        }
-        if (resp.isValueStructure()) {
-            ValueStructureBodyProcessResult valueStruct = resp.asValueStructure();
-            Collection<BodyFieldDomain> field = Lists.newArrayList(
-                    new BodyFieldDomain().jsonType(valueStruct.valueStructureJsonType())
-                            .numberFormat(valueStruct.valueStructureNumberFormat()));
-            api.responseBodyFields(field);
-        }
-        if (resp.isChaosStructure()) {
-            api.responseBodyChaosJsonSchema(resp.asChaosStructure().jsonSchema());
-        }
     }
 
 }

@@ -1,8 +1,9 @@
-package com.spldeolin.allison1875.da.core.processor.result;
+package com.spldeolin.allison1875.da.core.processor;
 
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
@@ -22,16 +23,27 @@ import lombok.experimental.Accessors;
  *
  * 这类情况不会出现太多，解析成field的成本也比较高，解析出来后也无法以主流的表格形式来描述field之间的关系，所以只提供一个Json Schema作为特殊处理
  *
- * @author Deolin 2020-01-06
+ * @author Deolin 2020-02-20
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-public class ChaosStructureBodyProcessResult extends BodyProcessResult {
+public class ChaosBodyProcessor extends BodyStructureProcessor {
 
-    /**
-     * struct=chaos时有效
-     */
+    @Setter
     private JsonSchema jsonSchema;
+
+    @Override
+    ChaosBodyProcessor moreProcess(ApiDomain api) {
+        if (super.forRequestBodyOrNot) {
+            api.requestBodyChaosJsonSchema(jsonSchema);
+        } else {
+            api.responseBodyChaosJsonSchema(jsonSchema);
+        }
+        return this;
+    }
+
+    @Override
+    BodyStructureEnum calcBodyStructure() {
+        return BodyStructureEnum.chaos;
+    }
 
 }

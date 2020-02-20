@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.core.enums.BodyTypeEnum;
+import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.MethodTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -27,13 +27,13 @@ public class ApiDomain {
 
     private Collection<UriFieldDomain> requestParamFields;
 
-    private BodyTypeEnum requestBodyType;
+    private BodyStructureEnum requestBodyStructure;
 
     private Collection<BodyFieldDomain> requestBodyFields;
 
     private JsonSchema requestBodyChaosJsonSchema;
 
-    private BodyTypeEnum responseBodyType;
+    private BodyStructureEnum responseBodyStructure;
 
     private Collection<BodyFieldDomain> responseBodyFields;
 

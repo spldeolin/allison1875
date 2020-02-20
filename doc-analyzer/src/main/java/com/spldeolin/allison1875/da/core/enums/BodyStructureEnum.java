@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum BodyTypeEnum {
+public enum BodyStructureEnum {
 
     none("none"),
 
