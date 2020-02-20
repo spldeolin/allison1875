@@ -88,7 +88,8 @@ public class BodyFieldProcessor {
                 childFieldDto.nullable(false);
             }
 
-            childFieldDto.validators(new ValidatorProcessor().process(field));
+            ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(field).process();
+            childFieldDto.validators(validatorProcessor.validators());
 
             if (childSchema.isValueTypeSchema()) {
                 childFieldDto.jsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));

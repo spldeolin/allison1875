@@ -118,7 +118,9 @@ class RequestParamProcessor {
             }
             field.jsonType(jsonType).numberFormat(numberFormat);
 
-            field.validators(new ValidatorProcessor().process(parameter));
+            ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(parameter).process();
+            field.validators(validatorProcessor.validators());
+
             fields.add(field);
         }
         return this;

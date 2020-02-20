@@ -114,7 +114,9 @@ class PathVariableProcessor {
             }
             field.jsonType(jsonType).numberFormat(numberFormat).stringFormat(stringFormat.toString());
 
-            field.validators(new ValidatorProcessor().process(parameter));
+            ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(parameter).process();
+            field.validators(validatorProcessor.validators());
+
             fields.add(field);
         }
         return this;
