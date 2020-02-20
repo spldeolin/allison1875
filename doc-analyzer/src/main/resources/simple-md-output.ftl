@@ -38,12 +38,6 @@ ${description}
 
 
 
-## 作者备注
-
-
-
-
-
 ## 作者
 
 ${author}
