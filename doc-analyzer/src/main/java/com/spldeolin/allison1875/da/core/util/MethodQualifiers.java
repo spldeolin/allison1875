@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.da.core.util;
 import java.lang.reflect.Method;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-import com.spldeolin.allison1875.base.exception.ResolveException;
 
 /**
  * @author Deolin 2019-12-29
@@ -39,13 +38,8 @@ public class MethodQualifiers {
     /**
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature
      */
-    public static String getShortestQualifiedSignature(MethodDeclaration methodDeclaration) throws ResolveException {
-        ResolvedMethodDeclaration resolve;
-        try {
-            resolve = methodDeclaration.resolve();
-        } catch (Exception e) {
-            throw new ResolveException(methodDeclaration, e);
-        }
+    public static String getShortestQualifiedSignature(MethodDeclaration methodDeclaration) {
+        ResolvedMethodDeclaration resolve = methodDeclaration.resolve();
 
         String result = resolve.getQualifiedSignature();
         // remove every <*>

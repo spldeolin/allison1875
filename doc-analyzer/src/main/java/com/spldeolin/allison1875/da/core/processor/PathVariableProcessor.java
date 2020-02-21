@@ -19,8 +19,6 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.exception.ResolveException;
-import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
@@ -50,14 +48,7 @@ class PathVariableProcessor {
         checkStatus();
 
         for (Parameter parameter : parameters) {
-            UriFieldDefinition field;
-            try {
-                field = processEachOne(parameter);
-            } catch (ResolveException e) {
-                log.warn("Node [{}] resolve failed, ignore handler [{}].", e.getCodeSource(),
-                        Locations.getRelativePathWithLineNo(parameter), e);
-                continue;
-            }
+            UriFieldDefinition field = processEachOne(parameter);
             if (field != null) {
                 fields.add(field);
             }
@@ -65,7 +56,7 @@ class PathVariableProcessor {
         return this;
     }
 
-    private UriFieldDefinition processEachOne(Parameter parameter) throws ResolveException {
+    private UriFieldDefinition processEachOne(Parameter parameter) {
         UriFieldDefinition field = new UriFieldDefinition();
         AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
         String name = null;
@@ -94,12 +85,7 @@ class PathVariableProcessor {
         NumberFormatTypeEnum numberFormat = null;
         StringBuilder stringFormat = new StringBuilder();
 
-        ResolvedType type;
-        try {
-            type = parameter.getType().resolve();
-        } catch (Exception e) {
-            throw new ResolveException(parameter, e);
-        }
+        ResolvedType type = parameter.getType().resolve();
 
         String describe = type.describe();
         JsonSchema jsonSchema = generateSchema(describe);

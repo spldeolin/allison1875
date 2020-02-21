@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.enums.MethodTypeEnum;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -54,10 +53,10 @@ class RouteProcessor {
 
         for (RequestMappingDto dto1 : fromController) {
             for (RequestMappingDto dto2 : fromHandler) {
-                methodTypes.addAll(dto1.getMethods());
-                methodTypes.addAll(dto2.getMethods());
-                for (String path1 : emptyToOne(dto1.getPaths())) {
-                    for (String path2 : emptyToOne(dto2.getPaths())) {
+                methodTypes.addAll(dto1.methods);
+                methodTypes.addAll(dto2.methods);
+                for (String path1 : emptyToOne(dto1.paths)) {
+                    for (String path2 : emptyToOne(dto2.paths)) {
                         uris.add(antPathMatcher.combine(path1, path2));
                     }
                 }
@@ -65,16 +64,16 @@ class RouteProcessor {
         }
         if (fromController.size() == 0) {
             for (RequestMappingDto dto : fromHandler) {
-                methodTypes.addAll(dto.getMethods());
-                for (String path : dto.getPaths()) {
+                methodTypes.addAll(dto.methods);
+                for (String path : dto.paths) {
                     uris.add(antPathMatcher.combine("", path));
                 }
             }
         }
         if (fromHandler.size() == 0) {
             for (RequestMappingDto dto : fromController) {
-                methodTypes.addAll(dto.getMethods());
-                for (String path : dto.getPaths()) {
+                methodTypes.addAll(dto.methods);
+                for (String path : dto.paths) {
                     uris.add(antPathMatcher.combine("", path));
                 }
             }
@@ -109,8 +108,6 @@ class RouteProcessor {
     private Collection<RequestMappingDto> parseRequestMappings(NodeList<AnnotationExpr> annotations) {
         Collection<RequestMappingDto> result = Lists.newArrayList();
         for (AnnotationExpr annotation : annotations) {
-
-
             ResolvedAnnotationDeclaration resolve = annotation.resolve();
 
             String annoQualifier = resolve.getId();
@@ -120,7 +117,8 @@ class RouteProcessor {
             } else {
                 Optional<MethodTypeEnum> methodType = MethodTypeEnum.ofAnnotationQualifier(annoQualifier);
                 if (methodType.isPresent()) {
-                    dto = this.parseRequestMapping(annotation, true).setMethods(methodType.get().inCollection());
+                    dto = this.parseRequestMapping(annotation, true);
+                    dto.methods = methodType.get().inCollection();
                 } else {
                     continue;
                 }
@@ -134,18 +132,18 @@ class RouteProcessor {
         RequestMappingDto dto = new RequestMappingDto();
         annotation.ifSingleMemberAnnotationExpr(single -> {
             Expression memberValue = single.getMemberValue();
-            dto.setPaths(this.collectPaths(memberValue));
+            dto.paths = this.collectPaths(memberValue);
         });
 
         annotation.ifNormalAnnotationExpr(normal -> normal.getPairs().forEach(pair -> {
             if (pair.getNameAsString().equals("value")) {
-                dto.setPaths(this.collectPaths(pair.getValue()));
+                dto.paths = this.collectPaths(pair.getValue());
             }
             if (pair.getNameAsString().equals("path")) {
-                dto.getPaths().addAll(this.collectPaths(pair.getValue()));
+                dto.paths.addAll(this.collectPaths(pair.getValue()));
             }
             if (!isSpecificMethod && pair.getNameAsString().equals("method")) {
-                dto.getMethods().addAll(this.collectionMethods(pair.getValue()));
+                dto.methods.addAll(this.collectionMethods(pair.getValue()));
             }
         }));
         return dto;
@@ -171,8 +169,6 @@ class RouteProcessor {
         return result;
     }
 
-    @Data
-    @Accessors(chain = true)
     private static class RequestMappingDto {
 
         private Collection<MethodTypeEnum> methods = Lists.newArrayList();

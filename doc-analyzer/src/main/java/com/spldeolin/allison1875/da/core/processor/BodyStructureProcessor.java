@@ -108,7 +108,7 @@ class BodyStructureProcessor {
         }
 
         if (jsonSchema == null) {
-            log.info("Cannot generate json schema [{}]", describe);
+            log.warn("Cannot generate json schema [{}]", describe);
             return new VoidBodyProcessor();
 
         } else if (jsonSchema.isObjectSchema()) {
@@ -184,6 +184,10 @@ class BodyStructureProcessor {
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
+        int typeParameterIndex = resolvedTypeDescribe.indexOf("<");
+        if (typeParameterIndex != -1) {
+            resolvedTypeDescribe = resolvedTypeDescribe.substring(0, typeParameterIndex);
+        }
         JsonSchema jsonSchema = generateSchemaByQualifierForClassLoader(resolvedTypeDescribe);
         if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
             generateSchema(Strings.replaceLast(resolvedTypeDescribe, ".", "$"));
