@@ -31,7 +31,7 @@ public class HandlerDefinition {
 
     @Override
     public String toString() {
-        return "HandlerEntry{" + shortestQualifiedSignature + '}';
+        return "Handler=[" + shortestQualifiedSignature + ']';
     }
 
 }
