@@ -1,20 +1,14 @@
 package com.spldeolin.allison1875.da.core.processor;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.da.core.definition.HandlerDefinition;
@@ -51,16 +45,16 @@ public class HandlerProcessor {
                 .forEach(controller -> {
 
                     // reflect controller
-                    Class<?> reflectController;
-                    String name = this.qualifierForClassLoader(controller);
-                    try {
-                        reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
-                    } catch (ClassNotFoundException e) {
-                        log.warn("class[{}] not found", name);
-                        return;
-                    }
+//                    Class<?> reflectController;
+//                    String name = this.qualifierForClassLoader(controller);
+//                    try {
+//                        reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
+//                    } catch (ClassNotFoundException e) {
+//                        log.warn("class[{}] not found", name);
+//                        return;
+//                    }
 
-                    Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
+//                    Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
                     controller.getMethods().stream().filter(this::isFilteredHandler).forEach(handler -> {
                         HandlerDefinition entry = new HandlerDefinition();
 
@@ -71,11 +65,11 @@ public class HandlerProcessor {
                         String shortestQualifiedSignature = MethodQualifiers.getShortestQualifiedSignature(handler);
                         entry.shortestQualifiedSignature(shortestQualifiedSignature);
                         entry.handler(handler);
-                        Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
-                        if (reflectHandler == null) {
-                            log.warn("method[{}] not found", shortestQualifiedSignature);
-                            return;
-                        }
+//                        Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
+//                        if (reflectHandler == null) {
+//                            log.warn("method[{}] not found", shortestQualifiedSignature);
+//                            return;
+//                        }
 
                         // result
                         if (responseBodyTypeParser != null) {
@@ -109,13 +103,6 @@ public class HandlerProcessor {
                 });
         log.info("(Summary) {} Spring MVC handlers has collected.", handlerDefinitions.size());
         return this;
-    }
-
-    private Map<String, Method> listDeclaredMethodAsMap(Class<?> reflectController) {
-        Map<String, Method> declaredMethods = Maps.newHashMap();
-        Arrays.stream(reflectController.getDeclaredMethods())
-                .forEach(method -> declaredMethods.put(MethodQualifiers.getShortestQualifiedSignature(method), method));
-        return declaredMethods;
     }
 
     private boolean isFilteredController(ClassOrInterfaceDeclaration coid) {
@@ -186,22 +173,30 @@ public class HandlerProcessor {
                 .hasDirectlyAnnotation(QualifierConstants.REQUEST_MAPPING);
     }
 
-    private String qualifierForClassLoader(ClassOrInterfaceDeclaration controller) {
-        StringBuilder qualifierForClassLoader = new StringBuilder(64);
-        this.qualifierForClassLoader(qualifierForClassLoader, controller);
-        return qualifierForClassLoader.toString();
-    }
+//    private Map<String, Method> listDeclaredMethodAsMap(Class<?> reflectController) {
+//        Map<String, Method> declaredMethods = Maps.newHashMap();
+//        Arrays.stream(reflectController.getDeclaredMethods())
+//                .forEach(method -> declaredMethods.put(MethodQualifiers.getShortestQualifiedSignature(method),
+//                method));
+//        return declaredMethods;
+//    }
 
-    private void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
-        node.getParentNode().ifPresent(parent -> {
-            if (parent instanceof TypeDeclaration) {
-                this.qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
-                qualifier.append("$");
-                qualifier.append(node.getNameAsString());
-            } else {
-                node.getFullyQualifiedName().ifPresent(qualifier::append);
-            }
-        });
-    }
+//    private String qualifierForClassLoader(ClassOrInterfaceDeclaration controller) {
+//        StringBuilder qualifierForClassLoader = new StringBuilder(64);
+//        this.qualifierForClassLoader(qualifierForClassLoader, controller);
+//        return qualifierForClassLoader.toString();
+//    }
+
+//    private void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
+//        node.getParentNode().ifPresent(parent -> {
+//            if (parent instanceof TypeDeclaration) {
+//                this.qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
+//                qualifier.append("$");
+//                qualifier.append(node.getNameAsString());
+//            } else {
+//                node.getFullyQualifiedName().ifPresent(qualifier::append);
+//            }
+//        });
+//    }
 
 }
