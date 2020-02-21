@@ -13,47 +13,36 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
 import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.util.Javadocs;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2019-12-03
  */
 @Log4j2
-public class BodyFieldProcessor {
+@Accessors(fluent = true)
+class BodyFieldProcessor {
 
-    private final boolean forRequestBodyNotNot;
+    @Setter
+    private ObjectSchema objectSchema;
 
-    public BodyFieldProcessor(boolean forRequestBodyNotNot) {
-        this.forRequestBodyNotNot = forRequestBodyNotNot;
+    @Getter
+    private Collection<BodyFieldDomain> firstFloorFields;
+
+    BodyFieldProcessor process() {
+        firstFloorFields = parseFieldTypes(objectSchema, false, new BodyFieldDomain()).childFields();
+        firstFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
+        return this;
     }
 
-    public void process(ObjectSchema objectSchema, ApiDomain api) {
-        Collection<BodyFieldDomain> zeroFloorFields = parseFirstFloorFields(objectSchema);
-        if (forRequestBodyNotNot) {
-            api.requestBodyFields(zeroFloorFields);
-        } else {
-            api.responseBodyFields(zeroFloorFields);
-        }
-        api.setAllBodyFieldLinkNames();
-    }
-
-    private Collection<BodyFieldDomain> parseFirstFloorFields(ObjectSchema zeroSchema) {
-        List<BodyFieldDomain> flatList = Lists.newArrayList();
-        Collection<BodyFieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new BodyFieldDomain(),
-                flatList).fields();
-        zeroFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
-
-        return zeroFloorFields;
-    }
-
-    private BodyFieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDomain parent,
-            List<BodyFieldDomain> flatList) {
+    private BodyFieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDomain parent) {
         if (isObjectInArray) {
             parent.jsonType(FieldTypeEnum.objectArray);
         } else {
@@ -94,7 +83,7 @@ public class BodyFieldProcessor {
             if (childSchema.isValueTypeSchema()) {
                 childFieldDto.jsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
             } else if (childSchema.isObjectSchema()) {
-                parseFieldTypes(childSchema.asObjectSchema(), false, childFieldDto, flatList);
+                parseFieldTypes(childSchema.asObjectSchema(), false, childFieldDto);
             } else if (childSchema.isArraySchema()) {
                 ArraySchema aSchema = childSchema.asArraySchema();
                 if (aSchema.getItems() == null) {
@@ -110,7 +99,7 @@ public class BodyFieldProcessor {
                 if (eleSchema.isValueTypeSchema()) {
                     childFieldDto.jsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
                 } else if (eleSchema.isObjectSchema()) {
-                    parseFieldTypes(eleSchema.asObjectSchema(), true, childFieldDto, flatList);
+                    parseFieldTypes(eleSchema.asObjectSchema(), true, childFieldDto);
                 } else {
                     // 可能是因为 1. 类中存在不支持类型的field 2. 这是个通过Jackson映射到CSV的DTO 3. 类中存在多个相同类型的ObjectSchema
                     return;
@@ -140,11 +129,9 @@ public class BodyFieldProcessor {
             children.add(childFieldDto);
         });
 
-        parent.fields(children);
-        flatList.addAll(children);
+        parent.childFields(children);
         return parent;
     }
-
 
     private FieldTypeEnum calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
         if (vSchema.isNumberSchema()) {

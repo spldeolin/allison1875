@@ -96,8 +96,8 @@ public class ApiDomain {
     }
 
     private void addAllChildren(BodyFieldDomain parent, Collection<BodyFieldDomain> container) {
-        if (!CollectionUtils.isEmpty(parent.fields())) {
-            for (BodyFieldDomain child : parent.fields()) {
+        if (!CollectionUtils.isEmpty(parent.childFields())) {
+            for (BodyFieldDomain child : parent.childFields()) {
                 container.add(child);
                 this.addAllChildren(child, container);
             }

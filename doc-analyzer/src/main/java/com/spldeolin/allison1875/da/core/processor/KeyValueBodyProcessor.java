@@ -21,7 +21,13 @@ public class KeyValueBodyProcessor extends BodyStructureProcessor {
 
     @Override
     KeyValueBodyProcessor moreProcess(ApiDomain api) {
-        new BodyFieldProcessor(super.forRequestBodyOrNot).process(objectSchema, api);
+        BodyFieldProcessor bodyFieldProcessor = new BodyFieldProcessor().objectSchema(objectSchema).process();
+        if (super.forRequestBodyOrNot) {
+            api.requestBodyFields(bodyFieldProcessor.firstFloorFields());
+        } else {
+            api.responseBodyFields(bodyFieldProcessor.firstFloorFields());
+        }
+        api.setAllBodyFieldLinkNames();
         return this;
     }
 

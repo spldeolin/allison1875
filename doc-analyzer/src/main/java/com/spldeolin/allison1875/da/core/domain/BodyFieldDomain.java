@@ -27,11 +27,6 @@ public class BodyFieldDomain {
 
     private String fieldName;
 
-    /**
-     * @see FieldTypeEnum
-     * @see ApiDomain#pathVariableFields() string, number, boolean
-     * @see ApiDomain#requestParamFields() string, number, boolean
-     */
     private FieldTypeEnum jsonType;
 
     private String stringFormat;
@@ -47,10 +42,6 @@ public class BodyFieldDomain {
 
     private String description;
 
-    /**
-     * com.topaiebiz.rapgen2.enums.TypeName#object
-     * com.topaiebiz.rapgen2.enums.TypeName#objectArray
-     */
-    private Collection<BodyFieldDomain> fields;
+    private Collection<BodyFieldDomain> childFields;
 
 }
