@@ -37,9 +37,16 @@ class BodyFieldProcessor {
     private Collection<BodyFieldDefinition> firstFloorFields;
 
     BodyFieldProcessor process() {
+        checkStatus();
         firstFloorFields = parseFieldTypes(objectSchema, false, new BodyFieldDefinition()).childFields();
         firstFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
         return this;
+    }
+
+    private void checkStatus() {
+        if (objectSchema == null) {
+            throw new IllegalStateException("objectSchema cannot be absent.");
+        }
     }
 
     private BodyFieldDefinition parseFieldTypes(ObjectSchema schema, boolean isObjectInArray,

@@ -45,6 +45,8 @@ class PathVariableProcessor {
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     PathVariableProcessor process() {
+        checkStatus();
+
         for (Parameter parameter : parameters) {
             UriFieldDefinition field = new UriFieldDefinition();
             AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
@@ -120,6 +122,12 @@ class PathVariableProcessor {
             fields.add(field);
         }
         return this;
+    }
+
+    private void checkStatus() {
+        if (parameters == null) {
+            throw new IllegalStateException("parameters cannot be absent.");
+        }
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {

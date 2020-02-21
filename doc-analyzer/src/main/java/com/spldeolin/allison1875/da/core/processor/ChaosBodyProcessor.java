@@ -33,6 +33,8 @@ public class ChaosBodyProcessor extends BodyStructureProcessor {
 
     @Override
     ChaosBodyProcessor moreProcess(ApiDefinition api) {
+        moreCheckStatus();
+
         if (super.forRequestBodyOrNot) {
             api.requestBodyChaosJsonSchema(jsonSchema);
         } else {
@@ -44,6 +46,12 @@ public class ChaosBodyProcessor extends BodyStructureProcessor {
     @Override
     BodyStructureEnum calcBodyStructure() {
         return BodyStructureEnum.chaos;
+    }
+
+    private void moreCheckStatus() {
+        if (jsonSchema == null) {
+            throw new IllegalStateException("jsonSchema cannot be absent.");
+        }
     }
 
 }

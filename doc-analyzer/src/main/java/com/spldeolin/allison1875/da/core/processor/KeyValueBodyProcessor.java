@@ -21,6 +21,8 @@ public class KeyValueBodyProcessor extends BodyStructureProcessor {
 
     @Override
     KeyValueBodyProcessor moreProcess(ApiDefinition api) {
+        moreCheckStatus();
+
         BodyFieldProcessor bodyFieldProcessor = new BodyFieldProcessor().objectSchema(objectSchema).process();
         if (super.forRequestBodyOrNot) {
             api.requestBodyFields(bodyFieldProcessor.firstFloorFields());
@@ -39,6 +41,12 @@ public class KeyValueBodyProcessor extends BodyStructureProcessor {
             return BodyStructureEnum.keyValuePage;
         } else {
             return BodyStructureEnum.keyValue;
+        }
+    }
+
+    private void moreCheckStatus() {
+        if (objectSchema == null) {
+            throw new IllegalStateException("objectSchema cannot be absent.");
         }
     }
 

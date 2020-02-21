@@ -28,6 +28,8 @@ public class ValueBodyProcessor extends BodyStructureProcessor {
 
     @Override
     ValueBodyProcessor moreProcess(ApiDefinition api) {
+        moreCheckStatus();
+
         Collection<BodyFieldDefinition> field = Lists.newArrayList(
                 new BodyFieldDefinition().jsonType(valueStructureJsonType).numberFormat(valueStructureNumberFormat));
         if (super.forRequestBodyOrNot) {
@@ -44,6 +46,15 @@ public class ValueBodyProcessor extends BodyStructureProcessor {
             return BodyStructureEnum.valueArray;
         } else {
             return BodyStructureEnum.va1ue;
+        }
+    }
+
+    private void moreCheckStatus() {
+        if (valueStructureJsonType == null) {
+            throw new IllegalStateException("valueStructureJsonType cannot be absent.");
+        }
+        if (valueStructureNumberFormat == null) {
+            throw new IllegalStateException("valueStructureNumberFormat cannot be absent.");
         }
     }
 

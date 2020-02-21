@@ -45,6 +45,8 @@ class RouteProcessor {
     private List<String> uris = Lists.newLinkedList();
 
     RouteProcessor process() {
+        checkStatus();
+
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         Collection<RequestMappingDto> fromController = parseRequestMappings(controller.getAnnotations());
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
@@ -85,6 +87,15 @@ class RouteProcessor {
         }
 
         return this;
+    }
+
+    private void checkStatus() {
+        if (controller == null) {
+            throw new IllegalStateException("controller cannot be absent.");
+        }
+        if (handler == null) {
+            throw new IllegalStateException("handler cannot be absent.");
+        }
     }
 
     private Collection<String> emptyToOne(Collection<String> paths) {

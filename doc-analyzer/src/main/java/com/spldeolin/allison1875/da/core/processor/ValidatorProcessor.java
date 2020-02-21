@@ -50,6 +50,8 @@ class ValidatorProcessor {
     private Collection<ValidatorDefinition> validators = Lists.newLinkedList();
 
     ValidatorProcessor process() {
+        checkStatus();
+
         this.calcValidators(nodeWithAnnotations.getAnnotations());
 
         if (validators.removeIf(validator -> enumValue == validator.validatorType())) {
@@ -58,6 +60,12 @@ class ValidatorProcessor {
         }
 
         return this;
+    }
+
+    private void checkStatus() {
+        if (nodeWithAnnotations == null) {
+            throw new IllegalStateException("nodeWithAnnotations cannot be absent.");
+        }
     }
 
     private StringBuilder calcEnumValueSpecially(NodeWithAnnotations<?> node) {

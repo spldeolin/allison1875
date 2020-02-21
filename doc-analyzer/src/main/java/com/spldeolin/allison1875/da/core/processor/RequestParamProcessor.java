@@ -46,6 +46,8 @@ class RequestParamProcessor {
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     RequestParamProcessor process() {
+        checkStatus();
+
         for (Parameter parameter : parameters) {
             UriFieldDefinition field = new UriFieldDefinition();
             AnnotationExpr requestParam = parameter.getAnnotationByName("RequestParam").get();
@@ -124,6 +126,12 @@ class RequestParamProcessor {
             fields.add(field);
         }
         return this;
+    }
+
+    private void checkStatus() {
+        if (parameters == null) {
+            throw new IllegalStateException("parameters cannot be absent.");
+        }
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {

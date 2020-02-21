@@ -21,8 +21,16 @@ class DescriptionProcessor {
     private String description;
 
     DescriptionProcessor process() {
+        checkStatus();
+
         description = Javadocs.extractFirstLine(handler);
         return this;
+    }
+
+    private void checkStatus() {
+        if (handler == null) {
+            throw new IllegalStateException("handler cannot be absent.");
+        }
     }
 
 }

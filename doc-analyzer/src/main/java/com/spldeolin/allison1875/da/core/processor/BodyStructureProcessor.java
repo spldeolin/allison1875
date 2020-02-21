@@ -55,6 +55,8 @@ class BodyStructureProcessor {
     }
 
     BodyStructureProcessor process() {
+        checkStatus();
+
         if (bodyType == null) {
             return new VoidBodyProcessor();
         }
@@ -85,6 +87,12 @@ class BodyStructureProcessor {
 
         // 新对象调用fillProcessResultToApi时需要用到forRequestBodyOrNot属性
         return result.forRequestBodyOrNot(forRequestBodyOrNot);
+    }
+
+    private void checkStatus() {
+        if (forRequestBodyOrNot == null) {
+            throw new IllegalStateException("forRequestBodyOrNot cannot be absent.");
+        }
     }
 
     private BodyStructureProcessor tryProcessNonArrayLikeType(ResolvedType type) {

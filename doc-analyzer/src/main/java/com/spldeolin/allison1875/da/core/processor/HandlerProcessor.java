@@ -41,6 +41,8 @@ public class HandlerProcessor {
     private Collection<HandlerDefinition> handlerDefinitions = Lists.newLinkedList();
 
     HandlerProcessor process() {
+        checkStatus();
+
         StaticAstContainer.getClassOrInterfaceDeclarations().stream().filter(this::isFilteredController)
                 .forEach(controller -> {
 
@@ -103,6 +105,18 @@ public class HandlerProcessor {
                 });
         log.info("(Summary) {} Spring MVC handlers has collected.", handlerDefinitions.size());
         return this;
+    }
+
+    private void checkStatus() {
+        if (controllerFilter == null) {
+            throw new IllegalStateException("controllerFilter cannot be absent.");
+        }
+        if (handlerFilter == null) {
+            throw new IllegalStateException("handlerFilter cannot be absent.");
+        }
+        if (responseBodyTypeParser == null) {
+            throw new IllegalStateException("responseBodyTypeParser cannot be absent.");
+        }
     }
 
     private boolean isFilteredController(ClassOrInterfaceDeclaration coid) {

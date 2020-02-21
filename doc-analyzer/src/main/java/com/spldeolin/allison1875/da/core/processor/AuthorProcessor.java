@@ -26,11 +26,22 @@ class AuthorProcessor {
     private String author;
 
     AuthorProcessor process() {
+        checkStatus();
+
         author = Javadocs.extractAuthorTag(handler);
         if (StringUtils.isEmpty(author)) {
             author = Javadocs.extractAuthorTag(controller);
         }
         return this;
+    }
+
+    private void checkStatus() {
+        if (controller == null) {
+            throw new IllegalStateException("controller cannot be absent.");
+        }
+        if (handler == null) {
+            throw new IllegalStateException("handler cannot be absent.");
+        }
     }
 
 }

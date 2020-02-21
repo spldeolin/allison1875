@@ -21,8 +21,16 @@ class CodeSourceProcessor {
     private String location;
 
     CodeSourceProcessor process() {
+        checkStatus();
+
         location = Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName());
         return this;
+    }
+
+    private void checkStatus() {
+        if (handler == null) {
+            throw new IllegalStateException("handler cannot be absent.");
+        }
     }
 
 }
