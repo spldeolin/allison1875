@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
-import com.spldeolin.allison1875.da.core.domain.UriFieldDomain;
+import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
@@ -40,13 +40,13 @@ class PathVariableProcessor {
     private Collection<Parameter> parameters;
 
     @Getter
-    private final Collection<UriFieldDomain> fields = Lists.newLinkedList();
+    private final Collection<UriFieldDefinition> fields = Lists.newLinkedList();
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     PathVariableProcessor process() {
         for (Parameter parameter : parameters) {
-            UriFieldDomain field = new UriFieldDomain();
+            UriFieldDefinition field = new UriFieldDefinition();
             AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
             String name = null;
             boolean required = false;

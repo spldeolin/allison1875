@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -20,7 +20,7 @@ public class KeyValueBodyProcessor extends BodyStructureProcessor {
     private ObjectSchema objectSchema;
 
     @Override
-    KeyValueBodyProcessor moreProcess(ApiDomain api) {
+    KeyValueBodyProcessor moreProcess(ApiDefinition api) {
         BodyFieldProcessor bodyFieldProcessor = new BodyFieldProcessor().objectSchema(objectSchema).process();
         if (super.forRequestBodyOrNot) {
             api.requestBodyFields(bodyFieldProcessor.firstFloorFields());

@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -32,7 +32,7 @@ public class ChaosBodyProcessor extends BodyStructureProcessor {
     private JsonSchema jsonSchema;
 
     @Override
-    ChaosBodyProcessor moreProcess(ApiDomain api) {
+    ChaosBodyProcessor moreProcess(ApiDefinition api) {
         if (super.forRequestBodyOrNot) {
             api.requestBodyChaosJsonSchema(jsonSchema);
         } else {

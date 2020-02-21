@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.da.view.rap;
 
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import lombok.Data;
 
 /**
@@ -29,7 +29,7 @@ public class ActionListVo {
 
     private List<ParameterListVo> responseParameterList;
 
-    public static ActionListVo build(ApiDomain apiDto) {
+    public static ActionListVo build(ApiDefinition apiDto) {
         ActionListVo result = new ActionListVo();
         result.setPageId(389L);
         result.setId(-2333L);

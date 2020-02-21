@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.core.processor.result;
+package com.spldeolin.allison1875.da.core.definition;
 
 import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-public class HandlerProcessResult {
+public class HandlerDefinition {
 
     private ClassOrInterfaceDeclaration controller;
 

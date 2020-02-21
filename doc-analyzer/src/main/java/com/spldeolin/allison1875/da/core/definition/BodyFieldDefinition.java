@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.core.domain;
+package com.spldeolin.allison1875.da.core.definition;
 
 import java.util.Collection;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
@@ -13,12 +13,12 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @ToString(exclude = {"parentField"}) // StackOverflowError
-public class BodyFieldDomain {
+public class BodyFieldDefinition {
 
     /**
      * e.g.: city
      */
-    private BodyFieldDomain parentField;
+    private BodyFieldDefinition parentField;
 
     /**
      * e.g.: userDetails[0].address.city
@@ -38,10 +38,10 @@ public class BodyFieldDomain {
      */
     private Boolean nullable;
 
-    private Collection<ValidatorDomain> validators;
+    private Collection<ValidatorDefinition> validators;
 
     private String description;
 
-    private Collection<BodyFieldDomain> childFields;
+    private Collection<BodyFieldDefinition> childFields;
 
 }

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.core.domain;
+package com.spldeolin.allison1875.da.core.definition;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-public class ApiDomain {
+public class ApiDefinition {
 
     private Collection<MethodTypeEnum> method;
 
@@ -23,19 +23,19 @@ public class ApiDomain {
 
     private String description;
 
-    private Collection<UriFieldDomain> pathVariableFields;
+    private Collection<UriFieldDefinition> pathVariableFields;
 
-    private Collection<UriFieldDomain> requestParamFields;
+    private Collection<UriFieldDefinition> requestParamFields;
 
     private BodyStructureEnum requestBodyStructure;
 
-    private Collection<BodyFieldDomain> requestBodyFields;
+    private Collection<BodyFieldDefinition> requestBodyFields;
 
     private JsonSchema requestBodyChaosJsonSchema;
 
     private BodyStructureEnum responseBodyStructure;
 
-    private Collection<BodyFieldDomain> responseBodyFields;
+    private Collection<BodyFieldDefinition> responseBodyFields;
 
     private JsonSchema responseBodyChaosJsonSchema;
 
@@ -43,24 +43,24 @@ public class ApiDomain {
 
     private String codeSource;
 
-    public Collection<BodyFieldDomain> listRequestBodyFieldsFlatly() {
-        Collection<BodyFieldDomain> result = Lists.newArrayList();
+    public Collection<BodyFieldDefinition> listRequestBodyFieldsFlatly() {
+        Collection<BodyFieldDefinition> result = Lists.newArrayList();
         if (requestBodyFields == null) {
             return Lists.newArrayList();
         }
-        for (BodyFieldDomain field : requestBodyFields) {
+        for (BodyFieldDefinition field : requestBodyFields) {
             result.add(field);
             addAllChildren(field, result);
         }
         return result;
     }
 
-    public Collection<BodyFieldDomain> listResponseBodyFieldsFlatly() {
-        Collection<BodyFieldDomain> result = Lists.newArrayList();
+    public Collection<BodyFieldDefinition> listResponseBodyFieldsFlatly() {
+        Collection<BodyFieldDefinition> result = Lists.newArrayList();
         if (responseBodyFields == null) {
             return Lists.newArrayList();
         }
-        for (BodyFieldDomain field : responseBodyFields) {
+        for (BodyFieldDefinition field : responseBodyFields) {
             result.add(field);
             addAllChildren(field, result);
         }
@@ -68,10 +68,10 @@ public class ApiDomain {
     }
 
     /**
-     * 执行这个方法后，这个对象中每个BodyFieldDomain.linkName均会有值
+     * 执行这个方法后，这个对象中的每个BodyFieldDefinition.linkName均会有值
      */
     public void setAllBodyFieldLinkNames() {
-        Consumer<BodyFieldDomain> action = field -> {
+        Consumer<BodyFieldDefinition> action = field -> {
             String fieldName = field.fieldName();
             if (fieldName != null) {
                 StringBuilder linkName = new StringBuilder(fieldName);
@@ -83,8 +83,8 @@ public class ApiDomain {
         listResponseBodyFieldsFlatly().forEach(action);
     }
 
-    private void appendParentName(BodyFieldDomain child, StringBuilder linkName) {
-        BodyFieldDomain parent = child.parentField();
+    private void appendParentName(BodyFieldDefinition child, StringBuilder linkName) {
+        BodyFieldDefinition parent = child.parentField();
         if (parent != null) {
             String linkPart = parent.fieldName();
             if (parent.jsonType().isArrayLike()) {
@@ -95,9 +95,9 @@ public class ApiDomain {
         }
     }
 
-    private void addAllChildren(BodyFieldDomain parent, Collection<BodyFieldDomain> container) {
+    private void addAllChildren(BodyFieldDefinition parent, Collection<BodyFieldDefinition> container) {
         if (!CollectionUtils.isEmpty(parent.childFields())) {
-            for (BodyFieldDomain child : parent.childFields()) {
+            for (BodyFieldDefinition child : parent.childFields()) {
                 container.add(child);
                 this.addAllChildren(child, container);
             }

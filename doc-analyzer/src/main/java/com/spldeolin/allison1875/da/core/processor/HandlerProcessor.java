@@ -12,46 +12,57 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.da.core.processor.result.HandlerProcessResult;
-import com.spldeolin.allison1875.da.core.strategy.DefaultHandlerFilter;
+import com.spldeolin.allison1875.da.core.definition.HandlerDefinition;
+import com.spldeolin.allison1875.da.core.strategy.ControllerFilter;
 import com.spldeolin.allison1875.da.core.strategy.HandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ResponseBodyTypeParser;
 import com.spldeolin.allison1875.da.core.util.MethodQualifiers;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-01-02
  */
 @Log4j2
+@Accessors(fluent = true)
 public class HandlerProcessor {
 
-    public Collection<HandlerProcessResult> process(HandlerFilter handlerFilter,
-            ResponseBodyTypeParser hanlderResultTypeParser) {
-        Collection<HandlerProcessResult> result = Lists.newLinkedList();
+    @Setter
+    private ControllerFilter controllerFilter = controller -> true;
 
-        StaticAstContainer.getClassOrInterfaceDeclarations().stream()
-                .filter(coid -> isFilteredController(coid, handlerFilter)).forEach(controller -> {
+    @Setter
+    private HandlerFilter handlerFilter = handler -> true;
 
-            // reflect controller
-            Class<?> reflectController;
-            String name = this.qualifierForClassLoader(controller);
-            try {
-                reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
-            } catch (ClassNotFoundException e) {
-                log.warn("class[{}] not found", name);
-                return;
-            }
+    @Setter
+    private ResponseBodyTypeParser responseBodyTypeParser = handler -> handler.getType().resolve();
 
-            Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
-            controller.getMethods().stream().filter(method -> this.isFilteredHandler(method, handlerFilter))
-                    .forEach(handler -> {
-                        HandlerProcessResult entry = new HandlerProcessResult();
+    @Getter
+    private Collection<HandlerDefinition> handlerDefinitions = Lists.newLinkedList();
+
+    HandlerProcessor process() {
+        StaticAstContainer.getClassOrInterfaceDeclarations().stream().filter(this::isFilteredController)
+                .forEach(controller -> {
+
+                    // reflect controller
+                    Class<?> reflectController;
+                    String name = this.qualifierForClassLoader(controller);
+                    try {
+                        reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
+                    } catch (ClassNotFoundException e) {
+                        log.warn("class[{}] not found", name);
+                        return;
+                    }
+
+                    Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
+                    controller.getMethods().stream().filter(this::isFilteredHandler).forEach(handler -> {
+                        HandlerDefinition entry = new HandlerDefinition();
 
                         // controller
                         entry.controller(controller);
@@ -67,8 +78,8 @@ public class HandlerProcessor {
                         }
 
                         // result
-                        if (hanlderResultTypeParser != null) {
-                            entry.responseBodyResolvedType(hanlderResultTypeParser.parse(handler));
+                        if (responseBodyTypeParser != null) {
+                            entry.responseBodyResolvedType(responseBodyTypeParser.parse(handler));
                         } else {
                             entry.responseBodyResolvedType(handler.getType().resolve());
                         }
@@ -93,11 +104,11 @@ public class HandlerProcessor {
                         entry.requestParams(requestParams);
                         entry.pathVariables(pathVariables);
 
-                        result.add(entry);
+                        handlerDefinitions.add(entry);
                     });
-        });
-        log.info("(Summary) {} Spring MVC handlers has collected.", result.size());
-        return result;
+                });
+        log.info("(Summary) {} Spring MVC handlers has collected.", handlerDefinitions.size());
+        return this;
     }
 
     private Map<String, Method> listDeclaredMethodAsMap(Class<?> reflectController) {
@@ -107,9 +118,9 @@ public class HandlerProcessor {
         return declaredMethods;
     }
 
-    private boolean isFilteredController(ClassOrInterfaceDeclaration coid, HandlerFilter handlerFilter) {
+    private boolean isFilteredController(ClassOrInterfaceDeclaration coid) {
         // is filtered
-        if (!MoreObjects.firstNonNull(handlerFilter, new DefaultHandlerFilter()).filter(coid)) {
+        if (!controllerFilter.filter(coid)) {
             return false;
         }
 
@@ -130,9 +141,9 @@ public class HandlerProcessor {
         return false;
     }
 
-    private boolean isFilteredHandler(MethodDeclaration method, HandlerFilter handlerFilter) {
+    private boolean isFilteredHandler(MethodDeclaration method) {
         // is filtered
-        if (!MoreObjects.firstNonNull(handlerFilter, new DefaultHandlerFilter()).filter(method)) {
+        if (!handlerFilter.filter(method)) {
             return false;
         }
 

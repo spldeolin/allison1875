@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.Strings;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
@@ -50,7 +50,7 @@ class BodyStructureProcessor {
         throw new IllegalStateException("Cannot call this method before calling process method.");
     }
 
-    BodyStructureProcessor moreProcess(ApiDomain api) {
+    BodyStructureProcessor moreProcess(ApiDefinition api) {
         throw new IllegalStateException("Cannot call this method before calling process method.");
     }
 

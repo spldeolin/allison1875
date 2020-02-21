@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.da.core.processor;
 
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import lombok.experimental.Accessors;
 
@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 public class VoidBodyProcessor extends BodyStructureProcessor {
 
     @Override
-    VoidBodyProcessor moreProcess(ApiDomain api) {
+    VoidBodyProcessor moreProcess(ApiDefinition api) {
         return this;
     }
 

@@ -6,9 +6,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
-import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
-import com.spldeolin.allison1875.da.core.domain.ValidatorDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
+import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
+import com.spldeolin.allison1875.da.core.definition.ValidatorDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
@@ -20,8 +20,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MarkdownConverter {
 
-    public void convert(Collection<ApiDomain> apis) {
-        for (ApiDomain api : apis) {
+    public void convert(Collection<ApiDefinition> apis) {
+        for (ApiDefinition api : apis) {
             SimpleMdOutputVo vo = new SimpleMdOutputVo();
             vo.setUri(Iterables.getFirst(api.uri(), ""));
             vo.setDescription(api.description());
@@ -34,7 +34,7 @@ public class MarkdownConverter {
 
             if (!vo.getIsRequestBodyChaos() && !vo.getIsRequestBodyNone()) {
                 Collection<RequestBodyFieldVo> fieldVos = Lists.newArrayList();
-                for (BodyFieldDomain field : api.listRequestBodyFieldsFlatly()) {
+                for (BodyFieldDefinition field : api.listRequestBodyFieldsFlatly()) {
                     RequestBodyFieldVo fieldVo = new RequestBodyFieldVo();
                     fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.linkName()));
                     fieldVo.setDescription(nullToEmpty(field.description()));
@@ -47,7 +47,7 @@ public class MarkdownConverter {
             }
             if (!vo.getIsResponseBodyChaos() && !vo.getIsResponseBodyNone()) {
                 Collection<ResponseBodyFieldVo> fieldVos = Lists.newArrayList();
-                for (BodyFieldDomain field : api.listResponseBodyFieldsFlatly()) {
+                for (BodyFieldDefinition field : api.listResponseBodyFieldsFlatly()) {
                     ResponseBodyFieldVo fieldVo = new ResponseBodyFieldVo();
                     fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.linkName()));
                     fieldVo.setDescription(nullToEmpty(field.description()));
@@ -77,7 +77,7 @@ public class MarkdownConverter {
         return Joiner.on("").join(linkName.substring(0, i + 1), "`", linkName.substring(i + 1), "`");
     }
 
-    private Collection<String> converterTypeAndFormat(BodyFieldDomain field) {
+    private Collection<String> converterTypeAndFormat(BodyFieldDefinition field) {
         Collection<String> result = Lists.newArrayList();
         result.add(field.jsonType().getValue());
         String stringFormat = field.stringFormat();
@@ -91,7 +91,7 @@ public class MarkdownConverter {
         return result;
     }
 
-    private String convertValidators(Boolean nullable, Collection<ValidatorDomain> validators) {
+    private String convertValidators(Boolean nullable, Collection<ValidatorDefinition> validators) {
         StringBuilder result = new StringBuilder(64);
 
         if (Boolean.FALSE.equals(nullable)) {

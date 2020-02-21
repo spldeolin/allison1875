@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
-import com.spldeolin.allison1875.da.core.domain.ValidatorDomain;
+import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
+import com.spldeolin.allison1875.da.core.definition.ValidatorDefinition;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import lombok.Data;
 
@@ -35,7 +35,7 @@ public class ParameterListVo {
      */
     private String dataType;
 
-    public static ParameterListVo build(BodyFieldDomain fieldDto) {
+    public static ParameterListVo build(BodyFieldDefinition fieldDto) {
         ParameterListVo result = new ParameterListVo();
         result.setId(-2333L);
         result.setIdentifier(fieldDto.fieldName());
@@ -62,7 +62,7 @@ public class ParameterListVo {
             remark.append("　");
         }
 
-        Collection<ValidatorDomain> validators = fieldDto.validators();
+        Collection<ValidatorDefinition> validators = fieldDto.validators();
         if (validators != null && validators.size() > 0) {
             Collection<String> parts = Lists.newLinkedList();
             validators.forEach(validator -> {

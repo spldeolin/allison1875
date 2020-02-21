@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.core.domain;
+package com.spldeolin.allison1875.da.core.definition;
 
 import com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-public class ValidatorDomain {
+public class ValidatorDefinition {
 
     private ValidatorTypeEnum validatorType;
 

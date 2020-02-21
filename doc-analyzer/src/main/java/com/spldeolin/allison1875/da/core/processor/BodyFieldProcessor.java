@@ -13,7 +13,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
-import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
+import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
@@ -34,24 +34,24 @@ class BodyFieldProcessor {
     private ObjectSchema objectSchema;
 
     @Getter
-    private Collection<BodyFieldDomain> firstFloorFields;
+    private Collection<BodyFieldDefinition> firstFloorFields;
 
     BodyFieldProcessor process() {
-        firstFloorFields = parseFieldTypes(objectSchema, false, new BodyFieldDomain()).childFields();
+        firstFloorFields = parseFieldTypes(objectSchema, false, new BodyFieldDefinition()).childFields();
         firstFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
         return this;
     }
 
-    private BodyFieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDomain parent) {
+    private BodyFieldDefinition parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDefinition parent) {
         if (isObjectInArray) {
             parent.jsonType(FieldTypeEnum.objectArray);
         } else {
             parent.jsonType(FieldTypeEnum.object);
         }
 
-        List<BodyFieldDomain> children = Lists.newArrayList();
+        List<BodyFieldDefinition> children = Lists.newArrayList();
         schema.getProperties().forEach((childFieldName, childSchema) -> {
-            BodyFieldDomain childFieldDto = new BodyFieldDomain();
+            BodyFieldDefinition childFieldDto = new BodyFieldDefinition();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
 

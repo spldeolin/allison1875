@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.core.domain;
+package com.spldeolin.allison1875.da.core.definition;
 
 import java.util.Collection;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
@@ -11,14 +11,14 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-public class UriFieldDomain {
+public class UriFieldDefinition {
 
     private String fieldName;
 
     /**
      * @see FieldTypeEnum
-     * @see ApiDomain#pathVariableFields() string, number, boolean
-     * @see ApiDomain#requestParamFields() string, number, boolean
+     * @see ApiDefinition#pathVariableFields() string, number, boolean
+     * @see ApiDefinition#requestParamFields() string, number, boolean
      */
     private FieldTypeEnum jsonType;
 
@@ -28,6 +28,6 @@ public class UriFieldDomain {
 
     private Boolean required;
 
-    private Collection<ValidatorDomain> validators;
+    private Collection<ValidatorDefinition> validators;
 
 }

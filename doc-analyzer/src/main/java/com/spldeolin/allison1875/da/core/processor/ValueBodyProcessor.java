@@ -2,8 +2,8 @@ package com.spldeolin.allison1875.da.core.processor;
 
 import java.util.Collection;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.core.domain.ApiDomain;
-import com.spldeolin.allison1875.da.core.domain.BodyFieldDomain;
+import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
+import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
@@ -27,9 +27,9 @@ public class ValueBodyProcessor extends BodyStructureProcessor {
     private NumberFormatTypeEnum valueStructureNumberFormat;
 
     @Override
-    ValueBodyProcessor moreProcess(ApiDomain api) {
-        Collection<BodyFieldDomain> field = Lists.newArrayList(
-                new BodyFieldDomain().jsonType(valueStructureJsonType).numberFormat(valueStructureNumberFormat));
+    ValueBodyProcessor moreProcess(ApiDefinition api) {
+        Collection<BodyFieldDefinition> field = Lists.newArrayList(
+                new BodyFieldDefinition().jsonType(valueStructureJsonType).numberFormat(valueStructureNumberFormat));
         if (super.forRequestBodyOrNot) {
             api.requestBodyFields(field);
         } else {
