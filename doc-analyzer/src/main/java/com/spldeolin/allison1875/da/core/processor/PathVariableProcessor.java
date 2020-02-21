@@ -19,6 +19,8 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.exception.ResolveException;
+import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
@@ -48,80 +50,99 @@ class PathVariableProcessor {
         checkStatus();
 
         for (Parameter parameter : parameters) {
-            UriFieldDefinition field = new UriFieldDefinition();
-            AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
-            String name = null;
-            boolean required = false;
-            if (pathVariable.isSingleMemberAnnotationExpr()) {
-                name = pathVariable.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString();
-            }
-            if (pathVariable.isNormalAnnotationExpr()) {
-                NormalAnnotationExpr normal = pathVariable.asNormalAnnotationExpr();
-                for (MemberValuePair pair : normal.getPairs()) {
-                    String pairName = pair.getNameAsString();
-                    if ("required".equals(pairName)) {
-                        required = pair.getValue().asBooleanLiteralExpr().getValue();
-                    }
-                    if (StringUtils.equalsAny(pairName, "name", "value")) {
-                        name = pair.getValue().asStringLiteralExpr().getValue();
-                    }
-                }
-            }
-            if (pathVariable.isMarkerAnnotationExpr() || name == null) {
-                name = parameter.getNameAsString();
-            }
-            field.fieldName(name).required(required);
-
-            FieldTypeEnum jsonType;
-            NumberFormatTypeEnum numberFormat = null;
-            StringBuilder stringFormat = new StringBuilder();
-            ResolvedType type = parameter.getType().resolve();
-            String describe = type.describe();
-            JsonSchema jsonSchema = generateSchema(describe);
-            if (jsonSchema != null && jsonSchema.isValueTypeSchema()) {
-                if (jsonSchema.isStringSchema()) {
-                    jsonType = FieldTypeEnum.string;
-                    parameter.getAnnotationByClass(DateTimeFormat.class)
-                            .ifPresent(dateTimeFormat -> dateTimeFormat.ifNormalAnnotationExpr(normal -> {
-                                normal.getPairs().forEach(pair -> {
-                                    if (pair.getNameAsString().equals("pattern")) {
-                                        stringFormat
-                                                .append(f(StringFormatTypeEnum.datetime.getValue(), pair.getValue()));
-                                    }
-                                });
-                            }));
-                    if (stringFormat.length() == 0) {
-                        stringFormat.append(StringFormatTypeEnum.normal.getValue());
-                    }
-                } else if (jsonSchema.isNumberSchema()) {
-                    jsonType = FieldTypeEnum.number;
-
-                    if (!jsonSchema.isIntegerSchema()) {
-                        numberFormat = NumberFormatTypeEnum.f1oat;
-                    } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
-                        numberFormat = NumberFormatTypeEnum.int32;
-                    } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
-                        numberFormat = NumberFormatTypeEnum.int64;
-                    } else {
-                        numberFormat = NumberFormatTypeEnum.inT;
-                    }
-                } else if (jsonSchema.isBooleanSchema()) {
-                    jsonType = FieldTypeEnum.bool;
-                } else {
-                    throw new RuntimeException("impossible unless bug");
-                }
-            } else {
-                log.warn("parameter[{}]不是ValueSchema", parameter);
+            UriFieldDefinition field;
+            try {
+                field = processEachOne(parameter);
+            } catch (ResolveException e) {
+                log.warn("Node [{}] resolve failed, ignore handler [{}].", e.getCodeSource(),
+                        Locations.getRelativePathWithLineNo(parameter), e);
                 continue;
             }
-            field.jsonType(jsonType).numberFormat(numberFormat).stringFormat(stringFormat.toString());
-
-            ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(parameter).process();
-            field.validators(validatorProcessor.validators());
-
-            fields.add(field);
+            if (field != null) {
+                fields.add(field);
+            }
         }
         return this;
+    }
+
+    private UriFieldDefinition processEachOne(Parameter parameter) throws ResolveException {
+        UriFieldDefinition field = new UriFieldDefinition();
+        AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
+        String name = null;
+        boolean required = false;
+        if (pathVariable.isSingleMemberAnnotationExpr()) {
+            name = pathVariable.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString();
+        }
+        if (pathVariable.isNormalAnnotationExpr()) {
+            NormalAnnotationExpr normal = pathVariable.asNormalAnnotationExpr();
+            for (MemberValuePair pair : normal.getPairs()) {
+                String pairName = pair.getNameAsString();
+                if ("required".equals(pairName)) {
+                    required = pair.getValue().asBooleanLiteralExpr().getValue();
+                }
+                if (StringUtils.equalsAny(pairName, "name", "value")) {
+                    name = pair.getValue().asStringLiteralExpr().getValue();
+                }
+            }
+        }
+        if (pathVariable.isMarkerAnnotationExpr() || name == null) {
+            name = parameter.getNameAsString();
+        }
+        field.fieldName(name).required(required);
+
+        FieldTypeEnum jsonType;
+        NumberFormatTypeEnum numberFormat = null;
+        StringBuilder stringFormat = new StringBuilder();
+
+        ResolvedType type;
+        try {
+            type = parameter.getType().resolve();
+        } catch (Exception e) {
+            throw new ResolveException(parameter, e);
+        }
+
+        String describe = type.describe();
+        JsonSchema jsonSchema = generateSchema(describe);
+        if (jsonSchema != null && jsonSchema.isValueTypeSchema()) {
+            if (jsonSchema.isStringSchema()) {
+                jsonType = FieldTypeEnum.string;
+                parameter.getAnnotationByClass(DateTimeFormat.class)
+                        .ifPresent(dateTimeFormat -> dateTimeFormat.ifNormalAnnotationExpr(normal -> {
+                            normal.getPairs().forEach(pair -> {
+                                if (pair.getNameAsString().equals("pattern")) {
+                                    stringFormat.append(f(StringFormatTypeEnum.datetime.getValue(), pair.getValue()));
+                                }
+                            });
+                        }));
+                if (stringFormat.length() == 0) {
+                    stringFormat.append(StringFormatTypeEnum.normal.getValue());
+                }
+            } else if (jsonSchema.isNumberSchema()) {
+                jsonType = FieldTypeEnum.number;
+
+                if (!jsonSchema.isIntegerSchema()) {
+                    numberFormat = NumberFormatTypeEnum.f1oat;
+                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
+                    numberFormat = NumberFormatTypeEnum.int32;
+                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
+                    numberFormat = NumberFormatTypeEnum.int64;
+                } else {
+                    numberFormat = NumberFormatTypeEnum.inT;
+                }
+            } else if (jsonSchema.isBooleanSchema()) {
+                jsonType = FieldTypeEnum.bool;
+            } else {
+                throw new RuntimeException("impossible unless bug");
+            }
+        } else {
+            log.warn("parameter[{}]不是ValueSchema", parameter);
+            return null;
+        }
+        field.jsonType(jsonType).numberFormat(numberFormat).stringFormat(stringFormat.toString());
+
+        ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(parameter).process();
+        field.validators(validatorProcessor.validators());
+        return field;
     }
 
     private void checkStatus() {
