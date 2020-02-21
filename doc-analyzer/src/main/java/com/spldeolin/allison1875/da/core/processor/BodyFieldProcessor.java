@@ -42,7 +42,8 @@ class BodyFieldProcessor {
         return this;
     }
 
-    private BodyFieldDefinition parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDefinition parent) {
+    private BodyFieldDefinition parseFieldTypes(ObjectSchema schema, boolean isObjectInArray,
+            BodyFieldDefinition parent) {
         if (isObjectInArray) {
             parent.jsonType(FieldTypeEnum.objectArray);
         } else {
