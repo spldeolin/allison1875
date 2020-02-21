@@ -11,6 +11,8 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.exception.ResolveException;
+import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.da.core.definition.HandlerDefinition;
 import com.spldeolin.allison1875.da.core.strategy.ControllerFilter;
 import com.spldeolin.allison1875.da.core.strategy.HandlerFilter;
@@ -47,60 +49,65 @@ public class HandlerProcessor {
                 .forEach(controller -> {
 
                     // reflect controller
-//                    Class<?> reflectController;
-//                    String name = this.qualifierForClassLoader(controller);
-//                    try {
-//                        reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
-//                    } catch (ClassNotFoundException e) {
-//                        log.warn("class[{}] not found", name);
-//                        return;
-//                    }
+//                  Class<?> reflectController;
+//                  String name = this.qualifierForClassLoader(controller);
+//                  try {
+//                      reflectController = WarOrFatJarClassLoaderFactory.getClassLoader().loadClass(name);
+//                  } catch (ClassNotFoundException e) {
+//                      log.warn("class[{}] not found", name);
+//                      return;
+//                  }
 
-//                    Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
+//                  Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
                     controller.getMethods().stream().filter(this::isFilteredHandler).forEach(handler -> {
-                        HandlerDefinition entry = new HandlerDefinition();
+                        try {
+                            HandlerDefinition entry = new HandlerDefinition();
 
-                        // controller
-                        entry.controller(controller);
+                            // controller
+                            entry.controller(controller);
 
-                        // handler
-                        String shortestQualifiedSignature = MethodQualifiers.getShortestQualifiedSignature(handler);
-                        entry.shortestQualifiedSignature(shortestQualifiedSignature);
-                        entry.handler(handler);
-//                        Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
-//                        if (reflectHandler == null) {
-//                            log.warn("method[{}] not found", shortestQualifiedSignature);
-//                            return;
-//                        }
+                            // handler
+                            String shortestQualifiedSignature = MethodQualifiers.getShortestQualifiedSignature(handler);
+                            entry.shortestQualifiedSignature(shortestQualifiedSignature);
+                            entry.handler(handler);
+//                          Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
+//                          if (reflectHandler == null) {
+//                              log.warn("method[{}] not found", shortestQualifiedSignature);
+//                              return;
+//                          }
 
-                        // result
-                        if (responseBodyTypeParser != null) {
-                            entry.responseBodyResolvedType(responseBodyTypeParser.parse(handler));
-                        } else {
-                            entry.responseBodyResolvedType(handler.getType().resolve());
+                            // result
+                            if (responseBodyTypeParser != null) {
+                                entry.responseBodyResolvedType(responseBodyTypeParser.parse(handler));
+                            } else {
+                                entry.responseBodyResolvedType(handler.getType().resolve());
+                            }
+
+                            // requestBody requestParams pathVariables
+                            Collection<Parameter> requestParams = Lists.newLinkedList();
+                            Collection<Parameter> pathVariables = Lists.newLinkedList();
+                            for (Parameter parameter : handler.getParameters()) {
+                                parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
+                                        .filter(resolvedAnno -> QualifierConstants.REQUEST_BODY
+                                                .equals(resolvedAnno.getId())).ifPresent(
+                                        resolvedAnno -> entry.requestBodyResolvedType(parameter.getType().resolve()));
+                                parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
+                                        .filter(resolvedAnno -> QualifierConstants.REQUEST_PARAM
+                                                .equals(resolvedAnno.getId()))
+                                        .ifPresent(resolvedAnno -> requestParams.add(parameter));
+                                parameter.getAnnotationByName("PathVariable").map(AnnotationExpr::resolve)
+                                        .filter(resolvedAnno -> QualifierConstants.PATH_VARIABLE
+                                                .equals(resolvedAnno.getId()))
+                                        .ifPresent(resolvedAnno -> pathVariables.add(parameter));
+                            }
+                            entry.requestParams(requestParams);
+                            entry.pathVariables(pathVariables);
+
+                            handlerDefinitions.add(entry);
+                        } catch (ResolveException e) {
+                            log.warn("Node [{}] resolve failed, ignore handler [{}].", e.getCodeSource(),
+                                    Locations.getRelativePathWithLineNo(handler), e);
                         }
-
-                        // requestBody requestParams pathVariables
-                        Collection<Parameter> requestParams = Lists.newLinkedList();
-                        Collection<Parameter> pathVariables = Lists.newLinkedList();
-                        for (Parameter parameter : handler.getParameters()) {
-                            parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
-                                    .filter(resolvedAnno -> QualifierConstants.REQUEST_BODY
-                                            .equals(resolvedAnno.getId())).ifPresent(
-                                    resolvedAnno -> entry.requestBodyResolvedType(parameter.getType().resolve()));
-                            parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
-                                    .filter(resolvedAnno -> QualifierConstants.REQUEST_PARAM
-                                            .equals(resolvedAnno.getId()))
-                                    .ifPresent(resolvedAnno -> requestParams.add(parameter));
-                            parameter.getAnnotationByName("PathVariable").map(AnnotationExpr::resolve)
-                                    .filter(resolvedAnno -> QualifierConstants.PATH_VARIABLE
-                                            .equals(resolvedAnno.getId()))
-                                    .ifPresent(resolvedAnno -> pathVariables.add(parameter));
-                        }
-                        entry.requestParams(requestParams);
-                        entry.pathVariables(pathVariables);
-
-                        handlerDefinitions.add(entry);
                     });
                 });
         log.info("(Summary) {} Spring MVC handlers has collected.", handlerDefinitions.size());

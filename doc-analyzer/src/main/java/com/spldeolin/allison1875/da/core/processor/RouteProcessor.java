@@ -13,6 +13,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
@@ -108,7 +109,11 @@ class RouteProcessor {
     private Collection<RequestMappingDto> parseRequestMappings(NodeList<AnnotationExpr> annotations) {
         Collection<RequestMappingDto> result = Lists.newArrayList();
         for (AnnotationExpr annotation : annotations) {
-            String annoQualifier = annotation.resolve().getId();
+
+
+            ResolvedAnnotationDeclaration resolve = annotation.resolve();
+
+            String annoQualifier = resolve.getId();
             RequestMappingDto dto;
             if (QualifierConstants.REQUEST_MAPPING.equals(annoQualifier)) {
                 dto = this.parseRequestMapping(annotation, false);

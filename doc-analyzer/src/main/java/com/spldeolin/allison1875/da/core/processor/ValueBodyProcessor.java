@@ -53,9 +53,6 @@ public class ValueBodyProcessor extends BodyStructureProcessor {
         if (valueStructureJsonType == null) {
             throw new IllegalStateException("valueStructureJsonType cannot be absent.");
         }
-        if (valueStructureNumberFormat == null) {
-            throw new IllegalStateException("valueStructureNumberFormat cannot be absent.");
-        }
     }
 
 }
