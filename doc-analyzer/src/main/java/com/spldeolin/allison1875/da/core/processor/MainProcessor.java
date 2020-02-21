@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
@@ -22,8 +23,7 @@ public class MainProcessor {
         HandlerProcessor handlerP = new HandlerProcessor().handlerFilter(handler -> true)
                 .responseBodyTypeParser(new ReturnStmtBaseResponseBodyTypeParser()).process();
 
-        Collection<ApiDefinition> apis = Lists.newLinkedList();
-        handlerP.handlerDefinitions().forEach(handlerDefinition -> {
+        return handlerP.handlerDefinitions().stream().map(handlerDefinition -> {
             ClassOrInterfaceDeclaration controller = handlerDefinition.controller();
             MethodDeclaration handler = handlerDefinition.handler();
             String handlerSignature = handlerDefinition.shortestQualifiedSignature();
@@ -110,9 +110,8 @@ public class MainProcessor {
                 api.codeSource("");
             }
 
-            apis.add(api);
-        });
-        return apis;
+            return api;
+        }).collect(Collectors.toList());
     }
 
 }
