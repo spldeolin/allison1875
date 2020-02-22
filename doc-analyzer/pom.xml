@@ -14,30 +14,27 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>base</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <!-- spring mvc -->
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>5.2.3.RELEASE</version>
         </dependency>
 
         <!-- freemarker -->
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
-            <version>2.3.29</version>
         </dependency>
 
         <!-- log4j2 -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
-            <version>2.13.0</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>base</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 
