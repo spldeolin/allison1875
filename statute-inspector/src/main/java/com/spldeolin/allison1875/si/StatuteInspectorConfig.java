@@ -5,17 +5,17 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 【standard-inspector】的全局配置
+ * 【statute-inspector】的全局配置
  *
  * @author Deolin 2020-02-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public final class StandardInspectorConfig extends BaseConfig {
+public final class StatuteInspectorConfig extends BaseConfig {
 
-    public static final StandardInspectorConfig CONFIG = new StandardInspectorConfig();
+    public static final StatuteInspectorConfig CONFIG = new StatuteInspectorConfig();
 
-    private StandardInspectorConfig() {
+    private StatuteInspectorConfig() {
         super();
         this.initLoad();
     }

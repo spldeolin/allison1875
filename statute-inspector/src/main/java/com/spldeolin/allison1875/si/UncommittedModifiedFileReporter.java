@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.si;
 
 
-import static com.spldeolin.allison1875.si.StandardInspectorConfig.CONFIG;
+import static com.spldeolin.allison1875.si.StatuteInspectorConfig.CONFIG;
 
 import java.io.IOException;
 import java.nio.file.Path;
