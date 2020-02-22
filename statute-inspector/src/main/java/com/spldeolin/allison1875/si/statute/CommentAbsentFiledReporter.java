@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.si;
+package com.spldeolin.allison1875.si.statute;
 
 import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
 import static com.spldeolin.allison1875.base.util.Locations.getBeginLine;

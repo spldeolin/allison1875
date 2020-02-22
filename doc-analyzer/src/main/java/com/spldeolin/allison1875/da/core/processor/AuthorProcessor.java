@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.da.core.processor;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.spldeolin.allison1875.da.core.util.Javadocs;
+import com.spldeolin.allison1875.base.util.Javadocs;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

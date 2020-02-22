@@ -7,6 +7,8 @@ public interface QualifierConstants {
 
     String CONTROLLER = "org.springframework.stereotype.Controller";
 
+    String REST_CONTROLLER = "org.springframework.web.bind.annotation.RestController";
+
     String DELETE_MAPPING = "org.springframework.web.bind.annotation.DeleteMapping";
 
     String GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping";

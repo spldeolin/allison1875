@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.spldeolin.allison1875.da.core.util.Javadocs;
+import com.spldeolin.allison1875.base.util.Javadocs;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

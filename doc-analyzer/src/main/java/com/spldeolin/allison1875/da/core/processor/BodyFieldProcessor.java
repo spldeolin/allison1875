@@ -17,7 +17,7 @@ import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
-import com.spldeolin.allison1875.da.core.util.Javadocs;
+import com.spldeolin.allison1875.base.util.Javadocs;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

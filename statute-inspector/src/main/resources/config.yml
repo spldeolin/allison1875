@@ -1,5 +1,8 @@
 # com.spldeolin.allison1875.base.BaseConfig
-projectPath: /Users/deolin/Documents/project-repo/motherbuy/motherbuy
-warOrFatJarPath: /Users/deolin/Documents/project-repo/motherbuy/motherbuy/topaiebiz-laucher/target/motherbuy.jar
-doNotCollectWithLoadingClass: f
-giveUpResultAddedSinceTime: '2020-01-10 00:00:00'
+projectPath:
+warOrFatJarPath:
+doNotCollectWithLoadingClass:
+giveUpResultAddedSinceTime:
+
+# com.spldeolin.allison1875.si.StatuteInspectorConfig
+lawlessReportCsvPath:

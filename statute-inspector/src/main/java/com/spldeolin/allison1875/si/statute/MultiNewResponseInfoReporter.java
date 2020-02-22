@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.si;
+package com.spldeolin.allison1875.si.statute;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;

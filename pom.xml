@@ -13,7 +13,7 @@
         <module>base</module>
         <module>doc-analyzer</module>
         <module>snippet-transformer</module>
-        <module>standard-inspector</module>
+        <module>statute-inspector</module>
     </modules>
 
     <name>allison1875</name>

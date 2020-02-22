@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.TimeZone;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -25,6 +26,9 @@ public class Csvs {
 
     static {
         defaultCsvMapper = new CsvMapper();
+
+        // 列不再按字母排序
+        defaultCsvMapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
 
         // csv -> object时，忽略json中不认识的属性名
         defaultCsvMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
