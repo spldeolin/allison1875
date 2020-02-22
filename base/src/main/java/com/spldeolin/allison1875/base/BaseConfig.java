@@ -20,23 +20,23 @@ import lombok.Data;
 public class BaseConfig {
 
     /**
-     * 项目源码路径
+     * 填写项目根目录路径，此项必填
      */
     private Path projectPath;
 
     /**
-     * projectPath打包后的war文件或是Spring Boot fat jar文件的路径
+     * 开启类加载时，此项必填。需要先对项目进行clean package，然后填入打包后的jar文件或是war文件路径
      */
     private Path warOrFatJarPath;
 
     /**
-     * 是否禁用类加载收集策略来收集CU
+     * 是否禁用类加载收集策略来收集CU，部分工具需要启用类加载
      * 禁用后可以加快收集速度，但是AST node将会不再支持resolved、calculateResolvedType等方法
      */
     private Boolean doNotCollectWithLoadingClass;
 
     /**
-     * 只将这个时间后在VCS中增量的文件作为目标对象（这个时间之前新增到VCS的文件将不被处理等）
+     * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
      */
     private LocalDateTime giveUpResultAddedSinceTime;
 
