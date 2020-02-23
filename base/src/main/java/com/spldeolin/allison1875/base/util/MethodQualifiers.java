@@ -1,7 +1,8 @@
-package com.spldeolin.allison1875.da.core.util;
+package com.spldeolin.allison1875.base.util;
 
 import java.lang.reflect.Method;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 
 /**
@@ -11,6 +12,8 @@ public class MethodQualifiers {
 
     /**
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature
+     * e.g.: com.spldeolin.allison1875.da.core.util.MethodQualifiers.getShortestQualifiedSignature(com.github
+     * .javaparser.ast.body.MethodDeclaration)
      */
     public static String getShortestQualifiedSignature(Method method) {
         StringBuilder result = new StringBuilder(64);
@@ -37,6 +40,8 @@ public class MethodQualifiers {
 
     /**
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature
+     * e.g.: com.spldeolin.allison1875.da.core.util.MethodQualifiers.getShortestQualifiedSignature(com.github
+     * .javaparser.ast.body.MethodDeclaration)
      */
     public static String getShortestQualifiedSignature(MethodDeclaration methodDeclaration) {
         ResolvedMethodDeclaration resolve = methodDeclaration.resolve();
@@ -45,6 +50,17 @@ public class MethodQualifiers {
         // remove every <*>
         result = result.replaceAll("<[^>]+>", "");
         return trimAllSpaces(dollarToDot(result));
+    }
+
+    /**
+     * e.g.: com.spldeolin.allison1875.da.core.util.MethodQualifiers.getTypeQualifierWithMethodName
+     */
+    public static String getTypeQualifierWithMethodName(MethodDeclaration methodDeclaration) {
+        StringBuilder sb = new StringBuilder(64);
+        methodDeclaration.findAncestor(TypeDeclaration.class).map(tp -> (TypeDeclaration<?>) tp)
+                .ifPresent(tp -> tp.getFullyQualifiedName().ifPresent(sb::append));
+        sb.append(methodDeclaration.getNameAsString());
+        return sb.toString();
     }
 
     private static String dollarToDot(String s) {
