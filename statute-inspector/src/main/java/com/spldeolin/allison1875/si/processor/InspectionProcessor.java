@@ -2,10 +2,10 @@ package com.spldeolin.allison1875.si.processor;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.checkerframework.checker.units.qual.A;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.si.statute.StatuteEnum;
 import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.Getter;
@@ -23,7 +23,8 @@ public class InspectionProcessor {
     private Collection<LawlessVo> lawlesses = Lists.newLinkedList();
 
     public InspectionProcessor process() {
-        Collection<CompilationUnit> cus = StaticAstContainer.getCompilationUnits();
+        Collection<CompilationUnit> cus = StaticGitAddedFileContainer
+                .removeIfNotContain(StaticAstContainer.getCompilationUnits());
         Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
             Collection<LawlessVo> vos = statuteEnum.getStatute().inspect(cus);
             vos.forEach(vo -> vo.setStatuteNo(statuteEnum.getNo()));
