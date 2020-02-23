@@ -6,7 +6,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.si.vo.LawlessVo;
@@ -22,7 +21,7 @@ public class NormalControllerStatute implements Statute {
     public Collection<LawlessVo> inspect(Collection<CompilationUnit> cus) {
         Collection<LawlessVo> result = Lists.newLinkedList();
 
-        StaticGitAddedFileContainer.removeIfNotContain(cus).forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class)
+        cus.forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class)
                 .forEach(coid -> coid.getAnnotationByName("Controller").ifPresent(anno -> {
                     LawlessVo vo = new LawlessVo(coid,
                             coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));

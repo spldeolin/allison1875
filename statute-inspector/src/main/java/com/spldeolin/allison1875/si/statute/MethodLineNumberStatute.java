@@ -5,7 +5,6 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.base.util.Locations;
 import com.spldeolin.allison1875.base.util.MethodQualifiers;
 import com.spldeolin.allison1875.si.vo.LawlessVo;
@@ -20,7 +19,7 @@ public class MethodLineNumberStatute implements Statute {
     @Override
     public Collection<LawlessVo> inspect(Collection<CompilationUnit> cus) {
         Collection<LawlessVo> result = Lists.newLinkedList();
-        StaticGitAddedFileContainer.removeIfNotContain(cus).forEach(
+        cus.forEach(
                 cu -> cu.findAll(MethodDeclaration.class, method -> method.getBody().isPresent()).forEach(method -> {
                     Range range = Locations.getRange(method);
                     int lineCount = range.end.line - range.begin.line + 1;
