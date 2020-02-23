@@ -22,8 +22,6 @@ import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * [cv5c-] 报告出未commit的被修改的文件
- *
  * @author Deolin 2020-02-16
  */
 @Log4j2
@@ -53,11 +51,6 @@ public class UncommittedModifiedFileStatute implements Statute {
             log.error("UncommitModifiedFileReporter#process failed.", e);
         }
         return result;
-    }
-
-    @Override
-    public String getStatuteNo() {
-        return "cv5c";
     }
 
 }

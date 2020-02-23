@@ -13,8 +13,6 @@ import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * [54u7+] 报告出声明了@Controller的和没有声明@RequestMapping的控制器
- *
  * @author Deolin 2020-02-13
  */
 @Log4j2
@@ -46,11 +44,6 @@ public class NormalControllerStatute implements Statute {
                 }));
 
         return result;
-    }
-
-    @Override
-    public String getStatuteNo() {
-        return "54u7";
     }
 
 }

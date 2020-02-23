@@ -16,31 +16,10 @@ import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 报告出符合条件的类中缺少注释的field
- *
  * @author Deolin 2020-02-09
  */
 @Log4j2
 public class CommentAbsentFiledStatute implements Statute {
-
-    public static void main(String[] args) {
-        new CommentAbsentFiledStatute().process();
-    }
-
-    private void process() {
-        CONFIG.setDoNotCollectWithLoadingClass(true);
-        StaticGitAddedFileContainer.removeIfNotContain(StaticAstContainer.getClassOrInterfaceDeclarations())
-                .forEach(coid -> {
-                    if (!isTarget(coid)) {
-                        return;
-                    }
-                    coid.getFields().forEach(field -> {
-                        if (!field.getJavadoc().isPresent()) {
-                            log.info("{}:{}", getRelativePath(field), getBeginLine(field));
-                        }
-                    });
-                });
-    }
 
     private boolean isTarget(ClassOrInterfaceDeclaration coid) {
         boolean result = coid.getNameAsString().endsWith("Req");
@@ -65,11 +44,6 @@ public class CommentAbsentFiledStatute implements Statute {
                 }));
 
         return result;
-    }
-
-    @Override
-    public String getStatuteNo() {
-        return "wftc";
     }
 
 }

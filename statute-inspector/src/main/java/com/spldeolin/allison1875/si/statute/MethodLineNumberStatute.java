@@ -12,10 +12,6 @@ import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 报告出所有方法的行数
- *
- * 行数包含方法签名，低于200行的方法不会被报告
- *
  * @author Deolin 2020-02-10
  */
 @Log4j2
@@ -34,11 +30,6 @@ public class MethodLineNumberStatute implements Statute {
                     }
                 }));
         return result;
-    }
-
-    @Override
-    public String getStatuteNo() {
-        return "5yya";
     }
 
 }

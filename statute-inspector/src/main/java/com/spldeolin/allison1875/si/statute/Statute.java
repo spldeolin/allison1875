@@ -11,6 +11,4 @@ public interface Statute {
 
     Collection<LawlessVo> inspect(Collection<CompilationUnit> cus);
 
-    String getStatuteNo();
-
 }

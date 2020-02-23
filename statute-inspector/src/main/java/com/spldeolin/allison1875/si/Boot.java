@@ -1,15 +1,7 @@
 package com.spldeolin.allison1875.si;
 
-import java.util.Collection;
-import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.si.processor.InspectionProcessor;
 import com.spldeolin.allison1875.si.processor.LawlessReportProcessor;
-import com.spldeolin.allison1875.si.statute.CommentAbsentFiledStatute;
-import com.spldeolin.allison1875.si.statute.MethodLineNumberStatute;
-import com.spldeolin.allison1875.si.statute.MultiNewResponseInfoStatute;
-import com.spldeolin.allison1875.si.statute.NormalControllerStatute;
-import com.spldeolin.allison1875.si.statute.Statute;
-import com.spldeolin.allison1875.si.statute.UncommittedModifiedFileStatute;
 
 /**
  * @author Deolin 2020-02-22
@@ -17,11 +9,7 @@ import com.spldeolin.allison1875.si.statute.UncommittedModifiedFileStatute;
 public class Boot {
 
     public static void main(String[] args) {
-        Collection<Statute> statutes = Lists
-                .newArrayList(new UncommittedModifiedFileStatute(), new NormalControllerStatute(),
-                        new MultiNewResponseInfoStatute(), new MethodLineNumberStatute(), new CommentAbsentFiledStatute());
-        InspectionProcessor inspectionP = new InspectionProcessor().statutes(statutes).processor();
-
+        InspectionProcessor inspectionP = new InspectionProcessor().process();
         new LawlessReportProcessor().lawlesses(inspectionP.lawlesses()).report();
     }
 

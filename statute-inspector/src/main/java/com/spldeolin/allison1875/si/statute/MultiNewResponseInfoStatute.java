@@ -10,8 +10,6 @@ import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 报告出多次new ResponseInfo对象的方法
- *
  * @author Deolin 2020-02-16
  */
 @Log4j2
@@ -28,11 +26,6 @@ public class MultiNewResponseInfoStatute implements Statute {
             }
         }));
         return result;
-    }
-
-    @Override
-    public String getStatuteNo() {
-        return "hfvk";
     }
 
 }
