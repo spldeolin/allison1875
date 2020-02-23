@@ -13,6 +13,16 @@ import lombok.Getter;
 public enum StatuteEnum {
 
     /**
+     * 出未commit的被修改的文件
+     */
+    UNCOMMITTED_MODIFIED_FILE_STATUTE("cv5c", new UncommittedModifiedFileStatute()),
+
+    /**
+     * 必须有@author
+     */
+    AUTHOR_MUST_EXIST_STATUTE("cw84", new AuthorMustExistStatute()),
+
+    /**
      * 某些类下的field必须有注释
      */
     COMMENT_ABSENT_FILED_STATUTE("wftc", new CommentAbsentFiledStatute()),
@@ -31,11 +41,6 @@ public enum StatuteEnum {
      * 声明了@Controller的和没有声明@RequestMapping的控制器
      */
     NORMAL_CONTROLLER_STATUTE("54u7", new NormalControllerStatute()),
-
-    /**
-     * 出未commit的被修改的文件
-     */
-    UNCOMMITTED_MODIFIED_FILE_STATUTE("cv5c", new UncommittedModifiedFileStatute()),
 
     ;
 
