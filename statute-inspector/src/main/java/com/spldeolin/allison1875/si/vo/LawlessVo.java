@@ -16,6 +16,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class LawlessVo {
 
+    private Integer no;
+
     private String codeSource;
 
     /**

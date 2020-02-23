@@ -2,6 +2,8 @@ package com.spldeolin.allison1875.si.processor;
 
 import java.util.Arrays;
 import java.util.Collection;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
@@ -25,9 +27,13 @@ public class InspectionProcessor {
     public InspectionProcessor process() {
         Collection<CompilationUnit> cus = StaticGitAddedFileContainer
                 .removeIfNotContain(StaticAstContainer.getCompilationUnits());
+        MutableInt no = new MutableInt(1);
         Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
             Collection<LawlessVo> vos = statuteEnum.getStatute().inspect(cus);
-            vos.forEach(vo -> vo.setStatuteNo(statuteEnum.getNo()));
+            vos.forEach(vo -> {
+                vo.setNo(no.getAndAdd(1));
+                vo.setStatuteNo(statuteEnum.getNo());
+            });
             lawlesses.addAll(vos);
         });
         return this;
