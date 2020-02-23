@@ -4,6 +4,7 @@ import java.util.Collection;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.si.processor.InspectionProcessor;
 import com.spldeolin.allison1875.si.processor.LawlessReportProcessor;
+import com.spldeolin.allison1875.si.statute.CommentAbsentFiledStatute;
 import com.spldeolin.allison1875.si.statute.MethodLineNumberStatute;
 import com.spldeolin.allison1875.si.statute.MultiNewResponseInfoStatute;
 import com.spldeolin.allison1875.si.statute.NormalControllerStatute;
@@ -18,7 +19,7 @@ public class Boot {
     public static void main(String[] args) {
         Collection<Statute> statutes = Lists
                 .newArrayList(new UncommittedModifiedFileStatute(), new NormalControllerStatute(),
-                        new MultiNewResponseInfoStatute(), new MethodLineNumberStatute());
+                        new MultiNewResponseInfoStatute(), new MethodLineNumberStatute(), new CommentAbsentFiledStatute());
         InspectionProcessor inspectionP = new InspectionProcessor().statutes(statutes).processor();
 
         new LawlessReportProcessor().lawlesses(inspectionP.lawlesses()).report();

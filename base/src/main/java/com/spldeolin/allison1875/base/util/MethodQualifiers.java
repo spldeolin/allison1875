@@ -59,6 +59,7 @@ public class MethodQualifiers {
         StringBuilder sb = new StringBuilder(64);
         methodDeclaration.findAncestor(TypeDeclaration.class).map(tp -> (TypeDeclaration<?>) tp)
                 .ifPresent(tp -> tp.getFullyQualifiedName().ifPresent(sb::append));
+        sb.append(".");
         sb.append(methodDeclaration.getNameAsString());
         return sb.toString();
     }
