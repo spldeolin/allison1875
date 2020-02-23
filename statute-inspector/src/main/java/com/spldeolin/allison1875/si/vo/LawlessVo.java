@@ -36,14 +36,14 @@ public class LawlessVo {
 
     private LocalDateTime fixedAt;
 
-    public LawlessVo(CompilationUnit cu) {
-        codeSource = Locations.getRelativePath(cu).toString();
-        author = Cus.getAuthor(cu);
-    }
-
     public LawlessVo(Node node, String qualifier) {
         codeSource = Locations.getRelativePathWithLineNo(node);
         this.qualifier = qualifier;
+        author = Cus.getAuthor(node.findCompilationUnit().orElseThrow(CuAbsentException::new));
+    }
+
+    public LawlessVo(Node node) {
+        codeSource = Locations.getRelativePathWithLineNo(node);
         author = Cus.getAuthor(node.findCompilationUnit().orElseThrow(CuAbsentException::new));
     }
 
