@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.si;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -17,7 +19,7 @@ public final class StatuteInspectorConfig extends BaseConfig {
 
     public static final StatuteInspectorConfig CONFIG = new StatuteInspectorConfig();
 
-    private Path lawlessReportCsvPath;
+    private Path lawlessCsvOutputDirectoryPath;
 
     private StatuteInspectorConfig() {
         super();
@@ -25,7 +27,13 @@ public final class StatuteInspectorConfig extends BaseConfig {
     }
 
     private void initLoad() {
-        lawlessReportCsvPath = Paths.get(super.rawData.get("lawlessReportCsvPath"));
+        File lawlessCsvOutputDirectory = new File(super.rawData.get("lawlessCsvOutputDirectoryPath"));
+        if (!lawlessCsvOutputDirectory.exists()) {
+            if (!lawlessCsvOutputDirectory.mkdirs()) {
+                throw new ConfigLoadingException("文件" + lawlessCsvOutputDirectory + "创建失败");
+            }
+        }
+        lawlessCsvOutputDirectoryPath = Paths.get(super.rawData.get("lawlessCsvOutputDirectoryPath"));
     }
 
 }

@@ -34,9 +34,9 @@ public final class DocAnalyzerConfig extends BaseConfig {
     }
 
     private void initLoad() {
-        commonPageTypeQualifier = rawData.get("commonPageTypeQualifier");
+        commonPageTypeQualifier = super.rawData.get("commonPageTypeQualifier");
 
-        File docOutputDirectory = new File(rawData.get("docOutputDirectoryPath"));
+        File docOutputDirectory = new File(super.rawData.get("docOutputDirectoryPath"));
         if (!docOutputDirectory.exists()) {
             if (!docOutputDirectory.mkdirs()) {
                 throw new ConfigLoadingException("文件" + docOutputDirectory + "创建失败");

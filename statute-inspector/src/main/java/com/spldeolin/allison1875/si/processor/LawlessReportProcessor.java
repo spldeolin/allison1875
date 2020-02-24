@@ -4,9 +4,12 @@ import static com.spldeolin.allison1875.si.StatuteInspectorConfig.CONFIG;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.base.util.Csvs;
+import com.spldeolin.allison1875.base.util.Times;
 import com.spldeolin.allison1875.si.vo.LawlessVo;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -24,8 +27,11 @@ public class LawlessReportProcessor {
 
     public void report() {
         String csvContent = Csvs.writeCsv(lawlesses, LawlessVo.class);
+
+        String fileName = "lawless-output-" + Times.toString(LocalDateTime.now(), "yyyyMMdd-HHmmss") + ".csv";
+        Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName);
         try {
-            FileUtils.writeStringToFile(CONFIG.getLawlessReportCsvPath().toFile(), csvContent, StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(csvFile.toFile(), csvContent, StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error(e);
         }
