@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.si.vo;
 
 import java.time.LocalDateTime;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.Cus;
@@ -18,7 +17,7 @@ public class LawlessVo {
 
     private Integer no;
 
-    private String codeSource;
+    private String sourceCode;
 
     /**
      * - type qualifier
@@ -39,13 +38,13 @@ public class LawlessVo {
     private LocalDateTime fixedAt;
 
     public LawlessVo(Node node, String qualifier) {
-        codeSource = Locations.getRelativePathWithLineNo(node);
+        sourceCode = Locations.getRelativePathWithLineNo(node);
         this.qualifier = qualifier;
         author = Cus.getAuthor(node.findCompilationUnit().orElseThrow(CuAbsentException::new));
     }
 
     public LawlessVo(Node node) {
-        codeSource = Locations.getRelativePathWithLineNo(node);
+        sourceCode = Locations.getRelativePathWithLineNo(node);
         author = Cus.getAuthor(node.findCompilationUnit().orElseThrow(CuAbsentException::new));
     }
 

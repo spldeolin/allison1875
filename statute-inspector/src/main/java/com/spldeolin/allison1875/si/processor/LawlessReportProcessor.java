@@ -28,7 +28,7 @@ public class LawlessReportProcessor {
     public void report() {
         String csvContent = Csvs.writeCsv(lawlesses, LawlessVo.class);
 
-        String fileName = "lawless-output-" + Times.toString(LocalDateTime.now(), "yyyyMMdd-HHmmss") + ".csv";
+        String fileName = "lawless-output-" + Times.toString(LocalDateTime.now(), "yyyyMMdd") + ".csv";
         Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName);
         try {
             FileUtils.writeStringToFile(csvFile.toFile(), csvContent, StandardCharsets.UTF_8);

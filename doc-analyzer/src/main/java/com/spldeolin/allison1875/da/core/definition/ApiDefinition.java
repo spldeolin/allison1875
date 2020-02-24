@@ -41,7 +41,7 @@ public class ApiDefinition {
 
     private String author;
 
-    private String codeSource;
+    private String sourceCode;
 
     public Collection<BodyFieldDefinition> listRequestBodyFieldsFlatly() {
         Collection<BodyFieldDefinition> result = Lists.newArrayList();

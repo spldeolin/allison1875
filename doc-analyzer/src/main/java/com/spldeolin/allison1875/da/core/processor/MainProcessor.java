@@ -102,12 +102,12 @@ public class MainProcessor {
 
             // 源码位置
             try {
-                CodeSourceProcessor codeSourceP = new CodeSourceProcessor().handler(handler).process();
-                api.codeSource(codeSourceP.location());
+                SourceCodeProcessor sourceCodeP = new SourceCodeProcessor().handler(handler).process();
+                api.sourceCode(sourceCodeP.location());
             } catch (Exception e) {
                 log.warn("BodyStructureProcessor(ResponseBody) processed failed for Handler [{}].", handlerSignature,
                         e);
-                api.codeSource("");
+                api.sourceCode("");
             }
 
             return api;

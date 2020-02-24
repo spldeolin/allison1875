@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-20
  */
 @Accessors(fluent = true)
-class CodeSourceProcessor {
+class SourceCodeProcessor {
 
     @Setter
     private MethodDeclaration handler;
@@ -20,7 +20,7 @@ class CodeSourceProcessor {
     @Getter
     private String location;
 
-    CodeSourceProcessor process() {
+    SourceCodeProcessor process() {
         checkStatus();
 
         location = Locations.getRelativePath(handler) + ":" + Locations.getBeginLine(handler.getName());

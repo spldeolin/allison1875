@@ -29,6 +29,6 @@ public class SimpleMdOutputVo {
 
     private String author;
 
-    private String codeSource;
+    private String sourceCode;
 
 }
