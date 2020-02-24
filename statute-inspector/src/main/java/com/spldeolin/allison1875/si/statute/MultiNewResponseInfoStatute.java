@@ -6,7 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.MethodQualifiers;
-import com.spldeolin.allison1875.si.vo.LawlessVo;
+import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -16,12 +16,12 @@ import lombok.extern.log4j.Log4j2;
 public class MultiNewResponseInfoStatute implements Statute {
 
     @Override
-    public Collection<LawlessVo> inspect(Collection<CompilationUnit> cus) {
-        Collection<LawlessVo> result = Lists.newLinkedList();
+    public Collection<LawlessDto> inspect(Collection<CompilationUnit> cus) {
+        Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodDeclaration.class).forEach(method -> {
             if (method.findAll(ObjectCreationExpr.class, oce -> oce.getTypeAsString().equals("ResponseInfo")).size()
                     > 1) {
-                LawlessVo vo = new LawlessVo(method, MethodQualifiers.getTypeQualifierWithMethodName(method));
+                LawlessDto vo = new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method));
                 result.add(vo);
             }
         }));

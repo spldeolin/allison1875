@@ -6,7 +6,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.si.vo.LawlessVo;
+import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,14 +22,14 @@ public class CommentAbsentFiledStatute implements Statute {
     }
 
     @Override
-    public Collection<LawlessVo> inspect(Collection<CompilationUnit> cus) {
-        Collection<LawlessVo> result = Lists.newArrayList();
+    public Collection<LawlessDto> inspect(Collection<CompilationUnit> cus) {
+        Collection<LawlessDto> result = Lists.newArrayList();
 
         cus.forEach(
                 cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(this::isTarget).forEach(coid -> {
                     coid.findAll(FieldDeclaration.class).forEach(field -> {
                         if (!field.getJavadoc().isPresent()) {
-                            LawlessVo vo = new LawlessVo(field,
+                            LawlessDto vo = new LawlessDto(field,
                                     coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new) + "."
                                             + field.getVariable(0).getNameAsString());
                             result.add(vo);

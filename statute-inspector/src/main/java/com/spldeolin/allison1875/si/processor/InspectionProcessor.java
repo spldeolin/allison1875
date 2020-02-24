@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
 import com.spldeolin.allison1875.si.dto.PublicAckDto;
 import com.spldeolin.allison1875.si.statute.StatuteEnum;
-import com.spldeolin.allison1875.si.vo.LawlessVo;
+import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -26,7 +26,7 @@ public class InspectionProcessor {
     private Collection<PublicAckDto> publicAcks;
 
     @Getter
-    private Collection<LawlessVo> lawlesses = Lists.newLinkedList();
+    private Collection<LawlessDto> lawlesses = Lists.newLinkedList();
 
     public InspectionProcessor process() {
         Collection<CompilationUnit> cus = StaticGitAddedFileContainer
@@ -46,7 +46,7 @@ public class InspectionProcessor {
         return this;
     }
 
-    private boolean isNotInPublicAcks(LawlessVo vo, String statuteNo) {
+    private boolean isNotInPublicAcks(LawlessDto vo, String statuteNo) {
         String qualifier = vo.getQualifier();
         String sourceCode = vo.getSourceCode();
 

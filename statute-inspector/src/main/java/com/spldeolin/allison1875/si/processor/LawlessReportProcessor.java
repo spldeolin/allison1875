@@ -10,7 +10,7 @@ import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.base.util.Csvs;
 import com.spldeolin.allison1875.base.util.Times;
-import com.spldeolin.allison1875.si.vo.LawlessVo;
+import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -23,10 +23,10 @@ import lombok.extern.log4j.Log4j2;
 public class LawlessReportProcessor {
 
     @Setter
-    private Collection<LawlessVo> lawlesses;
+    private Collection<LawlessDto> lawlesses;
 
     public void report() {
-        String csvContent = Csvs.writeCsv(lawlesses, LawlessVo.class);
+        String csvContent = Csvs.writeCsv(lawlesses, LawlessDto.class);
 
         String fileName = "lawless-output-" + Times.toString(LocalDateTime.now(), "yyyyMMdd") + ".csv";
         Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName);

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.si.vo;
+package com.spldeolin.allison1875.si.dto;
 
 import java.time.LocalDateTime;
 import com.github.javaparser.ast.Node;
@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class LawlessVo {
+public class LawlessDto {
 
     private Integer no;
 
@@ -37,13 +37,13 @@ public class LawlessVo {
 
     private LocalDateTime fixedAt;
 
-    public LawlessVo(Node node, String qualifier) {
+    public LawlessDto(Node node, String qualifier) {
         sourceCode = Locations.getRelativePathWithLineNo(node);
         this.qualifier = qualifier;
         author = Cus.getAuthor(node.findCompilationUnit().orElseThrow(CuAbsentException::new));
     }
 
-    public LawlessVo(Node node) {
+    public LawlessDto(Node node) {
         sourceCode = Locations.getRelativePathWithLineNo(node);
         author = Cus.getAuthor(node.findCompilationUnit().orElseThrow(CuAbsentException::new));
     }
