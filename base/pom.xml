@@ -83,7 +83,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>runntime</scope>
         </dependency>
     </dependencies>
 

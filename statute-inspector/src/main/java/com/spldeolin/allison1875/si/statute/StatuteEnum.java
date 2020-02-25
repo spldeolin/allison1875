@@ -65,9 +65,12 @@ public enum StatuteEnum {
     /**
      * 禁止出现单词State
      */
-    ForbidWordStateStatute("hch5", new ForbidWordStateStatute()),
+    FORBID_WORD_STATE_STATUTE("hch5", new ForbidWordStateStatute()),
 
-    ;
+    /**
+     * if或三目表达式中的条件部分，禁止3个及以上逻辑运算符
+     */
+    LimitConditionLogicalOperatorStatute("p5jv", new LimitConditionLogicalOperatorStatute());;
 
     private String no;
 
