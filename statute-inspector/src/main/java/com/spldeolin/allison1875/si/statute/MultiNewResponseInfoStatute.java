@@ -19,9 +19,11 @@ public class MultiNewResponseInfoStatute implements Statute {
     public Collection<LawlessDto> inspect(Collection<CompilationUnit> cus) {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodDeclaration.class).forEach(method -> {
-            if (method.findAll(ObjectCreationExpr.class, oce -> oce.getTypeAsString().equals("ResponseInfo")).size()
-                    > 1) {
-                LawlessDto vo = new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method));
+            int count = method.findAll(ObjectCreationExpr.class, oce -> oce.getTypeAsString().equals("ResponseInfo"))
+                    .size();
+            if (count > 1) {
+                LawlessDto vo = new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
+                        .setMessage("new ResponseInfo出现了" + count + "次");
                 result.add(vo);
             }
         }));

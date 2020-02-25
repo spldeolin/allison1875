@@ -38,6 +38,11 @@ public enum StatuteEnum {
     ONLY_POST_MAPPING_STATUTE("sx8k", new OnlyPostMappingStatute()),
 
     /**
+     * url必须与handler方法名一致
+     */
+    HANDLER_NAME_EQUALS_PATH_STATUTE("5g4p", new HandlerNameEqualsPathStatute()),
+
+    /**
      * 超过n行的方法
      */
     METHOD_LINE_NUMBER_STATUTE("5yya", new MethodLineNumberStatute()),
