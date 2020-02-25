@@ -52,6 +52,21 @@ public enum StatuteEnum {
      */
     MULTI_NEW_RESPONSE_INFO_STATUTE("hfvk", new MultiNewResponseInfoStatute()),
 
+    /**
+     * DTO禁止使用全大写DTO结尾
+     */
+    FORBID_ALL_UPPER_DTO_STATUTE("j3gt", new ForbidAllUpperDtoStatute()),
+
+    /**
+     * 禁止使用宽泛的单词
+     */
+    FORBID_BROAD_WORD_STATUTE("jfat", new ForbidBroadWordStatute()),
+
+    /**
+     * 禁止出现单词State
+     */
+    ForbidWordStateStatute("hch5", new ForbidWordStateStatute()),
+
     ;
 
     private String no;
