@@ -20,6 +20,8 @@ public final class StatuteInspectorConfig extends BaseConfig {
 
     public static final StatuteInspectorConfig CONFIG = new StatuteInspectorConfig();
 
+    private String commonPageTypeQualifier;
+
     private Path publicAckJsonDirectoryPath;
 
     private Path lawlessCsvOutputDirectoryPath;
@@ -30,6 +32,8 @@ public final class StatuteInspectorConfig extends BaseConfig {
     }
 
     private void initLoad() {
+        commonPageTypeQualifier = super.rawData.get("commonPageTypeQualifier");
+
         File publicAckJsonDirectory = new File(super.rawData.get("publicAckJsonDirectoryPath"));
         if (!publicAckJsonDirectory.exists()) {
             if (!publicAckJsonDirectory.mkdirs()) {
