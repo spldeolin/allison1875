@@ -6,10 +6,10 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
-import com.spldeolin.allison1875.base.collection.vcs.StaticGitAddedFileContainer;
+import com.spldeolin.allison1875.base.collection.vcs.StaticVcsContainer;
+import com.spldeolin.allison1875.si.dto.LawlessDto;
 import com.spldeolin.allison1875.si.dto.PublicAckDto;
 import com.spldeolin.allison1875.si.statute.StatuteEnum;
-import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -29,20 +29,17 @@ public class InspectionProcessor {
     private Collection<LawlessDto> lawlesses = Lists.newLinkedList();
 
     public InspectionProcessor process() {
-        Collection<CompilationUnit> cus = StaticGitAddedFileContainer
+        Collection<CompilationUnit> cus = StaticVcsContainer
                 .removeIfNotContain(StaticAstContainer.getCompilationUnits());
         MutableInt no = new MutableInt(1);
-        Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
-            statuteEnum.getStatute().inspect(cus).forEach(vo -> {
-                String statuteNo = statuteEnum.getNo();
-                if (isNotInPublicAcks(vo, statuteNo)) {
-                    vo.setNo(no.getAndAdd(1));
-                    vo.setStatuteNo(statuteNo);
-                    lawlesses.add(vo);
-                }
-            });
-
-        });
+        Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> statuteEnum.getStatute().inspect(cus).forEach(vo -> {
+            String statuteNo = statuteEnum.getNo();
+            if (isNotInPublicAcks(vo, statuteNo)) {
+                vo.setNo(no.getAndAdd(1));
+                vo.setStatuteNo(statuteNo);
+                lawlesses.add(vo);
+            }
+        }));
         return this;
     }
 
