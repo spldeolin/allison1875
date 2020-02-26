@@ -24,7 +24,7 @@ import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
-import com.spldeolin.allison1875.da.core.util.ResolvedTypes;
+import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
-import com.spldeolin.allison1875.da.core.util.ResolvedTypes;
+import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;

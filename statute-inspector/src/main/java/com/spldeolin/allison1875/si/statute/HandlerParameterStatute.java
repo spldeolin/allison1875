@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -60,7 +61,7 @@ public class HandlerParameterStatute implements Statute {
                 ResolvedReferenceType rrt = rt.asReferenceType();
 
                 // 可以是Collection<Req>或是Collection的派生类
-                if (isOrLike(rrt)) {
+                if (ResolvedTypes.isOrLike(rrt, QualifierConstants.COLLECTION)) {
                     rrt = rrt.getTypeParametersMap().get(0).b.asReferenceType();
                 }
 
@@ -83,14 +84,6 @@ public class HandlerParameterStatute implements Statute {
 
 
         return result;
-    }
-
-    private boolean isOrLike(ResolvedReferenceType rrt) {
-        if (QualifierConstants.COLLECTION.equals(rrt.getId())) {
-            return true;
-        }
-        return rrt.getAllAncestors().stream()
-                .anyMatch(ancestor -> QualifierConstants.COLLECTION.equals(ancestor.getId()));
     }
 
     private JsonSchema generateSchema(String qualifierForClassLoader) throws JsonMappingException {

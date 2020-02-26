@@ -1,5 +1,6 @@
-package com.spldeolin.allison1875.da.core.util;
+package com.spldeolin.allison1875.base.util.ast;
 
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 
@@ -14,7 +15,7 @@ public class ResolvedTypes {
      *     e.g.2: List_String> isOrLike java.util.List
      * </pre>
      */
-    public static boolean isOrLike(ResolvedType resolvedType, String typeQualifier) {
+    public static boolean isOrLike(ResolvedType resolvedType, String... typeQualifier) {
         if (typeQualifier == null) {
             throw new IllegalArgumentException("typeQualifier must not be null.");
         }
@@ -22,10 +23,11 @@ public class ResolvedTypes {
             return false;
         }
         ResolvedReferenceType referenceType = resolvedType.asReferenceType();
-        if (typeQualifier.equals(referenceType.getId())) {
+        if (StringUtils.equalsAny(referenceType.getId(), typeQualifier)) {
             return true;
         }
-        return referenceType.getAllAncestors().stream().anyMatch(ancestor -> typeQualifier.equals(ancestor.getId()));
+        return referenceType.getAllAncestors().stream()
+                .anyMatch(ancestor -> StringUtils.equalsAny(referenceType.getId(), typeQualifier));
     }
 
 }
