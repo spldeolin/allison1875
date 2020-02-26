@@ -17,7 +17,7 @@ import com.spldeolin.allison1875.da.core.definition.HandlerDefinition;
 import com.spldeolin.allison1875.da.core.strategy.ControllerFilter;
 import com.spldeolin.allison1875.da.core.strategy.HandlerFilter;
 import com.spldeolin.allison1875.da.core.strategy.ResponseBodyTypeParser;
-import com.spldeolin.allison1875.base.util.MethodQualifiers;
+import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

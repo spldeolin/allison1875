@@ -5,7 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.MethodQualifiers;
+import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 

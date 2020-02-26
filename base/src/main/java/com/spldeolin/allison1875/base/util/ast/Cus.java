@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.base.util.ast;
 
 import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;

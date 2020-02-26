@@ -3,8 +3,8 @@ package com.spldeolin.allison1875.si.dto;
 import java.time.LocalDateTime;
 import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.Cus;
-import com.spldeolin.allison1875.base.util.Locations;
+import com.spldeolin.allison1875.base.util.ast.Cus;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

@@ -17,7 +17,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.MethodQualifiers;
+import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 

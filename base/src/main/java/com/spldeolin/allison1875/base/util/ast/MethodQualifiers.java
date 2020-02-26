@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.base.util.ast;
 
 import java.lang.reflect.Method;
 import com.github.javaparser.ast.body.MethodDeclaration;

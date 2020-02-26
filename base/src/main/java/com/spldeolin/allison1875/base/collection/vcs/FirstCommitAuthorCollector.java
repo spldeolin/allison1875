@@ -1,13 +1,9 @@
 package com.spldeolin.allison1875.base.collection.vcs;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.RenameDetector;
@@ -18,7 +14,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
-import com.spldeolin.allison1875.base.util.Locations;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;

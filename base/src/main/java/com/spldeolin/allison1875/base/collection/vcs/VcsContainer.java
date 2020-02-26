@@ -12,7 +12,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import com.github.javaparser.ast.Node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.util.Locations;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;

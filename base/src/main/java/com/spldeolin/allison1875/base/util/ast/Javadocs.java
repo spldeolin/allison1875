@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.base.util.ast;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +8,7 @@ import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
+import com.spldeolin.allison1875.base.util.Strings;
 
 /**
  * @author Deolin 2019-12-23

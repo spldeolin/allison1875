@@ -7,7 +7,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.MethodQualifiers;
+import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 
 /**

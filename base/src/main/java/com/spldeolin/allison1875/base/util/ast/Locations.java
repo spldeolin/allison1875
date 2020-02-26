@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.base.util.ast;
 
 import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
 
