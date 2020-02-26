@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
 public class UncommittedModifiedFileStatute implements Statute {
 
     @Override
-    public Collection<LawlessDto> inspect(Collection<CompilationUnit> neverUse) {
+    public Collection<LawlessDto> inspect(Collection<CompilationUnit> neverUsed) {
         Collection<LawlessDto> result = Lists.newLinkedList();
 
         try (Git git = Git.open(CONFIG.getProjectPath().toFile())) {

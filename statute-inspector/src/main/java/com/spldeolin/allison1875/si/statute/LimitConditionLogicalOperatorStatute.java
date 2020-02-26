@@ -9,7 +9,6 @@ import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithCondition;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.StringRandomUtils;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 
 /**
@@ -31,16 +30,12 @@ public class LimitConditionLogicalOperatorStatute implements Statute {
         int operatorCount = node.getCondition().findAll(BinaryExpr.class, be -> {
             Operator operator = be.getOperator();
             return operator == Operator.OR || operator == Operator.AND || operator == Operator.BINARY_OR
-                    || operator == Operator.BINARY_AND || operator == Operator.XOR;
+                    || operator == Operator.BINARY_AND;
         }).size();
         if (operatorCount >= 3) {
             result.add(new LawlessDto(node)
                     .setMessage(operatorCount + "个逻辑运算符。 if (" + node.getCondition().toString() + ")"));
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(StringRandomUtils.generateVisibleAscii(30));
     }
 
 }
