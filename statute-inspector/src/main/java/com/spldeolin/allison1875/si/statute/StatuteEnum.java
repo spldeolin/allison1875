@@ -43,14 +43,14 @@ public enum StatuteEnum {
     HANDLER_NAME_EQUALS_PATH_STATUTE("5g4p", new HandlerNameEqualsPathStatute()),
 
     /**
-     * 超过n行的方法
-     */
-    METHOD_LINE_NUMBER_STATUTE("5yya", new MethodLineNumberStatute()),
-
-    /**
      * 多次new ResponseInfo对象的方法
      */
     MULTI_NEW_RESPONSE_INFO_STATUTE("hfvk", new MultiNewResponseInfoStatute()),
+
+    /**
+     * handler参数相关
+     */
+    HANDLER_PARAMETER_STATUTE("h33j", new HandlerParameterStatute()),
 
     /**
      * DTO禁止使用全大写DTO结尾
@@ -70,7 +70,14 @@ public enum StatuteEnum {
     /**
      * if或三目表达式中的条件部分，禁止3个及以上逻辑运算符
      */
-    LimitConditionLogicalOperatorStatute("p5jv", new LimitConditionLogicalOperatorStatute());;
+    LimitConditionLogicalOperatorStatute("p5jv", new LimitConditionLogicalOperatorStatute()),
+
+    /**
+     * 超过n行的方法
+     */
+    METHOD_LINE_NUMBER_STATUTE("5yya", new MethodLineNumberStatute()),
+
+    ;
 
     private String no;
 
