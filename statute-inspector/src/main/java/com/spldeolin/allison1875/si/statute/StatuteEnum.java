@@ -53,6 +53,11 @@ public enum StatuteEnum {
     HANDLER_PARAMETER_STATUTE("h33j", new HandlerParameterStatute()),
 
     /**
+     * handler返回相关
+     */
+    HANDLER_RETURN_STATUTE("w74v", new HandlerReturnStatute()),
+
+    /**
      * DTO禁止使用全大写DTO结尾
      */
     FORBID_ALL_UPPER_DTO_STATUTE("j3gt", new ForbidAllUpperDtoStatute()),

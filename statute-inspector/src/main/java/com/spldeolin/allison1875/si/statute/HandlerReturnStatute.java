@@ -11,6 +11,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
@@ -27,7 +28,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-02-26
  */
 @Log4j2
-public class HandlerParameterStatute implements Statute {
+public class HandlerReturnStatute implements Statute {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
@@ -36,51 +37,40 @@ public class HandlerParameterStatute implements Statute {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodDeclaration.class,
                 method -> method.getAnnotationByName("PostMapping").isPresent()).forEach(handler -> {
-            NodeList<Parameter> parameters = handler.getParameters();
-            if (parameters.size() == 0) {
-                return;
-            }
             LawlessDto dto = new LawlessDto(handler, MethodQualifiers.getTypeQualifierWithMethodName(handler));
+            handler.findAll(ObjectCreationExpr.class, oce -> oce.getTypeAsString().equals("ResponseInfo"))
+                    .forEach(oce -> {
+                        if (oce.getArguments().size() == 0) {
+                            return;
+                        }
+                        ResolvedType rt = null;
+                        try {
+                            rt = oce.getArgument(0).calculateResolvedType();
 
-            // 只能有1个参数
-            if (parameters.size() > 1) {
-                result.add(dto.setMessage("handler最多只能有1个参数，当前" + parameters.size() + "个"));
-                return;
-            }
-            Parameter parameter = Iterables.getOnlyElement(parameters);
+                            ResolvedReferenceType rrt = rt.asReferenceType();
 
-            // 必须是@RequestBody
-            if (!parameter.getAnnotationByName("RequestBody").isPresent()) {
-                result.add(dto.setMessage("唯一的那个参数必须是@RequestBody"));
-                return;
-            }
+                            // 可以是Collection<Pojo>或是Collection的派生类
+                            if (isOrLike(rrt)) {
+                                rrt = rrt.getTypeParametersMap().get(0).b.asReferenceType();
+                            }
 
-            try {
-                ResolvedType rt = parameter.getType().resolve();
-                ResolvedReferenceType rrt = rt.asReferenceType();
+                            // 可以是一个value-like的类型
+                            if (generateSchema(rrt.getId()).isValueTypeSchema()) {
+                                return;
+                            }
 
-                // 可以是Collection<Req>或是Collection的派生类
-                if (isOrLike(rrt)) {
-                    rrt = rrt.getTypeParametersMap().get(0).b.asReferenceType();
-                }
+                            // 必须以Xxx结尾
+                            if (!rrt.getId().endsWith("Resp")) {
+                                result.add(dto.setMessage("返回[" + oce + "]的POJO命名必须以Req结尾"));
+                            }
 
-                // 可以是一个value-like的类型
-                if (generateSchema(rrt.getId()).isValueTypeSchema()) {
-                    return;
-                }
+                        } catch (Exception e) {
+                            log.warn("The return data type[{}] of handler [{}] caused.", rt, dto.getQualifier());
+                            result.add(dto.setMessage("返回[" + oce + "]的类型不合规，具体原因需要review者检查"));
+                        }
 
-                // 必须以Req结尾
-                if (!rrt.getId().endsWith("Req")) {
-                    result.add(dto.setMessage("参数[" + parameter + "]的POJO命名必须以Req结尾"));
-                }
-
-            } catch (Exception e) {
-                log.warn("The paramater[{}] of handler[{}] caused.", parameter, dto.getQualifier());
-                result.add(dto.setMessage("参数[" + parameter + "]的类型不合规，具体原因需要review者检查"));
-            }
-
+                    });
         }));
-
 
         return result;
     }
