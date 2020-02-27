@@ -20,4 +20,8 @@ public class Strings {
         return string.substring(0, ind) + replacement + string.substring(ind + 1);
     }
 
+    public static String capture(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
 }

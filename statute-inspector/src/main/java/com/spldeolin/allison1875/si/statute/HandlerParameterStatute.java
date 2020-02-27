@@ -9,14 +9,17 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
@@ -58,6 +61,10 @@ public class HandlerParameterStatute implements Statute {
 
             try {
                 ResolvedType rt = parameter.getType().resolve();
+                if (rt.isPrimitive()) {
+                    return;
+                }
+
                 ResolvedReferenceType rrt = rt.asReferenceType();
 
                 // 可以是Collection<Req>或是Collection的派生类
@@ -70,11 +77,36 @@ public class HandlerParameterStatute implements Statute {
                     return;
                 }
 
-                // 必须以Req结尾
-                if (!rrt.getId().endsWith("Req")) {
+                // 命名前缀和后缀
+                boolean illegalNaming = false;
+                String pojoName = Iterables.getLast(Lists.newArrayList(rrt.getId().split("\\.")));
+                if (!pojoName.endsWith("Req")) {
                     result.add(dto.setMessage("参数[" + parameter + "]的POJO命名必须以Req结尾"));
+                    illegalNaming = true;
+                }
+                if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Req".length() - 1)
+                        .equals(handler.getNameAsString())) {
+                    result.add(dto.setMessage("参数[" + parameter + "]的POJO命名的Req以外部分必须与方法名一致"));
+                    illegalNaming = true;
+                }
+                if (illegalNaming) {
+                    return;
                 }
 
+                // 禁止作为任何field类型和任何方法的返回类型
+                cus.forEach(cux -> {
+                    cux.findAll(FieldDeclaration.class).forEach(field -> field.findAll(Type.class).forEach(type -> {
+                        if (type.toString().contains(pojoName)) {
+                            result.add(new LawlessDto(field).setMessage("[" + pojoName + "]禁止作为Field的类型"));
+                        }
+                    }));
+                    cux.findAll(MethodDeclaration.class).forEach(method -> {
+                        if (method.getType().toString().contains(pojoName)) {
+                            result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
+                                    .setMessage("[" + pojoName + "]禁止作为方法的返回类型"));
+                        }
+                    });
+                });
             } catch (Exception e) {
                 log.warn("The paramater[{}] of handler[{}] caused.", parameter, dto.getQualifier());
                 result.add(dto.setMessage("参数[" + parameter + "]的类型不合规，具体原因需要review者检查"));

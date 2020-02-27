@@ -27,7 +27,7 @@ public class ResolvedTypes {
             return true;
         }
         return referenceType.getAllAncestors().stream()
-                .anyMatch(ancestor -> StringUtils.equalsAny(referenceType.getId(), typeQualifier));
+                .anyMatch(ancestor -> StringUtils.equalsAny(ancestor.getId(), typeQualifier));
     }
 
 }
