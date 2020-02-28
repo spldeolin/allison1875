@@ -28,11 +28,13 @@ public class LawlessReportProcessor {
     public void report() {
         String csvContent = Csvs.writeCsv(lawlesses, LawlessDto.class);
 
-        String fileName = "lawless-" + Times.toString(LocalDateTime.now(), "yyyyMMdd") + ".csv";
-        Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName);
+        String fileName = "lawless-" + Times.toString(LocalDateTime.now(), "yyyyMMdd");
+        Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName + ".csv");
+        Path csvGbkFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName + "-gbk.csv");
         try {
             FileUtils.writeStringToFile(csvFile.toFile(), csvContent, StandardCharsets.UTF_8);
-            log.info("Lawless print to [{}] completed.", csvFile);
+            FileUtils.writeStringToFile(csvGbkFile.toFile(), csvContent, "GBK");
+            log.info("Lawless print to [{}] completed.", csvGbkFile);
         } catch (IOException e) {
             log.error(e);
         }
