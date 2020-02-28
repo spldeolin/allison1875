@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 public enum StatuteEnum {
 
-//    /**
+    //    /**
 //     * 出未commit的被修改的文件
 //     */
 //    UNCOMMITTED_MODIFIED_FILE_STATUTE("cv5c", new UncommittedModifiedFileStatute()),
@@ -35,7 +35,7 @@ public enum StatuteEnum {
 //    /**
 //     * 只能使用POST方式的请求
 //     */
-//    ONLY_POST_MAPPING_STATUTE("sx8k", new OnlyPostMappingStatute()),
+    ONLY_POST_MAPPING_STATUTE("sx8k", new OnlyPostMappingStatute()),
 //
 //    /**
 //     * url必须与handler方法名一致
@@ -46,17 +46,17 @@ public enum StatuteEnum {
 //     * 多次new ResponseInfo对象的方法
 //     */
 //    MULTI_NEW_RESPONSE_INFO_STATUTE("hfvk", new MultiNewResponseInfoStatute()),
-
-    /**
-     * handler参数相关
-     */
-    HANDLER_PARAMETER_STATUTE("h33j", new HandlerParameterStatute()),
-
-    /**
-     * handler返回相关
-     */
-    HANDLER_RETURN_STATUTE("w74v", new HandlerReturnStatute()),
-
+//
+//    /**
+//     * handler参数相关
+//     */
+//    HANDLER_PARAMETER_STATUTE("h33j", new HandlerParameterStatute()),
+//
+//    /**
+//     * handler返回相关
+//     */
+//    HANDLER_RETURN_STATUTE("w74v", new HandlerReturnStatute()),
+//
 //    /**
 //     * DTO禁止使用全大写DTO结尾
 //     */
@@ -81,6 +81,21 @@ public enum StatuteEnum {
 //     * 超过n行的方法
 //     */
 //    METHOD_LINE_NUMBER_STATUTE("5yya", new MethodLineNumberStatute()),
+
+    /**
+     * ServiceImpl中的方法禁止调用需要Wrapper的BaseMapper方法
+     */
+    MybatisWrapperSelectStatute("uv4w", new MybatisWrapperSelectStatute()),
+
+//    /**
+//     * 登录态相关
+//     */
+//    SignTokenStatute("43jg", new SignTokenStatute()),
+//
+//    /**
+//     * Entity类禁止作为任何类的Field
+//     */
+//    ForbidFieldTypeEntityStatute("ky8y", new ForbidFieldTypeEntityStatute()),
 
     ;
 

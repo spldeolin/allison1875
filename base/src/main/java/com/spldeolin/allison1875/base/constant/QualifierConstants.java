@@ -35,4 +35,6 @@ public interface QualifierConstants {
 
     String MULTIPART_FILE = "org.springframework.web.multipart.MultipartFile";
 
+    String MYBATIS_PLUS_BASE_MAPPER = "com.baomidou.mybatisplus.mapper.BaseMapper";
+
 }

@@ -23,7 +23,7 @@ public class OnlyPostMappingStatute implements Statute {
                     "DeleteMapping", "PutMapping", "PatchMapping");
             if (annotateByWhich.isPresent()) {
                 result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
-                        .setMessage("当前声明的" + annotateByWhich + "是被禁止的"));
+                        .setMessage("当前声明的" + annotateByWhich.get() + "是被禁止的"));
 
                 // 替换成PostMapping，方便后续statute扫描handler
                 annotateByWhich.get().setName("PostMapping");
