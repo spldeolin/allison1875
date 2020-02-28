@@ -34,6 +34,7 @@ public class LawlessReportProcessor {
         try {
             FileUtils.writeStringToFile(csvFile.toFile(), csvContent, StandardCharsets.UTF_8);
             FileUtils.writeStringToFile(csvGbkFile.toFile(), csvContent, "GBK");
+            log.info("Lawless print to [{}] completed.", csvFile);
             log.info("Lawless print to [{}] completed.", csvGbkFile);
         } catch (IOException e) {
             log.error(e);
