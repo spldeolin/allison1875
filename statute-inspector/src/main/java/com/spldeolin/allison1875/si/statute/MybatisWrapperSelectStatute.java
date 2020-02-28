@@ -22,23 +22,26 @@ public class MybatisWrapperSelectStatute implements Statute {
                 coid -> coid.getNameAsString().endsWith("ServiceImpl")).forEach(serviceImpl -> {
             serviceImpl.findAll(MethodCallExpr.class).forEach(mce -> mce.getScope().ifPresent(scope -> {
 
-                ResolvedType rt;
-                try {
-                    rt = scope.calculateResolvedType();
-                } catch (Exception ignored) {
-                    return;
-                }
+                // calculateResolvedType的性能开销比较大
 
-                if (!rt.isReferenceType()) {
-                    return;
+//                ResolvedType rt;
+//                try {
+//                    rt = scope.calculateResolvedType();
+//                } catch (Exception ignored) {
+//                    return;
+//                }
+//
+//                if (!rt.isReferenceType()) {
+//                    return;
+//                }
+//                if (rt.asReferenceType().getAllAncestors().stream()
+//                        .anyMatch(ancestor -> QualifierConstants.MYBATIS_PLUS_BASE_MAPPER.equals(ancestor.getId()))) {
+                if (StringUtils
+                        .equalsAny(mce.getNameAsString(), "delete", "update", "selectCount", "selectList", "selectMaps",
+                                "selectObjs", "selectPage", "selectMapsPage")) {
+                    result.add(new LawlessDto(mce).setMessage("ServiceImpl中禁止调用BaseMapper中需要Wrapper对象的方法" + mce));
                 }
-                if (rt.asReferenceType().getAllAncestors().stream()
-                        .anyMatch(ancestor -> QualifierConstants.MYBATIS_PLUS_BASE_MAPPER.equals(ancestor.getId()))) {
-                    if (StringUtils.equalsAny(mce.getNameAsString(), "delete", "update", "selectCount", "selectList",
-                            "selectMaps", "selectObjs", "selectPage", "selectMapsPage")) {
-                        result.add(new LawlessDto(mce).setMessage("ServiceImpl中禁止调用BaseMapper中需要Wrapper对象的方法" + mce));
-                    }
-                }
+//                }
             }));
         }));
 

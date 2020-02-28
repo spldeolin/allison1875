@@ -3,9 +3,7 @@ package com.spldeolin.allison1875.si.statute;
 import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 
 /**
@@ -18,6 +16,7 @@ public class ForbidPrintStackTraceStatus implements Statute {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodCallExpr.class).forEach(mce -> {
             mce.getScope().ifPresent(scope -> {
+
                 // calculateResolvedType的性能开销比较大
 
 //                ResolvedType rt;

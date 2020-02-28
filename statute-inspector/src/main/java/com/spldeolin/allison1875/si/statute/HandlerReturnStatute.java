@@ -104,7 +104,7 @@ public class HandlerReturnStatute implements Statute {
                             });
 
                         } catch (Exception e) {
-                            log.warn("The return data type[{}] of handler [{}] caused.", rt, dto.getQualifier(), e);
+                            log.warn("The return data type[{}] of handler [{}] caused.", rt, dto.getQualifier());
                             result.add(dto.setMessage("返回[" + oce + "]的类型不合规，具体原因需要review者检查"));
                         }
 

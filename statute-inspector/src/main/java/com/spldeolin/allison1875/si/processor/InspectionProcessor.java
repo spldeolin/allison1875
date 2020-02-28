@@ -32,14 +32,21 @@ public class InspectionProcessor {
         Collection<CompilationUnit> cus = StaticVcsContainer
                 .removeIfNotContain(StaticAstContainer.getCompilationUnits());
         MutableInt no = new MutableInt(1);
-        Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> statuteEnum.getStatute().inspect(cus).forEach(vo -> {
-            String statuteNo = statuteEnum.getNo();
-            if (isNotInPublicAcks(vo, statuteNo)) {
-                vo.setNo(no.getAndAdd(1));
-                vo.setStatuteNo(statuteNo);
-                lawlesses.add(vo);
-            }
-        }));
+        Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
+            long start = System.currentTimeMillis();
+            Collection<LawlessDto> dtos = statuteEnum.getStatute().inspect(cus);
+            log.info("Statute[{}] inspection completed with [{}]ms.", statuteEnum.getNo(),
+                    System.currentTimeMillis() - start);
+            dtos.forEach(dto -> {
+                String statuteNo = statuteEnum.getNo();
+                if (isNotInPublicAcks(dto, statuteNo)) {
+                    dto.setNo(no.getAndAdd(1));
+                    dto.setStatuteNo(statuteNo);
+                    lawlesses.add(dto);
+                }
+            });
+        });
+        log.info("All inspections completed");
         return this;
     }
 
