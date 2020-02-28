@@ -83,9 +83,14 @@ public enum StatuteEnum {
 //    METHOD_LINE_NUMBER_STATUTE("5yya", new MethodLineNumberStatute()),
 
     /**
-     * ServiceImpl中的方法禁止调用需要Wrapper的BaseMapper方法
+     * 禁止e.printStackTrace
      */
-    MybatisWrapperSelectStatute("uv4w", new MybatisWrapperSelectStatute()),
+    ForbidPrintStackTrace("aj3p", new ForbidPrintStackTraceStatus()),
+//
+//    /**
+//     * ServiceImpl中的方法禁止调用需要Wrapper的BaseMapper方法
+//     */
+//    MybatisWrapperSelectStatute("uv4w", new MybatisWrapperSelectStatute()),
 
 //    /**
 //     * 登录态相关

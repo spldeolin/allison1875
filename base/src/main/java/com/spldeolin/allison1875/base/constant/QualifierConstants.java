@@ -37,4 +37,6 @@ public interface QualifierConstants {
 
     String MYBATIS_PLUS_BASE_MAPPER = "com.baomidou.mybatisplus.mapper.BaseMapper";
 
+    String THROWABLE = "java.lang.Throwable";
+
 }
