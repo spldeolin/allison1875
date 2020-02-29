@@ -1,16 +1,10 @@
 package com.spldeolin.allison1875.si.statute;
 
 import java.util.Collection;
-import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.javadoc.Javadoc;
-import com.github.javaparser.javadoc.JavadocBlockTag;
-import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 
