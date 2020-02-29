@@ -43,8 +43,14 @@ public class Authors {
      * 3. 递归1. 和2.
      */
     public static String getAuthor(Node node) {
-        Collection<String> authors = listAuthors(node);
-        return concat(authors);
+        return concat(listAuthors(node));
+    }
+
+    /**
+     * Node是否没有作者信息
+     */
+    public static boolean isAuthorAbsent(Node node) {
+        return listAuthors(node).size() == 0;
     }
 
     private static Collection<String> listAuthors(Node node) {
