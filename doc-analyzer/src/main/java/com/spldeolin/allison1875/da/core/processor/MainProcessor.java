@@ -92,7 +92,7 @@ public class MainProcessor {
 
             // 作者
             try {
-                AuthorProcessor authorP = new AuthorProcessor().controller(controller).handler(handler).process();
+                AuthorProcessor authorP = new AuthorProcessor().handler(handler).process();
                 api.author(authorP.author());
             } catch (Exception e) {
                 log.warn("BodyStructureProcessor(ResponseBody) processed failed for Handler [{}].", handlerSignature,

@@ -1,9 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
-import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.spldeolin.allison1875.base.util.ast.Javadocs;
+import com.spldeolin.allison1875.base.util.ast.Authors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -17,9 +15,6 @@ import lombok.experimental.Accessors;
 class AuthorProcessor {
 
     @Setter
-    private ClassOrInterfaceDeclaration controller;
-
-    @Setter
     private MethodDeclaration handler;
 
     @Getter
@@ -28,17 +23,11 @@ class AuthorProcessor {
     AuthorProcessor process() {
         checkStatus();
 
-        author = Javadocs.extractAuthorTag(handler);
-        if (StringUtils.isEmpty(author)) {
-            author = Javadocs.extractAuthorTag(controller);
-        }
+        author = Authors.getAuthor(handler);
         return this;
     }
 
     private void checkStatus() {
-        if (controller == null) {
-            throw new IllegalStateException("controller cannot be absent.");
-        }
         if (handler == null) {
             throw new IllegalStateException("handler cannot be absent.");
         }
