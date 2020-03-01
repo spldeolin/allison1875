@@ -15,7 +15,7 @@ public class AuthorMustExistStatute implements Statute {
 
     @Override
     public Collection<LawlessDto> inspect(Collection<CompilationUnit> cus) {
-        Collection<LawlessDto> result = Lists.newArrayList();
+        Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> {
             NodeList<TypeDeclaration<?>> types = cu.getTypes();
             if (types.size() == 0) {

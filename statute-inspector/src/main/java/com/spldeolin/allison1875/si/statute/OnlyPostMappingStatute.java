@@ -17,7 +17,7 @@ public class OnlyPostMappingStatute implements Statute {
 
     @Override
     public Collection<LawlessDto> inspect(Collection<CompilationUnit> cus) {
-        Collection<LawlessDto> result = Lists.newArrayList();
+        Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodDeclaration.class).forEach(method -> {
             final Optional<AnnotationExpr> annotateByWhich = isAnnotateByWhich(method, "RequestMapping", "GetMapping",
                     "DeleteMapping", "PutMapping", "PatchMapping");

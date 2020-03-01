@@ -66,10 +66,13 @@ public class HandlerNameEqualsPathStatute implements Statute {
             Expression uriExpr) {
         String uri = uriExprToUriContent(uriExpr);
         String className = coid.getNameAsString();
+        if (className.endsWith("Controller")) {
+            className = className.substring(0, className.length() - "Controller".length());
+        }
         if (!Strings.capture(uri).equals(className)) {
             LawlessDto vo = new LawlessDto(coid,
                     coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new))
-                    .setMessage(String.format("URI[%s]与类名[%s]不一致", uri, className));
+                    .setMessage(String.format("URI[%st]与类名[%s]不一致", uri, className));
             result.add(vo);
         }
     }
