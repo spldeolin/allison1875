@@ -9,7 +9,6 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
-import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
@@ -33,16 +32,15 @@ public class ServiceOrApiReturnStatute implements Statute {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class, this::isServiceOrApi).forEach(service -> {
             service.findAll(MethodDeclaration.class).forEach(method -> {
+
+                // 类型检查
                 Type type = method.getType();
                 if (type.isVoidType() || type.isPrimitiveType()) {
                     return;
                 }
-
-                ResolvedType rt = null;
+                ResolvedReferenceType rrt;
                 try {
-                    rt = type.resolve();
-
-                    ResolvedReferenceType rrt = rt.asReferenceType();
+                    rrt = type.resolve().asReferenceType();
 
                     // 可以是Collection<Pojo>或是Collection的派生类
                     if (ResolvedTypes
@@ -69,15 +67,15 @@ public class ServiceOrApiReturnStatute implements Statute {
                     // 命名前缀和后缀
                     boolean illegalNaming = false;
                     String pojoName = Iterables.getLast(Lists.newArrayList(rrt.getId().split("\\.")));
-                    if (!pojoName.endsWith("Req")) {
+                    if (!pojoName.endsWith("Vo")) {
                         result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
-                                .setMessage("返回类型[" + type + "]的POJO命名必须以Resp结尾"));
+                                .setMessage("返回类型[" + type + "]的POJO命名必须以Vo结尾"));
                         illegalNaming = true;
                     }
-                    if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Req".length() - 1)
+                    if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Vo".length() - 1)
                             .equals(method.getNameAsString())) {
                         result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
-                                .setMessage("返回类型[" + type + "]的POJO命名的Resp以外部分必须与方法名一致"));
+                                .setMessage("返回类型[" + type + "]的POJO命名的Vo以外部分必须与方法名一致"));
                         illegalNaming = true;
                     }
                     if (illegalNaming) {
@@ -91,8 +89,8 @@ public class ServiceOrApiReturnStatute implements Statute {
                                 result.add(new LawlessDto(field).setMessage("[" + pojoName + "]禁止作为Field的类型"));
                             }
                         }));
-                        cux.findAll(MethodDeclaration.class).forEach(m -> m.getParameters().forEach(param -> {
-                            if (param.getType().toString().contains(pojoName)) {
+                        cux.findAll(MethodDeclaration.class).forEach(m -> m.getParameters().forEach(p -> {
+                            if (p.getType().toString().contains(pojoName)) {
                                 result.add(new LawlessDto(m, MethodQualifiers.getTypeQualifierWithMethodName(m))
                                         .setMessage("[" + pojoName + "]禁止作为方法的参数类型"));
                             }
@@ -100,7 +98,7 @@ public class ServiceOrApiReturnStatute implements Statute {
                     });
 
                 } catch (Exception e) {
-                    log.warn("The return data type[{}] of method [{}] caused.", rt,
+                    log.warn("The return data type[{}] of method [{}] caused.", type,
                             MethodQualifiers.getTypeQualifierWithMethodName(method));
                     result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
                             .setMessage("返回类型[" + type + "]的类型不合规，具体联系review者"));

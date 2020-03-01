@@ -8,7 +8,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
-import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
@@ -51,13 +50,14 @@ public class HandlerParameterStatute implements Statute {
                 return;
             }
 
+            // 类型检查
+            Type type = parameter.getType();
+            if (type.isPrimitiveType()) {
+                return;
+            }
+            ResolvedReferenceType rrt;
             try {
-                ResolvedType rt = parameter.getType().resolve();
-                if (rt.isPrimitive()) {
-                    return;
-                }
-
-                ResolvedReferenceType rrt = rt.asReferenceType();
+                rrt = type.resolve().asReferenceType();
 
                 // 可以是Collection或是Collection的派生类
                 if (ResolvedTypes.isOrLike(rrt, QualifierConstants.COLLECTION)) {
@@ -87,14 +87,14 @@ public class HandlerParameterStatute implements Statute {
 
                 // 禁止作为任何field类型和任何方法的返回类型
                 cus.forEach(cux -> {
-                    cux.findAll(FieldDeclaration.class).forEach(field -> field.findAll(Type.class).forEach(type -> {
-                        if (type.toString().contains(pojoName)) {
+                    cux.findAll(FieldDeclaration.class).forEach(field -> field.findAll(Type.class).forEach(t -> {
+                        if (t.toString().contains(pojoName)) {
                             result.add(new LawlessDto(field).setMessage("[" + pojoName + "]禁止作为Field的类型"));
                         }
                     }));
-                    cux.findAll(MethodDeclaration.class).forEach(method -> {
-                        if (method.getType().toString().contains(pojoName)) {
-                            result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
+                    cux.findAll(MethodDeclaration.class).forEach(m -> {
+                        if (m.getType().toString().contains(pojoName)) {
+                            result.add(new LawlessDto(m, MethodQualifiers.getTypeQualifierWithMethodName(m))
                                     .setMessage("[" + pojoName + "]禁止作为方法的返回类型"));
                         }
                     });
