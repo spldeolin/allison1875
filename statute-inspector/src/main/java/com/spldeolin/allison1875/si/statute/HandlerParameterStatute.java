@@ -109,7 +109,7 @@ public class HandlerParameterStatute implements Statute {
                 });
             } catch (Exception e) {
                 log.warn("The paramater[{}] of handler[{}] caused.", parameter, dto.getQualifier());
-                result.add(dto.setMessage("参数[" + parameter + "]的类型不合规，具体原因需要review者检查"));
+                result.add(dto.setMessage("参数[" + parameter + "]的类型不合规，具体联系review者"));
             }
 
         }));

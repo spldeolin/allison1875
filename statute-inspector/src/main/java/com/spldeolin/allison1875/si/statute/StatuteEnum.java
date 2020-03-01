@@ -63,6 +63,11 @@ public enum StatuteEnum {
     SERVICE_OR_API_PARAMETER("vpx7", new ServiceOrApiParameterStatute()),
 
     /**
+     * handler/api返回类型相关
+     */
+    ServiceOrApiReturn("wyjf", new ServiceOrApiReturnStatute()),
+
+    /**
      * DTO禁止使用全大写DTO结尾
      */
     FORBID_ALL_UPPER_DTO("k84s", new ForbidAllUpperDtoStatute()),
