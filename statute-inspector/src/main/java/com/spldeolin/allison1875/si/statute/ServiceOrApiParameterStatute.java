@@ -20,6 +20,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.util.JsonSchemas;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
@@ -31,8 +32,6 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class ServiceOrApiParameterStatute implements Statute {
-
-    private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     @Override
     public Collection<LawlessDto> inspect(Collection<CompilationUnit> cus) {
@@ -68,7 +67,7 @@ public class ServiceOrApiParameterStatute implements Statute {
                     // 可以是Map、Multimap或是两者的派生类
                     if (ResolvedTypes.isOrLike(rrt, QualifierConstants.MAP, QualifierConstants.MULTIPART_FILE)) {
                         ResolvedReferenceType key = rrt.getTypeParametersMap().get(0).b.asReferenceType();
-                        if (!generateSchema(key.getId()).isValueTypeSchema()) {
+                        if (!JsonSchemas.generateSchema(key.getId()).isValueTypeSchema()) {
                             result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
                                     .setMessage("映射的Key类型必须是value-like"));
                             return;
@@ -77,7 +76,7 @@ public class ServiceOrApiParameterStatute implements Statute {
                     }
 
                     // 可以是一个value-like的类型
-                    if (generateSchema(rrt.getId()).isValueTypeSchema()) {
+                    if (JsonSchemas.generateSchema(rrt.getId()).isValueTypeSchema()) {
                         return;
                     }
 
@@ -129,19 +128,6 @@ public class ServiceOrApiParameterStatute implements Statute {
     private boolean isServiceOrApi(ClassOrInterfaceDeclaration coid) {
         String name = coid.getNameAsString();
         return coid.isInterface() && (name.endsWith("Service") || name.endsWith("Api"));
-    }
-
-    private JsonSchema generateSchema(String qualifierForClassLoader) throws JsonMappingException {
-        JavaType javaType;
-        javaType = new TypeFactory(null) {
-            private static final long serialVersionUID = -8151903006798193420L;
-
-            @Override
-            public ClassLoader getClassLoader() {
-                return WarOrFatJarClassLoaderFactory.getClassLoader();
-            }
-        }.constructFromCanonical(qualifierForClassLoader);
-        return jsg.generateSchema(javaType);
     }
 
 }
