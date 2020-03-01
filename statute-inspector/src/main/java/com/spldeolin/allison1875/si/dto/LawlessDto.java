@@ -14,8 +14,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class LawlessDto {
 
-    private Integer no;
-
     private String sourceCode;
 
     /**
