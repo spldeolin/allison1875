@@ -23,6 +23,10 @@ public interface QualifierConstants {
 
     String COLLECTION = "java.util.Collection";
 
+    String MAP = "java.util.Map";
+
+    String MULTIMAP = "com.google.common.collect.Multimap";
+
     String INTEGER = "java.lang.Integer";
 
     String LONG = "java.lang.Long";

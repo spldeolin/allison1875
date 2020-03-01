@@ -58,6 +58,11 @@ public enum StatuteEnum {
     HANDLER_RETURN("w74v", new HandlerReturnStatute()),
 
     /**
+     * service/api参数相关
+     */
+    SERVICE_OR_API_PARAMETER("vpx7", new ServiceOrApiParameterStatute()),
+
+    /**
      * DTO禁止使用全大写DTO结尾
      */
     FORBID_ALL_UPPER_DTO("k84s", new ForbidAllUpperDtoStatute()),

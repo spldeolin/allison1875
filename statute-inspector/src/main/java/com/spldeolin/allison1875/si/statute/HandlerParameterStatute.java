@@ -67,7 +67,7 @@ public class HandlerParameterStatute implements Statute {
 
                 ResolvedReferenceType rrt = rt.asReferenceType();
 
-                // 可以是Collection<Req>或是Collection的派生类
+                // 可以是Collection或是Collection的派生类
                 if (ResolvedTypes.isOrLike(rrt, QualifierConstants.COLLECTION)) {
                     rrt = rrt.getTypeParametersMap().get(0).b.asReferenceType();
                 }
