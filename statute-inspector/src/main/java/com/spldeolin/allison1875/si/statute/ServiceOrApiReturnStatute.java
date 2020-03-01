@@ -32,6 +32,7 @@ public class ServiceOrApiReturnStatute implements Statute {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class, this::isServiceOrApi).forEach(service -> {
             service.findAll(MethodDeclaration.class).forEach(method -> {
+                String methodSimpleName = MethodQualifiers.getTypeQualifierWithMethodName(method);
 
                 // 类型检查
                 Type type = method.getType();
@@ -52,8 +53,7 @@ public class ServiceOrApiReturnStatute implements Statute {
                     if (ResolvedTypes.isOrLike(rrt, QualifierConstants.MAP, QualifierConstants.MULTIPART_FILE)) {
                         ResolvedReferenceType key = rrt.getTypeParametersMap().get(0).b.asReferenceType();
                         if (!JsonSchemas.generateSchema(key.getId()).isValueTypeSchema()) {
-                            result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
-                                    .setMessage("映射的Key类型必须是value-like"));
+                            result.add(new LawlessDto(method, methodSimpleName).setMessage("映射的Key类型必须是value-like"));
                             return;
                         }
                         rrt = rrt.getTypeParametersMap().get(1).b.asReferenceType();
@@ -68,13 +68,13 @@ public class ServiceOrApiReturnStatute implements Statute {
                     boolean illegalNaming = false;
                     String pojoName = Iterables.getLast(Lists.newArrayList(rrt.getId().split("\\.")));
                     if (!pojoName.endsWith("Vo")) {
-                        result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
-                                .setMessage("返回类型[" + type + "]的POJO命名必须以Vo结尾"));
+                        result.add(
+                                new LawlessDto(method, methodSimpleName).setMessage("返回类型[" + type + "]的POJO命名必须以Vo结尾"));
                         illegalNaming = true;
                     }
                     if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Vo".length() - 1)
                             .equals(method.getNameAsString())) {
-                        result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
+                        result.add(new LawlessDto(method, methodSimpleName)
                                 .setMessage("返回类型[" + type + "]的POJO命名的Vo以外部分必须与方法名一致"));
                         illegalNaming = true;
                     }
@@ -98,9 +98,8 @@ public class ServiceOrApiReturnStatute implements Statute {
                     });
 
                 } catch (Exception e) {
-                    log.warn("The return data type[{}] of method [{}] caused.", type,
-                            MethodQualifiers.getTypeQualifierWithMethodName(method));
-                    result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method))
+                    log.warn("The return data type[{}] of method [{}] caused.", type, methodSimpleName);
+                    result.add(new LawlessDto(method, methodSimpleName)
                             .setMessage("返回类型[" + type + "]的类型不合规，具体联系review者"));
                 }
 

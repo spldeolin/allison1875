@@ -19,8 +19,6 @@ import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * h33j
- *
  * @author Deolin 2020-02-26
  */
 @Log4j2
@@ -31,22 +29,24 @@ public class HandlerParameterStatute implements Statute {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodDeclaration.class,
                 method -> method.getAnnotationByName("PostMapping").isPresent()).forEach(handler -> {
+            String methodSimpleName = MethodQualifiers.getTypeQualifierWithMethodName(handler);
+
             NodeList<Parameter> parameters = handler.getParameters();
             if (parameters.size() == 0) {
                 return;
             }
-            LawlessDto dto = new LawlessDto(handler, MethodQualifiers.getTypeQualifierWithMethodName(handler));
 
             // 只能有1个参数
             if (parameters.size() > 1) {
-                result.add(dto.setMessage("handler最多只能有1个参数，当前" + parameters.size() + "个"));
+                result.add(new LawlessDto(handler, methodSimpleName)
+                        .setMessage("handler最多只能有1个参数，当前" + parameters.size() + "个"));
                 return;
             }
             Parameter parameter = Iterables.getOnlyElement(parameters);
 
             // 必须是@RequestBody
             if (!parameter.getAnnotationByName("RequestBody").isPresent()) {
-                result.add(dto.setMessage("唯一的那个参数必须是@RequestBody"));
+                result.add(new LawlessDto(handler, methodSimpleName).setMessage("唯一的那个参数必须是@RequestBody"));
                 return;
             }
 
@@ -73,12 +73,14 @@ public class HandlerParameterStatute implements Statute {
                 boolean illegalNaming = false;
                 String pojoName = Iterables.getLast(Lists.newArrayList(rrt.getId().split("\\.")));
                 if (!pojoName.endsWith("Req")) {
-                    result.add(dto.setMessage("参数[" + parameter + "]的POJO命名必须以Req结尾"));
+                    result.add(new LawlessDto(handler, methodSimpleName)
+                            .setMessage("参数[" + parameter + "]的POJO命名必须以Req结尾"));
                     illegalNaming = true;
                 }
                 if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Req".length() - 1)
                         .equals(handler.getNameAsString())) {
-                    result.add(dto.setMessage("参数[" + parameter + "]的POJO命名的Req以外部分必须与方法名一致"));
+                    result.add(new LawlessDto(handler, methodSimpleName)
+                            .setMessage("参数[" + parameter + "]的POJO命名的Req以外部分必须与方法名一致"));
                     illegalNaming = true;
                 }
                 if (illegalNaming) {
@@ -100,8 +102,9 @@ public class HandlerParameterStatute implements Statute {
                     });
                 });
             } catch (Exception e) {
-                log.warn("The paramater[{}] of handler[{}] caused.", parameter, dto.getQualifier());
-                result.add(dto.setMessage("参数[" + parameter + "]的类型不合规，具体联系review者"));
+                log.warn("The paramater[{}] of handler[{}] caused.", parameter, methodSimpleName);
+                result.add(new LawlessDto(handler, methodSimpleName)
+                        .setMessage("参数[" + parameter + "]的类型不合规，具体联系review者"));
             }
 
         }));

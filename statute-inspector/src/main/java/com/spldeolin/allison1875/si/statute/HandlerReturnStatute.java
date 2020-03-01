@@ -33,7 +33,8 @@ public class HandlerReturnStatute implements Statute {
         Collection<LawlessDto> result = Lists.newLinkedList();
         cus.forEach(cu -> cu.findAll(MethodDeclaration.class,
                 method -> method.getAnnotationByName("PostMapping").isPresent()).forEach(handler -> {
-            LawlessDto dto = new LawlessDto(handler, MethodQualifiers.getTypeQualifierWithMethodName(handler));
+            String methodSimpleName = MethodQualifiers.getTypeQualifierWithMethodName(handler);
+
             handler.findAll(ObjectCreationExpr.class, oce -> oce.getTypeAsString().equals("ResponseInfo"))
                     .forEach(oce -> {
                         if (oce.getArguments().size() == 0) {
@@ -64,12 +65,14 @@ public class HandlerReturnStatute implements Statute {
                             boolean illegalNaming = false;
                             String pojoName = Iterables.getLast(Lists.newArrayList(rrt.getId().split("\\.")));
                             if (!pojoName.endsWith("Resp")) {
-                                result.add(dto.setMessage("ResponseInfo.data[" + oce + "]的POJO命名必须以Resp结尾"));
+                                result.add(new LawlessDto(handler, methodSimpleName)
+                                        .setMessage("ResponseInfo.data[" + oce + "]的POJO命名必须以Resp结尾"));
                                 illegalNaming = true;
                             }
                             if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Resp".length() - 1)
                                     .equals(handler.getNameAsString())) {
-                                result.add(dto.setMessage("ResponseInfo.data[" + oce + "]的POJO命名的Resp以外部分必须与方法名一致"));
+                                result.add(new LawlessDto(handler, methodSimpleName)
+                                        .setMessage("ResponseInfo.data[" + oce + "]的POJO命名的Resp以外部分必须与方法名一致"));
                                 illegalNaming = true;
                             }
                             if (illegalNaming) {
@@ -94,8 +97,9 @@ public class HandlerReturnStatute implements Statute {
                             });
 
                         } catch (Exception e) {
-                            log.warn("The return data type[{}] of handler [{}] caused.", type, dto.getQualifier());
-                            result.add(dto.setMessage("返回[" + oce + "]的类型不合规，具体联系review者"));
+                            log.warn("The return data type[{}] of handler [{}] caused.", type, methodSimpleName);
+                            result.add(new LawlessDto(handler, methodSimpleName)
+                                    .setMessage("返回[" + oce + "]的类型不合规，具体联系review者"));
                         }
 
                     });
