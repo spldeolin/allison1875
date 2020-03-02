@@ -8,6 +8,10 @@ import com.google.common.collect.Lists;
  */
 public class Strings {
 
+    private Strings() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static List<String> splitLineByLine(String string) {
         if (string == null) {
             return Lists.newArrayList();

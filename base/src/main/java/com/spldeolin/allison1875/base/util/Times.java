@@ -22,6 +22,10 @@ import java.util.Date;
  */
 public class Times {
 
+    private Times() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
 
     /**

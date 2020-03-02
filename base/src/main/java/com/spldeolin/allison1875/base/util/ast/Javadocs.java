@@ -14,6 +14,10 @@ import com.spldeolin.allison1875.base.util.Strings;
  */
 public class Javadocs {
 
+    private Javadocs() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static String extractFirstLine(Javadoc javadoc) {
         JavadocDescription description = javadoc.getDescription();
         return extractFirstLineFromDescription(description);

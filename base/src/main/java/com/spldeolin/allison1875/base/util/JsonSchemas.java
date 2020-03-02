@@ -12,6 +12,10 @@ import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
  */
 public class JsonSchemas {
 
+    private JsonSchemas() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     private static final JsonSchemaGenerator defaultJsonSchemaGenerator;
 
     static {

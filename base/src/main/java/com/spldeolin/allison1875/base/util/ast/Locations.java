@@ -18,6 +18,10 @@ import com.spldeolin.allison1875.base.exception.StorageAbsentException;
  */
 public class Locations {
 
+    private Locations() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */

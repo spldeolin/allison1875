@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.si.processor;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.mutable.MutableInt;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
@@ -31,6 +32,9 @@ public class InspectionProcessor {
     public InspectionProcessor process() {
         Collection<CompilationUnit> cus = StaticVcsContainer
                 .removeIfNotContain(StaticAstContainer.getCompilationUnits());
+        cus.removeIf(
+                cu -> !cu.getPackageDeclaration().filter(pkg -> pkg.getNameAsString().contains("nova")).isPresent());
+
         Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
             long start = System.currentTimeMillis();
             Collection<LawlessDto> dtos = statuteEnum.getStatute().inspect(cus);

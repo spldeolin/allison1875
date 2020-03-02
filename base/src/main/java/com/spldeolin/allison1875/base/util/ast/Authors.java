@@ -20,6 +20,10 @@ import com.spldeolin.allison1875.base.util.Jsons;
  */
 public class Authors {
 
+    private Authors() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * 获取一个CU的作者信息，
      * 如果有与文件名同名的类型声明，则获取这个类型声明的作者信息，

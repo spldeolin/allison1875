@@ -12,6 +12,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Jsons {
 
+    private Jsons() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     private static final ObjectMapper defaultObjectMapper;
 
     static {

@@ -22,6 +22,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Csvs {
 
+    private Csvs() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static final CsvMapper defaultCsvMapper;
 
     static {

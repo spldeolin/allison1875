@@ -10,6 +10,10 @@ import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
  */
 public class MethodQualifiers {
 
+    private MethodQualifiers() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature
      * e.g.: com.spldeolin.allison1875.da.core.util.MethodQualifiers.getShortestQualifiedSignature(com.github

@@ -9,6 +9,10 @@ import com.github.javaparser.resolution.types.ResolvedType;
  */
 public class ResolvedTypes {
 
+    private ResolvedTypes() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * <pre>
      *     e.g.1: List_String> isOrLike java.util.Collection
