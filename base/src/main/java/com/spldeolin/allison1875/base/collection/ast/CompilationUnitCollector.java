@@ -16,6 +16,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -24,24 +27,43 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-02-03
  */
 @Log4j2
+@Accessors(fluent = true)
 class CompilationUnitCollector {
 
-    Collection<CompilationUnit> collectIntoCollection(Path path) {
+    @Setter
+    private Path path;
+
+    @Getter
+    @Setter
+    private Collection<CompilationUnit> list;
+
+    @Getter
+    private Map<Path, CompilationUnit> map;
+
+    CompilationUnitCollector collectIntoCollection() {
+        if (path == null) {
+            throw new IllegalStateException("path cannot be absent.");
+        }
+
         long start = System.currentTimeMillis();
-        Collection<CompilationUnit> result = Lists.newLinkedList();
-        collectSoruceRoots(path, newCollectionStrategy()).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
-        log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", result.size(),
+        list = Lists.newLinkedList();
+        collectSoruceRoots(newCollectionStrategy()).forEach(this::parseSourceRoot);
+        log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", list.size(),
                 path.toAbsolutePath(), System.currentTimeMillis() - start);
-        return result;
+        return this;
     }
 
-    Map<Path, CompilationUnit> collectIntoMap(Collection<CompilationUnit> cus) {
-        Map<Path, CompilationUnit> result = Maps.newHashMap();
-        for (CompilationUnit cu : cus) {
-            cu.getStorage().ifPresent(storage -> result.put(storage.getPath(), cu));
+    CompilationUnitCollector collectIntoMap() {
+        if (list == null) {
+            throw new IllegalStateException("must call collectIntoCollection() firstly.");
         }
-        log.info("(Summary) {} CompilationUnit has collected into Map.", result.size());
-        return result;
+
+        map = Maps.newHashMapWithExpectedSize(list.size());
+        for (CompilationUnit cu : list) {
+            cu.getStorage().ifPresent(storage -> map.put(storage.getPath(), cu));
+        }
+        log.info("(Summary) {} CompilationUnit has collected into Map.", map.size());
+        return this;
     }
 
     private CollectionStrategy newCollectionStrategy() {
@@ -56,18 +78,18 @@ class CompilationUnitCollector {
         return collectionStrategy;
     }
 
-    private Collection<SourceRoot> collectSoruceRoots(Path path, CollectionStrategy collectionStrategy) {
+    private Collection<SourceRoot> collectSoruceRoots(CollectionStrategy collectionStrategy) {
         ProjectRoot projectRoot = collectionStrategy.collect(path);
         projectRoot.addSourceRoot(path);
         return projectRoot.getSourceRoots();
     }
 
-    private void parseSourceRoot(SourceRoot sourceRoot, Collection<CompilationUnit> all) {
+    private void parseSourceRoot(SourceRoot sourceRoot) {
         long start = System.currentTimeMillis();
         int count = 0;
         for (ParseResult<CompilationUnit> parseResult : sourceRoot.tryToParseParallelized()) {
             if (parseResult.isSuccessful()) {
-                parseResult.getResult().ifPresent(all::add);
+                parseResult.getResult().ifPresent(list::add);
                 count++;
             } else {
                 log.warn("Parse with problem, ignore and continue. [{}]", parseResult.getProblems());

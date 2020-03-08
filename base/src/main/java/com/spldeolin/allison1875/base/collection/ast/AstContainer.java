@@ -35,7 +35,7 @@ public class AstContainer {
 
     AstContainer(Path path) {
         this.path = path;
-        this.cus = new CompilationUnitCollector().collectIntoCollection(path);
+        this.cus = new CompilationUnitCollector().path(path).collectIntoCollection().list();
     }
 
     public Path getPath() {
@@ -48,7 +48,7 @@ public class AstContainer {
 
     public CompilationUnit getCompilationUnit(Path path) {
         if (cusByPath == null) {
-            cusByPath = new CompilationUnitCollector().collectIntoMap(cus);
+            cusByPath = new CompilationUnitCollector().list(cus).collectIntoMap().map();
         }
         return cusByPath.get(path);
     }
