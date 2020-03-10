@@ -3,21 +3,14 @@ package com.spldeolin.allison1875.da.core.processor;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
-import com.spldeolin.allison1875.base.exception.FieldAbsentException;
-import com.spldeolin.allison1875.base.util.ast.Javadocs;
+import com.spldeolin.allison1875.base.util.Jsons;
 import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
-import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
-import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -58,45 +51,37 @@ class BodyFieldProcessor {
         }
 
         List<BodyFieldDefinition> children = Lists.newArrayList();
-        schema.getProperties().forEach((childFieldName, childSchema) -> {
-            BodyFieldDefinition childFieldDto = new BodyFieldDefinition();
-            String fieldVarQualifier =
-                    StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
-
-            VariableDeclarator fieldVar = StaticAstContainer.getFieldVariableDeclarator(fieldVarQualifier);
-            if (fieldVar == null) {
-                /*
-                被JsonSchema认为有这个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：
-                    类中有getMyField方法，但没有myField字段
-                忽略它们即可
-                 */
-                return;
+        schema.getProperties().forEach((childName, childSchema) -> {
+            BodyFieldDefinition child;
+            if (StringUtils.isNotEmpty(childSchema.getDescription())) {
+                child = Jsons.toObject(childSchema.getDescription(), BodyFieldDefinition.class);
+            } else {
+                child = new BodyFieldDefinition();
             }
 
-            childFieldDto.setFieldName(childFieldName);
-
-
+            child.setFieldName(childName);
 
             if (childSchema.isValueTypeSchema()) {
-                childFieldDto.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
+                child.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
             } else if (childSchema.isObjectSchema()) {
-                parseFieldTypes(childSchema.asObjectSchema(), false, childFieldDto);
+                parseFieldTypes(childSchema.asObjectSchema(), false, child);
             } else if (childSchema.isArraySchema()) {
                 ArraySchema aSchema = childSchema.asArraySchema();
                 if (aSchema.getItems() == null) {
-                    log.warn("Cannot analyze the type of array element, field=[{}]", fieldVarQualifier);
+                    log.warn("Cannot analyze the type of array element, schema=[{}], field=[{}]", schema.getId(),
+                            childName);
                     return;
                 }
                 if (aSchema.getItems().isArrayItems()) {
-                    log.warn("Cannot analyze the type of array element, field=[{}]", fieldVarQualifier);
+                    log.warn("Cannot analyze the type of array element, schema=[{}], field=[{}]", schema.getId(),
+                            childName);
                     return;
                 }
-
                 JsonSchema eleSchema = aSchema.getItems().asSingleItems().getSchema();
                 if (eleSchema.isValueTypeSchema()) {
-                    childFieldDto.setJsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
+                    child.setJsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
                 } else if (eleSchema.isObjectSchema()) {
-                    parseFieldTypes(eleSchema.asObjectSchema(), true, childFieldDto);
+                    parseFieldTypes(eleSchema.asObjectSchema(), true, child);
                 } else {
                     // 可能是因为 1. 类中存在不支持类型的field 2. 这是个通过Jackson映射到CSV的DTO 3. 类中存在多个相同类型的ObjectSchema
                     return;
@@ -106,17 +91,8 @@ class BodyFieldProcessor {
                 return;
             }
 
-            if (childFieldDto.getJsonType() == FieldTypeEnum.number) {
-                String javaType = fieldVar.getTypeAsString();
-                childFieldDto.setNumberFormat(calcNumberFormat(javaType));
-            }
-
-            if (childFieldDto.getJsonType() == FieldTypeEnum.string) {
-                childFieldDto.setStringFormat(StringFormatTypeEnum.normal.getValue());
-            }
-
-            childFieldDto.setParentField(parent);
-            children.add(childFieldDto);
+            child.setParentField(parent);
+            children.add(child);
         });
 
         parent.setChildFields(children);
@@ -144,16 +120,6 @@ class BodyFieldProcessor {
             }
         } else {
             throw new IllegalArgumentException(vSchema.toString());
-        }
-    }
-
-    private NumberFormatTypeEnum calcNumberFormat(String javaTypeName) {
-        if (StringUtils.equalsAnyIgnoreCase(javaTypeName, "Float", "Double", "BigDecimal")) {
-            return NumberFormatTypeEnum.f1oat;
-        } else if (StringUtils.equalsAnyIgnoreCase(javaTypeName, "Long", "BigInteger")) {
-            return NumberFormatTypeEnum.int64;
-        } else {
-            return NumberFormatTypeEnum.int32;
         }
     }
 
