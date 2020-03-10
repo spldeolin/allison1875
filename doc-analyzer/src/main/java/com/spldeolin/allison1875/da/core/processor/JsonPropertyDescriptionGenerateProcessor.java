@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.da.core.processor;
 
 import static com.github.javaparser.utils.CodeGenerationUtils.f;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -89,11 +88,9 @@ class JsonPropertyDescriptionGenerateProcessor {
 
     private static boolean addJsonPropertyDescriptionByJavadoc(NodeWithAnnotations<?> node, String content) {
         if (!node.getAnnotationByName("JsonPropertyDescription").isPresent()) {
-            if (StringUtils.isNotBlank(content)) {
-                content = StringEscapeUtils.escapeJava(content);
-                node.addAnnotation(StaticJavaParser.parseAnnotation(f("@JsonPropertyDescription(\"%s\")", content)));
-                return true;
-            }
+            content = StringEscapeUtils.escapeJava(content);
+            node.addAnnotation(StaticJavaParser.parseAnnotation(f("@JsonPropertyDescription(\"%s\")", content)));
+            return true;
         }
         return false;
     }
