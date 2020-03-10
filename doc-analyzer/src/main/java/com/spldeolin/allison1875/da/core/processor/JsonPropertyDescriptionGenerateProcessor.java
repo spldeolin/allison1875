@@ -32,13 +32,6 @@ class JsonPropertyDescriptionGenerateProcessor {
                         update.setTrue();
                     }
                 });
-
-                pojo.getMethods().forEach(method -> {
-                    BodyFieldDefinition bodyField = buildBodyFieldDefinition(method);
-                    if (addJsonPropertyDescriptionByJavadoc(method, Jsons.toJson(bodyField))) {
-                        update.setTrue();
-                    }
-                });
             });
 
             if (update.isTrue()) {
@@ -46,14 +39,6 @@ class JsonPropertyDescriptionGenerateProcessor {
                 Saves.prettySave(cu);
             }
         });
-    }
-
-    private BodyFieldDefinition buildBodyFieldDefinition(MethodDeclaration method) {
-        BodyFieldDefinition bodyField = new BodyFieldDefinition();
-
-        String description = Javadocs.extractFirstLine(method);
-        bodyField.setDescription(description);
-        return bodyField;
     }
 
     private BodyFieldDefinition buildBodyFieldDefinition(FieldDeclaration field) {
