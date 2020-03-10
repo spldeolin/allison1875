@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-20
  */
 @Accessors(fluent = true)
-public class ValueBodyProcessor extends BodyStructureProcessor {
+class ValueBodyProcessor extends BodyStructureProcessor {
 
     @Setter
     private FieldTypeEnum valueStructureJsonType;

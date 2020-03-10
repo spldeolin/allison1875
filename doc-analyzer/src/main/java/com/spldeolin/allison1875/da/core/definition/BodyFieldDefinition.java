@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.da.core.definition;
 
 import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import lombok.Data;
@@ -13,6 +15,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @ToString(exclude = {"parentField"}) // StackOverflowError
+@JsonInclude(Include.NON_NULL)
 public class BodyFieldDefinition {
 
     /**

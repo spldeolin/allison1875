@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.base.util;
 import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -31,6 +32,12 @@ public class Jsons {
     public static ObjectMapper initObjectMapper(ObjectMapper om) {
         // json -> object时，忽略json中不认识的属性名
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // 只有类属性可见，类的getter、setter、构造方法里的字段不会被当作JSON的字段
+        om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY).withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
         // 时区
         om.setTimeZone(TimeZone.getDefault());

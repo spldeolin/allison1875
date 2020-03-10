@@ -17,6 +17,11 @@ import lombok.EqualsAndHashCode;
 public final class DocAnalyzerConfig extends BaseConfig {
 
     /**
+     * Maven打包的命令行
+     */
+    private String mavenPackageCommandLine;
+
+    /**
      * 分页包装类的全限定名
      */
     private String commonPageTypeQualifier;
@@ -34,6 +39,8 @@ public final class DocAnalyzerConfig extends BaseConfig {
     }
 
     private void initLoad() {
+        mavenPackageCommandLine = super.rawData.get("mavenPackageCommandLine");
+
         commonPageTypeQualifier = super.rawData.get("commonPageTypeQualifier");
 
         File docOutputDirectory = new File(super.rawData.get("docOutputDirectoryPath"));

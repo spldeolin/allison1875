@@ -26,7 +26,7 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-20
  */
 @Accessors(fluent = true)
-public class ChaosBodyProcessor extends BodyStructureProcessor {
+class ChaosBodyProcessor extends BodyStructureProcessor {
 
     @Setter
     private JsonSchema jsonSchema;

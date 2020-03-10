@@ -23,6 +23,9 @@ public class MainProcessor {
         HandlerProcessor handlerP = new HandlerProcessor().handlerFilter(handler -> true)
                 .responseBodyTypeParser(new ReturnStmtBaseResponseBodyTypeParser()).process();
 
+        new JsonPropertyDescriptionGenerateProcessor().process();
+        new MavenPackageProcessor().process();
+
         return handlerP.handlerDefinitions().stream().map(handlerDefinition -> {
             ClassOrInterfaceDeclaration controller = handlerDefinition.controller();
             MethodDeclaration handler = handlerDefinition.handler();

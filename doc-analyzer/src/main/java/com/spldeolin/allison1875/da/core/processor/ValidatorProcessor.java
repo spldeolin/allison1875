@@ -41,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class ValidatorProcessor {
+class ValidatorProcessor {
 
     @Setter
     private NodeWithAnnotations<?> nodeWithAnnotations;
@@ -49,7 +49,7 @@ public class ValidatorProcessor {
     @Getter
     private Collection<ValidatorDefinition> validators = Lists.newLinkedList();
 
-    public ValidatorProcessor process() {
+    ValidatorProcessor process() {
         checkStatus();
 
         this.calcValidators(nodeWithAnnotations.getAnnotations());

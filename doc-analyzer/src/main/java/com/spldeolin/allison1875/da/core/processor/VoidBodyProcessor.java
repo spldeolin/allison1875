@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-20
  */
 @Accessors(fluent = true)
-public class VoidBodyProcessor extends BodyStructureProcessor {
+class VoidBodyProcessor extends BodyStructureProcessor {
 
     @Override
     VoidBodyProcessor moreProcess(ApiDefinition api) {

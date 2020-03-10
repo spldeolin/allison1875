@@ -43,4 +43,6 @@ public interface QualifierConstants {
 
     String THROWABLE = "java.lang.Throwable";
 
+    String JsonPropertyDescription = "com.fasterxml.jackson.annotation.JsonPropertyDescription";
+
 }
