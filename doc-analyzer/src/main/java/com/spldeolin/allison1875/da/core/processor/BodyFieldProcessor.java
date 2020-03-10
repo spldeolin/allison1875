@@ -56,6 +56,7 @@ class BodyFieldProcessor {
             if (StringUtils.isNotEmpty(childSchema.getDescription())) {
                 child = Jsons.toObject(childSchema.getDescription(), BodyFieldDefinition.class);
             } else {
+                log.warn("Cannot found JsonPropertyDescription, schema=[{}], field=[{}]", schema.getId(), childName);
                 child = new BodyFieldDefinition();
             }
 

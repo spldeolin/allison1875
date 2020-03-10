@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
@@ -27,6 +28,7 @@ class JsonPropertyDescriptionGenerateProcessor {
                     .forEach(pojo -> pojo.getFields().forEach(field -> {
                         BodyFieldDefinition bodyField = buildBodyFieldDefinition(field);
                         String content = StringEscapeUtils.escapeJava(Jsons.toJson(bodyField));
+                        field.getAnnotationByName("JsonPropertyDescription").ifPresent(AnnotationExpr::remove);
                         field.addAnnotation(
                                 StaticJavaParser.parseAnnotation(f("@JsonPropertyDescription(\"%s\")", content)));
                     }));
