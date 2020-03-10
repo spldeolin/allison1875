@@ -72,11 +72,11 @@ public class ApiDefinition {
      */
     public void setAllBodyFieldLinkNames() {
         Consumer<BodyFieldDefinition> action = field -> {
-            String fieldName = field.fieldName();
+            String fieldName = field.getFieldName();
             if (fieldName != null) {
                 StringBuilder linkName = new StringBuilder(fieldName);
                 appendParentName(field, linkName);
-                field.linkName(linkName.toString());
+                field.setLinkName(linkName.toString());
             }
         };
         listRequestBodyFieldsFlatly().forEach(action);
@@ -84,10 +84,10 @@ public class ApiDefinition {
     }
 
     private void appendParentName(BodyFieldDefinition child, StringBuilder linkName) {
-        BodyFieldDefinition parent = child.parentField();
+        BodyFieldDefinition parent = child.getParentField();
         if (parent != null) {
-            String linkPart = parent.fieldName();
-            if (parent.jsonType().isArrayLike()) {
+            String linkPart = parent.getFieldName();
+            if (parent.getJsonType().isArrayLike()) {
                 linkPart += "[0]";
             }
             linkName.insert(0, linkPart + ".");
@@ -96,8 +96,8 @@ public class ApiDefinition {
     }
 
     private void addAllChildren(BodyFieldDefinition parent, Collection<BodyFieldDefinition> container) {
-        if (!CollectionUtils.isEmpty(parent.childFields())) {
-            for (BodyFieldDefinition child : parent.childFields()) {
+        if (!CollectionUtils.isEmpty(parent.getChildFields())) {
+            for (BodyFieldDefinition child : parent.getChildFields()) {
                 container.add(child);
                 this.addAllChildren(child, container);
             }

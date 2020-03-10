@@ -38,36 +38,36 @@ public class ParameterListVo {
     public static ParameterListVo build(BodyFieldDefinition fieldDto) {
         ParameterListVo result = new ParameterListVo();
         result.setId(-2333L);
-        result.setIdentifier(fieldDto.fieldName());
-        result.setName(fieldDto.description());
+        result.setIdentifier(fieldDto.getFieldName());
+        result.setName(fieldDto.getDescription());
         result.setValidator("");
-        result.setDataType(RapJsonType.convert(fieldDto.jsonType()).getName());
+        result.setDataType(RapJsonType.convert(fieldDto.getJsonType()).getName());
         result.setParameterList(Lists.newArrayList());
 
         StringBuilder remark = new StringBuilder(64);
-        if (fieldDto.stringFormat() != null && !StringFormatTypeEnum.normal.getValue()
-                .equals(fieldDto.stringFormat())) {
+        if (fieldDto.getStringFormat() != null && !StringFormatTypeEnum.normal.getValue()
+                .equals(fieldDto.getStringFormat())) {
             remark.append("格式：");
-            remark.append(fieldDto.stringFormat());
+            remark.append(fieldDto.getStringFormat());
             remark.append("　");
         }
-        if (fieldDto.numberFormat() != null) {
+        if (fieldDto.getNumberFormat() != null) {
             remark.append("格式：");
-            remark.append(fieldDto.numberFormat().getValue());
+            remark.append(fieldDto.getNumberFormat().getValue());
             remark.append("　");
         }
 
-        if (Boolean.FALSE.equals(fieldDto.nullable())) {
+        if (Boolean.FALSE.equals(fieldDto.getNullable())) {
             remark.append("必填");
             remark.append("　");
         }
 
-        Collection<ValidatorDefinition> validators = fieldDto.validators();
+        Collection<ValidatorDefinition> validators = fieldDto.getValidators();
         if (validators != null && validators.size() > 0) {
             Collection<String> parts = Lists.newLinkedList();
             validators.forEach(validator -> {
-                parts.add(validator.validatorType().getDescription());
-                parts.add(validator.note());
+                parts.add(validator.getValidatorType().getDescription());
+                parts.add(validator.getNote());
             });
             Joiner.on("　").skipNulls().appendTo(remark, parts);
         }

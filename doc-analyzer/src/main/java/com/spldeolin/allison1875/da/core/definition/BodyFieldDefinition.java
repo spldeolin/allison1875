@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  * @author Deolin 2019-12-02
  */
 @Data
-@Accessors(fluent = true)
+@Accessors(chain = true)
 @ToString(exclude = {"parentField"}) // StackOverflowError
 public class BodyFieldDefinition {
 

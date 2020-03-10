@@ -46,8 +46,8 @@ public class RapConverter {
         }
         for (BodyFieldDefinition field : fields) {
             ParameterListVo child = ParameterListVo.build(field);
-            if (field.childFields() != null && field.childFields().size() > 0) {
-                this.convertFields(field.childFields(), child);
+            if (field.getChildFields() != null && field.getChildFields().size() > 0) {
+                this.convertFields(field.getChildFields(), child);
             }
             firstFloor.add(child);
         }
@@ -58,8 +58,8 @@ public class RapConverter {
         List<ParameterListVo> childrent = Lists.newArrayList();
         for (BodyFieldDefinition field : fields) {
             ParameterListVo child = ParameterListVo.build(field);
-            if (field.childFields() != null && field.childFields().size() > 0) {
-                this.convertFields(field.childFields(), child);
+            if (field.getChildFields() != null && field.getChildFields().size() > 0) {
+                this.convertFields(field.getChildFields(), child);
             }
             childrent.add(child);
         }

@@ -36,10 +36,10 @@ public class MarkdownConverter {
                 Collection<RequestBodyFieldVo> fieldVos = Lists.newArrayList();
                 for (BodyFieldDefinition field : api.listRequestBodyFieldsFlatly()) {
                     RequestBodyFieldVo fieldVo = new RequestBodyFieldVo();
-                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.linkName()));
-                    fieldVo.setDescription(nullToEmpty(field.description()));
+                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.getLinkName()));
+                    fieldVo.setDescription(nullToEmpty(field.getDescription()));
                     fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
-                    fieldVo.setValidators(convertValidators(field.nullable(), field.validators()));
+                    fieldVo.setValidators(convertValidators(field.getNullable(), field.getValidators()));
                     fieldVos.add(fieldVo);
                 }
                 vo.setRequestBodyFields(fieldVos);
@@ -49,8 +49,8 @@ public class MarkdownConverter {
                 Collection<ResponseBodyFieldVo> fieldVos = Lists.newArrayList();
                 for (BodyFieldDefinition field : api.listResponseBodyFieldsFlatly()) {
                     ResponseBodyFieldVo fieldVo = new ResponseBodyFieldVo();
-                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.linkName()));
-                    fieldVo.setDescription(nullToEmpty(field.description()));
+                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.getLinkName()));
+                    fieldVo.setDescription(nullToEmpty(field.getDescription()));
                     fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVos.add(fieldVo);
                 }
@@ -79,12 +79,12 @@ public class MarkdownConverter {
 
     private Collection<String> converterTypeAndFormat(BodyFieldDefinition field) {
         Collection<String> result = Lists.newArrayList();
-        result.add(field.jsonType().getValue());
-        String stringFormat = field.stringFormat();
+        result.add(field.getJsonType().getValue());
+        String stringFormat = field.getStringFormat();
         if (stringFormat != null && !StringFormatTypeEnum.normal.getValue().equals(stringFormat)) {
             result.add(stringFormat);
         }
-        NumberFormatTypeEnum numberFormat = field.numberFormat();
+        NumberFormatTypeEnum numberFormat = field.getNumberFormat();
         if (numberFormat != null) {
             result.add(numberFormat.getValue());
         }
@@ -102,8 +102,8 @@ public class MarkdownConverter {
         if (validators != null && validators.size() > 0) {
             Collection<String> parts = Lists.newLinkedList();
             validators.forEach(validator -> {
-                parts.add(validator.validatorType().getDescription());
-                parts.add(validator.note());
+                parts.add(validator.getValidatorType().getDescription());
+                parts.add(validator.getNote());
             });
             Joiner.on("　").skipNulls().appendTo(result, parts);
         }

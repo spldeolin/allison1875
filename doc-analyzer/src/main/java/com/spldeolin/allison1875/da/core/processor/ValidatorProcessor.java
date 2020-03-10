@@ -41,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-class ValidatorProcessor {
+public class ValidatorProcessor {
 
     @Setter
     private NodeWithAnnotations<?> nodeWithAnnotations;
@@ -49,14 +49,14 @@ class ValidatorProcessor {
     @Getter
     private Collection<ValidatorDefinition> validators = Lists.newLinkedList();
 
-    ValidatorProcessor process() {
+    public ValidatorProcessor process() {
         checkStatus();
 
         this.calcValidators(nodeWithAnnotations.getAnnotations());
 
-        if (validators.removeIf(validator -> enumValue == validator.validatorType())) {
+        if (validators.removeIf(validator -> enumValue == validator.getValidatorType())) {
             String enumValueNote = this.calcEnumValueSpecially(nodeWithAnnotations).toString();
-            validators.add(new ValidatorDefinition().validatorType(enumValue).note(enumValueNote));
+            validators.add(new ValidatorDefinition().setValidatorType(enumValue).setNote(enumValueNote));
         }
 
         return this;
@@ -105,89 +105,89 @@ class ValidatorProcessor {
         annos.forEach(anno -> {
             switch (anno.getNameAsString()) {
                 case "NotEmpty":
-                    validators.add(new ValidatorDefinition().validatorType(notEmpty));
+                    validators.add(new ValidatorDefinition().setValidatorType(notEmpty));
                     break;
                 case "NotBlank":
-                    validators.add(new ValidatorDefinition().validatorType(notBlank));
+                    validators.add(new ValidatorDefinition().setValidatorType(notBlank));
                     break;
                 case "Size":
                 case "Length":
                     anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        ValidatorDefinition validator = new ValidatorDefinition().note(pair.getValue().toString());
+                        ValidatorDefinition validator = new ValidatorDefinition().setNote(pair.getValue().toString());
                         if (nameOf(pair, "min")) {
-                            validators.add(validator.validatorType(minSize));
+                            validators.add(validator.setValidatorType(minSize));
                         }
                         if (nameOf(pair, "max")) {
-                            validators.add(validator.validatorType(maxSize));
+                            validators.add(validator.setValidatorType(maxSize));
                         }
                     });
                     break;
                 case "Max":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> validators
-                            .add(new ValidatorDefinition().validatorType(maxInteger)
-                                    .note(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDefinition().setValidatorType(maxInteger)
+                                    .setNote(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> validators.add(new ValidatorDefinition().validatorType(maxInteger)
-                                            .note(pair.getValue().toString()))));
+                                    pair -> validators.add(new ValidatorDefinition().setValidatorType(maxInteger)
+                                            .setNote(pair.getValue().toString()))));
                     break;
                 case "Min":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> validators
-                            .add(new ValidatorDefinition().validatorType(minInteger)
-                                    .note(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDefinition().setValidatorType(minInteger)
+                                    .setNote(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> validators.add(new ValidatorDefinition().validatorType(minInteger)
-                                            .note(pair.getValue().toString()))));
+                                    pair -> validators.add(new ValidatorDefinition().setValidatorType(minInteger)
+                                            .setNote(pair.getValue().toString()))));
                     break;
                 case "DecimalMax":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> validators
-                            .add(new ValidatorDefinition().validatorType(maxFloat)
-                                    .note(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDefinition().setValidatorType(maxFloat)
+                                    .setNote(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> validators.add(new ValidatorDefinition().validatorType(maxFloat)
-                                            .note(pair.getValue().toString()))));
+                                    pair -> validators.add(new ValidatorDefinition().setValidatorType(maxFloat)
+                                            .setNote(pair.getValue().toString()))));
                     break;
                 case "DecimalMin":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> validators
-                            .add(new ValidatorDefinition().validatorType(minFloat)
-                                    .note(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDefinition().setValidatorType(minFloat)
+                                    .setNote(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> validators.add(new ValidatorDefinition().validatorType(minFloat)
-                                            .note(pair.getValue().toString()))));
+                                    pair -> validators.add(new ValidatorDefinition().setValidatorType(minFloat)
+                                            .setNote(pair.getValue().toString()))));
                     break;
                 case "Future":
-                    validators.add(new ValidatorDefinition().validatorType(future));
+                    validators.add(new ValidatorDefinition().setValidatorType(future));
                     break;
                 case "Past":
-                    validators.add(new ValidatorDefinition().validatorType(past));
+                    validators.add(new ValidatorDefinition().setValidatorType(past));
                     break;
                 case "Digits":
                     anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        ValidatorDefinition validator = new ValidatorDefinition().note(pair.getValue().toString());
+                        ValidatorDefinition validator = new ValidatorDefinition().setNote(pair.getValue().toString());
                         if (nameOf(pair, "integer")) {
-                            validators.add(validator.validatorType(maxIntegralDigits));
+                            validators.add(validator.setValidatorType(maxIntegralDigits));
                         }
                         if (nameOf(pair, "fraction")) {
-                            validators.add(validator.validatorType(maxFractionalDigits));
+                            validators.add(validator.setValidatorType(maxFractionalDigits));
                         }
                     });
                     break;
                 case "Positive":
-                    validators.add(new ValidatorDefinition().validatorType(positive));
+                    validators.add(new ValidatorDefinition().setValidatorType(positive));
                     break;
                 case "Pattern":
                     anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         if (nameOf(pair, "regexp")) {
-                            validators.add(new ValidatorDefinition().validatorType(regex)
-                                    .note(pair.getValue().asStringLiteralExpr().asString()));
+                            validators.add(new ValidatorDefinition().setValidatorType(regex)
+                                    .setNote(pair.getValue().asStringLiteralExpr().asString()));
                         }
                     });
                     break;
                 case "ValidEnumValue":
-                    validators.add(new ValidatorDefinition().validatorType(enumValue));
+                    validators.add(new ValidatorDefinition().setValidatorType(enumValue));
                     break;
             }
         });

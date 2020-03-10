@@ -38,8 +38,8 @@ class BodyFieldProcessor {
 
     BodyFieldProcessor process() {
         checkStatus();
-        firstFloorFields = parseFieldTypes(objectSchema, false, new BodyFieldDefinition()).childFields();
-        firstFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
+        firstFloorFields = parseFieldTypes(objectSchema, false, new BodyFieldDefinition()).getChildFields();
+        firstFloorFields.forEach(fieldDto -> fieldDto.setParentField(null));
         return this;
     }
 
@@ -52,9 +52,9 @@ class BodyFieldProcessor {
     private BodyFieldDefinition parseFieldTypes(ObjectSchema schema, boolean isObjectInArray,
             BodyFieldDefinition parent) {
         if (isObjectInArray) {
-            parent.jsonType(FieldTypeEnum.objectArray);
+            parent.setJsonType(FieldTypeEnum.objectArray);
         } else {
-            parent.jsonType(FieldTypeEnum.object);
+            parent.setJsonType(FieldTypeEnum.object);
         }
 
         List<BodyFieldDefinition> children = Lists.newArrayList();
@@ -73,23 +73,12 @@ class BodyFieldProcessor {
                 return;
             }
 
-            FieldDeclaration field = fieldVar.findAncestor(FieldDeclaration.class)
-                    .orElseThrow(FieldAbsentException::new);
+            childFieldDto.setFieldName(childFieldName);
 
-            childFieldDto.fieldName(childFieldName);
-            childFieldDto.description(Javadocs.extractFirstLine(field));
 
-            childFieldDto.nullable(true);
-            if (field.getAnnotationByName("NotNull").isPresent() || field.getAnnotationByName("NotEmpty").isPresent()
-                    || field.getAnnotationByName("NotBlank").isPresent()) {
-                childFieldDto.nullable(false);
-            }
-
-            ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(field).process();
-            childFieldDto.validators(validatorProcessor.validators());
 
             if (childSchema.isValueTypeSchema()) {
-                childFieldDto.jsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
+                childFieldDto.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
             } else if (childSchema.isObjectSchema()) {
                 parseFieldTypes(childSchema.asObjectSchema(), false, childFieldDto);
             } else if (childSchema.isArraySchema()) {
@@ -105,7 +94,7 @@ class BodyFieldProcessor {
 
                 JsonSchema eleSchema = aSchema.getItems().asSingleItems().getSchema();
                 if (eleSchema.isValueTypeSchema()) {
-                    childFieldDto.jsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
+                    childFieldDto.setJsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
                 } else if (eleSchema.isObjectSchema()) {
                     parseFieldTypes(eleSchema.asObjectSchema(), true, childFieldDto);
                 } else {
@@ -117,27 +106,20 @@ class BodyFieldProcessor {
                 return;
             }
 
-            if (childFieldDto.jsonType() == FieldTypeEnum.number) {
+            if (childFieldDto.getJsonType() == FieldTypeEnum.number) {
                 String javaType = fieldVar.getTypeAsString();
-                childFieldDto.numberFormat(calcNumberFormat(javaType));
+                childFieldDto.setNumberFormat(calcNumberFormat(javaType));
             }
 
-            if (childFieldDto.jsonType() == FieldTypeEnum.string) {
-                childFieldDto.stringFormat(StringFormatTypeEnum.normal.getValue());
-                field.getAnnotationByClass(JsonFormat.class)
-                        .ifPresent(jsonFormat -> jsonFormat.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                            if (pair.getNameAsString().equals("pattern")) {
-                                childFieldDto.stringFormat(
-                                        String.format(StringFormatTypeEnum.datetime.getValue(), pair.getValue()));
-                            }
-                        }));
+            if (childFieldDto.getJsonType() == FieldTypeEnum.string) {
+                childFieldDto.setStringFormat(StringFormatTypeEnum.normal.getValue());
             }
 
-            childFieldDto.parentField(parent);
+            childFieldDto.setParentField(parent);
             children.add(childFieldDto);
         });
 
-        parent.childFields(children);
+        parent.setChildFields(children);
         return parent;
     }
 

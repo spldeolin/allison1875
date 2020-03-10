@@ -15,14 +15,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JsonSchemas {
 
+    private static final JsonSchemaGenerator defaultJsonSchemaGenerator = new JsonSchemaGenerator(
+            Jsons.initObjectMapper(new ObjectMapper()));
+
     private JsonSchemas() {
         throw new UnsupportedOperationException("Never instantiate me.");
-    }
-
-    private static final JsonSchemaGenerator defaultJsonSchemaGenerator;
-
-    static {
-        defaultJsonSchemaGenerator = new JsonSchemaGenerator(Jsons.initObjectMapper(new ObjectMapper()));
     }
 
     public static JsonSchema generateSchema(String qualifierForClassLoader) throws JsonSchemasException {
