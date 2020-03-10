@@ -1,17 +1,16 @@
 package com.spldeolin.allison1875.base.util;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
-import java.util.TimeZone;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.exception.CsvsException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,37 +21,26 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Csvs {
 
+    private static final String utf8 = StandardCharsets.UTF_8.name();
+
+    public static final CsvMapper cm = (CsvMapper) Jsons.initObjectMapper(new CsvMapper());
+
     private Csvs() {
         throw new UnsupportedOperationException("Never instantiate me.");
-    }
-
-    public static final CsvMapper defaultCsvMapper;
-
-    static {
-        defaultCsvMapper = new CsvMapper();
-
-        // 列不再按字母排序
-        defaultCsvMapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
-
-        // csv -> object时，忽略json中不认识的属性名
-        defaultCsvMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        // 时区
-        defaultCsvMapper.setTimeZone(TimeZone.getDefault());
     }
 
     /**
      * 读取csv
      */
-    public static <T> List<T> readCsv(String csvContent, Class<T> clazz) {
+    public static <T> List<T> readCsv(String csvContent, Class<T> clazz) throws CsvsException {
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        ObjectReader reader = defaultCsvMapper.readerFor(clazz).with(schema);
+        ObjectReader reader = cm.readerFor(clazz).with(schema);
 
         try {
             return Lists.newArrayList(reader.readValues(csvContent));
         } catch (IOException e) {
-            log.error("转化List失败", e);
-            throw new RuntimeException("转化List失败");
+            log.error("csvContent={}, clazz={}", csvContent, clazz, e);
+            throw new CsvsException();
         }
     }
 
@@ -60,14 +48,14 @@ public class Csvs {
      * 生成csv
      */
     public static <T> String writeCsv(Collection<T> data, Class<T> clazz) {
-        CsvSchema schema = defaultCsvMapper.schemaFor(clazz).withHeader();
-        ObjectWriter writer = defaultCsvMapper.writer(schema);
+        CsvSchema schema = cm.schemaFor(clazz).withHeader();
+        ObjectWriter writer = cm.writer(schema);
 
         try {
             return writer.writeValueAsString(data);
         } catch (JsonProcessingException e) {
-            log.error("转化CSV失败", e);
-            throw new RuntimeException("转化CSV失败");
+            log.error("data={}, clazz={}", data, clazz, e);
+            throw new CsvsException();
         }
     }
 

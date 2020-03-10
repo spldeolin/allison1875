@@ -22,10 +22,6 @@ import java.util.Date;
  */
 public class Times {
 
-    private Times() {
-        throw new UnsupportedOperationException("Never instantiate me.");
-    }
-
     public static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
 
     /**
@@ -55,6 +51,10 @@ public class Times {
 
     public static final DateTimeFormatter DEFAULT_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+    private Times() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * java.util.Date -> LocalDateTime
      */
@@ -70,7 +70,7 @@ public class Times {
     }
 
     /**
-     * String -> LocalDateTime  （yyyy-MM-dd HH:mm:ss）
+     * String -> LocalDateTime  （yyyy-MM-dd）
      */
     public static LocalDateTime toLocalDateTime(String content) {
         return LocalDateTime.parse(content, DEFAULT_DATE_TIME_FORMATTER);

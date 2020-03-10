@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonSchemas;
 import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
@@ -137,7 +138,7 @@ class PathVariableProcessor {
         JsonSchema jsonSchema;
         try {
             jsonSchema = JsonSchemas.generateSchema(resolvedTypeDescribe);
-        } catch (JsonMappingException e) {
+        } catch (JsonSchemasException e) {
             jsonSchema = null;
         }
         if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
