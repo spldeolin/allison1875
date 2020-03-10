@@ -98,6 +98,7 @@ class ValidatorProcessor {
                 }
             });
         });
+        result.append("）");
         return result;
     }
 
