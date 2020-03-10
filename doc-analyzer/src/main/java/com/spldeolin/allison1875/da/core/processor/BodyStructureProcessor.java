@@ -3,10 +3,7 @@ package com.spldeolin.allison1875.da.core.processor;
 import static com.spldeolin.allison1875.da.DocAnalyzerConfig.CONFIG;
 
 import org.apache.commons.lang3.StringUtils;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -14,11 +11,12 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.util.JsonSchemas;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
@@ -108,7 +106,6 @@ class BodyStructureProcessor {
         }
 
         if (jsonSchema == null) {
-            log.warn("Cannot generate json schema [{}]", describe);
             return new VoidBodyProcessor();
 
         } else if (jsonSchema.isObjectSchema()) {
@@ -180,7 +177,7 @@ class BodyStructureProcessor {
 
     private JsonSchema generateSchema(ClassOrInterfaceDeclaration clazz) {
         String qualifierForClassLoader = qualifierForClassLoader(clazz);
-        return generateSchemaByQualifierForClassLoader(qualifierForClassLoader);
+        return JsonSchemas.generateSchemaOrElseNull(qualifierForClassLoader);
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
@@ -188,33 +185,16 @@ class BodyStructureProcessor {
         if (typeParameterIndex != -1) {
             resolvedTypeDescribe = resolvedTypeDescribe.substring(0, typeParameterIndex);
         }
-        JsonSchema jsonSchema = generateSchemaByQualifierForClassLoader(resolvedTypeDescribe);
-        if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
-            generateSchema(Strings.replaceLast(resolvedTypeDescribe, ".", "$"));
-        }
-        return jsonSchema;
-    }
 
-    private JsonSchema generateSchemaByQualifierForClassLoader(String qualifierForClassLoader) {
-        JavaType javaType;
+        JsonSchema result = null;
         try {
-            javaType = new TypeFactory(null) {
-                private static final long serialVersionUID = -8151903006798193420L;
-
-                @Override
-                public ClassLoader getClassLoader() {
-                    return WarOrFatJarClassLoaderFactory.getClassLoader();
-                }
-            }.constructFromCanonical(qualifierForClassLoader);
-        } catch (IllegalArgumentException e) {
-            return null;
+            result = JsonSchemas.generateSchema(resolvedTypeDescribe);
+        } catch (JsonSchemasException e) {
+            if (resolvedTypeDescribe.contains(".")) {
+                result = generateSchema(Strings.replaceLast(resolvedTypeDescribe, ".", "$"));
+            }
         }
-        try {
-            return jsg.generateSchema(javaType);
-        } catch (JsonMappingException e) {
-            log.warn("jsg.generateSchema({})", javaType);
-            return null;
-        }
+        return result;
     }
 
     private String qualifierForClassLoader(ClassOrInterfaceDeclaration coid) {

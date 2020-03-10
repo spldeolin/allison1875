@@ -5,10 +5,7 @@ import static com.github.javaparser.utils.CodeGenerationUtils.f;
 import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.Parameter;
@@ -17,10 +14,11 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.util.JsonSchemas;
 import com.spldeolin.allison1875.base.util.Strings;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
@@ -142,34 +140,15 @@ class RequestParamProcessor {
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
-        JsonSchema jsonSchema = generateSchemaByQualifierForClassLoader(resolvedTypeDescribe);
-        if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
-            generateSchema(Strings.replaceLast(resolvedTypeDescribe, "\\.", "$"));
-        }
-        return jsonSchema;
-    }
-
-    private JsonSchema generateSchemaByQualifierForClassLoader(String qualifierForClassLoader) {
-        JavaType javaType;
+        JsonSchema result = null;
         try {
-            javaType = new TypeFactory(null) {
-                private static final long serialVersionUID = -8151903006798193420L;
-
-                @Override
-                public ClassLoader getClassLoader() {
-                    return WarOrFatJarClassLoaderFactory.getClassLoader();
-                }
-            }.constructFromCanonical(qualifierForClassLoader);
-        } catch (IllegalArgumentException e) {
-            log.warn("TypeFactory.constructFromCanonical({})", qualifierForClassLoader);
-            return null;
+            result = JsonSchemas.generateSchema(resolvedTypeDescribe);
+        } catch (JsonSchemasException e) {
+            if (resolvedTypeDescribe.contains(".")) {
+                result = generateSchema(Strings.replaceLast(resolvedTypeDescribe, "\\.", "$"));
+            }
         }
-        try {
-            return jsg.generateSchema(javaType);
-        } catch (JsonMappingException e) {
-            log.warn("jsg.generateSchema({})", javaType);
-            return null;
-        }
+        return result;
     }
 
 }

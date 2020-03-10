@@ -95,11 +95,11 @@ class BodyFieldProcessor {
             } else if (childSchema.isArraySchema()) {
                 ArraySchema aSchema = childSchema.asArraySchema();
                 if (aSchema.getItems() == null) {
-                    log.warn("无法解析JSONArray，忽略");
+                    log.warn("Cannot analyze the type of array element, field=[{}]", fieldVarQualifier);
                     return;
                 }
                 if (aSchema.getItems().isArrayItems()) {
-                    log.warn("rap不支持类似于 List<List<String>> 数组直接嵌套数组的参数，忽略");
+                    log.warn("Cannot analyze the type of array element, field=[{}]", fieldVarQualifier);
                     return;
                 }
 

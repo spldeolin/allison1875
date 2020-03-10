@@ -38,8 +38,17 @@ public class JsonSchemas {
             }.constructFromCanonical(qualifierForClassLoader);
             return defaultJsonSchemaGenerator.generateSchema(javaType);
         } catch (Exception e) {
-            log.warn("qualifierForClassLoader={}", qualifierForClassLoader, e);
+            log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", qualifierForClassLoader,
+                    e.getMessage());
             throw new JsonSchemasException();
+        }
+    }
+
+    public static JsonSchema generateSchemaOrElseNull(String qualifierForClassLoader) {
+        try {
+            return generateSchema(qualifierForClassLoader);
+        } catch (JsonSchemasException e) {
+            return null;
         }
     }
 
