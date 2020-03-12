@@ -34,4 +34,8 @@ public enum FieldTypeEnum {
         return stringArray == this || numberArray == this || booleanArray == this || objectArray == this;
     }
 
+    public boolean isNotNumberLike() {
+        return numberArray != this && number != this;
+    }
+
 }

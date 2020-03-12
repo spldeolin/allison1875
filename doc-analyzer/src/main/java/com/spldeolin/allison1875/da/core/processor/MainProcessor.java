@@ -1,7 +1,10 @@
 package com.spldeolin.allison1875.da.core.processor;
 
+import static com.spldeolin.allison1875.da.DocAnalyzerConfig.CONFIG;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
@@ -23,8 +26,10 @@ public class MainProcessor {
         HandlerProcessor handlerP = new HandlerProcessor().handlerFilter(handler -> true)
                 .responseBodyTypeParser(new ReturnStmtBaseResponseBodyTypeParser()).process();
 
-        new JsonPropertyDescriptionGenerateProcessor().process();
-        new MavenPackageProcessor().process();
+        if (StringUtils.isNotEmpty(CONFIG.getMavenPackageCommandLine())) {
+            new JsonPropertyDescriptionGenerateProcessor().process();
+            new MavenPackageProcessor().process();
+        }
 
         return handlerP.handlerDefinitions().stream().map(handlerDefinition -> {
             ClassOrInterfaceDeclaration controller = handlerDefinition.controller();

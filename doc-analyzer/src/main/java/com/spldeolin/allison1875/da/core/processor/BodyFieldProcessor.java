@@ -92,6 +92,10 @@ class BodyFieldProcessor {
                 return;
             }
 
+            if (child.getJsonType().isNotNumberLike()) {
+                child.setNumberFormat(null);
+            }
+
             child.setParentField(parent);
             children.add(child);
         });

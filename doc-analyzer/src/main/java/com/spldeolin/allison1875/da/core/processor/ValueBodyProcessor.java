@@ -30,9 +30,11 @@ class ValueBodyProcessor extends BodyStructureProcessor {
     ValueBodyProcessor moreProcess(ApiDefinition api) {
         moreCheckStatus();
 
-        Collection<BodyFieldDefinition> field = Lists.newArrayList(
-                new BodyFieldDefinition().setJsonType(valueStructureJsonType)
-                        .setNumberFormat(valueStructureNumberFormat));
+        BodyFieldDefinition bodyField = new BodyFieldDefinition().setJsonType(valueStructureJsonType);
+        if (valueStructureJsonType.isNotNumberLike()) {
+            bodyField.setNumberFormat(valueStructureNumberFormat);
+        }
+        Collection<BodyFieldDefinition> field = Lists.newArrayList(bodyField);
         if (super.forRequestBodyOrNot) {
             api.requestBodyFields(field);
         } else {

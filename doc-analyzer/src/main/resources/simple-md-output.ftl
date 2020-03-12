@@ -2,7 +2,7 @@
 
 ${description}
 
-`${uri}`
+${uri}
 
 
 
@@ -16,7 +16,7 @@ ${description}
 | name                | 描述                 | JSON类型和格式                <#if anyValidatorsExist>| 校验项             </#if> |
 | ------------------- | -------------------- | ---------------------------- <#if anyValidatorsExist>| ------------------</#if> |
 <#list requestBodyFields as field>
-| ${field.linkName} | ${field.description} | <#list field.jsonTypeAndFormats as one>`${one}` </#list> <#if anyValidatorsExist>| ${field.validators}</#if> |
+| ${field.linkName} | ${field.description} | <#list field.jsonTypeAndFormats as one>${one} </#list> <#if anyValidatorsExist>| ${field.validators}</#if> |
 </#list>
 </#if>
 
@@ -32,7 +32,7 @@ ${description}
 | name                | 描述                 | JSON类型和格式                |
 | ------------------- | -------------------- | ---------------------------- |
 <#list responseBodyFields as field>
-| ${field.linkName} | ${field.description} | <#list field.jsonTypeAndFormats as one>`${one}` </#list> |
+| ${field.linkName} | ${field.description} | <#list field.jsonTypeAndFormats as one>${one} </#list> |
 </#list>
 </#if>
 

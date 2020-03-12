@@ -36,7 +36,7 @@ public class MarkdownConverter {
                 Collection<RequestBodyFieldVo> fieldVos = Lists.newArrayList();
                 for (BodyFieldDefinition field : api.listRequestBodyFieldsFlatly()) {
                     RequestBodyFieldVo fieldVo = new RequestBodyFieldVo();
-                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.getLinkName()));
+                    fieldVo.setLinkName(emptyToHorizontalLine(field.getLinkName()));
                     fieldVo.setDescription(nullToEmpty(field.getDescription()));
                     fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVo.setValidators(convertValidators(field.getNullable(), field.getValidators()));
@@ -49,7 +49,7 @@ public class MarkdownConverter {
                 Collection<ResponseBodyFieldVo> fieldVos = Lists.newArrayList();
                 for (BodyFieldDefinition field : api.listResponseBodyFieldsFlatly()) {
                     ResponseBodyFieldVo fieldVo = new ResponseBodyFieldVo();
-                    fieldVo.setLinkName(surroundMdCodeStyleForListLinkNamePart(field.getLinkName()));
+                    fieldVo.setLinkName(emptyToHorizontalLine(field.getLinkName()));
                     fieldVo.setDescription(nullToEmpty(field.getDescription()));
                     fieldVo.setJsonTypeAndFormats(converterTypeAndFormat(field));
                     fieldVos.add(fieldVo);
@@ -66,15 +66,11 @@ public class MarkdownConverter {
 
     }
 
-    private String surroundMdCodeStyleForListLinkNamePart(String linkName) {
+    private String emptyToHorizontalLine(String linkName) {
         if (StringUtils.isEmpty(linkName)) {
             return "`-`";
         }
-        int i = linkName.lastIndexOf('.');
-        if (i == -1) {
-            return "`" + linkName + "`";
-        }
-        return Joiner.on("").join(linkName.substring(0, i + 1), "`", linkName.substring(i + 1), "`");
+        return linkName;
     }
 
     private Collection<String> converterTypeAndFormat(BodyFieldDefinition field) {
