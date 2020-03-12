@@ -64,7 +64,14 @@ class JsonPropertyDescriptionGenerateProcessor {
     }
 
     private boolean isPojo(ClassOrInterfaceDeclaration coid) {
-        return coid.getAnnotationByName("Data").isPresent() && !coid.isInterface();
+        if (coid.isInterface()) {
+            return false;
+        }
+        if (coid.getFullyQualifiedName().filter(qualifier -> qualifier.contains("dto")).isPresent()) {
+            return true;
+        }
+        return !coid.isInterface() && coid.getAnnotations().stream()
+                .anyMatch(anno -> StringUtils.equalsAny(anno.getNameAsString(), "Data", "Getter", "Setter"));
     }
 
     private String calcStringFormat(FieldDeclaration field) {
