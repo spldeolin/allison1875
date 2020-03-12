@@ -11,12 +11,14 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Maps;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 存放抽象语法树节点的容器的静态访问口
  *
  * @author Deolin 2020-02-03
  */
+@Log4j2
 public class StaticAstContainer {
 
     private static AstContainer fromConfigPath = new AstContainer(CONFIG.getProjectPath());
@@ -25,6 +27,11 @@ public class StaticAstContainer {
 
     public static Path getPath() {
         return fromConfigPath.getPath();
+    }
+
+    public static void reflash() {
+        log.info("reflash AstContainer from config path.");
+        fromConfigPath = new AstContainer(CONFIG.getProjectPath());
     }
 
     public static Collection<CompilationUnit> getCompilationUnits() {

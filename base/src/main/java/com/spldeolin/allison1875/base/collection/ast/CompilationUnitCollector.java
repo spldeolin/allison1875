@@ -92,7 +92,7 @@ class CompilationUnitCollector {
                 parseResult.getResult().ifPresent(list::add);
                 count++;
             } else {
-                log.warn("Parse with problem, ignore and continue. [{}]", parseResult.getProblems());
+                log.warn("Parse with problems, ignore and continue. [{}]", parseResult.getProblems());
             }
         }
 

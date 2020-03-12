@@ -67,7 +67,9 @@ class JsonPropertyDescriptionGenerateProcessor {
         if (coid.isInterface()) {
             return false;
         }
-        if (coid.getFullyQualifiedName().filter(qualifier -> qualifier.contains("dto")).isPresent()) {
+        if (coid.getFullyQualifiedName()
+                .filter(qualifier -> qualifier.contains("dto") || qualifier.contains("vo") || qualifier
+                        .contains("entity")).isPresent()) {
             return true;
         }
         return !coid.isInterface() && coid.getAnnotations().stream()
