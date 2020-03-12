@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
+import static com.spldeolin.allison1875.base.util.JsonSchemas.getId;
+
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +58,7 @@ class BodyFieldProcessor {
             if (StringUtils.isNotEmpty(childSchema.getDescription())) {
                 child = Jsons.toObject(childSchema.getDescription(), BodyFieldDefinition.class);
             } else {
-                log.warn("Cannot found JsonPropertyDescription, schema=[{}], field=[{}]", schema.getId(), childName);
+                log.warn("Cannot found JsonPropertyDescription, schema=[{}], field=[{}]", getId(schema), childName);
                 child = new BodyFieldDefinition();
             }
 
@@ -69,12 +71,12 @@ class BodyFieldProcessor {
             } else if (childSchema.isArraySchema()) {
                 ArraySchema aSchema = childSchema.asArraySchema();
                 if (aSchema.getItems() == null) {
-                    log.warn("Cannot analyze the type of array element, schema=[{}], field=[{}]", schema.getId(),
+                    log.warn("Cannot analyze the type of array element, schema=[{}], field=[{}]", getId(schema),
                             childName);
                     return;
                 }
                 if (aSchema.getItems().isArrayItems()) {
-                    log.warn("Cannot analyze the type of array element, schema=[{}], field=[{}]", schema.getId(),
+                    log.warn("Cannot analyze the type of array element, schema=[{}], field=[{}]", getId(schema),
                             childName);
                     return;
                 }

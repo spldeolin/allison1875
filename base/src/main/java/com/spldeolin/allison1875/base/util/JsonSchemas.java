@@ -15,6 +15,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JsonSchemas {
 
+    private static final int prefixLength = "urn:jsonschema:".length();
+
     private static final JsonSchemaGenerator defaultJsonSchemaGenerator = new JsonSchemaGenerator(
             Jsons.initObjectMapper(new ObjectMapper()));
 
@@ -47,6 +49,10 @@ public class JsonSchemas {
         } catch (JsonSchemasException e) {
             return null;
         }
+    }
+
+    public static String getId(JsonSchema jsonSchema) {
+        return jsonSchema.getId().substring(prefixLength).replace(':', '.');
     }
 
 }
