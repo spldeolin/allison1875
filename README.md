@@ -1,5 +1,7 @@
 # *Allison 1875*
 
+> 「 *Dedicated to allison, I cannot say no more* 」
+
 *Allison 1875* is a no-code-pollutional Java source code analyzing and transforming toolkit.
 
 It enable developers get better programming experience and higher productivity working via parsing code as Abstract Syntax Tree (AST).
