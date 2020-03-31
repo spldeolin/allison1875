@@ -34,7 +34,9 @@ public class UncommittedModifiedFileStatute implements Statute {
                 if (DiffEntry.ChangeType.MODIFY == diff.getChangeType()) {
                     Path path = Paths.get(projectPath, diff.getNewPath());
                     CompilationUnit cu = StaticAstContainer.getCompilationUnit(path);
-                    modifiedCus.add(cu);
+                    if (cu != null) {
+                        modifiedCus.add(cu);
+                    }
                 }
             }
 
