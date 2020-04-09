@@ -17,19 +17,23 @@ import lombok.Data;
 @Data
 public class CuCreator {
 
+    private CompilationUnit cu;
+
+    private TypeDeclaration<?> pt;
+
     private String primaryTypeName;
 
     private String primaryTypeQualifier;
 
     private String primaryTypeInstanceName;
 
-    private Path sourceRoot;
+    private final Path sourceRoot;
 
-    private String packageName;
+    private final String packageName;
 
-    private Collection<ImportDeclaration> imports;
+    private final Collection<ImportDeclaration> imports;
 
-    private TypeCreator primaryTypeCreator;
+    private final TypeCreator primaryTypeCreator;
 
     public CuCreator(Path sourceRoot, String packageName, Collection<ImportDeclaration> imports,
             TypeCreator primaryTypeCreator) {
@@ -42,6 +46,7 @@ public class CuCreator {
     public CompilationUnit create(boolean saveNow) {
         Path storage = CodeGenerationUtils.packageAbsolutePath(sourceRoot, packageName);
         TypeDeclaration<?> primaryType = primaryTypeCreator.createType();
+        pt = primaryType;
         primaryTypeName = primaryType.getNameAsString();
         primaryTypeQualifier = packageName + "." + primaryTypeName;
         primaryTypeInstanceName = Strings.lowerFirstLetter(primaryTypeName);
@@ -56,6 +61,7 @@ public class CuCreator {
             Saves.prettySave(cu);
         }
 
+        this.cu = cu;
         return cu;
     }
 
