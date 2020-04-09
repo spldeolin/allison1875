@@ -12,3 +12,6 @@ target/
 
 # Lombok
 *.lombok
+
+# Mac OS
+.DS_Store
