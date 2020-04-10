@@ -23,7 +23,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.st.common.CuCreator;
 import com.spldeolin.allison1875.st.common.CuCreator.TypeCreator;
@@ -124,7 +124,7 @@ public class BeanUtilToConverter {
                                         if ("serialVersionUID".equals(name)) {
                                             return;
                                         }
-                                        String upper = Strings.upperFirstLetter(name);
+                                        String upper = StringUtils.upperFirstLetter(name);
                                         body.addStatement(StaticJavaParser
                                                 .parseExpression(f("dest.set%s(src.get%s())", upper, upper)));
                                     }

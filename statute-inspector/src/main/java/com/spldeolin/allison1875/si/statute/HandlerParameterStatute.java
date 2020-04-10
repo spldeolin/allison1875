@@ -11,8 +11,8 @@ import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.JsonSchemas;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
@@ -65,7 +65,7 @@ public class HandlerParameterStatute implements Statute {
                 }
 
                 // 可以是一个value-like的类型
-                if (JsonSchemas.generateSchema(rrt.getId()).isValueTypeSchema()) {
+                if (JsonSchemaUtils.generateSchema(rrt.getId()).isValueTypeSchema()) {
                     return;
                 }
 
@@ -77,7 +77,7 @@ public class HandlerParameterStatute implements Statute {
                             .setMessage("参数[" + parameter + "]的POJO命名必须以Req结尾"));
                     illegalNaming = true;
                 }
-                if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Req".length() - 1)
+                if (!StringUtils.capture(pojoName).substring(0, pojoName.length() - "Req".length() - 1)
                         .equals(handler.getNameAsString())) {
                     result.add(new LawlessDto(handler, methodSimpleName)
                             .setMessage("参数[" + parameter + "]的POJO命名的Req以外部分必须与方法名一致"));

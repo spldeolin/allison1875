@@ -3,12 +3,8 @@ package com.spldeolin.allison1875.da.core.processor;
 import static com.github.javaparser.utils.CodeGenerationUtils.f;
 
 import java.util.Collection;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
@@ -16,8 +12,8 @@ import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.JsonSchemas;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.da.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
@@ -68,7 +64,7 @@ class PathVariableProcessor {
                 if ("required".equals(pairName)) {
                     required = pair.getValue().asBooleanLiteralExpr().getValue();
                 }
-                if (StringUtils.equalsAny(pairName, "name", "value")) {
+                if (org.apache.commons.lang3.StringUtils.equalsAny(pairName, "name", "value")) {
                     name = pair.getValue().asStringLiteralExpr().getValue();
                 }
             }
@@ -105,9 +101,11 @@ class PathVariableProcessor {
 
                 if (!jsonSchema.isIntegerSchema()) {
                     numberFormat = NumberFormatTypeEnum.f1oat;
-                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
+                } else if (org.apache.commons.lang3.StringUtils
+                        .equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
                     numberFormat = NumberFormatTypeEnum.int32;
-                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
+                } else if (org.apache.commons.lang3.StringUtils
+                        .equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
                     numberFormat = NumberFormatTypeEnum.int64;
                 } else {
                     numberFormat = NumberFormatTypeEnum.inT;
@@ -137,12 +135,12 @@ class PathVariableProcessor {
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
         JsonSchema jsonSchema;
         try {
-            jsonSchema = JsonSchemas.generateSchema(resolvedTypeDescribe);
+            jsonSchema = JsonSchemaUtils.generateSchema(resolvedTypeDescribe);
         } catch (JsonSchemasException e) {
             jsonSchema = null;
         }
         if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
-            generateSchema(Strings.replaceLast(resolvedTypeDescribe, "\\.", "$"));
+            generateSchema(StringUtils.replaceLast(resolvedTypeDescribe, "\\.", "$"));
         }
         return jsonSchema;
     }

@@ -7,9 +7,9 @@ import com.google.common.collect.Lists;
 /**
  * @author Deolin 2019-12-03
  */
-public class Strings {
+public class StringUtils {
 
-    private Strings() {
+    private StringUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
@@ -38,7 +38,7 @@ public class Strings {
     }
 
     public static String removeFirstLetterAndTrim(String s) {
-        if (StringUtils.isBlank(s)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(s)) {
             return s;
         }
         return s.substring(1).trim();

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.RandomStringUtils;
  *
  * @author Deolin
  */
-public class RandomStrings {
+public class StringRandomUtils {
 
     private static final char[] LOW_EN_NUM = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7',
@@ -16,7 +16,7 @@ public class RandomStrings {
     private static final char[] EASY_READ_AND_SPEAK = new char[]{'3', '4', '5', '7', '8', 'a', 'c', 'f', 'g', 'h', 'j',
             'k', 'p', 's', 't', 'u', 'v', 'w', 'x', 'y'};
 
-    private RandomStrings() {
+    private StringRandomUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

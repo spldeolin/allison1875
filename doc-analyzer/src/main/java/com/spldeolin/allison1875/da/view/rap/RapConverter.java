@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.da.view.rap;
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Jsons;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 
@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 public class RapConverter {
 
     public String convert(Collection<ApiDefinition> apis) {
-        String json = Jsons.toJson(convertApis(apis));
+        String json = JsonUtils.toJson(convertApis(apis));
 
         StringBuilder sb = new StringBuilder(json.length());
         int id = -1;

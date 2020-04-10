@@ -19,13 +19,13 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-01-14
  */
 @Log4j2
-public class Csvs {
+public class CsvUtils {
 
     private static final String utf8 = StandardCharsets.UTF_8.name();
 
-    public static final CsvMapper cm = (CsvMapper) Jsons.initObjectMapper(new CsvMapper());
+    public static final CsvMapper cm = (CsvMapper) JsonUtils.initObjectMapper(new CsvMapper());
 
-    private Csvs() {
+    private CsvUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

@@ -18,7 +18,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.base.util.Times;
+import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -33,7 +33,7 @@ class AddedFileCollector {
         if (since == null) {
             return Optional.empty();
         }
-        Date sinceDate = Times.toDate(since);
+        Date sinceDate = TimeUtils.toDate(since);
 
         List<RevCommit> commits = loader.commits();
         if (commits.size() < 2) {

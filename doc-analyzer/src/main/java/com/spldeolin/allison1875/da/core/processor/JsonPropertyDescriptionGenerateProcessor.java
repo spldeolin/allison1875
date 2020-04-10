@@ -10,7 +10,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.Jsons;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
@@ -27,7 +27,7 @@ class JsonPropertyDescriptionGenerateProcessor {
             cu.findAll(ClassOrInterfaceDeclaration.class, this::isPojo)
                     .forEach(pojo -> pojo.getFields().forEach(field -> {
                         BodyFieldDefinition bodyField = buildBodyFieldDefinition(field);
-                        String content = StringEscapeUtils.escapeJava(Jsons.toJson(bodyField));
+                        String content = StringEscapeUtils.escapeJava(JsonUtils.toJson(bodyField));
                         field.getAnnotationByName("JsonPropertyDescription").ifPresent(AnnotationExpr::remove);
                         field.addAnnotation(
                                 StaticJavaParser.parseAnnotation(f("@JsonPropertyDescription(\"%s\")", content)));

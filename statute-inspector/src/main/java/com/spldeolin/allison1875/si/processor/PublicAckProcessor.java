@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Jsons;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.si.dto.PublicAckDto;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -32,9 +32,9 @@ public class PublicAckProcessor {
             try {
                 String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
                 if (json.startsWith("[")) {
-                    publicAcks.addAll(Jsons.toListOfObjects(json, PublicAckDto.class));
+                    publicAcks.addAll(JsonUtils.toListOfObjects(json, PublicAckDto.class));
                 } else {
-                    publicAcks.add(Jsons.toObject(json, PublicAckDto.class));
+                    publicAcks.add(JsonUtils.toObject(json, PublicAckDto.class));
                 }
             } catch (Exception e) {
                 log.error("Cannot load public ack from json file. [{}]", jsonFile, e);

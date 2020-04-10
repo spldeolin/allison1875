@@ -12,8 +12,8 @@ import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.JsonSchemas;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
@@ -52,7 +52,7 @@ public class ServiceOrApiReturnStatute implements Statute {
                     // 可以是Map、Multimap或是两者的派生类
                     if (ResolvedTypes.isOrLike(rrt, QualifierConstants.MAP, QualifierConstants.MULTIPART_FILE)) {
                         ResolvedReferenceType key = rrt.getTypeParametersMap().get(0).b.asReferenceType();
-                        if (!JsonSchemas.generateSchema(key.getId()).isValueTypeSchema()) {
+                        if (!JsonSchemaUtils.generateSchema(key.getId()).isValueTypeSchema()) {
                             result.add(new LawlessDto(method, methodSimpleName).setMessage("映射的Key类型必须是value-like"));
                             return;
                         }
@@ -60,7 +60,7 @@ public class ServiceOrApiReturnStatute implements Statute {
                     }
 
                     // 可以是一个value-like的类型
-                    if (JsonSchemas.generateSchema(rrt.getId()).isValueTypeSchema()) {
+                    if (JsonSchemaUtils.generateSchema(rrt.getId()).isValueTypeSchema()) {
                         return;
                     }
 
@@ -68,11 +68,11 @@ public class ServiceOrApiReturnStatute implements Statute {
                     boolean illegalNaming = false;
                     String pojoName = Iterables.getLast(Lists.newArrayList(rrt.getId().split("\\.")));
                     if (!pojoName.endsWith("Vo")) {
-                        result.add(
-                                new LawlessDto(method, methodSimpleName).setMessage("返回类型[" + type + "]的POJO命名必须以Vo结尾"));
+                        result.add(new LawlessDto(method, methodSimpleName)
+                                .setMessage("返回类型[" + type + "]的POJO命名必须以Vo结尾"));
                         illegalNaming = true;
                     }
-                    if (!Strings.capture(pojoName).substring(0, pojoName.length() - "Vo".length() - 1)
+                    if (!StringUtils.capture(pojoName).substring(0, pojoName.length() - "Vo".length() - 1)
                             .equals(method.getNameAsString())) {
                         result.add(new LawlessDto(method, methodSimpleName)
                                 .setMessage("返回类型[" + type + "]的POJO命名的Vo以外部分必须与方法名一致"));

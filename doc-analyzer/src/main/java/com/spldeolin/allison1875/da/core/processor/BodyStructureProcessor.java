@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.da.core.processor;
 
 import static com.spldeolin.allison1875.da.DocAnalyzerConfig.CONFIG;
 
-import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
@@ -13,8 +12,8 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.JsonSchemas;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
@@ -121,9 +120,11 @@ class BodyStructureProcessor {
 
                 if (!jsonSchema.isIntegerSchema()) {
                     numberFormat = NumberFormatTypeEnum.f1oat;
-                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
+                } else if (org.apache.commons.lang3.StringUtils
+                        .equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
                     numberFormat = NumberFormatTypeEnum.int32;
-                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
+                } else if (org.apache.commons.lang3.StringUtils
+                        .equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
                     numberFormat = NumberFormatTypeEnum.int64;
                 } else {
                     numberFormat = NumberFormatTypeEnum.inT;
@@ -177,7 +178,7 @@ class BodyStructureProcessor {
 
     private JsonSchema generateSchema(ClassOrInterfaceDeclaration clazz) {
         String qualifierForClassLoader = qualifierForClassLoader(clazz);
-        return JsonSchemas.generateSchemaOrElseNull(qualifierForClassLoader);
+        return JsonSchemaUtils.generateSchemaOrElseNull(qualifierForClassLoader);
     }
 
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
@@ -188,10 +189,10 @@ class BodyStructureProcessor {
 
         JsonSchema result = null;
         try {
-            result = JsonSchemas.generateSchema(resolvedTypeDescribe);
+            result = JsonSchemaUtils.generateSchema(resolvedTypeDescribe);
         } catch (JsonSchemasException e) {
             if (resolvedTypeDescribe.contains(".")) {
-                result = generateSchema(Strings.replaceLast(resolvedTypeDescribe, ".", "$"));
+                result = generateSchema(StringUtils.replaceLast(resolvedTypeDescribe, ".", "$"));
             }
         }
         return result;

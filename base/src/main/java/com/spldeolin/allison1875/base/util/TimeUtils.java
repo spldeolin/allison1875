@@ -20,7 +20,7 @@ import java.util.Date;
  *
  * @author Deolin 2018/05/23
  */
-public class Times {
+public class TimeUtils {
 
     public static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
 
@@ -51,7 +51,7 @@ public class Times {
 
     public static final DateTimeFormatter DEFAULT_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    private Times() {
+    private TimeUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

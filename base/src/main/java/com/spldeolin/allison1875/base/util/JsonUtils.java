@@ -21,11 +21,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin
  */
 @Log4j2
-public class Jsons {
+public class JsonUtils {
 
     private static final ObjectMapper om = initObjectMapper(new ObjectMapper());
 
-    private Jsons() {
+    private JsonUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

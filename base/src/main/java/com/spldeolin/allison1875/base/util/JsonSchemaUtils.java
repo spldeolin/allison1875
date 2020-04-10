@@ -13,14 +13,14 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-03-01
  */
 @Log4j2
-public class JsonSchemas {
+public class JsonSchemaUtils {
 
     private static final int prefixLength = "urn:jsonschema:".length();
 
     private static final JsonSchemaGenerator defaultJsonSchemaGenerator = new JsonSchemaGenerator(
-            Jsons.initObjectMapper(new ObjectMapper()));
+            JsonUtils.initObjectMapper(new ObjectMapper()));
 
-    private JsonSchemas() {
+    private JsonSchemaUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

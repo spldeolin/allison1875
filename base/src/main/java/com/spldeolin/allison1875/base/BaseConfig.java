@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.BooleanUtils;
 import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
-import com.spldeolin.allison1875.base.util.Times;
+import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
 
 /**
@@ -58,7 +58,7 @@ public class BaseConfig {
             projectPath = Paths.get(rawData.get("projectPath"));
             warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
             doNotCollectWithLoadingClass = BooleanUtils.toBoolean(rawData.get("doNotCollectWithLoadingClass"));
-            giveUpResultAddedSinceTime = Times.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
+            giveUpResultAddedSinceTime = TimeUtils.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
         } catch (Exception e) {
             throw new ConfigLoadingException(e);
         }

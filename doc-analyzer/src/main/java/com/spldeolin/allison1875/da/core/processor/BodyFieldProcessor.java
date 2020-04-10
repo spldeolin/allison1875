@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.da.core.processor;
 
-import static com.spldeolin.allison1875.base.util.JsonSchemas.getId;
+import static com.spldeolin.allison1875.base.util.JsonSchemaUtils.getId;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Jsons;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.FieldTypeEnum;
 import lombok.Getter;
@@ -56,7 +56,7 @@ class BodyFieldProcessor {
         schema.getProperties().forEach((childName, childSchema) -> {
             BodyFieldDefinition child;
             if (StringUtils.isNotEmpty(childSchema.getDescription())) {
-                child = Jsons.toObject(childSchema.getDescription(), BodyFieldDefinition.class);
+                child = JsonUtils.toObject(childSchema.getDescription(), BodyFieldDefinition.class);
             } else {
                 log.warn("Cannot found JsonPropertyDescription, schema=[{}], field=[{}]", getId(schema), childName);
                 child = new BodyFieldDefinition();

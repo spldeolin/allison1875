@@ -1,14 +1,13 @@
 package com.spldeolin.allison1875.si.statute;
 
 import java.util.Collection;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 
@@ -28,7 +27,8 @@ public class HandlerNameEqualsPathStatute implements Statute {
                             this.checkForContoller(result, coid, uri);
                         });
                         rm.ifNormalAnnotationExpr(restController -> restController.getPairs().stream()
-                                .filter(pair -> StringUtils.equalsAny(pair.getNameAsString(), "value", "path"))
+                                .filter(pair -> org.apache.commons.lang3.StringUtils
+                                        .equalsAny(pair.getNameAsString(), "value", "path"))
                                 .findFirst().ifPresent(pair -> {
                                     Expression uri = pair.getValue();
                                     this.checkForContoller(result, coid, uri);
@@ -42,7 +42,8 @@ public class HandlerNameEqualsPathStatute implements Statute {
                             this.checkForHandler(result, method, uri);
                         });
                         pm.ifNormalAnnotationExpr(postMapping -> postMapping.getPairs().stream()
-                                .filter(pair -> StringUtils.equalsAny(pair.getNameAsString(), "value", "path"))
+                                .filter(pair -> org.apache.commons.lang3.StringUtils
+                                        .equalsAny(pair.getNameAsString(), "value", "path"))
                                 .findFirst().ifPresent(pair -> {
                                     Expression uri = pair.getValue();
                                     this.checkForHandler(result, method, uri);
@@ -69,7 +70,7 @@ public class HandlerNameEqualsPathStatute implements Statute {
         if (className.endsWith("Controller")) {
             className = className.substring(0, className.length() - "Controller".length());
         }
-        if (!Strings.capture(uri).equals(className)) {
+        if (!StringUtils.capture(uri).equals(className)) {
             LawlessDto vo = new LawlessDto(coid,
                     coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new))
                     .setMessage(String.format("URI[%st]与类名[%s]不一致", uri, className));

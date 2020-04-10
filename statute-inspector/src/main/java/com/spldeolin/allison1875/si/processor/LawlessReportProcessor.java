@@ -8,8 +8,8 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
-import com.spldeolin.allison1875.base.util.Csvs;
-import com.spldeolin.allison1875.base.util.Times;
+import com.spldeolin.allison1875.base.util.CsvUtils;
+import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -26,9 +26,9 @@ public class LawlessReportProcessor {
     private Collection<LawlessDto> lawlesses;
 
     public void report() {
-        String csvContent = Csvs.writeCsv(lawlesses, LawlessDto.class);
+        String csvContent = CsvUtils.writeCsv(lawlesses, LawlessDto.class);
 
-        String fileName = "lawless-" + Times.toString(LocalDateTime.now(), "yyyyMMdd");
+        String fileName = "lawless-" + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd");
         Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName + ".csv");
         Path csvGbkFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName + "-gbk.csv");
         try {

@@ -1,13 +1,13 @@
 package com.spldeolin.allison1875.base.util.exception;
 
-import com.spldeolin.allison1875.base.util.Csvs;
+import com.spldeolin.allison1875.base.util.CsvUtils;
 
 /**
  * 工具类Csvs遇到预想以外的情况或是内部异常时，
  * 会抛出这个异常，以交给调用方决定如何处理
  *
  * @author Deolin 2020-03-04
- * @see Csvs
+ * @see CsvUtils
  */
 public class CsvsException extends RuntimeException {
 

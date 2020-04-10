@@ -11,7 +11,7 @@ import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Jsons;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 
 /**
  * 根据Javadoc的@author标签，获取作者信息
@@ -85,7 +85,7 @@ public class Authors {
         } else if (authors.size() == 1) {
             return Iterables.getOnlyElement(authors);
         } else {
-            return Jsons.toJson(authors);
+            return JsonUtils.toJson(authors);
         }
     }
 

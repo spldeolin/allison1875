@@ -7,7 +7,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
-import com.spldeolin.allison1875.base.util.Strings;
+import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**
  * @author Deolin 2019-12-23
@@ -39,7 +39,7 @@ public class Javadocs {
             return "";
         }
 
-        List<String> lines = Strings.splitLineByLine(firstSnippet.get().toText());
+        List<String> lines = StringUtils.splitLineByLine(firstSnippet.get().toText());
         if (lines.size() == 0) {
             return "";
         }

@@ -19,7 +19,7 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Times;
+import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -60,7 +60,7 @@ public class WarOrFatJarClassLoaderFactory {
 
     private static Path decompressToTempDir() throws IOException {
         Path tempDir = Files.createTempDirectory(
-                "allision1875-temp-classpath" + Times.toString(LocalDateTime.now(), "-yyyyMMdd-HHmmss"));
+                "allision1875-temp-classpath" + TimeUtils.toString(LocalDateTime.now(), "-yyyyMMdd-HHmmss"));
         tempDir.toFile().deleteOnExit();
 
         try (ZipFile zip = new ZipFile(CONFIG.getWarOrFatJarPath().toFile())) {
