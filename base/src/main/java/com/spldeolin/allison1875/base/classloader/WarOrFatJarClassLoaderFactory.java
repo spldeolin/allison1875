@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Iterator;
@@ -49,11 +48,6 @@ public class WarOrFatJarClassLoaderFactory {
 
             // classes
             urls.add(webInf.resolve("classes").toUri().toURL());
-
-            // extra
-            urls.add(Paths.get(
-                    WarOrFatJarClassLoaderFactory.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
-                    "classpathex").toUri().toURL());
 
         } catch (IOException e) {
             log.error("something wasn't right here.", e);
