@@ -21,7 +21,7 @@ import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
 /**
  * @author Deolin 2020-03-10
  */
-class JsonPropertyDescriptionGenerateProcessor {
+class AddJsonPropertyDescriptionProcessor {
 
     void process() {
         StaticAstContainer.getCompilationUnits().forEach(cu -> {

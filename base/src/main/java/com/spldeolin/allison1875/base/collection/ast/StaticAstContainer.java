@@ -28,7 +28,7 @@ public class StaticAstContainer {
         return fromConfigPath.getPath();
     }
 
-    public static void reflash() {
+    public static void refresh() {
         log.info("reflash AstContainer from config path.");
         fromConfigPath = new AstContainer(BaseConfig.getInstace().getProjectPath());
     }

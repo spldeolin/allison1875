@@ -14,9 +14,11 @@ import lombok.extern.log4j.Log4j2;
 public class GitDiscardProcessor {
 
     public void process() {
+        long start = System.currentTimeMillis();
         GitLoader loader = new GitLoader().projectPath(BaseConfig.getInstace().getProjectPath());
         try {
             loader.openAndLoad().git().reset().setMode(ResetType.HARD).call();
+            log.info("Discard all modifications complete with elapsing {}ms.", System.currentTimeMillis() - start);
         } catch (IOException | GitAPIException e) {
             log.error("Cannot discard modifications", e);
         } finally {

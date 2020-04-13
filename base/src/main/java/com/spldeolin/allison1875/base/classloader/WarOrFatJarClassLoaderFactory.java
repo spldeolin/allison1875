@@ -32,9 +32,13 @@ public class WarOrFatJarClassLoaderFactory {
     private static ClassLoader cache;
 
     public static ClassLoader getClassLoader() {
-        if (cache != null) {
-            return cache;
+        if (cache == null) {
+            refresh();
         }
+        return cache;
+    }
+
+    public static void refresh() {
         List<URL> urls = Lists.newLinkedList();
         try {
             Path tempDir = decompressToTempDir();
@@ -54,7 +58,6 @@ public class WarOrFatJarClassLoaderFactory {
             System.exit(-1);
         }
         cache = new URLClassLoader(urls.toArray(new URL[0]));
-        return cache;
     }
 
     private static Path decompressToTempDir() throws IOException {
