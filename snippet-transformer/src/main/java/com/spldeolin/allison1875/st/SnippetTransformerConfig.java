@@ -3,7 +3,9 @@ package com.spldeolin.allison1875.st;
 import lombok.Data;
 
 /**
- * 【snippet-transformer】的全局配置
+ * Allison1875[snippet-transformer]的配置
+ *
+ * snippet-transformer模块目前暂时没有专门的配置项，所以这个类暂时没有作用
  *
  * @author Deolin 2020-02-18
  */

@@ -67,12 +67,12 @@ class CompilationUnitCollector {
 
     private CollectionStrategy newCollectionStrategy() {
         CollectionStrategy collectionStrategy;
-        if (BaseConfig.getInstace().getDoNotCollectWithLoadingClass()) {
-            log.info("Start collecting CompilationUnit with ParserCollectionStrategy.");
-            collectionStrategy = new ParserCollectionStrategy();
-        } else {
+        if (BaseConfig.getInstace().getCollectWithLoadingClass()) {
             log.info("Start collecting CompilationUnit with ClassLoaderCollectionStrategy.");
             collectionStrategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoaderFactory.getClassLoader());
+        } else {
+            log.info("Start collecting CompilationUnit with ParserCollectionStrategy.");
+            collectionStrategy = new ParserCollectionStrategy();
         }
         return collectionStrategy;
     }

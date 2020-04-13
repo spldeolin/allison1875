@@ -7,7 +7,7 @@ import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
 
 /**
- * 【doc-analyzer】的全局配置
+ * Allison1875[doc-analyzer]的配置
  *
  * @author Deolin 2020-02-18
  */

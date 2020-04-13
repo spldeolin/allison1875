@@ -26,10 +26,10 @@ public class MainProcessor {
 
     public Collection<ApiDefinition> process() {
         if (StringUtils.isNotEmpty(CONFIG.getMavenPackageCommandLine())) {
-            BaseConfig.getInstace().setDoNotCollectWithLoadingClass(true);
+            BaseConfig.getInstace().setCollectWithLoadingClass(false);
             new JsonPropertyDescriptionGenerateProcessor().process();
             new MavenPackageProcessor().process();
-            BaseConfig.getInstace().setDoNotCollectWithLoadingClass(false);
+            BaseConfig.getInstace().setCollectWithLoadingClass(true);
             StaticAstContainer.reflash();
         }
 
