@@ -59,7 +59,6 @@ public final class BaseConfig {
             rawData = yaml.load(is);
             projectPath = Paths.get(rawData.get("projectPath"));
             warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
-            collectWithLoadingClass = BooleanUtils.toBoolean(rawData.get("doNotCollectWithLoadingClass"));
             giveUpResultAddedSinceTime = TimeUtils.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
         } catch (Exception e) {
             throw new ConfigLoadingException(e);

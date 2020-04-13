@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.da.core.processor;
 import static com.github.javaparser.utils.CodeGenerationUtils.f;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -24,17 +25,20 @@ class JsonPropertyDescriptionGenerateProcessor {
 
     void process() {
         StaticAstContainer.getCompilationUnits().forEach(cu -> {
-            cu.findAll(ClassOrInterfaceDeclaration.class, this::isPojo)
-                    .forEach(pojo -> pojo.getFields().forEach(field -> {
+            MutableBoolean save = new MutableBoolean(false);
+            cu.findAll(ClassOrInterfaceDeclaration.class, this::isJavabean)
+                    .forEach(javabean -> javabean.getFields().forEach(field -> {
                         BodyFieldDefinition bodyField = buildBodyFieldDefinition(field);
                         String content = StringEscapeUtils.escapeJava(JsonUtils.toJson(bodyField));
                         field.getAnnotationByName("JsonPropertyDescription").ifPresent(AnnotationExpr::remove);
                         field.addAnnotation(
                                 StaticJavaParser.parseAnnotation(f("@JsonPropertyDescription(\"%s\")", content)));
+                        save.setTrue();
                     }));
-
-            cu.addImport(QualifierConstants.JsonPropertyDescription);
-            Saves.prettySave(cu);
+            if (save.isTrue()) {
+                cu.addImport(QualifierConstants.JsonPropertyDescription);
+                Saves.prettySave(cu);
+            }
         });
     }
 
@@ -63,7 +67,7 @@ class JsonPropertyDescriptionGenerateProcessor {
         return bodyField;
     }
 
-    private boolean isPojo(ClassOrInterfaceDeclaration coid) {
+    private boolean isJavabean(ClassOrInterfaceDeclaration coid) {
         if (coid.isInterface()) {
             return false;
         }

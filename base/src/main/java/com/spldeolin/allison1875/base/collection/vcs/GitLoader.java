@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-26
  */
 @Accessors(fluent = true)
-class GitLoader {
+public class GitLoader {
 
     @Setter
     @Getter
@@ -31,14 +31,14 @@ class GitLoader {
     @Getter
     private List<RevCommit> commits;
 
-    GitLoader openAndLoad() throws IOException, GitAPIException {
+    public GitLoader openAndLoad() throws IOException, GitAPIException {
         git = Git.open(projectPath.toFile());
         repo = git.getRepository();
         commits = Lists.newLinkedList(git.log().call());
         return this;
     }
 
-    void close() {
+    public void close() {
         if (git != null) {
             git.close();
         }
