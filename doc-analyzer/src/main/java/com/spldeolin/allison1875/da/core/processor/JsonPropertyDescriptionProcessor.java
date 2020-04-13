@@ -49,7 +49,7 @@ class JsonPropertyDescriptionProcessor {
                         save.setTrue();
                     }));
             if (save.isTrue()) {
-                cu.addImport(QualifierConstants.JsonPropertyDescription);
+                cu.addImport(QualifierConstants.JSON_PROPERTY_DESCRIPTION);
                 Saves.prettySave(cu);
             }
         });
