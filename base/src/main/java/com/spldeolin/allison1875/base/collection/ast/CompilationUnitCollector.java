@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
 
-import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
-
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
@@ -14,6 +12,7 @@ import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import lombok.Getter;
@@ -68,7 +67,7 @@ class CompilationUnitCollector {
 
     private CollectionStrategy newCollectionStrategy() {
         CollectionStrategy collectionStrategy;
-        if (CONFIG.getDoNotCollectWithLoadingClass()) {
+        if (BaseConfig.getInstace().getDoNotCollectWithLoadingClass()) {
             log.info("Start collecting CompilationUnit with ParserCollectionStrategy.");
             collectionStrategy = new ParserCollectionStrategy();
         } else {
@@ -98,7 +97,8 @@ class CompilationUnitCollector {
 
         if (count > 0) {
             log.info("(Detail) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", count,
-                    CONFIG.getProjectPath().relativize(sourceRoot.getRoot()), System.currentTimeMillis() - start);
+                    BaseConfig.getInstace().getProjectPath().relativize(sourceRoot.getRoot()),
+                    System.currentTimeMillis() - start);
         }
     }
 

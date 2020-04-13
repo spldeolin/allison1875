@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.base.collection.vcs;
 
-import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -12,6 +10,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import com.github.javaparser.ast.Node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import lombok.Getter;
 import lombok.ToString;
@@ -36,8 +35,8 @@ public class VcsContainer {
         this.projectPath = projectPath;
         try {
             GitLoader loader = new GitLoader().projectPath(projectPath).openAndLoad();
-            addedFiles = new AddedFileCollector().collectSinceTime(loader, CONFIG.getGiveUpResultAddedSinceTime());
-//            firstCommitAuthorsByFile = new FirstCommitAuthorCollector().loader(loader).collect();
+            addedFiles = new AddedFileCollector()
+                    .collectSinceTime(loader, BaseConfig.getInstace().getGiveUpResultAddedSinceTime());
             loader.close();
         } catch (IOException | GitAPIException e) {
             log.error(e);
@@ -56,9 +55,5 @@ public class VcsContainer {
         result.removeIf(node -> !contain(node));
         return result;
     }
-
-//    public String getFirstCommitAuthors(Path path) {
-//        return firstCommitAuthorsByFile.get(path);
-//    }
 
 }

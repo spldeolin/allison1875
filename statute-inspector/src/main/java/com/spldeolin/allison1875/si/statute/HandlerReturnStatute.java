@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.si.statute;
 
-import static com.spldeolin.allison1875.si.StatuteInspectorConfig.CONFIG;
-
 import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -17,6 +15,7 @@ import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
+import com.spldeolin.allison1875.si.StatuteInspectorConfig;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -52,7 +51,7 @@ public class HandlerReturnStatute implements Statute {
 
                             // 可以是Collection<Pojo>或是Collection的派生类
                             if (ResolvedTypes.isOrLike(rrt, QualifierConstants.COLLECTION,
-                                    CONFIG.getCommonPageTypeQualifier())) {
+                                    StatuteInspectorConfig.getInstance().getCommonPageTypeQualifier())) {
                                 rrt = rrt.getTypeParametersMap().get(0).b.asReferenceType();
                             }
 

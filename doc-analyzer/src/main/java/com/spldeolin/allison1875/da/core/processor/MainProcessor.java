@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
 import com.spldeolin.allison1875.da.core.enums.BodyStructureEnum;
@@ -25,10 +26,10 @@ public class MainProcessor {
 
     public Collection<ApiDefinition> process() {
         if (StringUtils.isNotEmpty(CONFIG.getMavenPackageCommandLine())) {
-            CONFIG.setDoNotCollectWithLoadingClass(true);
+            BaseConfig.getInstace().setDoNotCollectWithLoadingClass(true);
             new JsonPropertyDescriptionGenerateProcessor().process();
             new MavenPackageProcessor().process();
-            CONFIG.setDoNotCollectWithLoadingClass(false);
+            BaseConfig.getInstace().setDoNotCollectWithLoadingClass(false);
             StaticAstContainer.reflash();
         }
 

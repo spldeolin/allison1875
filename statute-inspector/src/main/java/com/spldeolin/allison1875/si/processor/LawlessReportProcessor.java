@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.si.processor;
 
-import static com.spldeolin.allison1875.si.StatuteInspectorConfig.CONFIG;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -10,6 +8,7 @@ import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
+import com.spldeolin.allison1875.si.StatuteInspectorConfig;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -29,8 +28,9 @@ public class LawlessReportProcessor {
         String csvContent = CsvUtils.writeCsv(lawlesses, LawlessDto.class);
 
         String fileName = "lawless-" + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd");
-        Path csvFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName + ".csv");
-        Path csvGbkFile = CONFIG.getLawlessCsvOutputDirectoryPath().resolve(fileName + "-gbk.csv");
+        Path outputDirectory = StatuteInspectorConfig.getInstance().getLawlessCsvOutputDirectoryPath();
+        Path csvFile = outputDirectory.resolve(fileName + ".csv");
+        Path csvGbkFile = outputDirectory.resolve(fileName + "-gbk.csv");
         try {
             FileUtils.writeStringToFile(csvFile.toFile(), csvContent, StandardCharsets.UTF_8);
             FileUtils.writeStringToFile(csvGbkFile.toFile(), csvContent, "GBK");

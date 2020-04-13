@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 【doc-analyzer】的全局配置
@@ -13,8 +12,7 @@ import lombok.EqualsAndHashCode;
  * @author Deolin 2020-02-18
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public final class DocAnalyzerConfig extends BaseConfig {
+public final class DocAnalyzerConfig {
 
     /**
      * Maven打包的命令行
@@ -39,11 +37,11 @@ public final class DocAnalyzerConfig extends BaseConfig {
     }
 
     private void initLoad() {
-        mavenPackageCommandLine = super.rawData.get("mavenPackageCommandLine");
+        mavenPackageCommandLine = BaseConfig.getInstace().getRawData().get("mavenPackageCommandLine");
 
-        commonPageTypeQualifier = super.rawData.get("commonPageTypeQualifier");
+        commonPageTypeQualifier = BaseConfig.getInstace().getRawData().get("commonPageTypeQualifier");
 
-        File docOutputDirectory = new File(super.rawData.get("docOutputDirectoryPath"));
+        File docOutputDirectory = new File(BaseConfig.getInstace().getRawData().get("docOutputDirectoryPath"));
         if (!docOutputDirectory.exists()) {
             if (!docOutputDirectory.mkdirs()) {
                 throw new ConfigLoadingException("文件" + docOutputDirectory + "创建失败");

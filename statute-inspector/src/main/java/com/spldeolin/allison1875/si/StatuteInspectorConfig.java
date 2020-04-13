@@ -5,8 +5,6 @@ import java.nio.file.Path;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 【statute-inspector】的全局配置
@@ -14,11 +12,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-02-18
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-@Log4j2
-public final class StatuteInspectorConfig extends BaseConfig {
+public final class StatuteInspectorConfig {
 
-    public static final StatuteInspectorConfig CONFIG = new StatuteInspectorConfig();
+    private static final StatuteInspectorConfig instance = new StatuteInspectorConfig();
 
     private String commonPageTypeQualifier;
 
@@ -32,9 +28,9 @@ public final class StatuteInspectorConfig extends BaseConfig {
     }
 
     private void initLoad() {
-        commonPageTypeQualifier = super.rawData.get("commonPageTypeQualifier");
+        commonPageTypeQualifier = BaseConfig.getInstace().getRawData().get("commonPageTypeQualifier");
 
-        File publicAckJsonDirectory = new File(super.rawData.get("publicAckJsonDirectoryPath"));
+        File publicAckJsonDirectory = new File(BaseConfig.getInstace().getRawData().get("publicAckJsonDirectoryPath"));
         if (!publicAckJsonDirectory.exists()) {
             if (!publicAckJsonDirectory.mkdirs()) {
                 throw new ConfigLoadingException("Make directory failed. [" + publicAckJsonDirectory + "]");
@@ -42,13 +38,18 @@ public final class StatuteInspectorConfig extends BaseConfig {
         }
         publicAckJsonDirectoryPath = publicAckJsonDirectory.toPath();
 
-        File lawlessCsvOutputDirectory = new File(super.rawData.get("lawlessCsvOutputDirectoryPath"));
+        File lawlessCsvOutputDirectory = new File(
+                BaseConfig.getInstace().getRawData().get("lawlessCsvOutputDirectoryPath"));
         if (!lawlessCsvOutputDirectory.exists()) {
             if (!lawlessCsvOutputDirectory.mkdirs()) {
                 throw new ConfigLoadingException("Make directory failed. [" + lawlessCsvOutputDirectory + "]");
             }
         }
         lawlessCsvOutputDirectoryPath = lawlessCsvOutputDirectory.toPath();
+    }
+
+    public static StatuteInspectorConfig getInstance() {
+        return instance;
     }
 
 }

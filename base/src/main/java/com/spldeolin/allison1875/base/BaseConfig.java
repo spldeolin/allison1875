@@ -12,12 +12,14 @@ import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
 
 /**
- * Allison 1875的全局配置，只包含项目路径、Git增量起始时间等配置
+ * Allison 1875的全局配置
  *
  * @author Deolin 2020-02-08
  */
 @Data
-public class BaseConfig {
+public final class BaseConfig {
+
+    private static final BaseConfig instace = new BaseConfig();
 
     /**
      * 填写项目根目录路径，此项必填
@@ -40,14 +42,12 @@ public class BaseConfig {
      */
     private LocalDateTime giveUpResultAddedSinceTime;
 
-    public static final BaseConfig CONFIG = new BaseConfig();
-
     /**
      * 来自classpath的config.yml的原始数据
      */
-    protected Map<String, String> rawData;
+    private Map<String, String> rawData;
 
-    protected BaseConfig() {
+    private BaseConfig() {
         initLoad();
     }
 
@@ -62,6 +62,10 @@ public class BaseConfig {
         } catch (Exception e) {
             throw new ConfigLoadingException(e);
         }
+    }
+
+    public static BaseConfig getInstace() {
+        return instace;
     }
 
 }

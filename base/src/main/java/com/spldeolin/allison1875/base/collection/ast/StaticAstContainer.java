@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
 
-import static com.spldeolin.allison1875.base.BaseConfig.CONFIG;
-
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
@@ -11,6 +9,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -21,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class StaticAstContainer {
 
-    private static AstContainer fromConfigPath = new AstContainer(CONFIG.getProjectPath());
+    private static AstContainer fromConfigPath = new AstContainer(BaseConfig.getInstace().getProjectPath());
 
     private static Map<Path, AstContainer> fromCustomPath = Maps.newHashMap();
 
@@ -31,7 +30,7 @@ public class StaticAstContainer {
 
     public static void reflash() {
         log.info("reflash AstContainer from config path.");
-        fromConfigPath = new AstContainer(CONFIG.getProjectPath());
+        fromConfigPath = new AstContainer(BaseConfig.getInstace().getProjectPath());
     }
 
     public static Collection<CompilationUnit> getCompilationUnits() {
