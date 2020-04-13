@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.core.processor;
 
 import static com.github.javaparser.utils.CodeGenerationUtils.f;
+import static com.spldeolin.allison1875.da.DocAnalyzerConfig.CONFIG;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -9,6 +10,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
+import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -17,13 +19,24 @@ import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.da.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.core.enums.StringFormatTypeEnum;
+import lombok.extern.log4j.Log4j2;
 
 /**
+ * 1. 生成@JsonPropertyDescription
+ * 2. 重新mvn clean package
+ * 3. 刷新WarOrFatJarClassLoaderFactory缓存、刷新StaticAstContainer
+ *
  * @author Deolin 2020-03-10
  */
-class AddJsonPropertyDescriptionProcessor {
+@Log4j2
+class JsonPropertyDescriptionProcessor {
 
     void process() {
+        if (StringUtils.isEmpty(CONFIG.getMavenPackageCommandLine())) {
+            return;
+        }
+
+        long start = System.currentTimeMillis();
         StaticAstContainer.getCompilationUnits().forEach(cu -> {
             MutableBoolean save = new MutableBoolean(false);
             cu.findAll(ClassOrInterfaceDeclaration.class, this::isJavabean)
@@ -40,6 +53,18 @@ class AddJsonPropertyDescriptionProcessor {
                 Saves.prettySave(cu);
             }
         });
+        log.info("Add JsonPropertyDescription for javabean complete with elapsing {}ms.",
+                System.currentTimeMillis() - start);
+
+        start = System.currentTimeMillis();
+        new MavenPackageProcessor().process();
+        log.info("Repackage maven project complete with elapsing {}ms.", System.currentTimeMillis() - start);
+
+        start = System.currentTimeMillis();
+        WarOrFatJarClassLoaderFactory.refresh();
+        StaticAstContainer.refresh();
+        log.info("Refresh WarOrFatJarClassLoader and AstContainer complete with elapsing {}ms.",
+                System.currentTimeMillis() - start);
     }
 
     private BodyFieldDefinition buildBodyFieldDefinition(FieldDeclaration field) {

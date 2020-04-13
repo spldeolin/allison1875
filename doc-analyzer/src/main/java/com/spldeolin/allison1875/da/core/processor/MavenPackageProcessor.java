@@ -22,7 +22,7 @@ class MavenPackageProcessor {
                     new InputStreamReader(in))) {
                 String message;
                 while ((message = br.readLine()) != null) {
-                    log.info(message);
+                    log.info("\t" + message);
                 }
             }
         } catch (IOException e) {
