@@ -49,6 +49,10 @@ public class StaticAstContainer {
         return fromConfigPath.getClassOrInterfaceDeclaration(qualifier);
     }
 
+    public static Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations(String name) {
+        return fromConfigPath.getClassOrInterfaceDeclarations(name);
+    }
+
     public static Collection<EnumDeclaration> getEnumDeclarations() {
         return fromConfigPath.getEnumDeclarations();
     }

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.google.common.collect.Multimap;
 
 /**
  * 存放抽象语法树节点的容器
@@ -24,6 +25,8 @@ public class AstContainer {
     private Collection<ClassOrInterfaceDeclaration> coids;
 
     private Map<String, ClassOrInterfaceDeclaration> coidsByQualifier;
+
+    private Multimap<String, ClassOrInterfaceDeclaration> coidsByName;
 
     private Collection<EnumDeclaration> enums;
 
@@ -73,6 +76,20 @@ public class AstContainer {
             }
         }
         return coidsByQualifier.get(qualifier);
+    }
+
+    public Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations(String name) {
+        if (coidsByName == null) {
+            TypeDeclarationByNameCollector<ClassOrInterfaceDeclaration> collector =
+                    new TypeDeclarationByNameCollector<>(
+                    ClassOrInterfaceDeclaration.class);
+            if (coids == null) {
+                coidsByName = collector.collectIntoMapByCompilationUnits(cus);
+            } else {
+                coidsByName = collector.collectIntoMapByCollectedOnes(coids);
+            }
+        }
+        return coidsByName.get(name);
     }
 
     public Collection<EnumDeclaration> getEnumDeclarations() {
