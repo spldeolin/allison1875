@@ -38,20 +38,22 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ObtainDependencyJarPathTool {
 
-    public static void main(String[] args) throws IOException {
-        Collection<String> jarPaths = Sets.newHashSet();
-
-        Iterator<File> xmls = FileUtils
-                .iterateFiles(BaseConfig.getInstace().getProjectPath().toFile(), new String[]{"xml"}, true);
-        while (xmls.hasNext()) {
-            File file = xmls.next();
-            if ("pom".equals(FilenameUtils.getBaseName(file.getName()))) {
-                jarPaths.addAll(obtainFromPom(file.getPath()));
+    public static void main(String[] args) {
+        BaseConfig.getInstace().getProjectPaths().forEach(projectPath -> {
+            Collection<String> jarPaths = Sets.newHashSet();
+            Iterator<File> xmls = FileUtils.iterateFiles(projectPath.toFile(), new String[]{"xml"}, true);
+            while (xmls.hasNext()) {
+                File file = xmls.next();
+                if ("pom".equals(FilenameUtils.getBaseName(file.getName()))) {
+                    jarPaths.addAll(obtainFromPom(file.getPath()));
+                }
             }
-        }
-
-        FileUtils.writeLines(BaseConfig.getInstace().getProjectPath().resolve(".dependency-jar-paths.tmp").toFile(),
-                jarPaths);
+            try {
+                FileUtils.writeLines(projectPath.resolve(".dependency-jar-paths.tmp").toFile(), jarPaths);
+            } catch (IOException e) {
+                log.error("FileUtils.writeLines({})", projectPath.resolve(".dependency-jar-paths.tmp").toFile(), e);
+            }
+        });
     }
 
     private static Collection<String> obtainFromPom(String pomPath) {

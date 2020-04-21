@@ -118,8 +118,6 @@ public class MainProcessor {
             return api;
         }).collect(Collectors.toList());
 
-        new GitDiscardProcessor().process();
-
         return result;
     }
 

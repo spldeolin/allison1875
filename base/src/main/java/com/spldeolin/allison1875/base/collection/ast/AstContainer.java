@@ -10,7 +10,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Multimap;
 
 /**
- * 存放抽象语法树节点的容器
+ * 抽象语法森林
  *
  * @author Deolin 2020-02-03
  */
@@ -18,7 +18,7 @@ public class AstContainer {
 
     private Path path;
 
-    private Collection<CompilationUnit> cus;
+    protected Collection<CompilationUnit> cus;
 
     private Map<Path, CompilationUnit> cusByPath;
 
@@ -35,6 +35,10 @@ public class AstContainer {
     private Collection<VariableDeclarator> fieldVars;
 
     private Map<String, VariableDeclarator> fieldVarsByQualifier;
+
+    protected AstContainer() {
+
+    }
 
     AstContainer(Path path) {
         this.path = path;

@@ -1,11 +1,24 @@
 package com.spldeolin.allison1875.base;
 
-import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
-import org.yaml.snakeyaml.Yaml;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.github.javaparser.ast.CompilationUnit;
+import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
@@ -20,12 +33,18 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public final class BaseConfig {
 
-    private static final BaseConfig instace = new BaseConfig();
+    private static BaseConfig instace;
+
+    /**
+     * projectPaths的第一个路径
+     */
+    @Deprecated
+    private Path projectPath;
 
     /**
      * 项目根目录路径，此项必填
      */
-    private Path projectPath;
+    private Collection<Path> projectPaths;
 
     /**
      * Maven全局配置setting.xml的路径
@@ -56,26 +75,43 @@ public final class BaseConfig {
     private LocalDateTime giveUpResultAddedSinceTime;
 
     private BaseConfig() {
-        initLoad();
-    }
-
-    private void initLoad() {
-        Yaml yaml = new Yaml();
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("base-config.yml")) {
-            Map<String, String> rawData = yaml.load(is);
-            projectPath = Paths.get(rawData.get("projectPath"));
-            mavenGlobalSettingXmlPath = Paths.get(rawData.get("mavenGlobalSettingXmlPath"));
-            mavenHome = Paths.get(rawData.get("mavenHome"));
-            warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
-            giveUpResultAddedSinceTime = TimeUtils.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
-        } catch (Exception e) {
-            log.error("BaseConfig.initLoad fail.", e);
-            throw new ConfigLoadingException();
-        }
     }
 
     public static BaseConfig getInstace() {
+        if (instace != null) {
+            return instace;
+        }
+
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        SimpleModule forNioPath = new SimpleModule();
+        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
+        mapper.registerModule(forNioPath);
+        mapper.registerModule(timeModule());
+
+        try {
+            instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("base-config.yml"), BaseConfig.class);
+            instace.projectPath = Iterables.getFirst(instace.projectPaths, null);
+
+        } catch (Exception e) {
+            log.error("BaseConfig.getInstance failed.", e);
+            throw new ConfigLoadingException();
+        }
+
         return instace;
+    }
+
+    private static SimpleModule timeModule() {
+        SimpleModule javaTimeModule = new JavaTimeModule();
+        DateTimeFormatter date = TimeUtils.DEFAULT_DATE_FORMATTER;
+        DateTimeFormatter time = TimeUtils.DEFAULT_TIME_FORMATTER;
+        DateTimeFormatter dateTime = TimeUtils.DEFAULT_DATE_TIME_FORMATTER;
+        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(date))
+                .addDeserializer(LocalDate.class, new LocalDateDeserializer(date))
+                .addSerializer(LocalTime.class, new LocalTimeSerializer(time))
+                .addDeserializer(LocalTime.class, new LocalTimeDeserializer(time))
+                .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTime))
+                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTime));
+        return javaTimeModule;
     }
 
 }

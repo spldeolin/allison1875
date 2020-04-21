@@ -1,12 +1,12 @@
 package com.spldeolin.allison1875.base.util.ast;
 
-
 import java.nio.file.Path;
 import com.github.javaparser.Range;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.Node;
 import com.google.common.base.Joiner;
-import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.base.collection.ast.AggregateAstContainer;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
@@ -26,7 +26,9 @@ public class Locations {
      * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */
     public static Path getRelativePath(Node node) {
-        return BaseConfig.getInstace().getProjectPath().relativize(getAbsolutePath(node));
+        CompilationUnit cu = node.findCompilationUnit().orElseThrow(CuAbsentException::new);
+        Path projectPath = AggregateAstContainer.getInstance().getProjectPath(cu);
+        return projectPath.relativize(getAbsolutePath(node));
     }
 
     /**

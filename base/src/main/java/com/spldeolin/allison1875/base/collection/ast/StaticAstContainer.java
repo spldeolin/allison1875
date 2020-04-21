@@ -3,12 +3,10 @@ package com.spldeolin.allison1875.base.collection.ast;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,8 +19,6 @@ import lombok.extern.log4j.Log4j2;
 public class StaticAstContainer {
 
     private static AstContainer fromConfigPath = new AstContainer(BaseConfig.getInstace().getProjectPath());
-
-    private static Map<Path, AstContainer> fromCustomPath = Maps.newHashMap();
 
     public static Path getPath() {
         return fromConfigPath.getPath();
@@ -67,15 +63,6 @@ public class StaticAstContainer {
 
     public static VariableDeclarator getFieldVariableDeclarator(String qualifier) {
         return fromConfigPath.getFieldVariableDeclarator(qualifier);
-    }
-
-    public static AstContainer getAstContainerByCustomPath(Path path) {
-        AstContainer container = fromCustomPath.get(path);
-        if (container == null) {
-            container = new AstContainer(path);
-            fromCustomPath.put(path, container);
-        }
-        return container;
     }
 
 }

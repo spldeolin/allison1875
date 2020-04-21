@@ -1,6 +1,6 @@
 # *Allison 1875*
 
-> 「 *Dedicated to allison, I cannot say no more* 」
+> 「 *Dedicated to allison, I cannot say anymore* 」
 
 *Allison 1875* is a no-code-pollutional Java source code analyzing and transforming toolkit.
 

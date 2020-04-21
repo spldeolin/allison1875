@@ -97,8 +97,7 @@ class CompilationUnitCollector {
 
         if (count > 0) {
             log.info("(Detail) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", count,
-                    BaseConfig.getInstace().getProjectPath().relativize(sourceRoot.getRoot()),
-                    System.currentTimeMillis() - start);
+                    path.relativize(sourceRoot.getRoot()), System.currentTimeMillis() - start);
         }
     }
 
