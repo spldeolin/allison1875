@@ -1,5 +1,7 @@
-projectPath:
-warOrFatJarPath:
+projectPaths:
+  -
+classpathRelativePath: target/classes
 mavenGlobalSettingXmlPath:
 mavenHome:
+warOrFatJarPath:
 giveUpResultAddedSinceTime:

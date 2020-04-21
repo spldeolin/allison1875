@@ -47,6 +47,11 @@ public final class BaseConfig {
     private Collection<Path> projectPaths;
 
     /**
+     * classpath相对于项目根目录的相对路径
+     */
+    private Path classpathRelativePath;
+
+    /**
      * Maven全局配置setting.xml的路径
      */
     private Path mavenGlobalSettingXmlPath;

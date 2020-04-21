@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
+import com.spldeolin.allison1875.base.classloader.MavenProjectClassLoaderFactory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -69,7 +69,7 @@ class CompilationUnitCollector {
         CollectionStrategy collectionStrategy;
         if (BaseConfig.getInstace().getCollectWithLoadingClass()) {
             log.info("Start collecting CompilationUnit with ClassLoaderCollectionStrategy.");
-            collectionStrategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoaderFactory.getClassLoader());
+            collectionStrategy = new ClassLoaderCollectionStrategy(MavenProjectClassLoaderFactory.getClassLoader());
         } else {
             log.info("Start collecting CompilationUnit with ParserCollectionStrategy.");
             collectionStrategy = new ParserCollectionStrategy();
