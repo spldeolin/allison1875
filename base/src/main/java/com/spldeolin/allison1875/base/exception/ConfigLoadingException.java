@@ -9,12 +9,4 @@ public class ConfigLoadingException extends RuntimeException {
 
     private static final long serialVersionUID = 4471313664025086461L;
 
-    public ConfigLoadingException(String message) {
-        super(message);
-    }
-
-    public ConfigLoadingException(Throwable cause) {
-        super(cause);
-    }
-
 }

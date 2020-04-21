@@ -5,11 +5,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Map;
-import org.apache.commons.lang3.BooleanUtils;
 import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Allison1875的全局配置
@@ -17,6 +17,7 @@ import lombok.Data;
  * @author Deolin 2020-02-08
  */
 @Data
+@Log4j2
 public final class BaseConfig {
 
     private static final BaseConfig instace = new BaseConfig();
@@ -44,24 +45,20 @@ public final class BaseConfig {
      */
     private LocalDateTime giveUpResultAddedSinceTime;
 
-    /**
-     * 来自classpath的config.yml的原始数据
-     */
-    private Map<String, String> rawData;
-
     private BaseConfig() {
         initLoad();
     }
 
     private void initLoad() {
         Yaml yaml = new Yaml();
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
-            rawData = yaml.load(is);
+        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("base-config.yml")) {
+            Map<String, String> rawData = yaml.load(is);
             projectPath = Paths.get(rawData.get("projectPath"));
             warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
             giveUpResultAddedSinceTime = TimeUtils.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
         } catch (Exception e) {
-            throw new ConfigLoadingException(e);
+            log.error("BaseConfig.initLoad fail.", e);
+            throw new ConfigLoadingException();
         }
     }
 

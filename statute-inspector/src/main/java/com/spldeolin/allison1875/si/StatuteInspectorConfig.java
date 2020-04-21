@@ -1,10 +1,13 @@
 package com.spldeolin.allison1875.si;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
-import com.spldeolin.allison1875.base.BaseConfig;
+import java.util.Map;
+import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Allison1875[statute-inspector]的配置
@@ -12,6 +15,7 @@ import lombok.Data;
  * @author Deolin 2020-02-18
  */
 @Data
+@Log4j2
 public final class StatuteInspectorConfig {
 
     private static final StatuteInspectorConfig instance = new StatuteInspectorConfig();
@@ -32,29 +36,38 @@ public final class StatuteInspectorConfig {
     private Path lawlessCsvOutputDirectoryPath;
 
     private StatuteInspectorConfig() {
-        super();
         this.initLoad();
     }
 
     private void initLoad() {
-        commonPageTypeQualifier = BaseConfig.getInstace().getRawData().get("commonPageTypeQualifier");
+        Yaml yaml = new Yaml();
+        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("statute-inspector-config.yml")) {
+            Map<String, String> rawData = yaml.load(is);
+            commonPageTypeQualifier = rawData.get("commonPageTypeQualifier");
 
-        File publicAckJsonDirectory = new File(BaseConfig.getInstace().getRawData().get("publicAckJsonDirectoryPath"));
-        if (!publicAckJsonDirectory.exists()) {
-            if (!publicAckJsonDirectory.mkdirs()) {
-                throw new ConfigLoadingException("Make directory failed. [" + publicAckJsonDirectory + "]");
+            File publicAckJsonDirectory = new File(rawData.get("publicAckJsonDirectoryPath"));
+            if (!publicAckJsonDirectory.exists()) {
+                if (!publicAckJsonDirectory.mkdirs()) {
+                    log.error("[{}] mkdir failed.", publicAckJsonDirectory);
+                    throw new ConfigLoadingException();
+                }
             }
-        }
-        publicAckJsonDirectoryPath = publicAckJsonDirectory.toPath();
+            publicAckJsonDirectoryPath = publicAckJsonDirectory.toPath();
 
-        File lawlessCsvOutputDirectory = new File(
-                BaseConfig.getInstace().getRawData().get("lawlessCsvOutputDirectoryPath"));
-        if (!lawlessCsvOutputDirectory.exists()) {
-            if (!lawlessCsvOutputDirectory.mkdirs()) {
-                throw new ConfigLoadingException("Make directory failed. [" + lawlessCsvOutputDirectory + "]");
+            File lawlessCsvOutputDirectory = new File(rawData.get("lawlessCsvOutputDirectoryPath"));
+            if (!lawlessCsvOutputDirectory.exists()) {
+                if (!lawlessCsvOutputDirectory.mkdirs()) {
+                    log.error("[{}] mkdir failed.", lawlessCsvOutputDirectory);
+                    throw new ConfigLoadingException();
+                }
             }
+            lawlessCsvOutputDirectoryPath = lawlessCsvOutputDirectory.toPath();
+
+        } catch (Exception e) {
+            log.error("StatuteInspectorConfig.initLoad failed.", e);
+            throw new ConfigLoadingException();
         }
-        lawlessCsvOutputDirectoryPath = lawlessCsvOutputDirectory.toPath();
+
     }
 
     public static StatuteInspectorConfig getInstance() {
