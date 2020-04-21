@@ -83,6 +83,12 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <!-- maven invoker -->
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-invoker</artifactId>
+        </dependency>
+
         <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

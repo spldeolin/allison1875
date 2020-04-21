@@ -28,6 +28,16 @@ public final class BaseConfig {
     private Path projectPath;
 
     /**
+     * Maven全局配置setting.xml的路径
+     */
+    private Path mavenGlobalSettingXmlPath;
+
+    /**
+     * maven客户端的路径
+     */
+    private Path mavenHome;
+
+    /**
      * 开启类加载时，此项必填。
      * 使用脚本前需要先确保项目已经执行过mvn clean package，然后填入打包后的jar文件或是war文件路径
      */
@@ -54,6 +64,8 @@ public final class BaseConfig {
         try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("base-config.yml")) {
             Map<String, String> rawData = yaml.load(is);
             projectPath = Paths.get(rawData.get("projectPath"));
+            mavenGlobalSettingXmlPath = Paths.get(rawData.get("mavenGlobalSettingXmlPath"));
+            mavenHome = Paths.get(rawData.get("mavenHome"));
             warOrFatJarPath = Paths.get(rawData.get("warOrFatJarPath"));
             giveUpResultAddedSinceTime = TimeUtils.toLocalDateTime(rawData.get("giveUpResultAddedSinceTime"));
         } catch (Exception e) {

@@ -133,6 +133,14 @@
                 <version>2.3.30</version>
             </dependency>
 
+            <!-- maven invoker -->
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-invoker</artifactId>
+                <version>3.0.1</version>
+            </dependency>
+
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
