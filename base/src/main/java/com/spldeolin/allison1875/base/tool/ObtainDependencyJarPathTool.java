@@ -70,7 +70,7 @@ public class ObtainDependencyJarPathTool {
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(new File(pomPath));
         request.setGlobalSettingsFile(BaseConfig.getInstace().getMavenGlobalSettingXmlPath().toFile());
-        request.setGoals(Collections.singletonList("dependency:list -Dexcludes=com.topaiebiz"));
+        request.setGoals(Collections.singletonList("dependency:list"));
         Properties properties = new Properties();
         properties.setProperty("outputFile", output.getPath()); // redirect output to a file
         properties.setProperty("outputAbsoluteArtifactFilename", "true"); // with paths

@@ -1,8 +1,5 @@
 package com.spldeolin.allison1875.base.classloader;
 
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
-
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -10,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
@@ -21,6 +19,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.utils.CollectionStrategy;
 import com.github.javaparser.utils.Log;
 import com.github.javaparser.utils.ProjectRoot;
+
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
 
 /**
  * @author Deolin 2019-12-27
@@ -36,6 +37,9 @@ public class ClassLoaderCollectionStrategy implements CollectionStrategy {
         typeSolver.add(new ReflectionTypeSolver(false));
         parserConfiguration = StaticJavaParser.getConfiguration();
         parserConfiguration.setSymbolResolver(new JavaSymbolSolver(typeSolver));
+
+        // 目标项目足够大时，为了防止引起OOM，需要关闭这项配置，关闭后 getRange和 getTokenRange将不会返回内容
+        parserConfiguration.setStoreTokens(false);
     }
 
     @Override

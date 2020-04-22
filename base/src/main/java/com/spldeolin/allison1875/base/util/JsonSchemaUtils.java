@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
+import com.spldeolin.allison1875.base.classloader.MavenProjectClassLoaderFactory;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import lombok.extern.log4j.Log4j2;
 
@@ -27,7 +27,7 @@ public class JsonSchemaUtils {
 
         @Override
         public ClassLoader getClassLoader() {
-            return WarOrFatJarClassLoaderFactory.getClassLoader();
+            return MavenProjectClassLoaderFactory.getClassLoader();
         }
     };
 
