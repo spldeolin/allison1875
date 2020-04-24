@@ -10,7 +10,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
-import com.spldeolin.allison1875.base.classloader.WarOrFatJarClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -29,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-03-10
  */
 @Log4j2
+@Deprecated
 class JsonPropertyDescriptionProcessor {
 
     void process() {
@@ -61,8 +61,6 @@ class JsonPropertyDescriptionProcessor {
         log.info("Repackage maven project complete with elapsing {}ms.", System.currentTimeMillis() - start);
 
         start = System.currentTimeMillis();
-        WarOrFatJarClassLoaderFactory.refresh();
-        StaticAstContainer.refresh();
         log.info("Refresh WarOrFatJarClassLoader and AstContainer complete with elapsing {}ms.",
                 System.currentTimeMillis() - start);
     }

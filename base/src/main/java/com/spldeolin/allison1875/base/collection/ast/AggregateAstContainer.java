@@ -30,7 +30,7 @@ public class AggregateAstContainer extends AstContainer {
 
     private final Map<CompilationUnit, Path> projectPathsByCu;
 
-    AggregateAstContainer(Collection<Path> projectPaths) {
+    public AggregateAstContainer(Collection<Path> projectPaths) {
         super();
         this.projectPaths = projectPaths;
         astContainers = Maps.newHashMap();
