@@ -1,15 +1,13 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.CollectionStrategy;
 import com.github.javaparser.utils.SourceRoot;
-import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.allison1875.base.classloader.MavenProjectClassLoaderFactory;
-import lombok.Data;
 
 /**
  * 抽象语法树迭代子
@@ -21,10 +19,10 @@ class AstCursor implements Iterator<CompilationUnit> {
     private final CollectionStrategy collectionStrategy = new ClassLoaderCollectionStrategy(
             MavenProjectClassLoaderFactory.getClassLoader());
 
-    private final CursorBuffer buffer;
+    private final AstCursorBuffer buffer;
 
-    AstCursor(Collection<Path> projectPaths) {
-        buffer = new CursorBuffer(projectPaths);
+    AstCursor(AstCursorBuffer buffer) {
+        this.buffer = buffer;
     }
 
     @Override
@@ -35,7 +33,9 @@ class AstCursor implements Iterator<CompilationUnit> {
         } else if (buffer.getSourceRootIterator().hasNext()) {
             // cus没有了，sourceRoots还有 -> 清空cus，tryToParse下一个sourceRoot，重新收集cus
             buffer.getCompilationUnits().clear();
-            buffer.getSourceRootIterator().next().tryToParseParallelized().forEach(parseResult -> {
+            SourceRoot sourceRoot = buffer.getSourceRootIterator().next();
+            buffer.setCurrentSourceRoot(sourceRoot);
+            sourceRoot.tryToParseParallelized().forEach(parseResult -> {
                 if (parseResult.isSuccessful()) {
                     parseResult.getResult().ifPresent(cu -> buffer.getCompilationUnits().add(cu));
                 }
@@ -47,9 +47,12 @@ class AstCursor implements Iterator<CompilationUnit> {
             // sourceRoots也没有了，projectPaths还有
             // 清空sourceRoots，collect下一个projectPath，重新收集sourceRoot，重新收集sourceRoots
             buffer.getSourceRoots().clear();
-            buffer.getSourceRoots()
-                    .addAll(collectionStrategy.collect(buffer.getProjectPathIterator().next()).getSourceRoots());
+            Path projectPath = buffer.getProjectPathIterator().next();
+            List<SourceRoot> sourceRoots = collectionStrategy.collect(projectPath).getSourceRoots();
+            buffer.getSourceRoots().addAll(sourceRoots);
             buffer.setSourceRootIterator(buffer.getSourceRoots().iterator());
+            buffer.setCurrentProjectPath(projectPath);
+            buffer.setCurrentProjectAstForest(new ProjectAstForest(projectPath, sourceRoots));
             // 递归原因同上
             return hasNext();
         } else {
@@ -58,39 +61,17 @@ class AstCursor implements Iterator<CompilationUnit> {
         }
     }
 
+    @Override
+    public CompilationUnit next() {
+        return buffer.getCompilationUnitIterator().next();
+    }
+
     public void reset() {
         buffer.setProjectPathIterator(buffer.getProjectPaths().iterator());
         buffer.getSourceRoots().clear();
         buffer.setSourceRootIterator(buffer.getSourceRoots().iterator());
         buffer.getSourceRoots().clear();
         buffer.setCompilationUnitIterator(buffer.getCompilationUnits().iterator());
-    }
-
-    @Override
-    public CompilationUnit next() {
-        return buffer.getCompilationUnitIterator().next();
-    }
-
-    @Data
-    private static class CursorBuffer {
-
-        private final Collection<Path> projectPaths;
-
-        private Iterator<Path> projectPathIterator;
-
-        private final Collection<SourceRoot> sourceRoots = Lists.newLinkedList();
-
-        private Iterator<SourceRoot> sourceRootIterator = sourceRoots.iterator();
-
-        private final Collection<CompilationUnit> compilationUnits = Lists.newLinkedList();
-
-        private Iterator<CompilationUnit> compilationUnitIterator = compilationUnits.iterator();
-
-        public CursorBuffer(Collection<Path> projectPath) {
-            this.projectPaths = projectPath;
-            projectPathIterator = projectPaths.iterator();
-        }
-
     }
 
 }

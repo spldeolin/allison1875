@@ -9,6 +9,6 @@ import com.spldeolin.allison1875.si.dto.LawlessDto;
  */
 public interface Statute {
 
-    Collection<LawlessDto> inspect(Collection<CompilationUnit> cus);
+    Collection<LawlessDto> inspect(CompilationUnit cu);
 
 }

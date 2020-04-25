@@ -5,15 +5,11 @@ import static com.spldeolin.allison1875.da.DocAnalyzerConfig.CONFIG;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
-import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.ResolvedTypes;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.da.core.definition.ApiDefinition;
@@ -93,16 +89,7 @@ class BodyStructureProcessor {
     }
 
     private BodyStructureProcessor tryProcessNonArrayLikeType(ResolvedType type) {
-        String describe = type.describe();
-        ClassOrInterfaceDeclaration coid = StaticAstContainer.getClassOrInterfaceDeclaration(describe);
-
-        JsonSchema jsonSchema;
-        if (coid == null) {
-            // 往往是泛型返回值或是非用户定义的类型
-            jsonSchema = generateSchema(describe);
-        } else {
-            jsonSchema = generateSchema(coid);
-        }
+        JsonSchema jsonSchema = generateSchema(type.describe());
 
         if (jsonSchema == null) {
             return new VoidBodyProcessor();
@@ -176,11 +163,6 @@ class BodyStructureProcessor {
         return Iterables.getOnlyElement(pageType.asReferenceType().getTypeParametersMap()).b;
     }
 
-    private JsonSchema generateSchema(ClassOrInterfaceDeclaration clazz) {
-        String qualifierForClassLoader = qualifierForClassLoader(clazz);
-        return JsonSchemaUtils.generateSchemaOrElseNull(qualifierForClassLoader);
-    }
-
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
         int typeParameterIndex = resolvedTypeDescribe.indexOf("<");
         if (typeParameterIndex != -1) {
@@ -190,30 +172,9 @@ class BodyStructureProcessor {
         JsonSchema result = null;
         try {
             result = JsonSchemaUtils.generateSchema(resolvedTypeDescribe);
-        } catch (JsonSchemasException e) {
-            if (resolvedTypeDescribe.contains(".")) {
-                result = generateSchema(StringUtils.replaceLast(resolvedTypeDescribe, ".", "$"));
-            }
+        } catch (JsonSchemasException ignored) {
         }
         return result;
-    }
-
-    private String qualifierForClassLoader(ClassOrInterfaceDeclaration coid) {
-        StringBuilder qualifierForClassLoader = new StringBuilder(64);
-        this.qualifierForClassLoader(qualifierForClassLoader, coid);
-        return qualifierForClassLoader.toString();
-    }
-
-    private void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
-        node.getParentNode().ifPresent(parent -> {
-            if (parent instanceof TypeDeclaration) {
-                this.qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
-                qualifier.append("$");
-                qualifier.append(node.getNameAsString());
-            } else {
-                node.getFullyQualifiedName().ifPresent(qualifier::append);
-            }
-        });
     }
 
 }

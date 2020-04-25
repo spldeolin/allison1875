@@ -3,11 +3,9 @@ package com.spldeolin.allison1875.base.collection.vcs;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Map;
 import com.github.javaparser.ast.Node;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.BaseConfig;
-import com.spldeolin.allison1875.base.collection.ast.AstContainer;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
@@ -18,9 +16,8 @@ import lombok.extern.log4j.Log4j2;
 @Data
 public class StaticVcsContainer {
 
-    private static VcsContainer fromConfigPath = new VcsContainer(BaseConfig.getInstace().getProjectPath());
-
-    private static Map<Path, AstContainer> fromCustomPath = Maps.newHashMap();
+    private static VcsContainer fromConfigPath = new VcsContainer(
+            Iterables.getFirst(BaseConfig.getInstace().getProjectPaths(), null));
 
     public static Path getProjectPath() {
         return fromConfigPath.getProjectPath();

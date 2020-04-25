@@ -2,12 +2,10 @@ package com.spldeolin.allison1875.si.processor;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.mutable.MutableInt;
-import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.collection.vcs.StaticVcsContainer;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.si.dto.LawlessDto;
 import com.spldeolin.allison1875.si.dto.PublicAckDto;
 import com.spldeolin.allison1875.si.statute.StatuteEnum;
@@ -27,27 +25,27 @@ public class InspectionProcessor {
     private Collection<PublicAckDto> publicAcks;
 
     @Getter
-    private Collection<LawlessDto> lawlesses = Lists.newLinkedList();
+    private final Collection<LawlessDto> lawlesses = Lists.newLinkedList();
 
     public InspectionProcessor process() {
-        Collection<CompilationUnit> cus = StaticVcsContainer
-                .removeIfNotContain(StaticAstContainer.getCompilationUnits());
-        cus.removeIf(
-                cu -> !cu.getPackageDeclaration().filter(pkg -> pkg.getNameAsString().contains("nova")).isPresent());
-
-        Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
-            long start = System.currentTimeMillis();
-            Collection<LawlessDto> dtos = statuteEnum.getStatute().inspect(cus);
-            log.info("Statute[{}] inspection completed with [{}]ms.", statuteEnum.getNo(),
-                    System.currentTimeMillis() - start);
-            dtos.forEach(dto -> {
-                String statuteNo = statuteEnum.getNo();
-                if (isNotInPublicAcks(dto, statuteNo)) {
-                    dto.setStatuteNo(statuteNo);
-                    lawlesses.add(dto);
-                }
-            });
+        AstForest.getInstance().forEach(cu -> {
+            if (StaticVcsContainer.contain(cu)) {
+                long start = System.currentTimeMillis();
+                Arrays.stream(StatuteEnum.values()).forEach(statuteEnum -> {
+                    Collection<LawlessDto> dtos = statuteEnum.getStatute().inspect(cu);
+                    dtos.forEach(dto -> {
+                        String statuteNo = statuteEnum.getNo();
+                        if (isNotInPublicAcks(dto, statuteNo)) {
+                            dto.setStatuteNo(statuteNo);
+                            lawlesses.add(dto);
+                        }
+                    });
+                });
+                log.info("CompilationUnit [{}] inspection completed with [{}]ms.", Locations.getRelativePath(cu),
+                        System.currentTimeMillis() - start);
+            }
         });
+
         log.info("All inspections completed");
         return this;
     }

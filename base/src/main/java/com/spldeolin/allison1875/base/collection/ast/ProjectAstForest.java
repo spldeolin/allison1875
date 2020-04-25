@@ -7,20 +7,21 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Multimap;
 
 /**
- * 抽象语法森林
+ * 一个项目映射的抽象语法森林
  *
  * @author Deolin 2020-02-03
  */
-public class AstContainer {
+public class ProjectAstForest {
 
-    private Path path;
+    private final Path projectPath;
 
-    protected Collection<CompilationUnit> cus;
+    private final Collection<SourceRoot> sourceRoots;
 
-    private Map<Path, CompilationUnit> cusByPath;
+    private Collection<CompilationUnit> cus;
 
     private Collection<ClassOrInterfaceDeclaration> coids;
 
@@ -36,28 +37,18 @@ public class AstContainer {
 
     private Map<String, VariableDeclarator> fieldVarsByQualifier;
 
-    protected AstContainer() {
-
+    ProjectAstForest(Path projectPath, Collection<SourceRoot> sourceRoots) {
+        this.projectPath = projectPath;
+        this.sourceRoots = sourceRoots;
     }
 
-    AstContainer(Path path) {
-        this.path = path;
-        this.cus = new CompilationUnitCollector().path(path).collectIntoCollection().list();
-    }
-
-    public Path getPath() {
-        return path;
+    public Path getProjectPath() {
+        return projectPath;
     }
 
     public Collection<CompilationUnit> getCompilationUnits() {
+        cus = new CompilationUnitCollector().sourceRoots(sourceRoots).collectIntoCollection().list();
         return cus;
-    }
-
-    public CompilationUnit getCompilationUnit(Path path) {
-        if (cusByPath == null) {
-            cusByPath = new CompilationUnitCollector().list(cus).collectIntoMap().map();
-        }
-        return cusByPath.get(path);
     }
 
     public Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {

@@ -6,15 +6,9 @@ import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.utils.CollectionStrategy;
-import com.github.javaparser.utils.ParserCollectionStrategy;
-import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.BaseConfig;
-import com.spldeolin.allison1875.base.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.allison1875.base.classloader.MavenProjectClassLoaderFactory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -30,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
 class CompilationUnitCollector {
 
     @Setter
-    private Path path;
+    private Collection<SourceRoot> sourceRoots;
 
     @Getter
     @Setter
@@ -40,15 +34,12 @@ class CompilationUnitCollector {
     private Map<Path, CompilationUnit> map;
 
     CompilationUnitCollector collectIntoCollection() {
-        if (path == null) {
-            throw new IllegalStateException("path cannot be absent.");
+        if (sourceRoots == null) {
+            throw new IllegalStateException("sourceRoots cannot be absent.");
         }
 
-        long start = System.currentTimeMillis();
         list = Lists.newLinkedList();
-        collectSoruceRoots(newCollectionStrategy()).forEach(this::parseSourceRoot);
-        log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", list.size(),
-                path.toAbsolutePath(), System.currentTimeMillis() - start);
+        sourceRoots.forEach(this::parseSourceRoot);
         return this;
     }
 
@@ -65,24 +56,6 @@ class CompilationUnitCollector {
         return this;
     }
 
-    private CollectionStrategy newCollectionStrategy() {
-        CollectionStrategy collectionStrategy;
-        if (BaseConfig.getInstace().getCollectWithLoadingClass()) {
-            log.info("Start collecting CompilationUnit with ClassLoaderCollectionStrategy.");
-            collectionStrategy = new ClassLoaderCollectionStrategy(MavenProjectClassLoaderFactory.getClassLoader());
-        } else {
-            log.info("Start collecting CompilationUnit with ParserCollectionStrategy.");
-            collectionStrategy = new ParserCollectionStrategy();
-        }
-        return collectionStrategy;
-    }
-
-    private Collection<SourceRoot> collectSoruceRoots(CollectionStrategy collectionStrategy) {
-        ProjectRoot projectRoot = collectionStrategy.collect(path);
-        projectRoot.addSourceRoot(path);
-        return projectRoot.getSourceRoots();
-    }
-
     private void parseSourceRoot(SourceRoot sourceRoot) {
         long start = System.currentTimeMillis();
         int count = 0;
@@ -97,7 +70,7 @@ class CompilationUnitCollector {
 
         if (count > 0) {
             log.info("(Detail) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", count,
-                    path.relativize(sourceRoot.getRoot()), System.currentTimeMillis() - start);
+                    sourceRoot.getRoot(), System.currentTimeMillis() - start);
         }
     }
 

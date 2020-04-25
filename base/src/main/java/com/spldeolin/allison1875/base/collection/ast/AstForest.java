@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.base.BaseConfig;
-import lombok.Getter;
 import lombok.ToString;
 
 /**
@@ -13,7 +12,6 @@ import lombok.ToString;
  *
  * @author Deolin 2020-04-24
  */
-@Getter
 @ToString
 public class AstForest implements Iterable<CompilationUnit> {
 
@@ -21,24 +19,14 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     private final Collection<Path> projectPaths;
 
-    private final boolean cursorMode;
+    private final AstCursorBuffer buffer;
 
-    private AstCursor astCursor;
+    private final AstCursor cursor;
 
-    private AggregateAstContainer aggregateAstContainer;
-
-    public AstForest(Collection<Path> projectPaths) {
-        this(projectPaths, projectPaths.size() > 1);
-    }
-
-    public AstForest(Collection<Path> projectPaths, boolean cursorMode) {
+    private AstForest(Collection<Path> projectPaths) {
         this.projectPaths = projectPaths;
-        this.cursorMode = cursorMode;
-        if (cursorMode) {
-            astCursor = new AstCursor(projectPaths);
-        } else {
-            aggregateAstContainer = new AggregateAstContainer(projectPaths);
-        }
+        this.buffer = new AstCursorBuffer(projectPaths);
+        this.cursor = new AstCursor(buffer);
     }
 
     public static AstForest getInstance() {
@@ -47,19 +35,15 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     @Override
     public Iterator<CompilationUnit> iterator() {
-        if (cursorMode) {
-            return astCursor;
-        } else {
-            return aggregateAstContainer.getCompilationUnits().iterator();
-        }
+        return cursor;
     }
 
-    public AggregateAstContainer getAggregateAstContainer() {
-        if (cursorMode) {
-            throw new IllegalStateException("AstForest is not in cursor mode.");
-        } else {
-            return aggregateAstContainer;
-        }
+    public Collection<Path> getProjectPaths() {
+        return projectPaths;
+    }
+
+    public AstCursorBuffer getBuffer() {
+        return buffer;
     }
 
 }

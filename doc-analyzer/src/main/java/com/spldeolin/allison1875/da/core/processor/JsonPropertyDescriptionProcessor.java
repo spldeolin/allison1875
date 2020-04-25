@@ -10,7 +10,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
-import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -37,7 +37,7 @@ class JsonPropertyDescriptionProcessor {
         }
 
         long start = System.currentTimeMillis();
-        StaticAstContainer.getCompilationUnits().forEach(cu -> {
+        AstForest.getInstance().forEach(cu -> {
             MutableBoolean save = new MutableBoolean(false);
             cu.findAll(ClassOrInterfaceDeclaration.class, this::isJavabean)
                     .forEach(javabean -> javabean.getFields().forEach(field -> {

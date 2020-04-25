@@ -1,11 +1,14 @@
 package com.spldeolin.allison1875.base;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -17,8 +20,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import com.github.javaparser.ast.CompilationUnit;
-import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
@@ -36,18 +37,12 @@ public final class BaseConfig {
     private static BaseConfig instace;
 
     /**
-     * projectPaths的第一个路径
-     */
-    @Deprecated
-    private Path projectPath;
-
-    /**
      * 项目根目录路径，此项必填
      */
     private Collection<Path> projectPaths;
 
     /**
-     * classpath相对于项目根目录的相对路径
+     * classpath相对于项目根目录的相对路径（默认均为target/classes）
      */
     private Path classpathRelativePath;
 
@@ -62,22 +57,14 @@ public final class BaseConfig {
     private Path mavenHome;
 
     /**
-     * 开启类加载时，此项必填。
-     * 使用脚本前需要先确保项目已经执行过mvn clean package，然后填入打包后的jar文件或是war文件路径
-     */
-    private Path warOrFatJarPath;
-
-    /**
-     * 是否禁用类加载收集策略来收集CU，部分工具需要启用类加载
-     * 禁用后可以加快收集速度，但是AST node将会不再支持resolved、calculateResolvedType等方法
-     * （这个配置项默认为true，是否设置为false不由用户通过config.yml配置决定，而是由每个决定）
-     */
-    private Boolean collectWithLoadingClass = true;
-
-    /**
      * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
      */
-    private LocalDateTime giveUpResultAddedSinceTime;
+    private LocalDateTime targetFileSince;
+
+    /**
+     * 所有projectPaths的公有部分
+     */
+    private Path commonPart;
 
     private BaseConfig() {
     }
@@ -95,12 +82,24 @@ public final class BaseConfig {
 
         try {
             instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("base-config.yml"), BaseConfig.class);
-            instace.projectPath = Iterables.getFirst(instace.projectPaths, null);
-
         } catch (Exception e) {
             log.error("BaseConfig.getInstance failed.", e);
             throw new ConfigLoadingException();
         }
+
+        StringBuilder commonPart = new StringBuilder();
+        List<String> paths = getInstace().getProjectPaths().stream().map(Path::toString).collect(Collectors.toList());
+        String firstPath = paths.get(0);
+        for (int i = 0; i < firstPath.length(); i++) {
+            final int ii = i;
+            char firstPathEachChar = firstPath.charAt(ii);
+            if (paths.stream().allMatch(path -> path.charAt(ii) == firstPathEachChar)) {
+                commonPart.append(firstPathEachChar);
+            } else {
+                break;
+            }
+        }
+        instace.setCommonPart(Paths.get(commonPart.toString()));
 
         return instace;
     }
@@ -117,6 +116,10 @@ public final class BaseConfig {
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTime))
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTime));
         return javaTimeModule;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getInstace().getCommonPart());
     }
 
 }

@@ -26,7 +26,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.collection.ast.StaticAstContainer;
+import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.da.core.definition.ValidatorDefinition;
 import lombok.Getter;
@@ -47,17 +47,17 @@ class ValidatorProcessor {
     private NodeWithAnnotations<?> nodeWithAnnotations;
 
     @Getter
-    private Collection<ValidatorDefinition> validators = Lists.newLinkedList();
+    private final Collection<ValidatorDefinition> validators = Lists.newLinkedList();
 
     ValidatorProcessor process() {
         checkStatus();
 
         this.calcValidators(nodeWithAnnotations.getAnnotations());
 
-        if (validators.removeIf(validator -> enumValue == validator.getValidatorType())) {
-            String enumValueNote = this.calcEnumValueSpecially(nodeWithAnnotations).toString();
-            validators.add(new ValidatorDefinition().setValidatorType(enumValue).setNote(enumValueNote));
-        }
+//        if (validators.removeIf(validator -> enumValue == validator.getValidatorType())) {
+//            String enumValueNote = this.calcEnumValueSpecially(nodeWithAnnotations).toString();
+//            validators.add(new ValidatorDefinition().setValidatorType(enumValue).setNote(enumValueNote));
+//        }
 
         return this;
     }
@@ -68,39 +68,39 @@ class ValidatorProcessor {
         }
     }
 
-    private StringBuilder calcEnumValueSpecially(NodeWithAnnotations<?> node) {
-        StringBuilder result = new StringBuilder(64);
-        node.getAnnotationByName("ValidEnumValue").ifPresent(anno -> {
-            result.append("（");
-            anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                if (nameOf(pair, "enumType")) {
-                    ResolvedType resolvedType = pair.getValue().calculateResolvedType();
-                    String qualifier = resolvedType.asReferenceType().getTypeParametersMap().get(0).b.describe();
-                    EnumDeclaration enumDeclaration = StaticAstContainer.getEnumDeclaration(qualifier);
-//                            EnumContainer.getInstance().getByQualifier().get(qualifier);
-
-                    Collection<String> parts = Lists.newLinkedList();
-                    try {
-                        enumDeclaration.getEntries().forEach(entry -> {
-                            if (entry.getArguments().size() > 0) {
-                                // 约定第1个作为参数绑定的value
-                                parts.add(entry.getArgument(0).toString());
-                                parts.add(Javadocs.extractFirstLine(entry));
-                            } else {
-                                // 类似于 public enum Gender {male, female;}
-                            }
-                        });
-                    } catch (NoSuchElementException e) {
-                        log.warn("找不到enum[{}]", qualifier);
-                        return;
-                    }
-                    Joiner.on("、").appendTo(result, parts);
-                }
-            });
-        });
-        result.append("）");
-        return result;
-    }
+//    private StringBuilder calcEnumValueSpecially(NodeWithAnnotations<?> node) {
+//        StringBuilder result = new StringBuilder(64);
+//        node.getAnnotationByName("ValidEnumValue").ifPresent(anno -> {
+//            result.append("（");
+//            anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
+//                if (nameOf(pair, "enumType")) {
+//                    ResolvedType resolvedType = pair.getValue().calculateResolvedType();
+//                    String qualifier = resolvedType.asReferenceType().getTypeParametersMap().get(0).b.describe();
+//                    EnumDeclaration enumDeclaration = StaticAstContainer.getEnumDeclaration(qualifier);
+////                            EnumContainer.getInstance().getByQualifier().get(qualifier);
+//
+//                    Collection<String> parts = Lists.newLinkedList();
+//                    try {
+//                        enumDeclaration.getEntries().forEach(entry -> {
+//                            if (entry.getArguments().size() > 0) {
+//                                // 约定第1个作为参数绑定的value
+//                                parts.add(entry.getArgument(0).toString());
+//                                parts.add(Javadocs.extractFirstLine(entry));
+//                            } else {
+//                                // 类似于 public enum Gender {male, female;}
+//                            }
+//                        });
+//                    } catch (NoSuchElementException e) {
+//                        log.warn("找不到enum[{}]", qualifier);
+//                        return;
+//                    }
+//                    Joiner.on("、").appendTo(result, parts);
+//                }
+//            });
+//        });
+//        result.append("）");
+//        return result;
+//    }
 
     private void calcValidators(NodeList<AnnotationExpr> annos) {
         annos.forEach(anno -> {
@@ -187,9 +187,9 @@ class ValidatorProcessor {
                         }
                     });
                     break;
-                case "ValidEnumValue":
-                    validators.add(new ValidatorDefinition().setValidatorType(enumValue));
-                    break;
+//                case "ValidEnumValue":
+//                    validators.add(new ValidatorDefinition().setValidatorType(enumValue));
+//                    break;
             }
         });
     }
