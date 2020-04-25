@@ -70,17 +70,15 @@ public class JsonSchemaUtils {
     }
 
     private static void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
-        node.getParentNode()
-            .ifPresent(parent -> {
-                if (parent instanceof TypeDeclaration) {
-                    qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
-                    qualifier.append("$");
-                    qualifier.append(node.getNameAsString());
-                } else {
-                    node.getFullyQualifiedName()
-                        .ifPresent(qualifier::append);
-                }
-            });
+        node.getParentNode().ifPresent(parent -> {
+            if (parent instanceof TypeDeclaration) {
+                qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
+                qualifier.append("$");
+                qualifier.append(node.getNameAsString());
+            } else {
+                node.getFullyQualifiedName().ifPresent(qualifier::append);
+            }
+        });
     }
 
 }

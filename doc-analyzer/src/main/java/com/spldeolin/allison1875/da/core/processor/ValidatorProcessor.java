@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.da.core.processor;
 
-import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.enumValue;
 import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.future;
 import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxFloat;
 import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.maxFractionalDigits;
@@ -17,17 +16,11 @@ import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.positive
 import static com.spldeolin.allison1875.da.core.enums.ValidatorTypeEnum.regex;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.resolution.types.ResolvedType;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.collection.ast.AstForest;
-import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.da.core.definition.ValidatorDefinition;
 import lombok.Getter;
 import lombok.Setter;
