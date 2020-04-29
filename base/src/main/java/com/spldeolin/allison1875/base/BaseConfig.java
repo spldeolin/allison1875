@@ -42,19 +42,13 @@ public final class BaseConfig {
     private Collection<Path> projectPaths;
 
     /**
-     * classpath相对于项目根目录的相对路径（默认均为target/classes）
+     * 项目下模块的源码路径、编译后classpath路径、额外jar文件的路径。
+     * 如果是单模块项目，那么主体则是项目本身。
+     *
+     * 可以使用CompileSourceAndCopyDependencyTool对projectPaths进行编译、jar拷贝后，
+     * 产生这个配置的yaml片段
      */
-    private Path classpathRelativePath;
-
-    /**
-     * Maven全局配置setting.xml的路径
-     */
-    private Path mavenGlobalSettingXmlPath;
-
-    /**
-     * maven客户端的路径
-     */
-    private Path mavenHome;
+    private Collection<ProjectModule> projectModules;
 
     /**
      * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
@@ -120,6 +114,17 @@ public final class BaseConfig {
 
     public static void main(String[] args) {
         System.out.println(getInstace().getCommonPart());
+    }
+
+    @Data
+    public static class ProjectModule {
+
+        private Path sourceCodePath;
+
+        private Path classesPath;
+
+        private Path externalJarsPath;
+
     }
 
 }
