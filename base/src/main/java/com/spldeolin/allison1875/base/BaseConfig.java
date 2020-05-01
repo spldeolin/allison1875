@@ -8,7 +8,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -20,6 +22,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
@@ -58,7 +61,11 @@ public final class BaseConfig {
     /**
      * 所有projectPaths的公有部分
      */
+    @JsonIgnore
     private Path commonPart;
+
+    @JsonIgnore
+    private Map<Path, ProjectModule> projectModulesMap = Maps.newHashMap();
 
     private BaseConfig() {
     }
@@ -94,6 +101,11 @@ public final class BaseConfig {
             }
         }
         instace.setCommonPart(Paths.get(commonPart.toString()));
+
+        if (instace.getProjectModules() != null) {
+            instace.getProjectModules()
+                    .forEach(module -> instace.getProjectModulesMap().put(module.getSourceCodePath(), module));
+        }
 
         return instace;
     }

@@ -6,9 +6,14 @@ import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.base.classloader.MavenProjectClassLoaderFactory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -59,6 +64,17 @@ class CompilationUnitCollector {
     private void parseSourceRoot(SourceRoot sourceRoot) {
         long start = System.currentTimeMillis();
         int count = 0;
+
+        TypeSolver typeSolver;
+        ClassLoader classLoader = MavenProjectClassLoaderFactory.getClassLoader(sourceRoot.getRoot());
+        if (classLoader != null) {
+            typeSolver = new ClassLoaderTypeSolver(classLoader);
+        } else {
+            // 因为某些原因无法类加载，使用无需类加载的TypeSolver
+            typeSolver = new JavaParserTypeSolver(sourceRoot.getRoot());
+        }
+        sourceRoot.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(typeSolver));
+
         for (ParseResult<CompilationUnit> parseResult : sourceRoot.tryToParseParallelized()) {
             if (parseResult.isSuccessful()) {
                 parseResult.getResult().ifPresent(list::add);

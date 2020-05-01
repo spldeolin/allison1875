@@ -4,16 +4,15 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
+import com.github.javaparser.utils.ParserCollectionStrategy;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
  * 这是一个独立运行的Tool
  * 这个Tool的作用是在对目标项目下的每个pom文件执行mvn compile 命令和mvn dependency:copy-dependencies
  * 从而获取到module的源码路径、编译后classpath路径、额外jar文件的路径
- * 最后生成yaml片段并打印
+ * 最后生成yaml片段并打印以提供给base-config.yml使用
  *
  * @author Deolin 2020-04-19
  */
@@ -55,38 +54,41 @@ public class CompileSourceAndCopyDependencyTool {
     private static final Path externalJarsBasePath = Paths.get("/Users/deolin/Downloads/externalJars/");
 
     public static void main(String[] args) {
+        ParserCollectionStrategy collectionStrategy = new ParserCollectionStrategy();
         StringBuilder report = new StringBuilder(1024);
-        List<File> poms = Lists.newArrayList();
         BaseConfig.getInstace().getProjectPaths().forEach(projectPath -> {
-            Iterator<File> xmls = FileUtils.iterateFiles(projectPath.toFile(), new String[]{"xml"}, true);
-            while (xmls.hasNext()) {
-                File xml = xmls.next();
-                if ("pom.xml".equals(xml.getName())) {
-                    poms.add(xml);
+            List<File> poms = Lists.newArrayList();
+            collectionStrategy.collect(projectPath).getSourceRoots().forEach(sourceRoot -> {
+                String path = sourceRoot.getRoot().toString();
+                if (path.endsWith(sourceRootRelativeToModulePath.toString())) {
+                    path = path.replace(sourceRootRelativeToModulePath.toString(), "");
+                    poms.add(Paths.get(path, "pom.xml").toFile()); // check exist
+                }
+            });
+
+            List<File> excludeParent = poms;
+            if (poms.size() > 1) {
+                poms.sort(Comparator.comparingInt(o -> o.getParent().length()));
+                excludeParent = poms.subList(1, poms.size());
+            }
+
+            for (File pom : excludeParent) {
+                Path pomPath = pom.toPath();
+                Path modulePath = pom.getParentFile().toPath();
+                try {
+                    log.info("CompileSourceAndCopyDependencyTool.invokePom({})", pomPath);
+                    String externalJarsPath = invokePom(pomPath);
+                    report.append("\r\n  - sourceCodePath: ");
+                    report.append(modulePath.resolve(sourceRootRelativeToModulePath));
+                    report.append("\r\n    classesPath: ");
+                    report.append(modulePath.resolve(classpathRelativeToModulePath));
+                    report.append("\r\n    externalJarsPath: ");
+                    report.append(modulePath.resolve(externalJarsPath));
+                } catch (MavenInvocationException e) {
+                    log.error("CompileSourceAndCopyDependencyTool.invokePom({})", pomPath, e);
                 }
             }
         });
-        List<File> excludeParent = poms;
-        if (poms.size() > 1) {
-            poms.sort(Comparator.comparingInt(o -> o.getParent().length()));
-            excludeParent = poms.subList(1, poms.size());
-        }
-
-        for (File pom : excludeParent) {
-            Path pomPath = pom.toPath();
-            Path modulePath = pom.getParentFile().toPath();
-            try {
-                String externalJarsPath = invokePom(pomPath);
-                report.append("\r\n  - sourceCodePath: ");
-                report.append(modulePath.resolve(sourceRootRelativeToModulePath));
-                report.append("\r\n    classesPath: ");
-                report.append(modulePath.resolve(classpathRelativeToModulePath));
-                report.append("\r\n    externalJarsPath: ");
-                report.append(modulePath.resolve(externalJarsPath));
-            } catch (MavenInvocationException e) {
-                log.error("ObtainDependencyJarPathTool.obtainFromPom({})", pomPath, e);
-            }
-        }
 
         log.info(report);
     }
@@ -97,7 +99,10 @@ public class CompileSourceAndCopyDependencyTool {
         invoker.setOutputHandler(new PrintStreamHandler() {
             @Override
             public void consumeLine(String line) {
-                log.info(nullToEmpty(line));
+                line = nullToEmpty(line);
+                if (line.startsWith("[ERROR]")) {
+                    log.info(line);
+                }
             }
         });
 

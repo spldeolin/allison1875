@@ -15,17 +15,17 @@ import lombok.ToString;
 @ToString
 public class AstForest implements Iterable<CompilationUnit> {
 
-    private static final AstForest instance = new AstForest(BaseConfig.getInstace().getProjectPaths());
+    private static final AstForest instance = new AstForest(BaseConfig.getInstace().getProjectModulesMap().keySet());
 
-    private final Collection<Path> projectPaths;
+    private final Collection<Path> sourceRoots;
 
     private final AstCursorBuffer buffer;
 
     private final AstCursor cursor;
 
-    private AstForest(Collection<Path> projectPaths) {
-        this.projectPaths = projectPaths;
-        this.buffer = new AstCursorBuffer(projectPaths);
+    private AstForest(Collection<Path> sourceRoots) {
+        this.sourceRoots = sourceRoots;
+        this.buffer = new AstCursorBuffer(sourceRoots);
         this.cursor = new AstCursor(buffer);
     }
 
@@ -38,12 +38,16 @@ public class AstForest implements Iterable<CompilationUnit> {
         return cursor;
     }
 
-    public Collection<Path> getProjectPaths() {
-        return projectPaths;
+    public Collection<Path> getSourceRoots() {
+        return sourceRoots;
     }
 
     public AstCursorBuffer getBuffer() {
         return buffer;
+    }
+
+    public void reset() {
+        cursor.reset();
     }
 
 }

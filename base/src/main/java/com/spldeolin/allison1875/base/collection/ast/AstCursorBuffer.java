@@ -11,15 +11,9 @@ import lombok.Data;
 @Data
 public class AstCursorBuffer {
 
-    private final Collection<Path> projectPaths;
+    private final Collection<Path> sourceRoots;
 
-    private Iterator<Path> projectPathIterator;
-
-    private Path currentProjectPath;
-
-    private final Collection<SourceRoot> sourceRoots = Lists.newLinkedList();
-
-    private Iterator<SourceRoot> sourceRootIterator = sourceRoots.iterator();
+    private Iterator<Path> sourceRootIterator;
 
     private SourceRoot currentSourceRoot;
 
@@ -31,9 +25,9 @@ public class AstCursorBuffer {
 
     private ProjectAstForest currentProjectAstForest;
 
-    AstCursorBuffer(Collection<Path> projectPath) {
-        this.projectPaths = projectPath;
-        projectPathIterator = projectPaths.iterator();
+    AstCursorBuffer(Collection<Path> sourceRoots) {
+        this.sourceRoots = sourceRoots;
+        sourceRootIterator = sourceRoots.iterator();
     }
 
 }
