@@ -14,12 +14,12 @@ import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * get a classpath and jars classloader for sourceRoot
+ * 为module提供java.lang.ClassLoader 对象的工厂
  *
  * @author Deolin 2019-12-27
  */
 @Log4j2
-public class MavenProjectClassLoaderFactory {
+public class ModuleClassLoaderFactory {
 
     private static final Map<Path, ClassLoader> cache = Maps.newHashMap();
 
