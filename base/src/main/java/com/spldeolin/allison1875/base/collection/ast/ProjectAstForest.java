@@ -51,7 +51,7 @@ public class ProjectAstForest {
         if (cus == null) {
             cus = Lists.newLinkedList();
             for (SourceRoot sourceRoot : sourceRoots) {
-                cus.addAll(new CompilationUnitCollector().sourceRoot(sourceRoot).collectIntoCollection().list());
+                cus.addAll(new CompilationUnitCollector().collect(sourceRoot));
             }
         }
         return cus;

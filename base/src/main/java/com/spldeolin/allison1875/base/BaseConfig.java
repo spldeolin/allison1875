@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -35,6 +36,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Data
 @Log4j2
+@Accessors(chain = true)
 public final class BaseConfig {
 
     private static BaseConfig instace;
@@ -43,6 +45,12 @@ public final class BaseConfig {
      * 项目根目录路径，此项必填
      */
     private Collection<Path> projectPaths;
+
+    /**
+     * 是否使用类加载
+     */
+    @JsonIgnore
+    private Boolean withClassLoader = true;
 
     /**
      * 项目下模块的源码路径、编译后classpath路径、额外jar文件的路径。

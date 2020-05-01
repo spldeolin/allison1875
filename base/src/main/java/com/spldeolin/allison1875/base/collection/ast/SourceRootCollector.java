@@ -13,9 +13,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-05-01
  */
 @Log4j2
-class SourceRootCollector {
+public class SourceRootCollector {
 
-    Collection<SourceRoot> collect(Collection<Path> projectPaths) {
+    public Collection<SourceRoot> collect(Collection<Path> projectPaths) {
         Collection<SourceRoot> result = Lists.newLinkedList();
         ParserCollectionStrategy strategy = new ParserCollectionStrategy();
         for (Path projectPath : projectPaths) {

@@ -21,33 +21,39 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MavenProjectClassLoaderFactory {
 
-    private static final Map<SourceRoot, ClassLoader> cache = Maps.newHashMap();
+    private static final Map<Path, ClassLoader> cache = Maps.newHashMap();
 
-    public static ClassLoader getClassLoader(SourceRoot sourceRoot) {
-        ClassLoader classLoader = cache.get(sourceRoot);
+    public static ClassLoader getClassLoader(Path sourceRootPath) {
+        ClassLoader classLoader = cache.get(sourceRootPath);
         if (classLoader != null) {
             return classLoader;
         }
 
         // target classpath
         ClassPool classPool = ClassPool.getDefault();
-        ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRoot.getRoot());
+        ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRootPath);
         if (projectModule == null) {
             return null;
         }
         appendToClassPool(classPool, projectModule.getClassesPath());
 
         // target jars path
-        Iterator<File> jarItr = FileUtils
-                .iterateFiles(projectModule.getExternalJarsPath().toFile(), new String[]{"jar"}, true);
-        while (jarItr.hasNext()) {
-            File jar = jarItr.next();
-            appendToClassPool(classPool, jar.toPath());
+        File directory = projectModule.getExternalJarsPath().toFile();
+        if (directory.isDirectory()) {
+            Iterator<File> jarItr = FileUtils.iterateFiles(directory, new String[]{"jar"}, true);
+            while (jarItr.hasNext()) {
+                File jar = jarItr.next();
+                appendToClassPool(classPool, jar.toPath());
+            }
         }
 
         classLoader = new javassist.Loader(classPool);
-        cache.put(sourceRoot, classLoader);
+        cache.put(sourceRootPath, classLoader);
         return classLoader;
+    }
+
+    public static ClassLoader getClassLoader(SourceRoot sourceRoot) {
+        return getClassLoader(sourceRoot.getRoot());
     }
 
     private static void appendToClassPool(ClassPool classPool, Path path) {

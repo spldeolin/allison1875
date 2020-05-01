@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Iterator;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.utils.SourceRoot;
 import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.ToString;
 
@@ -17,13 +18,14 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     private static final AstForest instance = new AstForest(BaseConfig.getInstace().getProjectPaths());
 
-    private final AstCursorBuffer buffer;
+    private final Collection<Path> projectPaths;
 
-    private final AstCursor cursor;
+    private AstCursor cursor;
 
     private AstForest(Collection<Path> projectPaths) {
-        this.buffer = new AstCursorBuffer(new SourceRootCollector().collect(projectPaths));
-        this.cursor = new AstCursor(buffer);
+        this.projectPaths = projectPaths;
+        Collection<SourceRoot> sourceRoots = new SourceRootCollector().collect(projectPaths);
+        this.cursor = new AstCursor(sourceRoots);
     }
 
     public static AstForest getInstance() {
@@ -35,12 +37,9 @@ public class AstForest implements Iterable<CompilationUnit> {
         return cursor;
     }
 
-    public AstCursorBuffer getBuffer() {
-        return buffer;
-    }
-
     public void reset() {
-        cursor.reset();
+        Collection<SourceRoot> sourceRoots = new SourceRootCollector().collect(projectPaths);
+        this.cursor = new AstCursor(sourceRoots);
     }
 
 }
