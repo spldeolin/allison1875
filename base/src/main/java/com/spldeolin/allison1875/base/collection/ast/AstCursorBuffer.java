@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Iterator;
 import com.github.javaparser.ast.CompilationUnit;
@@ -11,9 +10,9 @@ import lombok.Data;
 @Data
 public class AstCursorBuffer {
 
-    private final Collection<Path> sourceRoots;
+    private final Collection<SourceRoot> sourceRoots;
 
-    private Iterator<Path> sourceRootIterator;
+    private Iterator<SourceRoot> sourceRootIterator;
 
     private SourceRoot currentSourceRoot;
 
@@ -25,7 +24,7 @@ public class AstCursorBuffer {
 
     private ProjectAstForest currentProjectAstForest;
 
-    AstCursorBuffer(Collection<Path> sourceRoots) {
+    AstCursorBuffer(Collection<SourceRoot> sourceRoots) {
         this.sourceRoots = sourceRoots;
         sourceRootIterator = sourceRoots.iterator();
     }

@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.utils.SourceRoot;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 /**
@@ -47,7 +48,12 @@ public class ProjectAstForest {
     }
 
     public Collection<CompilationUnit> getCompilationUnits() {
-        cus = new CompilationUnitCollector().sourceRoots(sourceRoots).collectIntoCollection().list();
+        if (cus == null) {
+            cus = Lists.newLinkedList();
+            for (SourceRoot sourceRoot : sourceRoots) {
+                cus.addAll(new CompilationUnitCollector().sourceRoot(sourceRoot).collectIntoCollection().list());
+            }
+        }
         return cus;
     }
 

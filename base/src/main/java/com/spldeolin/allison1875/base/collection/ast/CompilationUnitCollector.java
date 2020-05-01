@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 class CompilationUnitCollector {
 
     @Setter
-    private Collection<SourceRoot> sourceRoots;
+    private SourceRoot sourceRoot;
 
     @Getter
     @Setter
@@ -39,12 +39,12 @@ class CompilationUnitCollector {
     private Map<Path, CompilationUnit> map;
 
     CompilationUnitCollector collectIntoCollection() {
-        if (sourceRoots == null) {
+        if (sourceRoot == null) {
             throw new IllegalStateException("sourceRoots cannot be absent.");
         }
 
         list = Lists.newLinkedList();
-        sourceRoots.forEach(this::parseSourceRoot);
+        parseSourceRoot(sourceRoot);
         return this;
     }
 
@@ -66,7 +66,7 @@ class CompilationUnitCollector {
         int count = 0;
 
         TypeSolver typeSolver;
-        ClassLoader classLoader = MavenProjectClassLoaderFactory.getClassLoader(sourceRoot.getRoot());
+        ClassLoader classLoader = MavenProjectClassLoaderFactory.getClassLoader(sourceRoot);
         if (classLoader != null) {
             typeSolver = new ClassLoaderTypeSolver(classLoader);
         } else {

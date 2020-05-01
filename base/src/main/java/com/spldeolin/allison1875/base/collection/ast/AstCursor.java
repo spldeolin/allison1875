@@ -1,11 +1,9 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Iterator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
-import com.google.common.collect.Lists;
 
 /**
  * 抽象语法树迭代子
@@ -28,10 +26,9 @@ class AstCursor implements Iterator<CompilationUnit> {
         } else if (buffer.getSourceRootIterator().hasNext()) {
             // cus没有了，sourceRoots还有 -> 清空cus，tryToParse下一个sourceRoot，重新收集cus
             buffer.getCompilationUnits().clear();
-            Path sourceRootPath = buffer.getSourceRootIterator().next();
-            SourceRoot sourceRoot = new SourceRoot(sourceRootPath);
+            SourceRoot sourceRoot = buffer.getSourceRootIterator().next();
             buffer.setCurrentSourceRoot(sourceRoot);
-            Collection<CompilationUnit> cus = new CompilationUnitCollector().sourceRoots(Lists.newArrayList(sourceRoot))
+            Collection<CompilationUnit> cus = new CompilationUnitCollector().sourceRoot(sourceRoot)
                     .collectIntoCollection().list();
             buffer.getCompilationUnits().addAll(cus);
             buffer.setCompilationUnitIterator(buffer.getCompilationUnits().iterator());

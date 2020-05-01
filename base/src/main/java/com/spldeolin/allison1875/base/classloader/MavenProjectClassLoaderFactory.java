@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.BaseConfig.ProjectModule;
@@ -20,17 +21,17 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MavenProjectClassLoaderFactory {
 
-    private static final Map<Path, ClassLoader> cache = Maps.newHashMap();
+    private static final Map<SourceRoot, ClassLoader> cache = Maps.newHashMap();
 
-    public static ClassLoader getClassLoader(Path sourceRootPath) {
-        ClassLoader classLoader = cache.get(sourceRootPath);
+    public static ClassLoader getClassLoader(SourceRoot sourceRoot) {
+        ClassLoader classLoader = cache.get(sourceRoot);
         if (classLoader != null) {
             return classLoader;
         }
 
         // target classpath
         ClassPool classPool = ClassPool.getDefault();
-        ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRootPath);
+        ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRoot.getRoot());
         if (projectModule == null) {
             return null;
         }
@@ -45,7 +46,7 @@ public class MavenProjectClassLoaderFactory {
         }
 
         classLoader = new javassist.Loader(classPool);
-        cache.put(sourceRootPath, classLoader);
+        cache.put(sourceRoot, classLoader);
         return classLoader;
     }
 
