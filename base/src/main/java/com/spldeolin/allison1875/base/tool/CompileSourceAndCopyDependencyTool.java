@@ -51,7 +51,7 @@ public class CompileSourceAndCopyDependencyTool {
     /**
      * mvn dependency:copy-dependencies 命令会将jar拷贝到这个目录下
      */
-    private static final Path externalJarsBasePath = Paths.get("/Users/deolin/Downloads/externalJars/");
+    private static final Path externalJarsBasePath = Paths.get("/Users/deolin/Documents/project-repo/external-jars");
 
     public static void main(String[] args) {
         ParserCollectionStrategy collectionStrategy = new ParserCollectionStrategy();
@@ -100,12 +100,13 @@ public class CompileSourceAndCopyDependencyTool {
             @Override
             public void consumeLine(String line) {
                 line = nullToEmpty(line);
-                if (line.startsWith("[ERROR]")) {
+//                if (line.startsWith("[ERROR]")) {
                     log.info(line);
-                }
+//                }
             }
         });
 
+        log.info("invoke compile for [{}]", BaseConfig.getInstace().getCommonPart().relativize(pomPath));
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(pomPath.toFile());
         request.setJavaHome(javaHome.toFile());
@@ -113,12 +114,18 @@ public class CompileSourceAndCopyDependencyTool {
         request.setGoals(Lists.newArrayList("clean compile"));
         invoker.execute(request);
 
+        log.info("invoke copy dependencies for [{}]", BaseConfig.getInstace().getCommonPart().relativize(pomPath));
         String externalJarPath = externalJarsBasePath + pomPath.getParent().toString();
         request.setGoals(Lists.newArrayList("dependency:copy-dependencies"));
         Properties properties = new Properties();
         properties.setProperty("outputAbsoluteArtifactFilename", "true");
         properties.setProperty("includeScope", "runtime");
         properties.setProperty("outputDirectory", externalJarPath);
+        request.setProperties(properties);
+        invoker.execute(request);
+
+        log.info("invoke download sources for [{}]", BaseConfig.getInstace().getCommonPart().relativize(pomPath));
+        request.setGoals(Lists.newArrayList("dependency:sources"));
         request.setProperties(properties);
         invoker.execute(request);
 
