@@ -1,12 +1,10 @@
 package com.spldeolin.allison1875.base.util.ast;
 
 import java.util.List;
-import java.util.Optional;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
-import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
-import com.github.javaparser.javadoc.description.JavadocSnippet;
+import com.google.common.base.Joiner;
 import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**
@@ -18,33 +16,41 @@ public class Javadocs {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
+    /**
+     * 如果Javadoc内有多行注释，提取注释的第一行
+     */
     public static String extractFirstLine(Javadoc javadoc) {
         JavadocDescription description = javadoc.getDescription();
-        return extractFirstLineFromDescription(description);
+        List<String> lines = StringUtils.splitLineByLine(description.toText());
+        if (lines.size() == 0) {
+            return "";
+        } else {
+            return lines.get(0);
+        }
     }
 
+
+    /**
+     * 如果Javadoc内有多行注释，提取注释的第一行
+     */
     public static String extractFirstLine(NodeWithJavadoc<?> node) {
         return node.getJavadoc().map(Javadocs::extractFirstLine).orElse("");
     }
 
-    private static String extractFirstLineFromDescription(JavadocDescription description) {
-        List<JavadocDescriptionElement> elements = description.getElements();
-        if (elements.size() == 0) {
-            return "";
-        }
+    /**
+     * 如果Javadoc内有多行注释，每行注释用分隔符拼接成一行后返回
+     */
+    public static String extractEveryLine(Javadoc javadoc, String sep) {
+        JavadocDescription description = javadoc.getDescription();
+        List<String> lines = StringUtils.splitLineByLine(description.toText());
+        return Joiner.on(sep).join(lines);
+    }
 
-        Optional<JavadocDescriptionElement> firstSnippet = elements.stream()
-                .filter(element -> element instanceof JavadocSnippet).findFirst();
-        if (!firstSnippet.isPresent()) {
-            return "";
-        }
-
-        List<String> lines = StringUtils.splitLineByLine(firstSnippet.get().toText());
-        if (lines.size() == 0) {
-            return "";
-        }
-
-        return lines.get(0);
+    /**
+     * 如果Javadoc内有多行注释，每行注释用分隔符拼接成一行后返回
+     */
+    public static String extractEveryLine(NodeWithJavadoc<?> node, String sep) {
+        return node.getJavadoc().map(javadoc -> extractEveryLine(javadoc, sep)).orElse("");
     }
 
 }
