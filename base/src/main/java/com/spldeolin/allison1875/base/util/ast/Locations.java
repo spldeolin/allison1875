@@ -22,15 +22,14 @@ public class Locations {
     }
 
     /**
-     * @return e.g.: project-group-name-might/project-name/module-name/src/main/java/com/spldeolin/allison1875/base
-     *         /util/Locations.java
+     * @return e.g.: project-name/module-name/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */
     public static Path getRelativePath(Node node) {
         return BaseConfig.getInstace().getCommonPart().relativize(getAbsolutePath(node)).normalize();
     }
 
     /**
-     * @return e.g.: child-module/src/main/java/com/spldeolin/allison1875/base/util/Locations.java:23
+     * @return e.g.: project-name/module-name/src/main/java/com/spldeolin/allison1875/base/util/Locations.java:23
      */
     public static String getRelativePathWithLineNo(Node node) {
         return Joiner.on(":").join(Locations.getRelativePath(node), Locations.getBeginLine(node));
