@@ -29,7 +29,7 @@ public class ModuleClassLoaderFactory {
             return classLoader;
         }
 
-        // target classpath
+        // classes
         ClassPool classPool = ClassPool.getDefault();
         ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRootPath);
         if (projectModule == null) {
@@ -37,7 +37,7 @@ public class ModuleClassLoaderFactory {
         }
         appendToClassPool(classPool, projectModule.getClassesPath());
 
-        // target jars path
+        // external jars
         File directory = projectModule.getExternalJarsPath().toFile();
         if (directory.isDirectory()) {
             Iterator<File> jarItr = FileUtils.iterateFiles(directory, new String[]{"jar"}, true);

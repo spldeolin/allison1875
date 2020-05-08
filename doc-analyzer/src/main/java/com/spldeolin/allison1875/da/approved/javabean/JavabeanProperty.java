@@ -4,9 +4,7 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
-
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;

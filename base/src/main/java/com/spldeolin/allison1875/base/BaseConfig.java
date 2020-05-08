@@ -113,7 +113,7 @@ public final class BaseConfig {
 
         if (instace.projectModules != null) {
             instace.projectModules
-                    .forEach(module -> instace.getProjectModulesMap().put(module.getSourceCodePath(), module));
+                    .forEach(module -> instace.getProjectModulesMap().put(module.getSourceRootPath(), module));
         }
 
         return instace;
@@ -140,7 +140,7 @@ public final class BaseConfig {
     @Data
     public static class ProjectModule {
 
-        private Path sourceCodePath;
+        private Path sourceRootPath;
 
         private Path classesPath;
 

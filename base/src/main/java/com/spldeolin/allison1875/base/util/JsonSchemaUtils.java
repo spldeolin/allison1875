@@ -58,8 +58,8 @@ public class JsonSchemaUtils {
         }
     }
 
-    public static JsonSchema generateSchema(String qualifierForClassLoader, ClassLoader classLoader, JsonSchemaGenerator jsg)
-            throws JsonSchemasException {
+    public static JsonSchema generateSchema(String qualifierForClassLoader, ClassLoader classLoader,
+            JsonSchemaGenerator jsg) throws JsonSchemasException {
         try {
             JavaType javaType = new TypeFactory(null) {
                 @Override

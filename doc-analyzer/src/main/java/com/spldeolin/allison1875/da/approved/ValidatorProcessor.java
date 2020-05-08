@@ -46,7 +46,8 @@ public class ValidatorProcessor {
                 case "Size":
                 case "Length":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        JavabeanPropertyValidator validator = new JavabeanPropertyValidator().setNote(pair.getValue().toString());
+                        JavabeanPropertyValidator validator = new JavabeanPropertyValidator()
+                                .setNote(pair.getValue().toString());
                         if (nameOf(pair, "min")) {
                             result.add(validator.setValidatorType(minSize));
                         }
@@ -99,7 +100,8 @@ public class ValidatorProcessor {
                     break;
                 case "Digits":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        JavabeanPropertyValidator validator = new JavabeanPropertyValidator().setNote(pair.getValue().toString());
+                        JavabeanPropertyValidator validator = new JavabeanPropertyValidator()
+                                .setNote(pair.getValue().toString());
                         if (nameOf(pair, "integer")) {
                             result.add(validator.setValidatorType(maxIntegralDigits));
                         }

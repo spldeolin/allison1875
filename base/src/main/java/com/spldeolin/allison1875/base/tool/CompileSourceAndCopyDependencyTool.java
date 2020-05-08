@@ -45,8 +45,7 @@ public class CompileSourceAndCopyDependencyTool {
     /**
      * Maven全局配置setting.xml的路径
      */
-    private static final Path mavenGlobalSettingXml = Paths
-            .get("");
+    private static final Path mavenGlobalSettingXml = Paths.get("");
 
     /**
      * mvn dependency:copy-dependencies 命令会将jar拷贝到这个目录下
@@ -101,7 +100,7 @@ public class CompileSourceAndCopyDependencyTool {
             public void consumeLine(String line) {
                 line = nullToEmpty(line);
 //                if (line.startsWith("[ERROR]")) {
-                    log.info(line);
+                log.info(line);
 //                }
             }
         });
