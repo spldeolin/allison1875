@@ -98,7 +98,7 @@ public final class BaseConfig {
             throw new ConfigLoadingException();
         }
 
-        instace.projectPaths = instace.projectPaths.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        instace.projectPaths.removeIf(Objects::isNull);
         if (instace.projectPaths.size() == 0) {
             log.error("未指定projectPath");
             throw new ConfigLoadingException();

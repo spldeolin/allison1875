@@ -23,7 +23,6 @@ class AstCursor implements Iterator<CompilationUnit> {
 
     AstCursor(Collection<SourceRoot> sourceRoots) {
         sourceRootItr = sourceRoots.iterator();
-
     }
 
     @Override

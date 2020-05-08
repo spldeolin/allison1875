@@ -44,7 +44,7 @@ public class CompilationUnitCollector {
             }
         }
         if (count > 0) {
-            log.info("{} CompilationUnit from [{}] elapsing {}ms.", count,
+            log.info("CompilationUnit collected. [{} of CompilationUnit at {} in {}ms]", count,
                     BaseConfig.getInstace().getCommonPart().relativize(sourceRoot.getRoot()),
                     System.currentTimeMillis() - start);
         }
