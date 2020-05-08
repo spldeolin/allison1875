@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
+import com.spldeolin.allison1875.da.approved.ValidatorProcessor;
 import com.spldeolin.allison1875.da.deprecated.core.definition.UriFieldDefinition;
 import com.spldeolin.allison1875.da.deprecated.core.enums.FieldTypeEnum;
 import com.spldeolin.allison1875.da.deprecated.core.enums.NumberFormatTypeEnum;
@@ -121,8 +122,8 @@ class PathVariableProcessor {
         }
         field.jsonType(jsonType).numberFormat(numberFormat).stringFormat(stringFormat.toString());
 
-        ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(parameter).process();
-        field.validators(validatorProcessor.validators());
+//        ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(parameter).process();
+//        field.validators(validatorProcessor.validators());
         return field;
     }
 

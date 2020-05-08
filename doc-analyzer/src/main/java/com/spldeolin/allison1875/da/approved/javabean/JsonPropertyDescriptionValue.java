@@ -18,7 +18,7 @@ public class JsonPropertyDescriptionValue {
 
     Boolean nullable;
 
-    Collection<ValidatorDefinition> validators;
+    Collection<JavabeanPropertyValidator> validators;
 
     String rawType;
 

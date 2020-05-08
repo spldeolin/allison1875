@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
@@ -96,22 +98,21 @@ public final class BaseConfig {
             throw new ConfigLoadingException();
         }
 
-        StringBuilder commonPart = new StringBuilder();
-        List<String> paths = getInstace().getProjectPaths().stream().map(Path::toString).collect(Collectors.toList());
-        String firstPath = paths.get(0);
-        for (int i = 0; i < firstPath.length(); i++) {
-            final int ii = i;
-            char firstPathEachChar = firstPath.charAt(ii);
-            if (paths.stream().allMatch(path -> path.charAt(ii) == firstPathEachChar)) {
-                commonPart.append(firstPathEachChar);
-            } else {
-                break;
-            }
+        instace.projectPaths = instace.projectPaths.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        if (instace.projectPaths.size() == 0) {
+            log.error("未指定projectPath");
+            throw new ConfigLoadingException();
         }
-        instace.setCommonPart(Paths.get(commonPart.toString()));
 
-        if (instace.getProjectModules() != null) {
-            instace.getProjectModules()
+        List<String> paths = getInstace().getProjectPaths().stream().map(Path::toString).collect(Collectors.toList());
+        String common = paths.get(0);
+        for (String path : paths) {
+            common = Strings.commonPrefix(common, path);
+        }
+        instace.commonPart = Paths.get(common);
+
+        if (instace.projectModules != null) {
+            instace.projectModules
                     .forEach(module -> instace.getProjectModulesMap().put(module.getSourceCodePath(), module));
         }
 

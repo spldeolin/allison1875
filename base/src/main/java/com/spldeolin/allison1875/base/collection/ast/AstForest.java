@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.ToString;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 可遍历的抽象语法树森林
@@ -14,6 +15,7 @@ import lombok.ToString;
  * @author Deolin 2020-04-24
  */
 @ToString
+@Log4j2
 public class AstForest implements Iterable<CompilationUnit> {
 
     private static final AstForest instance = new AstForest(BaseConfig.getInstace().getProjectPaths());
@@ -40,6 +42,7 @@ public class AstForest implements Iterable<CompilationUnit> {
     public void reset() {
         Collection<SourceRoot> sourceRoots = new SourceRootCollector().collect(projectPaths);
         this.cursor = new AstCursor(sourceRoots);
+        log.info("Astforest reset.");
     }
 
 }

@@ -3,18 +3,28 @@ package com.spldeolin.allison1875.da.approved;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
+import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.classloader.ModuleClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
@@ -24,9 +34,10 @@ import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
+import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.approved.javabean.JavabeanProperty;
 import com.spldeolin.allison1875.da.approved.javabean.JsonPropertyDescriptionValue;
-import com.spldeolin.allison1875.da.deprecated.core.processor.ValidatorProcessor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
@@ -47,14 +58,121 @@ public class RequestBodyJsonSchemaAnalyzer {
 
         JsonSchemaGenerator jsg = buildJsg(coidAndEnumInfos);
 
-        Collection<JsonSchema> jsonSchemas = obtainJsonSchema(forest, jsg);
+        Map<String, JsonSchema> jsonSchemas = obtainJsonSchema(forest, jsg);
+
+        Multimap<String, JavabeanProperty> javabeanProperties = ArrayListMultimap.create();
+        for (Entry<String, JsonSchema> entry : jsonSchemas.entrySet()) {
+            JsonSchema jsonSchema = entry.getValue();
+            if (jsonSchema.isObjectSchema()) {
+                JavabeanProperty tempParent = new JavabeanProperty();
+                calcObjectTypeWithRecur(tempParent, jsonSchema.asObjectSchema(), false);
+                javabeanProperties.putAll(entry.getKey(),
+                        tempParent.getChildren().stream().map(child -> child.setParent(null))
+                                .collect(Collectors.toList()));
+            }
+        }
 
 
         return Lists.newArrayList();
     }
 
-    private Collection<JsonSchema> obtainJsonSchema(AstForest forest, JsonSchemaGenerator jsg) {
-        Collection<JsonSchema> result = Lists.newLinkedList();
+    private JsonTypeEnum calcObjectTypeWithRecur(JavabeanProperty parent, ObjectSchema parentSchema,
+            boolean isInArray) {
+        parent.setJsonType(isInArray ? JsonTypeEnum.OBJECT_ARRAY : JsonTypeEnum.OBJECT);
+
+        Collection<JavabeanProperty> children = Lists.newLinkedList();
+        for (Entry<String, JsonSchema> entry : parentSchema.getProperties().entrySet()) {
+            String childName = entry.getKey();
+            JsonSchema childSchema = entry.getValue();
+            JavabeanProperty child = new JavabeanProperty();
+            child.setName(childName);
+            child.setRawJsonSchema(childSchema);
+            log.info("{}.{}", JsonSchemaUtils.getId(parentSchema), childName);
+
+            if (childSchema.getDescription() != null) {
+                JsonPropertyDescriptionValue jpdv = JsonUtils
+                        .toObject(childSchema.getDescription(), JsonPropertyDescriptionValue.class);
+                child.setDescription(jpdv.getComment());
+                child.setValidators(jpdv.getValidators());
+                child.setNullable(jpdv.getNullable());
+                child.setJsonFormat(calcJsonFormat(jpdv.getRawType(), childSchema));
+            } else {
+                child.setJsonFormat(calcJsonFormat(null, childSchema));
+                log.warn("Cannot found JsonPropertyDescriptionValue. {}.{}", JsonSchemaUtils.getId(parentSchema),
+                        childName);
+            }
+            JsonTypeEnum jsonType;
+            if (childSchema.isValueTypeSchema()) {
+                jsonType = calcValueType(childSchema.asValueTypeSchema(), false);
+            } else if (childSchema.isObjectSchema()) {
+                jsonType = calcObjectTypeWithRecur(child, childSchema.asObjectSchema(), false);
+            } else if (childSchema.isArraySchema()) {
+                Items items = childSchema.asArraySchema().getItems();
+                if (items == null || items.isArrayItems()) {
+                    jsonType = JsonTypeEnum.UNKNOWN;
+                } else {
+                    JsonSchema eleSchema = items.asSingleItems().getSchema();
+                    if (eleSchema.isValueTypeSchema()) {
+                        jsonType = calcValueType(eleSchema.asValueTypeSchema(), true);
+                    } else if (eleSchema.isObjectSchema()) {
+                        jsonType = calcObjectTypeWithRecur(child, eleSchema.asObjectSchema(), true);
+                    } else {
+                        jsonType = JsonTypeEnum.UNKNOWN;
+                    }
+                }
+            } else {
+                jsonType = JsonTypeEnum.UNKNOWN;
+            }
+            child.setJsonType(jsonType);
+            child.setParent(parent);
+            children.add(child);
+        }
+
+        parent.setChildren(children);
+        return parent.getJsonType();
+    }
+
+    private String calcJsonFormat(String rawType, JsonSchema childSchema) {
+        if (childSchema.isValueTypeSchema() && !CollectionUtils.isEmpty(childSchema.asValueTypeSchema().getEnums())) {
+            StringBuilder sb = new StringBuilder(64);
+            for (String cadJson : childSchema.asStringSchema().getEnums()) {
+                CodeAndDescription cad = JsonUtils.toObject(cadJson, CodeAndDescription.class);
+                sb.append(cad.getCode()).append("-").append(cad.getDescription());
+                sb.append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            return String.format(JsonFormatEnum.ENUM.getValue(), sb);
+        }
+
+        if (childSchema.isNumberSchema() && rawType != null) {
+            if (!childSchema.isIntegerSchema()) {
+                return JsonFormatEnum.FLOAT.getValue();
+            } else if (StringUtils.equalsAny(rawType, "Integer", "int")) {
+                return JsonFormatEnum.INT_32.getValue();
+            } else if (StringUtils.equalsAny(rawType, "Long", "long")) {
+                return JsonFormatEnum.INT_64.getValue();
+            } else {
+                return JsonFormatEnum.INT_UNKNOWN.getValue();
+            }
+        }
+
+        return JsonFormatEnum.NOTHING_SPECIAL.getValue();
+    }
+
+    private JsonTypeEnum calcValueType(ValueTypeSchema vSchema, boolean isInArray) {
+        if (vSchema.isNumberSchema()) {
+            return isInArray ? JsonTypeEnum.NUMBER_ARRAY : JsonTypeEnum.NUMBER;
+        } else if (vSchema.isStringSchema()) {
+            return isInArray ? JsonTypeEnum.STRING_ARRAY : JsonTypeEnum.STRING;
+        } else if (vSchema.isBooleanSchema()) {
+            return isInArray ? JsonTypeEnum.BOOLEAN_ARRAY : JsonTypeEnum.BOOLEAN;
+        } else {
+            throw new IllegalArgumentException(vSchema.toString());
+        }
+    }
+
+    private Map<String, JsonSchema> obtainJsonSchema(AstForest forest, JsonSchemaGenerator jsg) {
+        Map<String, JsonSchema> result = Maps.newHashMap();
         forest.reset();
         forest.forEach(cu -> {
             ClassLoader classLoader = ModuleClassLoaderFactory
@@ -63,10 +181,10 @@ public class RequestBodyJsonSchemaAnalyzer {
                     .forEach(requestBody -> {
                         try {
                             String describe = requestBody.resolve().describeType();
-                            log.info("describe={}", describe);
+//                            log.info("describe={}", describe);
                             JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(describe, classLoader, jsg);
-                            result.add(jsonSchema);
-                            log.info(JsonUtils.toJson(jsonSchema));
+                            result.put(describe, jsonSchema);
+//                            log.info(JsonUtils.toJson(jsonSchema));
                         } catch (Exception e) {
                             log.error(Locations.getRelativePathWithLineNo(requestBody), e);
                         }
@@ -82,8 +200,7 @@ public class RequestBodyJsonSchemaAnalyzer {
 
             @Override
             public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-                if (Arrays.stream(enumType.getInterfaces())
-                        .anyMatch(one -> one.getSimpleName().equals("IEnum"))) {
+                if (Arrays.stream(enumType.getInterfaces()).anyMatch(one -> one.getSimpleName().equals("IEnum"))) {
                     String[] result = new String[enumValues.length];
                     Field codeField;
                     try {
@@ -115,7 +232,8 @@ public class RequestBodyJsonSchemaAnalyzer {
                             if (descriptionField != null) {
                                 cad.setDescription((String) descriptionField.get(enumValues[i]));
                             } else {
-                                cad.setDescription(coidAndEnumInfos.get(enumType.getName().replace('$','.'),enumValues[i].toString()));
+                                cad.setDescription(coidAndEnumInfos
+                                        .get(enumType.getName().replace('$', '.'), enumValues[i].toString()));
                             }
                             result[i] = JsonUtils.toJson(cad);
                         } catch (IllegalAccessException e) {
@@ -133,7 +251,7 @@ public class RequestBodyJsonSchemaAnalyzer {
                 String superResult = super.findPropertyDescription(ann);
                 if (ann instanceof AnnotatedField && superResult == null) {
                     AnnotatedField annf = (AnnotatedField) ann;
-                    String className = annf.getDeclaringClass().getName().replace('$','.');
+                    String className = annf.getDeclaringClass().getName().replace('$', '.');
                     String fieldName = annf.getName();
                     String result = coidAndEnumInfos.get(className, fieldName);
                     return result;
@@ -150,7 +268,7 @@ public class RequestBodyJsonSchemaAnalyzer {
             cu.findAll(EnumDeclaration.class).forEach(ed -> {
                 String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
                 ed.getEntries().forEach(entry -> {
-                    coidAndEnumInfos.put(qualifier,entry.getNameAsString(), Javadocs.extractFirstLine(entry));
+                    coidAndEnumInfos.put(qualifier, entry.getNameAsString(), Javadocs.extractFirstLine(entry));
                 });
             });
             cu.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getAnnotationByName("Data").isPresent())
@@ -163,12 +281,14 @@ public class RequestBodyJsonSchemaAnalyzer {
                             value.setNullable(!field.getAnnotationByName("NotNull").isPresent() && !field
                                     .getAnnotationByName("NotEmpty").isPresent() && !field
                                     .getAnnotationByName("NotBlank").isPresent());
-                            value.setValidators(
-                                    new ValidatorProcessor().nodeWithAnnotations(field).process().validators());
+                            value.setValidators(new ValidatorProcessor().process(field));
 
                             field.getVariables().forEach(var -> {
                                 String variableName = var.getNameAsString();
-                                value.setRawType(var.getTypeAsString());
+                                try {
+                                    value.setRawType(var.getTypeAsString());
+                                } catch (Exception ignored) {
+                                }
                                 coidAndEnumInfos.put(javabeanQualifier, variableName, JsonUtils.toJson(value));
                             });
                         });
@@ -178,7 +298,7 @@ public class RequestBodyJsonSchemaAnalyzer {
     }
 
     @Data
-    public static class CodeAndDescription {
+    private static class CodeAndDescription {
 
         private String code;
 

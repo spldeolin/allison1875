@@ -17,7 +17,7 @@ public enum JsonFormatEnum {
     /**
      * 未知位数的整数
      */
-    INT_KNOW("int"),
+    INT_UNKNOWN("int"),
 
     FLOAT("float"),
 
@@ -25,6 +25,8 @@ public enum JsonFormatEnum {
      * "时间"类
      */
     TIME("datetime(%s)"),
+
+    ENUM("enum(%s)"),
 
     /**
      * 不是上述中的任何一种

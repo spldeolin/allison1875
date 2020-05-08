@@ -26,7 +26,9 @@ public enum JsonTypeEnum {
 
     OBJECT_ARRAY("objectArray"),
 
-    FILE("file");
+    FILE("file"),
+
+    UNKNOWN("unknown");
 
     private final String value;
 

@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.da.approved.ValidatorProcessor;
 import com.spldeolin.allison1875.da.deprecated.core.definition.BodyFieldDefinition;
 import com.spldeolin.allison1875.da.deprecated.core.enums.NumberFormatTypeEnum;
 import com.spldeolin.allison1875.da.deprecated.core.enums.StringFormatTypeEnum;
@@ -78,8 +79,8 @@ class JsonPropertyDescriptionProcessor {
         }
         bodyField.setNullable(nullable);
 
-        ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(field).process();
-        bodyField.setValidators(validatorProcessor.validators());
+//        ValidatorProcessor validatorProcessor = new ValidatorProcessor().nodeWithAnnotations(field).process();
+//        bodyField.setValidators(validatorProcessor.validators());
 
         String stringFormat = calcStringFormat(field);
         bodyField.setStringFormat(stringFormat);
