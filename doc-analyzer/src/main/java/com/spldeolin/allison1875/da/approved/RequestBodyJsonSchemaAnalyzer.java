@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.da.approved;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -20,11 +21,9 @@ import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.classloader.ModuleClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
@@ -37,6 +36,7 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.approved.javabean.JavabeanProperty;
+import com.spldeolin.allison1875.da.approved.javabean.JavabeanPropertyContainer;
 import com.spldeolin.allison1875.da.approved.javabean.JsonPropertyDescriptionValue;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -60,18 +60,18 @@ public class RequestBodyJsonSchemaAnalyzer {
 
         Map<String, JsonSchema> jsonSchemas = obtainJsonSchema(forest, jsg);
 
-        Multimap<String, JavabeanProperty> javabeanProperties = ArrayListMultimap.create();
+        // Map<String, JavabeanPropertyContainer> javabeanProperties = Maps.newHashMap();
         for (Entry<String, JsonSchema> entry : jsonSchemas.entrySet()) {
             JsonSchema jsonSchema = entry.getValue();
             if (jsonSchema.isObjectSchema()) {
+                String qualifier = entry.getKey();
                 JavabeanProperty tempParent = new JavabeanProperty();
                 calcObjectTypeWithRecur(tempParent, jsonSchema.asObjectSchema(), false);
-                javabeanProperties.putAll(entry.getKey(),
-                        tempParent.getChildren().stream().map(child -> child.setParent(null))
-                                .collect(Collectors.toList()));
+                List<JavabeanProperty> dendriformProperties = tempParent.getChildren().stream()
+                        .map(child -> child.setParent(null)).collect(Collectors.toList());
+                log.info("{} : {}", qualifier, new JavabeanPropertyContainer(qualifier, dendriformProperties));
             }
         }
-
 
         return Lists.newArrayList();
     }
@@ -86,8 +86,7 @@ public class RequestBodyJsonSchemaAnalyzer {
             JsonSchema childSchema = entry.getValue();
             JavabeanProperty child = new JavabeanProperty();
             child.setName(childName);
-            child.setRawJsonSchema(childSchema);
-            log.info("{}.{}", JsonSchemaUtils.getId(parentSchema), childName);
+            child.setRawJsonSchema(JsonUtils.toJson(childSchema));
 
             if (childSchema.getDescription() != null) {
                 JsonPropertyDescriptionValue jpdv = JsonUtils
@@ -181,10 +180,10 @@ public class RequestBodyJsonSchemaAnalyzer {
                     .forEach(requestBody -> {
                         try {
                             String describe = requestBody.resolve().describeType();
-//                            log.info("describe={}", describe);
+                            //                            log.info("describe={}", describe);
                             JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(describe, classLoader, jsg);
                             result.put(describe, jsonSchema);
-//                            log.info(JsonUtils.toJson(jsonSchema));
+                            //                            log.info(JsonUtils.toJson(jsonSchema));
                         } catch (Exception e) {
                             log.error(Locations.getRelativePathWithLineNo(requestBody), e);
                         }
@@ -248,15 +247,14 @@ public class RequestBodyJsonSchemaAnalyzer {
 
             @Override
             public String findPropertyDescription(Annotated ann) {
-                String superResult = super.findPropertyDescription(ann);
-                if (ann instanceof AnnotatedField && superResult == null) {
+                if (ann instanceof AnnotatedField) {
                     AnnotatedField annf = (AnnotatedField) ann;
                     String className = annf.getDeclaringClass().getName().replace('$', '.');
                     String fieldName = annf.getName();
                     String result = coidAndEnumInfos.get(className, fieldName);
                     return result;
                 }
-                return superResult;
+                return "{}";
             }
         });
         return new JsonSchemaGenerator(om);

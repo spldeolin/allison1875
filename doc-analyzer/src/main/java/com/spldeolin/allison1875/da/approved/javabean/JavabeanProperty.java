@@ -1,12 +1,13 @@
 package com.spldeolin.allison1875.da.approved.javabean;
 
 import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
 import lombok.Data;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
@@ -14,7 +15,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @JsonInclude(Include.NON_NULL)
-@ToString(exclude = {"parent"}) // StackOverflowError
+@JsonIgnoreProperties("parent")
 @Accessors(chain = true)
 public class JavabeanProperty {
 
@@ -30,12 +31,17 @@ public class JavabeanProperty {
 
     private String jsonFormat;
 
-    private JsonSchema rawJsonSchema;
+    private String rawJsonSchema;
 
     private Boolean nullable;
 
     private Collection<JavabeanPropertyValidator> validators;
 
     private Collection<JavabeanProperty> children;
+
+    @Override
+    public String toString() {
+        return JsonUtils.beautify(this);
+    }
 
 }

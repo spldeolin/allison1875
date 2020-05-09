@@ -104,7 +104,7 @@ public final class BaseConfig {
             throw new ConfigLoadingException();
         }
 
-        List<String> paths = getInstace().getProjectPaths().stream().map(Path::toString).collect(Collectors.toList());
+        List<String> paths = instace.projectPaths.stream().map(Path::toString).collect(Collectors.toList());
         String common = paths.get(0);
         for (String path : paths) {
             common = Strings.commonPrefix(common, path);
