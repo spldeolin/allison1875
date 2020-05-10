@@ -89,6 +89,12 @@
             <artifactId>maven-invoker</artifactId>
         </dependency>
 
+        <!-- reflections -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
+
         <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
