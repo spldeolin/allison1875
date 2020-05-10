@@ -33,6 +33,7 @@ import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.exception.JsonsException;
 import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.approved.javabean.JavabeanProperty;
@@ -134,12 +135,23 @@ public class RequestBodyJsonSchemaAnalyzer {
     private String calcJsonFormat(String rawType, JsonSchema childSchema) {
         if (childSchema.isValueTypeSchema() && !CollectionUtils.isEmpty(childSchema.asValueTypeSchema().getEnums())) {
             StringBuilder sb = new StringBuilder(64);
-            for (String cadJson : childSchema.asStringSchema().getEnums()) {
-                CodeAndDescription cad = JsonUtils.toObject(cadJson, CodeAndDescription.class);
-                sb.append(cad.getCode()).append("-").append(cad.getDescription());
-                sb.append(",");
+            try {
+                for (String cadJson : childSchema.asStringSchema()
+                    .getEnums()) {
+
+                    CodeAndDescription cad = JsonUtils.toObject(cadJson, CodeAndDescription.class);
+                    sb.append(cad.getCode())
+                        .append("-")
+                        .append(cad.getDescription());
+                    sb.append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+            } catch (JsonsException e) {
+                log.warn("enum illegal. rawType={}, childSchema={}", rawType, childSchema);
             }
-            sb.deleteCharAt(sb.length() - 1);
+            if (sb.length() == 0) {
+                sb.append("unknown");
+            }
             return String.format(JsonFormatEnum.ENUM.getValue(), sb);
         }
 
@@ -180,10 +192,8 @@ public class RequestBodyJsonSchemaAnalyzer {
                     .forEach(requestBody -> {
                         try {
                             String describe = requestBody.resolve().describeType();
-                            //                            log.info("describe={}", describe);
                             JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(describe, classLoader, jsg);
                             result.put(describe, jsonSchema);
-                            //                            log.info(JsonUtils.toJson(jsonSchema));
                         } catch (Exception e) {
                             log.error(Locations.getRelativePathWithLineNo(requestBody), e);
                         }
@@ -264,10 +274,11 @@ public class RequestBodyJsonSchemaAnalyzer {
         Table<String, String, String> coidAndEnumInfos = HashBasedTable.create();
         forest.forEach(cu -> {
             cu.findAll(EnumDeclaration.class).forEach(ed -> {
-                String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-                ed.getEntries().forEach(entry -> {
-                    coidAndEnumInfos.put(qualifier, entry.getNameAsString(), Javadocs.extractFirstLine(entry));
-                });
+                String qualifier = ed.getFullyQualifiedName()
+                    .orElseThrow(QualifierAbsentException::new);
+                ed.getEntries()
+                    .forEach(entry -> coidAndEnumInfos.put(qualifier, entry.getNameAsString(),
+                        Javadocs.extractFirstLine(entry)));
             });
             cu.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getAnnotationByName("Data").isPresent())
                     .forEach(javabean -> {
