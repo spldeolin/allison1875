@@ -32,7 +32,7 @@ class AstCursor implements Iterator<CompilationUnit> {
         } else if (sourceRootItr.hasNext()) {
             // cus没有了，sourceRoots还有 -> 清空cus，tryToParse下一个sourceRoot，重新收集cus
 
-            // help gc
+            // remove current one help gc
             try {
                 sourceRootItr.remove();
             } catch (Exception ignored) {

@@ -1,11 +1,16 @@
 package com.spldeolin.allison1875.base.classloader;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import com.github.javaparser.utils.SourceRoot;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.BaseConfig.ProjectModule;
@@ -50,6 +55,23 @@ public class ModuleClassLoaderFactory {
         classLoader = new javassist.Loader(classPool);
         cache.put(sourceRootPath, classLoader);
         return classLoader;
+    }
+
+    public static URLClassLoader getURLClassLoader(Path sourceRootPath) {
+        ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRootPath);
+        Collection<URL> URLs = Lists.newArrayList();
+        try {
+            URLs.add(projectModule.getClassesPath().toUri().toURL());
+            Iterator<File> jarItr = FileUtils
+                    .iterateFiles(projectModule.getExternalJarsPath().toFile(), new String[]{"jar"}, true);
+            while (jarItr.hasNext()) {
+                File jar = jarItr.next();
+                URLs.add(jar.toURI().toURL());
+            }
+        } catch (MalformedURLException e) {
+            log.warn(e);
+        }
+        return new URLClassLoader(URLs.toArray(new URL[0]));
     }
 
     public static ClassLoader getClassLoader(SourceRoot sourceRoot) {

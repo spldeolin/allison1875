@@ -13,6 +13,7 @@ import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
 import com.github.javaparser.utils.ParserCollectionStrategy;
+import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.extern.log4j.Log4j2;
@@ -55,15 +56,15 @@ public class CompileSourceAndCopyDependencyTool {
     public static void main(String[] args) {
         ParserCollectionStrategy collectionStrategy = new ParserCollectionStrategy();
         StringBuilder report = new StringBuilder(1024);
-        BaseConfig.getInstace().getProjectPaths().forEach(projectPath -> {
+        for (Path projectPath : BaseConfig.getInstace().getProjectPaths()) {
             List<File> poms = Lists.newArrayList();
-            collectionStrategy.collect(projectPath).getSourceRoots().forEach(sourceRoot -> {
+            for (SourceRoot sourceRoot : collectionStrategy.collect(projectPath).getSourceRoots()) {
                 String path = sourceRoot.getRoot().toString();
                 if (path.endsWith(sourceRootRelativeToModulePath.toString())) {
                     path = path.replace(sourceRootRelativeToModulePath.toString(), "");
                     poms.add(Paths.get(path, "pom.xml").toFile()); // check exist
                 }
-            });
+            }
 
             List<File> excludeParent = poms;
             if (poms.size() > 1) {
@@ -87,7 +88,7 @@ public class CompileSourceAndCopyDependencyTool {
                     log.error("CompileSourceAndCopyDependencyTool.invokePom({})", pomPath, e);
                 }
             }
-        });
+        }
 
         log.info(report);
     }

@@ -112,8 +112,9 @@ public final class BaseConfig {
         instace.commonPart = Paths.get(common);
 
         if (instace.projectModules != null) {
-            instace.projectModules
-                    .forEach(module -> instace.getProjectModulesMap().put(module.getSourceRootPath(), module));
+            for (ProjectModule projectModule : instace.projectModules) {
+                instace.getProjectModulesMap().put(projectModule.getSourceRootPath(), projectModule);
+            }
         }
 
         return instace;

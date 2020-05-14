@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
+import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
@@ -35,7 +37,9 @@ public class Authors {
             authors = listAuthors(cu.getPrimaryType().get());
         } else {
             authors = Lists.newLinkedList();
-            cu.getTypes().forEach(type -> authors.addAll(Authors.listAuthors(type)));
+            for (TypeDeclaration<?> type : cu.getTypes()) {
+                authors.addAll(Authors.listAuthors(type));
+            }
         }
         return concat(authors);
     }
@@ -60,12 +64,15 @@ public class Authors {
     private static Collection<String> listAuthors(Node node) {
         Collection<String> authors = Lists.newArrayList();
         if (node instanceof NodeWithJavadoc) {
-            ((NodeWithJavadoc<?>) node).getJavadoc().ifPresent(
-                    value -> value.getBlockTags().stream().filter(Authors::isAuthorTag).forEach(
-                            tag -> tag.getContent().getElements().stream().filter(Authors::isJavadocSnippet)
-                                    .forEach(ele -> {
-                                        authors.add(ele.toText());
-                                    })));
+            NodeWithJavadoc<?> nwj = (NodeWithJavadoc<?>) node;
+            if (nwj.getJavadoc().isPresent()) {
+                Javadoc javadoc = nwj.getJavadoc().get();
+                for (JavadocBlockTag blockTag : javadoc.getBlockTags()) {
+                    if (isAuthorTag(blockTag)) {
+                        authors.add(blockTag.getContent().toText());
+                    }
+                }
+            }
         }
 
         // 没有有效的author信息时，寻找父节点的author信息

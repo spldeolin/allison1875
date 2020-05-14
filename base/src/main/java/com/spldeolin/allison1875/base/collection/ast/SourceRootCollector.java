@@ -24,8 +24,9 @@ class SourceRootCollector {
                 }
             }
         }
-        result.forEach(sr -> log
-                .info("SourceRoot collected. [{}]", BaseConfig.getInstace().getCommonPart().relativize(sr.getRoot())));
+        for (SourceRoot sr : result) {
+            log.info("SourceRoot collected. [{}]", BaseConfig.getInstace().getCommonPart().relativize(sr.getRoot()));
+        }
         return result;
     }
 

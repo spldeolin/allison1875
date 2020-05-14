@@ -39,7 +39,9 @@ class TypeDeclarationByNameCollector<T extends TypeDeclaration<?>> {
     }
 
     private void putAll(Collection<T> coids, Multimap<String, T> map) {
-        coids.forEach(coid -> map.put(coid.getNameAsString(), coid));
+        for (T coid : coids) {
+            map.put(coid.getNameAsString(), coid);
+        }
     }
 
 }
