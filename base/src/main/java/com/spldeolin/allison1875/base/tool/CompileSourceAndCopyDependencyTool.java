@@ -46,7 +46,7 @@ public class CompileSourceAndCopyDependencyTool {
     /**
      * Maven全局配置setting.xml的路径
      */
-    private static final Path mavenGlobalSettingXml = Paths.get("");
+    private static final Path mavenGlobalSettingXml = Paths.get("/Users/deolin/OneDrive/secret/xxx-settings.xml");
 
     /**
      * mvn dependency:copy-dependencies 命令会将jar拷贝到这个目录下
@@ -78,7 +78,7 @@ public class CompileSourceAndCopyDependencyTool {
                 try {
                     log.info("CompileSourceAndCopyDependencyTool.invokePom({})", pomPath);
                     String externalJarsPath = invokePom(pomPath);
-                    report.append("\r\n  - sourceCodePath: ");
+                    report.append("\r\n  - sourceRootPath: ");
                     report.append(modulePath.resolve(sourceRootRelativeToModulePath));
                     report.append("\r\n    classesPath: ");
                     report.append(modulePath.resolve(classpathRelativeToModulePath));

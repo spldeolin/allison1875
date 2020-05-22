@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.da.approved;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.base.util.exception.JsonsException;
 import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
@@ -61,7 +61,6 @@ public class RequestBodyJsonSchemaAnalyzer {
 
         Map<String, JsonSchema> jsonSchemas = obtainJsonSchema(forest, jsg);
 
-        // Map<String, JavabeanPropertyContainer> javabeanProperties = Maps.newHashMap();
         for (Entry<String, JsonSchema> entry : jsonSchemas.entrySet()) {
             JsonSchema jsonSchema = entry.getValue();
             if (jsonSchema.isObjectSchema()) {
@@ -136,20 +135,21 @@ public class RequestBodyJsonSchemaAnalyzer {
         if (childSchema.isValueTypeSchema() && !CollectionUtils.isEmpty(childSchema.asValueTypeSchema().getEnums())) {
             StringBuilder sb = new StringBuilder(64);
             try {
-                for (String cadJson : childSchema.asStringSchema()
-                    .getEnums()) {
+                for (String cadJson : childSchema.asStringSchema().getEnums()) {
 
                     CodeAndDescription cad = JsonUtils.toObject(cadJson, CodeAndDescription.class);
-                    sb.append(cad.getCode())
-                        .append("-")
-                        .append(cad.getDescription());
+                    sb.append(cad.getCode()).append("-").append(cad.getDescription());
                     sb.append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
             } catch (JsonsException e) {
+                childSchema.asStringSchema().getEnums().forEach(one -> sb.append(one).append(","));
+                sb.deleteCharAt(sb.length() - 1);
                 log.warn("enum illegal. rawType={}, childSchema={}", rawType, childSchema);
             }
-            if (sb.length() == 0) {
+            if (sb.length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+            } else {
                 sb.append("unknown");
             }
             return String.format(JsonFormatEnum.ENUM.getValue(), sb);
@@ -192,13 +192,27 @@ public class RequestBodyJsonSchemaAnalyzer {
                     .forEach(requestBody -> {
                         try {
                             String describe = requestBody.resolve().describeType();
-                            JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(describe, classLoader, jsg);
+                            JsonSchema jsonSchema = generateSchema(describe, classLoader, jsg);
                             result.put(describe, jsonSchema);
                         } catch (Exception e) {
                             log.error(Locations.getRelativePathWithLineNo(requestBody), e);
                         }
                     });
         });
+        return result;
+    }
+
+    private JsonSchema generateSchema(String resolvedTypeDescribe, ClassLoader classLoader, JsonSchemaGenerator jsg) {
+        JsonSchema result = null;
+        try {
+            result = JsonSchemaUtils.generateSchema(resolvedTypeDescribe, classLoader, jsg);
+        } catch (JsonSchemasException e) {
+            if (resolvedTypeDescribe.contains(".")) {
+                result = generateSchema(
+                        com.spldeolin.allison1875.base.util.StringUtils.replaceLast(resolvedTypeDescribe, ".", "$"),
+                        classLoader, jsg);
+            }
+        }
         return result;
     }
 
@@ -209,50 +223,47 @@ public class RequestBodyJsonSchemaAnalyzer {
 
             @Override
             public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-                if (Arrays.stream(enumType.getInterfaces()).anyMatch(one -> one.getSimpleName().equals("IEnum"))) {
-                    String[] result = new String[enumValues.length];
-                    Field codeField;
+                String[] result = new String[enumValues.length];
+                Field codeField;
+                try {
+                    codeField = enumType.getDeclaredFields()[0];
+                } catch (Exception e) {
+                    // has no field any more.
+                    return super.findEnumValues(enumType, enumValues, names);
+                }
+
+                Field descriptionField = null;
+                try {
+                    descriptionField = enumType.getDeclaredField("description");
+                    descriptionField.setAccessible(true);
+                } catch (NoSuchFieldException e) {
                     try {
-                        codeField = enumType.getDeclaredField("code");
-                    } catch (NoSuchFieldException e) {
-                        // impossible unless IEnum changed.
+                        descriptionField = enumType.getDeclaredField("desc");
+                        descriptionField.setAccessible(true);
+                    } catch (NoSuchFieldException ignore) {
+                        // just enough
+                    }
+                }
+
+                codeField.setAccessible(true);
+                for (int i = 0; i < enumValues.length; i++) {
+                    try {
+                        String code = (String) codeField.get(enumValues[i]);
+                        CodeAndDescription cad = new CodeAndDescription();
+                        cad.setCode(code);
+                        if (descriptionField != null) {
+                            cad.setDescription((String) descriptionField.get(enumValues[i]));
+                        } else {
+                            cad.setDescription(coidAndEnumInfos
+                                    .get(enumType.getName().replace('$', '.'), enumValues[i].toString()));
+                        }
+                        result[i] = JsonUtils.toJson(cad);
+                    } catch (IllegalAccessException e) {
+                        // impossible unless bug
                         return super.findEnumValues(enumType, enumValues, names);
                     }
-
-                    Field descriptionField = null;
-                    try {
-                        descriptionField = enumType.getDeclaredField("description");
-                        descriptionField.setAccessible(true);
-                    } catch (NoSuchFieldException e) {
-                        try {
-                            descriptionField = enumType.getDeclaredField("desc");
-                            descriptionField.setAccessible(true);
-                        } catch (NoSuchFieldException ignore) {
-                            // just enough
-                        }
-                    }
-
-                    codeField.setAccessible(true);
-                    for (int i = 0; i < enumValues.length; i++) {
-                        try {
-                            String code = (String) codeField.get(enumValues[i]);
-                            CodeAndDescription cad = new CodeAndDescription();
-                            cad.setCode(code);
-                            if (descriptionField != null) {
-                                cad.setDescription((String) descriptionField.get(enumValues[i]));
-                            } else {
-                                cad.setDescription(coidAndEnumInfos
-                                        .get(enumType.getName().replace('$', '.'), enumValues[i].toString()));
-                            }
-                            result[i] = JsonUtils.toJson(cad);
-                        } catch (IllegalAccessException e) {
-                            // impossible unless bug
-                            return super.findEnumValues(enumType, enumValues, names);
-                        }
-                    }
-                    return result;
                 }
-                return super.findEnumValues(enumType, enumValues, names);
+                return result;
             }
 
             @Override
@@ -274,34 +285,30 @@ public class RequestBodyJsonSchemaAnalyzer {
         Table<String, String, String> coidAndEnumInfos = HashBasedTable.create();
         forest.forEach(cu -> {
             cu.findAll(EnumDeclaration.class).forEach(ed -> {
-                String qualifier = ed.getFullyQualifiedName()
-                    .orElseThrow(QualifierAbsentException::new);
-                ed.getEntries()
-                    .forEach(entry -> coidAndEnumInfos.put(qualifier, entry.getNameAsString(),
-                        Javadocs.extractFirstLine(entry)));
+                String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+                ed.getEntries().forEach(entry -> coidAndEnumInfos
+                        .put(qualifier, entry.getNameAsString(), Javadocs.extractFirstLine(entry)));
             });
-            cu.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getAnnotationByName("Data").isPresent())
-                    .forEach(javabean -> {
-                        String javabeanQualifier = javabean.getFullyQualifiedName()
-                                .orElseThrow(QualifierAbsentException::new);
-                        javabean.getFields().forEach(field -> {
-                            JsonPropertyDescriptionValue value = new JsonPropertyDescriptionValue();
-                            value.setComment(Javadocs.extractFirstLine(field));
-                            value.setNullable(!field.getAnnotationByName("NotNull").isPresent() && !field
-                                    .getAnnotationByName("NotEmpty").isPresent() && !field
-                                    .getAnnotationByName("NotBlank").isPresent());
-                            value.setValidators(new ValidatorProcessor().process(field));
+            cu.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getFields().size() > 0).forEach(javabean -> {
+                String javabeanQualifier = javabean.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+                javabean.getFields().forEach(field -> {
+                    JsonPropertyDescriptionValue value = new JsonPropertyDescriptionValue();
+                    value.setComment(Javadocs.extractFirstLine(field));
+                    value.setNullable(
+                            !field.getAnnotationByName("NotNull").isPresent() && !field.getAnnotationByName("NotEmpty")
+                                    .isPresent() && !field.getAnnotationByName("NotBlank").isPresent());
+                    value.setValidators(new ValidatorProcessor().process(field));
 
-                            field.getVariables().forEach(var -> {
-                                String variableName = var.getNameAsString();
-                                try {
-                                    value.setRawType(var.getTypeAsString());
-                                } catch (Exception ignored) {
-                                }
-                                coidAndEnumInfos.put(javabeanQualifier, variableName, JsonUtils.toJson(value));
-                            });
-                        });
+                    field.getVariables().forEach(var -> {
+                        String variableName = var.getNameAsString();
+                        try {
+                            value.setRawType(var.getTypeAsString());
+                        } catch (Exception ignored) {
+                        }
+                        coidAndEnumInfos.put(javabeanQualifier, variableName, JsonUtils.toJson(value));
                     });
+                });
+            });
         });
         return coidAndEnumInfos;
     }
