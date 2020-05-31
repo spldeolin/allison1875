@@ -49,4 +49,8 @@ public class AstForest implements Iterable<CompilationUnit> {
         this.cursor = new AstCursor(sourceRoots);
     }
 
+    public ClassLoader getCurrentClassLoader() {
+        return this.cursor.getCurrentClassLoader();
+    }
+
 }

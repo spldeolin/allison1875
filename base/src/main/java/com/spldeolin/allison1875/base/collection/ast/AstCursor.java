@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
+import com.spldeolin.allison1875.base.classloader.ModuleClassLoaderFactory;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -19,6 +21,10 @@ class AstCursor implements Iterator<CompilationUnit> {
 
     private Iterator<CompilationUnit> cuItr = Collections.emptyIterator();
 
+    @Getter
+    private ClassLoader currentClassLoader;
+
+    @Getter
     private ProjectAstForest currentProjectAstForest;
 
     AstCursor(Collection<SourceRoot> sourceRoots) {
@@ -37,8 +43,10 @@ class AstCursor implements Iterator<CompilationUnit> {
                 sourceRootItr.remove();
             } catch (Exception ignored) {
             }
+
             SourceRoot sourceRoot = sourceRootItr.next();
             Collection<CompilationUnit> cus = new CompilationUnitCollector().collect(sourceRoot);
+            currentClassLoader = ModuleClassLoaderFactory.getClassLoader(sourceRoot);
             cuItr = cus.iterator();
             // 递归的目的是这个sourceRoot可能没源码
             return hasNext();

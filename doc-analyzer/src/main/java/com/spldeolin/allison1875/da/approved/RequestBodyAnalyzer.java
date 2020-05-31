@@ -24,10 +24,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
-import com.spldeolin.allison1875.base.classloader.ModuleClassLoaderFactory;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -43,13 +41,15 @@ import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * 基于JsonSchema分析RequestBody类
+ *
  * @author Deolin 2020-04-25
  */
 @Log4j2
-public class RequestBodyJsonSchemaAnalyzer {
+public class RequestBodyAnalyzer {
 
     public static void main(String[] args) {
-        new RequestBodyJsonSchemaAnalyzer().analyze();
+        new RequestBodyAnalyzer().analyze();
     }
 
     private Collection<JavabeanProperty> analyze() {
@@ -186,8 +186,7 @@ public class RequestBodyJsonSchemaAnalyzer {
         Map<String, JsonSchema> result = Maps.newHashMap();
         forest.reset();
         forest.forEach(cu -> {
-            ClassLoader classLoader = ModuleClassLoaderFactory
-                    .getClassLoader(cu.getStorage().orElseThrow(StorageAbsentException::new).getSourceRoot());
+            ClassLoader classLoader = AstForest.getInstance().getCurrentClassLoader();
             cu.findAll(Parameter.class, parameter -> parameter.getAnnotationByName("RequestBody").isPresent())
                     .forEach(requestBody -> {
                         try {
