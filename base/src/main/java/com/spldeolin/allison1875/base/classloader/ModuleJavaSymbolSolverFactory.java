@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.base.BaseConfig;
  */
 public class ModuleJavaSymbolSolverFactory {
 
-    public static JavaSymbolSolver getClassLoader(SourceRoot sourceRoot) {
+    public static JavaSymbolSolver getJavaSymbolSolver(SourceRoot sourceRoot) {
         TypeSolver typeSolver;
         if (BaseConfig.getInstace().getWithClassLoader()) {
             ClassLoader classLoader = ModuleClassLoaderFactory.getClassLoader(sourceRoot);
