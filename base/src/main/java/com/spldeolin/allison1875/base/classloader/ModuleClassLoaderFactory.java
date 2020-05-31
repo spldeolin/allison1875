@@ -57,23 +57,6 @@ public class ModuleClassLoaderFactory {
         return classLoader;
     }
 
-    public static URLClassLoader getURLClassLoader(Path sourceRootPath) {
-        ProjectModule projectModule = BaseConfig.getInstace().getProjectModulesMap().get(sourceRootPath);
-        Collection<URL> URLs = Lists.newArrayList();
-        try {
-            URLs.add(projectModule.getClassesPath().toUri().toURL());
-            Iterator<File> jarItr = FileUtils
-                    .iterateFiles(projectModule.getExternalJarsPath().toFile(), new String[]{"jar"}, true);
-            while (jarItr.hasNext()) {
-                File jar = jarItr.next();
-                URLs.add(jar.toURI().toURL());
-            }
-        } catch (MalformedURLException e) {
-            log.warn(e);
-        }
-        return new URLClassLoader(URLs.toArray(new URL[0]));
-    }
-
     public static ClassLoader getClassLoader(SourceRoot sourceRoot) {
         return getClassLoader(sourceRoot.getRoot());
     }
