@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.javabean;
+package com.spldeolin.allison1875.da.approved.dto;
 
 import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,9 +16,9 @@ import lombok.experimental.Accessors;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties("parent")
 @Accessors(chain = true)
-public class JavabeanProperty {
+public class PropertyDto {
 
-    private JavabeanProperty parent;
+    private PropertyDto parent;
 
     private String path;
 
@@ -34,9 +34,9 @@ public class JavabeanProperty {
 
     private Boolean nullable;
 
-    private Collection<JavabeanPropertyValidator> validators;
+    private Collection<PropertyValidatorDto> validators;
 
-    private Collection<JavabeanProperty> children;
+    private Collection<PropertyDto> children;
 
     @Override
     public String toString() {

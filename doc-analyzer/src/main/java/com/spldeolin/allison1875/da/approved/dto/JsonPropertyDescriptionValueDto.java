@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.javabean;
+package com.spldeolin.allison1875.da.approved.dto;
 
 import java.util.Collection;
 import lombok.AllArgsConstructor;
@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class JsonPropertyDescriptionValue {
+public class JsonPropertyDescriptionValueDto {
 
     String comment;
 
     Boolean nullable;
 
-    Collection<JavabeanPropertyValidator> validators;
+    Collection<PropertyValidatorDto> validators;
 
     String rawType;
 

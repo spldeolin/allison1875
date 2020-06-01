@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.javabean;
+package com.spldeolin.allison1875.da.approved.dto;
 
 
 import com.spldeolin.allison1875.da.approved.enums.ValidatorTypeEnum;
@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class JavabeanPropertyValidator {
+public class PropertyValidatorDto {
 
     private ValidatorTypeEnum validatorType;
 

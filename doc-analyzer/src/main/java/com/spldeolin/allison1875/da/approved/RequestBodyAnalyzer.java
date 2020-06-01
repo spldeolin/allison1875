@@ -34,9 +34,9 @@ import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.base.util.exception.JsonsException;
 import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
-import com.spldeolin.allison1875.da.approved.javabean.JavabeanProperty;
-import com.spldeolin.allison1875.da.approved.javabean.JavabeanPropertyContainer;
-import com.spldeolin.allison1875.da.approved.javabean.JsonPropertyDescriptionValue;
+import com.spldeolin.allison1875.da.approved.dto.PropertyDto;
+import com.spldeolin.allison1875.da.approved.dto.PropertiesContainerDto;
+import com.spldeolin.allison1875.da.approved.dto.JsonPropertyDescriptionValueDto;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
@@ -52,7 +52,7 @@ public class RequestBodyAnalyzer {
         new RequestBodyAnalyzer().analyze();
     }
 
-    private Collection<JavabeanProperty> analyze() {
+    private Collection<PropertyDto> analyze() {
         AstForest forest = AstForest.getInstance();
 
         Table<String, String, String> coidAndEnumInfos = obtainCoidAndEnumInfos(forest);
@@ -65,32 +65,31 @@ public class RequestBodyAnalyzer {
             JsonSchema jsonSchema = entry.getValue();
             if (jsonSchema.isObjectSchema()) {
                 String qualifier = entry.getKey();
-                JavabeanProperty tempParent = new JavabeanProperty();
+                PropertyDto tempParent = new PropertyDto();
                 calcObjectTypeWithRecur(tempParent, jsonSchema.asObjectSchema(), false);
-                List<JavabeanProperty> dendriformProperties = tempParent.getChildren().stream()
+                List<PropertyDto> dendriformProperties = tempParent.getChildren().stream()
                         .map(child -> child.setParent(null)).collect(Collectors.toList());
-                log.info("{} : {}", qualifier, new JavabeanPropertyContainer(qualifier, dendriformProperties));
+                log.info("{} : {}", qualifier, new PropertiesContainerDto(qualifier, dendriformProperties));
             }
         }
 
         return Lists.newArrayList();
     }
 
-    private JsonTypeEnum calcObjectTypeWithRecur(JavabeanProperty parent, ObjectSchema parentSchema,
-            boolean isInArray) {
+    private JsonTypeEnum calcObjectTypeWithRecur(PropertyDto parent, ObjectSchema parentSchema, boolean isInArray) {
         parent.setJsonType(isInArray ? JsonTypeEnum.OBJECT_ARRAY : JsonTypeEnum.OBJECT);
 
-        Collection<JavabeanProperty> children = Lists.newLinkedList();
+        Collection<PropertyDto> children = Lists.newLinkedList();
         for (Entry<String, JsonSchema> entry : parentSchema.getProperties().entrySet()) {
             String childName = entry.getKey();
             JsonSchema childSchema = entry.getValue();
-            JavabeanProperty child = new JavabeanProperty();
+            PropertyDto child = new PropertyDto();
             child.setName(childName);
             child.setRawJsonSchema(JsonUtils.toJson(childSchema));
 
             if (childSchema.getDescription() != null) {
-                JsonPropertyDescriptionValue jpdv = JsonUtils
-                        .toObject(childSchema.getDescription(), JsonPropertyDescriptionValue.class);
+                JsonPropertyDescriptionValueDto jpdv = JsonUtils
+                        .toObject(childSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
                 child.setDescription(jpdv.getComment());
                 child.setValidators(jpdv.getValidators());
                 child.setNullable(jpdv.getNullable());
@@ -291,7 +290,7 @@ public class RequestBodyAnalyzer {
             cu.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getFields().size() > 0).forEach(javabean -> {
                 String javabeanQualifier = javabean.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
                 javabean.getFields().forEach(field -> {
-                    JsonPropertyDescriptionValue value = new JsonPropertyDescriptionValue();
+                    JsonPropertyDescriptionValueDto value = new JsonPropertyDescriptionValueDto();
                     value.setComment(Javadocs.extractFirstLine(field));
                     value.setNullable(
                             !field.getAnnotationByName("NotNull").isPresent() && !field.getAnnotationByName("NotEmpty")

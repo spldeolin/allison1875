@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.javabean;
+package com.spldeolin.allison1875.da.approved.dto;
 
 import java.util.Collection;
 import com.google.common.collect.Lists;
@@ -12,21 +12,21 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class JavabeanPropertyContainer {
+public class PropertiesContainerDto {
 
     private String javabeanQualifier;
 
     /**
      * 树状的JavabeanProperty
      */
-    private Collection<JavabeanProperty> dendriformProperties;
+    private Collection<PropertyDto> dendriformProperties;
 
     /**
      * 平铺的JavabeanProperty
      */
-    private Collection<JavabeanProperty> flatProperties;
+    private Collection<PropertyDto> flatProperties;
 
-    public JavabeanPropertyContainer(String javabeanQualifier, Collection<JavabeanProperty> dendriformProperties) {
+    public PropertiesContainerDto(String javabeanQualifier, Collection<PropertyDto> dendriformProperties) {
         this.javabeanQualifier = javabeanQualifier;
         this.dendriformProperties = dendriformProperties;
         flat();
@@ -36,7 +36,7 @@ public class JavabeanPropertyContainer {
     private void flat() {
         flatProperties = Lists.newLinkedList();
         if (dendriformProperties != null) {
-            for (JavabeanProperty firstFloor : dendriformProperties) {
+            for (PropertyDto firstFloor : dendriformProperties) {
                 flat(firstFloor, flatProperties);
             }
         }
@@ -46,7 +46,7 @@ public class JavabeanPropertyContainer {
         if (flatProperties == null) {
             flat();
         }
-        for (JavabeanProperty prop : flatProperties) {
+        for (PropertyDto prop : flatProperties) {
             String name = prop.getName();
             StringBuilder path = new StringBuilder(name);
             this.insertToHead(prop, path);
@@ -54,8 +54,8 @@ public class JavabeanPropertyContainer {
         }
     }
 
-    private void insertToHead(JavabeanProperty prop, StringBuilder path) {
-        JavabeanProperty parent = prop.getParent();
+    private void insertToHead(PropertyDto prop, StringBuilder path) {
+        PropertyDto parent = prop.getParent();
         if (parent != null) {
             String linkPart = parent.getName();
             if (parent.getJsonType().isArrayLike()) {
@@ -66,9 +66,9 @@ public class JavabeanPropertyContainer {
         }
     }
 
-    private void flat(JavabeanProperty parent, Collection<JavabeanProperty> props) {
+    private void flat(PropertyDto parent, Collection<PropertyDto> props) {
         if (parent.getChildren() != null) {
-            for (JavabeanProperty child : parent.getChildren()) {
+            for (PropertyDto child : parent.getChildren()) {
                 props.add(child);
                 this.flat(child, props);
             }
