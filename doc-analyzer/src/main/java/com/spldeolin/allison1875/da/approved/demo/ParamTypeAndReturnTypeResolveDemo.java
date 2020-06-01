@@ -1,7 +1,10 @@
-package com.spldeolin.allison1875.base.demo;
+package com.spldeolin.allison1875.da.approved.demo;
 
 import java.util.Collection;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -15,12 +18,16 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.Pair;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 对方法的参数和返回值进行resolve，然后然后进行类加载的示例
+ * 示例代码：对方法的参数和返回值进行resolve，然后进行类加载的
+ *
  * （这是doc-analyzer中最重要也最容易出现没有考虑到异常的一部）
+ *
  * <pre>
  * 几个会导致type.resolve()抛出RuntimeException的情况
  * 1. 声明Type所在的java文件未被编译时，会提示Unsolved symbol :，靠源码工具无法解决这个种问题，需要目标项目充分编译
@@ -31,7 +38,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-05-30
  */
 @Log4j2
-public class MethodParamTypeAndReturnTypeResolveDemo {
+public class ParamTypeAndReturnTypeResolveDemo {
 
     private static final AstForest astFotest = AstForest.getInstance();
 
@@ -56,6 +63,11 @@ public class MethodParamTypeAndReturnTypeResolveDemo {
                                 try {
                                     LoadClassUtils.loadClass(classQualifier, astFotest.getCurrentClassLoader());
                                 } catch (Exception ignored) {
+                                    JsonSchema jsonSchema = JsonSchemaUtils
+                                            .generateSchema(describe, AstForest.getInstance().getCurrentClassLoader(),
+                                                    new JsonSchemaGenerator(
+                                                            JsonUtils.initObjectMapper(new ObjectMapper())));
+                                    log.info(jsonSchema);
                                 }
                             }
                         }

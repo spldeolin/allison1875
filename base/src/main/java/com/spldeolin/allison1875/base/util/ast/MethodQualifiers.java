@@ -15,7 +15,7 @@ public class MethodQualifiers {
     }
 
     /**
-     * 获取能定位到唯一一个方法的最短形式QualifiedSignature
+     * 获取能定位到唯一一个方法的最短形式QualifiedSignature（内部类的$替换成.）
      * e.g.: com.spldeolin.allison1875.da.core.util.MethodQualifiers.getShortestQualifiedSignature(com.github
      * .javaparser.ast.body.MethodDeclaration)
      */
@@ -39,7 +39,7 @@ public class MethodQualifiers {
         }
         result.append(')');
 
-        return trimAllSpaces(result);
+        return trimAllSpaces(result).replaceAll("\\$", ".");
     }
 
     /**
