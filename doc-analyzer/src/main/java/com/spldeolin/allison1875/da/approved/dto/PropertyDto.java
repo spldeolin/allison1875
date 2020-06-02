@@ -30,8 +30,6 @@ public class PropertyDto {
 
     private String jsonFormat;
 
-    private String rawJsonSchema;
-
     private Boolean nullable;
 
     private Collection<PropertyValidatorDto> validators;

@@ -73,7 +73,7 @@ public class JsonSchemaUtils {
         } catch (Throwable e) {
             // TODO qualifierForClassLoader可能是内部类，需要递归处理
             log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", qualifierForClassLoader,
-                    e.getMessage());
+                    e.getMessage(), e);
             throw new JsonSchemasException();
         }
     }

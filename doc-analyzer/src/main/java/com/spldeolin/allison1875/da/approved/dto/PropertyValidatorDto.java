@@ -12,7 +12,10 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PropertyValidatorDto {
 
-    private ValidatorTypeEnum validatorType;
+    /**
+     * @see ValidatorTypeEnum
+     */
+    private String validatorType;
 
     private String note;
 

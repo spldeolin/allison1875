@@ -40,6 +40,6 @@ public enum ValidatorTypeEnum {
 
     regex("正则表达式：");
 
-    private String description;
+    private final String value;
 
 }

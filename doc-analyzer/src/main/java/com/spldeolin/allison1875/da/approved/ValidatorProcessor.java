@@ -38,83 +38,85 @@ public class ValidatorProcessor {
         for (AnnotationExpr annotation : node.getAnnotations()) {
             switch (annotation.getNameAsString()) {
                 case "NotEmpty":
-                    result.add(new PropertyValidatorDto().setValidatorType(notEmpty));
+                    result.add(new PropertyValidatorDto().setValidatorType(notEmpty.getValue()));
                     break;
                 case "NotBlank":
-                    result.add(new PropertyValidatorDto().setValidatorType(notBlank));
+                    result.add(new PropertyValidatorDto().setValidatorType(notBlank.getValue()));
                     break;
                 case "Size":
                 case "Length":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         PropertyValidatorDto validator = new PropertyValidatorDto().setNote(pair.getValue().toString());
                         if (nameOf(pair, "min")) {
-                            result.add(validator.setValidatorType(minSize));
+                            result.add(validator.setValidatorType(minSize.getValue()));
                         }
                         if (nameOf(pair, "max")) {
-                            result.add(validator.setValidatorType(maxSize));
+                            result.add(validator.setValidatorType(maxSize.getValue()));
                         }
                     });
                     break;
                 case "Max":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(maxInteger)
+                            .add(new PropertyValidatorDto().setValidatorType(maxInteger.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto().setValidatorType(maxInteger)
-                                            .setNote(pair.getValue().toString()))));
+                                    pair -> result
+                                            .add(new PropertyValidatorDto().setValidatorType(maxInteger.getValue())
+                                                    .setNote(pair.getValue().toString()))));
                     break;
                 case "Min":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(minInteger)
+                            .add(new PropertyValidatorDto().setValidatorType(minInteger.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto().setValidatorType(minInteger)
-                                            .setNote(pair.getValue().toString()))));
+                                    pair -> result
+                                            .add(new PropertyValidatorDto().setValidatorType(minInteger.getValue())
+                                                    .setNote(pair.getValue().toString()))));
                     break;
                 case "DecimalMax":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(maxFloat)
+                            .add(new PropertyValidatorDto().setValidatorType(maxFloat.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto().setValidatorType(maxFloat)
+                                    pair -> result.add(new PropertyValidatorDto().setValidatorType(maxFloat.getValue())
                                             .setNote(pair.getValue().toString()))));
                     break;
                 case "DecimalMin":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(minFloat)
+                            .add(new PropertyValidatorDto().setValidatorType(minFloat.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto().setValidatorType(minFloat)
+                                    pair -> result.add(new PropertyValidatorDto().setValidatorType(minFloat.getValue())
                                             .setNote(pair.getValue().toString()))));
                     break;
                 case "Future":
-                    result.add(new PropertyValidatorDto().setValidatorType(future));
+                    result.add(new PropertyValidatorDto().setValidatorType(future.getValue()));
                     break;
                 case "Past":
-                    result.add(new PropertyValidatorDto().setValidatorType(past));
+                    result.add(new PropertyValidatorDto().setValidatorType(past.getValue()));
                     break;
                 case "Digits":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         PropertyValidatorDto validator = new PropertyValidatorDto().setNote(pair.getValue().toString());
                         if (nameOf(pair, "integer")) {
-                            result.add(validator.setValidatorType(maxIntegralDigits));
+                            result.add(validator.setValidatorType(maxIntegralDigits.getValue()));
                         }
                         if (nameOf(pair, "fraction")) {
-                            result.add(validator.setValidatorType(maxFractionalDigits));
+                            result.add(validator.setValidatorType(maxFractionalDigits.getValue()));
                         }
                     });
                     break;
                 case "Positive":
-                    result.add(new PropertyValidatorDto().setValidatorType(positive));
+                    result.add(new PropertyValidatorDto().setValidatorType(positive.getValue()));
                     break;
                 case "Pattern":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         if (nameOf(pair, "regexp")) {
-                            result.add(new PropertyValidatorDto().setValidatorType(regex)
+                            result.add(new PropertyValidatorDto().setValidatorType(regex.getValue())
                                     .setNote(pair.getValue().asStringLiteralExpr().asString()));
                         }
                     });

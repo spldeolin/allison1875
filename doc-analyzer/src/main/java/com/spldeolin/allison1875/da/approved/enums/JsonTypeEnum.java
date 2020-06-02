@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.da.approved.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -38,6 +39,11 @@ public enum JsonTypeEnum {
 
     public boolean isNotNumberLike() {
         return NUMBER_ARRAY != this && NUMBER != this;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
     }
 
 }
