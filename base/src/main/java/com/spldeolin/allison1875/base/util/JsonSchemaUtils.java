@@ -71,6 +71,7 @@ public class JsonSchemaUtils {
             }.constructFromCanonical(qualifierForClassLoader);
             return jsg.generateSchema(javaType);
         } catch (Throwable e) {
+            // TODO qualifierForClassLoader可能是内部类，需要递归处理
             log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", qualifierForClassLoader,
                     e.getMessage());
             throw new JsonSchemasException();

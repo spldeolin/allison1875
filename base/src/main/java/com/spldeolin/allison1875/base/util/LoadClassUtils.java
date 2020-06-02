@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.base.util;
 
-import java.util.regex.Pattern;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -9,8 +8,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class LoadClassUtils {
 
-    private static final Pattern genericsPattern = Pattern.compile("<.*?>");
-
     /**
      * 使用参数classloader对参数name进行类加载
      *
@@ -18,7 +15,7 @@ public class LoadClassUtils {
      * 如果抛出ClassNotFoundException，这个方法将会把最后一位的'.'符号替换为'$'并递归自己
      */
     public static Class<?> loadClass(String name, ClassLoader classLoader) throws ClassNotFoundException {
-        name = genericsPattern.matcher(name).replaceAll("");
+        name = name.replaceAll("<[^>]+>", "");
         try {
             return Class.forName(name, false, classLoader);
         } catch (ClassNotFoundException e) {
