@@ -126,6 +126,13 @@
                 <version>5.2.6.RELEASE</version>
             </dependency>
 
+            <!-- hibernate validator -->
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>6.1.5.Final</version>
+            </dependency>
+
             <!-- freemarker -->
             <dependency>
                 <groupId>org.freemarker</groupId>

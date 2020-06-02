@@ -25,6 +25,12 @@
             <artifactId>spring-webmvc</artifactId>
         </dependency>
 
+        <!-- hibernate validator -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
         <!-- freemarker -->
         <dependency>
             <groupId>org.freemarker</groupId>
