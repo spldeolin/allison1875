@@ -145,10 +145,11 @@ public class DocAnanlyzerBoot {
                     builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
                     BodySituation requestBodySituation;
+                    String requestBodyDescribe = null;
                     try {
                         ResolvedType requestBody = findRequestBody(handler);
                         if (requestBody != null) {
-                            String requestBodyDescribe = requestBody.describe();
+                            requestBodyDescribe = requestBody.describe();
                             JsonSchema jsonSchema = JsonSchemaUtils
                                     .generateSchema(requestBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
@@ -164,23 +165,25 @@ public class DocAnanlyzerBoot {
                         } else {
                             requestBodySituation = BodySituation.NONE;
                         }
-                    } catch (Exception e) {
-                        log.error(e);
+                    } catch (Exception any) {
+                        log.warn("BodySituation.FAIL method={} describe={}",
+                                MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, any);
                         requestBodySituation = BodySituation.FAIL;
                     }
                     builder.requestBodySituation(requestBodySituation);
 
                     BodySituation responseBodySituation;
+                    String responseBodyDescribe = null;
                     try {
                         ResolvedType responseBody = findResponseBody(controller, handler);
                         if (responseBody != null) {
-                            String responseDescribe = responseBody.describe();
+                            responseBodyDescribe = responseBody.describe();
                             JsonSchema jsonSchema = JsonSchemaUtils
-                                    .generateSchema(responseDescribe, astForest.getCurrentClassLoader(), jsg);
+                                    .generateSchema(responseBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
                             if (jsonSchema.isObjectSchema()) {
                                 responseBodySituation = BodySituation.NEITHER;
-                                PropertiesContainerDto propContainer = anaylzeObjectSchema(responseDescribe,
+                                PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
                                         jsonSchema.asObjectSchema());
                                 clearAllValidatorAndNullableFlag(propContainer);
                                 builder.flatResponseProperties(propContainer.getFlatProperties());
@@ -192,13 +195,14 @@ public class DocAnanlyzerBoot {
                             responseBodySituation = BodySituation.NONE;
                         }
                     } catch (Exception any) {
-                        log.error("", any);
+                        log.warn("BodySituation.FAIL method={} describe={}",
+                                MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, any);
                         responseBodySituation = BodySituation.FAIL;
                     }
                     builder.responseBodySituation(responseBodySituation);
 
                     EndpointDto endpoint = builder.build();
-                    log.info("builder={}", endpoint);
+//                    log.info("builder={}", endpoint);
                 }
             }
         }
@@ -268,8 +272,9 @@ public class DocAnanlyzerBoot {
                 child.setJsonFormat(calcJsonFormat(jpdv.getRawType(), jpdv.getJsonFormatPattern(), forCalcJsonFormat));
             } else {
                 child.setJsonFormat(calcJsonFormat(null, null, forCalcJsonFormat));
-                log.warn("Cannot found JsonPropertyDescriptionValue. {}.{}", JsonSchemaUtils.getId(parentSchema),
-                        childName);
+//                log.warn("Cannot found JsonPropertyDescriptionValue. parentSchemaId={} childName={}",
+//                JsonSchemaUtils.getId(parentSchema),
+//                        childName);
             }
 
             child.setParent(parent);
