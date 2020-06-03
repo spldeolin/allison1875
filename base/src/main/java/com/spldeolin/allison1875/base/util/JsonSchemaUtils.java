@@ -1,12 +1,10 @@
 package com.spldeolin.allison1875.base.util;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
+import com.spldeolin.allison1875.base.exception.DotAbsentInStringException;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import lombok.extern.log4j.Log4j2;
 
@@ -16,96 +14,65 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JsonSchemaUtils {
 
-    private static final String idPrefix = "urn:jsonschema:";
-
-    private static final JsonSchemaGenerator defaultJsonSchemaGenerator = new JsonSchemaGenerator(
-            JsonUtils.initObjectMapper(new ObjectMapper()));
-
-    private static final TypeFactory typeFactory = TypeFactory.defaultInstance();
-
     private JsonSchemaUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-    @Deprecated
-    public static JsonSchema generateSchema(ClassOrInterfaceDeclaration coid) throws JsonSchemasException {
-        return generateSchema(qualifierForClassLoader(coid), defaultJsonSchemaGenerator);
-    }
+    public static final JsonSchemaGenerator DEFAULT_JSG = new JsonSchemaGenerator(
+            JsonUtils.initObjectMapper(new ObjectMapper()));
 
-
-    @Deprecated
-    public static JsonSchema generateSchema(ClassOrInterfaceDeclaration coid, JsonSchemaGenerator jsg)
+    public static JsonSchema generateSchema(String describe, ClassLoader cl, JsonSchemaGenerator jsg)
             throws JsonSchemasException {
-        return generateSchema(qualifierForClassLoader(coid), jsg);
-    }
+        TypeFactory tf = buildTypeFactory(cl);
 
-
-    @Deprecated
-    public static JsonSchema generateSchema(String qualifierForClassLoader) throws JsonSchemasException {
-        return generateSchema(qualifierForClassLoader, defaultJsonSchemaGenerator);
-    }
-
-    @Deprecated
-    public static JsonSchema generateSchema(String qualifierForClassLoader, JsonSchemaGenerator jsg)
-            throws JsonSchemasException {
         try {
-            JavaType javaType = typeFactory.constructFromCanonical(qualifierForClassLoader);
-            return jsg.generateSchema(javaType);
+            return jsg.generateSchema(tf.constructFromCanonical(describe));
         } catch (Throwable e) {
-            log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", qualifierForClassLoader,
-                    e.getMessage());
-            throw new JsonSchemasException();
+            try {
+                // 考虑describe可能是内部类，所以递归地将describe的最后一个.替换成$并重新尝试generateSchema
+                return generateSchemaRecursively(describe, tf, jsg);
+            } catch (DotAbsentInStringException dotAbsent) {
+                // 即便递归到describe中没有.可替换了，依然generateSchema失败，递归尝试失败，说明describe本身就无法处理（无法处理的原因见方法Javadoc）
+                log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", describe,
+                        e.getMessage());
+                throw new JsonSchemasException(e);
+            }
         }
     }
 
-    public static JsonSchema generateSchema(String qualifierForClassLoader, ClassLoader classLoader,
-            JsonSchemaGenerator jsg) throws JsonSchemasException {
-        try {
-            JavaType javaType = new TypeFactory(null) {
-                @Override
-                public ClassLoader getClassLoader() {
-                    return classLoader;
-                }
+    private static TypeFactory buildTypeFactory(ClassLoader cl) {
+        return new TypeFactory(null) {
+            @Override
+            public ClassLoader getClassLoader() {
+                return cl;
+            }
 
-                private static final long serialVersionUID = -3065446625827426521L;
-            }.constructFromCanonical(qualifierForClassLoader);
-            return jsg.generateSchema(javaType);
+            private static final long serialVersionUID = -3065446625827426521L;
+        };
+    }
+
+    private static JsonSchema generateSchemaRecursively(String innerClassMightDescribe, TypeFactory tf,
+            JsonSchemaGenerator jsg) throws DotAbsentInStringException {
+        try {
+            return jsg.generateSchema(tf.constructFromCanonical(innerClassMightDescribe));
         } catch (Throwable e) {
-            // TODO qualifierForClassLoader可能是内部类，需要递归处理
-            log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", qualifierForClassLoader,
-                    e.getMessage(), e);
-            throw new JsonSchemasException();
+            innerClassMightDescribe = tryReplaceLastDotToDollar(innerClassMightDescribe);
+            return generateSchemaRecursively(innerClassMightDescribe, tf, jsg);
         }
     }
 
-    public static JsonSchema generateSchemaOrElseNull(String qualifierForClassLoader) {
-        try {
-            return generateSchema(qualifierForClassLoader);
-        } catch (JsonSchemasException e) {
-            return null;
+    private static String tryReplaceLastDotToDollar(String innerClassMightDescribe) throws DotAbsentInStringException {
+        int lastDotIndex = innerClassMightDescribe.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            throw new DotAbsentInStringException();
         }
+        return innerClassMightDescribe.substring(0, lastDotIndex) + '$' + innerClassMightDescribe
+                .substring(lastDotIndex + 1);
     }
+
 
     public static String getId(JsonSchema jsonSchema) {
-        return jsonSchema.getId().substring(idPrefix.length()).replace(':', '.');
-    }
-
-    private static String qualifierForClassLoader(ClassOrInterfaceDeclaration coid) {
-        StringBuilder qualifierForClassLoader = new StringBuilder(64);
-        qualifierForClassLoader(qualifierForClassLoader, coid);
-        return qualifierForClassLoader.toString();
-    }
-
-    private static void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
-        node.getParentNode().ifPresent(parent -> {
-            if (parent instanceof TypeDeclaration) {
-                qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
-                qualifier.append("$");
-                qualifier.append(node.getNameAsString());
-            } else {
-                node.getFullyQualifiedName().ifPresent(qualifier::append);
-            }
-        });
+        return jsonSchema.getId().substring("urn:jsonschema:".length()).replace(':', '.');
     }
 
 }

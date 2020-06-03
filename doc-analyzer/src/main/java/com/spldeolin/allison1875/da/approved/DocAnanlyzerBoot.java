@@ -58,6 +58,7 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
 import com.spldeolin.allison1875.base.util.exception.JsonsException;
 import com.spldeolin.allison1875.da.approved.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.da.approved.dto.CodeAndDescriptionDto;
@@ -165,9 +166,11 @@ public class DocAnanlyzerBoot {
                         } else {
                             requestBodySituation = BodySituation.NONE;
                         }
-                    } catch (Exception any) {
-                        log.warn("BodySituation.FAIL method={} describe={}",
-                                MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, any);
+                    } catch (JsonSchemasException ignore) {
+                        requestBodySituation = BodySituation.FAIL;
+                    } catch (Exception e) {
+                        log.error("BodySituation.FAIL method={} describe={}",
+                                MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
                         requestBodySituation = BodySituation.FAIL;
                     }
                     builder.requestBodySituation(requestBodySituation);
@@ -194,9 +197,11 @@ public class DocAnanlyzerBoot {
                         } else {
                             responseBodySituation = BodySituation.NONE;
                         }
-                    } catch (Exception any) {
-                        log.warn("BodySituation.FAIL method={} describe={}",
-                                MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, any);
+                    } catch (JsonSchemasException ignore) {
+                        responseBodySituation = BodySituation.FAIL;
+                    } catch (Exception e) {
+                        log.error("BodySituation.FAIL method={} describe={}",
+                                MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
                         responseBodySituation = BodySituation.FAIL;
                     }
                     builder.responseBodySituation(responseBodySituation);

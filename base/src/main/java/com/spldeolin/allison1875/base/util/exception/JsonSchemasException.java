@@ -7,4 +7,8 @@ public class JsonSchemasException extends Exception {
 
     private static final long serialVersionUID = -7427455041690069646L;
 
+    public JsonSchemasException(Throwable cause) {
+        super(cause);
+    }
+
 }
