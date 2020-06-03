@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.spldeolin.allison1875.base.exception.DotAbsentInStringException;
-import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,7 +22,7 @@ public class JsonSchemaUtils {
             JsonUtils.initObjectMapper(new ObjectMapper()));
 
     public static JsonSchema generateSchema(String describe, ClassLoader cl, JsonSchemaGenerator jsg)
-            throws JsonSchemasException {
+            throws JsonSchemaException {
         TypeFactory tf = buildTypeFactory(cl);
 
         try {
@@ -35,7 +35,7 @@ public class JsonSchemaUtils {
                 // 即便递归到describe中没有.可替换了，依然generateSchema失败，递归尝试失败，说明describe本身就无法处理（无法处理的原因见方法Javadoc）
                 log.warn("Cannot generate the json schema, qualifierForClassLoader={}, reason={}", describe,
                         e.getMessage());
-                throw new JsonSchemasException(e);
+                throw new JsonSchemaException(e);
             }
         }
     }

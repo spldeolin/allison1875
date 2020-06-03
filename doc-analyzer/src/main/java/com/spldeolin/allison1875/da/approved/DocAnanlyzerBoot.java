@@ -58,8 +58,8 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
-import com.spldeolin.allison1875.base.util.exception.JsonSchemasException;
-import com.spldeolin.allison1875.base.util.exception.JsonsException;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
+import com.spldeolin.allison1875.base.util.exception.JsonException;
 import com.spldeolin.allison1875.da.approved.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.da.approved.dto.CodeAndDescriptionDto;
 import com.spldeolin.allison1875.da.approved.dto.EndpointDto;
@@ -166,7 +166,7 @@ public class DocAnanlyzerBoot {
                         } else {
                             requestBodySituation = BodySituation.NONE;
                         }
-                    } catch (JsonSchemasException ignore) {
+                    } catch (JsonSchemaException ignore) {
                         requestBodySituation = BodySituation.FAIL;
                     } catch (Exception e) {
                         log.error("BodySituation.FAIL method={} describe={}",
@@ -197,7 +197,7 @@ public class DocAnanlyzerBoot {
                         } else {
                             responseBodySituation = BodySituation.NONE;
                         }
-                    } catch (JsonSchemasException ignore) {
+                    } catch (JsonSchemaException ignore) {
                         responseBodySituation = BodySituation.FAIL;
                     } catch (Exception e) {
                         log.error("BodySituation.FAIL method={} describe={}",
@@ -299,7 +299,7 @@ public class DocAnanlyzerBoot {
                     sb.append(cad.getCode()).append("-").append(cad.getDescription());
                     sb.append(",");
                 }
-            } catch (JsonsException e) {
+            } catch (JsonException e) {
                 jsonSchema.asStringSchema().getEnums().forEach(one -> sb.append(one).append(","));
                 log.warn("enum illegal. rawType={}, jsonSchema={}", rawType, jsonSchema);
             }

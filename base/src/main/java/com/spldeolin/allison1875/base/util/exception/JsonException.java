@@ -9,27 +9,27 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
  * @author Deolin 2020-03-05
  * @see JsonUtils
  */
-public class JsonsException extends RuntimeException {
+public class JsonException extends RuntimeException {
 
     private static final long serialVersionUID = 2506389302288058433L;
 
-    public JsonsException() {
+    public JsonException() {
         super();
     }
 
-    public JsonsException(String message) {
+    public JsonException(String message) {
         super(message);
     }
 
-    public JsonsException(String message, Throwable cause) {
+    public JsonException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public JsonsException(Throwable cause) {
+    public JsonException(Throwable cause) {
         super(cause);
     }
 
-    protected JsonsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected JsonException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

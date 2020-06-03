@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.spldeolin.allison1875.base.util.exception.JsonsException;
+import com.spldeolin.allison1875.base.util.exception.JsonException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -60,7 +60,7 @@ public class JsonUtils {
             return om.writerWithDefaultPrettyPrinter().writeValueAsString(object);
         } catch (JsonProcessingException e) {
             log.error("object={}", object, e);
-            throw new JsonsException("转化JSON失败");
+            throw new JsonException("转化JSON失败");
         }
     }
 
@@ -79,7 +79,7 @@ public class JsonUtils {
             return om.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             log.error("object={}", object, e);
-            throw new JsonsException("转化JSON失败");
+            throw new JsonException("转化JSON失败");
         }
     }
 
@@ -98,7 +98,7 @@ public class JsonUtils {
             return om.readValue(json, clazz);
         } catch (IOException e) {
             log.error("json={}, clazz={}", json, clazz, e);
-            throw new JsonsException("转化对象失败");
+            throw new JsonException("转化对象失败");
         }
     }
 
@@ -120,7 +120,7 @@ public class JsonUtils {
             return om.readValue(json, javaType);
         } catch (IOException e) {
             log.error("json={}, clazz={}", json, clazz, e);
-            throw new JsonsException("转化对象失败");
+            throw new JsonException("转化对象失败");
         }
     }
 

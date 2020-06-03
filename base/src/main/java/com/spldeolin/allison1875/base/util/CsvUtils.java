@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.exception.CsvsException;
+import com.spldeolin.allison1875.base.util.exception.CsvException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -35,7 +35,7 @@ public class CsvUtils {
     /**
      * 读取csv
      */
-    public static <T> List<T> readCsv(String csvContent, Class<T> clazz) throws CsvsException {
+    public static <T> List<T> readCsv(String csvContent, Class<T> clazz) throws CsvException {
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader reader = cm.readerFor(clazz).with(schema);
 
@@ -43,7 +43,7 @@ public class CsvUtils {
             return Lists.newArrayList(reader.readValues(csvContent));
         } catch (IOException e) {
             log.error("csvContent={}, clazz={}", csvContent, clazz, e);
-            throw new CsvsException();
+            throw new CsvException();
         }
     }
 
@@ -58,7 +58,7 @@ public class CsvUtils {
             return writer.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.error("data={}, clazz={}", data, clazz, e);
-            throw new CsvsException();
+            throw new CsvException();
         }
     }
 

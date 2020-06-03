@@ -9,27 +9,27 @@ import com.spldeolin.allison1875.base.util.CsvUtils;
  * @author Deolin 2020-03-04
  * @see CsvUtils
  */
-public class CsvsException extends RuntimeException {
+public class CsvException extends RuntimeException {
 
     private static final long serialVersionUID = 8247500390534094194L;
 
-    public CsvsException() {
+    public CsvException() {
         super();
     }
 
-    public CsvsException(String message) {
+    public CsvException(String message) {
         super(message);
     }
 
-    public CsvsException(String message, Throwable cause) {
+    public CsvException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public CsvsException(Throwable cause) {
+    public CsvException(Throwable cause) {
         super(cause);
     }
 
-    protected CsvsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected CsvException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
