@@ -11,7 +11,6 @@ import lombok.Data;
  * @author Deolin 2020-06-01
  */
 @Data
-@JsonInclude(Include.NON_NULL)
 public class EndpointDto {
 
     private String description;

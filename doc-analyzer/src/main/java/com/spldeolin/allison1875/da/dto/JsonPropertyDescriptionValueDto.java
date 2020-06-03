@@ -14,7 +14,7 @@ public class JsonPropertyDescriptionValueDto {
 
     private String comment;
 
-    private Boolean nullable;
+    private Boolean required;
 
     private Collection<PropertyValidatorDto> validators;
 

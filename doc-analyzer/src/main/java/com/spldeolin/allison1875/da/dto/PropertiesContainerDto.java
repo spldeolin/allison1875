@@ -1,9 +1,10 @@
 package com.spldeolin.allison1875.da.dto;
 
 import java.util.Collection;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
+import java.util.Map;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.da.converter.PropertyConverter;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -21,14 +22,16 @@ public class PropertiesContainerDto {
     /**
      * 树状的JavabeanProperty
      */
-    private Collection<PropertyDto> dendriformProperties;
+    private Collection<PropertyTreeNodeDto> dendriformProperties;
 
     /**
      * 平铺的JavabeanProperty
      */
     private Collection<PropertyDto> flatProperties;
 
-    public PropertiesContainerDto(String javabeanQualifier, Collection<PropertyDto> dendriformProperties) {
+    private Map<String, PropertyDto> flatPropertiesMap;
+
+    public PropertiesContainerDto(String javabeanQualifier, Collection<PropertyTreeNodeDto> dendriformProperties) {
         this.javabeanQualifier = javabeanQualifier;
         this.dendriformProperties = dendriformProperties;
         flat();
@@ -37,56 +40,44 @@ public class PropertiesContainerDto {
 
     private void flat() {
         flatProperties = Lists.newLinkedList();
+        flatPropertiesMap = Maps.newHashMap();
         if (dendriformProperties != null) {
-            for (PropertyDto firstFloor : dendriformProperties) {
-                flatProperties.add(firstFloor);
-                flat(firstFloor, flatProperties);
-            }
+            PropertyTreeNodeDto tempParent = new PropertyTreeNodeDto();
+            tempParent.setChildren(dendriformProperties);
+            flatRecursively(tempParent);
         }
+    }
 
-        Collection<PropertyDto> newFlatProperties = Lists.newArrayList();
-        for (PropertyDto flatProperty : flatProperties) {
-            PropertyDto newDto = new PropertyDto();
-            BeanUtils.copyProperties(flatProperty, newDto);
-            newDto.setChildren(null);
-            newFlatProperties.add(newDto);
+    private void flatRecursively(PropertyTreeNodeDto parent) {
+        for (PropertyTreeNodeDto child : parent.getChildren()) {
+            PropertyDto dto = PropertyConverter.converter(child);
+            flatProperties.add(dto);
+            flatPropertiesMap.put(dto.getUuid(), dto);
+            this.flatRecursively(child);
         }
-        flatProperties = newFlatProperties;
     }
 
     private void buildAllPath() {
-        if (flatProperties == null) {
-            flat();
-        }
-        for (PropertyDto prop : flatProperties) {
-            String name = prop.getName();
+        for (PropertyDto dto : flatProperties) {
+            String name = dto.getName();
             StringBuilder path = new StringBuilder(name);
-            this.insertToHead(prop, path);
-            if (prop.getJsonType().isArrayLike()) {
+            if (dto.getJsonType().isArrayLike()) {
                 path.append("[0]");
             }
-            prop.setPath(path.toString());
+            this.insertToHeadRecursively(dto, path);
+            dto.setPath(path.toString());
         }
     }
 
-    private void insertToHead(PropertyDto prop, StringBuilder path) {
-        PropertyDto parent = prop.getParent();
+    private void insertToHeadRecursively(PropertyDto dto, StringBuilder path) {
+        PropertyDto parent = flatPropertiesMap.get(dto.getParentUuid());
         if (parent != null) {
             String linkPart = parent.getName();
             if (parent.getJsonType().isArrayLike()) {
                 linkPart += "[0]";
             }
             path.insert(0, linkPart + ".");
-            this.insertToHead(parent, path);
-        }
-    }
-
-    private void flat(PropertyDto parent, Collection<PropertyDto> props) {
-        if (!CollectionUtils.isEmpty(parent.getChildren())) {
-            for (PropertyDto child : parent.getChildren()) {
-                props.add(child);
-                this.flat(child, props);
-            }
+            this.insertToHeadRecursively(parent, path);
         }
     }
 

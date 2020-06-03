@@ -10,9 +10,9 @@ import lombok.Getter;
 @Getter
 public enum ValidatorTypeEnum {
 
-    notBlank("必须有非空格字符"),
+    notBlank("必须除空格外的字符"),
 
-    notEmpty("必须有字符"),
+    notEmpty("必须有元素"),
 
     maxSize("最大长度/容量："),
 
@@ -35,6 +35,8 @@ public enum ValidatorTypeEnum {
     maxFractionalDigits("最小整数位数："),
 
     positive("必须是正数"),
+
+    negative("必须是小数"),
 
     enumValue("可选枚举值："),
 

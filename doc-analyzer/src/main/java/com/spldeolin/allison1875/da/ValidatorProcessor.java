@@ -101,6 +101,9 @@ public class ValidatorProcessor {
                 case "Positive":
                     result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.positive.getValue()));
                     break;
+                case "Negative":
+                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.negative.getValue()));
+                    break;
                 case "Pattern":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         if (nameOf(pair, "regexp")) {

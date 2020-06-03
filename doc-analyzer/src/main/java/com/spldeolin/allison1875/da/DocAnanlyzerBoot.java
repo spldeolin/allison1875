@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -58,20 +59,19 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
-import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.base.util.exception.JsonException;
+import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.da.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.da.dto.CodeAndDescriptionDto;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
-import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
+import com.spldeolin.allison1875.da.dto.PropertyTreeNodeDto;
 import com.spldeolin.allison1875.da.enums.BodySituation;
 import com.spldeolin.allison1875.da.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.jackson.MappingJacksonAnnotationIntrospector;
-import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -207,7 +207,7 @@ public class DocAnanlyzerBoot {
                     builder.responseBodySituation(responseBodySituation);
 
                     EndpointDto endpoint = builder.build();
-//                    log.info("builder={}", endpoint);
+                    log.info("endpoint={}", endpoint);
                 }
             }
         }
@@ -215,30 +215,32 @@ public class DocAnanlyzerBoot {
 
     private void clearAllValidatorAndNullableFlag(PropertiesContainerDto propContainer) {
         for (PropertyDto prop : propContainer.getFlatProperties()) {
-            prop.setNullable(null);
+            prop.setRequired(null);
             prop.setValidators(null);
         }
     }
 
     private PropertiesContainerDto anaylzeObjectSchema(String requestBodyDescribe, ObjectSchema objectSchema) {
-        PropertyDto tempParent = new PropertyDto();
+        PropertyTreeNodeDto tempParent = new PropertyTreeNodeDto();
         calcObjectTypeWithRecur(tempParent, objectSchema, false);
-        List<PropertyDto> dendriformProperties = getDendriformPropertiesFromTemp(tempParent);
+        List<PropertyTreeNodeDto> dendriformProperties = getDendriformPropertiesFromTemp(tempParent);
         return new PropertiesContainerDto(requestBodyDescribe, dendriformProperties);
     }
 
-    private List<PropertyDto> getDendriformPropertiesFromTemp(PropertyDto tempParent) {
+    private List<PropertyTreeNodeDto> getDendriformPropertiesFromTemp(PropertyTreeNodeDto tempParent) {
         return tempParent.getChildren().stream().map(child -> child.setParent(null)).collect(Collectors.toList());
     }
 
-    private JsonTypeEnum calcObjectTypeWithRecur(PropertyDto parent, ObjectSchema parentSchema, boolean isInArray) {
+    private JsonTypeEnum calcObjectTypeWithRecur(PropertyTreeNodeDto parent, ObjectSchema parentSchema,
+            boolean isInArray) {
         parent.setJsonType(isInArray ? JsonTypeEnum.OBJECT_ARRAY : JsonTypeEnum.OBJECT);
 
-        Collection<PropertyDto> children = Lists.newLinkedList();
+        Collection<PropertyTreeNodeDto> children = Lists.newLinkedList();
         for (Entry<String, JsonSchema> entry : parentSchema.getProperties().entrySet()) {
             String childName = entry.getKey();
             JsonSchema childSchema = entry.getValue();
-            PropertyDto child = new PropertyDto();
+            PropertyTreeNodeDto child = new PropertyTreeNodeDto();
+            child.setUuid(UUID.randomUUID().toString().replace("-", ""));
             child.setName(childName);
 
             JsonTypeEnum jsonType;
@@ -273,7 +275,7 @@ public class DocAnanlyzerBoot {
                         .toObject(childSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
                 child.setDescription(jpdv.getComment());
                 child.setValidators(jpdv.getValidators());
-                child.setNullable(jpdv.getNullable());
+                child.setRequired(jpdv.getRequired());
                 child.setJsonFormat(calcJsonFormat(jpdv.getRawType(), jpdv.getJsonFormatPattern(), forCalcJsonFormat));
             } else {
                 child.setJsonFormat(calcJsonFormat(null, null, forCalcJsonFormat));
@@ -283,6 +285,9 @@ public class DocAnanlyzerBoot {
             }
 
             child.setParent(parent);
+            if (child.getChildren() == null) {
+                child.setChildren(Lists.newArrayList());
+            }
             children.add(child);
         }
 
@@ -353,8 +358,8 @@ public class DocAnanlyzerBoot {
         for (FieldDeclaration field : coid.getFields()) {
             JsonPropertyDescriptionValueDto value = new JsonPropertyDescriptionValueDto();
             value.setComment(Javadocs.extractFirstLine(field));
-            value.setNullable(
-                    isAnnoAbsent(field, NotNull.class) && isAnnoAbsent(field, NotEmpty.class) && isAnnoAbsent(field,
+            value.setRequired(
+                    isAnnoPresent(field, NotNull.class) || isAnnoPresent(field, NotEmpty.class) || isAnnoPresent(field,
                             NotBlank.class));
             value.setValidators(new ValidatorProcessor().process(field));
 
@@ -442,7 +447,7 @@ public class DocAnanlyzerBoot {
     }
 
     private <A extends Annotation> boolean isAnnoPresent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
-        return findAnno(node, annotationClass) == null;
+        return findAnno(node, annotationClass) != null;
     }
 
     private <A extends Annotation> AnnotationExpr findAnno(NodeWithAnnotations<?> node, Class<A> annotationClass) {
@@ -543,19 +548,6 @@ public class DocAnanlyzerBoot {
             }
         }
         return false;
-    }
-
-    @Data
-    private static class JsonPropertyDescriptionValue {
-
-        String comment;
-
-        Boolean nullable;
-
-        Collection<PropertyValidatorDto> validators;
-
-        String rawType;
-
     }
 
 }
