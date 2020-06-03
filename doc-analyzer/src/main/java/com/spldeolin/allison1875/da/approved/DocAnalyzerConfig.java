@@ -1,10 +1,11 @@
 package com.spldeolin.allison1875.da.approved;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Map;
-import org.yaml.snakeyaml.Yaml;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -18,10 +19,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public final class DocAnalyzerConfig {
 
-    /**
-     * Maven打包的命令行
-     */
-    private String mavenPackageCommandLine;
+    private static DocAnalyzerConfig instace;
 
     /**
      * 分页包装类的全限定名
@@ -36,33 +34,35 @@ public final class DocAnalyzerConfig {
     public static final DocAnalyzerConfig CONFIG = new DocAnalyzerConfig();
 
     private DocAnalyzerConfig() {
-        super();
-        this.initLoad();
     }
 
-    private void initLoad() {
-        Yaml yaml = new Yaml();
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("doc-analyzer-config.yml")) {
-            Map<String, String> rawData = yaml.load(is);
+    public static DocAnalyzerConfig getInstace() {
+        if (instace != null) {
+            return instace;
+        }
 
-            mavenPackageCommandLine = rawData.get("mavenPackageCommandLine");
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        SimpleModule forNioPath = new SimpleModule();
+        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
+        mapper.registerModule(forNioPath);
 
-            commonPageTypeQualifier = rawData.get("commonPageTypeQualifier");
-
-            File docOutputDirectory = new File(rawData.get("docOutputDirectoryPath"));
-            if (!docOutputDirectory.exists()) {
-                if (!docOutputDirectory.mkdirs()) {
-                    log.error("[{}] mkdir failed.", docOutputDirectory);
-                    throw new ConfigLoadingException();
-                }
-            }
-            docOutputDirectoryPath = docOutputDirectory.toPath();
-
+        try {
+            instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("doc-analyzer-config.yml"),
+                    DocAnalyzerConfig.class);
         } catch (Exception e) {
-            log.error("DocAnalyzerConfig.initLoad failed.", e);
+            log.error("DocAnalyzerConfig.getInstance failed.", e);
             throw new ConfigLoadingException();
         }
 
+        File docOutputDirectory = instace.docOutputDirectoryPath.toFile();
+        if (!docOutputDirectory.exists()) {
+            if (!docOutputDirectory.mkdirs()) {
+                log.error("docOutputDirectory.mkdirs failed.");
+                throw new ConfigLoadingException();
+            }
+        }
+
+        return instace;
     }
 
 }
