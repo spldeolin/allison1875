@@ -1,12 +1,12 @@
-package com.spldeolin.allison1875.da.approved.builder;
+package com.spldeolin.allison1875.da.builder;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.spldeolin.allison1875.da.approved.dto.EndpointDto;
-import com.spldeolin.allison1875.da.approved.dto.PropertyDto;
-import com.spldeolin.allison1875.da.approved.enums.BodySituation;
+import com.spldeolin.allison1875.da.dto.EndpointDto;
+import com.spldeolin.allison1875.da.dto.PropertyDto;
+import com.spldeolin.allison1875.da.enums.BodySituation;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

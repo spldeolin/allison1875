@@ -1,7 +1,7 @@
-package com.spldeolin.allison1875.da.approved.dto;
+package com.spldeolin.allison1875.da.dto;
 
 
-import com.spldeolin.allison1875.da.approved.enums.ValidatorTypeEnum;
+import com.spldeolin.allison1875.da.enums.ValidatorTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

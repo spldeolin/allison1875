@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.jackson;
+package com.spldeolin.allison1875.da.jackson;
 
 import java.lang.reflect.Field;
 import com.fasterxml.jackson.databind.introspect.Annotated;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.da.approved.dto.CodeAndDescriptionDto;
+import com.spldeolin.allison1875.da.dto.CodeAndDescriptionDto;
 import lombok.AllArgsConstructor;
 
 /**

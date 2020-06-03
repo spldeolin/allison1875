@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.markdown;
+package com.spldeolin.allison1875.da.markdown;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
-import com.spldeolin.allison1875.da.approved.DocAnalyzerConfig;
+import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;

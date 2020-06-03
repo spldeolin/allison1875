@@ -1,10 +1,10 @@
-package com.spldeolin.allison1875.da.approved.dto;
+package com.spldeolin.allison1875.da.dto;
 
 import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.da.approved.enums.BodySituation;
+import com.spldeolin.allison1875.da.enums.BodySituation;
 import lombok.Data;
 
 /**

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.markdown;
+package com.spldeolin.allison1875.da.markdown;
 
 import java.util.Collection;
 import lombok.Data;

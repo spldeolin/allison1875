@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.enums;
+package com.spldeolin.allison1875.da.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

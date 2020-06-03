@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved.dto;
+package com.spldeolin.allison1875.da.dto;
 
 import java.util.Collection;
 import lombok.Data;

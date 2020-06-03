@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.approved;
+package com.spldeolin.allison1875.da;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -60,17 +60,17 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.base.util.exception.JsonException;
-import com.spldeolin.allison1875.da.approved.builder.EndpointDtoBuilder;
-import com.spldeolin.allison1875.da.approved.dto.CodeAndDescriptionDto;
-import com.spldeolin.allison1875.da.approved.dto.EndpointDto;
-import com.spldeolin.allison1875.da.approved.dto.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.da.approved.dto.PropertiesContainerDto;
-import com.spldeolin.allison1875.da.approved.dto.PropertyDto;
-import com.spldeolin.allison1875.da.approved.dto.PropertyValidatorDto;
-import com.spldeolin.allison1875.da.approved.enums.BodySituation;
-import com.spldeolin.allison1875.da.approved.enums.JsonFormatEnum;
-import com.spldeolin.allison1875.da.approved.enums.JsonTypeEnum;
-import com.spldeolin.allison1875.da.approved.jackson.MappingJacksonAnnotationIntrospector;
+import com.spldeolin.allison1875.da.builder.EndpointDtoBuilder;
+import com.spldeolin.allison1875.da.dto.CodeAndDescriptionDto;
+import com.spldeolin.allison1875.da.dto.EndpointDto;
+import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
+import com.spldeolin.allison1875.da.dto.PropertyDto;
+import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
+import com.spldeolin.allison1875.da.enums.BodySituation;
+import com.spldeolin.allison1875.da.enums.JsonFormatEnum;
+import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
+import com.spldeolin.allison1875.da.jackson.MappingJacksonAnnotationIntrospector;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
