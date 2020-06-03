@@ -37,12 +37,12 @@ public class LawlessDto {
     public LawlessDto(Node node, String qualifier) {
         sourceCode = Locations.getRelativePathWithLineNo(node);
         this.qualifier = qualifier;
-        author = Authors.getAuthor(node);
+        author = Authors.getAuthorOrElseEmpty(node);
     }
 
     public LawlessDto(Node node) {
         sourceCode = Locations.getRelativePathWithLineNo(node);
-        author = Authors.getAuthor(node);
+        author = Authors.getAuthorOrElseEmpty(node);
     }
 
 }

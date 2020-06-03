@@ -9,8 +9,6 @@ import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
-import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
-import com.github.javaparser.javadoc.description.JavadocSnippet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -31,7 +29,7 @@ public class Authors {
      * 如果有与文件名同名的类型声明，则获取这个类型声明的作者信息，
      * 否则获取所有最外层类型声明的作者信息的集合
      */
-    public static String getAuthor(CompilationUnit cu) {
+    public static String getAuthorOrElseEmpty(CompilationUnit cu) {
         Collection<String> authors;
         if (cu.getPrimaryType().isPresent()) {
             authors = listAuthors(cu.getPrimaryType().get());
@@ -50,7 +48,7 @@ public class Authors {
      * 2. 如果1. 没有收获，则尝试获取这个Node的第一个能声明Javadoc的祖先Node
      * 3. 递归1. 和2.
      */
-    public static String getAuthor(Node node) {
+    public static String getAuthorOrElseEmpty(Node node) {
         return concat(listAuthors(node));
     }
 
@@ -88,7 +86,7 @@ public class Authors {
 
     private static String concat(Collection<String> authors) {
         if (authors.size() == 0) {
-            return "Unknown author";
+            return "";
         } else if (authors.size() == 1) {
             return Iterables.getOnlyElement(authors);
         } else {
@@ -111,10 +109,6 @@ public class Authors {
 
     private static boolean isAuthorTag(JavadocBlockTag tag) {
         return Type.AUTHOR == tag.getType();
-    }
-
-    private static boolean isJavadocSnippet(JavadocDescriptionElement ele) {
-        return ele instanceof JavadocSnippet;
     }
 
 }

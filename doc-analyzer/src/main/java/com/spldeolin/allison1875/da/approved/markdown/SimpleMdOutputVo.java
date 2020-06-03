@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da.deprecated.view.markdown;
+package com.spldeolin.allison1875.da.approved.markdown;
 
 import java.util.Collection;
 import lombok.Data;
@@ -13,17 +13,11 @@ public class SimpleMdOutputVo {
 
     private String description;
 
-    private Boolean isRequestBodyNone;
-
-    private Boolean isRequestBodyChaos;
-
-    private Boolean anyValidatorsExist;
+    private Integer requestBodySituation;
 
     private Collection<RequestBodyFieldVo> requestBodyFields;
 
-    private Boolean isResponseBodyNone;
-
-    private Boolean isResponseBodyChaos;
+    private Integer responseBodySituation;
 
     private Collection<ResponseBodyFieldVo> responseBodyFields;
 

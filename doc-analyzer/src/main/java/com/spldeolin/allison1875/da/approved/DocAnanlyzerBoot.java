@@ -141,7 +141,7 @@ public class DocAnanlyzerBoot {
                     builder.description(Javadocs.extractEveryLine(handler, "\n"));
                     builder.version("");
                     builder.isDeprecated(isDeprecated(controller, handler));
-                    builder.author(Authors.getAuthor(handler));
+                    builder.author(Authors.getAuthorOrElseEmpty(handler));
                     builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
                     BodySituation requestBodySituation;
