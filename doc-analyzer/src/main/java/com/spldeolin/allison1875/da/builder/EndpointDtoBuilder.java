@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
-import com.spldeolin.allison1875.da.enums.BodySituation;
+import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -29,7 +29,7 @@ public class EndpointDtoBuilder {
 
     private Collection<RequestMethod> combinedVerbs;
 
-    private BodySituation requestBodySituation;
+    private BodySituationEnum requestBodySituation;
 
     private String requestBodyJsonSchema;
 
@@ -39,7 +39,7 @@ public class EndpointDtoBuilder {
 
     private boolean isResponseBodyChaos;
 
-    private BodySituation responseBodySituation;
+    private BodySituationEnum responseBodySituation;
 
     private String responseBodyJsonSchema;
 

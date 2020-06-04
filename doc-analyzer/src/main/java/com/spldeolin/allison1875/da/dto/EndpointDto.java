@@ -1,10 +1,8 @@
 package com.spldeolin.allison1875.da.dto;
 
 import java.util.Collection;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.da.enums.BodySituation;
+import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import lombok.Data;
 
 /**
@@ -28,7 +26,7 @@ public class EndpointDto {
 
     private Boolean isDeprecated;
 
-    private BodySituation requestBodySituation;
+    private BodySituationEnum requestBodySituation;
 
     /**
      * requestBodySituation为CHAOS时，不为null，内容是raw json
@@ -40,7 +38,7 @@ public class EndpointDto {
      */
     private Collection<PropertyDto> requestBodyProperties;
 
-    private BodySituation responseBodySituation;
+    private BodySituationEnum responseBodySituation;
 
     /**
      * responseBodySituation为CHAOS时，不为null，内容是raw json

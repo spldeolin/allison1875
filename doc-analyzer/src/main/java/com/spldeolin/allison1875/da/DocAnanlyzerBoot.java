@@ -71,7 +71,7 @@ import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.dto.PropertyTreeNodeDto;
-import com.spldeolin.allison1875.da.enums.BodySituation;
+import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import com.spldeolin.allison1875.da.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.jackson.MappingJacksonAnnotationIntrospector;
@@ -151,7 +151,7 @@ public class DocAnanlyzerBoot {
                     builder.author(Authors.getAuthorOrElseEmpty(handler));
                     builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
-                    BodySituation requestBodySituation;
+                    BodySituationEnum requestBodySituation;
                     String requestBodyDescribe = null;
                     try {
                         ResolvedType requestBody = findRequestBody(handler);
@@ -161,29 +161,29 @@ public class DocAnanlyzerBoot {
                                     .generateSchema(requestBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
                             if (jsonSchema.isObjectSchema()) {
-                                requestBodySituation = BodySituation.KEY_VALUE;
+                                requestBodySituation = BodySituationEnum.KEY_VALUE;
                                 PropertiesContainerDto propContainer = anaylzeObjectSchema(requestBodyDescribe,
                                         jsonSchema.asObjectSchema());
                                 builder.flatRequestProperties(propContainer.getFlatProperties());
                             } else if (fieldsAbsent(requestBody)) {
-                                requestBodySituation = BodySituation.NONE;
+                                requestBodySituation = BodySituationEnum.NONE;
                             } else {
-                                requestBodySituation = BodySituation.CHAOS;
+                                requestBodySituation = BodySituationEnum.CHAOS;
                                 builder.requestBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                             }
                         } else {
-                            requestBodySituation = BodySituation.NONE;
+                            requestBodySituation = BodySituationEnum.NONE;
                         }
                     } catch (JsonSchemaException ignore) {
-                        requestBodySituation = BodySituation.FAIL;
+                        requestBodySituation = BodySituationEnum.FAIL;
                     } catch (Exception e) {
                         log.error("BodySituation.FAIL method={} describe={}",
                                 MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
-                        requestBodySituation = BodySituation.FAIL;
+                        requestBodySituation = BodySituationEnum.FAIL;
                     }
                     builder.requestBodySituation(requestBodySituation);
 
-                    BodySituation responseBodySituation;
+                    BodySituationEnum responseBodySituation;
                     String responseBodyDescribe = null;
                     try {
                         ResolvedType responseBody = findResponseBody(controller, handler);
@@ -196,36 +196,36 @@ public class DocAnanlyzerBoot {
                                 Items items = jsonSchema.asArraySchema().getItems();
                                 if (items != null && items.isSingleItems() && items.asSingleItems().getSchema()
                                         .isObjectSchema()) {
-                                    responseBodySituation = BodySituation.KEY_VALUE_ARRAY;
+                                    responseBodySituation = BodySituationEnum.KEY_VALUE_ARRAY;
                                     PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
                                             items.asSingleItems().getSchema().asObjectSchema());
                                     clearAllValidatorAndNullableFlag(propContainer);
                                     builder.flatResponseProperties(propContainer.getFlatProperties());
                                 } else {
-                                    responseBodySituation = BodySituation.CHAOS;
+                                    responseBodySituation = BodySituationEnum.CHAOS;
                                     builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                                 }
                             } else if (jsonSchema.isObjectSchema()) {
-                                responseBodySituation = BodySituation.KEY_VALUE;
+                                responseBodySituation = BodySituationEnum.KEY_VALUE;
                                 PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
                                         jsonSchema.asObjectSchema());
                                 clearAllValidatorAndNullableFlag(propContainer);
                                 builder.flatResponseProperties(propContainer.getFlatProperties());
                             } else if (fieldsAbsent(responseBody)) {
-                                responseBodySituation = BodySituation.NONE;
+                                responseBodySituation = BodySituationEnum.NONE;
                             } else {
-                                responseBodySituation = BodySituation.CHAOS;
+                                responseBodySituation = BodySituationEnum.CHAOS;
                                 builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                             }
                         } else {
-                            responseBodySituation = BodySituation.NONE;
+                            responseBodySituation = BodySituationEnum.NONE;
                         }
                     } catch (JsonSchemaException ignore) {
-                        responseBodySituation = BodySituation.FAIL;
+                        responseBodySituation = BodySituationEnum.FAIL;
                     } catch (Exception e) {
                         log.error("BodySituation.FAIL method={} describe={}",
                                 MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
-                        responseBodySituation = BodySituation.FAIL;
+                        responseBodySituation = BodySituationEnum.FAIL;
                     }
                     builder.responseBodySituation(responseBodySituation);
 

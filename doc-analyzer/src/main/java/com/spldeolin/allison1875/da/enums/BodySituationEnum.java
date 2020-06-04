@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
  * @author Deolin 2020-06-02
  */
 @AllArgsConstructor
-public enum BodySituation {
+public enum BodySituationEnum {
 
     /**
      * 代表没有body，即请求不需要参数或是没有返回值
