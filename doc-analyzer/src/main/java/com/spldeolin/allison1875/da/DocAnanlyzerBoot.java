@@ -240,7 +240,7 @@ public class DocAnanlyzerBoot {
     private String findGroupNames(CompilationUnit cu) {
         String result = null;
         for (Comment oc : cu.getOrphanComments()) {
-            if (oc.isLineComment() && oc.getContent().startsWith("DOC-GROUP")) {
+            if (oc.isLineComment() && oc.getContent().trim().startsWith("DOC-GROUP")) {
                 result = oc.getContent().replaceFirst("DOC-GROUP", "").trim();
                 break;
             }

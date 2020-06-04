@@ -43,4 +43,12 @@ public class StringUtils {
         return s.substring(1).trim();
     }
 
+    /**
+     * @see org.apache.commons.lang3.StringUtils#isEmpty(java.lang.CharSequence)
+     */
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+
+
 }

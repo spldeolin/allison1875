@@ -1,10 +1,13 @@
 package com.spldeolin.allison1875.da.markdown;
 
+import java.io.File;
 import java.util.Collection;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
+import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
@@ -63,8 +66,17 @@ public class MarkdownConverter {
             vo.setAuthor(endpoint.getAuthor());
             vo.setSourceCode(endpoint.getSourceCode());
 
+            String uriFirstLine = StringUtils.splitLineByLine(vo.getUri()).get(0);
+            String fileName =
+                    Iterables.getFirst(StringUtils.splitLineByLine(vo.getDescription()), uriFirstLine).replace('/', '-') + ".md";
+            File dir = DocAnalyzerConfig.getInstace().getDocOutputDirectoryPath()
+                    .resolve(endpoint.getGroupNames().replace('.', File.separatorChar)).toFile();
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File output = dir.toPath().resolve(fileName).toFile();
             try {
-                FreeMarkerPrinter.print(vo, vo.getDescription());
+                FreeMarkerPrinter.print(vo, output);
             } catch (FreeMarkerPrintExcpetion e) {
                 log.warn("FreeMarkerPrinter print failed.", e);
             }
