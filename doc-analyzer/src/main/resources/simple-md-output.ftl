@@ -14,9 +14,10 @@
 不需要参数
 <#elseif requestBodySituation == 2>
 参数结构过于复杂 或是 RequestBody结构存在泛化的部分，只提供JsonSchema
-<#elseif responseBodySituation == 3>
+<#elseif requestBodySituation == 3>
 参数结构解析失败
 <#else>
+<#if requestBodySituation == 5>结构的最外层是个json array</#if>
 | 属性路径             | 属性名               | 描述                   | JSON类型和格式                |<#if anyValidatorsExist>校验项              |</#if>
 | ------------------- | ------------------- | ---------------------- | ---------------------------- |<#if anyValidatorsExist>------------------ |</#if>
 <#list requestBodyProperties as reqProp>
@@ -35,6 +36,7 @@
 <#elseif responseBodySituation == 3>
 返回值结构解析失败
 <#else>
+<#if responseBodySituation == 5>结构的最外层是个json array</#if>
 | 属性路径             | 属性名               | 描述                    | JSON类型和格式                 |
 | ------------------- | ------------------- | ----------------------- | ----------------------------- |
 <#list responseBodyProperties as respProp>
