@@ -1,18 +1,19 @@
 package com.spldeolin.allison1875.da.markdown;
 
-import java.util.Collection;
 import lombok.Data;
 
 /**
  * @author Deolin 2020-02-17
  */
 @Data
-public class ResponseBodyFieldVo {
+public class ResponseBodyPropertyVo {
 
-    private String linkName;
+    private String path;
+
+    private String name;
 
     private String description;
 
-    private Collection<String> jsonTypeAndFormats;
+    private String jsonTypeAndFormats;
 
 }

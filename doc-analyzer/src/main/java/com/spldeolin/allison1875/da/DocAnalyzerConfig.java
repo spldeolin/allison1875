@@ -22,16 +22,9 @@ public final class DocAnalyzerConfig {
     private static DocAnalyzerConfig instace;
 
     /**
-     * 分页包装类的全限定名
-     */
-    private String commonPageTypeQualifier;
-
-    /**
      * 文档输出路径
      */
     private Path docOutputDirectoryPath;
-
-    public static final DocAnalyzerConfig CONFIG = new DocAnalyzerConfig();
 
     private DocAnalyzerConfig() {
     }

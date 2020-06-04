@@ -1,39 +1,43 @@
 ## 概要
 
-${description}
+- ${description}
 
-${uri}
+- ${httpMethod}
+
+- ${uri}
 
 
+## 参数结构
 
-## 参数
-
-<#if isRequestBodyNone>
-没有参数
-<#elseif isRequestBodyChaos>
-参数结构无法用表格表示，只提供JSON Schema
+<#if requestBodySituation == 1>
+    不需要参数
+<#elseif requestBodySituation == 2>
+    参数结构过于复杂 或是 RequestBody结构存在泛化的部分，只提供JsonSchema
+<#elseif responseBodySituation == 3>
+    参数结构解析失败
 <#else>
-| name                | 描述                 | JSON类型和格式                <#if anyValidatorsExist>| 校验项             </#if> |
-| ------------------- | -------------------- | ---------------------------- <#if anyValidatorsExist>| ------------------</#if> |
-<#list requestBodyFields as field>
-| ${field.linkName} | ${field.description} | <#list field.jsonTypeAndFormats as one>${one} </#list> <#if anyValidatorsExist>| ${field.validators}</#if> |
-</#list>
+    | 属性路径             | 属性名               | 描述                   | JSON类型和格式                |<#if anyValidatorsExist>校验项              |</#if>
+    | ------------------- | ------------------- | ---------------------- | ---------------------------- |<#if anyValidatorsExist>------------------ |</#if>
+    <#list requestBodyProperties as reqProp>
+        | ${reqProp.path}     | ${reqProp.name}     | ${reqProp.description} | ${reqProp.jsonTypeAndFormats}|<#if anyValidatorsExist>${reqProp.validators} |</#if>
+    </#list>
 </#if>
 
 
+## 返回值结构
 
-## 返回值
-
-<#if isResponseBodyNone>
-没有返回值
-<#elseif isResponseBodyChaos>
-返回值结构无法用表格表示，只提供JSON Schema
+<#if responseBodySituation == 1>
+    没有返回值
+<#elseif responseBodySituation == 2>
+    返回值结构过于复杂 或是 RequestBody结构存在泛化的部分，值提供JsonSchema
+<#elseif responseBodySituation == 3>
+    返回值结构解析失败
 <#else>
-| name                | 描述                 | JSON类型和格式                |
-| ------------------- | -------------------- | ---------------------------- |
-<#list responseBodyFields as field>
-| ${field.linkName} | ${field.description} | <#list field.jsonTypeAndFormats as one>${one} </#list> |
-</#list>
+    | 属性路径             | 属性名               | 描述                    | JSON类型和格式                 |
+    | ------------------- | ------------------- | ----------------------- | ----------------------------- |
+    <#list responseBodyProperties as respProp>
+        | ${respProp.path}    | ${respProp.name}    | ${respProp.description} | ${respProp.jsonTypeAndFormats}|
+    </#list>
 </#if>
 
 

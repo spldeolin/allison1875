@@ -16,14 +16,14 @@ import freemarker.template.TemplateException;
  */
 public class FreeMarkerPrinter {
 
-    public static void print(SimpleMdOutputVo ftl, String fileName) throws FreeMarkerPrintExcpetion {
+    public static void print(EndpointVo ftl, String fileName) throws FreeMarkerPrintExcpetion {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
         cfg.setClassForTemplateLoading(FreeMarkerPrinter.class, "/");
         cfg.setDefaultEncoding("utf-8");
 
         fileName = fileName + (fileName.endsWith(".md") ? "" : ".md");
         fileName = fileName.replace(File.separator, ", ");
-        File outFile = DocAnalyzerConfig.CONFIG.getDocOutputDirectoryPath().resolve(fileName).toFile();
+        File outFile = DocAnalyzerConfig.getInstace().getDocOutputDirectoryPath().resolve(fileName).toFile();
 
         try (Writer out = new BufferedWriter(new FileWriter(outFile))) {
             Template template = cfg.getTemplate("simple-md-output.ftl");

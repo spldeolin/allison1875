@@ -45,6 +45,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
+import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -72,6 +73,7 @@ import com.spldeolin.allison1875.da.enums.BodySituation;
 import com.spldeolin.allison1875.da.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.jackson.MappingJacksonAnnotationIntrospector;
+import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -159,9 +161,11 @@ public class DocAnanlyzerBoot {
                                 PropertiesContainerDto propContainer = anaylzeObjectSchema(requestBodyDescribe,
                                         jsonSchema.asObjectSchema());
                                 builder.flatRequestProperties(propContainer.getFlatProperties());
+                            } else if (fieldsAbsent(requestBody)) {
+                                requestBodySituation = BodySituation.NONE;
                             } else {
                                 requestBodySituation = BodySituation.CHAOS;
-                                builder.requestBodyJsonSchema(JsonUtils.toJson(jsonSchema));
+                                builder.requestBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                             }
                         } else {
                             requestBodySituation = BodySituation.NONE;
@@ -190,9 +194,11 @@ public class DocAnanlyzerBoot {
                                         jsonSchema.asObjectSchema());
                                 clearAllValidatorAndNullableFlag(propContainer);
                                 builder.flatResponseProperties(propContainer.getFlatProperties());
+                            } else if (fieldsAbsent(responseBody)) {
+                                responseBodySituation = BodySituation.NONE;
                             } else {
                                 responseBodySituation = BodySituation.CHAOS;
-                                builder.responseBodyJsonSchema(JsonUtils.toJson(jsonSchema));
+                                builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                             }
                         } else {
                             responseBodySituation = BodySituation.NONE;
@@ -207,10 +213,18 @@ public class DocAnanlyzerBoot {
                     builder.responseBodySituation(responseBodySituation);
 
                     EndpointDto endpoint = builder.build();
-                    log.info("endpoint={}", endpoint);
+
+                    new MarkdownConverter().convert(Lists.newArrayList(endpoint));
                 }
             }
         }
+    }
+
+    private boolean fieldsAbsent(ResolvedType requestBody) {
+        if (requestBody.isReferenceType()) {
+            return requestBody.asReferenceType().getDeclaredFields().size() == 0;
+        }
+        return false;
     }
 
     private void clearAllValidatorAndNullableFlag(PropertiesContainerDto propContainer) {
@@ -243,6 +257,12 @@ public class DocAnanlyzerBoot {
             child.setUuid(UUID.randomUUID().toString().replace("-", ""));
             child.setName(childName);
 
+            JsonPropertyDescriptionValueDto jpdv = null;
+            try {
+                jpdv = JsonUtils.toObject(childSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+            } catch (Exception ignored) {
+            }
+
             JsonTypeEnum jsonType;
             JsonSchema forCalcJsonFormat = childSchema;
             if (childSchema.isValueTypeSchema()) {
@@ -270,18 +290,16 @@ public class DocAnanlyzerBoot {
             }
             child.setJsonType(jsonType);
 
-            if (childSchema.getDescription() != null) {
-                JsonPropertyDescriptionValueDto jpdv = JsonUtils
-                        .toObject(childSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+            if (jpdv != null) {
                 child.setDescription(jpdv.getComment());
                 child.setValidators(jpdv.getValidators());
                 child.setRequired(jpdv.getRequired());
                 child.setJsonFormat(calcJsonFormat(jpdv.getRawType(), jpdv.getJsonFormatPattern(), forCalcJsonFormat));
             } else {
+                child.setRequired(false);
                 child.setJsonFormat(calcJsonFormat(null, null, forCalcJsonFormat));
 //                log.warn("Cannot found JsonPropertyDescriptionValue. parentSchemaId={} childName={}",
-//                JsonSchemaUtils.getId(parentSchema),
-//                        childName);
+//                        JsonSchemaUtils.getId(parentSchema), childName);
             }
 
             child.setParent(parent);
@@ -378,7 +396,14 @@ public class DocAnanlyzerBoot {
                     value.setRawType(var.getTypeAsString());
                 } catch (Exception ignored) {
                 }
-                table.put(javabeanQualifier, variableName, JsonUtils.toJson(value));
+                String json = JsonUtils.toJson(value);
+                table.put(javabeanQualifier, variableName, json);
+
+                var.getType().ifPrimitiveType(pt -> {
+                    if (pt.getType().name().equals("boolean")) {
+                        table.put(javabeanQualifier, CodeGenerationUtils.getterName(boolean.class, variableName), json);
+                    }
+                });
             }
         }
     }

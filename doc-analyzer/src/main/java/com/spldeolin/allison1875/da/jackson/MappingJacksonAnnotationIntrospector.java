@@ -1,8 +1,11 @@
 package com.spldeolin.allison1875.da.jackson;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedField;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -76,14 +79,27 @@ public class MappingJacksonAnnotationIntrospector extends JacksonAnnotationIntro
 
     @Override
     public String findPropertyDescription(Annotated ann) {
+        Class<?> clazz;
         if (ann instanceof AnnotatedField) {
-            AnnotatedField annf = (AnnotatedField) ann;
-            String className = annf.getDeclaringClass().getName().replace('$', '.');
-            String fieldName = annf.getName();
-            String result = propertyDescriptions.get(className, fieldName);
-            return result;
+            clazz = ((AnnotatedField) ann).getDeclaringClass();
+        } else if (ann instanceof AnnotatedMethod) {
+            clazz = ((AnnotatedMethod) ann).getDeclaringClass();
+        } else {
+            return "{}";
         }
-        return "{}";
+
+        String className = clazz.getName().replace('$', '.');
+        String fieldName = ann.getName();
+        String result = propertyDescriptions.get(className, fieldName);
+        return result;
+    }
+
+    @Override
+    protected <A extends Annotation> A _findAnnotation(Annotated annotated, Class<A> annoClass) {
+        if (annoClass == JsonSerialize.class) {
+            return null;
+        }
+        return super._findAnnotation(annotated, annoClass);
     }
 
 }

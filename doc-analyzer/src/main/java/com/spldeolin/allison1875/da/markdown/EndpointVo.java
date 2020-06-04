@@ -7,19 +7,27 @@ import lombok.Data;
  * @author Deolin 2020-02-17
  */
 @Data
-public class SimpleMdOutputVo {
+public class EndpointVo {
 
     private String uri;
+
+    private String httpMethod;
 
     private String description;
 
     private Integer requestBodySituation;
 
-    private Collection<RequestBodyFieldVo> requestBodyFields;
+    private String requestBodyJsonSchema;
+
+    private Collection<RequestBodyPropertyVo> requestBodyProperties;
+
+    private Boolean anyValidatorsExist;
 
     private Integer responseBodySituation;
 
-    private Collection<ResponseBodyFieldVo> responseBodyFields;
+    private String responseBodyJsonSchema;
+
+    private Collection<ResponseBodyPropertyVo> responseBodyProperties;
 
     private String author;
 
