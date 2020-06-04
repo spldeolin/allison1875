@@ -30,6 +30,7 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -39,6 +40,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
@@ -46,6 +48,7 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.CodeGenerationUtils;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -113,6 +116,8 @@ public class DocAnanlyzerBoot {
                 }
                 EndpointDtoBuilder builder = new EndpointDtoBuilder();
 
+                builder.groupNames(findGroupNames(cu, controller));
+
                 RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
                 String[] cPaths = findValueFromAnno(controllerRequestMapping);
                 RequestMethod[] cVerbs = findVerbFromAnno(controllerRequestMapping);
@@ -157,7 +162,7 @@ public class DocAnanlyzerBoot {
                                     .generateSchema(requestBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
                             if (jsonSchema.isObjectSchema()) {
-                                requestBodySituation = BodySituation.NEITHER;
+                                requestBodySituation = BodySituation.KEY_VALUE;
                                 PropertiesContainerDto propContainer = anaylzeObjectSchema(requestBodyDescribe,
                                         jsonSchema.asObjectSchema());
                                 builder.flatRequestProperties(propContainer.getFlatProperties());
@@ -188,8 +193,21 @@ public class DocAnanlyzerBoot {
                             JsonSchema jsonSchema = JsonSchemaUtils
                                     .generateSchema(responseBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
-                            if (jsonSchema.isObjectSchema()) {
-                                responseBodySituation = BodySituation.NEITHER;
+                            if (jsonSchema.isArraySchema()) {
+                                Items items = jsonSchema.asArraySchema().getItems();
+                                if (items != null && items.isSingleItems() && items.asSingleItems().getSchema()
+                                        .isObjectSchema()) {
+                                    responseBodySituation = BodySituation.KEY_VALUE_ARRAY;
+                                    PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
+                                            items.asSingleItems().getSchema().asObjectSchema());
+                                    clearAllValidatorAndNullableFlag(propContainer);
+                                    builder.flatResponseProperties(propContainer.getFlatProperties());
+                                } else {
+                                    responseBodySituation = BodySituation.CHAOS;
+                                    builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
+                                }
+                            } else if (jsonSchema.isObjectSchema()) {
+                                responseBodySituation = BodySituation.KEY_VALUE;
                                 PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
                                         jsonSchema.asObjectSchema());
                                 clearAllValidatorAndNullableFlag(propContainer);
@@ -218,6 +236,22 @@ public class DocAnanlyzerBoot {
                 }
             }
         }
+    }
+
+    private String findGroupNames(CompilationUnit cu, ClassOrInterfaceDeclaration controller) {
+        String result = null;
+        for (Comment oc : cu.getOrphanComments()) {
+            if (oc.isLineComment() && oc.getContent().startsWith("DOC-GROUP")) {
+                result = oc.getContent().replaceFirst("DOC-GROUP", "").trim();
+                break;
+            }
+        }
+        String controllerDesc = Javadocs.extractFirstLine(controller);
+        result = Joiner.on('.').skipNulls().join(result, controllerDesc);
+        if (StringUtils.isBlank(result)) {
+            result = "未分类";
+        }
+        return result;
     }
 
     private boolean fieldsAbsent(ResolvedType requestBody) {
@@ -281,10 +315,14 @@ public class DocAnanlyzerBoot {
                         jsonType = calcValueType(eleSchema.asValueTypeSchema(), true);
                     } else if (eleSchema.isObjectSchema()) {
                         jsonType = calcObjectTypeWithRecur(child, eleSchema.asObjectSchema(), true);
+                    } else if (eleSchema instanceof ReferenceSchema) {
+                        jsonType = JsonTypeEnum.RECURSION;
                     } else {
                         jsonType = JsonTypeEnum.UNKNOWN;
                     }
                 }
+            } else if (childSchema instanceof ReferenceSchema) {
+                jsonType = JsonTypeEnum.RECURSION;
             } else {
                 jsonType = JsonTypeEnum.UNKNOWN;
             }

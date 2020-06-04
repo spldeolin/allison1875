@@ -32,9 +32,14 @@ public enum BodySituation {
     FAIL(3),
 
     /**
-     * 不是以上3种情况中的任何一种
+     * body结构整体上是个key-value结构
      */
-    NEITHER(4);
+    KEY_VALUE(4),
+
+    /**
+     * body结构整体上是个数组中的key-value结构
+     */
+    KEY_VALUE_ARRAY(5);
 
     private final Integer value;
 

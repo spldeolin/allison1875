@@ -17,6 +17,8 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class EndpointDtoBuilder {
 
+    private String groupNames;
+
     private String description;
 
     private String version;
@@ -49,6 +51,7 @@ public class EndpointDtoBuilder {
 
     public EndpointDto build() {
         EndpointDto result = new EndpointDto();
+        result.setGroupNames(groupNames);
         result.setDescription(description);
         result.setUrls(combinedUrls);
         result.setHttpMethods(
