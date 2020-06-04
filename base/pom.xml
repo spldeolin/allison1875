@@ -89,10 +89,10 @@
             <artifactId>maven-invoker</artifactId>
         </dependency>
 
-        <!-- reflections -->
+        <!-- okhttp -->
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
         </dependency>
 
         <!-- lombok -->

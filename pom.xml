@@ -147,11 +147,11 @@
                 <version>3.0.1</version>
             </dependency>
 
-            <!-- reflections -->
+            <!-- okhttp -->
             <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>0.9.12</version>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>4.7.2</version>
             </dependency>
 
             <!-- lombok -->

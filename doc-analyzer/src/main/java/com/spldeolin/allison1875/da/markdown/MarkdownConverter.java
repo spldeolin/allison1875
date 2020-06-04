@@ -11,6 +11,7 @@ import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
+import com.spldeolin.allison1875.da.showdoc.ShowdocHttpInvoker;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -21,7 +22,8 @@ public class MarkdownConverter {
 
     private static final String horizontalLine = "-";
 
-    public void convert(Collection<EndpointDto> endpoints) {
+    public void convert(Collection<EndpointDto> endpoints, boolean alsoSendToShowdoc) {
+        int sequence = 0;
         for (EndpointDto endpoint : endpoints) {
             EndpointVo vo = new EndpointVo();
             // 概要
@@ -67,16 +69,23 @@ public class MarkdownConverter {
             vo.setSourceCode(endpoint.getSourceCode());
 
             String uriFirstLine = StringUtils.splitLineByLine(vo.getUri()).get(0);
+            String description = vo.getDescription();
             String fileName =
-                    Iterables.getFirst(StringUtils.splitLineByLine(vo.getDescription()), uriFirstLine).replace('/', '-') + ".md";
+                    Iterables.getFirst(StringUtils.splitLineByLine(description), uriFirstLine).replace('/', '-')
+                            + ".md";
+            String groupNames = endpoint.getGroupNames();
             File dir = DocAnalyzerConfig.getInstace().getDocOutputDirectoryPath()
-                    .resolve(endpoint.getGroupNames().replace('.', File.separatorChar)).toFile();
+                    .resolve(groupNames.replace('.', File.separatorChar)).toFile();
             if (!dir.exists()) {
                 dir.mkdirs();
             }
             File output = dir.toPath().resolve(fileName).toFile();
             try {
-                FreeMarkerPrinter.print(vo, output);
+                FreeMarkerPrinter.printToFile(vo, output);
+                if (alsoSendToShowdoc) {
+                    ShowdocHttpInvoker.invoke(groupNames, description, FreeMarkerPrinter.printAsString(vo), sequence);
+                    sequence++;
+                }
             } catch (FreeMarkerPrintExcpetion e) {
                 log.warn("FreeMarkerPrinter print failed.", e);
             }

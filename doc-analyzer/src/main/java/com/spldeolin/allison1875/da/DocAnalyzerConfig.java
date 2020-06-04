@@ -26,6 +26,16 @@ public final class DocAnalyzerConfig {
      */
     private Path docOutputDirectoryPath;
 
+    /**
+     * showdoc的api_key
+     */
+    private String showdocApiKey;
+
+    /**
+     * showdoc的api_token
+     */
+    private String showdocApiToken;
+
     private DocAnalyzerConfig() {
     }
 
