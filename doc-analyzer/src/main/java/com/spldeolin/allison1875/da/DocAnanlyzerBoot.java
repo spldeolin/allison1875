@@ -48,7 +48,6 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -116,7 +115,7 @@ public class DocAnanlyzerBoot {
                 }
                 EndpointDtoBuilder builder = new EndpointDtoBuilder();
 
-                builder.groupNames(findGroupNames(cu, controller));
+                builder.groupNames(findGroupNames(cu));
 
                 RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
                 String[] cPaths = findValueFromAnno(controllerRequestMapping);
@@ -238,7 +237,7 @@ public class DocAnanlyzerBoot {
         }
     }
 
-    private String findGroupNames(CompilationUnit cu, ClassOrInterfaceDeclaration controller) {
+    private String findGroupNames(CompilationUnit cu) {
         String result = null;
         for (Comment oc : cu.getOrphanComments()) {
             if (oc.isLineComment() && oc.getContent().startsWith("DOC-GROUP")) {
@@ -246,8 +245,6 @@ public class DocAnanlyzerBoot {
                 break;
             }
         }
-        String controllerDesc = Javadocs.extractFirstLine(controller);
-        result = Joiner.on('.').skipNulls().join(result, controllerDesc);
         if (StringUtils.isBlank(result)) {
             result = "未分类";
         }
