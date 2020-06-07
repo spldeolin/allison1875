@@ -313,7 +313,7 @@ public class DocAnanlyzerBoot {
                     } else if (eleSchema.isObjectSchema()) {
                         jsonType = calcObjectTypeWithRecur(child, eleSchema.asObjectSchema(), true);
                     } else if (eleSchema instanceof ReferenceSchema) {
-                        jsonType = JsonTypeEnum.RECURSION;
+                        jsonType = JsonTypeEnum.RECURSION_ARRAY;
                     } else {
                         jsonType = JsonTypeEnum.UNKNOWN;
                     }

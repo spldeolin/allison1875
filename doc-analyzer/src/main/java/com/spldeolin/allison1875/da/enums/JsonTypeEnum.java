@@ -29,6 +29,8 @@ public enum JsonTypeEnum {
 
     RECURSION("recursion"),
 
+    RECURSION_ARRAY("recursionArray"),
+
     FILE("file"),
 
     UNKNOWN("unknown");
