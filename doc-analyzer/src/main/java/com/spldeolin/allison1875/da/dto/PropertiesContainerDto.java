@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.da.converter.PropertyConverter;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -51,7 +50,7 @@ public class PropertiesContainerDto {
 
     private void flatRecursively(PropertyTreeNodeDto parent) {
         for (PropertyTreeNodeDto child : parent.getChildren()) {
-            PropertyDto dto = PropertyConverter.converter(child);
+            PropertyDto dto = PropertyDto.fromTreeNode(child);
             flatProperties.add(dto);
             flatPropertiesMap.put(dto.getId(), dto);
             this.flatRecursively(child);

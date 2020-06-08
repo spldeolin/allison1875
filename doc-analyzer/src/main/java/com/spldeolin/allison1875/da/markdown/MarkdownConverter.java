@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.da.markdown;
 
 import java.io.File;
 import java.util.Collection;
+import org.jetbrains.annotations.NotNull;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -9,6 +10,7 @@ import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
+import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
 import com.spldeolin.allison1875.da.showdoc.ShowdocHttpInvoker;
@@ -35,17 +37,32 @@ public class MarkdownConverter {
             vo.setRequestBodySituation(endpoint.getRequestBodySituation().getValue());
             vo.setRequestBodyJsonSchema(endpoint.getRequestBodyJsonSchema());
             if (endpoint.getRequestBodyProperties() != null) {
+                boolean isAnyRequestBodyPropertyEnum = false;
                 Collection<RequestBodyPropertyVo> propVos = Lists.newArrayList();
                 for (PropertyDto dto : endpoint.getRequestBodyProperties()) {
                     RequestBodyPropertyVo propVo = new RequestBodyPropertyVo();
                     propVo.setPath(dto.getPath());
                     propVo.setName(dto.getName());
                     propVo.setDescription(emptyToHorizontalLine(dto.getDescription()));
-                    propVo.setJsonTypeAndFormats(dto.getJsonType().getValue() + " " + dto.getJsonFormat());
+                    String fullJsonType = dto.getJsonType().getValue();
+                    if (Boolean.TRUE.equals(dto.getIsFloat())) {
+                        fullJsonType += " (float)";
+                    }
+                    if (StringUtils.isNotBlank(dto.getDatetimePattern())) {
+                        fullJsonType += " (" + dto.getDatetimePattern() + ")";
+                    }
+                    propVo.setDetailedJsonType(fullJsonType);
                     propVo.setValidators(convertValidators(dto.getRequired(), dto.getValidators()));
+                    if (Boolean.TRUE.equals(dto.getIsEnum())) {
+                        isAnyRequestBodyPropertyEnum = true;
+                        propVo.setEnums(convertEnums(dto.getEnums()));
+                    } else {
+                        propVo.setEnums("-");
+                    }
                     propVos.add(propVo);
                 }
                 vo.setRequestBodyProperties(propVos);
+                vo.setIsAnyRequestBodyPropertyEnum(isAnyRequestBodyPropertyEnum);
                 vo.setAnyValidatorsExist(propVos.stream().anyMatch(one -> !horizontalLine.equals(one.getValidators())));
             }
 
@@ -54,15 +71,30 @@ public class MarkdownConverter {
             vo.setResponseBodyJsonSchema(endpoint.getResponseBodyJsonSchema());
             if (endpoint.getResponseBodyProperties() != null) {
                 Collection<ResponseBodyPropertyVo> propVos = Lists.newArrayList();
+                boolean isAnyResponseBodyPropertyEnum = false;
                 for (PropertyDto dto : endpoint.getResponseBodyProperties()) {
                     ResponseBodyPropertyVo propVo = new ResponseBodyPropertyVo();
                     propVo.setPath(dto.getPath());
                     propVo.setName(dto.getName());
                     propVo.setDescription(emptyToHorizontalLine(dto.getDescription()));
-                    propVo.setJsonTypeAndFormats(dto.getJsonType().getValue() + " " + dto.getJsonFormat());
+                    String fullJsonType = dto.getJsonType().getValue();
+                    if (Boolean.TRUE.equals(dto.getIsFloat())) {
+                        fullJsonType += " (float)";
+                    }
+                    if (StringUtils.isNotBlank(dto.getDatetimePattern())) {
+                        fullJsonType += " (" + dto.getDatetimePattern() + ")";
+                    }
+                    propVo.setDetailedJsonType(fullJsonType);
+                    if (Boolean.TRUE.equals(dto.getIsEnum())) {
+                        isAnyResponseBodyPropertyEnum = true;
+                        propVo.setEnums(convertEnums(dto.getEnums()));
+                    } else {
+                        propVo.setEnums("-");
+                    }
                     propVos.add(propVo);
                 }
                 vo.setResponseBodyProperties(propVos);
+                vo.setIsAnyResponseBodyPropertyEnum(isAnyResponseBodyPropertyEnum);
             }
 
             vo.setAuthor(endpoint.getAuthor());
@@ -94,6 +126,19 @@ public class MarkdownConverter {
             }
         }
 
+    }
+
+    @NotNull
+    private String convertEnums(Collection<EnumDto> enums) {
+        StringBuilder sb = new StringBuilder(64);
+        for (EnumDto anEnum : enums) {
+            sb.append(anEnum.getCode());
+            sb.append("-");
+            sb.append(anEnum.getMeaning());
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
     private String emptyToHorizontalLine(String linkName) {

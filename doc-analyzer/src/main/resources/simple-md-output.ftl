@@ -21,10 +21,10 @@ ${requestBodyJsonSchema}
 参数结构解析失败
 <#else>
 <#if requestBodySituation == 5>结构的最外层是个json array</#if>
-| 属性路径             | 属性名               | 描述                   | JSON类型和格式                |<#if anyValidatorsExist>校验项              |</#if>
-| ------------------- | ------------------- | ---------------------- | ---------------------------- |<#if anyValidatorsExist>------------------ |</#if>
+| 属性路径             | 属性名               | 描述                   | JSON类型                   |<#if anyValidatorsExist>校验项              |</#if><#if isAnyRequestBodyPropertyEnum>枚举项              |</#if>
+| ------------------- | ------------------- | ---------------------- | -------------------------- |<#if anyValidatorsExist>------------------ |</#if><#if isAnyRequestBodyPropertyEnum>------------------ |</#if>
 <#list requestBodyProperties as reqProp>
-| ${reqProp.path}     | ${reqProp.name}     | ${reqProp.description} | ${reqProp.jsonTypeAndFormats}|<#if anyValidatorsExist>${reqProp.validators} |</#if>
+| ${reqProp.path}     | ${reqProp.name}     | ${reqProp.description} | ${reqProp.detailedJsonType}|<#if anyValidatorsExist>${reqProp.validators} |</#if><#if isAnyRequestBodyPropertyEnum>${reqProp.enums} |</#if>
 </#list>
 </#if>
 
@@ -43,10 +43,10 @@ ${responseBodyJsonSchema}
 返回值结构解析失败
 <#else>
 <#if responseBodySituation == 5>结构的最外层是个json array</#if>
-| 属性路径             | 属性名               | 描述                    | JSON类型和格式                 |
-| ------------------- | ------------------- | ----------------------- | ----------------------------- |
+| 属性路径             | 属性名               | 描述                    | JSON类型                    |<#if isAnyResponseBodyPropertyEnum>枚举项              |</#if>
+| ------------------- | ------------------- | ----------------------- | --------------------------- |<#if isAnyResponseBodyPropertyEnum>------------------ |</#if>
 <#list responseBodyProperties as respProp>
-| ${respProp.path}    | ${respProp.name}    | ${respProp.description} | ${respProp.jsonTypeAndFormats}|
+| ${respProp.path}    | ${respProp.name}    | ${respProp.description} | ${respProp.detailedJsonType}|<#if isAnyResponseBodyPropertyEnum>${respProp.enums} |</#if>
 </#list>
 </#if>
 

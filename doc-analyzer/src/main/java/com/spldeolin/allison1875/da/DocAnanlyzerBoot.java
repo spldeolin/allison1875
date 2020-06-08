@@ -62,17 +62,15 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
-import com.spldeolin.allison1875.base.util.exception.JsonException;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.da.builder.EndpointDtoBuilder;
-import com.spldeolin.allison1875.da.dto.CodeAndDescriptionDto;
+import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.dto.PropertyTreeNodeDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
-import com.spldeolin.allison1875.da.enums.JsonFormatEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.jackson.MappingJacksonAnnotationIntrospector;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
@@ -295,9 +293,18 @@ public class DocAnanlyzerBoot {
             }
 
             JsonTypeEnum jsonType;
+            Boolean isFloat = null;
+            Boolean isEnum = null;
+            Collection<EnumDto> enums = null;
             JsonSchema forCalcJsonFormat = childSchema;
             if (childSchema.isValueTypeSchema()) {
-                jsonType = calcValueType(childSchema.asValueTypeSchema(), false);
+                ValueTypeSchema valueSchema = childSchema.asValueTypeSchema();
+                jsonType = calcValueType(valueSchema, false);
+                isFloat = isFloat(valueSchema);
+                isEnum = isEnum(valueSchema);
+                if (isEnum) {
+                    enums = calcEnum(valueSchema);
+                }
             } else if (childSchema.isObjectSchema()) {
                 jsonType = calcObjectTypeWithRecur(child, childSchema.asObjectSchema(), false);
             } else if (childSchema.isArraySchema()) {
@@ -309,7 +316,13 @@ public class DocAnanlyzerBoot {
                     forCalcJsonFormat = eleSchema;
                     forCalcJsonFormat.setDescription(childSchema.getDescription());
                     if (eleSchema.isValueTypeSchema()) {
-                        jsonType = calcValueType(eleSchema.asValueTypeSchema(), true);
+                        ValueTypeSchema valueSchema = eleSchema.asValueTypeSchema();
+                        jsonType = calcValueType(valueSchema, true);
+                        isFloat = isFloat(valueSchema);
+                        isEnum = isEnum(valueSchema);
+                        if (isEnum) {
+                            enums = calcEnum(valueSchema);
+                        }
                     } else if (eleSchema.isObjectSchema()) {
                         jsonType = calcObjectTypeWithRecur(child, eleSchema.asObjectSchema(), true);
                     } else if (eleSchema instanceof ReferenceSchema) {
@@ -324,15 +337,17 @@ public class DocAnanlyzerBoot {
                 jsonType = JsonTypeEnum.UNKNOWN;
             }
             child.setJsonType(jsonType);
+            child.setIsFloat(isFloat);
+            child.setIsEnum(isEnum);
+            child.setEnums(enums);
 
             if (jpdv != null) {
                 child.setDescription(jpdv.getComment());
                 child.setValidators(jpdv.getValidators());
                 child.setRequired(jpdv.getRequired());
-                child.setJsonFormat(calcJsonFormat(jpdv.getRawType(), jpdv.getJsonFormatPattern(), forCalcJsonFormat));
+                child.setDatetimePattern(jpdv.getJsonFormatPattern());
             } else {
                 child.setRequired(false);
-                child.setJsonFormat(calcJsonFormat(null, null, forCalcJsonFormat));
 //                log.warn("Cannot found JsonPropertyDescriptionValue. parentSchemaId={} childName={}",
 //                        JsonSchemaUtils.getId(parentSchema), childName);
             }
@@ -348,44 +363,27 @@ public class DocAnanlyzerBoot {
         return parent.getJsonType();
     }
 
-    private String calcJsonFormat(String rawType, String jsonFormatPattern, JsonSchema jsonSchema) {
-        if (jsonSchema.isValueTypeSchema() && !CollectionUtils.isEmpty(jsonSchema.asValueTypeSchema().getEnums())) {
-            StringBuilder sb = new StringBuilder(64);
-            try {
-                for (String cadJson : jsonSchema.asStringSchema().getEnums()) {
-                    CodeAndDescriptionDto cad = JsonUtils.toObject(cadJson, CodeAndDescriptionDto.class);
-                    sb.append(cad.getCode()).append("-").append(cad.getDescription());
-                    sb.append(",");
-                }
-            } catch (JsonException e) {
-                jsonSchema.asStringSchema().getEnums().forEach(one -> sb.append(one).append(","));
-                log.warn("enum illegal. rawType={}, jsonSchema={}", rawType, jsonSchema);
-            }
-            if (sb.length() > 0) {
-                sb.deleteCharAt(sb.length() - 1);
-            } else {
-                sb.append("unknown");
-            }
-            return String.format(JsonFormatEnum.ENUM.getValue(), StringUtils.limitLength(sb, 4096));
+    private Boolean isFloat(ValueTypeSchema valueTypeSchema) {
+        if (valueTypeSchema.isIntegerSchema()) {
+            return false;
+        } else if (valueTypeSchema.isNumberSchema()) {
+            return true;
+        } else {
+            return null;
         }
+    }
 
-        if (jsonFormatPattern != null && jsonSchema.isStringSchema()) {
-            return String.format(JsonFormatEnum.TIME.getValue(), jsonFormatPattern);
+    private Boolean isEnum(ValueTypeSchema valueSchema) {
+        return !CollectionUtils.isEmpty(valueSchema.getEnums());
+    }
+
+    private Collection<EnumDto> calcEnum(ValueTypeSchema valueSchema) {
+        Collection<EnumDto> result = Lists.newArrayList();
+        for (String enumJson : valueSchema.getEnums()) {
+            EnumDto cad = JsonUtils.toObject(enumJson, EnumDto.class);
+            result.add(cad);
         }
-
-        if (jsonSchema.isNumberSchema() && rawType != null) {
-            if (!jsonSchema.isIntegerSchema()) {
-                return JsonFormatEnum.FLOAT.getValue();
-            } else if (StringUtils.containsAny(rawType, "Integer", "int")) {
-                return JsonFormatEnum.INT_32.getValue();
-            } else if (StringUtils.containsAny(rawType, "Long", "long")) {
-                return JsonFormatEnum.INT_64.getValue();
-            } else {
-                return JsonFormatEnum.INT_UNKNOWN.getValue();
-            }
-        }
-
-        return JsonFormatEnum.NOTHING_SPECIAL.getValue();
+        return result;
     }
 
     private JsonTypeEnum calcValueType(ValueTypeSchema vSchema, boolean isInArray) {

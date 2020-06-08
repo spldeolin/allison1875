@@ -26,7 +26,13 @@ public class PropertyTreeNodeDto {
 
     private JsonTypeEnum jsonType;
 
-    private String jsonFormat;
+    private Boolean isFloat;
+
+    private String datetimePattern;
+
+    private Boolean isEnum;
+
+    private Collection<EnumDto> enums;
 
     private Boolean required;
 

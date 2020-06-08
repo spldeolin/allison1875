@@ -20,6 +20,13 @@ public class StringUtils {
     }
 
     /**
+     * @see org.apache.commons.lang3.StringUtils#isNotBlank(java.lang.CharSequence)
+     */
+    public static boolean isNotBlank(CharSequence cs) {
+        return org.apache.commons.lang3.StringUtils.isNotBlank(cs);
+    }
+
+    /**
      * @see org.apache.commons.lang3.StringUtils#isBlank(java.lang.CharSequence)
      */
     public static boolean isBlank(CharSequence cs) {

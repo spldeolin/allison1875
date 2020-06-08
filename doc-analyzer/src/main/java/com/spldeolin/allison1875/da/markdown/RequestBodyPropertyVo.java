@@ -14,8 +14,10 @@ public class RequestBodyPropertyVo {
 
     private String description;
 
-    private String jsonTypeAndFormats;
+    private String detailedJsonType;
 
     private String validators;
+
+    private String enums;
 
 }

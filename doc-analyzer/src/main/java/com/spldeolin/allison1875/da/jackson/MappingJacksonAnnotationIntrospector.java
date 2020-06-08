@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.da.dto.CodeAndDescriptionDto;
+import com.spldeolin.allison1875.da.dto.EnumDto;
 import lombok.AllArgsConstructor;
 
 /**
@@ -60,12 +60,12 @@ public class MappingJacksonAnnotationIntrospector extends JacksonAnnotationIntro
         for (int i = 0; i < enumValues.length; i++) {
             try {
                 String code = codeField.get(enumValues[i]).toString();
-                CodeAndDescriptionDto cad = new CodeAndDescriptionDto();
+                EnumDto cad = new EnumDto();
                 cad.setCode(code);
                 if (descriptionField != null) {
-                    cad.setDescription(descriptionField.get(enumValues[i]).toString());
+                    cad.setMeaning(descriptionField.get(enumValues[i]).toString());
                 } else {
-                    cad.setDescription(
+                    cad.setMeaning(
                             enumDescriptions.get(enumType.getName().replace('$', '.'), enumValues[i].name()));
                 }
                 result[i] = JsonUtils.toJson(cad);

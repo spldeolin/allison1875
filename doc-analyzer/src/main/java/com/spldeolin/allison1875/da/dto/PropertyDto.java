@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import lombok.Data;
 
@@ -24,7 +25,13 @@ public class PropertyDto {
 
     private JsonTypeEnum jsonType;
 
-    private String jsonFormat;
+    private Boolean isFloat;
+
+    private String datetimePattern;
+
+    private Boolean isEnum;
+
+    private Collection<EnumDto> enums;
 
     private Boolean required;
 
@@ -40,5 +47,28 @@ public class PropertyDto {
     private Long parentId;
 
     private Collection<Long> childIds;
+
+    public static PropertyDto fromTreeNode(PropertyTreeNodeDto treeNode) {
+        PropertyDto result = new PropertyDto();
+        result.setId(treeNode.getId());
+        result.setName(treeNode.getName());
+        result.setDescription(treeNode.getDescription());
+        result.setJsonType(treeNode.getJsonType());
+        result.setIsFloat(treeNode.getIsFloat());
+        result.setDatetimePattern(treeNode.getDatetimePattern());
+        result.setIsEnum(treeNode.getIsEnum());
+        result.setEnums(treeNode.getEnums());
+        result.setRequired(treeNode.getRequired());
+        result.setValidators(treeNode.getValidators());
+        if (treeNode.getParent() != null) {
+            result.setParentId(treeNode.getParent().getId());
+        }
+        Collection<Long> childUuids = Lists.newArrayList();
+        for (PropertyTreeNodeDto child : treeNode.getChildren()) {
+            childUuids.add(child.getId());
+        }
+        result.setChildIds(childUuids);
+        return result;
+    }
 
 }
