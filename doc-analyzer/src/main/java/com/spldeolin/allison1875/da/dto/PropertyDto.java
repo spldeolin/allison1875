@@ -30,8 +30,8 @@ public class PropertyDto {
     private Collection<PropertyValidatorDto> validators;
 
     @JsonInclude
-    private String parentUuid;
+    private String parentId;
 
-    private Collection<Long> childUuids;
+    private Collection<Long> childIds;
 
 }

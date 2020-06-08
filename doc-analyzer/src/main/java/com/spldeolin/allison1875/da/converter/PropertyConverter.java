@@ -20,13 +20,13 @@ public class PropertyConverter {
         result.setRequired(node.getRequired());
         result.setValidators(node.getValidators());
         if (node.getParent() != null) {
-            result.setParentUuid(node.getParent().getId().toString());
+            result.setParentId(node.getParent().getId().toString());
         }
         Collection<Long> childUuids = Lists.newArrayList();
         for (PropertyTreeNodeDto child : node.getChildren()) {
             childUuids.add(child.getId());
         }
-        result.setChildUuids(childUuids);
+        result.setChildIds(childUuids);
         return result;
     }
 

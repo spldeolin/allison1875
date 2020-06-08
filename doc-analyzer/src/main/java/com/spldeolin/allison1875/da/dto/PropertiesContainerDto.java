@@ -70,7 +70,7 @@ public class PropertiesContainerDto {
     }
 
     private void insertToHeadRecursively(PropertyDto dto, StringBuilder path) {
-        PropertyDto parent = flatPropertiesMap.get(dto.getParentUuid());
+        PropertyDto parent = flatPropertiesMap.get(dto.getParentId());
         if (parent != null) {
             String linkPart = parent.getName();
             if (parent.getJsonType().isArrayLike()) {
