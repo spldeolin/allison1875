@@ -13,7 +13,7 @@
 <#if requestBodySituation == 1>
 不需要参数
 <#elseif requestBodySituation == 2>
-参数结构过于复杂 或是 RequestBody结构存在泛化的部分，只提供JsonSchema
+参数结构过于复杂 或是 存在泛化的部分，只提供JsonSchema
 ~~~
 ${requestBodyJsonSchema}
 ~~~
@@ -35,7 +35,7 @@ ${requestBodyJsonSchema}
 <#if responseBodySituation == 1>
 没有返回值
 <#elseif responseBodySituation == 2>
-返回值结构过于复杂 或是 RequestBody结构存在泛化的部分，只提供JsonSchema
+参数结构过于复杂 或是 存在泛化的部分，只提供JsonSchema
 ~~~
 ${responseBodyJsonSchema}
 ~~~
