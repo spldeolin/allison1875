@@ -116,7 +116,12 @@ public class CompileSourceAndCopyDependencyTool {
 
         log.info("invoke copy dependencies for [{}]", BaseConfig.getInstace().getCommonPart().relativize(pomPath));
         String externalJarPath = externalJarsBasePath + pomPath.getParent().toString();
-        FileUtils.cleanDirectory(new File(externalJarPath));
+        File externalJar = new File(externalJarPath);
+        if (!externalJar.exists()) {
+            externalJar.mkdirs();
+        } else {
+            FileUtils.cleanDirectory(externalJar);
+        }
 
         request.setGoals(Lists.newArrayList("dependency:copy-dependencies"));
         Properties properties = new Properties();
