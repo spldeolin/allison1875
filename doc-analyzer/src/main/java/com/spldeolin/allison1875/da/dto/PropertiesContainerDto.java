@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.dto;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -59,17 +60,20 @@ public class PropertiesContainerDto {
 
     private void buildAllPath() {
         for (PropertyDto dto : flatProperties) {
-            String name = dto.getName();
-            StringBuilder path = new StringBuilder(name);
+            StringBuilder path = new StringBuilder(dto.getName());
             if (dto.getJsonType().isArrayLike()) {
                 path.append("[0]");
             }
-            this.insertToHeadRecursively(dto, path);
+            List<Long> ancestorIds = Lists.newArrayList();
+
+            this.insertNameToHeadRecursively(dto, path, ancestorIds);
+
             dto.setPath(path.toString());
+            dto.setAncestorIds(ancestorIds);
         }
     }
 
-    private void insertToHeadRecursively(PropertyDto dto, StringBuilder path) {
+    private void insertNameToHeadRecursively(PropertyDto dto, StringBuilder path, List<Long> ancestorIds) {
         PropertyDto parent = flatPropertiesMap.get(dto.getParentId());
         if (parent != null) {
             String linkPart = parent.getName();
@@ -77,7 +81,12 @@ public class PropertiesContainerDto {
                 linkPart += "[0]";
             }
             path.insert(0, linkPart + ".");
-            this.insertToHeadRecursively(parent, path);
+
+            Long idPart = parent.getId();
+            if (idPart != null) {
+                ancestorIds.add(0, parent.getId());
+            }
+            this.insertNameToHeadRecursively(parent, path, ancestorIds);
         }
     }
 
