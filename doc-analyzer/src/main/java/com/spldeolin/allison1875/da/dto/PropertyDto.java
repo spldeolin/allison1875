@@ -30,7 +30,7 @@ public class PropertyDto {
     private Collection<PropertyValidatorDto> validators;
 
     @JsonInclude
-    private String parentId;
+    private Long parentId;
 
     private Collection<Long> childIds;
 
