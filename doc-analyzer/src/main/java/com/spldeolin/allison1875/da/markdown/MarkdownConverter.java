@@ -77,7 +77,10 @@ public class MarkdownConverter {
             File dir = DocAnalyzerConfig.getInstace().getDocOutputDirectoryPath()
                     .resolve(groupNames.replace('.', File.separatorChar)).toFile();
             if (!dir.exists()) {
-                dir.mkdirs();
+                if (!dir.mkdirs()) {
+                    log.warn("mkdirs [{}] failed.", dir);
+                    continue;
+                }
             }
             File output = dir.toPath().resolve(fileName).toFile();
             try {

@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.da;
 
 import java.io.File;
 import java.nio.file.Path;
+import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -60,9 +61,15 @@ public final class DocAnalyzerConfig {
         File docOutputDirectory = instace.docOutputDirectoryPath.toFile();
         if (!docOutputDirectory.exists()) {
             if (!docOutputDirectory.mkdirs()) {
-                log.error("docOutputDirectory.mkdirs failed.");
+                log.error("mkdirs [{}] failed.", docOutputDirectory);
                 throw new ConfigLoadingException();
             }
+        }
+        try {
+            FileUtils.cleanDirectory(docOutputDirectory);
+        } catch (Exception e) {
+            log.error("FileUtils.cleanDirectory failed. {}", docOutputDirectory, e);
+                throw new ConfigLoadingException();
         }
 
         return instace;

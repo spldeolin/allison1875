@@ -231,7 +231,7 @@ public class DocAnanlyzerBoot {
 
                     EndpointDto endpoint = builder.build();
 
-                    new MarkdownConverter().convert(Lists.newArrayList(endpoint), true);
+                    new MarkdownConverter().convert(Lists.newArrayList(endpoint), false);
                 }
             }
         }

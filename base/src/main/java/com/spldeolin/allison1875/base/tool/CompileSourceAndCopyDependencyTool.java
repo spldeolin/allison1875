@@ -6,11 +6,11 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
-import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
 import com.github.javaparser.utils.ParserCollectionStrategy;
 import com.github.javaparser.utils.SourceRoot;
@@ -84,7 +84,7 @@ public class CompileSourceAndCopyDependencyTool {
                     report.append(modulePath.resolve(classpathRelativeToModulePath));
                     report.append("\r\n    externalJarsPath: ");
                     report.append(modulePath.resolve(externalJarsPath));
-                } catch (MavenInvocationException e) {
+                } catch (Exception e) {
                     log.error("CompileSourceAndCopyDependencyTool.invokePom({})", pomPath, e);
                 }
             }
@@ -93,7 +93,7 @@ public class CompileSourceAndCopyDependencyTool {
         log.info(report);
     }
 
-    private static String invokePom(Path pomPath) throws MavenInvocationException {
+    private static String invokePom(Path pomPath) throws Exception {
         Invoker invoker = new DefaultInvoker();
         invoker.setMavenHome(mavenHome.toFile());
         invoker.setOutputHandler(new PrintStreamHandler() {
@@ -116,6 +116,8 @@ public class CompileSourceAndCopyDependencyTool {
 
         log.info("invoke copy dependencies for [{}]", BaseConfig.getInstace().getCommonPart().relativize(pomPath));
         String externalJarPath = externalJarsBasePath + pomPath.getParent().toString();
+        FileUtils.cleanDirectory(new File(externalJarPath));
+
         request.setGoals(Lists.newArrayList("dependency:copy-dependencies"));
         Properties properties = new Properties();
         properties.setProperty("outputAbsoluteArtifactFilename", "true");

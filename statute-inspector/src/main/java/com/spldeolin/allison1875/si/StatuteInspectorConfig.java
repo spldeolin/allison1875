@@ -48,7 +48,7 @@ public final class StatuteInspectorConfig {
             File publicAckJsonDirectory = new File(rawData.get("publicAckJsonDirectoryPath"));
             if (!publicAckJsonDirectory.exists()) {
                 if (!publicAckJsonDirectory.mkdirs()) {
-                    log.error("[{}] mkdir failed.", publicAckJsonDirectory);
+                    log.error("mkdirs [{}] failed.", publicAckJsonDirectory);
                     throw new ConfigLoadingException();
                 }
             }
@@ -57,7 +57,7 @@ public final class StatuteInspectorConfig {
             File lawlessCsvOutputDirectory = new File(rawData.get("lawlessCsvOutputDirectoryPath"));
             if (!lawlessCsvOutputDirectory.exists()) {
                 if (!lawlessCsvOutputDirectory.mkdirs()) {
-                    log.error("[{}] mkdir failed.", lawlessCsvOutputDirectory);
+                    log.error("mkdirs [{}] failed.", lawlessCsvOutputDirectory);
                     throw new ConfigLoadingException();
                 }
             }
