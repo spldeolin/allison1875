@@ -15,7 +15,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
@@ -58,6 +57,7 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -145,7 +145,7 @@ public class DocAnanlyzerBoot {
                         continue;
                     }
 
-                    builder.description(Javadocs.extractEveryLine(handler, "\n"));
+                    builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
                     builder.version("");
                     builder.isDeprecated(isDeprecated(controller, handler));
                     builder.author(Authors.getAuthorOrElseEmpty(handler));
@@ -366,7 +366,7 @@ public class DocAnanlyzerBoot {
             } else {
                 sb.append("unknown");
             }
-            return String.format(JsonFormatEnum.ENUM.getValue(), sb);
+            return String.format(JsonFormatEnum.ENUM.getValue(), StringUtils.limitLength(sb, 4096));
         }
 
         if (jsonFormatPattern != null && jsonSchema.isStringSchema()) {
@@ -402,15 +402,17 @@ public class DocAnanlyzerBoot {
 
     private void collectEnumDescription(EnumDeclaration ed, Table<String, String, String> table) {
         String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        ed.getEntries()
-                .forEach(entry -> table.put(qualifier, entry.getNameAsString(), Javadocs.extractFirstLine(entry)));
+        ed.getEntries().forEach(entry -> {
+            String comment = StringUtils.limitLength(Javadocs.extractFirstLine(entry), 4096);
+            table.put(qualifier, entry.getNameAsString(), comment);
+        });
     }
 
     private void collectPropertiesAnnoInfo(ClassOrInterfaceDeclaration coid, Table<String, String, String> table) {
         String javabeanQualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         for (FieldDeclaration field : coid.getFields()) {
             JsonPropertyDescriptionValueDto value = new JsonPropertyDescriptionValueDto();
-            value.setComment(Javadocs.extractFirstLine(field));
+            value.setComment(StringUtils.limitLength(Javadocs.extractFirstLine(field), 4096));
             value.setRequired(
                     isAnnoPresent(field, NotNull.class) || isAnnoPresent(field, NotEmpty.class) || isAnnoPresent(field,
                             NotBlank.class));

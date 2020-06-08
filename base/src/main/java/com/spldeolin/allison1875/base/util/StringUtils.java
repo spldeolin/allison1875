@@ -12,6 +12,27 @@ public class StringUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
+    /**
+     * @see org.apache.commons.lang3.StringUtils#isEmpty(java.lang.CharSequence)
+     */
+    public static boolean isEmpty(CharSequence cs) {
+        return org.apache.commons.lang3.StringUtils.isEmpty(cs);
+    }
+
+    /**
+     * @see org.apache.commons.lang3.StringUtils#isBlank(java.lang.CharSequence)
+     */
+    public static boolean isBlank(CharSequence cs) {
+        return org.apache.commons.lang3.StringUtils.isBlank(cs);
+    }
+
+    /**
+     * @see org.apache.commons.lang3.StringUtils#containsAny(java.lang.CharSequence, java.lang.CharSequence...)
+     */
+    public static boolean containsAny(CharSequence cs, CharSequence... searchCharSequences) {
+        return org.apache.commons.lang3.StringUtils.containsAny(cs, searchCharSequences);
+    }
+
     public static List<String> splitLineByLine(String string) {
         if (string == null) {
             return Lists.newArrayList();
@@ -43,12 +64,14 @@ public class StringUtils {
         return s.substring(1).trim();
     }
 
-    /**
-     * @see org.apache.commons.lang3.StringUtils#isEmpty(java.lang.CharSequence)
-     */
-    public static boolean isEmpty(final CharSequence cs) {
-        return cs == null || cs.length() == 0;
+    public static String limitLength(CharSequence s, int limit) {
+        if (s == null) {
+            return null;
+        }
+        if (s.length() <= limit) {
+            return s.toString();
+        }
+        return s.toString().substring(0, limit);
     }
-
 
 }
