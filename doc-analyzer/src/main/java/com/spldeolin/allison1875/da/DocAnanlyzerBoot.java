@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -54,6 +53,7 @@ import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.IdUtils;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
@@ -285,7 +285,7 @@ public class DocAnanlyzerBoot {
             String childName = entry.getKey();
             JsonSchema childSchema = entry.getValue();
             PropertyTreeNodeDto child = new PropertyTreeNodeDto();
-            child.setUuid(UUID.randomUUID().toString().replace("-", ""));
+            child.setId(IdUtils.nextId());
             child.setName(childName);
 
             JsonPropertyDescriptionValueDto jpdv = null;

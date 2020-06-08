@@ -13,7 +13,7 @@ import lombok.Data;
 @JsonInclude(Include.NON_NULL)
 public class PropertyDto {
 
-    private String uuid;
+    private Long id;
 
     private String path;
 
@@ -32,6 +32,6 @@ public class PropertyDto {
     @JsonInclude
     private String parentUuid;
 
-    private Collection<String> childUuids;
+    private Collection<Long> childUuids;
 
 }

@@ -29,7 +29,7 @@ public class PropertiesContainerDto {
      */
     private Collection<PropertyDto> flatProperties;
 
-    private Map<String, PropertyDto> flatPropertiesMap;
+    private Map<Long, PropertyDto> flatPropertiesMap;
 
     public PropertiesContainerDto(String javabeanQualifier, Collection<PropertyTreeNodeDto> dendriformProperties) {
         this.javabeanQualifier = javabeanQualifier;
@@ -52,7 +52,7 @@ public class PropertiesContainerDto {
         for (PropertyTreeNodeDto child : parent.getChildren()) {
             PropertyDto dto = PropertyConverter.converter(child);
             flatProperties.add(dto);
-            flatPropertiesMap.put(dto.getUuid(), dto);
+            flatPropertiesMap.put(dto.getId(), dto);
             this.flatRecursively(child);
         }
     }

@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PropertyTreeNodeDto {
 
-    private String uuid;
+    private Long id;
 
     private String name;
 
