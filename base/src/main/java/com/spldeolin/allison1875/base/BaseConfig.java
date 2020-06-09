@@ -134,10 +134,6 @@ public final class BaseConfig {
         return javaTimeModule;
     }
 
-    public static void main(String[] args) {
-        System.out.println(getInstace().getCommonPart());
-    }
-
     @Data
     public static class ProjectModule {
 
