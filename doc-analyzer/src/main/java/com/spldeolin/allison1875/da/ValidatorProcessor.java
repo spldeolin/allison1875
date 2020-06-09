@@ -5,7 +5,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
+import com.spldeolin.allison1875.da.dto.ValidatorDto;
 import com.spldeolin.allison1875.da.enums.ValidatorTypeEnum;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -19,20 +19,20 @@ import lombok.extern.log4j.Log4j2;
 @Accessors(fluent = true)
 public class ValidatorProcessor {
 
-    public Collection<PropertyValidatorDto> process(NodeWithAnnotations<?> node) {
-        Collection<PropertyValidatorDto> result = Lists.newLinkedList();
+    public Collection<ValidatorDto> process(NodeWithAnnotations<?> node) {
+        Collection<ValidatorDto> result = Lists.newLinkedList();
         for (AnnotationExpr annotation : node.getAnnotations()) {
             switch (annotation.getNameAsString()) {
                 case "NotEmpty":
-                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.notEmpty.getValue()));
+                    result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.notEmpty.getValue()));
                     break;
                 case "NotBlank":
-                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.notBlank.getValue()));
+                    result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.notBlank.getValue()));
                     break;
                 case "Size":
                 case "Length":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        PropertyValidatorDto validator = new PropertyValidatorDto().setNote(pair.getValue().toString());
+                        ValidatorDto validator = new ValidatorDto().setNote(pair.getValue().toString());
                         if (nameOf(pair, "min")) {
                             result.add(validator.setValidatorType(ValidatorTypeEnum.minSize.getValue()));
                         }
@@ -43,53 +43,53 @@ public class ValidatorProcessor {
                     break;
                 case "Max":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
+                            .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto()
+                                    pair -> result.add(new ValidatorDto()
                                             .setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
                                             .setNote(pair.getValue().toString()))));
                     break;
                 case "Min":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.minInteger.getValue())
+                            .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minInteger.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto()
+                                    pair -> result.add(new ValidatorDto()
                                             .setValidatorType(ValidatorTypeEnum.minInteger.getValue())
                                             .setNote(pair.getValue().toString()))));
                     break;
                 case "DecimalMax":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
+                            .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto()
+                                    pair -> result.add(new ValidatorDto()
                                             .setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
                                             .setNote(pair.getValue().toString()))));
                     break;
                 case "DecimalMin":
                     annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.minFloat.getValue())
+                            .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minFloat.getValue())
                                     .setNote(singleAnno.getMemberValue().toString())));
                     annotation.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new PropertyValidatorDto()
+                                    pair -> result.add(new ValidatorDto()
                                             .setValidatorType(ValidatorTypeEnum.minFloat.getValue())
                                             .setNote(pair.getValue().toString()))));
                     break;
                 case "Future":
-                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.future.getValue()));
+                    result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.future.getValue()));
                     break;
                 case "Past":
-                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.past.getValue()));
+                    result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.past.getValue()));
                     break;
                 case "Digits":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        PropertyValidatorDto validator = new PropertyValidatorDto().setNote(pair.getValue().toString());
+                        ValidatorDto validator = new ValidatorDto().setNote(pair.getValue().toString());
                         if (nameOf(pair, "integer")) {
                             result.add(validator.setValidatorType(ValidatorTypeEnum.maxIntegralDigits.getValue()));
                         }
@@ -99,15 +99,15 @@ public class ValidatorProcessor {
                     });
                     break;
                 case "Positive":
-                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.positive.getValue()));
+                    result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.positive.getValue()));
                     break;
                 case "Negative":
-                    result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.negative.getValue()));
+                    result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.negative.getValue()));
                     break;
                 case "Pattern":
                     annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         if (nameOf(pair, "regexp")) {
-                            result.add(new PropertyValidatorDto().setValidatorType(ValidatorTypeEnum.regex.getValue())
+                            result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.regex.getValue())
                                     .setNote(pair.getValue().asStringLiteralExpr().asString()));
                         }
                     });

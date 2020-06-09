@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @JsonInclude(Include.NON_NULL)
-public class PropertyValidatorDto {
+public class ValidatorDto {
 
     /**
      * @see ValidatorTypeEnum

@@ -12,7 +12,7 @@ import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
-import com.spldeolin.allison1875.da.dto.PropertyValidatorDto;
+import com.spldeolin.allison1875.da.dto.ValidatorDto;
 import com.spldeolin.allison1875.da.showdoc.ShowdocHttpInvoker;
 import lombok.extern.log4j.Log4j2;
 
@@ -148,7 +148,7 @@ public class MarkdownConverter {
         return linkName;
     }
 
-    private String convertValidators(Boolean required, Collection<PropertyValidatorDto> validators) {
+    private String convertValidators(Boolean required, Collection<ValidatorDto> validators) {
         StringBuilder result = new StringBuilder(64);
 
         if (required) {
@@ -156,7 +156,7 @@ public class MarkdownConverter {
         }
 
         if (validators != null && validators.size() > 0) {
-            for (PropertyValidatorDto validator : validators) {
+            for (ValidatorDto validator : validators) {
                 result.append("　");
                 result.append(validator.getValidatorType());
                 result.append(validator.getNote());

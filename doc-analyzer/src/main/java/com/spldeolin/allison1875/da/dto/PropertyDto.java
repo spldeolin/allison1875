@@ -35,7 +35,7 @@ public class PropertyDto {
 
     private Boolean required;
 
-    private Collection<PropertyValidatorDto> validators;
+    private Collection<ValidatorDto> validators;
 
     /**
      * e.g.: 1.12.20.21.22

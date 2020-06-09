@@ -36,7 +36,7 @@ public class PropertyTreeNodeDto {
 
     private Boolean required;
 
-    private Collection<PropertyValidatorDto> validators;
+    private Collection<ValidatorDto> validators;
 
     private PropertyTreeNodeDto parent;
 
