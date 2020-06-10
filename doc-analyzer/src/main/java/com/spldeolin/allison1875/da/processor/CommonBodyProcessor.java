@@ -21,9 +21,11 @@ import com.spldeolin.allison1875.da.dto.PropertyTreeNodeDto;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 
 /**
+ * RequestMappingProcessor和ResponseBodyProcessor的共用代码
+ *
  * @author Deolin 2020-06-10
  */
-public class CommonBodyAnalyzeProcessor {
+class CommonBodyProcessor {
 
     public PropertiesContainerDto anaylzeObjectSchema(String requestBodyDescribe, ObjectSchema objectSchema) {
         PropertyTreeNodeDto tempParent = new PropertyTreeNodeDto();

@@ -22,16 +22,18 @@ import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * 内聚了 解析ResponseBody的功能
+ *
  * @author Deolin 2020-06-10
  */
 @Log4j2
-public class ResponseBodyProcessor {
+class ResponseBodyProcessor {
 
     private final AstForest astForest;
 
     private final JsonSchemaGenerator jsg;
 
-    private final CommonBodyAnalyzeProcessor common = new CommonBodyAnalyzeProcessor();
+    private final CommonBodyProcessor common = new CommonBodyProcessor();
 
     public ResponseBodyProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
         this.astForest = astForest;

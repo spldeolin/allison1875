@@ -18,7 +18,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-06-10
  */
-public class RequestMappingProcessor {
+class RequestMappingProcessor {
 
     private static final PathMatcher pathMatcher = new AntPathMatcher();
 

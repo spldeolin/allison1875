@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * 内聚了 遍历Class controllerClass下handler的功能
+ *
  * @author Deolin 2020-06-10
  */
 @Log4j2
-public class HandlerIterateProcessor {
+class HandlerIterateProcessor {
 
     private final Class<?> controllerClass;
 

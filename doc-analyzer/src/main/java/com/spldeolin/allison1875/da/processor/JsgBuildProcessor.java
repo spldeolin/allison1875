@@ -39,7 +39,7 @@ import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
  *
  * @author Deolin 2020-06-10
  */
-public class JsgBuildProcessor {
+class JsgBuildProcessor {
 
     private final AstForest astForest;
 

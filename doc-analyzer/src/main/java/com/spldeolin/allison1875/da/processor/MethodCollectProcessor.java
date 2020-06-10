@@ -7,9 +7,11 @@ import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 
 /**
+ * 内聚了 收集coid下所有method的功能
+ *
  * @author Deolin 2020-06-10
  */
-public class MethodCollectProcessor {
+class MethodCollectProcessor {
 
     public Map<String, MethodDeclaration> collectMethods(ClassOrInterfaceDeclaration coid) {
         Map<String, MethodDeclaration> methods = Maps.newHashMap();
