@@ -24,6 +24,7 @@ import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,6 +39,7 @@ import lombok.extern.log4j.Log4j2;
 public class MassAnalyzer {
 
     public static void main(String[] args) {
+        Map<Path, Multiset<String>> totalCus = Maps.newHashMap();
         Map<Path, Multiset<String>> totalClasses = Maps.newHashMap();
         Map<Path, Multiset<String>> totalInterfaces = Maps.newHashMap();
         Map<Path, Multiset<String>> totalEnums = Maps.newHashMap();
@@ -48,6 +50,8 @@ public class MassAnalyzer {
 
         for (CompilationUnit cu : AstForest.getInstance()) {
             Path sourceRoot = cu.getStorage().orElseThrow(StorageAbsentException::new).getSourceRoot();
+            getOrElseDefault(totalCus, sourceRoot, HashMultiset.create())
+                    .add(Locations.getStorage(cu).getFileName(), calcLineCount(cu));
             for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
                 String qualifier = td.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
                 int lineCount = calcLineCount(td);
@@ -133,9 +137,20 @@ public class MassAnalyzer {
 
         totalHandlers.forEach(
                 (sourceRoot, lineCounts) -> log.info("handler 个数：{} [{}]", lineCounts.entrySet().size(), sourceRoot));
-        totalMethods
+        totalHandlers
                 .forEach((sourceRoot, lineCounts) -> log.info("handler 代码总行数：{} [{}]", lineCounts.size(), sourceRoot));
 
+        int allProjectLineCount = 0;
+        for (Multiset<String> set : totalCus.values()) {
+            allProjectLineCount += set.size();
+        }
+        log.info("全部项目的总行数：{}", allProjectLineCount);
+
+        int allProjectTotalHandlerCount = 0;
+        for (Multiset<String> set : totalHandlers.values()) {
+            allProjectTotalHandlerCount += set.entrySet().size();
+        }
+        log.info("全部项目的handler 个数：{}", allProjectTotalHandlerCount);
     }
 
     private static Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
