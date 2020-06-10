@@ -22,9 +22,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-02-03
  */
 @Log4j2
-public class CompilationUnitCollector {
+class CompilationUnitCollector {
 
-    public Collection<CompilationUnit> collect(SourceRoot sourceRoot) {
+    Collection<CompilationUnit> collect(SourceRoot sourceRoot) {
         if (sourceRoot.toString().endsWith("src" + File.separator + "test" + File.separator + "java")) {
             return Lists.newArrayList();
         }

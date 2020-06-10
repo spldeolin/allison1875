@@ -76,6 +76,7 @@ public class DocAnanlyzerBoot {
     public void process() {
         AstForest astForest = AstForest.getInstance();
 
+        // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
         JsonSchemaGeneratorProcessor enumAndPropertyProcessor = new JsonSchemaGeneratorProcessor(astForest);
         JsonSchemaGenerator jsg = enumAndPropertyProcessor.analyzeAstAndBuildJsg();
 

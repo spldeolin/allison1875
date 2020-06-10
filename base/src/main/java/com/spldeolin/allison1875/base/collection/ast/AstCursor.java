@@ -24,9 +24,6 @@ class AstCursor implements Iterator<CompilationUnit> {
     @Getter
     private ClassLoader currentClassLoader;
 
-    @Getter
-    private ProjectAstForest currentProjectAstForest;
-
     AstCursor(Collection<SourceRoot> sourceRoots) {
         sourceRootItr = sourceRoots.iterator();
     }
