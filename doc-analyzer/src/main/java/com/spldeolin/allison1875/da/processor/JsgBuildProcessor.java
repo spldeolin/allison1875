@@ -39,7 +39,7 @@ import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
  *
  * @author Deolin 2020-06-10
  */
-public class JsonSchemaGeneratorProcessor {
+public class JsgBuildProcessor {
 
     private final AstForest astForest;
 
@@ -47,7 +47,7 @@ public class JsonSchemaGeneratorProcessor {
 
     private final Table<String, String, String> propertyJpdvs = HashBasedTable.create();
 
-    public JsonSchemaGeneratorProcessor(AstForest astForest) {
+    public JsgBuildProcessor(AstForest astForest) {
         this.astForest = astForest;
     }
 

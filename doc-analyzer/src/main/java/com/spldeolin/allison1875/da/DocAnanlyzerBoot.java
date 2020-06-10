@@ -1,15 +1,6 @@
 package com.spldeolin.allison1875.da;
 
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -31,10 +22,11 @@ import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
 import com.spldeolin.allison1875.da.processor.ControllerIterateProcessor;
 import com.spldeolin.allison1875.da.processor.HandlerIterateProcessor;
-import com.spldeolin.allison1875.da.processor.JsonSchemaGeneratorProcessor;
+import com.spldeolin.allison1875.da.processor.JsgBuildProcessor;
 import com.spldeolin.allison1875.da.processor.MethodCollectProcessor;
-import com.spldeolin.allison1875.da.processor.RequestBodyAnalyzeProcessor;
-import com.spldeolin.allison1875.da.processor.ResponseBodyAnalyzeProcessor;
+import com.spldeolin.allison1875.da.processor.RequestBodyProcessor;
+import com.spldeolin.allison1875.da.processor.RequestMappingProcessor;
+import com.spldeolin.allison1875.da.processor.ResponseBodyProcessor;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -47,13 +39,11 @@ public class DocAnanlyzerBoot {
         new DocAnanlyzerBoot().process();
     }
 
-    private static final PathMatcher pathMatcher = new AntPathMatcher();
-
     public void process() {
         AstForest astForest = AstForest.getInstance();
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsonSchemaGeneratorProcessor jsgProcessor = new JsonSchemaGeneratorProcessor(astForest);
+        JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // 再次重头遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
@@ -72,12 +62,12 @@ public class DocAnanlyzerBoot {
             Map<String, MethodDeclaration> methodsByShortestQualifier = new MethodCollectProcessor()
                     .collectMethods(controller);
 
+            // 收集分组信息
             EndpointDtoBuilder builder = new EndpointDtoBuilder();
             builder.groupNames(findGroupNames(controller));
 
-            RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
-            String[] cPaths = findValueFromAnno(controllerRequestMapping);
-            RequestMethod[] cVerbs = findVerbFromAnno(controllerRequestMapping);
+            // 处理@RequestMapping（controller的RequestMapping）
+            RequestMappingProcessor requestMappingProcessor = new RequestMappingProcessor(controllerClass);
 
             // 遍历handler
             HandlerIterateProcessor handlerIterateProcessor = new HandlerIterateProcessor(controllerClass);
@@ -91,26 +81,24 @@ public class DocAnanlyzerBoot {
                     return;
                 }
 
-                RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
-                String[] mPaths = methodRequestMapping.value();
-                RequestMethod[] mVerbs = methodRequestMapping.method();
-                builder.combinedUrls(combineUrl(cPaths, mPaths));
-                builder.combinedVerbs(combineVerb(cVerbs, mVerbs));
-
+                // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
                 builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthorOrElseEmpty(handler));
                 builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
+                // 处理@RequestMapping（handler的RequestMapping）
+                requestMappingProcessor.analyze(reflectionMethod);
+                builder.combinedUrls(requestMappingProcessor.getCombinedUrls());
+                builder.combinedVerbs(requestMappingProcessor.getCombinedVerbs());
+
                 // 分析Request Body
-                RequestBodyAnalyzeProcessor requestBodyAnalyzeProcessor = new RequestBodyAnalyzeProcessor(astForest,
-                        jsg);
+                RequestBodyProcessor requestBodyAnalyzeProcessor = new RequestBodyProcessor(astForest, jsg);
                 builder.requestBodyInfo(requestBodyAnalyzeProcessor.analyze(handler));
 
                 // 分析Response Body
-                ResponseBodyAnalyzeProcessor responseBodyAnalyzeProcessor = new ResponseBodyAnalyzeProcessor(astForest,
-                        jsg);
+                ResponseBodyProcessor responseBodyAnalyzeProcessor = new ResponseBodyProcessor(astForest, jsg);
                 builder.responseBodyInfo(responseBodyAnalyzeProcessor.analyze(controller, handler));
 
                 // 构建EndpointDto
@@ -142,64 +130,6 @@ public class DocAnanlyzerBoot {
     private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         return Annotations.isAnnoPresent(handler, Deprecated.class) || Annotations
                 .isAnnoPresent(controller, Deprecated.class);
-    }
-
-
-    private Collection<RequestMethod> combineVerb(RequestMethod[] cVerbs, RequestMethod[] mVerbs) {
-        Collection<RequestMethod> combinedVerbs = Lists.newArrayList();
-        if (ArrayUtils.isNotEmpty(cVerbs)) {
-            combinedVerbs.addAll(Arrays.asList(cVerbs));
-        }
-        if (ArrayUtils.isNotEmpty(mVerbs)) {
-            combinedVerbs.addAll(Arrays.asList(mVerbs));
-        }
-        if (combinedVerbs.size() == 0) {
-            combinedVerbs.addAll(Arrays.asList(RequestMethod.values()));
-        }
-        return combinedVerbs;
-    }
-
-    private Collection<String> combineUrl(String[] cPaths, String[] mPaths) {
-        Collection<String> combinedUrls = Lists.newArrayList();
-        if (ArrayUtils.isNotEmpty(cPaths) && ArrayUtils.isNotEmpty(mPaths)) {
-            for (String cPath : cPaths) {
-                for (String mPath : mPaths) {
-                    combinedUrls.add(pathMatcher.combine(cPath, mPath));
-                }
-            }
-        } else if (ArrayUtils.isEmpty(cPaths)) {
-            combinedUrls.addAll(Arrays.asList(mPaths));
-        } else if (ArrayUtils.isEmpty(mPaths)) {
-            combinedUrls.addAll(Arrays.asList(cPaths));
-        } else {
-            combinedUrls.add("/");
-        }
-        combinedUrls = ensureAllStartWithSlash(combinedUrls);
-        return combinedUrls;
-    }
-
-    private Collection<String> ensureAllStartWithSlash(Collection<String> urls) {
-        Collection<String> result = Lists.newArrayList();
-        for (String url : urls) {
-            if (!url.startsWith("/")) {
-                url = "/" + url;
-            }
-            result.add(url);
-        }
-        return result;
-    }
-
-
-    private RequestMethod[] findVerbFromAnno(RequestMapping controllerRequestMapping) {
-        return controllerRequestMapping == null ? new RequestMethod[0] : controllerRequestMapping.method();
-    }
-
-    private String[] findValueFromAnno(RequestMapping controllerRequestMapping) {
-        return controllerRequestMapping == null ? new String[0] : controllerRequestMapping.value();
-    }
-
-    private RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {
-        return AnnotatedElementUtils.findMergedAnnotation(annotated, RequestMapping.class);
     }
 
     private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)

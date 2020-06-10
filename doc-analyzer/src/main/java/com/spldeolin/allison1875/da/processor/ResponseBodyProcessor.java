@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-public class ResponseBodyAnalyzeProcessor {
+public class ResponseBodyProcessor {
 
     private final AstForest astForest;
 
@@ -33,7 +33,7 @@ public class ResponseBodyAnalyzeProcessor {
 
     private final CommonBodyAnalyzeProcessor common = new CommonBodyAnalyzeProcessor();
 
-    public ResponseBodyAnalyzeProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
+    public ResponseBodyProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
         this.astForest = astForest;
         this.jsg = jsg;
     }
