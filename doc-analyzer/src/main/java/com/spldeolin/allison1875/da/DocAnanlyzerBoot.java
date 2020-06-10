@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.da;
 
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +32,6 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
@@ -60,7 +58,9 @@ import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
 import com.spldeolin.allison1875.da.processor.ControllerIterateProcessor;
+import com.spldeolin.allison1875.da.processor.HandlerIterateProcessor;
 import com.spldeolin.allison1875.da.processor.JsonSchemaGeneratorProcessor;
+import com.spldeolin.allison1875.da.processor.MethodCollectProcessor;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -86,7 +86,7 @@ public class DocAnanlyzerBoot {
         ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
         controllerIterateProcessor.iterate(controller -> {
 
-            // 反射controller，如果失败那么这个controller就没有处理的必要了
+            // 反射controller，如果失败那么这个controller就没有处理该controller的必要了
             Class<?> controllerClass;
             try {
                 controllerClass = tryReflectController(controller, astForest);
@@ -94,37 +94,34 @@ public class DocAnanlyzerBoot {
                 return;
             }
 
-            EndpointDtoBuilder builder = new EndpointDtoBuilder();
+            // 收集controller内的所有方法
+            Map<String, MethodDeclaration> methodsByShortestQualifier = new MethodCollectProcessor()
+                    .collectMethods(controller);
 
+            EndpointDtoBuilder builder = new EndpointDtoBuilder();
             builder.groupNames(findGroupNames(controller));
 
             RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
             String[] cPaths = findValueFromAnno(controllerRequestMapping);
             RequestMethod[] cVerbs = findVerbFromAnno(controllerRequestMapping);
 
-            Map<String, MethodDeclaration> methods = Maps.newHashMap();
-            for (MethodDeclaration method : controller.findAll(MethodDeclaration.class)) {
-                methods.put(MethodQualifiers.getShortestQualifiedSignature(method), method);
-            }
+            // 遍历handler
+            HandlerIterateProcessor handlerIterateProcessor = new HandlerIterateProcessor(controllerClass);
+            handlerIterateProcessor.iterate(reflectionMethod -> {
 
-            for (Method reflectionMethod : controllerClass.getDeclaredMethods()) {
-                if (isNotHandler(reflectionMethod)) {
-                    continue;
+                MethodDeclaration handler = methodsByShortestQualifier
+                        .get(MethodQualifiers.getShortestQualifiedSignature(reflectionMethod));
+                if (handler == null) {
+                    // 可能是源码删除了某个handler但未编译，所以reflectionMethod存在，但MethodDeclaration已经不存在了
+                    // 这种情况没有继续处理该handler的必要了
+                    return;
                 }
 
                 RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
                 String[] mPaths = methodRequestMapping.value();
                 RequestMethod[] mVerbs = methodRequestMapping.method();
-
                 builder.combinedUrls(combineUrl(cPaths, mPaths));
                 builder.combinedVerbs(combineVerb(cVerbs, mVerbs));
-
-                MethodDeclaration handler = methods
-                        .get(MethodQualifiers.getShortestQualifiedSignature(reflectionMethod));
-                if (handler == null) {
-                    // 可能是源码删除了某个handler但未编译，所以reflectionMethod还存在，但MethodDeclaration已经不存在了，忽略即可
-                    continue;
-                }
 
                 builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
                 builder.version("");
@@ -211,9 +208,9 @@ public class DocAnanlyzerBoot {
                 builder.responseBodySituation(responseBodySituation);
 
                 EndpointDto endpoint = builder.build();
-
                 new MarkdownConverter().convert(Lists.newArrayList(endpoint), false);
-            }
+            });
+
         });
 
     }
@@ -485,10 +482,6 @@ public class DocAnanlyzerBoot {
     }
 
 
-    private boolean isNotHandler(Method method) {
-        return findRequestMappingAnnoOrElseNull(method) == null;
-    }
-
     private RequestMethod[] findVerbFromAnno(RequestMapping controllerRequestMapping) {
         return controllerRequestMapping == null ? new RequestMethod[0] : controllerRequestMapping.method();
     }
@@ -497,8 +490,8 @@ public class DocAnanlyzerBoot {
         return controllerRequestMapping == null ? new String[0] : controllerRequestMapping.value();
     }
 
-    private RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement controllerClass) {
-        return AnnotatedElementUtils.findMergedAnnotation(controllerClass, RequestMapping.class);
+    private RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {
+        return AnnotatedElementUtils.findMergedAnnotation(annotated, RequestMapping.class);
     }
 
     private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)
