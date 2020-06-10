@@ -49,6 +49,24 @@ ${responseBodyJsonSchema}
 | ${respProp.path}    | ${respProp.name}    | ${respProp.description} | ${respProp.detailedJsonType}|<#if isAnyResponseBodyPropertyEnum>${respProp.enums} |</#if>
 </#list>
 </#if>
+<#if requestBodySituation != 1>
+
+
+
+## Request报文body示例
+~~~json
+
+~~~
+</#if>
+<#if responseBodySituation != 1>
+
+
+
+## Response报文body示例
+~~~json
+
+~~~
+</#if>
 
 
 
