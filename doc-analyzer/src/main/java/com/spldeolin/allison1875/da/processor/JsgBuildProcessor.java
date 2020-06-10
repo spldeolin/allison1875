@@ -30,7 +30,6 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
-import com.spldeolin.allison1875.da.ValidatorProcessor;
 import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
 

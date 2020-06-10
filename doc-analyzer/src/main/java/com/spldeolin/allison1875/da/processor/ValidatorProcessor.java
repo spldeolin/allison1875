@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da;
+package com.spldeolin.allison1875.da.processor;
 
 import java.util.Collection;
 import com.github.javaparser.ast.expr.AnnotationExpr;
