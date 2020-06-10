@@ -12,7 +12,7 @@ import lombok.Data;
 @JsonInclude(Include.NON_NULL)
 public class JsonPropertyDescriptionValueDto {
 
-    private String comment;
+    private String description;
 
     private Boolean required;
 

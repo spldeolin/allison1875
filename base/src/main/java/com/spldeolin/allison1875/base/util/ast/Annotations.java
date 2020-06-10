@@ -16,7 +16,6 @@ public class Annotations {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-
     public static <A extends Annotation> boolean isAnnoPresent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
         return findAnno(node, annotationClass) != null;
     }
@@ -31,6 +30,29 @@ public class Annotations {
         if (annotation.isPresent()) {
             try {
                 if (annotationClass.getName().equals(annotation.get().resolve().getQualifiedName())) {
+                    return annotation.get();
+                }
+            } catch (Exception e) {
+                log.error(e);
+            }
+        }
+        return null;
+    }
+
+    public static boolean isAnnoPresent(NodeWithAnnotations<?> node, String annotationQualifier) {
+        return findAnno(node, annotationQualifier) != null;
+    }
+
+    public static boolean isAnnoAbsent(NodeWithAnnotations<?> node, String annotationQualifier) {
+        return !isAnnoPresent(node, annotationQualifier);
+    }
+
+    public static AnnotationExpr findAnno(NodeWithAnnotations<?> node, String annotationQualifier) {
+        String simpleName = annotationQualifier.substring(annotationQualifier.lastIndexOf('.') + 1);
+        Optional<AnnotationExpr> annotation = node.getAnnotationByName(simpleName);
+        if (annotation.isPresent()) {
+            try {
+                if (annotationQualifier.equals(annotation.get().resolve().getQualifiedName())) {
                     return annotation.get();
                 }
             } catch (Exception e) {

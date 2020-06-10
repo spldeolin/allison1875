@@ -76,18 +76,18 @@ class JsgBuildProcessor {
     private void collectPropertiesAnnoInfo(ClassOrInterfaceDeclaration coid, Table<String, String, String> table) {
         String javabeanQualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         for (FieldDeclaration field : coid.getFields()) {
-            JsonPropertyDescriptionValueDto value = new JsonPropertyDescriptionValueDto();
-            value.setComment(StringUtils.limitLength(Javadocs.extractFirstLine(field), 4096));
-            value.setRequired(
+            JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
+            jpdv.setDescription(StringUtils.limitLength(Javadocs.extractFirstLine(field), 4096));
+            jpdv.setRequired(
                     Annotations.isAnnoPresent(field, NotNull.class) || Annotations.isAnnoPresent(field, NotEmpty.class)
                             || Annotations.isAnnoPresent(field, NotBlank.class));
-            value.setValidators(new ValidatorProcessor().process(field));
+            jpdv.setValidators(new ValidatorProcessor().process(field));
 
             AnnotationExpr anno = Annotations.findAnno(field, JsonFormat.class);
             if (anno != null) {
                 for (MemberValuePair pair : anno.asNormalAnnotationExpr().getPairs()) {
                     if (pair.getNameAsString().equals("pattern")) {
-                        value.setJsonFormatPattern(pair.getValue().asStringLiteralExpr().getValue());
+                        jpdv.setJsonFormatPattern(pair.getValue().asStringLiteralExpr().getValue());
                     }
                 }
             }
@@ -95,10 +95,10 @@ class JsgBuildProcessor {
             for (VariableDeclarator var : field.getVariables()) {
                 String variableName = var.getNameAsString();
                 try {
-                    value.setRawType(var.getTypeAsString());
+                    jpdv.setRawType(var.getTypeAsString());
                 } catch (Exception ignored) {
                 }
-                String json = JsonUtils.toJson(value);
+                String json = JsonUtils.toJson(jpdv);
                 table.put(javabeanQualifier, variableName, json);
 
                 var.getType().ifPrimitiveType(pt -> {

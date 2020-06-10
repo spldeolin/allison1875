@@ -106,7 +106,7 @@ class CommonBodyProcessor {
             child.setEnums(enums);
 
             if (jpdv != null) {
-                child.setDescription(jpdv.getComment());
+                child.setDescription(jpdv.getDescription());
                 child.setValidators(jpdv.getValidators());
                 child.setRequired(jpdv.getRequired());
                 child.setDatetimePattern(jpdv.getJsonFormatPattern());
