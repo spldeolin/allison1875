@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
-import com.spldeolin.allison1875.da.dto.PropertyDto;
-import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -29,21 +27,9 @@ public class EndpointDtoBuilder {
 
     private Collection<RequestMethod> combinedVerbs;
 
-    private BodySituationEnum requestBodySituation;
+    private RequestBodyInfoResult requestBodyInfo;
 
-    private String requestBodyJsonSchema;
-
-    private Collection<PropertyDto> flatRequestProperties;
-
-    private boolean isResponseBodyNone;
-
-    private boolean isResponseBodyChaos;
-
-    private BodySituationEnum responseBodySituation;
-
-    private String responseBodyJsonSchema;
-
-    private Collection<PropertyDto> flatResponseProperties;
+    private ResponseBodyInfoResult responseBodyInfo;
 
     private String author;
 
@@ -58,13 +44,12 @@ public class EndpointDtoBuilder {
                 combinedVerbs.stream().map(one -> StringUtils.lowerCase(one.name())).collect(Collectors.toList()));
         result.setEndpointVersion(version);
         result.setIsDeprecated(isDeprecated);
-        result.setRequestBodySituation(requestBodySituation);
-        result.setRequestBodyJsonSchema(requestBodyJsonSchema);
-        result.setRequestBodyProperties(flatRequestProperties);
-
-        result.setResponseBodySituation(responseBodySituation);
-        result.setResponseBodyJsonSchema(responseBodyJsonSchema);
-        result.setResponseBodyProperties(flatResponseProperties);
+        result.setRequestBodySituation(requestBodyInfo.requestBodySituation());
+        result.setRequestBodyJsonSchema(requestBodyInfo.requestBodyJsonSchema());
+        result.setRequestBodyProperties(requestBodyInfo.flatRequestProperties());
+        result.setResponseBodySituation(responseBodyInfo.responseBodySituation());
+        result.setResponseBodyJsonSchema(responseBodyInfo.responseBodyJsonSchema());
+        result.setResponseBodyProperties(responseBodyInfo.flatResponseProperties());
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
         return result;
