@@ -44,15 +44,19 @@ public final class BaseConfig {
     private static BaseConfig instace;
 
     /**
+     * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
+     */
+    private LocalDateTime targetFileSince;
+
+    /**
+     * Maven全局配置setting.xml的路径
+     */
+    private Path mavenGlobalSettingXml;
+
+    /**
      * 项目根目录路径，此项必填
      */
     private Collection<Path> projectPaths;
-
-    /**
-     * 是否使用类加载
-     */
-    @JsonIgnore
-    private Boolean withClassLoader = true;
 
     /**
      * 项目下模块的源码路径、编译后classpath路径、额外jar文件的路径。
@@ -64,9 +68,10 @@ public final class BaseConfig {
     private Collection<ProjectModule> projectModules;
 
     /**
-     * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
+     * 是否使用类加载
      */
-    private LocalDateTime targetFileSince;
+    @JsonIgnore
+    private Boolean withClassLoader = true;
 
     /**
      * 所有projectPaths的公有部分

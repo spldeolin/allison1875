@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.da.ConcernedResponseBodyTypeResolver;
+import com.spldeolin.allison1875.da.strategy.ConcernedResponseBodyTypeStrategy;
 import com.spldeolin.allison1875.da.builder.ResponseBodyInfoResult;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
@@ -101,7 +101,7 @@ class ResponseBodyProcessor {
                     .isAnnoAbsent(handler, ResponseBody.class)) {
                 return null;
             }
-            return new ConcernedResponseBodyTypeResolver().findConcernedResponseBodyType(handler);
+            return new ConcernedResponseBodyTypeStrategy().findConcernedResponseBodyType(handler);
         } catch (Exception e) {
             log.error(e);
             return null;

@@ -44,11 +44,6 @@ public class CompileSourceAndCopyDependencyTool {
     private static final Path mavenHome = Paths.get("/usr/local/Cellar/maven/3.6.3_1");
 
     /**
-     * Maven全局配置setting.xml的路径
-     */
-    private static final Path mavenGlobalSettingXml = Paths.get("/Users/deolin/OneDrive/secret/xxx-settings.xml");
-
-    /**
      * mvn dependency:copy-dependencies 命令会将jar拷贝到这个目录下
      */
     private static final Path externalJarsBasePath = Paths.get("/Users/deolin/Documents/project-repo/external-jars");
@@ -100,9 +95,7 @@ public class CompileSourceAndCopyDependencyTool {
             @Override
             public void consumeLine(String line) {
                 line = nullToEmpty(line);
-//                if (line.startsWith("[ERROR]")) {
                 log.info(line);
-//                }
             }
         });
 
@@ -110,7 +103,7 @@ public class CompileSourceAndCopyDependencyTool {
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(pomPath.toFile());
         request.setJavaHome(javaHome.toFile());
-        request.setGlobalSettingsFile(mavenGlobalSettingXml.toFile());
+        request.setGlobalSettingsFile(BaseConfig.getInstace().getMavenGlobalSettingXml().toFile());
         request.setGoals(Lists.newArrayList("clean compile"));
         invoker.execute(request);
 
@@ -128,11 +121,6 @@ public class CompileSourceAndCopyDependencyTool {
         properties.setProperty("outputAbsoluteArtifactFilename", "true");
         properties.setProperty("includeScope", "runtime");
         properties.setProperty("outputDirectory", externalJarPath);
-        request.setProperties(properties);
-        invoker.execute(request);
-
-        log.info("invoke download sources for [{}]", BaseConfig.getInstace().getCommonPart().relativize(pomPath));
-        request.setGoals(Lists.newArrayList("dependency:sources"));
         request.setProperties(properties);
         invoker.execute(request);
 

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.da;
+package com.spldeolin.allison1875.da.strategy;
 
 import java.util.Optional;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -9,7 +9,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 /**
  * @author Deolin 2020-06-02
  */
-public class ConcernedResponseBodyTypeResolver {
+public class ConcernedResponseBodyTypeStrategy {
 
     public ResolvedType findConcernedResponseBodyType(MethodDeclaration handler) {
         for (MethodCallExpr mce : handler.findAll(MethodCallExpr.class)) {
