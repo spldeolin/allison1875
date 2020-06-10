@@ -40,13 +40,14 @@ public class AstForest implements Iterable<CompilationUnit> {
         return cursor;
     }
 
-    public void reset() {
+    public AstForest reset() {
         log.info("Astforest reset.");
         Collection<SourceRoot> sourceRoots = new SourceRootCollector()
                 .collect(BaseConfig.getInstace().getProjectPaths(),
                         BaseConfig.getInstace().getProjectModules().stream().map(ProjectModule::getSourceRootPath)
                                 .collect(Collectors.toList()));
         this.cursor = new AstCursor(sourceRoots);
+        return this;
     }
 
     public ClassLoader getCurrentClassLoader() {

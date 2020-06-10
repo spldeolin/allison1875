@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.da;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -8,11 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.AntPathMatcher;
@@ -22,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
@@ -32,24 +25,15 @@ import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.MemberValuePair;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
-import com.github.javaparser.utils.CodeGenerationUtils;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -58,22 +42,23 @@ import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.da.builder.EndpointDtoBuilder;
-import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
+import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.dto.PropertyTreeNodeDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
-import com.spldeolin.allison1875.da.jackson.MappingJacksonAnnotationIntrospector;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
+import com.spldeolin.allison1875.da.processor.JsonSchemaGeneratorProcessor;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -86,28 +71,20 @@ public class DocAnanlyzerBoot {
         new DocAnanlyzerBoot().process();
     }
 
-    private static final AstForest astForest = AstForest.getInstance();
-
     private static final PathMatcher pathMatcher = new AntPathMatcher();
 
     public void process() {
-        Table<String, String, String> enumDescriptions = HashBasedTable.create();
-        Table<String, String, String> propertyDescriptions = HashBasedTable.create();
-        for (CompilationUnit cu : astForest) {
-            for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
-                td.ifEnumDeclaration(ed -> collectEnumDescription(ed, enumDescriptions));
-                td.ifClassOrInterfaceDeclaration(coid -> collectPropertiesAnnoInfo(coid, propertyDescriptions));
-            }
-        }
-        JsonSchemaGenerator jsg = buildJsg(enumDescriptions, propertyDescriptions);
+        AstForest astForest = AstForest.getInstance();
 
-        astForest.reset();
-        for (CompilationUnit cu : astForest) {
+        JsonSchemaGeneratorProcessor enumAndPropertyProcessor = new JsonSchemaGeneratorProcessor(astForest);
+        JsonSchemaGenerator jsg = enumAndPropertyProcessor.analyzeAstAndBuildJsg();
+
+        for (CompilationUnit cu : astForest.reset()) {
             for (ClassOrInterfaceDeclaration controller : cu
                     .findAll(ClassOrInterfaceDeclaration.class, this::isController)) {
                 Class<?> controllerClass;
                 try {
-                    controllerClass = tryReflectController(controller);
+                    controllerClass = tryReflectController(controller, astForest);
                 } catch (Exception e) {
                     continue;
                 }
@@ -398,58 +375,6 @@ public class DocAnanlyzerBoot {
         }
     }
 
-    private void collectEnumDescription(EnumDeclaration ed, Table<String, String, String> table) {
-        String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        ed.getEntries().forEach(entry -> {
-            String comment = StringUtils.limitLength(Javadocs.extractFirstLine(entry), 4096);
-            table.put(qualifier, entry.getNameAsString(), comment);
-        });
-    }
-
-    private void collectPropertiesAnnoInfo(ClassOrInterfaceDeclaration coid, Table<String, String, String> table) {
-        String javabeanQualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        for (FieldDeclaration field : coid.getFields()) {
-            JsonPropertyDescriptionValueDto value = new JsonPropertyDescriptionValueDto();
-            value.setComment(StringUtils.limitLength(Javadocs.extractFirstLine(field), 4096));
-            value.setRequired(
-                    isAnnoPresent(field, NotNull.class) || isAnnoPresent(field, NotEmpty.class) || isAnnoPresent(field,
-                            NotBlank.class));
-            value.setValidators(new ValidatorProcessor().process(field));
-
-            AnnotationExpr anno = findAnno(field, JsonFormat.class);
-            if (anno != null) {
-                for (MemberValuePair pair : anno.asNormalAnnotationExpr().getPairs()) {
-                    if (pair.getNameAsString().equals("pattern")) {
-                        value.setJsonFormatPattern(pair.getValue().asStringLiteralExpr().getValue());
-                    }
-                }
-            }
-
-            for (VariableDeclarator var : field.getVariables()) {
-                String variableName = var.getNameAsString();
-                try {
-                    value.setRawType(var.getTypeAsString());
-                } catch (Exception ignored) {
-                }
-                String json = JsonUtils.toJson(value);
-                table.put(javabeanQualifier, variableName, json);
-
-                var.getType().ifPrimitiveType(pt -> {
-                    if (pt.getType().name().equals("boolean")) {
-                        table.put(javabeanQualifier, CodeGenerationUtils.getterName(boolean.class, variableName), json);
-                    }
-                });
-            }
-        }
-    }
-
-    private JsonSchemaGenerator buildJsg(Table<String, String, String> enumDescriptions,
-            Table<String, String, String> propertyDescriptions) {
-        ObjectMapper om = JsonUtils.initObjectMapper(new ObjectMapper());
-        om.setAnnotationIntrospector(new MappingJacksonAnnotationIntrospector(enumDescriptions, propertyDescriptions));
-        return new JsonSchemaGenerator(om);
-    }
-
     /**
      * 1. 遍历出声明了@RequestBody的参数后返回
      * 2. 发生任何异常时，都会认为没有ResponseBody
@@ -495,38 +420,18 @@ public class DocAnanlyzerBoot {
     }
 
     private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        return isAnnoPresent(handler, Deprecated.class) || isAnnoPresent(controller, Deprecated.class);
+        return Annotations.isAnnoPresent(handler, Deprecated.class) || Annotations
+                .isAnnoPresent(controller, Deprecated.class);
     }
 
     private boolean isResponseBodyAnnoAbsent(MethodDeclaration handler) {
-        return isAnnoAbsent(handler, ResponseBody.class);
+        return Annotations.isAnnoAbsent(handler, ResponseBody.class);
     }
 
     private boolean isRestControllerAnnoAbsent(ClassOrInterfaceDeclaration controller) {
-        return isAnnoAbsent(controller, RestController.class);
+        return Annotations.isAnnoAbsent(controller, RestController.class);
     }
 
-    private <A extends Annotation> boolean isAnnoPresent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
-        return findAnno(node, annotationClass) != null;
-    }
-
-    private <A extends Annotation> AnnotationExpr findAnno(NodeWithAnnotations<?> node, Class<A> annotationClass) {
-        Optional<AnnotationExpr> annotation = node.getAnnotationByName(annotationClass.getSimpleName());
-        if (annotation.isPresent()) {
-            try {
-                if (annotationClass.getName().equals(annotation.get().resolve().getQualifiedName())) {
-                    return annotation.get();
-                }
-            } catch (Exception e) {
-                log.error(e);
-            }
-        }
-        return null;
-    }
-
-    private <A extends Annotation> boolean isAnnoAbsent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
-        return !isAnnoPresent(node, annotationClass);
-    }
 
     private Collection<RequestMethod> combineVerb(RequestMethod[] cVerbs, RequestMethod[] mVerbs) {
         Collection<RequestMethod> combinedVerbs = Lists.newArrayList();
@@ -589,7 +494,8 @@ public class DocAnanlyzerBoot {
         return AnnotatedElementUtils.findMergedAnnotation(controllerClass, RequestMapping.class);
     }
 
-    private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
+    private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)
+            throws ClassNotFoundException {
         return LoadClassUtils.loadClass(controller.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
                 astForest.getCurrentClassLoader());
     }
