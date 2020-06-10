@@ -1,11 +1,8 @@
 package com.spldeolin.allison1875.base.util;
 
-import lombok.extern.log4j.Log4j2;
-
 /**
  * @author Deolin 2020-05-31
  */
-@Log4j2
 public class LoadClassUtils {
 
     /**
@@ -22,7 +19,6 @@ public class LoadClassUtils {
             try {
                 return loadClassConsideringInnerClassRecursively(name, classLoader);
             } catch (ClassNotFoundException ex) {
-                log.error("类[{}]无法被加载", name);
                 throw e;
             }
         }

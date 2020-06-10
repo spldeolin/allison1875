@@ -35,7 +35,7 @@ import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
 
 /**
- * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的逻辑
+ * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
  *
  * @author Deolin 2020-06-10
  */

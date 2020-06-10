@@ -36,6 +36,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.IdUtils;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
@@ -58,6 +59,7 @@ import com.spldeolin.allison1875.da.dto.PropertyTreeNodeDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import com.spldeolin.allison1875.da.enums.JsonTypeEnum;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
+import com.spldeolin.allison1875.da.processor.ControllerIterateProcessor;
 import com.spldeolin.allison1875.da.processor.JsonSchemaGeneratorProcessor;
 import lombok.extern.log4j.Log4j2;
 
@@ -77,143 +79,147 @@ public class DocAnanlyzerBoot {
         AstForest astForest = AstForest.getInstance();
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsonSchemaGeneratorProcessor enumAndPropertyProcessor = new JsonSchemaGeneratorProcessor(astForest);
-        JsonSchemaGenerator jsg = enumAndPropertyProcessor.analyzeAstAndBuildJsg();
+        JsonSchemaGeneratorProcessor jsgProcessor = new JsonSchemaGeneratorProcessor(astForest);
+        JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
-        for (CompilationUnit cu : astForest.reset()) {
-            for (ClassOrInterfaceDeclaration controller : cu
-                    .findAll(ClassOrInterfaceDeclaration.class, this::isController)) {
-                Class<?> controllerClass;
-                try {
-                    controllerClass = tryReflectController(controller, astForest);
-                } catch (Exception e) {
+        // 再次重头遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
+        ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
+        controllerIterateProcessor.iterate(controller -> {
+
+            // 反射controller，如果失败那么这个controller就没有处理的必要了
+            Class<?> controllerClass;
+            try {
+                controllerClass = tryReflectController(controller, astForest);
+            } catch (ClassNotFoundException e) {
+                return;
+            }
+
+            EndpointDtoBuilder builder = new EndpointDtoBuilder();
+
+            builder.groupNames(findGroupNames(controller));
+
+            RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
+            String[] cPaths = findValueFromAnno(controllerRequestMapping);
+            RequestMethod[] cVerbs = findVerbFromAnno(controllerRequestMapping);
+
+            Map<String, MethodDeclaration> methods = Maps.newHashMap();
+            for (MethodDeclaration method : controller.findAll(MethodDeclaration.class)) {
+                methods.put(MethodQualifiers.getShortestQualifiedSignature(method), method);
+            }
+
+            for (Method reflectionMethod : controllerClass.getDeclaredMethods()) {
+                if (isNotHandler(reflectionMethod)) {
                     continue;
                 }
-                EndpointDtoBuilder builder = new EndpointDtoBuilder();
 
-                builder.groupNames(findGroupNames(cu));
+                RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
+                String[] mPaths = methodRequestMapping.value();
+                RequestMethod[] mVerbs = methodRequestMapping.method();
 
-                RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
-                String[] cPaths = findValueFromAnno(controllerRequestMapping);
-                RequestMethod[] cVerbs = findVerbFromAnno(controllerRequestMapping);
+                builder.combinedUrls(combineUrl(cPaths, mPaths));
+                builder.combinedVerbs(combineVerb(cVerbs, mVerbs));
 
-                Map<String, MethodDeclaration> methods = Maps.newHashMap();
-                for (MethodDeclaration method : controller.findAll(MethodDeclaration.class)) {
-                    methods.put(MethodQualifiers.getShortestQualifiedSignature(method), method);
+                MethodDeclaration handler = methods
+                        .get(MethodQualifiers.getShortestQualifiedSignature(reflectionMethod));
+                if (handler == null) {
+                    // 可能是源码删除了某个handler但未编译，所以reflectionMethod还存在，但MethodDeclaration已经不存在了，忽略即可
+                    continue;
                 }
 
-                for (Method reflectionMethod : controllerClass.getDeclaredMethods()) {
-                    if (isNotHandler(reflectionMethod)) {
-                        continue;
-                    }
+                builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
+                builder.version("");
+                builder.isDeprecated(isDeprecated(controller, handler));
+                builder.author(Authors.getAuthorOrElseEmpty(handler));
+                builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
-                    RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
-                    String[] mPaths = methodRequestMapping.value();
-                    RequestMethod[] mVerbs = methodRequestMapping.method();
+                BodySituationEnum requestBodySituation;
+                String requestBodyDescribe = null;
+                try {
+                    ResolvedType requestBody = findRequestBody(handler);
+                    if (requestBody != null) {
+                        requestBodyDescribe = requestBody.describe();
+                        JsonSchema jsonSchema = JsonSchemaUtils
+                                .generateSchema(requestBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
-                    builder.combinedUrls(combineUrl(cPaths, mPaths));
-                    builder.combinedVerbs(combineVerb(cVerbs, mVerbs));
-
-                    MethodDeclaration handler = methods
-                            .get(MethodQualifiers.getShortestQualifiedSignature(reflectionMethod));
-                    if (handler == null) {
-                        // 可能是源码删除了某个handler但未编译，所以reflectionMethod还存在，但MethodDeclaration已经不存在了，忽略即可
-                        continue;
-                    }
-
-                    builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
-                    builder.version("");
-                    builder.isDeprecated(isDeprecated(controller, handler));
-                    builder.author(Authors.getAuthorOrElseEmpty(handler));
-                    builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
-
-                    BodySituationEnum requestBodySituation;
-                    String requestBodyDescribe = null;
-                    try {
-                        ResolvedType requestBody = findRequestBody(handler);
-                        if (requestBody != null) {
-                            requestBodyDescribe = requestBody.describe();
-                            JsonSchema jsonSchema = JsonSchemaUtils
-                                    .generateSchema(requestBodyDescribe, astForest.getCurrentClassLoader(), jsg);
-
-                            if (jsonSchema.isObjectSchema()) {
-                                requestBodySituation = BodySituationEnum.KEY_VALUE;
-                                PropertiesContainerDto propContainer = anaylzeObjectSchema(requestBodyDescribe,
-                                        jsonSchema.asObjectSchema());
-                                builder.flatRequestProperties(propContainer.getFlatProperties());
-                            } else if (fieldsAbsent(requestBody)) {
-                                requestBodySituation = BodySituationEnum.NONE;
-                            } else {
-                                requestBodySituation = BodySituationEnum.CHAOS;
-                                builder.requestBodyJsonSchema(JsonUtils.beautify(jsonSchema));
-                            }
-                        } else {
+                        if (jsonSchema.isObjectSchema()) {
+                            requestBodySituation = BodySituationEnum.KEY_VALUE;
+                            PropertiesContainerDto propContainer = anaylzeObjectSchema(requestBodyDescribe,
+                                    jsonSchema.asObjectSchema());
+                            builder.flatRequestProperties(propContainer.getFlatProperties());
+                        } else if (fieldsAbsent(requestBody)) {
                             requestBodySituation = BodySituationEnum.NONE;
+                        } else {
+                            requestBodySituation = BodySituationEnum.CHAOS;
+                            builder.requestBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                         }
-                    } catch (JsonSchemaException ignore) {
-                        requestBodySituation = BodySituationEnum.FAIL;
-                    } catch (Exception e) {
-                        log.error("BodySituation.FAIL method={} describe={}",
-                                MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
-                        requestBodySituation = BodySituationEnum.FAIL;
+                    } else {
+                        requestBodySituation = BodySituationEnum.NONE;
                     }
-                    builder.requestBodySituation(requestBodySituation);
+                } catch (JsonSchemaException ignore) {
+                    requestBodySituation = BodySituationEnum.FAIL;
+                } catch (Exception e) {
+                    log.error("BodySituation.FAIL method={} describe={}",
+                            MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
+                    requestBodySituation = BodySituationEnum.FAIL;
+                }
+                builder.requestBodySituation(requestBodySituation);
 
-                    BodySituationEnum responseBodySituation;
-                    String responseBodyDescribe = null;
-                    try {
-                        ResolvedType responseBody = findResponseBody(controller, handler);
-                        if (responseBody != null) {
-                            responseBodyDescribe = responseBody.describe();
-                            JsonSchema jsonSchema = JsonSchemaUtils
-                                    .generateSchema(responseBodyDescribe, astForest.getCurrentClassLoader(), jsg);
+                BodySituationEnum responseBodySituation;
+                String responseBodyDescribe = null;
+                try {
+                    ResolvedType responseBody = findResponseBody(controller, handler);
+                    if (responseBody != null) {
+                        responseBodyDescribe = responseBody.describe();
+                        JsonSchema jsonSchema = JsonSchemaUtils
+                                .generateSchema(responseBodyDescribe, astForest.getCurrentClassLoader(), jsg);
 
-                            if (jsonSchema.isArraySchema()) {
-                                Items items = jsonSchema.asArraySchema().getItems();
-                                if (items != null && items.isSingleItems() && items.asSingleItems().getSchema()
-                                        .isObjectSchema()) {
-                                    responseBodySituation = BodySituationEnum.KEY_VALUE_ARRAY;
-                                    PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
-                                            items.asSingleItems().getSchema().asObjectSchema());
-                                    clearAllValidatorAndNullableFlag(propContainer);
-                                    builder.flatResponseProperties(propContainer.getFlatProperties());
-                                } else {
-                                    responseBodySituation = BodySituationEnum.CHAOS;
-                                    builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
-                                }
-                            } else if (jsonSchema.isObjectSchema()) {
-                                responseBodySituation = BodySituationEnum.KEY_VALUE;
+                        if (jsonSchema.isArraySchema()) {
+                            Items items = jsonSchema.asArraySchema().getItems();
+                            if (items != null && items.isSingleItems() && items.asSingleItems().getSchema()
+                                    .isObjectSchema()) {
+                                responseBodySituation = BodySituationEnum.KEY_VALUE_ARRAY;
                                 PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
-                                        jsonSchema.asObjectSchema());
+                                        items.asSingleItems().getSchema().asObjectSchema());
                                 clearAllValidatorAndNullableFlag(propContainer);
                                 builder.flatResponseProperties(propContainer.getFlatProperties());
-                            } else if (fieldsAbsent(responseBody)) {
-                                responseBodySituation = BodySituationEnum.NONE;
                             } else {
                                 responseBodySituation = BodySituationEnum.CHAOS;
                                 builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                             }
-                        } else {
+                        } else if (jsonSchema.isObjectSchema()) {
+                            responseBodySituation = BodySituationEnum.KEY_VALUE;
+                            PropertiesContainerDto propContainer = anaylzeObjectSchema(responseBodyDescribe,
+                                    jsonSchema.asObjectSchema());
+                            clearAllValidatorAndNullableFlag(propContainer);
+                            builder.flatResponseProperties(propContainer.getFlatProperties());
+                        } else if (fieldsAbsent(responseBody)) {
                             responseBodySituation = BodySituationEnum.NONE;
+                        } else {
+                            responseBodySituation = BodySituationEnum.CHAOS;
+                            builder.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
                         }
-                    } catch (JsonSchemaException ignore) {
-                        responseBodySituation = BodySituationEnum.FAIL;
-                    } catch (Exception e) {
-                        log.error("BodySituation.FAIL method={} describe={}",
-                                MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
-                        responseBodySituation = BodySituationEnum.FAIL;
+                    } else {
+                        responseBodySituation = BodySituationEnum.NONE;
                     }
-                    builder.responseBodySituation(responseBodySituation);
-
-                    EndpointDto endpoint = builder.build();
-
-                    new MarkdownConverter().convert(Lists.newArrayList(endpoint), false);
+                } catch (JsonSchemaException ignore) {
+                    responseBodySituation = BodySituationEnum.FAIL;
+                } catch (Exception e) {
+                    log.error("BodySituation.FAIL method={} describe={}",
+                            MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
+                    responseBodySituation = BodySituationEnum.FAIL;
                 }
+                builder.responseBodySituation(responseBodySituation);
+
+                EndpointDto endpoint = builder.build();
+
+                new MarkdownConverter().convert(Lists.newArrayList(endpoint), false);
             }
-        }
+        });
+
     }
 
-    private String findGroupNames(CompilationUnit cu) {
+    private String findGroupNames(ClassOrInterfaceDeclaration controller) {
+        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         String result = null;
         for (Comment oc : cu.getOrphanComments()) {
             if (oc.isLineComment() && oc.getContent().trim().startsWith("DOC-GROUP")) {
@@ -497,24 +503,13 @@ public class DocAnanlyzerBoot {
 
     private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)
             throws ClassNotFoundException {
-        return LoadClassUtils.loadClass(controller.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
-                astForest.getCurrentClassLoader());
-    }
-
-    private boolean isController(ClassOrInterfaceDeclaration coid) {
-        for (AnnotationExpr annotation : coid.getAnnotations()) {
-            try {
-                ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(QualifierConstants.CONTROLLER) || QualifierConstants.CONTROLLER
-                        .equals(resolve.getName())) {
-                    return true;
-                }
-            } catch (Exception e) {
-                log.warn("annotation [{}] of class [{}] cannot resolve", annotation.getNameAsString(),
-                        coid.getNameAsString(), e);
-            }
+        String qualifier = controller.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+        try {
+            return LoadClassUtils.loadClass(qualifier, astForest.getCurrentClassLoader());
+        } catch (ClassNotFoundException e) {
+            log.error("类[{}]无法被加载", qualifier);
+            throw e;
         }
-        return false;
     }
 
 }
