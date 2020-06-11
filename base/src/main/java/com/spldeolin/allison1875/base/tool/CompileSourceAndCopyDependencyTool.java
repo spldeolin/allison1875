@@ -61,13 +61,16 @@ public class CompileSourceAndCopyDependencyTool {
                 }
             }
 
-            List<File> excludeParent = poms;
-            if (poms.size() > 1) {
-                poms.sort(Comparator.comparingInt(o -> o.getParent().length()));
-                excludeParent = poms.subList(1, poms.size());
-            }
+//            List<File> excludeParent = poms;
+//            if (poms.size() > 1) {
+//                poms.sort(Comparator.comparingInt(o -> o.getParent().length()));
+//                excludeParent = poms.subList(1, poms.size());
+//            }
 
-            for (File pom : excludeParent) {
+            poms.forEach(log::info);
+            log.info("");
+
+            for (File pom : poms) {
                 Path pomPath = pom.toPath();
                 Path modulePath = pom.getParentFile().toPath();
                 try {
