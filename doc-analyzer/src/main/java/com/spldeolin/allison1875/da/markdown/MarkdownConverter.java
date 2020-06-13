@@ -138,7 +138,7 @@ public class MarkdownConverter {
             sb.append(",");
         }
         sb.deleteCharAt(sb.length() - 1);
-        return sb.toString();
+        return StringUtils.limitLength(sb, 4096);
     }
 
     private String emptyToHorizontalLine(String linkName) {
