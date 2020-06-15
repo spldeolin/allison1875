@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.da.processor;
 
 import java.util.Map;
+import org.apache.commons.lang3.mutable.MutableInt;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -36,6 +37,9 @@ public class MainProcessor {
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
         JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
+
+        // handler个数
+        MutableInt handlerCount = new MutableInt(0);
 
         // 再次重头遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
         ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
@@ -97,10 +101,12 @@ public class MainProcessor {
 
                 // 转化为视图层
                 new MarkdownConverter().convert(Lists.newArrayList(endpoint), false);
+
+                // handler个数
+                handlerCount.increment();
             });
-
         });
-
+        log.info(handlerCount);
     }
 
     private String findGroupNames(ClassOrInterfaceDeclaration controller) {
