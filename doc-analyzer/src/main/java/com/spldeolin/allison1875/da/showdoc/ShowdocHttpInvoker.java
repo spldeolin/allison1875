@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.da.showdoc;
 
+import java.util.concurrent.TimeUnit;
 import com.spldeolin.allison1875.base.util.HttpUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.da.DocAnalyzerConfig;
@@ -22,6 +23,10 @@ public class ShowdocHttpInvoker {
         String rawResp = HttpUtils
                 .postJson("https://www.showdoc.cc/server/api/item/updateByApi", JsonUtils.toJson(req));
         log.info(rawResp);
+        try {
+            TimeUnit.MILLISECONDS.sleep(500);
+        } catch (InterruptedException ignored) {
+        }
     }
 
 }

@@ -119,7 +119,7 @@ public class MainProcessor {
         String result = null;
         for (Comment oc : cu.getOrphanComments()) {
             if (oc.isLineComment() && StringUtils.lowerCase(oc.getContent().trim()).startsWith("doc-group")) {
-                result = oc.getContent().replaceFirst("DOC-GROUP", "").trim();
+                result = oc.getContent().substring("doc-group".length() + 1).trim();
                 break;
             }
         }
