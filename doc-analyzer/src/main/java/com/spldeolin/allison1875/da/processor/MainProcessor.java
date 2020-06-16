@@ -76,6 +76,11 @@ public class MainProcessor {
                     return;
                 }
 
+                // DOC-IGNORE标志
+                if (findIgnoreFlag(handler)) {
+                    return;
+                }
+
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
                 builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
                 builder.version("");
@@ -113,7 +118,7 @@ public class MainProcessor {
         CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         String result = null;
         for (Comment oc : cu.getOrphanComments()) {
-            if (oc.isLineComment() && oc.getContent().trim().startsWith("DOC-GROUP")) {
+            if (oc.isLineComment() && StringUtils.lowerCase(oc.getContent().trim()).startsWith("doc-group")) {
                 result = oc.getContent().replaceFirst("DOC-GROUP", "").trim();
                 break;
             }
@@ -122,6 +127,15 @@ public class MainProcessor {
             result = "未分类";
         }
         return result;
+    }
+
+    private boolean findIgnoreFlag(MethodDeclaration handler) {
+        for (String line : Javadocs.extractEveryLine(handler)) {
+            if (line.equalsIgnoreCase("doc-ignore")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {

@@ -40,6 +40,13 @@ public class StringUtils {
         return org.apache.commons.lang3.StringUtils.containsAny(cs, searchCharSequences);
     }
 
+    /**
+     * @see org.apache.commons.lang3.StringUtils#lowerCase(java.lang.String)
+     */
+    public static String lowerCase(String str) {
+        return org.apache.commons.lang3.StringUtils.lowerCase(str);
+    }
+
     public static List<String> splitLineByLine(String string) {
         if (string == null) {
             return Lists.newArrayList();
