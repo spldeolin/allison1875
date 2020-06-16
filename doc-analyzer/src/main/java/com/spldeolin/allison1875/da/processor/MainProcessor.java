@@ -45,6 +45,11 @@ public class MainProcessor {
         ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
         controllerIterateProcessor.iterate(controller -> {
 
+            // DOC-IGNORE标志
+            if (findIgnoreFlag(controller)) {
+                return;
+            }
+
             // 反射controller，如果失败那么这个controller就没有处理该controller的必要了
             Class<?> controllerClass;
             try {
@@ -127,6 +132,16 @@ public class MainProcessor {
             result = "未分类";
         }
         return result;
+    }
+
+    private boolean findIgnoreFlag(ClassOrInterfaceDeclaration controller) {
+        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
+        for (Comment oc : cu.getOrphanComments()) {
+            if (oc.isLineComment() && StringUtils.lowerCase(oc.getContent().trim()).startsWith("doc-ignore")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean findIgnoreFlag(MethodDeclaration handler) {
