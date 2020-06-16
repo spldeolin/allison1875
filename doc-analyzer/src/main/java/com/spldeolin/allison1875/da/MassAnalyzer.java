@@ -1,12 +1,17 @@
 package com.spldeolin.allison1875.da;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -48,6 +53,8 @@ public class MassAnalyzer {
         Map<Path, Collection<String>> totalAbstractMethods = Maps.newHashMap();
         Map<Path, Multiset<String>> totalHandlers = Maps.newHashMap();
 
+        List<String> notRequestBodyTotally = Lists.newArrayList();
+
         for (CompilationUnit cu : AstForest.getInstance()) {
             Path sourceRoot = cu.getStorage().orElseThrow(StorageAbsentException::new).getSourceRoot();
             getOrElseDefault(totalCus, sourceRoot, HashMultiset.create())
@@ -83,6 +90,18 @@ public class MassAnalyzer {
                                         .getShortestQualifiedSignature(reflectionMethod);
                                 getOrElseDefault(totalHandlers, sourceRoot, HashMultiset.create())
                                         .add(methodQualifier, calcLineCount(methods.get(methodQualifier)));
+
+                                for (Parameter parameter : reflectionMethod.getParameters()) {
+                                    if (parameter.getAnnotation(RequestParam.class) != null) {
+                                        notRequestBodyTotally.add(methodQualifier);
+                                    }
+                                    if (parameter.getAnnotation(PathVariable.class) != null) {
+                                        notRequestBodyTotally.add(methodQualifier);
+                                    }
+                                    if (ArrayUtils.isEmpty(parameter.getAnnotations())) {
+                                        notRequestBodyTotally.add(methodQualifier);
+                                    }
+                                }
 
                             }
                         }
@@ -151,6 +170,8 @@ public class MassAnalyzer {
             allProjectTotalHandlerCount += set.entrySet().size();
         }
         log.info("全部项目的handler 个数：{}", allProjectTotalHandlerCount);
+        notRequestBodyTotally.forEach(log::info);
+        log.info(notRequestBodyTotally.size());
     }
 
     private static Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
