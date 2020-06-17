@@ -130,7 +130,7 @@ public class ValidatorProcessor {
                 }));
             }
         }
-        return result;
+        return nullToEmpty(result);
     }
 
     private boolean nameIsValue(MemberValuePair pair) {
@@ -139,6 +139,15 @@ public class ValidatorProcessor {
 
     private boolean nameOf(MemberValuePair pair, String value) {
         return pair.getNameAsString().equals(value);
+    }
+
+    private Collection<ValidatorDto> nullToEmpty(Collection<ValidatorDto> dtos) {
+        dtos.forEach(one -> {
+            if (one.getNote() == null) {
+                one.setNote("");
+            }
+        });
+        return dtos;
     }
 
 }
