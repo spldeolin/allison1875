@@ -27,9 +27,9 @@ public class EndpointDtoBuilder {
 
     private Collection<RequestMethod> combinedVerbs;
 
-    private RequestBodyInfoResult requestBodyInfo;
+    private RequestBodyInfoBuilder requestBodyInfo;
 
-    private ResponseBodyInfoResult responseBodyInfo;
+    private ResponseBodyInfoBuilder responseBodyInfo;
 
     private String author;
 

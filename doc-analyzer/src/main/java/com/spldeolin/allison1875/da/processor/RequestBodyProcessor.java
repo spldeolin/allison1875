@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.da.builder.RequestBodyInfoResult;
+import com.spldeolin.allison1875.da.builder.RequestBodyInfoBuilder;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
 import lombok.extern.log4j.Log4j2;
@@ -38,8 +38,8 @@ class RequestBodyProcessor {
         this.jsg = jsg;
     }
 
-    public RequestBodyInfoResult analyze(MethodDeclaration handler) {
-        RequestBodyInfoResult requestBodyBuilder = new RequestBodyInfoResult();
+    public RequestBodyInfoBuilder analyze(MethodDeclaration handler) {
+        RequestBodyInfoBuilder requestBodyBuilder = new RequestBodyInfoBuilder();
         BodySituationEnum requestBodySituation;
         String requestBodyDescribe = null;
         try {

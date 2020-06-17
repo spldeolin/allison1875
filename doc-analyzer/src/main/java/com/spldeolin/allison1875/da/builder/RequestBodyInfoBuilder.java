@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-public class RequestBodyInfoResult {
+public class RequestBodyInfoBuilder {
 
     private BodySituationEnum requestBodySituation;
 

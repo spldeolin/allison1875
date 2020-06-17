@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.da.strategy.ConcernedResponseBodyTypeStrategy;
-import com.spldeolin.allison1875.da.builder.ResponseBodyInfoResult;
+import com.spldeolin.allison1875.da.builder.ResponseBodyInfoBuilder;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
@@ -29,19 +29,19 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class ResponseBodyProcessor {
 
+    private static final CommonBodyProcessor common = new CommonBodyProcessor();
+
     private final AstForest astForest;
 
     private final JsonSchemaGenerator jsg;
-
-    private final CommonBodyProcessor common = new CommonBodyProcessor();
 
     public ResponseBodyProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
         this.astForest = astForest;
         this.jsg = jsg;
     }
 
-    public ResponseBodyInfoResult analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        ResponseBodyInfoResult responseBodyInfo = new ResponseBodyInfoResult();
+    public ResponseBodyInfoBuilder analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+        ResponseBodyInfoBuilder responseBodyInfo = new ResponseBodyInfoBuilder();
         BodySituationEnum responseBodySituation;
         String responseBodyDescribe = null;
         try {
