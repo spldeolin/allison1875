@@ -38,7 +38,7 @@ public class ValidatorProcessor {
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Size",
                     "org.hibernate.validator.constraints.Length")) {
-                annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
+                annotation.ifNormalAnnotationExpr(nae -> nae.getPairs().forEach(pair -> {
                     ValidatorDto validator = new ValidatorDto().setNote(pair.getValue().toString());
                     if (nameOf(pair, "min")) {
                         result.add(validator.setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue()));
@@ -46,7 +46,7 @@ public class ValidatorProcessor {
                     if (nameOf(pair, "max")) {
                         result.add(validator.setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue()));
                     }
-                });
+                }));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Max")) {
@@ -77,9 +77,9 @@ public class ValidatorProcessor {
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
                         normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                pair -> result
-                                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
-                                                .setNote(pair.getValue().toString()))));
+                                pair -> result.add(new ValidatorDto()
+                                        .setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
+                                        .setNote(pair.getValue().toString()))));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMin")) {
@@ -88,9 +88,9 @@ public class ValidatorProcessor {
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
                         normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                pair -> result
-                                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
-                                                .setNote(pair.getValue().toString()))));
+                                pair -> result.add(new ValidatorDto()
+                                        .setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
+                                        .setNote(pair.getValue().toString()))));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Future")) {
@@ -102,7 +102,7 @@ public class ValidatorProcessor {
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Digits")) {
-                annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
+                annotation.ifNormalAnnotationExpr(nae -> nae.getPairs().forEach(pair -> {
                     ValidatorDto validator = new ValidatorDto().setNote(pair.getValue().toString());
                     if (nameOf(pair, "integer")) {
                         result.add(validator.setValidatorType(ValidatorTypeEnum.MAX_INTEGRAL_DIGITS.getValue()));
@@ -110,7 +110,7 @@ public class ValidatorProcessor {
                     if (nameOf(pair, "fraction")) {
                         result.add(validator.setValidatorType(ValidatorTypeEnum.MAX_FRACTIONAL_DIGITS.getValue()));
                     }
-                });
+                }));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Positive")) {
@@ -122,12 +122,12 @@ public class ValidatorProcessor {
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Pattern")) {
-                annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
+                annotation.ifNormalAnnotationExpr(nae -> nae.getPairs().forEach(pair -> {
                     if (nameOf(pair, "regexp")) {
                         result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.REGEX.getValue())
                                 .setNote(pair.getValue().asStringLiteralExpr().asString()));
                     }
-                });
+                }));
             }
         }
         return result;
