@@ -28,6 +28,11 @@ public final class DocAnalyzerConfig {
     private Path docOutputDirectoryPath;
 
     /**
+     * 根据作者名过滤
+     */
+    private String filterByAuthorName;
+
+    /**
      * showdoc的api_key
      */
     private String showdocApiKey;

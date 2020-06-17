@@ -18,6 +18,7 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import com.spldeolin.allison1875.da.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
@@ -93,6 +94,11 @@ public class MainProcessor {
                 builder.author(Authors.getAuthorOrElseEmpty(handler));
                 builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
+                // 根据作者名过滤
+                if (notContainAuthorNameFromConfig(builder.author())) {
+                    return;
+                }
+
                 // 处理@RequestMapping（handler的RequestMapping）
                 requestMappingProcessor.analyze(reflectionMethod);
                 builder.combinedUrls(requestMappingProcessor.getCombinedUrls());
@@ -117,6 +123,10 @@ public class MainProcessor {
             });
         });
         log.info(handlerCount);
+    }
+
+    private boolean notContainAuthorNameFromConfig(String author) {
+        return !author.contains(DocAnalyzerConfig.getInstace().getFilterByAuthorName());
     }
 
     private String findGroupNames(ClassOrInterfaceDeclaration controller) {

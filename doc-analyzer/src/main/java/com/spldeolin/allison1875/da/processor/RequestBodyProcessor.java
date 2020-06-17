@@ -31,7 +31,7 @@ class RequestBodyProcessor {
 
     private final JsonSchemaGenerator jsg;
 
-    private final CommonBodyProcessor common = new CommonBodyProcessor();
+    private static final CommonBodyProcessor common = new CommonBodyProcessor();
 
     public RequestBodyProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
         this.astForest = astForest;
