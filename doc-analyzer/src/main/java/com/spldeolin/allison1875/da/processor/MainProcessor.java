@@ -126,7 +126,11 @@ public class MainProcessor {
     }
 
     private boolean notContainAuthorNameFromConfig(String author) {
-        return !author.contains(DocAnalyzerConfig.getInstace().getFilterByAuthorName());
+        String filterByAuthorName = DocAnalyzerConfig.getInstace().getFilterByAuthorName();
+        if (StringUtils.isEmpty(filterByAuthorName)) {
+            return false;
+        }
+        return !author.contains(filterByAuthorName);
     }
 
     private String findGroupNames(ClassOrInterfaceDeclaration controller) {
