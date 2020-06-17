@@ -38,7 +38,7 @@ class ControllerIterateProcessor {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
                 if (resolve.hasAnnotation(QualifierConstants.CONTROLLER) || QualifierConstants.CONTROLLER
-                        .equals(resolve.getName())) {
+                        .equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {
