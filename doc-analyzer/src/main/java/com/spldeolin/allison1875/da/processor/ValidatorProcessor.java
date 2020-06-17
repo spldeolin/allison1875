@@ -51,45 +51,45 @@ public class ValidatorProcessor {
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Max")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
+                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxNumber.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
                         normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
                                 pair -> result.add(new ValidatorDto()
-                                        .setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
+                                        .setValidatorType(ValidatorTypeEnum.maxNumber.getValue())
                                         .setNote(pair.getValue().toString()))));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Min")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minInteger.getValue())
+                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minNumber.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
                         normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
                                 pair -> result.add(new ValidatorDto()
-                                        .setValidatorType(ValidatorTypeEnum.minInteger.getValue())
+                                        .setValidatorType(ValidatorTypeEnum.minNumber.getValue())
                                         .setNote(pair.getValue().toString()))));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMax")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
+                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxNumber.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
                         normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
                                 pair -> result
-                                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
+                                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxNumber.getValue())
                                                 .setNote(pair.getValue().toString()))));
             }
 
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMin")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
-                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minFloat.getValue())
+                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minNumber.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
                         normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
                                 pair -> result
-                                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minFloat.getValue())
+                                        .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minNumber.getValue())
                                                 .setNote(pair.getValue().toString()))));
             }
 
