@@ -10,33 +10,31 @@ import lombok.Getter;
 @Getter
 public enum ValidatorTypeEnum {
 
-    notBlank("必须有非空格字符"),
+    NOT_BLANK("必须有非空格字符"),
 
-    notEmpty("必须有元素/字符"),
+    NOT_EMPTY("必须有元素/字符"),
 
-    maxSize("最大长度/容量："),
+    MAX_SIZE("最大长度/容量："),
 
-    minSize("最小长度/容量："),
+    MIN_SIZE("最小长度/容量："),
 
-    maxNumber("最大值："),
+    MAX_NUMBER("最大值："),
 
-    minNumber("最小值："),
+    MIN_NUMBER("最小值："),
 
-    future("必须是未来的时间"),
+    VALIDATOR_TYPE_ENUM("必须是未来的时间"),
 
-    past("必须是过去的时间"),
+    PAST("必须是过去的时间"),
 
-    maxIntegralDigits("最大整数位数："),
+    MAX_INTEGRAL_DIGITS("最大整数位数："),
 
-    maxFractionalDigits("最小整数位数："),
+    MAX_FRACTIONAL_DIGITS("最大小数位数："),
 
-    positive("必须是正数"),
+    POSITIVE("必须是正数"),
 
-    negative("必须是小数"),
+    NEGATIVE("必须是小数"),
 
-    enumValue("可选枚举值："),
-
-    regex("正则表达式：");
+    REGEX("正则表达式：");
 
     private final String value;
 
