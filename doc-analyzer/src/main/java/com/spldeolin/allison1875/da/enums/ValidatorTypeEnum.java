@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 public enum ValidatorTypeEnum {
 
-    notBlank("必须除空格外的字符"),
+    notBlank("必须有除空格外的字符"),
 
     notEmpty("必须有元素"),
 

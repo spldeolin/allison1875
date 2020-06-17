@@ -29,10 +29,14 @@ public class ValidatorProcessor {
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.NotEmpty",
                     "org.hibernate.validator.constraints.NotEmpty")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.notEmpty.getValue()));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.NotBlank",
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.NotBlank",
                     "org.hibernate.validator.constraints.NotBlank")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.notBlank.getValue()));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Size",
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Size",
                     "org.hibernate.validator.constraints.Length")) {
                 annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                     ValidatorDto validator = new ValidatorDto().setNote(pair.getValue().toString());
@@ -43,7 +47,9 @@ public class ValidatorProcessor {
                         result.add(validator.setValidatorType(ValidatorTypeEnum.maxSize.getValue()));
                     }
                 });
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Max")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Max")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
@@ -52,7 +58,9 @@ public class ValidatorProcessor {
                                 pair -> result.add(new ValidatorDto()
                                         .setValidatorType(ValidatorTypeEnum.maxInteger.getValue())
                                         .setNote(pair.getValue().toString()))));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Min")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Min")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minInteger.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
@@ -61,7 +69,9 @@ public class ValidatorProcessor {
                                 pair -> result.add(new ValidatorDto()
                                         .setValidatorType(ValidatorTypeEnum.minInteger.getValue())
                                         .setNote(pair.getValue().toString()))));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMax")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMax")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
@@ -70,7 +80,9 @@ public class ValidatorProcessor {
                                 pair -> result
                                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.maxFloat.getValue())
                                                 .setNote(pair.getValue().toString()))));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMin")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.DecimalMin")) {
                 annotation.ifSingleMemberAnnotationExpr(singleAnno -> result
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minFloat.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
@@ -79,11 +91,17 @@ public class ValidatorProcessor {
                                 pair -> result
                                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.minFloat.getValue())
                                                 .setNote(pair.getValue().toString()))));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Future")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Future")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.future.getValue()));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Past")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Past")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.past.getValue()));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Digits")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Digits")) {
                 annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                     ValidatorDto validator = new ValidatorDto().setNote(pair.getValue().toString());
                     if (nameOf(pair, "integer")) {
@@ -93,11 +111,17 @@ public class ValidatorProcessor {
                         result.add(validator.setValidatorType(ValidatorTypeEnum.maxFractionalDigits.getValue()));
                     }
                 });
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Positive")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Positive")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.positive.getValue()));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Negative")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Negative")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.negative.getValue()));
-            } else if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Pattern")) {
+            }
+
+            if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.Pattern")) {
                 annotation.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                     if (nameOf(pair, "regexp")) {
                         result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.regex.getValue())
