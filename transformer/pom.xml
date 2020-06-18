@@ -9,7 +9,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>snippet-transformer</artifactId>
+    <artifactId>transformer</artifactId>
     <version>1.0.0</version>
 
     <dependencies>

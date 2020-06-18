@@ -12,8 +12,8 @@
     <modules>
         <module>base</module>
         <module>doc-analyzer</module>
-        <module>snippet-transformer</module>
-        <module>statute-inspector</module>
+        <module>transformer</module>
+        <module>inspector</module>
     </modules>
 
     <name>allison1875</name>

@@ -10,7 +10,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>statute-inspector</artifactId>
+    <artifactId>inspector</artifactId>
     <version>1.0.0</version>
 
     <dependencies>
