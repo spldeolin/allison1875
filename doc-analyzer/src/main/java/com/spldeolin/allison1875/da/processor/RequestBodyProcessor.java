@@ -27,14 +27,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class RequestBodyProcessor {
 
-    private final AstForest astForest;
+    private static final CommonBodyProcessor common = new CommonBodyProcessor();
 
     private final JsonSchemaGenerator jsg;
 
-    private static final CommonBodyProcessor common = new CommonBodyProcessor();
-
-    public RequestBodyProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
-        this.astForest = astForest;
+    public RequestBodyProcessor(JsonSchemaGenerator jsg) {
         this.jsg = jsg;
     }
 

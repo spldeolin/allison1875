@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
-import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
@@ -18,7 +17,7 @@ import com.spldeolin.allison1875.da.builder.ResponseBodyInfoBuilder;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
-import com.spldeolin.allison1875.da.strategy.ConcernedResponseBodyTypeStrategy;
+import com.spldeolin.allison1875.da.strategy.ObtainConcernedResponseBodyStrategy;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -31,13 +30,14 @@ class ResponseBodyProcessor {
 
     private static final CommonBodyProcessor common = new CommonBodyProcessor();
 
-    private final AstForest astForest;
-
     private final JsonSchemaGenerator jsg;
 
-    public ResponseBodyProcessor(AstForest astForest, JsonSchemaGenerator jsg) {
-        this.astForest = astForest;
+    private final ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy;
+
+    public ResponseBodyProcessor(JsonSchemaGenerator jsg,
+            ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy) {
         this.jsg = jsg;
+        this.obtainConcernedResponseBodyStrategy = obtainConcernedResponseBodyStrategy;
     }
 
     public ResponseBodyInfoBuilder analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
@@ -100,7 +100,7 @@ class ResponseBodyProcessor {
                     .isAnnoAbsent(handler, ResponseBody.class)) {
                 return null;
             }
-            return new ConcernedResponseBodyTypeStrategy().findConcernedResponseBodyType(handler);
+            return obtainConcernedResponseBodyStrategy.findConcernedResponseBodyType(handler);
         } catch (Exception e) {
             log.error(e);
             return null;

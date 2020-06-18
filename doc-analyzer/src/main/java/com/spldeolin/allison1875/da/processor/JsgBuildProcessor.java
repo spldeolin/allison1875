@@ -32,6 +32,7 @@ import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.da.dto.EnumDto;
 import com.spldeolin.allison1875.da.dto.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.da.strategy.AnalyzeCustomValidationStrategy;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
@@ -42,12 +43,15 @@ class JsgBuildProcessor {
 
     private final AstForest astForest;
 
+    private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
+
     private final Table<String, String, String> enumDescriptions = HashBasedTable.create();
 
     private final Table<String, String, String> propertyJpdvs = HashBasedTable.create();
 
-    public JsgBuildProcessor(AstForest astForest) {
+    public JsgBuildProcessor(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
         this.astForest = astForest;
+        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
     }
 
     public JsonSchemaGenerator analyzeAstAndBuildJsg() {
@@ -80,7 +84,7 @@ class JsgBuildProcessor {
             jpdv.setRequired(
                     Annotations.isAnnoPresent(field, NotNull.class) || Annotations.isAnnoPresent(field, NotEmpty.class)
                             || Annotations.isAnnoPresent(field, NotBlank.class));
-            jpdv.setValidators(new ValidatorProcessor().process(field));
+            jpdv.setValidators(new ValidatorProcessor(analyzeCustomValidationStrategy).process(field));
 
             AnnotationExpr anno = Annotations.findAnno(field, JsonFormat.class);
             if (anno != null) {

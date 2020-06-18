@@ -7,8 +7,10 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.da.dto.ValidatorDto;
 import com.spldeolin.allison1875.da.enums.ValidatorTypeEnum;
+import com.spldeolin.allison1875.da.strategy.AnalyzeCustomValidationStrategy;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,11 +23,20 @@ import lombok.extern.log4j.Log4j2;
 @Accessors(fluent = true)
 public class ValidatorProcessor {
 
+    private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
+
+    public ValidatorProcessor(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
+        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
+    }
+
     public Collection<ValidatorDto> process(NodeWithAnnotations<?> node) {
         Collection<ValidatorDto> result = Lists.newLinkedList();
         for (AnnotationExpr annotation : node.getAnnotations()) {
             ResolvedAnnotationDeclaration resolve = annotation.resolve();
             String qualifier = resolve.getQualifiedName();
+
+            result.addAll(analyzeCustomValidationStrategy.analyzeCustomValidation(qualifier, annotation));
+
             if (StringUtils.equalsAny(qualifier, "javax.validation.constraints.NotEmpty",
                     "org.hibernate.validator.constraints.NotEmpty")) {
                 result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_EMPTY.getValue()));
@@ -54,8 +65,8 @@ public class ValidatorProcessor {
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
-                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                pair -> result.add(new ValidatorDto()
+                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny()
+                                .ifPresent(pair -> result.add(new ValidatorDto()
                                         .setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
                                         .setNote(pair.getValue().toString()))));
             }
@@ -65,8 +76,8 @@ public class ValidatorProcessor {
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
-                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                pair -> result.add(new ValidatorDto()
+                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny()
+                                .ifPresent(pair -> result.add(new ValidatorDto()
                                         .setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
                                         .setNote(pair.getValue().toString()))));
             }
@@ -76,8 +87,8 @@ public class ValidatorProcessor {
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
-                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                pair -> result.add(new ValidatorDto()
+                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny()
+                                .ifPresent(pair -> result.add(new ValidatorDto()
                                         .setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
                                         .setNote(pair.getValue().toString()))));
             }
@@ -87,8 +98,8 @@ public class ValidatorProcessor {
                         .add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
                                 .setNote(singleAnno.getMemberValue().toString())));
                 annotation.ifNormalAnnotationExpr(
-                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                pair -> result.add(new ValidatorDto()
+                        normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny()
+                                .ifPresent(pair -> result.add(new ValidatorDto()
                                         .setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
                                         .setNote(pair.getValue().toString()))));
             }

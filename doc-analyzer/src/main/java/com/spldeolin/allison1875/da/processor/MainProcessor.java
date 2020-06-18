@@ -22,6 +22,12 @@ import com.spldeolin.allison1875.da.DocAnalyzerConfig;
 import com.spldeolin.allison1875.da.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.da.dto.EndpointDto;
 import com.spldeolin.allison1875.da.markdown.MarkdownConverter;
+import com.spldeolin.allison1875.da.strategy.AnalyzeCustomValidationStrategy;
+import com.spldeolin.allison1875.da.strategy.DefaultAnalyzeCustomValidationStrategy;
+import com.spldeolin.allison1875.da.strategy.DefaultObtainConcernedResponseBodyStrategy;
+import com.spldeolin.allison1875.da.strategy.ObtainConcernedResponseBodyStrategy;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -30,13 +36,22 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
+@Accessors(fluent = true)
 public class MainProcessor {
+
+    @Setter
+    private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
+            new DefaultObtainConcernedResponseBodyStrategy();
+
+    @Setter
+    private AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
+            new DefaultAnalyzeCustomValidationStrategy();
 
     public void process() {
         AstForest astForest = AstForest.getInstance();
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest);
+        JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest, analyzeCustomValidationStrategy);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // handler个数
@@ -105,11 +120,12 @@ public class MainProcessor {
                 builder.combinedVerbs(requestMappingProcessor.getCombinedVerbs());
 
                 // 分析Request Body
-                RequestBodyProcessor requestBodyAnalyzeProcessor = new RequestBodyProcessor(astForest, jsg);
+                RequestBodyProcessor requestBodyAnalyzeProcessor = new RequestBodyProcessor(jsg);
                 builder.requestBodyInfo(requestBodyAnalyzeProcessor.analyze(handler));
 
                 // 分析Response Body
-                ResponseBodyProcessor responseBodyAnalyzeProcessor = new ResponseBodyProcessor(astForest, jsg);
+                ResponseBodyProcessor responseBodyAnalyzeProcessor = new ResponseBodyProcessor(jsg,
+                        obtainConcernedResponseBodyStrategy);
                 builder.responseBodyInfo(responseBodyAnalyzeProcessor.analyze(controller, handler));
 
                 // 构建EndpointDto
