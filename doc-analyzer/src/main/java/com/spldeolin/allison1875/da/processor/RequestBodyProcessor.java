@@ -46,8 +46,7 @@ class RequestBodyProcessor {
             ResolvedType requestBody = findRequestBody(handler);
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
-                JsonSchema jsonSchema = JsonSchemaUtils
-                        .generateSchema(requestBodyDescribe, astForest.getCurrentClassLoader(), jsg);
+                JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(requestBodyDescribe, jsg);
 
                 if (jsonSchema.isObjectSchema()) {
                     requestBodySituation = BodySituationEnum.KEY_VALUE;

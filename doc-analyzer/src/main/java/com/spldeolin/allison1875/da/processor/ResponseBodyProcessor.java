@@ -14,11 +14,11 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.da.strategy.ConcernedResponseBodyTypeStrategy;
 import com.spldeolin.allison1875.da.builder.ResponseBodyInfoBuilder;
 import com.spldeolin.allison1875.da.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.da.dto.PropertyDto;
 import com.spldeolin.allison1875.da.enums.BodySituationEnum;
+import com.spldeolin.allison1875.da.strategy.ConcernedResponseBodyTypeStrategy;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -48,8 +48,7 @@ class ResponseBodyProcessor {
             ResolvedType responseBody = findResponseBody(controller, handler);
             if (responseBody != null) {
                 responseBodyDescribe = responseBody.describe();
-                JsonSchema jsonSchema = JsonSchemaUtils
-                        .generateSchema(responseBodyDescribe, astForest.getCurrentClassLoader(), jsg);
+                JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(responseBodyDescribe, jsg);
 
                 if (jsonSchema.isArraySchema()) {
                     Items items = jsonSchema.asArraySchema().getItems();

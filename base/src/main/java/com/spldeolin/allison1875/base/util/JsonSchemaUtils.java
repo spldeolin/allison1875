@@ -21,9 +21,8 @@ public class JsonSchemaUtils {
     public static final JsonSchemaGenerator DEFAULT_JSG = new JsonSchemaGenerator(
             JsonUtils.initObjectMapper(new ObjectMapper()));
 
-    public static JsonSchema generateSchema(String describe, ClassLoader cl, JsonSchemaGenerator jsg)
-            throws JsonSchemaException {
-        TypeFactory tf = buildTypeFactory(cl);
+    public static JsonSchema generateSchema(String describe, JsonSchemaGenerator jsg) throws JsonSchemaException {
+        TypeFactory tf = TypeFactory.defaultInstance();
 
         try {
             return jsg.generateSchema(tf.constructFromCanonical(describe));
@@ -38,17 +37,6 @@ public class JsonSchemaUtils {
                 throw new JsonSchemaException(e);
             }
         }
-    }
-
-    private static TypeFactory buildTypeFactory(ClassLoader cl) {
-        return new TypeFactory(null) {
-            @Override
-            public ClassLoader getClassLoader() {
-                return cl;
-            }
-
-            private static final long serialVersionUID = -3065446625827426521L;
-        };
     }
 
     private static JsonSchema generateSchemaRecursively(String innerClassMightDescribe, TypeFactory tf,

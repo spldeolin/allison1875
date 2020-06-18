@@ -74,7 +74,7 @@ public final class DocAnalyzerConfig {
             FileUtils.cleanDirectory(docOutputDirectory);
         } catch (Exception e) {
             log.error("FileUtils.cleanDirectory failed. {}", docOutputDirectory, e);
-                throw new ConfigLoadingException();
+            throw new ConfigLoadingException();
         }
 
         return instace;

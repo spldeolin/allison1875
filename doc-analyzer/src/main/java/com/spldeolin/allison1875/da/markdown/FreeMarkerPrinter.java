@@ -17,7 +17,7 @@ import freemarker.template.TemplateException;
 public class FreeMarkerPrinter {
 
     public static void printToFile(EndpointVo ftl, File output) throws FreeMarkerPrintExcpetion {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
+        Configuration cfg = new Configuration(Configuration.getVersion());
         cfg.setClassForTemplateLoading(FreeMarkerPrinter.class, "/");
         cfg.setDefaultEncoding("utf-8");
         try (Writer out = new BufferedWriter(new FileWriter(output))) {

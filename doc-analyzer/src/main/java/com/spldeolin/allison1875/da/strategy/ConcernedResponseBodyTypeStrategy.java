@@ -15,7 +15,8 @@ public class ConcernedResponseBodyTypeStrategy {
         for (MethodCallExpr mce : handler.findAll(MethodCallExpr.class)) {
             Optional<Expression> scope = mce.getScope();
             if (scope.isPresent() && "setData".equals(mce.getNameAsString())) {
-                if (scope.get().calculateResolvedType().describe().startsWith("")) {
+                if (scope.get().calculateResolvedType().describe()
+                        .startsWith("")) {
                     if (!"null".equals(mce.getArgument(0).toString())) {
                         return mce.getArgument(0).calculateResolvedType();
                     }

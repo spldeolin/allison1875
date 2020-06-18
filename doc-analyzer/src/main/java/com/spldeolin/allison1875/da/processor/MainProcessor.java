@@ -54,7 +54,7 @@ public class MainProcessor {
             // 反射controller，如果失败那么这个controller就没有处理该controller的必要了
             Class<?> controllerClass;
             try {
-                controllerClass = tryReflectController(controller, astForest);
+                controllerClass = tryReflectController(controller);
             } catch (ClassNotFoundException e) {
                 return;
             }
@@ -172,11 +172,10 @@ public class MainProcessor {
                 .isAnnoPresent(controller, Deprecated.class);
     }
 
-    private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)
-            throws ClassNotFoundException {
+    private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
         String qualifier = controller.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         try {
-            return LoadClassUtils.loadClass(qualifier, astForest.getCurrentClassLoader());
+            return LoadClassUtils.loadClass(qualifier, this.getClass().getClassLoader());
         } catch (ClassNotFoundException e) {
             log.error("类[{}]无法被加载", qualifier);
             throw e;

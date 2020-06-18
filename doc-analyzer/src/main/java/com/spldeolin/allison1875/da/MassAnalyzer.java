@@ -176,7 +176,7 @@ public class MassAnalyzer {
 
     private static Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
         return LoadClassUtils.loadClass(controller.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
-                AstForest.getInstance().getCurrentClassLoader());
+                Object.class.getClassLoader());
     }
 
     private static boolean isController(ClassOrInterfaceDeclaration coid) {

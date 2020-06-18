@@ -29,7 +29,7 @@ class CompilationUnitCollector {
             return Lists.newArrayList();
         }
 
-        JavaSymbolSolver symbolSolver = ModuleJavaSymbolSolverFactory.getJavaSymbolSolver(sourceRoot);
+        JavaSymbolSolver symbolSolver = ModuleJavaSymbolSolverFactory.getJavaSymbolSolver();
         sourceRoot.getParserConfiguration().setSymbolResolver(symbolSolver);
 
         long start = System.currentTimeMillis();

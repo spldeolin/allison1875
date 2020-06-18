@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import com.google.common.base.Strings;
 import com.spldeolin.allison1875.base.util.exception.HttpException;
-import lombok.extern.log4j.Log4j2;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;

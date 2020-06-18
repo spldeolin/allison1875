@@ -8,7 +8,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,7 +23,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
@@ -49,38 +47,15 @@ public final class BaseConfig {
     private LocalDateTime targetFileSince;
 
     /**
-     * Maven全局配置setting.xml的路径
-     */
-    private Path mavenGlobalSettingXml;
-
-    /**
      * 项目根目录路径，此项必填
      */
     private Collection<Path> projectPaths;
-
-    /**
-     * 项目下模块的源码路径、编译后classpath路径、额外jar文件的路径。
-     * 如果是单模块项目，那么主体则是项目本身。
-     *
-     * 可以使用CompileSourceAndCopyDependencyTool对projectPaths进行编译、jar拷贝后，
-     * 产生这个配置的yaml片段
-     */
-    private Collection<ProjectModule> projectModules;
-
-    /**
-     * 是否使用类加载
-     */
-    @JsonIgnore
-    private Boolean withClassLoader = true;
 
     /**
      * 所有projectPaths的公有部分
      */
     @JsonIgnore
     private Path commonPart;
-
-    @JsonIgnore
-    private Map<Path, ProjectModule> projectModulesMap = Maps.newHashMap();
 
     private BaseConfig() {
     }
@@ -116,12 +91,6 @@ public final class BaseConfig {
         }
         instace.commonPart = Paths.get(common);
 
-        if (instace.projectModules != null) {
-            for (ProjectModule projectModule : instace.projectModules) {
-                instace.getProjectModulesMap().put(projectModule.getSourceRootPath(), projectModule);
-            }
-        }
-
         return instace;
     }
 
@@ -137,17 +106,6 @@ public final class BaseConfig {
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTime))
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTime));
         return javaTimeModule;
-    }
-
-    @Data
-    public static class ProjectModule {
-
-        private Path sourceRootPath;
-
-        private Path classesPath;
-
-        private Path externalJarsPath;
-
     }
 
 }
