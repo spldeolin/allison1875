@@ -184,8 +184,8 @@ public class MainProcessor {
     }
 
     private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        return Annotations.isAnnoPresent(handler, Deprecated.class) || Annotations
-                .isAnnoPresent(controller, Deprecated.class);
+        return Annotations.isAnnotationPresent(handler, Deprecated.class) || Annotations
+                .isAnnotationPresent(controller, Deprecated.class);
     }
 
     private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {

@@ -16,15 +16,15 @@ public class Annotations {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-    public static <A extends Annotation> boolean isAnnoPresent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
-        return findAnno(node, annotationClass) != null;
+    public static <A extends Annotation> boolean isAnnotationPresent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
+        return getAnnotation(node, annotationClass) != null;
     }
 
-    public static <A extends Annotation> boolean isAnnoAbsent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
-        return !isAnnoPresent(node, annotationClass);
+    public static <A extends Annotation> boolean isAnnotationAbsent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
+        return !isAnnotationPresent(node, annotationClass);
     }
 
-    public static <A extends Annotation> AnnotationExpr findAnno(NodeWithAnnotations<?> node,
+    public static <A extends Annotation> AnnotationExpr getAnnotation(NodeWithAnnotations<?> node,
             Class<A> annotationClass) {
         Optional<AnnotationExpr> annotation = node.getAnnotationByName(annotationClass.getSimpleName());
         if (annotation.isPresent()) {
@@ -39,15 +39,15 @@ public class Annotations {
         return null;
     }
 
-    public static boolean isAnnoPresent(NodeWithAnnotations<?> node, String annotationQualifier) {
-        return findAnno(node, annotationQualifier) != null;
+    public static boolean isAnnotationPresent(NodeWithAnnotations<?> node, String annotationQualifier) {
+        return getAnnotation(node, annotationQualifier) != null;
     }
 
-    public static boolean isAnnoAbsent(NodeWithAnnotations<?> node, String annotationQualifier) {
-        return !isAnnoPresent(node, annotationQualifier);
+    public static boolean isAnnotationAbsent(NodeWithAnnotations<?> node, String annotationQualifier) {
+        return !isAnnotationPresent(node, annotationQualifier);
     }
 
-    public static AnnotationExpr findAnno(NodeWithAnnotations<?> node, String annotationQualifier) {
+    public static AnnotationExpr getAnnotation(NodeWithAnnotations<?> node, String annotationQualifier) {
         String simpleName = annotationQualifier.substring(annotationQualifier.lastIndexOf('.') + 1);
         Optional<AnnotationExpr> annotation = node.getAnnotationByName(simpleName);
         if (annotation.isPresent()) {

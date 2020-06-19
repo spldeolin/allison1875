@@ -82,11 +82,11 @@ class JsgBuildProcessor {
             JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
             jpdv.setDescription(StringUtils.limitLength(Javadocs.getFirstLine(field), 4096));
             jpdv.setRequired(
-                    Annotations.isAnnoPresent(field, NotNull.class) || Annotations.isAnnoPresent(field, NotEmpty.class)
-                            || Annotations.isAnnoPresent(field, NotBlank.class));
+                    Annotations.isAnnotationPresent(field, NotNull.class) || Annotations.isAnnotationPresent(field, NotEmpty.class)
+                            || Annotations.isAnnotationPresent(field, NotBlank.class));
             jpdv.setValidators(new ValidatorProcessor(analyzeCustomValidationStrategy).process(field));
 
-            AnnotationExpr anno = Annotations.findAnno(field, JsonFormat.class);
+            AnnotationExpr anno = Annotations.getAnnotation(field, JsonFormat.class);
             if (anno != null) {
                 for (MemberValuePair pair : anno.asNormalAnnotationExpr().getPairs()) {
                     if (pair.getNameAsString().equals("pattern")) {

@@ -96,8 +96,8 @@ class ResponseBodyProcessor {
      */
     private ResolvedType findResponseBody(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         try {
-            if (Annotations.isAnnoAbsent(controller, RestController.class) && Annotations
-                    .isAnnoAbsent(handler, ResponseBody.class)) {
+            if (Annotations.isAnnotationAbsent(controller, RestController.class) && Annotations
+                    .isAnnotationAbsent(handler, ResponseBody.class)) {
                 return null;
             }
             return obtainConcernedResponseBodyStrategy.findConcernedResponseBodyType(handler);
