@@ -103,7 +103,7 @@ public class MainProcessor {
                 }
 
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
-                builder.description(StringUtils.limitLength(Javadocs.extractEveryLine(handler, "\n"), 4096));
+                builder.description(StringUtils.limitLength(Javadocs.getEveryLine(handler, "\n"), 4096));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthorOrElseEmpty(handler));
@@ -175,7 +175,7 @@ public class MainProcessor {
     }
 
     private boolean findIgnoreFlag(MethodDeclaration handler) {
-        for (String line : Javadocs.extractEveryLine(handler)) {
+        for (String line : Javadocs.getEveryLine(handler)) {
             if (line.equalsIgnoreCase("doc-ignore")) {
                 return true;
             }

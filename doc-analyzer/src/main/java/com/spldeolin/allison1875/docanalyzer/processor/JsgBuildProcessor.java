@@ -71,7 +71,7 @@ class JsgBuildProcessor {
     private void collectEnumDescription(EnumDeclaration ed, Table<String, String, String> table) {
         String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         ed.getEntries().forEach(entry -> {
-            String comment = StringUtils.limitLength(Javadocs.extractFirstLine(entry), 4096);
+            String comment = StringUtils.limitLength(Javadocs.getFirstLine(entry), 4096);
             table.put(qualifier, entry.getNameAsString(), comment);
         });
     }
@@ -80,7 +80,7 @@ class JsgBuildProcessor {
         String javabeanQualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         for (FieldDeclaration field : coid.getFields()) {
             JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
-            jpdv.setDescription(StringUtils.limitLength(Javadocs.extractFirstLine(field), 4096));
+            jpdv.setDescription(StringUtils.limitLength(Javadocs.getFirstLine(field), 4096));
             jpdv.setRequired(
                     Annotations.isAnnoPresent(field, NotNull.class) || Annotations.isAnnoPresent(field, NotEmpty.class)
                             || Annotations.isAnnoPresent(field, NotBlank.class));

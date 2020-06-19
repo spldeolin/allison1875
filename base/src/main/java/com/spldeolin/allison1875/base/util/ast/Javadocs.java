@@ -1,10 +1,12 @@
 package com.spldeolin.allison1875.base.util.ast;
 
+import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
 
@@ -18,55 +20,62 @@ public class Javadocs {
     }
 
     /**
-     * 如果Javadoc内有多行注释，提取注释的第一行
+     * 获取Javadoc中注释部分的第一行
+     *
+     * @return trim()后的字符串，或者""
      */
-    public static String extractFirstLine(Javadoc javadoc) {
+    public static String getFirstLine(Javadoc javadoc) {
+        Collection<String> strings = getEveryLine(javadoc);
+        return Iterables.getFirst(strings, "");
+    }
+
+    /**
+     * 获取Javadoc中注释部分的第一行
+     *
+     * @return trim()后的字符串，或者""
+     */
+    public static String getFirstLine(NodeWithJavadoc<?> node) {
+        return node.getJavadoc().map(Javadocs::getFirstLine).orElse("");
+    }
+
+    /**
+     * 获取Javadoc中注释部分的每一行，并使用参数sep拼接成一行
+     *
+     * @return trim()后的字符串，或者""
+     */
+    public static String getEveryLine(Javadoc javadoc, String sep) {
+        return Joiner.on(sep).join(getEveryLine(javadoc));
+    }
+
+    /**
+     * 获取Javadoc中注释部分的每一行，并使用参数sep拼接成一行
+     *
+     * @return trim()后的字符串，或者""
+     */
+    public static String getEveryLine(NodeWithJavadoc<?> node, String sep) {
+        return node.getJavadoc().map(javadoc -> getEveryLine(javadoc, sep)).orElse("");
+    }
+
+    /**
+     * 获取Javadoc中注释部分的每一行
+     *
+     * @retrun 每个String均已trim()
+     */
+    public static Collection<String> getEveryLine(Javadoc javadoc) {
         JavadocDescription description = javadoc.getDescription();
-        List<String> lines = StringUtils.splitLineByLine(description.toText());
-        if (lines.size() == 0) {
-            return "";
-        } else {
-            return lines.get(0);
-        }
-    }
-
-    /**
-     * 如果Javadoc内有多行注释，提取注释的第一行
-     */
-    public static String extractFirstLine(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(Javadocs::extractFirstLine).orElse("");
-    }
-
-    /**
-     * 如果Javadoc内有多行注释，每行注释用分隔符拼接成一行后返回
-     */
-    public static String extractEveryLine(Javadoc javadoc, String sep) {
-        JavadocDescription description = javadoc.getDescription();
-        List<String> lines = StringUtils.splitLineByLine(description.toText());
-        return Joiner.on(sep).join(lines);
-    }
-
-    /**
-     * 如果Javadoc内有多行注释，每行注释用分隔符拼接成一行后返回
-     */
-    public static String extractEveryLine(NodeWithJavadoc<?> node, String sep) {
-        return node.getJavadoc().map(javadoc -> extractEveryLine(javadoc, sep)).orElse("");
-    }
-
-    /**
-     * 如果Javadoc内有多行注释，则提取每一行
-     */
-    public static List<String> extractEveryLine(Javadoc javadoc) {
-        JavadocDescription description = javadoc.getDescription();
-        List<String> lines = StringUtils.splitLineByLine(description.toText());
+        String rawComment = description.toText();
+        List<String> lines = StringUtils.splitLineByLine(rawComment);
+        lines.replaceAll(String::trim);
         return lines;
     }
 
     /**
-     * 如果Javadoc内有多行注释，则提取每一行
+     * 获取Javadoc中注释部分的每一行
+     *
+     * @retrun 每个String均已trim()
      */
-    public static List<String> extractEveryLine(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(Javadocs::extractEveryLine).orElse(Lists.newArrayList());
+    public static Collection<String> getEveryLine(NodeWithJavadoc<?> node) {
+        return node.getJavadoc().map(Javadocs::getEveryLine).orElse(Lists.newArrayList());
     }
 
 }
