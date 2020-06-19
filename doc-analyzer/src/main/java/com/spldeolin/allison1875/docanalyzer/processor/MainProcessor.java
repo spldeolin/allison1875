@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
-import com.spldeolin.allison1875.base.util.ast.Javadocs;
+import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -103,10 +103,10 @@ public class MainProcessor {
                 }
 
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
-                builder.description(StringUtils.limitLength(Javadocs.getEveryLine(handler, "\n"), 4096));
+                builder.description(StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(handler, "\n"), 4096));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
-                builder.author(Authors.getAuthorOrElseEmpty(handler));
+                builder.author(Authors.getAuthor(handler));
                 builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
 
                 // 根据作者名过滤
@@ -175,7 +175,7 @@ public class MainProcessor {
     }
 
     private boolean findIgnoreFlag(MethodDeclaration handler) {
-        for (String line : Javadocs.getEveryLine(handler)) {
+        for (String line : JavadocDescriptions.getEveryLine(handler)) {
             if (line.equalsIgnoreCase("doc-ignore")) {
                 return true;
             }

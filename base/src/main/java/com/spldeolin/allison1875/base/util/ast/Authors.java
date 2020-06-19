@@ -1,17 +1,17 @@
 package com.spldeolin.allison1875.base.util.ast;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
-import com.github.javaparser.javadoc.Javadoc;
-import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.JsonUtils;
 
 /**
  * 根据Javadoc的@author标签，获取作者信息
@@ -25,21 +25,40 @@ public class Authors {
     }
 
     /**
-     * 获取一个CU的作者信息，
-     * 如果有与文件名同名的类型声明，则获取这个类型声明的作者信息，
-     * 否则获取所有最外层类型声明的作者信息的集合
+     * 获取一个CompilationUnit的所有作者
+     * <p>
+     * 如果有与文件名同名的TypeDeclaration，则获取这个TypeDeclaration的所有作者信息，
+     * 否则获取所有最外层类型声明的所有作者信息，
+     * 获取方式参考{@link Authors#getEveryAuthor(com.github.javaparser.ast.Node)}
+     *
+     * @return 如果有多个作者，去重后每个作者信息为一行，每行均已trim
      */
-    public static String getAuthorOrElseEmpty(CompilationUnit cu) {
+    public static String getAuthor(CompilationUnit cu) {
         Collection<String> authors;
         if (cu.getPrimaryType().isPresent()) {
-            authors = listAuthors(cu.getPrimaryType().get());
+            TypeDeclaration<?> primaryType = cu.getPrimaryType().get();
+            authors = getEveryAuthor(primaryType);
+
         } else {
             authors = Lists.newLinkedList();
             for (TypeDeclaration<?> type : cu.getTypes()) {
-                authors.addAll(Authors.listAuthors(type));
+                authors.addAll(getEveryAuthor(type));
             }
         }
-        return concat(authors);
+
+        return distinctAndConcat(authors);
+    }
+
+
+    /**
+     * 获取一个Node的所有作者
+     * <p>
+     * 获取方式参考{@link Authors#getEveryAuthor(com.github.javaparser.ast.Node)}
+     *
+     * @return 如果有多个作者，去重后每个作者信息为一行，每行均已trim
+     */
+    public static String getAuthor(Node node) {
+        return distinctAndConcat(getEveryAuthor(node));
     }
 
     /**
@@ -48,50 +67,23 @@ public class Authors {
      * 2. 如果1. 没有收获，则尝试获取这个Node的第一个能声明Javadoc的祖先Node
      * 3. 递归1. 和2.
      */
-    public static String getAuthorOrElseEmpty(Node node) {
-        return concat(listAuthors(node));
-    }
-
-    /**
-     * Node是否没有作者信息
-     */
-    public static boolean isAuthorAbsent(Node node) {
-        return listAuthors(node).size() == 0;
-    }
-
-    private static Collection<String> listAuthors(Node node) {
-        Collection<String> authors = Lists.newArrayList();
+    private static Collection<String> getEveryAuthor(Node node) {
+        // 本节点withJavadoc，并且能获取到可见的@author内容时，直接返回
         if (node instanceof NodeWithJavadoc) {
-            NodeWithJavadoc<?> nwj = (NodeWithJavadoc<?>) node;
-            if (nwj.getJavadoc().isPresent()) {
-                Javadoc javadoc = nwj.getJavadoc().get();
-                for (JavadocBlockTag blockTag : javadoc.getBlockTags()) {
-                    if (isAuthorTag(blockTag)) {
-                        authors.add(blockTag.getContent().toText());
-                    }
-                }
+            Collection<String> authors = JavadocTags.getEveryLineByTag((NodeWithJavadoc<?>) node, Type.AUTHOR);
+            if (authors.size() > 0) {
+                return authors;
             }
         }
 
-        // 没有有效的author信息时，寻找父节点的author信息
-        if (authors.size() == 0) {
-            Optional<Node> parentWithJavadoc = getParentWithJavadoc(node);
-            if (parentWithJavadoc.isPresent()) {
-                return listAuthors(parentWithJavadoc.get());
-            }
+        // 本节点没有有效的author信息时，尝试递归地寻找父节点的author信息
+        Optional<Node> parentWithJavadoc = getParentWithJavadoc(node);
+        if (parentWithJavadoc.isPresent()) {
+            return getEveryAuthor(parentWithJavadoc.get());
         }
 
-        return authors;
-    }
-
-    private static String concat(Collection<String> authors) {
-        if (authors.size() == 0) {
-            return "";
-        } else if (authors.size() == 1) {
-            return Iterables.getOnlyElement(authors);
-        } else {
-            return JsonUtils.toJson(authors);
-        }
+        // 递归到找不到withJavadoc的父节点时，返回empty
+        return Lists.newArrayList();
     }
 
     private static Optional<Node> getParentWithJavadoc(Node node) {
@@ -107,8 +99,15 @@ public class Authors {
         return Optional.empty();
     }
 
-    private static boolean isAuthorTag(JavadocBlockTag tag) {
-        return Type.AUTHOR == tag.getType();
+    private static String distinctAndConcat(Collection<String> authors) {
+        if (authors.size() == 0) {
+            return "";
+        } else if (authors.size() == 1) {
+            return Iterables.getOnlyElement(authors);
+        } else {
+            List<String> distinctAuthors = authors.stream().distinct().collect(Collectors.toList());
+            return Joiner.on('\n').join(distinctAuthors);
+        }
     }
 
 }

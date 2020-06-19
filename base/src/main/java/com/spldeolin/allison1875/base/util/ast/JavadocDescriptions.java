@@ -11,11 +11,13 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**
+ * 获取Javadoc注释部分
+ *
  * @author Deolin 2019-12-23
  */
-public class Javadocs {
+public class JavadocDescriptions {
 
-    private Javadocs() {
+    private JavadocDescriptions() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
@@ -30,12 +32,10 @@ public class Javadocs {
     }
 
     /**
-     * 获取Javadoc中注释部分的第一行
-     *
-     * @return trim()后的字符串，或者""
+     * 重载自 {@linkplain JavadocDescriptions#getFirstLine(com.github.javaparser.javadoc.Javadoc)}
      */
     public static String getFirstLine(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(Javadocs::getFirstLine).orElse("");
+        return node.getJavadoc().map(JavadocDescriptions::getFirstLine).orElse("");
     }
 
     /**
@@ -43,17 +43,15 @@ public class Javadocs {
      *
      * @return trim()后的字符串，或者""
      */
-    public static String getEveryLine(Javadoc javadoc, String sep) {
+    public static String getEveryLineInOne(Javadoc javadoc, String sep) {
         return Joiner.on(sep).join(getEveryLine(javadoc));
     }
 
     /**
-     * 获取Javadoc中注释部分的每一行，并使用参数sep拼接成一行
-     *
-     * @return trim()后的字符串，或者""
+     * 重载自 {@linkplain JavadocDescriptions#getEveryLineInOne(com.github.javaparser.javadoc.Javadoc, java.lang.String)}
      */
-    public static String getEveryLine(NodeWithJavadoc<?> node, String sep) {
-        return node.getJavadoc().map(javadoc -> getEveryLine(javadoc, sep)).orElse("");
+    public static String getEveryLineInOne(NodeWithJavadoc<?> node, String sep) {
+        return node.getJavadoc().map(javadoc -> getEveryLineInOne(javadoc, sep)).orElse("");
     }
 
     /**
@@ -63,19 +61,25 @@ public class Javadocs {
      */
     public static Collection<String> getEveryLine(Javadoc javadoc) {
         JavadocDescription description = javadoc.getDescription();
-        String rawComment = description.toText();
-        List<String> lines = StringUtils.splitLineByLine(rawComment);
-        lines.replaceAll(String::trim);
-        return lines;
+        return getEveryLine(description);
+    }
+
+    /**
+     * 重载自 {@linkplain JavadocDescriptions#getEveryLine(com.github.javaparser.javadoc.Javadoc)}
+     */
+    public static Collection<String> getEveryLine(NodeWithJavadoc<?> node) {
+        return node.getJavadoc().map(JavadocDescriptions::getEveryLine).orElse(Lists.newArrayList());
     }
 
     /**
      * 获取Javadoc中注释部分的每一行
-     *
-     * @retrun 每个String均已trim()
+     * @return 每个String均已trim()
      */
-    public static Collection<String> getEveryLine(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(Javadocs::getEveryLine).orElse(Lists.newArrayList());
+    public static Collection<String> getEveryLine(JavadocDescription description) {
+        String rawComment = description.toText();
+        List<String> lines = StringUtils.splitLineByLine(rawComment);
+        lines.replaceAll(String::trim);
+        return lines;
     }
 
 }
