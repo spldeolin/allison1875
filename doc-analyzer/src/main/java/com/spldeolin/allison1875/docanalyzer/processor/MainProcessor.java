@@ -142,7 +142,7 @@ public class MainProcessor {
     }
 
     private boolean notContainAuthorNameFromConfig(String author) {
-        String filterByAuthorName = DocAnalyzerConfig.getInstace().getFilterByAuthorName();
+        String filterByAuthorName = DocAnalyzerConfig.getInstance().getFilterByAuthorName();
         if (StringUtils.isEmpty(filterByAuthorName)) {
             return false;
         }

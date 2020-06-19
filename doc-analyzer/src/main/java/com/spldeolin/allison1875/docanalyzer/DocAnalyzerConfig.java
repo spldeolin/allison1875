@@ -20,7 +20,36 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public final class DocAnalyzerConfig {
 
-    private static DocAnalyzerConfig instace;
+    private static final DocAnalyzerConfig instance;
+
+    static {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        SimpleModule forNioPath = new SimpleModule();
+        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
+        mapper.registerModule(forNioPath);
+
+        try {
+            instance = mapper.readValue(ClassLoader.getSystemResourceAsStream("doc-analyzer-config.yml"),
+                    DocAnalyzerConfig.class);
+        } catch (Exception e) {
+            log.error("DocAnalyzerConfig static block failed.", e);
+            throw new ConfigLoadingException();
+        }
+
+        File docOutputDirectory = instance.docOutputDirectoryPath.toFile();
+        if (!docOutputDirectory.exists()) {
+            if (!docOutputDirectory.mkdirs()) {
+                log.error("mkdirs [{}] failed.", docOutputDirectory);
+                throw new ConfigLoadingException();
+            }
+        }
+        try {
+            FileUtils.cleanDirectory(docOutputDirectory);
+        } catch (Exception e) {
+            log.error("FileUtils.cleanDirectory failed. {}", docOutputDirectory, e);
+            throw new ConfigLoadingException();
+        }
+    }
 
     /**
      * 文档输出路径
@@ -45,39 +74,8 @@ public final class DocAnalyzerConfig {
     private DocAnalyzerConfig() {
     }
 
-    public static DocAnalyzerConfig getInstace() {
-        if (instace != null) {
-            return instace;
-        }
-
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        SimpleModule forNioPath = new SimpleModule();
-        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
-        mapper.registerModule(forNioPath);
-
-        try {
-            instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("doc-analyzer-config.yml"),
-                    DocAnalyzerConfig.class);
-        } catch (Exception e) {
-            log.error("DocAnalyzerConfig.getInstance failed.", e);
-            throw new ConfigLoadingException();
-        }
-
-        File docOutputDirectory = instace.docOutputDirectoryPath.toFile();
-        if (!docOutputDirectory.exists()) {
-            if (!docOutputDirectory.mkdirs()) {
-                log.error("mkdirs [{}] failed.", docOutputDirectory);
-                throw new ConfigLoadingException();
-            }
-        }
-        try {
-            FileUtils.cleanDirectory(docOutputDirectory);
-        } catch (Exception e) {
-            log.error("FileUtils.cleanDirectory failed. {}", docOutputDirectory, e);
-            throw new ConfigLoadingException();
-        }
-
-        return instace;
+    public static DocAnalyzerConfig getInstance() {
+        return instance;
     }
 
 }

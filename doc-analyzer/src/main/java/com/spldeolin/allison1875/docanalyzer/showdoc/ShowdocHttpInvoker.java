@@ -14,8 +14,8 @@ public class ShowdocHttpInvoker {
 
     public static void invoke(String groupNames, String description, String markdownContent, int sequence) {
         ShowdocRequest req = new ShowdocRequest();
-        req.setApiKey(DocAnalyzerConfig.getInstace().getShowdocApiKey());
-        req.setApiToken(DocAnalyzerConfig.getInstace().getShowdocApiToken());
+        req.setApiKey(DocAnalyzerConfig.getInstance().getShowdocApiKey());
+        req.setApiToken(DocAnalyzerConfig.getInstance().getShowdocApiToken());
         req.setCatName(groupNames.replace('.', '/'));
         req.setPageTitle(description);
         req.setPageContent(markdownContent);

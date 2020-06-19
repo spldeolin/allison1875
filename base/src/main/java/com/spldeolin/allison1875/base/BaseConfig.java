@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -39,7 +40,34 @@ import lombok.extern.log4j.Log4j2;
 @Accessors(chain = true)
 public final class BaseConfig {
 
-    private static BaseConfig instace;
+    private static final BaseConfig instace;
+
+    static {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        SimpleModule forNioPath = new SimpleModule();
+        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
+        mapper.registerModule(forNioPath);
+        mapper.registerModule(timeModule());
+        try {
+            instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("base-config.yml"), BaseConfig.class);
+        } catch (IOException e) {
+            log.error("BaseConfig static block failed.", e);
+            throw new ConfigLoadingException();
+        }
+
+        instace.projectPaths.removeIf(Objects::isNull);
+        if (instace.projectPaths.size() == 0) {
+            log.error("未指定projectPath");
+            throw new ConfigLoadingException();
+        }
+
+        List<String> paths = instace.projectPaths.stream().map(Path::toString).collect(Collectors.toList());
+        String common = paths.get(0);
+        for (String path : paths) {
+            common = Strings.commonPrefix(common, path);
+        }
+        instace.commonPart = Paths.get(common);
+    }
 
     /**
      * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
@@ -61,36 +89,6 @@ public final class BaseConfig {
     }
 
     public static BaseConfig getInstace() {
-        if (instace != null) {
-            return instace;
-        }
-
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        SimpleModule forNioPath = new SimpleModule();
-        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
-        mapper.registerModule(forNioPath);
-        mapper.registerModule(timeModule());
-
-        try {
-            instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("base-config.yml"), BaseConfig.class);
-        } catch (Exception e) {
-            log.error("BaseConfig.getInstance failed.", e);
-            throw new ConfigLoadingException();
-        }
-
-        instace.projectPaths.removeIf(Objects::isNull);
-        if (instace.projectPaths.size() == 0) {
-            log.error("未指定projectPath");
-            throw new ConfigLoadingException();
-        }
-
-        List<String> paths = instace.projectPaths.stream().map(Path::toString).collect(Collectors.toList());
-        String common = paths.get(0);
-        for (String path : paths) {
-            common = Strings.commonPrefix(common, path);
-        }
-        instace.commonPart = Paths.get(common);
-
         return instace;
     }
 

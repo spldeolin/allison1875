@@ -7,7 +7,7 @@ import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.inspector.StatuteInspectorConfig;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.dto.PublicAckDto;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -25,7 +25,7 @@ public class PublicAckProcessor {
 
     public PublicAckProcessor process() {
         Iterator<File> fileIterator = FileUtils
-                .iterateFiles(StatuteInspectorConfig.getInstance().getPublicAckJsonDirectoryPath().toFile(),
+                .iterateFiles(InspectorConfig.getInstance().getPublicAckJsonDirectoryPath().toFile(),
                         new String[]{"json"}, true);
         if (fileIterator.hasNext()) {
             File jsonFile = fileIterator.next();

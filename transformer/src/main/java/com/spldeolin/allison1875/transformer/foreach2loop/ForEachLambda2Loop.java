@@ -26,7 +26,7 @@ public class ForEachLambda2Loop {
     public static void main(String[] args) throws FileNotFoundException {
 
         CompilationUnit demo = StaticJavaParser.parse(new File(
-                "/Users/deolin/Documents/project-repo/allison1875/snippet-transformer/src/main/java/com/spldeolin"
+                "/Users/deolin/Documents/project-repo/allison1875/transformer/src/main/java/com/spldeolin"
                         + "/allison1875/st/foreach2loop/ForEachLambda2Loop.java"));
 
         for (CompilationUnit cu : AstForest.getInstance()) {
