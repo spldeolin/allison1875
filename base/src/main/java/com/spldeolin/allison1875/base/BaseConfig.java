@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
@@ -61,12 +62,7 @@ public final class BaseConfig {
             throw new ConfigLoadingException();
         }
 
-        List<String> paths = instace.projectPaths.stream().map(Path::toString).collect(Collectors.toList());
-        String common = paths.get(0);
-        for (String path : paths) {
-            common = Strings.commonPrefix(common, path);
-        }
-        instace.commonPart = Paths.get(common);
+        calcCommonPath();
     }
 
     /**
@@ -104,6 +100,26 @@ public final class BaseConfig {
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTime))
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTime));
         return javaTimeModule;
+    }
+
+    /**
+     * 重新覆盖projectPaths属性
+     */
+    public BaseConfig resetProjectPaths(Collection<Path> projectPaths) {
+        if (CollectionUtils.isNotEmpty(projectPaths)) {
+            this.projectPaths = projectPaths;
+            calcCommonPath();
+        }
+        return this;
+    }
+
+    private static void calcCommonPath() {
+        List<String> paths = instace.projectPaths.stream().map(Path::toString).collect(Collectors.toList());
+        String common = paths.get(0);
+        for (String path : paths) {
+            common = Strings.commonPrefix(common, path);
+        }
+        instace.commonPart = Paths.get(common);
     }
 
 }

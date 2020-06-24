@@ -38,6 +38,7 @@ public class MarkdownConverter {
             vo.setRequestBodyJsonSchema(endpoint.getRequestBodyJsonSchema());
             if (endpoint.getRequestBodyProperties() != null) {
                 boolean isAnyRequestBodyPropertyEnum = false;
+                boolean anyObjectLiekTypeExistInRequestBody = false;
                 Collection<RequestBodyPropertyVo> propVos = Lists.newArrayList();
                 for (PropertyDto dto : endpoint.getRequestBodyProperties()) {
                     RequestBodyPropertyVo propVo = new RequestBodyPropertyVo();
@@ -59,10 +60,14 @@ public class MarkdownConverter {
                     } else {
                         propVo.setEnums("-");
                     }
+                    if (dto.getJsonType().isObjectLike()) {
+                        anyObjectLiekTypeExistInRequestBody = true;
+                    }
                     propVos.add(propVo);
                 }
                 vo.setRequestBodyProperties(propVos);
                 vo.setIsAnyRequestBodyPropertyEnum(isAnyRequestBodyPropertyEnum);
+                vo.setAnyObjectLiekTypeExistInRequestBody(anyObjectLiekTypeExistInRequestBody);
                 vo.setAnyValidatorsExist(propVos.stream().anyMatch(one -> !horizontalLine.equals(one.getValidators())));
             }
 
@@ -72,6 +77,7 @@ public class MarkdownConverter {
             if (endpoint.getResponseBodyProperties() != null) {
                 Collection<ResponseBodyPropertyVo> propVos = Lists.newArrayList();
                 boolean isAnyResponseBodyPropertyEnum = false;
+                boolean anyObjectLiekTypeExistInResponseBody = false;
                 for (PropertyDto dto : endpoint.getResponseBodyProperties()) {
                     ResponseBodyPropertyVo propVo = new ResponseBodyPropertyVo();
                     propVo.setPath(dto.getPath());
@@ -91,10 +97,14 @@ public class MarkdownConverter {
                     } else {
                         propVo.setEnums("-");
                     }
+                    if (dto.getJsonType().isObjectLike()) {
+                        anyObjectLiekTypeExistInResponseBody = true;
+                    }
                     propVos.add(propVo);
                 }
                 vo.setResponseBodyProperties(propVos);
                 vo.setIsAnyResponseBodyPropertyEnum(isAnyResponseBodyPropertyEnum);
+                vo.setAnyObjectLiekTypeExistInResponseBody(anyObjectLiekTypeExistInResponseBody);
             }
 
             vo.setAuthor(endpoint.getAuthor());

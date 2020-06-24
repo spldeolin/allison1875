@@ -25,6 +25,8 @@ public class EndpointVo {
 
     private Boolean anyValidatorsExist;
 
+    private Boolean anyObjectLiekTypeExistInRequestBody;
+
     private Integer responseBodySituation;
 
     private String responseBodyJsonSchema;
@@ -32,6 +34,8 @@ public class EndpointVo {
     private Collection<ResponseBodyPropertyVo> responseBodyProperties;
 
     private Boolean isAnyResponseBodyPropertyEnum;
+
+    private Boolean anyObjectLiekTypeExistInResponseBody;
 
     private String author;
 

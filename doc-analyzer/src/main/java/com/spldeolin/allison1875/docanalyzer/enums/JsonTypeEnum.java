@@ -45,6 +45,10 @@ public enum JsonTypeEnum {
         return NUMBER_ARRAY != this && NUMBER != this;
     }
 
+    public boolean isObjectLike() {
+        return OBJECT == this || OBJECT_ARRAY == this || RECURSION == this || RECURSION_ARRAY == this;
+    }
+
     @JsonValue
     public String getValue() {
         return value;
