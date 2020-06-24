@@ -46,7 +46,8 @@ public enum JsonTypeEnum {
     }
 
     public boolean isObjectLike() {
-        return OBJECT == this || OBJECT_ARRAY == this || RECURSION == this || RECURSION_ARRAY == this;
+        return OBJECT == this || OBJECT_ARRAY == this || RECURSION == this || RECURSION_ARRAY == this
+                || UNKNOWN == this;
     }
 
     @JsonValue

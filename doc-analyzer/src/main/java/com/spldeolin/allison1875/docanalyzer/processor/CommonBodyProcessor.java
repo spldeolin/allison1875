@@ -60,7 +60,6 @@ class CommonBodyProcessor {
             Boolean isFloat = null;
             Boolean isEnum = null;
             Collection<EnumDto> enums = null;
-            JsonSchema forCalcJsonFormat = childSchema;
             if (childSchema.isValueTypeSchema()) {
                 ValueTypeSchema valueSchema = childSchema.asValueTypeSchema();
                 jsonType = calcValueType(valueSchema, false);
@@ -77,8 +76,6 @@ class CommonBodyProcessor {
                     jsonType = JsonTypeEnum.UNKNOWN;
                 } else {
                     JsonSchema eleSchema = items.asSingleItems().getSchema();
-                    forCalcJsonFormat = eleSchema;
-                    forCalcJsonFormat.setDescription(childSchema.getDescription());
                     if (eleSchema.isValueTypeSchema()) {
                         ValueTypeSchema valueSchema = eleSchema.asValueTypeSchema();
                         jsonType = calcValueType(valueSchema, true);
