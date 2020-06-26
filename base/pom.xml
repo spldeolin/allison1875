@@ -101,6 +101,12 @@
             <artifactId>okhttp</artifactId>
         </dependency>
 
+        <!-- evo inflector -->
+        <dependency>
+            <groupId>org.atteo</groupId>
+            <artifactId>evo-inflector</artifactId>
+        </dependency>
+
         <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
