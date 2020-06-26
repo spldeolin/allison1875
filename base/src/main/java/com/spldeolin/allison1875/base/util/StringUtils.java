@@ -27,6 +27,13 @@ public class StringUtils {
     }
 
     /**
+     * @see org.apache.commons.lang3.StringUtils#equalsAny(java.lang.CharSequence, java.lang.CharSequence...)
+     */
+    public static boolean equalsAny(final CharSequence string, final CharSequence... searchStrings) {
+        return org.apache.commons.lang3.StringUtils.equalsAny(string, searchStrings);
+    }
+
+    /**
      * @see org.apache.commons.lang3.StringUtils#isBlank(java.lang.CharSequence)
      */
     public static boolean isBlank(CharSequence cs) {

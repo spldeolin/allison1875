@@ -6,3 +6,4 @@
 - `sourceCode` 用户源码，指Java文件
 - `AstForest` 抽象语法森林，是一个可遍历出`CompilationUnit`的单例对象，代表了`base-config.yml`中所有指定的`projects`和`projectModules`下`CompilationUnit`的集合，Allison1875所有源码工具的入口
 - `Collector` 用于收集某类对象的收集器
+- `VariableDeclarator` / `vd` 类型+命名代表一个VariableDeclarator，例如`Collection<String> names`、`UserDto user`、`int[] num`、`long ids[]`等
