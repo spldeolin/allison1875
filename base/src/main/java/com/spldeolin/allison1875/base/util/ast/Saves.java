@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base.util.ast;
 
+import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
@@ -16,6 +17,16 @@ public class Saves {
      */
     public static void prettySave(CompilationUnit cu) {
         cu.getStorage().orElseThrow(StorageAbsentException::new).save();
+    }
+
+    /**
+     * 以代码格式化的形式进行保存
+     */
+    public static void prettySave(Collection<CompilationUnit> cus) {
+        if (cus == null) {
+            return;
+        }
+        cus.forEach(Saves::prettySave);
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlergenerator;
+package com.spldeolin.allison1875.handlergenerator.meta;
 
 import java.util.Collection;
 import com.google.common.collect.Lists;
@@ -26,6 +26,8 @@ public class HandlerMetaInfo {
     private DtoMetaInfo reqBodyDto;
 
     private DtoMetaInfo respBodyDto;
+
+    private String callServiceExpr;
 
     private Collection<DtoMetaInfo> dtos = Lists.newArrayList();
 

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlergenerator;
+package com.spldeolin.allison1875.handlergenerator.meta;
 
 import java.util.Collection;
 import com.google.common.collect.Lists;
