@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.base.collection.ast;
 import java.io.File;
 import java.util.Collection;
 import java.util.Optional;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.Problem;
 import com.github.javaparser.ast.CompilationUnit;
@@ -44,7 +45,8 @@ class CompilationUnitCollector {
             }
         }
         if (count > 0) {
-            log.info("CompilationUnit collected. [{} of CompilationUnit at {} in {}ms]", count,
+            log.info("CompilationUnit collected. [{} of {} at {} in {}ms]", count,
+                    English.plural("CompilationUnit", count),
                     BaseConfig.getInstace().getCommonPart().relativize(sourceRoot.getRoot()),
                     System.currentTimeMillis() - start);
         }
