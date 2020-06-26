@@ -14,6 +14,7 @@
         <module>doc-analyzer</module>
         <module>transformer</module>
         <module>inspector</module>
+        <module>handler-generator</module>
     </modules>
 
     <name>allison1875</name>

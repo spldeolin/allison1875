@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.transformer.handlergen;
+package com.spldeolin.allison1875.handlergenerator;
 
 import java.util.Collection;
 import com.google.common.collect.Lists;
