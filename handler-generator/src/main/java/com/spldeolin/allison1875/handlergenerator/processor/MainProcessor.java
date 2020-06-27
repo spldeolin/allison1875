@@ -8,6 +8,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
@@ -67,6 +68,7 @@ public class MainProcessor {
     public void process() {
         AstForest forest = AstForest.getInstance();
         Collection<CompilationUnit> cus = Lists.newArrayList();
+        Collection<String> serviceNames = Lists.newArrayList();
 
         ControllerInitDecIterateProcessor iterateProcessor = new ControllerInitDecIterateProcessor(forest);
         iterateProcessor.iterate((cu, controller, init) -> {
@@ -76,10 +78,31 @@ public class MainProcessor {
             InitializerDeclarationAnalyzeProcessor analyzeProcessor = new InitializerDeclarationAnalyzeProcessor(
                     controllerPackage, packageStrategy);
             HandlerMetaInfo handlerMetaInfo = analyzeProcessor.analyze(init);
+            serviceNames.add(handlerMetaInfo.serviceName());
 
             cus.addAll(generateDtos(cu, handlerMetaInfo.dtos()));
             cus.add(generateHandler(cu, controller, handlerMetaInfo));
         });
+
+        ServiceFindProcessor serviceIterateProcessor = new ServiceFindProcessor(forest.reset(), serviceNames);
+
+        // TODO 1. 找出class service或者interface service，找不到时新建interface service 与 class serviceImpl
+        // TODO 2. 确保controller中import 以及 autowired了service
+        // TODO 3. 为handlerMetaInfo set callServiceExpr
+        // TODO 4. HandlerStrategy的实现中兼容callServiceExpr
+
+        for (CompilationUnit cu : forest.reset()) {
+            for (TypeDeclaration<?> td : cu.getTypes()) {
+                if (td.isClassOrInterfaceDeclaration()) {
+                    ClassOrInterfaceDeclaration service = td.asClassOrInterfaceDeclaration();
+                    if (service.isInterface()) {
+                        if (serviceNames.contains(service.getNameAsString())) {
+
+                        }
+                    }
+                }
+            }
+        }
 
         Saves.prettySave(cus);
     }
