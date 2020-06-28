@@ -15,6 +15,7 @@ import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.creator.CuCreator;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.PackageAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocTags;
@@ -68,8 +69,9 @@ public class MainProcessor {
     public void process() {
         AstForest forest = AstForest.getInstance();
         Collection<CompilationUnit> cus = Lists.newArrayList();
-        Collection<String> serviceNames = Lists.newArrayList();
 
+        Collection<String> serviceNames = Lists.newArrayList();
+        Collection<HandlerMetaInfo> metaInfos = Lists.newArrayList();
         ControllerInitDecIterateProcessor iterateProcessor = new ControllerInitDecIterateProcessor(forest);
         iterateProcessor.iterate((cu, controller, init) -> {
             String controllerPackage = cu.getPackageDeclaration().orElseThrow(PackageAbsentException::new)
@@ -77,38 +79,44 @@ public class MainProcessor {
 
             InitializerDeclarationAnalyzeProcessor analyzeProcessor = new InitializerDeclarationAnalyzeProcessor(
                     controllerPackage, packageStrategy);
-            HandlerMetaInfo handlerMetaInfo = analyzeProcessor.analyze(init);
-            serviceNames.add(handlerMetaInfo.serviceName());
+            HandlerMetaInfo metaInfo = analyzeProcessor.analyze(init);
+            metaInfo.controller(controller);
+            serviceNames.add(metaInfo.serviceName());
+            metaInfos.add(metaInfo);
 
-            cus.addAll(generateDtos(cu, handlerMetaInfo.dtos()));
-            cus.add(generateHandler(cu, controller, handlerMetaInfo));
+            cus.addAll(generateDtos(cu, metaInfo.dtos()));
         });
 
-        ServiceFindProcessor serviceIterateProcessor = new ServiceFindProcessor(forest.reset(), serviceNames);
+        ServiceFindProcessor serviceFindProcessor = new ServiceFindProcessor(forest.reset(), serviceNames);
+        serviceFindProcessor.findAll();
 
-        // TODO 1. 找出class service或者interface service，找不到时新建interface service 与 class serviceImpl
-        // TODO 2. 确保controller中import 以及 autowired了service
-        // TODO 3. 为handlerMetaInfo set callServiceExpr
-        // TODO 4. HandlerStrategy的实现中兼容callServiceExpr
-
-        for (CompilationUnit cu : forest.reset()) {
-            for (TypeDeclaration<?> td : cu.getTypes()) {
-                if (td.isClassOrInterfaceDeclaration()) {
-                    ClassOrInterfaceDeclaration service = td.asClassOrInterfaceDeclaration();
-                    if (service.isInterface()) {
-                        if (serviceNames.contains(service.getNameAsString())) {
-
-                        }
-                    }
-                }
+        for (HandlerMetaInfo metaInfo : metaInfos) {
+            String serviceName = metaInfo.serviceName();
+            ClassOrInterfaceDeclaration service = serviceFindProcessor.getService(serviceName);
+            Collection<TypeDeclaration<?>> serviceImpls = serviceFindProcessor.getServiceImpl(serviceName);
+            if (service == null) {
+                // TODO 新建interface service 与 class serviceImpl
+                // service = new Coid();
+                // serviceImpls = Lists.newArrayList(new Coid());
             }
+            // TODO 为service和serviceImpls分别追加方法
+
+            // TODO handlerMetaInfo.imports中追加service的qualifier
+
+            // TODO handlerMetaInfo.autowiredServiceFields追加service
+
+            // TODO handlerMetaInfo.callServiceExpr
+
+            // TODO HandlerStrategy的实现中兼容callServiceExpr
+
+            cus.add(generateHandler(metaInfo.controller(), metaInfo));
         }
 
         Saves.prettySave(cus);
     }
 
-    private CompilationUnit generateHandler(CompilationUnit cu, ClassOrInterfaceDeclaration controller,
-            HandlerMetaInfo metaInfo) {
+    private CompilationUnit generateHandler(ClassOrInterfaceDeclaration controller, HandlerMetaInfo metaInfo) {
+        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         cu.addImport(metaInfo.reqBodyDto().typeQualifier());
         cu.addImport(metaInfo.respBodyDto().typeQualifier());
         MethodDeclaration handler = new MethodDeclaration();

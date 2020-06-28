@@ -37,25 +37,25 @@ public class InitializerDeclarationAnalyzeProcessor {
     }
 
     HandlerMetaInfo analyze(InitializerDeclaration init) {
-        // handler meta
-        HandlerMetaInfo handler = new HandlerMetaInfo();
+        // metaInfo meta
+        HandlerMetaInfo metaInfo = new HandlerMetaInfo();
         for (Statement stmtInInit : init.getBody().getStatements()) {
             stmtInInit.ifExpressionStmt(exprInInit -> exprInInit.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     vd.getInitializer().ifPresent(i -> {
                         String value = i.asStringLiteralExpr().getValue();
                         switch (vd.getNameAsString()) {
-                            case "handler":
-                                handler.handlerName(value);
+                            case "metaInfo":
+                                metaInfo.handlerName(value);
                                 break;
                             case "desc":
-                                handler.handlerDescription(value);
+                                metaInfo.handlerDescription(value);
                                 break;
                             case "service":
-                                handler.serviceName(value);
+                                metaInfo.serviceName(value);
                                 break;
                             case "author":
-                                handler.author(value);
+                                metaInfo.author(value);
                                 break;
                         }
                     });
@@ -99,31 +99,31 @@ public class InitializerDeclarationAnalyzeProcessor {
 
             if (dtoBuilder.typeName() == null) {
                 if (i == 0) {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(handler.handlerName()) + "Req");
+                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.handlerName()) + "Req");
                     dtoBuilder.packageName(packageStrategy.calcReqPackage(controllerPackage));
                     dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                     dtoBuilder.dtoName("req");
-                    handler.reqBodyDto(dtoBuilder);
+                    metaInfo.reqBodyDto(dtoBuilder);
                 } else {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(handler.handlerName()) + "Resp");
+                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.handlerName()) + "Resp");
                     dtoBuilder.packageName(packageStrategy.calcRespPackage(controllerPackage));
                     dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                     dtoBuilder.dtoName("resp");
-                    handler.respBodyDto(dtoBuilder);
+                    metaInfo.respBodyDto(dtoBuilder);
                 }
-                handler.imports().add(dtoBuilder.typeQualifier());
+                metaInfo.imports().add(dtoBuilder.typeQualifier());
                 dtoBuilder.asVariableDeclarator(dtoBuilder.typeName() + " " + dtoBuilder.dtoName());
             }
             dtos.put(blockStmt, dtoBuilder);
         }
-        handler.dtos(dtos.values());
+        metaInfo.dtos(dtos.values());
         dtos.forEach((blockStmt, dtoBuilder) -> blockStmt.getParentNode().filter(dtos::containsKey)
                 .ifPresent(parentBlock -> {
                     DtoMetaInfo parentMeta = dtos.get(parentBlock);
                     parentMeta.variableDeclarators().add(dtoBuilder.asVariableDeclarator());
                     parentMeta.imports().add(dtoBuilder.typeQualifier());
                 }));
-        return handler;
+        return metaInfo;
     }
 
     private String removeLastDollars(String text) {

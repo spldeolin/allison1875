@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlergenerator.meta;
 
 import java.util.Collection;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import lombok.Data;
@@ -12,6 +13,8 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 public class HandlerMetaInfo {
+
+    private ClassOrInterfaceDeclaration controller;
 
     private String handlerName = "";
 
@@ -26,6 +29,8 @@ public class HandlerMetaInfo {
     private DtoMetaInfo reqBodyDto;
 
     private DtoMetaInfo respBodyDto;
+
+    private Collection<String> autowiredServiceFields;
 
     private String callServiceExpr;
 
