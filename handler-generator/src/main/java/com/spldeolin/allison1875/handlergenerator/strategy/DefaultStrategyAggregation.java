@@ -13,7 +13,7 @@ public class DefaultStrategyAggregation implements HandlerStrategy, PackageStrat
 
     @Override
     public Type resolveReturnType(HandlerMetaInfo metaInfo) {
-        return StaticJavaParser.parseType(metaInfo.respBodyDto().typeName());
+        return StaticJavaParser.parseType(metaInfo.getRespBodyDto().typeName());
     }
 
     @Override

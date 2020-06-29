@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.handlergenerator.meta;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
@@ -11,8 +12,12 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-06-26
  */
 @Data
-@Accessors(fluent = true)
+@Accessors(chain = true)
 public class HandlerMetaInfo {
+
+    private Path sourceRoot;
+
+    private String controllerPackage;
 
     private ClassOrInterfaceDeclaration controller;
 

@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.atteo.evo.inflector.English;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -16,7 +18,10 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
+import com.spldeolin.allison1875.base.exception.PackageAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlergenerator.meta.DtoMetaInfo;
 import com.spldeolin.allison1875.handlergenerator.meta.HandlerMetaInfo;
 import com.spldeolin.allison1875.handlergenerator.strategy.PackageStrategy;
@@ -27,18 +32,24 @@ import com.spldeolin.allison1875.handlergenerator.util.BlockStmts;
  */
 public class InitializerDeclarationAnalyzeProcessor {
 
-    private final String controllerPackage;
+
+    private final ClassOrInterfaceDeclaration controller;
 
     private final PackageStrategy packageStrategy;
 
-    public InitializerDeclarationAnalyzeProcessor(String controllerPackage, PackageStrategy packageStrategy) {
-        this.controllerPackage = controllerPackage;
+    public InitializerDeclarationAnalyzeProcessor(ClassOrInterfaceDeclaration controller,
+            PackageStrategy packageStrategy) {
+        this.controller = controller;
         this.packageStrategy = packageStrategy;
     }
 
     HandlerMetaInfo analyze(InitializerDeclaration init) {
         // metaInfo meta
         HandlerMetaInfo metaInfo = new HandlerMetaInfo();
+        metaInfo.setController(controller);
+        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
+        metaInfo.setSourceRoot(Locations.getStorage(controller).getSourceRoot().getRoot());
+
         for (Statement stmtInInit : init.getBody().getStatements()) {
             stmtInInit.ifExpressionStmt(exprInInit -> exprInInit.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
@@ -46,22 +57,27 @@ public class InitializerDeclarationAnalyzeProcessor {
                         String value = i.asStringLiteralExpr().getValue();
                         switch (vd.getNameAsString()) {
                             case "metaInfo":
-                                metaInfo.handlerName(value);
+                                metaInfo.setHandlerName(value);
                                 break;
                             case "desc":
-                                metaInfo.handlerDescription(value);
+                                metaInfo.setHandlerDescription(value);
                                 break;
                             case "service":
-                                metaInfo.serviceName(value);
+                                metaInfo.setServiceName(value);
                                 break;
                             case "author":
-                                metaInfo.author(value);
+                                metaInfo.setAuthor(value);
                                 break;
                         }
                     });
                 }
             }));
         }
+
+        String controllerPackage = cu.getPackageDeclaration().orElseThrow(PackageAbsentException::new)
+                .getNameAsString();
+        metaInfo.setControllerPackage(controllerPackage);
+
         // dto meta
         Map<BlockStmt, DtoMetaInfo> dtos = Maps.newLinkedHashMap();
         List<BlockStmt> allBlockStmt = init.findAll(BlockStmt.class);
@@ -99,24 +115,24 @@ public class InitializerDeclarationAnalyzeProcessor {
 
             if (dtoBuilder.typeName() == null) {
                 if (i == 0) {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.handlerName()) + "Req");
+                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Req");
                     dtoBuilder.packageName(packageStrategy.calcReqPackage(controllerPackage));
                     dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                     dtoBuilder.dtoName("req");
-                    metaInfo.reqBodyDto(dtoBuilder);
+                    metaInfo.setReqBodyDto(dtoBuilder);
                 } else {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.handlerName()) + "Resp");
+                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Resp");
                     dtoBuilder.packageName(packageStrategy.calcRespPackage(controllerPackage));
                     dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                     dtoBuilder.dtoName("resp");
-                    metaInfo.respBodyDto(dtoBuilder);
+                    metaInfo.setRespBodyDto(dtoBuilder);
                 }
-                metaInfo.imports().add(dtoBuilder.typeQualifier());
+                metaInfo.getImports().add(dtoBuilder.typeQualifier());
                 dtoBuilder.asVariableDeclarator(dtoBuilder.typeName() + " " + dtoBuilder.dtoName());
             }
             dtos.put(blockStmt, dtoBuilder);
         }
-        metaInfo.dtos(dtos.values());
+        metaInfo.setDtos(dtos.values());
         dtos.forEach((blockStmt, dtoBuilder) -> blockStmt.getParentNode().filter(dtos::containsKey)
                 .ifPresent(parentBlock -> {
                     DtoMetaInfo parentMeta = dtos.get(parentBlock);

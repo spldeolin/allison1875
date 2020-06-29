@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.handlergenerator.processor;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -10,13 +12,16 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.creator.CuCreator;
+import com.spldeolin.allison1875.base.creator.CuCreator.TypeCreator;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.exception.PackageAbsentException;
+import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocTags;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -68,73 +73,122 @@ public class MainProcessor {
 
     public void process() {
         AstForest forest = AstForest.getInstance();
-        Collection<CompilationUnit> cus = Lists.newArrayList();
+        Collection<CompilationUnit> cus = Sets.newHashSet();
 
         Collection<String> serviceNames = Lists.newArrayList();
         Collection<HandlerMetaInfo> metaInfos = Lists.newArrayList();
-        ControllerInitDecIterateProcessor iterateProcessor = new ControllerInitDecIterateProcessor(forest);
-        iterateProcessor.iterate((cu, controller, init) -> {
-            String controllerPackage = cu.getPackageDeclaration().orElseThrow(PackageAbsentException::new)
-                    .getNameAsString();
+        new ControllerInitDecIterateProcessor(forest).iterate((cu, controller, init) -> {
 
             InitializerDeclarationAnalyzeProcessor analyzeProcessor = new InitializerDeclarationAnalyzeProcessor(
-                    controllerPackage, packageStrategy);
+                    controller, packageStrategy);
             HandlerMetaInfo metaInfo = analyzeProcessor.analyze(init);
-            metaInfo.controller(controller);
-            serviceNames.add(metaInfo.serviceName());
+            serviceNames.add(metaInfo.getServiceName());
             metaInfos.add(metaInfo);
-
-            cus.addAll(generateDtos(cu, metaInfo.dtos()));
+            cus.addAll(generateDtos(cu, metaInfo.getDtos()));
         });
 
         ServiceFindProcessor serviceFindProcessor = new ServiceFindProcessor(forest.reset(), serviceNames);
         serviceFindProcessor.findAll();
 
         for (HandlerMetaInfo metaInfo : metaInfos) {
-            String serviceName = metaInfo.serviceName();
+            String serviceName = metaInfo.getServiceName();
             ClassOrInterfaceDeclaration service = serviceFindProcessor.getService(serviceName);
             Collection<TypeDeclaration<?>> serviceImpls = serviceFindProcessor.getServiceImpl(serviceName);
+
+            // 找不到serivce时，创建service与serviceImpl
             if (service == null) {
-                // TODO 新建interface service 与 class serviceImpl
-                // service = new Coid();
-                // serviceImpls = Lists.newArrayList(new Coid());
+                Collection<ImportDeclaration> imports = metaInfo.getImports().stream()
+                        .map(one -> new ImportDeclaration(one, false, false)).collect(Collectors.toList());
+                CuCreator cuCreator = new CuCreator(metaInfo.getSourceRoot(),
+                        packageStrategy.calcServicePackage(metaInfo.getControllerPackage()), imports, () -> {
+                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+                    coid.setInterface(true);
+                    coid.setName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service");
+                    return coid;
+                });
+                cus.add(cuCreator.getCu());
+                service = cuCreator.getPt().asClassOrInterfaceDeclaration();
+
+                ArrayList<ImportDeclaration> imports4Impl = Lists.newArrayList(imports);
+                imports4Impl.add(new ImportDeclaration(cuCreator.getPrimaryTypeQualifier(), false, false));
+                final String serviceName4Impl = service.getNameAsString();
+                cuCreator = new CuCreator(metaInfo.getSourceRoot(),
+                        packageStrategy.calcServiceImplPackage(metaInfo.getControllerPackage()), imports4Impl, () -> {
+                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+                    coid.setInterface(false);
+                    coid.setName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ServiceImpl");
+                    coid.addImplementedType(serviceName4Impl);
+                    return coid;
+                });
+                cus.add(cuCreator.getCu());
+                serviceImpls.add(cuCreator.getPt().asClassOrInterfaceDeclaration());
+            } else {
+                cus.add(service.findCompilationUnit().orElseThrow(CuAbsentException::new));
+                for (TypeDeclaration<?> serviceImpl : serviceImpls) {
+                    cus.add(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new));
+                }
             }
             // TODO 为service和serviceImpls分别追加方法
+            MethodDeclaration method = new MethodDeclaration();
+            Javadoc javadoc = new JavadocComment(metaInfo.getHandlerDescription()).parse();
+            String author = metaInfo.getAuthor();
+            if (StringUtils.isNotBlank(author)) {
+                boolean noneMatch = JavadocTags.getEveryLineByTag(metaInfo.getController(), JavadocBlockTag.Type.AUTHOR)
+                        .stream().noneMatch(line -> line.contains(author));
+                if (noneMatch) {
+                    javadoc.addBlockTag(new JavadocBlockTag(JavadocBlockTag.Type.AUTHOR, author));
+                }
+            }
+            method.setJavadocComment(javadoc);
+            method.setType(handlerStrategy.resolveReturnType(metaInfo));
+            method.setName(metaInfo.getHandlerName());
+            service.addMember(method);
 
-            // TODO handlerMetaInfo.imports中追加service的qualifier
+            MethodDeclaration methodImpl = method.clone();
+            methodImpl.addAnnotation(StaticJavaParser.parseAnnotation("@Override"));
+            methodImpl.setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement("return null;")));
+            serviceImpls.forEach(one -> one.addMember(methodImpl));
 
-            // TODO handlerMetaInfo.autowiredServiceFields追加service
+            // handlerMetaInfo.imports中追加service的qualifier
+            metaInfo.getImports().add(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            for (TypeDeclaration<?> serviceImpl : serviceImpls) {
+                metaInfo.getImports().add(serviceImpl.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            }
 
-            // TODO handlerMetaInfo.callServiceExpr
+            // TODO metaInfo.autowiredServiceFields追加service
+
+            // TODO metaInfo.callServiceExpr
 
             // TODO HandlerStrategy的实现中兼容callServiceExpr
 
-            cus.add(generateHandler(metaInfo.controller(), metaInfo));
+            cus.add(generateHandler(metaInfo));
         }
 
         Saves.prettySave(cus);
     }
 
-    private CompilationUnit generateHandler(ClassOrInterfaceDeclaration controller, HandlerMetaInfo metaInfo) {
+    private CompilationUnit generateHandler(HandlerMetaInfo metaInfo) {
+        ClassOrInterfaceDeclaration controller = metaInfo.getController();
         CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        cu.addImport(metaInfo.reqBodyDto().typeQualifier());
-        cu.addImport(metaInfo.respBodyDto().typeQualifier());
+        cu.addImport(metaInfo.getReqBodyDto().typeQualifier());
+        cu.addImport(metaInfo.getRespBodyDto().typeQualifier());
         MethodDeclaration handler = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment(metaInfo.handlerDescription()).parse();
-        if (StringUtils.isNotBlank(metaInfo.author())) {
+        Javadoc javadoc = new JavadocComment(metaInfo.getHandlerDescription()).parse();
+        String author = metaInfo.getAuthor();
+        if (StringUtils.isNotBlank(author)) {
             boolean noneMatch = JavadocTags.getEveryLineByTag(controller, JavadocBlockTag.Type.AUTHOR).stream()
-                    .noneMatch(line -> line.contains(metaInfo.author()));
+                    .noneMatch(line -> line.contains(author));
             if (noneMatch) {
-                javadoc.addBlockTag(new JavadocBlockTag(JavadocBlockTag.Type.AUTHOR, metaInfo.author()));
+                javadoc.addBlockTag(new JavadocBlockTag(JavadocBlockTag.Type.AUTHOR, author));
             }
         }
         handler.setJavadocComment(javadoc);
-        handler.addAnnotation(
-                StaticJavaParser.parseAnnotation("@PostMapping(value=\"/" + metaInfo.handlerName() + "\")"));
+        String handlerName = metaInfo.getHandlerName();
+        handler.addAnnotation(StaticJavaParser.parseAnnotation("@PostMapping(value=\"/" + handlerName + "\")"));
         handler.setPublic(true);
         handler.setType(handlerStrategy.resolveReturnType(metaInfo));
-        handler.setName(metaInfo.handlerName());
-        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.reqBodyDto().asVariableDeclarator());
+        handler.setName(handlerName);
+        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBodyDto().asVariableDeclarator());
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
         handler.addParameter(requestBody);
         handler.setBody(handlerStrategy.resolveBody(metaInfo));
