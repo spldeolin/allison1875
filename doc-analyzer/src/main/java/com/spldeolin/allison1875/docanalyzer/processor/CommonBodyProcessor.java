@@ -87,13 +87,13 @@ class CommonBodyProcessor {
                     } else if (eleSchema.isObjectSchema()) {
                         jsonType = calcObjectTypeWithRecur(child, eleSchema.asObjectSchema(), true);
                     } else if (eleSchema instanceof ReferenceSchema) {
-                        jsonType = JsonTypeEnum.RECURSION_ARRAY;
+                        jsonType = JsonTypeEnum.REFERENCE_ARRAY;
                     } else {
                         jsonType = JsonTypeEnum.UNKNOWN;
                     }
                 }
             } else if (childSchema instanceof ReferenceSchema) {
-                jsonType = JsonTypeEnum.RECURSION;
+                jsonType = JsonTypeEnum.REFERENCE;
             } else {
                 jsonType = JsonTypeEnum.UNKNOWN;
             }

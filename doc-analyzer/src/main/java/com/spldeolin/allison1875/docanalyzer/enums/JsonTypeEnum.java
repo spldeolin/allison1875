@@ -27,9 +27,9 @@ public enum JsonTypeEnum {
 
     OBJECT_ARRAY("objectArray"),
 
-    RECURSION("recursion"),
+    REFERENCE("ref"),
 
-    RECURSION_ARRAY("recursionArray"),
+    REFERENCE_ARRAY("refArray"),
 
     FILE("file"),
 
@@ -38,7 +38,8 @@ public enum JsonTypeEnum {
     private final String value;
 
     public boolean isArrayLike() {
-        return STRING_ARRAY == this || NUMBER_ARRAY == this || BOOLEAN_ARRAY == this || OBJECT_ARRAY == this;
+        return STRING_ARRAY == this || NUMBER_ARRAY == this || BOOLEAN_ARRAY == this || OBJECT_ARRAY == this
+                || REFERENCE == this || REFERENCE_ARRAY == this;
     }
 
     public boolean isNotNumberLike() {
@@ -46,7 +47,7 @@ public enum JsonTypeEnum {
     }
 
     public boolean isObjectLike() {
-        return OBJECT == this || OBJECT_ARRAY == this || RECURSION == this || RECURSION_ARRAY == this
+        return OBJECT == this || OBJECT_ARRAY == this || REFERENCE == this || REFERENCE_ARRAY == this
                 || UNKNOWN == this;
     }
 
