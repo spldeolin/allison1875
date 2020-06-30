@@ -109,7 +109,6 @@ class ResponseBodyProcessor {
 
     private void clearAllValidatorAndNullableFlag(PropertiesContainerDto propContainer) {
         for (PropertyDto prop : propContainer.getFlatProperties()) {
-            prop.setRequired(null);
             prop.setValidators(null);
         }
     }

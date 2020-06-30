@@ -53,7 +53,7 @@ public class MarkdownConverter {
                         fullJsonType += " (" + dto.getDatetimePattern() + ")";
                     }
                     propVo.setDetailedJsonType(fullJsonType);
-                    propVo.setValidators(convertValidators(dto.getRequired(), dto.getValidators()));
+                    propVo.setValidators(convertValidators(dto.getValidators()));
                     if (Boolean.TRUE.equals(dto.getIsEnum())) {
                         isAnyRequestBodyPropertyEnum = true;
                         propVo.setEnums(convertEnums(dto.getEnums()));
@@ -158,12 +158,8 @@ public class MarkdownConverter {
         return linkName;
     }
 
-    private String convertValidators(Boolean required, Collection<ValidatorDto> validators) {
+    private String convertValidators(Collection<ValidatorDto> validators) {
         StringBuilder result = new StringBuilder(64);
-
-        if (required) {
-            result.append("必填");
-        }
 
         if (validators != null && validators.size() > 0) {
             for (ValidatorDto validator : validators) {

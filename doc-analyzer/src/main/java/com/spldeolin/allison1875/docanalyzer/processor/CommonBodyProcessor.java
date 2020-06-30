@@ -105,12 +105,7 @@ class CommonBodyProcessor {
             if (jpdv != null) {
                 child.setDescription(jpdv.getDescription());
                 child.setValidators(jpdv.getValidators());
-                child.setRequired(jpdv.getRequired());
                 child.setDatetimePattern(jpdv.getJsonFormatPattern());
-            } else {
-                child.setRequired(false);
-//                log.warn("Cannot found JsonPropertyDescriptionValue. parentSchemaId={} childName={}",
-//                        JsonSchemaUtils.getId(parentSchema), childName);
             }
 
             child.setParent(parent);

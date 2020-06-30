@@ -33,8 +33,6 @@ public class PropertyDto {
 
     private Collection<EnumDto> enums;
 
-    private Boolean required;
-
     private Collection<ValidatorDto> validators;
 
     /**
@@ -58,7 +56,6 @@ public class PropertyDto {
         result.setDatetimePattern(treeNode.getDatetimePattern());
         result.setIsEnum(treeNode.getIsEnum());
         result.setEnums(treeNode.getEnums());
-        result.setRequired(treeNode.getRequired());
         result.setValidators(treeNode.getValidators());
         if (treeNode.getParent() != null) {
             result.setParentId(treeNode.getParent().getId());

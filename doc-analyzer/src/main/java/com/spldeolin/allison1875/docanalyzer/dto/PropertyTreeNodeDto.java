@@ -34,8 +34,6 @@ public class PropertyTreeNodeDto {
 
     private Collection<EnumDto> enums;
 
-    private Boolean required;
-
     private Collection<ValidatorDto> validators;
 
     private PropertyTreeNodeDto parent;

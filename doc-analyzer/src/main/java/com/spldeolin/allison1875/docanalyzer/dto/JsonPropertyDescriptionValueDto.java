@@ -14,8 +14,6 @@ public class JsonPropertyDescriptionValueDto {
 
     private String description;
 
-    private Boolean required;
-
     private Collection<ValidatorDto> validators;
 
     private String rawType;

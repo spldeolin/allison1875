@@ -10,9 +10,11 @@ import lombok.Getter;
 @Getter
 public enum ValidatorTypeEnum {
 
-    NOT_BLANK("必须有非空格字符"),
+    NOT_NULL("不能为null"),
 
     NOT_EMPTY("必须有元素/字符"),
+
+    NOT_BLANK("必须有非空格字符"),
 
     MAX_SIZE("最大长度/容量："),
 
@@ -22,7 +24,7 @@ public enum ValidatorTypeEnum {
 
     MIN_NUMBER("最小值："),
 
-    VALIDATOR_TYPE_ENUM("必须是未来的时间"),
+    FUTURE("必须是未来的时间"),
 
     PAST("必须是过去的时间"),
 
