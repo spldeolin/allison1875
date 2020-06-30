@@ -21,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
 public class PublicAckProcessor {
 
     @Getter
-    private final Collection<PublicAckDto> publicAcks = Lists.newLinkedList();
+    private final Collection<PublicAckDto> publicAcks = Lists.newArrayList();
 
     public PublicAckProcessor process() {
         Iterator<File> fileIterator = FileUtils

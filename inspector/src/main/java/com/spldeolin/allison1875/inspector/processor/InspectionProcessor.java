@@ -25,7 +25,7 @@ public class InspectionProcessor {
     private Collection<PublicAckDto> publicAcks;
 
     @Getter
-    private final Collection<LawlessDto> lawlesses = Lists.newLinkedList();
+    private final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 
     public InspectionProcessor process() {
         AstForest.getInstance().forEach(cu -> {

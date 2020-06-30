@@ -51,7 +51,7 @@ public class VcsContainer {
     }
 
     public <T extends Node> Collection<T> removeIfNotContain(Collection<T> nodes) {
-        Collection<T> result = Lists.newLinkedList(nodes);
+        Collection<T> result = Lists.newArrayList(nodes);
         result.removeIf(node -> !contain(node));
         return result;
     }

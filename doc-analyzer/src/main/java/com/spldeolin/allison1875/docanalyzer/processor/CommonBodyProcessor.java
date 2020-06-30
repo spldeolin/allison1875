@@ -42,7 +42,7 @@ class CommonBodyProcessor {
             boolean isInArray) {
         parent.setJsonType(isInArray ? JsonTypeEnum.OBJECT_ARRAY : JsonTypeEnum.OBJECT);
 
-        Collection<PropertyTreeNodeDto> children = Lists.newLinkedList();
+        Collection<PropertyTreeNodeDto> children = Lists.newArrayListWithCapacity(parentSchema.getProperties().size());
         for (Entry<String, JsonSchema> entry : parentSchema.getProperties().entrySet()) {
             String childName = entry.getKey();
             JsonSchema childSchema = entry.getValue();

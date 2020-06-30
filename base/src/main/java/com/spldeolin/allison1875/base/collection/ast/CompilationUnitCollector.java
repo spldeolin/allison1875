@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.base.collection.ast;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.ParseResult;
@@ -35,8 +36,10 @@ class CompilationUnitCollector {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        Collection<CompilationUnit> result = Lists.newLinkedList();
-        for (ParseResult<CompilationUnit> parseResult : sourceRoot.tryToParseParallelized()) {
+
+        List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParseParallelized();
+        Collection<CompilationUnit> result = Lists.newArrayListWithCapacity(parseResults.size());
+        for (ParseResult<CompilationUnit> parseResult : parseResults) {
             if (parseResult.isSuccessful()) {
                 parseResult.getResult().ifPresent(result::add);
                 count++;

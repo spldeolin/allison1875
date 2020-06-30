@@ -40,7 +40,7 @@ public class ValidatorProcessor {
     }
 
     public Collection<ValidatorDto> process(AnnotatedElement annotatedElement) {
-        Collection<ValidatorDto> result = Lists.newLinkedList();
+        Collection<ValidatorDto> result = Lists.newArrayList();
         NotNull notNull = find(annotatedElement, NotNull.class);
         if (notNull != null) {
             result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));

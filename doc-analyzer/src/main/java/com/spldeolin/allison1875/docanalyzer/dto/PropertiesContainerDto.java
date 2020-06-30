@@ -39,7 +39,7 @@ public class PropertiesContainerDto {
     }
 
     private void flat() {
-        flatProperties = Lists.newLinkedList();
+        flatProperties = Lists.newArrayList();
         flatPropertiesMap = Maps.newHashMap();
         if (dendriformProperties != null) {
             PropertyTreeNodeDto tempParent = new PropertyTreeNodeDto();

@@ -40,7 +40,7 @@ public class Authors {
             authors = getEveryAuthor(primaryType);
 
         } else {
-            authors = Lists.newLinkedList();
+            authors = Lists.newArrayList();
             for (TypeDeclaration<?> type : cu.getTypes()) {
                 authors.addAll(getEveryAuthor(type));
             }

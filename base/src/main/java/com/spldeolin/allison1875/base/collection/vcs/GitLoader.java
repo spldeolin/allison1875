@@ -34,7 +34,7 @@ public class GitLoader {
     public GitLoader openAndLoad() throws IOException, GitAPIException {
         git = Git.open(projectPath.toFile());
         repo = git.getRepository();
-        commits = Lists.newLinkedList(git.log().call());
+        commits = Lists.newArrayList(git.log().call());
         return this;
     }
 

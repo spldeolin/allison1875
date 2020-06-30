@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 class SourceRootCollector {
 
     Collection<SourceRoot> collect(Collection<Path> projectPaths) {
-        Collection<SourceRoot> result = Lists.newLinkedList();
+        Collection<SourceRoot> result = Lists.newArrayList();
         for (Path projectPath : projectPaths) {
             List<SourceRoot> sourceRoots = new SymbolSolverCollectionStrategy().collect(projectPath).getSourceRoots();
             result.addAll(sourceRoots);
