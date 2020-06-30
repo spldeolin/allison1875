@@ -35,7 +35,7 @@ public class HandlerMetaInfo {
 
     private DtoMetaInfo respBodyDto;
 
-    private Collection<String> autowiredServiceFields;
+    private String autowiredServiceField;
 
     private String callServiceExpr;
 

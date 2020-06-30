@@ -56,14 +56,14 @@ public class InitializerDeclarationAnalyzeProcessor {
                     vd.getInitializer().ifPresent(i -> {
                         String value = i.asStringLiteralExpr().getValue();
                         switch (vd.getNameAsString()) {
-                            case "metaInfo":
-                                metaInfo.setHandlerName(value);
+                            case "handler":
+                                metaInfo.setHandlerName(StringUtils.lowerFirstLetter(value));
                                 break;
                             case "desc":
                                 metaInfo.setHandlerDescription(value);
                                 break;
                             case "service":
-                                metaInfo.setServiceName(value);
+                                metaInfo.setServiceName(StringUtils.upperFirstLetter(value));
                                 break;
                             case "author":
                                 metaInfo.setAuthor(value);

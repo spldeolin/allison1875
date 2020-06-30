@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.handlergenerator.processor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.stream.Collectors;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -128,7 +129,7 @@ public class MainProcessor {
                     cus.add(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new));
                 }
             }
-            // TODO 为service和serviceImpls分别追加方法
+            // 为service和serviceImpls分别追加方法
             MethodDeclaration method = new MethodDeclaration();
             Javadoc javadoc = new JavadocComment(metaInfo.getHandlerDescription()).parse();
             String author = metaInfo.getAuthor();
@@ -155,9 +156,12 @@ public class MainProcessor {
                 metaInfo.getImports().add(serviceImpl.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
             }
 
-            // TODO metaInfo.autowiredServiceFields追加service
+            // metaInfo.autowiredServiceFields追加service
+            String serviceVariableName = StringUtils.lowerFirstLetter(serviceName);
+            metaInfo.setAutowiredServiceField(serviceName + " " + serviceVariableName);
 
-            // TODO metaInfo.callServiceExpr
+            // metaInfo.callServiceExpr
+            metaInfo.setCallServiceExpr(String.format("%s.%s(%s);", serviceVariableName, metaInfo.getHandlerName(), metaInfo.getReqBodyDto().dtoName()));
 
             // TODO HandlerStrategy的实现中兼容callServiceExpr
 
