@@ -115,13 +115,13 @@ public class InitializerDeclarationAnalyzeProcessor {
 
             if (dtoBuilder.typeName() == null) {
                 if (i == 0) {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Req");
+                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto");
                     dtoBuilder.packageName(packageStrategy.calcReqPackage(controllerPackage));
                     dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                     dtoBuilder.dtoName("req");
                     metaInfo.setReqBodyDto(dtoBuilder);
                 } else {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Resp");
+                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto");
                     dtoBuilder.packageName(packageStrategy.calcRespPackage(controllerPackage));
                     dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                     dtoBuilder.dtoName("resp");

@@ -3,12 +3,13 @@ package com.spldeolin.allison1875.handlergenerator.processor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -20,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.creator.CuCreator;
-import com.spldeolin.allison1875.base.creator.CuCreator.TypeCreator;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -78,21 +78,29 @@ public class MainProcessor {
 
         Collection<String> serviceNames = Lists.newArrayList();
         Collection<HandlerMetaInfo> metaInfos = Lists.newArrayList();
-        new ControllerInitDecIterateProcessor(forest).iterate((cu, controller, init) -> {
 
-            InitializerDeclarationAnalyzeProcessor analyzeProcessor = new InitializerDeclarationAnalyzeProcessor(
-                    controller, packageStrategy);
-            HandlerMetaInfo metaInfo = analyzeProcessor.analyze(init);
-            serviceNames.add(metaInfo.getServiceName());
-            metaInfos.add(metaInfo);
-            cus.addAll(generateDtos(cu, metaInfo.getDtos()));
-        });
+        for (CompilationUnit cu : forest) {
+            for (Pair<ClassOrInterfaceDeclaration, InitializerDeclaration> controllerAndInit :
+                    new ControllerInitDecCollectProcessor(
+                    cu).collect().getResult()) {
+                InitializerDeclarationAnalyzeProcessor analyzeProcessor = new InitializerDeclarationAnalyzeProcessor(
+                        controllerAndInit.getLeft(), packageStrategy);
+                HandlerMetaInfo metaInfo = analyzeProcessor.analyze(controllerAndInit.getRight());
+                serviceNames.add(metaInfo.getServiceName());
+                metaInfos.add(metaInfo);
+                cus.addAll(generateDtos(cu, metaInfo.getDtos()));
+                cus.add(generateHandler(metaInfo));
+            }
+        }
 
         ServiceFindProcessor serviceFindProcessor = new ServiceFindProcessor(forest.reset(), serviceNames);
         serviceFindProcessor.findAll();
 
         for (HandlerMetaInfo metaInfo : metaInfos) {
             String serviceName = metaInfo.getServiceName();
+            if (StringUtils.isBlank(serviceName)) {
+                break;
+            }
             ClassOrInterfaceDeclaration service = serviceFindProcessor.getService(serviceName);
             Collection<TypeDeclaration<?>> serviceImpls = serviceFindProcessor.getServiceImpl(serviceName);
 
@@ -153,7 +161,8 @@ public class MainProcessor {
             // handlerMetaInfo.imports中追加service的qualifier
             metaInfo.getImports().add(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
             for (TypeDeclaration<?> serviceImpl : serviceImpls) {
-                metaInfo.getImports().add(serviceImpl.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+                metaInfo.getImports()
+                        .add(serviceImpl.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
             }
 
             // metaInfo.autowiredServiceFields追加service
@@ -161,11 +170,12 @@ public class MainProcessor {
             metaInfo.setAutowiredServiceField(serviceName + " " + serviceVariableName);
 
             // metaInfo.callServiceExpr
-            metaInfo.setCallServiceExpr(String.format("%s.%s(%s);", serviceVariableName, metaInfo.getHandlerName(), metaInfo.getReqBodyDto().dtoName()));
+            metaInfo.setCallServiceExpr(String.format("%s.%s(%s);", serviceVariableName, metaInfo.getHandlerName(),
+                    metaInfo.getReqBodyDto().dtoName()));
 
             // TODO HandlerStrategy的实现中兼容callServiceExpr
 
-            cus.add(generateHandler(metaInfo));
+
         }
 
         Saves.prettySave(cus);
@@ -188,7 +198,7 @@ public class MainProcessor {
         }
         handler.setJavadocComment(javadoc);
         String handlerName = metaInfo.getHandlerName();
-        handler.addAnnotation(StaticJavaParser.parseAnnotation("@PostMapping(value=\"/" + handlerName + "\")"));
+        handler.addAnnotation(StaticJavaParser.parseAnnotation("@PostMapping(\"/" + handlerName + "\")"));
         handler.setPublic(true);
         handler.setType(handlerStrategy.resolveReturnType(metaInfo));
         handler.setName(handlerName);
