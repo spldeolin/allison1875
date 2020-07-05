@@ -15,6 +15,7 @@
         <module>transformer</module>
         <module>inspector</module>
         <module>handler-generator</module>
+        <module>persistence-generator</module>
     </modules>
 
     <name>allison1875</name>
