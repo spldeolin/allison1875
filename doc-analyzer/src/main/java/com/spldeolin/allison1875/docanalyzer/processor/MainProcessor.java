@@ -7,7 +7,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -47,11 +49,15 @@ public class MainProcessor {
     private AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
             new DefaultAnalyzeCustomValidationStrategy();
 
+    @Setter
+    private Table<String, String, String> extraFieldDescriptions = HashBasedTable.create();
+
     public void process() {
         AstForest astForest = AstForest.getInstance();
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest, analyzeCustomValidationStrategy);
+        JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest, analyzeCustomValidationStrategy,
+                extraFieldDescriptions);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // handler个数
@@ -103,7 +109,8 @@ public class MainProcessor {
                 }
 
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
-                builder.description(StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(handler, "\n"), 4096));
+                builder.description(
+                        StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(handler, "\n"), 4096));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthor(handler));

@@ -20,6 +20,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -44,13 +45,17 @@ class JsgBuildProcessor {
 
     private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
 
+    private final Table<String, String, String> extraFieldDescriptions;
+
     private final Table<String, String, String> enumDescriptions = HashBasedTable.create();
 
     private final Table<String, String, JsonPropertyDescriptionValueDto> propertyJpdvs = HashBasedTable.create();
 
-    public JsgBuildProcessor(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
+    public JsgBuildProcessor(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
+            Table<String, String, String> extraFieldDescriptions) {
         this.astForest = astForest;
         this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
+        this.extraFieldDescriptions = extraFieldDescriptions;
     }
 
     public JsonSchemaGenerator analyzeAstAndBuildJsg() {
@@ -180,18 +185,37 @@ class JsgBuildProcessor {
             @Override
             public String findPropertyDescription(Annotated ann) {
                 Class<?> clazz;
+                String className;
+                String fieldName = null;
                 if (ann instanceof AnnotatedField) {
                     clazz = ((AnnotatedField) ann).getDeclaringClass();
+                    fieldName = ann.getName();
                 } else if (ann instanceof AnnotatedMethod) {
                     clazz = ((AnnotatedMethod) ann).getDeclaringClass();
+                    if (ann.getName().startsWith("is")) {
+                        fieldName = StringUtils.lowerFirstLetter(ann.getName().substring(2));
+                    }
                 } else {
                     return "{}";
                 }
+                className = clazz.getName().replace('$', '.');
 
-                String className = clazz.getName().replace('$', '.');
-                String fieldName = ann.getName();
-                String result = JsonUtils.toJson(propertyJpdvs.get(className, fieldName));
-                return result;
+                String extraDescription = extraFieldDescriptions.get(className, fieldName);
+                JsonPropertyDescriptionValueDto jpdv = propertyJpdvs.get(className, fieldName);
+
+                if (jpdv == null) {
+                    jpdv = new JsonPropertyDescriptionValueDto();
+                    if (extraDescription != null) {
+                        jpdv.setDescription(extraDescription);
+                    }
+                    jpdv.setValidators(Lists.newArrayList());
+                    jpdv.setRawType(ann.getRawType().getSimpleName());
+                } else {
+                    if (extraDescription != null) {
+                        jpdv.setDescription(extraDescription);
+                    }
+                }
+                return JsonUtils.toJson(jpdv);
             }
 
             @Override
