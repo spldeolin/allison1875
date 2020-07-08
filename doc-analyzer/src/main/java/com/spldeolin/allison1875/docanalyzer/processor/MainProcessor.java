@@ -7,9 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -27,7 +25,9 @@ import com.spldeolin.allison1875.docanalyzer.markdown.MarkdownConverter;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
+import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
+import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -50,14 +50,15 @@ public class MainProcessor {
             new DefaultAnalyzeCustomValidationStrategy();
 
     @Setter
-    private Table<String, String, String> extraFieldDescriptions = HashBasedTable.create();
+    private SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
+            new DefaultSpecificFieldDescriptionsStrategy();
 
     public void process() {
         AstForest astForest = AstForest.getInstance();
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
         JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest, analyzeCustomValidationStrategy,
-                extraFieldDescriptions);
+                specificFieldDescriptionsStrategy.provideSpecificFieldDescriptions());
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // handler个数
