@@ -13,7 +13,6 @@ import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.EnumDto;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertyDto;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
-import com.spldeolin.allison1875.docanalyzer.showdoc.ShowdocHttpInvoker;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -127,10 +126,6 @@ public class MarkdownConverter {
             File output = dir.toPath().resolve(fileName).toFile();
             try {
                 FreeMarkerPrinter.printToFile(vo, output);
-                if (alsoSendToShowdoc) {
-                    ShowdocHttpInvoker.invoke(groupNames, description, FreeMarkerPrinter.printAsString(vo), sequence);
-                    sequence++;
-                }
             } catch (FreeMarkerPrintExcpetion e) {
                 log.warn("FreeMarkerPrinter print failed.", e);
             }

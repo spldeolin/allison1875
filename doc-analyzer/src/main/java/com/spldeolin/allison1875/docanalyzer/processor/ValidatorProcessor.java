@@ -46,19 +46,13 @@ public class ValidatorProcessor {
             result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));
         }
 
-        javax.validation.constraints.NotEmpty javaxNotEmpty = find(annotatedElement,
-                javax.validation.constraints.NotEmpty.class);
-        org.hibernate.validator.constraints.NotEmpty hibernateNotEmpty = find(annotatedElement,
-                org.hibernate.validator.constraints.NotEmpty.class);
-        if (javaxNotEmpty != null || hibernateNotEmpty != null) {
+        if (find(annotatedElement, javax.validation.constraints.NotEmpty.class) != null
+                || find(annotatedElement, org.hibernate.validator.constraints.NotEmpty.class) != null) {
             result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_EMPTY.getValue()));
         }
 
-        javax.validation.constraints.NotBlank javaxNotBlank = find(annotatedElement,
-                javax.validation.constraints.NotBlank.class);
-        org.hibernate.validator.constraints.NotBlank hibernateNotBlank = find(annotatedElement,
-                org.hibernate.validator.constraints.NotBlank.class);
-        if (javaxNotBlank != null || hibernateNotBlank != null) {
+        if (find(annotatedElement, javax.validation.constraints.NotBlank.class) != null
+                || find(annotatedElement, org.hibernate.validator.constraints.NotBlank.class) != null) {
             result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_BLANK.getValue()));
         }
 

@@ -62,14 +62,9 @@ public final class DocAnalyzerConfig {
     private String filterByAuthorName;
 
     /**
-     * showdoc的api_key
+     * 全局URL前缀
      */
-    private String showdocApiKey;
-
-    /**
-     * showdoc的api_token
-     */
-    private String showdocApiToken;
+    private String globalUrlPrefix;
 
     private DocAnalyzerConfig() {
     }

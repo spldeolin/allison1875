@@ -4,6 +4,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.ListIterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.AntPathMatcher;
@@ -11,6 +13,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import lombok.Getter;
 
 /**
@@ -42,8 +45,15 @@ class RequestMappingProcessor {
         RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
         String[] mPaths = methodRequestMapping.value();
         RequestMethod[] mVerbs = methodRequestMapping.method();
-        combinedUrls = combineUrl(cPaths, mPaths);
+        List<String> combinedUrls = combineUrl(cPaths, mPaths);
+        this.combinedUrls = combinedUrls;
         combinedVerbs = combineVerb(cVerbs, mVerbs);
+
+        // 添加全局前缀
+        ListIterator<String> itr = combinedUrls.listIterator();
+        while (itr.hasNext()) {
+            itr.set(DocAnalyzerConfig.getInstance().getGlobalUrlPrefix() + itr.next());
+        }
     }
 
     private RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {
@@ -72,8 +82,8 @@ class RequestMappingProcessor {
         return combinedVerbs;
     }
 
-    private Collection<String> combineUrl(String[] cPaths, String[] mPaths) {
-        Collection<String> combinedUrls = Lists.newArrayList();
+    private List<String> combineUrl(String[] cPaths, String[] mPaths) {
+        List<String> combinedUrls = Lists.newArrayList();
         if (ArrayUtils.isNotEmpty(cPaths) && ArrayUtils.isNotEmpty(mPaths)) {
             for (String cPath : cPaths) {
                 for (String mPath : mPaths) {
@@ -91,8 +101,8 @@ class RequestMappingProcessor {
         return combinedUrls;
     }
 
-    private Collection<String> ensureAllStartWithSlash(Collection<String> urls) {
-        Collection<String> result = Lists.newArrayList();
+    private List<String> ensureAllStartWithSlash(Collection<String> urls) {
+        List<String> result = Lists.newArrayList();
         for (String url : urls) {
             if (!url.startsWith("/")) {
                 url = "/" + url;
