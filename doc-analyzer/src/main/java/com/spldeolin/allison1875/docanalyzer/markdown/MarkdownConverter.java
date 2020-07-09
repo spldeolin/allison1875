@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.markdown;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
 import com.google.common.base.Joiner;
@@ -115,7 +116,7 @@ public class MarkdownConverter {
                     Iterables.getFirst(StringUtils.splitLineByLine(description), uriFirstLine).replace('/', '-')
                             + ".md";
             String groupNames = endpoint.getGroupNames();
-            File dir = DocAnalyzerConfig.getInstance().getDocOutputDirectoryPath()
+            File dir = Paths.get(DocAnalyzerConfig.getInstance().getDocOutputDirectoryPath())
                     .resolve(groupNames.replace('.', File.separatorChar)).toFile();
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {

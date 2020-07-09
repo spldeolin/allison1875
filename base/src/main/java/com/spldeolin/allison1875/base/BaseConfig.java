@@ -10,11 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -25,6 +23,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import lombok.Data;
@@ -45,9 +44,6 @@ public final class BaseConfig {
 
     static {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        SimpleModule forNioPath = new SimpleModule();
-        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
-        mapper.registerModule(forNioPath);
         mapper.registerModule(timeModule());
         try {
             instace = mapper.readValue(ClassLoader.getSystemResourceAsStream("base-config.yml"), BaseConfig.class);
@@ -73,7 +69,7 @@ public final class BaseConfig {
     /**
      * 项目根目录路径，此项必填
      */
-    private Collection<Path> projectPaths;
+    private Collection<String> projectPaths;
 
     /**
      * 所有projectPaths的公有部分
@@ -105,7 +101,7 @@ public final class BaseConfig {
     /**
      * 重新覆盖projectPaths属性
      */
-    public BaseConfig resetProjectPaths(Collection<Path> projectPaths) {
+    public BaseConfig resetProjectPaths(Collection<String> projectPaths) {
         if (CollectionUtils.isNotEmpty(projectPaths)) {
             this.projectPaths = projectPaths;
             calcCommonPath();
@@ -114,7 +110,7 @@ public final class BaseConfig {
     }
 
     private static void calcCommonPath() {
-        List<String> paths = instace.projectPaths.stream().map(Path::toString).collect(Collectors.toList());
+        List<String> paths = Lists.newArrayList(instace.projectPaths);
         String common = paths.get(0);
         for (String path : paths) {
             common = Strings.commonPrefix(common, path);

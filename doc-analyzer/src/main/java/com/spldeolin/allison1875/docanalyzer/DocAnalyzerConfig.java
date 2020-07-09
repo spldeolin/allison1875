@@ -1,11 +1,8 @@
 package com.spldeolin.allison1875.docanalyzer;
 
 import java.io.File;
-import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
 import lombok.Data;
@@ -24,9 +21,6 @@ public final class DocAnalyzerConfig {
 
     static {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        SimpleModule forNioPath = new SimpleModule();
-        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
-        mapper.registerModule(forNioPath);
 
         try {
             instance = mapper.readValue(ClassLoader.getSystemResourceAsStream("doc-analyzer-config.yml"),
@@ -36,7 +30,7 @@ public final class DocAnalyzerConfig {
             throw new ConfigLoadingException();
         }
 
-        File docOutputDirectory = instance.docOutputDirectoryPath.toFile();
+        File docOutputDirectory = new File(instance.docOutputDirectoryPath);
         if (!docOutputDirectory.exists()) {
             if (!docOutputDirectory.mkdirs()) {
                 log.error("mkdirs [{}] failed.", docOutputDirectory);
@@ -54,7 +48,7 @@ public final class DocAnalyzerConfig {
     /**
      * 文档输出路径
      */
-    private Path docOutputDirectoryPath;
+    private String docOutputDirectoryPath;
 
     /**
      * 根据作者名过滤

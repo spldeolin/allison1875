@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.base.collection.vcs;
 
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import com.github.javaparser.ast.Node;
 import com.google.common.collect.Iterables;
@@ -17,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 public class StaticVcsContainer {
 
     private static VcsContainer fromConfigPath = new VcsContainer(
-            Iterables.getFirst(BaseConfig.getInstace().getProjectPaths(), null));
+            Paths.get(Iterables.getFirst(BaseConfig.getInstace().getProjectPaths(), null)));
 
     public static Path getProjectPath() {
         return fromConfigPath.getProjectPath();
