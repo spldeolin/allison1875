@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import com.spldeolin.allison1875.base.BaseConfig;
@@ -36,7 +35,6 @@ public class AstForest implements Iterable<CompilationUnit> {
         return instance;
     }
 
-    @NotNull
     @Override
     public Iterator<CompilationUnit> iterator() {
         return cursor;

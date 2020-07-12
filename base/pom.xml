@@ -89,18 +89,6 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
-        <!-- maven invoker -->
-        <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-invoker</artifactId>
-        </dependency>
-
-        <!-- okhttp -->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-
         <!-- evo inflector -->
         <dependency>
             <groupId>org.atteo</groupId>

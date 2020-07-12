@@ -154,18 +154,11 @@
                 <version>2.3.30</version>
             </dependency>
 
-            <!-- maven invoker -->
+            <!-- commons dbutils -->
             <dependency>
-                <groupId>org.apache.maven.shared</groupId>
-                <artifactId>maven-invoker</artifactId>
-                <version>3.0.1</version>
-            </dependency>
-
-            <!-- okhttp -->
-            <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>4.7.2</version>
+                <groupId>commons-dbutils</groupId>
+                <artifactId>commons-dbutils</artifactId>
+                <version>1.7</version>
             </dependency>
 
             <!-- evo inflector -->
@@ -173,6 +166,21 @@
                 <groupId>org.atteo</groupId>
                 <artifactId>evo-inflector</artifactId>
                 <version>1.2.2</version>
+            </dependency>
+
+            <!-- dom4j -->
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>1.6.1</version>
+            </dependency>
+
+            <!-- mysql -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>8.0.20</version>
+                <scope>runtime</scope>
             </dependency>
 
             <!-- lombok -->

@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.docanalyzer.markdown;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collection;
-import org.jetbrains.annotations.NotNull;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -134,7 +133,6 @@ public class MarkdownConverter {
 
     }
 
-    @NotNull
     private String convertEnums(Collection<EnumDto> enums) {
         StringBuilder sb = new StringBuilder(64);
         for (EnumDto anEnum : enums) {
