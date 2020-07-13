@@ -6,17 +6,19 @@ import lombok.Data;
  * @author Deolin 2020-07-11
  */
 @Data
-public class ColumnDto {
+public class InformationSchemaDto {
 
     private String tableName;
 
+    private String tableComment;
+
     private String columnName;
 
-    private Boolean isNullable;
+    private String isNullable; // YES NO
 
     private String dataType;
 
-    private Long charMaxLength;
+    private Long characterMaximumLength;
 
     private String columnType;
 

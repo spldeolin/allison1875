@@ -1,0 +1,11 @@
+jdbcUrl: jdbc:mysql://127.0.0.1:3306/beginning_mind
+userName: root
+password: root
+schema: beginning_mind
+author: Deolin
+
+sourceRoot: /Users/deolin/Documents/project-repo/beginning-mind/src/main/java
+mapperPackage: com.spldeolin.beginningmind.mapper
+mapperXmlPath: /Users/deolin/Documents/project-repo/beginning-mind/src/main/resources/mapper
+entityPackage: com.spldeolin.beginningmind.entity
+repositoryPackage: com.spldeolin.beginningmind.repository

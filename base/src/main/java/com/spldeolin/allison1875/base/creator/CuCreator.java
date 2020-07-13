@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.base.creator;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -34,6 +36,14 @@ public class CuCreator {
     private final Collection<ImportDeclaration> imports;
 
     private final TypeCreator primaryTypeCreator;
+
+    public CuCreator(Path sourceRoot, String packageName, List<String> imports, TypeCreator primaryTypeCreator) {
+        this.sourceRoot = sourceRoot;
+        this.packageName = packageName;
+        this.imports = imports.stream().map(one -> new ImportDeclaration(one, false, false))
+                .collect(Collectors.toList());
+        this.primaryTypeCreator = primaryTypeCreator;
+    }
 
     public CuCreator(Path sourceRoot, String packageName, Collection<ImportDeclaration> imports,
             TypeCreator primaryTypeCreator) {

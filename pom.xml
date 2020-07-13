@@ -175,6 +175,13 @@
                 <version>1.6.1</version>
             </dependency>
 
+            <!-- hikari cp -->
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>3.4.5</version>
+            </dependency>
+
             <!-- mysql -->
             <dependency>
                 <groupId>mysql</groupId>

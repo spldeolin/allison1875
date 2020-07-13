@@ -32,6 +32,12 @@
             <artifactId>dom4j</artifactId>
         </dependency>
 
+        <!-- hikari cp -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
         <!-- mysql -->
         <dependency>
             <groupId>mysql</groupId>

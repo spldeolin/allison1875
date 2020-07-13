@@ -1,12 +1,20 @@
 package com.spldeolin.allison1875.base.util;
 
 import java.util.List;
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Converter;
 import com.google.common.collect.Lists;
 
 /**
  * @author Deolin 2019-12-03
  */
 public class StringUtils {
+
+    private static final Converter<String, String> lowerUnderscore2UpperCamel = CaseFormat.LOWER_UNDERSCORE
+            .converterTo(CaseFormat.UPPER_CAMEL);
+
+    private static final Converter<String, String> lowerUnderscore2LowerCamel = CaseFormat.LOWER_UNDERSCORE
+            .converterTo(CaseFormat.LOWER_CAMEL);
 
     private StringUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
@@ -93,6 +101,14 @@ public class StringUtils {
             return s.toString();
         }
         return s.toString().substring(0, limit);
+    }
+
+    public static String underscoreToUpperCamel(String string) {
+        return lowerUnderscore2UpperCamel.convert(string);
+    }
+
+    public static String underscoreToLowerCamel(String string) {
+        return lowerUnderscore2LowerCamel.convert(string);
     }
 
 }
