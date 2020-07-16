@@ -21,15 +21,20 @@
 
         <!-- commons dbutils -->
         <dependency>
-            <!-- WARNING 这个标签由Allison1875生成，禁止人为修改 WARNING -->
             <groupId>commons-dbutils</groupId>
             <artifactId>commons-dbutils</artifactId>
         </dependency>
 
         <!-- dom4j -->
         <dependency>
-            <groupId>dom4j</groupId>
+            <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
+        </dependency>
+
+        <!-- jaxen -->
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
         </dependency>
 
         <!-- hikari cp -->

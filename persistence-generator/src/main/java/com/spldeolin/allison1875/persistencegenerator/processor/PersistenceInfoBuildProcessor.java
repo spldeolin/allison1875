@@ -40,13 +40,14 @@ public class PersistenceInfoBuildProcessor {
         }
         for (InformationSchemaDto columnMeta : infoSchemas) {
             PropertyDto dto = new PropertyDto();
-            dto.setName(StringUtils.underscoreToLowerCamel(columnMeta.getColumnName()));
+            dto.setColumnName(columnMeta.getColumnName());
+            dto.setPropertyName(StringUtils.underscoreToLowerCamel(columnMeta.getColumnName()));
             JdbcTypeEnum jdbcTypeEnum = calcJavaType(columnMeta);
             if (jdbcTypeEnum == null) {
                 continue;
             }
             Class<?> javaType = jdbcTypeEnum.getJavaType();
-            dto.setType(javaType);
+            dto.setJavaType(javaType);
             dto.setDescription(columnMeta.getColumnComment());
             persistences.get(columnMeta.getTableName()).getProperties().add(dto);
         }

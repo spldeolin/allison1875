@@ -10,9 +10,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PropertyDto {
 
-    private String name;
+    private String columnName;
 
-    private Class<?> type;
+    private String propertyName;
+
+    private Class<?> javaType;
 
     private String description;
 
