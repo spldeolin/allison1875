@@ -69,6 +69,10 @@ public class StringUtils {
         return sb.toString();
     }
 
+    public static String removeLast(CharSequence cs, String target) {
+        return replaceLast(cs, target, "");
+    }
+
     public static String capture(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }

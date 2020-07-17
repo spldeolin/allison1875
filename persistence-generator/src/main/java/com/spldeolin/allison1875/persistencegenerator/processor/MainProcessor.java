@@ -228,8 +228,12 @@ public class MainProcessor {
             insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
             insertTag.addAttribute("id", "insert");
             insertTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-            insertTag.addAttribute("useGeneratedKeys", "true");
-            insertTag.addAttribute("keyProperty", "id");
+            if (!persistence.getIsNonePK()) {
+                insertTag.addAttribute("useGeneratedKeys", "true");
+                String keyProperty = persistence.getProperties().stream().filter(PropertyDto::getIsPK)
+                        .map(PropertyDto::getColumnName).collect(Collectors.joining(","));
+                insertTag.addAttribute("keyProperty", keyProperty);
+            }
             StringBuilder sql = new StringBuilder(64);
             sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
             sql.append("INSERT INTO ").append(persistence.getTableName()).append(" (");
@@ -240,7 +244,7 @@ public class MainProcessor {
             for (PropertyDto property : persistence.getProperties()) {
                 sql.append("#{").append(property.getPropertyName()).append("},");
             }
-            sql.deleteCharAt(sql.lastIndexOf(","));
+            sql.deleteCharAt(sql.lastIndexOf(",")).append(")");
             insertTag.addText(sql.toString());
 
             // Mapper.xml#updateById
@@ -249,19 +253,18 @@ public class MainProcessor {
                 updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
                 updateByIdTag.addAttribute("id", "updateById");
                 updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-                final StringBuilder sql2 = new StringBuilder(64);
-                sql2.append("\r\n").append(Strings.repeat(oneIndent, 2));
-                sql2.append("UPDATE ").append(persistence.getTableName()).append(" SET ");
+                final StringBuilder sb = new StringBuilder(64);
+                sb.append("\r\n").append(Strings.repeat(oneIndent, 2));
+                sb.append("UPDATE ").append(persistence.getTableName()).append(" SET ");
                 for (PropertyDto property : persistence.getProperties()) {
-                    sql2.append(property.getColumnName()).append("=#{").append(property.getPropertyName()).append("},");
+                    sb.append(property.getColumnName()).append("=#{").append(property.getPropertyName()).append("},");
                 }
-                sql2.deleteCharAt(sql2.lastIndexOf(","));
-                sql2.append(" WHERE ");
-                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(property -> {
-                    sql2.append(property.getColumnName()).append("=#{").append(property.getPropertyName())
-                            .append("} AND ");
-                });
-                String text = StringUtils.replaceLast(sql2.toString(), " AND ", "");
+                sb.deleteCharAt(sb.lastIndexOf(","));
+                sb.append(" WHERE ");
+                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(
+                        property -> sb.append(property.getColumnName()).append("=#{").append(property.getPropertyName())
+                                .append("} AND "));
+                String text = StringUtils.removeLast(sb.toString(), " AND ");
                 updateByIdTag.addText(text);
             }
 
