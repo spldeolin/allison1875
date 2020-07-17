@@ -11,8 +11,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PersistenceDto {
 
-    private Boolean isNonePK;
-
     private String tableName;
 
     private String entityName;
@@ -20,6 +18,10 @@ public class PersistenceDto {
     private String mapperName;
 
     private String descrption;
+
+    private Collection<PropertyDto> pkProperties;
+
+    private Collection<PropertyDto> nonPkProperties;
 
     private Collection<PropertyDto> properties;
 

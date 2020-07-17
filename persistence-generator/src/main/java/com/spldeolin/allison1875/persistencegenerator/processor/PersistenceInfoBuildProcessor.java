@@ -32,32 +32,34 @@ public class PersistenceInfoBuildProcessor {
         for (InformationSchemaDto infoSchema : infoSchemas) {
             PersistenceDto dto = new PersistenceDto();
             String domainName = StringUtils.underscoreToUpperCamel(infoSchema.getTableName());
-            dto.setIsNonePK(true);
             dto.setTableName(infoSchema.getTableName());
             dto.setEntityName(domainName + "Entity");
             dto.setMapperName(domainName + "Mapper");
             dto.setDescrption(infoSchema.getTableComment());
+            dto.setPkProperties(Lists.newArrayList());
+            dto.setNonPkProperties(Lists.newArrayList());
             dto.setProperties(Lists.newArrayList());
             persistences.put(infoSchema.getTableName(), dto);
         }
         for (InformationSchemaDto columnMeta : infoSchemas) {
-            PropertyDto dto = new PropertyDto();
-            boolean isPK = "PRI".equalsIgnoreCase(columnMeta.getColumnKey());
-            dto.setIsPK(isPK);
-            dto.setColumnName(columnMeta.getColumnName());
-            dto.setPropertyName(StringUtils.underscoreToLowerCamel(columnMeta.getColumnName()));
+            PropertyDto property = new PropertyDto();
+            property.setColumnName(columnMeta.getColumnName());
+            property.setPropertyName(StringUtils.underscoreToLowerCamel(columnMeta.getColumnName()));
             JdbcTypeEnum jdbcTypeEnum = calcJavaType(columnMeta);
             if (jdbcTypeEnum == null) {
                 continue;
             }
             Class<?> javaType = jdbcTypeEnum.getJavaType();
-            dto.setJavaType(javaType);
-            dto.setDescription(columnMeta.getColumnComment());
-            PersistenceDto persistenceDto = persistences.get(columnMeta.getTableName());
-            if (isPK) {
-                persistenceDto.setIsNonePK(false);
+            property.setJavaType(javaType);
+            property.setDescription(columnMeta.getColumnComment());
+            PersistenceDto persistence = persistences.get(columnMeta.getTableName());
+
+            persistence.getProperties().add(property);
+            if ("PRI".equalsIgnoreCase(columnMeta.getColumnKey())) {
+                persistence.getPkProperties().add(property);
+            } else {
+                persistence.getNonPkProperties().add(property);
             }
-            persistenceDto.getProperties().add(dto);
         }
         this.persistences = persistences.values();
         return this;

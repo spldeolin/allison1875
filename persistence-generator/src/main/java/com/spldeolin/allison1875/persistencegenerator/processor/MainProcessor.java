@@ -126,7 +126,9 @@ public class MainProcessor {
                 members.add(0, insert);
             }
 
-            if (!persistence.getIsNonePK()) {
+            boolean hasPK = persistence.getPkProperties().size() > 0;
+
+            if (hasPK) {
                 // 删除所有updateById方法，再在前一个方法之后插入int updateById(BizEntity entity);
                 methods = mapper.getMethodsByName("updateById");
                 methods.forEach(Node::remove);
@@ -140,7 +142,7 @@ public class MainProcessor {
                 members.add(0, updateById);
             }
 
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 // 删除所有updateByIdEvenNull方法，再在前一个方法之后插入int updateByIdEvenNull(XxxEntity xxx);
                 methods = mapper.getMethodsByName("updateByIdEvenNull");
                 methods.forEach(Node::remove);
@@ -154,7 +156,7 @@ public class MainProcessor {
                 members.add(0, updateByIdEvenNull);
             }
 
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 // 删除所有queryById方法，再在前一个方法之后插入BizEntity queryById(Long id);
                 methods = mapper.getMethodsByName("queryById");
                 methods.forEach(Node::remove);
@@ -162,7 +164,7 @@ public class MainProcessor {
                 queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
                 queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
                 queryById.setName("queryById");
-                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(pk -> {
+                for (PropertyDto pk : persistence.getPkProperties()) {
                     Parameter parameter = new Parameter();
                     String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
                     Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
@@ -170,12 +172,12 @@ public class MainProcessor {
                     parameter.setType(pk.getJavaType().getSimpleName());
                     parameter.setName(varName);
                     queryById.addParameter(parameter);
-                });
+                }
                 queryById.setBody(null);
                 members.add(0, queryById);
             }
 
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 // 删除所有queryByIds方法，再在前一个方法之后插入List<BizEntity> queryByIds(Collection<Long> ids);
                 methods = mapper.getMethodsByName("queryByIds");
                 methods.forEach(Node::remove);
@@ -189,7 +191,7 @@ public class MainProcessor {
                 members.add(0, queryByIds);
             }
 
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 // 删除所有queryByIdsAsMap方，再在前一个方法之后插入@MapKey("id") Map<Long, BizEntity> queryByIdsEachId(Collection<Long>
                 // ids);
                 methods = mapper.getMethodsByName("queryByIdsEachId");
@@ -243,10 +245,10 @@ public class MainProcessor {
             Element insertTag = Dom4jUtils.findAndRebuildElement(root, "insert", "id", "insert");
             insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
             insertTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 insertTag.addAttribute("useGeneratedKeys", "true");
-                String keyProperty = persistence.getProperties().stream().filter(PropertyDto::getIsPK)
-                        .map(PropertyDto::getColumnName).collect(Collectors.joining(","));
+                String keyProperty = persistence.getPkProperties().stream().map(PropertyDto::getColumnName)
+                        .collect(Collectors.joining(","));
                 insertTag.addAttribute("keyProperty", keyProperty);
             }
             final StringBuilder sql = new StringBuilder(64);
@@ -264,7 +266,7 @@ public class MainProcessor {
             sql.setLength(0);
 
             // Mapper.xml#updateById
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 root.addText(newLine);
                 Element updateByIdTag = Dom4jUtils.findAndRebuildElement(root, "update", "id", "updateById");
                 updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
@@ -272,28 +274,28 @@ public class MainProcessor {
                 updateByIdTag.addText(newLine + doubleIndex + "UPDATE " + persistence.getTableName());
 
                 Element setTag = updateByIdTag.addElement("set");
-                persistence.getProperties().stream().filter(one -> !one.getIsPK()).forEach(nonPK -> {
+                for (PropertyDto nonPk : persistence.getNonPkProperties()) {
                     Element ifTag = setTag.addElement("if");
-                    String ifTest = nonPK.getPropertyName() + "!=null";
-                    if (String.class == nonPK.getJavaType()) {
-                        ifTest += " and " + nonPK.getPropertyName() + "!=''";
+                    String ifTest = nonPk.getPropertyName() + "!=null";
+                    if (String.class == nonPk.getJavaType()) {
+                        ifTest += " and " + nonPk.getPropertyName() + "!=''";
                     }
                     ifTag.addAttribute("test", ifTest);
-                    ifTag.addText(newLine + Strings.repeat(singleIndent, 4) + nonPK.getColumnName() + "=#{" + nonPK
+                    ifTag.addText(newLine + Strings.repeat(singleIndent, 4) + nonPk.getColumnName() + "=#{" + nonPk
                             .getPropertyName() + "},\r\n" + trebleIndex);
-                });
+                }
 
                 sql.append(" WHERE ");
-                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(
-                        property -> sql.append(property.getColumnName()).append("=#{")
-                                .append(property.getPropertyName()).append("} AND "));
+                for (PropertyDto pk : persistence.getPkProperties()) {
+                    sql.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("} AND ");
+                }
                 String text = StringUtils.removeLast(sql.toString(), " AND ");
                 sql.setLength(0);
                 updateByIdTag.addText(text);
             }
 
             // Mapper.xml#updateByIdEvenNull
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 root.addText(newLine);
                 Element updateByIdEvenNullTag = Dom4jUtils
                         .findAndRebuildElement(root, "update", "id", "updateByIdEvenNull");
@@ -301,21 +303,21 @@ public class MainProcessor {
                 updateByIdEvenNullTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
                 sql.append(newLine).append(doubleIndex).append("UPDATE ").append(persistence.getTableName());
                 sql.append(newLine).append(doubleIndex).append("SET ");
-                persistence.getProperties().stream().filter(one -> !one.getIsPK()).forEach(
-                        nonPK -> sql.append(nonPK.getColumnName()).append("=#{").append(nonPK.getPropertyName())
-                                .append("},"));
+                for (PropertyDto nonPk : persistence.getNonPkProperties()) {
+                    sql.append(nonPk.getColumnName()).append("=#{").append(nonPk.getPropertyName()).append("},");
+                }
                 sql.deleteCharAt(sql.lastIndexOf(","));
                 sql.append(newLine).append(doubleIndex).append("WHERE ");
-                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(
-                        property -> sql.append(property.getColumnName()).append("=#{")
-                                .append(property.getPropertyName()).append("} AND "));
+                for (PropertyDto pk : persistence.getPkProperties()) {
+                    sql.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("} AND ");
+                }
                 String text = StringUtils.removeLast(sql, " AND ");
                 sql.setLength(0);
                 updateByIdEvenNullTag.addText(text);
             }
 
             // Mapper.xml#queryById
-            if (!persistence.getIsNonePK()) {
+            if (hasPK) {
                 root.addText(newLine);
                 Element queryByIdTag = Dom4jUtils.findAndRebuildElement(root, "select", "id", "queryById");
                 queryByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
@@ -324,14 +326,13 @@ public class MainProcessor {
                 queryByIdTag.addElement("include").addAttribute("refid", "all");
                 sql.append(newLine).append(doubleIndex).append("FROM ").append(persistence.getTableName());
                 sql.append(newLine).append(doubleIndex).append("WHERE ");
-                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(pk -> {
+                for (PropertyDto pk : persistence.getPkProperties()) {
                     sql.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("},");
-                });
+                }
                 String text = StringUtils.removeLast(sql, ",");
                 sql.setLength(0);
                 queryByIdTag.addText(text);
             }
-
 
             Dom4jUtils.write(mapperXmlFile, root);
         }

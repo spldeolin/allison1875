@@ -10,8 +10,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PropertyDto {
 
-    private Boolean isPK;
-
     private String columnName;
 
     private String propertyName;
