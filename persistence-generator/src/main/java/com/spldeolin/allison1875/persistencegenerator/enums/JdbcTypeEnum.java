@@ -27,7 +27,7 @@ public enum JdbcTypeEnum {
 
     BIGINT("bigint", null, Long.class),
 
-    TINYINT_1U(null, "tinyint(1) unsigned", Boolean.class),
+    TINYINT_1(null, "tinyint(1)", Boolean.class),
 
     DATE("date", null, Date.class),
 

@@ -332,10 +332,9 @@ public class MainProcessor {
                 queryByIdTag.addText(text);
             }
 
+
             Dom4jUtils.write(mapperXmlFile, root);
-
         }
-
         cus.forEach(Saves::prettySave);
     }
 
