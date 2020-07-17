@@ -32,6 +32,7 @@ public class PersistenceInfoBuildProcessor {
         for (InformationSchemaDto infoSchema : infoSchemas) {
             PersistenceDto dto = new PersistenceDto();
             String domainName = StringUtils.underscoreToUpperCamel(infoSchema.getTableName());
+            dto.setTableName(infoSchema.getTableName());
             dto.setEntityName(domainName + "Entity");
             dto.setMapperName(domainName + "Mapper");
             dto.setDescrption(infoSchema.getTableComment());

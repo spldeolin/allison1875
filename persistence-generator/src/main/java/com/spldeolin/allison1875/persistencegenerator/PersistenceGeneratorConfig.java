@@ -49,6 +49,8 @@ public class PersistenceGeneratorConfig {
 
     private String sourceRoot;
 
+    private Boolean isEntityUsingAlias;
+
     public static PersistenceGeneratorConfig getInstace() {
         return instace;
     }

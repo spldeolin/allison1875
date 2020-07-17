@@ -11,6 +11,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PersistenceDto {
 
+    private String tableName;
+
     private String entityName;
 
     private String mapperName;

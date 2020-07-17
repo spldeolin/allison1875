@@ -1,22 +1,20 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
+import org.dom4j.tree.DefaultElement;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -35,6 +33,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
@@ -46,6 +45,7 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -53,6 +53,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class MainProcessor {
+
+    private static final String oneIndent = "    ";
 
     public static void main(String[] args) {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
@@ -65,9 +67,8 @@ public class MainProcessor {
         Collection<PersistenceDto> persistences = pibp.getPersistences();
 
         for (PersistenceDto persistence : persistences) {
-            Path entityPath = CodeGenerationUtils
-                    .fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
-                            persistence.getEntityName() + ".java");
+            Path entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
+                    persistence.getEntityName() + ".java");
             if (entityPath.toFile().exists()) {
                 log.info("Entity file exist, overwrite. [{}]", entityPath);
             }
@@ -77,7 +78,8 @@ public class MainProcessor {
                     Lists.newArrayList("java.math.BigDecimal", "java.util.Date", "lombok.Data",
                             "lombok.experimental.Accessors"), () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                Javadoc javadoc = new JavadocComment(persistence.getDescrption() + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+                Javadoc javadoc = new JavadocComment(
+                        persistence.getDescrption() + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
                 javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
                 coid.setJavadocComment(javadoc);
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Data"));
@@ -120,8 +122,7 @@ public class MainProcessor {
             methods = mapper.getMethodsByName("updateById");
             methods.forEach(Node::remove);
             MethodDeclaration updateById = new MethodDeclaration();
-            updateById.setJavadocComment(
-                    new JavadocComment("根据ID更新数据，忽略值为null的属性" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            updateById.setJavadocComment(new JavadocComment("根据ID更新数据，忽略值为null的属性" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             updateById.setType(PrimitiveType.intType());
             updateById.setName("updateById");
             updateById.addParameter(persistence.getEntityName(), "entity");
@@ -132,8 +133,7 @@ public class MainProcessor {
             methods = mapper.getMethodsByName("updateByIdForce");
             methods.forEach(Node::remove);
             MethodDeclaration updateByIdForce = new MethodDeclaration();
-            updateByIdForce.setJavadocComment(
-                    new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            updateByIdForce.setJavadocComment(new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             updateByIdForce.setType(PrimitiveType.intType());
             updateByIdForce.setName("updateByIdForce");
             updateByIdForce.addParameter(persistence.getEntityName(), "entity");
@@ -167,8 +167,7 @@ public class MainProcessor {
             methods = mapper.getMethodsByName("queryByIdsEachId");
             methods.forEach(Node::remove);
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            queryByIdsEachId.setJavadocComment(
-                    new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            queryByIdsEachId.setJavadocComment(new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
             Imports.ensureImported(mapper, "java.util", false, true);
             queryByIdsEachId.addAnnotation(StaticJavaParser.parseAnnotation("@MapKey(\"id\")"));
@@ -189,14 +188,10 @@ public class MainProcessor {
 
             overwriteNamespace(mapper, root);
 
-
-            Element resultMapTag = (Element) root.selectSingleNode("./resultMap[@id='all']");
-            if (resultMapTag != null) {
-                resultMapTag.getParent().remove(resultMapTag);
-            }
-            resultMapTag = root.addElement("resultMap");
+            // 删除可能存在的resultMap(id=all)标签，并重新生成
+            Element resultMapTag = rebuildElement(root, "./resultMap[@id='all']", "resultMap");
             resultMapTag.addAttribute("id", "all");
-            resultMapTag.addAttribute("type", entityCuCreator.getPrimaryTypeQualifier());
+            resultMapTag.addAttribute("type", getEntityNameInXml(entityCuCreator));
             Element idTag = resultMapTag.addElement("id");
             idTag.addAttribute("column", "id");
             idTag.addAttribute("property", "id");
@@ -206,21 +201,71 @@ public class MainProcessor {
                 resultTag.addAttribute("property", property.getPropertyName());
             }
 
+            // 删除可能存在的sql(id=all)标签，并重新生成
+            Element sqlTag = rebuildElement(root, "./sql[@id='all']", "sql");
+            sqlTag.addAttribute("id", "all");
+            sqlTag.addText(persistence.getProperties().stream().map(PropertyDto::getColumnName)
+                    .collect(Collectors.joining(",")));
 
-            // 写xml
-            try {
-                OutputFormat format = OutputFormat.createPrettyPrint();
-                format.setEncoding(StandardCharsets.UTF_8.name());
-                XMLWriter outPut = new XMLWriter(new FileWriter(mapperXmlFile), format);
-                outPut.write(root.getDocument());
-                outPut.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            // Mapper.xml#insert
+            Element insertTag = rebuildElement(root, "./insert[@id='insert']", "insert");
+            insertTag.addComment(Constant.PROHIBIT_MODIFICATION);
+            insertTag.addAttribute("id", "insert");
+            insertTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
+            insertTag.addAttribute("useGeneratedKeys", "true");
+            insertTag.addAttribute("keyProperty", "id");
+            StringBuilder sql = new StringBuilder(64);
+            sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
+            sql.append("INSERT INTO ").append(persistence.getTableName()).append(" (");
+            insertTag.addText(sql.toString());
+            insertTag.addElement("include").addAttribute("refid", "all");
+            sql = new StringBuilder(64);
+            sql.append(") VALUES (");
+            for (PropertyDto property : persistence.getProperties()) {
+                sql.append("#{").append(property.getPropertyName()).append("},");
             }
+            sql.deleteCharAt(sql.lastIndexOf(","));
+            insertTag.addText(sql.toString());
+
+            // Mapper.xml#updateById
+            Element updateByIdTag = rebuildElement(root, "./update[@id='updateByIdTag']", "update");
+            updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION);
+            updateByIdTag.addAttribute("id", "updateById");
+            updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
+            sql = new StringBuilder(64);
+            sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
+            sql.append("UPDATE ").append(persistence.getTableName()).append(" SET ");
+            for (PropertyDto property : persistence.getProperties()) {
+                sql.append(property.getColumnName()).append("=#{").append(property.getPropertyName()).append("},");
+            }
+            sql.deleteCharAt(sql.lastIndexOf(","));
+            sql.append(" WHERE id=#{id}");
+            updateByIdTag.addText(sql.toString());
+
+            Dom4jUtils.write(mapperXmlFile, root);
 
         }
 
         cus.forEach(Saves::prettySave);
+    }
+
+    private static String getEntityNameInXml(CuCreator entityCuCreator) {
+        if (PersistenceGeneratorConfig.getInstace().getIsEntityUsingAlias()) {
+            return entityCuCreator.getPrimaryTypeName();
+        } else {
+            return entityCuCreator.getPrimaryTypeQualifier();
+        }
+    }
+
+
+    private static Element rebuildElement(Element root, String s, String tagName) {
+        Element tag = (Element) root.selectSingleNode(s);
+        if (tag != null) {
+            tag.getParent().remove(tag);
+        }
+        tag = new DefaultElement(tagName);
+        root.elements().add(tag);
+        return tag;
     }
 
     private static void overwriteNamespace(ClassOrInterfaceDeclaration mapper, Element root) {

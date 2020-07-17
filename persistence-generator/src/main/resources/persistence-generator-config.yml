@@ -9,3 +9,5 @@ mapperPackage: com.spldeolin.beginningmind.mapper
 mapperXmlPath: /Users/deolin/Documents/project-repo/beginning-mind/src/main/resources/mapper
 entityPackage: com.spldeolin.beginningmind.entity
 repositoryPackage: com.spldeolin.beginningmind.repository
+
+isEntityUsingAlias: true
