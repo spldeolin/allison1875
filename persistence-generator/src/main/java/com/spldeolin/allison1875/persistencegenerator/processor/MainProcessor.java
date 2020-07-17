@@ -24,6 +24,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -54,7 +55,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MainProcessor {
 
-    private static final String oneIndent = "    ";
+    private static final String singleIndent = "    ";
+
+    private static final String doubleIndex = Strings.repeat(singleIndent, 2);
+
+    private static final String trebleIndex = Strings.repeat(singleIndent, 3);
+
+    private static final String newLine = "\r\n";
 
     public static void main(String[] args) {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
@@ -134,17 +141,17 @@ public class MainProcessor {
             }
 
             if (!persistence.getIsNonePK()) {
-                // 删除所有updateByIdForce方法，再在前一个方法之后插入int updateByIdForce(XxxEntity xxx);
-                methods = mapper.getMethodsByName("updateByIdForce");
+                // 删除所有updateByIdEvenNull方法，再在前一个方法之后插入int updateByIdEvenNull(XxxEntity xxx);
+                methods = mapper.getMethodsByName("updateByIdEvenNull");
                 methods.forEach(Node::remove);
-                MethodDeclaration updateByIdForce = new MethodDeclaration();
-                updateByIdForce.setJavadocComment(
+                MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
+                updateByIdEvenNull.setJavadocComment(
                         new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                updateByIdForce.setType(PrimitiveType.intType());
-                updateByIdForce.setName("updateByIdForce");
-                updateByIdForce.addParameter(persistence.getEntityName(), "entity");
-                updateByIdForce.setBody(null);
-                members.add(0, updateByIdForce);
+                updateByIdEvenNull.setType(PrimitiveType.intType());
+                updateByIdEvenNull.setName("updateByIdEvenNull");
+                updateByIdEvenNull.addParameter(persistence.getEntityName(), "entity");
+                updateByIdEvenNull.setBody(null);
+                members.add(0, updateByIdEvenNull);
             }
 
             if (!persistence.getIsNonePK()) {
@@ -155,18 +162,27 @@ public class MainProcessor {
                 queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
                 queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
                 queryById.setName("queryById");
-                queryById.addParameter(PrimitiveType.longType(), "id");
+                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(pk -> {
+                    Parameter parameter = new Parameter();
+                    String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
+                    Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
+                    parameter.addAnnotation(StaticJavaParser.parseAnnotation("@Param(\"" + varName + "\")"));
+                    parameter.setType(pk.getJavaType().getSimpleName());
+                    parameter.setName(varName);
+                    queryById.addParameter(parameter);
+                });
                 queryById.setBody(null);
                 members.add(0, queryById);
             }
 
             if (!persistence.getIsNonePK()) {
-                // 删除所有queryByIds方法，再在前一个方法之后插入Collection<BizEntity> queryByIds(Collection<Long> ids);
+                // 删除所有queryByIds方法，再在前一个方法之后插入List<BizEntity> queryByIds(Collection<Long> ids);
                 methods = mapper.getMethodsByName("queryByIds");
                 methods.forEach(Node::remove);
                 MethodDeclaration queryByIds = new MethodDeclaration();
                 queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                queryByIds.setType(StaticJavaParser.parseType("Collection<" + persistence.getEntityName() + ">"));
+                Imports.ensureImported(mapper, "java.util.List");
+                queryByIds.setType(StaticJavaParser.parseType("List<" + persistence.getEntityName() + ">"));
                 queryByIds.setName("queryByIds");
                 queryByIds.addParameter(StaticJavaParser.parseType("Collection<Long>"), "ids");
                 queryByIds.setBody(null);
@@ -182,7 +198,7 @@ public class MainProcessor {
                 queryByIdsEachId.setJavadocComment(
                         new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
                 Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
-                Imports.ensureImported(mapper, "java.util", false, true);
+                Imports.ensureImported(mapper, "java.util.Map");
                 queryByIdsEachId.addAnnotation(StaticJavaParser.parseAnnotation("@MapKey(\"id\")"));
                 queryByIdsEachId.setType(StaticJavaParser.parseType("Map<Long, " + persistence.getEntityName() + ">"));
                 queryByIdsEachId.setName("queryByIdsEachId");
@@ -199,13 +215,12 @@ public class MainProcessor {
             if (root == null) {
                 continue;
             }
-
             overwriteNamespace(mapper, root);
 
             // 删除可能存在的resultMap(id=all)标签，并重新生成
+            root.addText(newLine);
             Element resultMapTag = Dom4jUtils.findAndRebuildElement(root, "resultMap", "id", "all");
             resultMapTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-            resultMapTag.addAttribute("id", "all");
             resultMapTag.addAttribute("type", getEntityNameInXml(entityCuCreator));
             Element idTag = resultMapTag.addElement("id");
             idTag.addAttribute("column", "id");
@@ -217,16 +232,16 @@ public class MainProcessor {
             }
 
             // 删除可能存在的sql(id=all)标签，并重新生成
+            root.addText(newLine);
             Element sqlTag = Dom4jUtils.findAndRebuildElement(root, "sql", "id", "all");
-            sqlTag.addAttribute("id", "all");
             sqlTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-            sqlTag.addText("\r\n" + Strings.repeat(oneIndent, 2) + persistence.getProperties().stream()
-                    .map(PropertyDto::getColumnName).collect(Collectors.joining(",")));
+            sqlTag.addText(newLine + doubleIndex + persistence.getProperties().stream().map(PropertyDto::getColumnName)
+                    .collect(Collectors.joining(",")));
 
             // Mapper.xml#insert
+            root.addText(newLine);
             Element insertTag = Dom4jUtils.findAndRebuildElement(root, "insert", "id", "insert");
             insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-            insertTag.addAttribute("id", "insert");
             insertTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
             if (!persistence.getIsNonePK()) {
                 insertTag.addAttribute("useGeneratedKeys", "true");
@@ -235,7 +250,7 @@ public class MainProcessor {
                 insertTag.addAttribute("keyProperty", keyProperty);
             }
             final StringBuilder sql = new StringBuilder(64);
-            sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
+            sql.append(newLine).append(doubleIndex);
             sql.append("INSERT INTO ").append(persistence.getTableName()).append(" (");
             insertTag.addText(sql.toString());
             insertTag.addElement("include").addAttribute("refid", "all");
@@ -250,35 +265,72 @@ public class MainProcessor {
 
             // Mapper.xml#updateById
             if (!persistence.getIsNonePK()) {
+                root.addText(newLine);
                 Element updateByIdTag = Dom4jUtils.findAndRebuildElement(root, "update", "id", "updateById");
                 updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-                updateByIdTag.addAttribute("id", "updateById");
                 updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-                sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
-                sql.append("UPDATE ").append(persistence.getTableName());
-                Element setTag = updateByIdTag.addElement("set");
+                updateByIdTag.addText(newLine + doubleIndex + "UPDATE " + persistence.getTableName());
 
-                List<PropertyDto> nonPKs = persistence.getProperties().stream().filter(one -> !one.getIsPK())
-                        .collect(Collectors.toList());
-                for (PropertyDto nonPK : nonPKs) {
+                Element setTag = updateByIdTag.addElement("set");
+                persistence.getProperties().stream().filter(one -> !one.getIsPK()).forEach(nonPK -> {
                     Element ifTag = setTag.addElement("if");
                     String ifTest = nonPK.getPropertyName() + "!=null";
                     if (String.class == nonPK.getJavaType()) {
                         ifTest += " and " + nonPK.getPropertyName() + "!=''";
                     }
                     ifTag.addAttribute("test", ifTest);
-                    ifTag.addText("\r\n" + Strings.repeat(oneIndent, 4) + nonPK.getColumnName() + "=#{" + nonPK
-                            .getPropertyName() + "},\r\n" + Strings.repeat(oneIndent, 3));
-                }
+                    ifTag.addText(newLine + Strings.repeat(singleIndent, 4) + nonPK.getColumnName() + "=#{" + nonPK
+                            .getPropertyName() + "},\r\n" + trebleIndex);
+                });
+
                 sql.append(" WHERE ");
                 persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(
                         property -> sql.append(property.getColumnName()).append("=#{")
                                 .append(property.getPropertyName()).append("} AND "));
                 String text = StringUtils.removeLast(sql.toString(), " AND ");
+                sql.setLength(0);
                 updateByIdTag.addText(text);
             }
 
-            // Mapper.xml#
+            // Mapper.xml#updateByIdEvenNull
+            if (!persistence.getIsNonePK()) {
+                root.addText(newLine);
+                Element updateByIdEvenNullTag = Dom4jUtils
+                        .findAndRebuildElement(root, "update", "id", "updateByIdEvenNull");
+                updateByIdEvenNullTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+                updateByIdEvenNullTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
+                sql.append(newLine).append(doubleIndex).append("UPDATE ").append(persistence.getTableName());
+                sql.append(newLine).append(doubleIndex).append("SET ");
+                persistence.getProperties().stream().filter(one -> !one.getIsPK()).forEach(
+                        nonPK -> sql.append(nonPK.getColumnName()).append("=#{").append(nonPK.getPropertyName())
+                                .append("},"));
+                sql.deleteCharAt(sql.lastIndexOf(","));
+                sql.append(newLine).append(doubleIndex).append("WHERE ");
+                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(
+                        property -> sql.append(property.getColumnName()).append("=#{")
+                                .append(property.getPropertyName()).append("} AND "));
+                String text = StringUtils.removeLast(sql, " AND ");
+                sql.setLength(0);
+                updateByIdEvenNullTag.addText(text);
+            }
+
+            // Mapper.xml#queryById
+            if (!persistence.getIsNonePK()) {
+                root.addText(newLine);
+                Element queryByIdTag = Dom4jUtils.findAndRebuildElement(root, "select", "id", "queryById");
+                queryByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+                queryByIdTag.addAttribute("resultMap", "all");
+                queryByIdTag.addText(newLine + doubleIndex + "SELECT");
+                queryByIdTag.addElement("include").addAttribute("refid", "all");
+                sql.append(newLine).append(doubleIndex).append("FROM ").append(persistence.getTableName());
+                sql.append(newLine).append(doubleIndex).append("WHERE ");
+                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(pk -> {
+                    sql.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("},");
+                });
+                String text = StringUtils.removeLast(sql, ",");
+                sql.setLength(0);
+                queryByIdTag.addText(text);
+            }
 
             Dom4jUtils.write(mapperXmlFile, root);
 
@@ -345,7 +397,7 @@ public class MainProcessor {
             CuCreator mapperCuCreator = new CuCreator(Paths.get(conf.getSourceRoot()), conf.getMapperPackage(),
                     Lists.newArrayList(new ImportDeclaration("java.util", false, true),
                             new ImportDeclaration(entityCuCreator.getPrimaryTypeQualifier(), false, false),
-                            new ImportDeclaration("org.apache.ibatis.annotations.MapKey", false, false)), () -> {
+                            new ImportDeclaration("org.apache.ibatis.annotations", false, true)), () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
                 javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityCuCreator.getPrimaryTypeName()));

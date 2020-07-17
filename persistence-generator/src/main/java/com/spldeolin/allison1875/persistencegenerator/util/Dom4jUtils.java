@@ -37,6 +37,7 @@ public class Dom4jUtils {
             tag.getParent().remove(tag);
         }
         tag = new DefaultElement(tagName);
+        tag.addAttribute(attributeName, attributeValue);
         ele.elements().add(tag);
         return tag;
     }
