@@ -234,18 +234,19 @@ public class MainProcessor {
                         .map(PropertyDto::getColumnName).collect(Collectors.joining(","));
                 insertTag.addAttribute("keyProperty", keyProperty);
             }
-            StringBuilder sql = new StringBuilder(64);
+            final StringBuilder sql = new StringBuilder(64);
             sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
             sql.append("INSERT INTO ").append(persistence.getTableName()).append(" (");
             insertTag.addText(sql.toString());
             insertTag.addElement("include").addAttribute("refid", "all");
-            sql = new StringBuilder(64);
+            sql.setLength(0);
             sql.append(") VALUES (");
             for (PropertyDto property : persistence.getProperties()) {
                 sql.append("#{").append(property.getPropertyName()).append("},");
             }
             sql.deleteCharAt(sql.lastIndexOf(",")).append(")");
             insertTag.addText(sql.toString());
+            sql.setLength(0);
 
             // Mapper.xml#updateById
             if (!persistence.getIsNonePK()) {
@@ -253,20 +254,31 @@ public class MainProcessor {
                 updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
                 updateByIdTag.addAttribute("id", "updateById");
                 updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-                final StringBuilder sb = new StringBuilder(64);
-                sb.append("\r\n").append(Strings.repeat(oneIndent, 2));
-                sb.append("UPDATE ").append(persistence.getTableName()).append(" SET ");
-                for (PropertyDto property : persistence.getProperties()) {
-                    sb.append(property.getColumnName()).append("=#{").append(property.getPropertyName()).append("},");
+                sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
+                sql.append("UPDATE ").append(persistence.getTableName());
+                Element setTag = updateByIdTag.addElement("set");
+
+                List<PropertyDto> nonPKs = persistence.getProperties().stream().filter(one -> !one.getIsPK())
+                        .collect(Collectors.toList());
+                for (PropertyDto nonPK : nonPKs) {
+                    Element ifTag = setTag.addElement("if");
+                    String ifTest = nonPK.getPropertyName() + "!=null";
+                    if (String.class == nonPK.getJavaType()) {
+                        ifTest += " and " + nonPK.getPropertyName() + "!=''";
+                    }
+                    ifTag.addAttribute("test", ifTest);
+                    ifTag.addText("\r\n" + Strings.repeat(oneIndent, 4) + nonPK.getColumnName() + "=#{" + nonPK
+                            .getPropertyName() + "},\r\n" + Strings.repeat(oneIndent, 3));
                 }
-                sb.deleteCharAt(sb.lastIndexOf(","));
-                sb.append(" WHERE ");
+                sql.append(" WHERE ");
                 persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(
-                        property -> sb.append(property.getColumnName()).append("=#{").append(property.getPropertyName())
-                                .append("} AND "));
-                String text = StringUtils.removeLast(sb.toString(), " AND ");
+                        property -> sql.append(property.getColumnName()).append("=#{")
+                                .append(property.getPropertyName()).append("} AND "));
+                String text = StringUtils.removeLast(sql.toString(), " AND ");
                 updateByIdTag.addText(text);
             }
+
+            // Mapper.xml#
 
             Dom4jUtils.write(mapperXmlFile, root);
 
