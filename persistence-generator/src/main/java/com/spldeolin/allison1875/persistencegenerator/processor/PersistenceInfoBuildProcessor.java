@@ -32,6 +32,7 @@ public class PersistenceInfoBuildProcessor {
         for (InformationSchemaDto infoSchema : infoSchemas) {
             PersistenceDto dto = new PersistenceDto();
             String domainName = StringUtils.underscoreToUpperCamel(infoSchema.getTableName());
+            dto.setIsNonePK(true);
             dto.setTableName(infoSchema.getTableName());
             dto.setEntityName(domainName + "Entity");
             dto.setMapperName(domainName + "Mapper");
@@ -41,6 +42,8 @@ public class PersistenceInfoBuildProcessor {
         }
         for (InformationSchemaDto columnMeta : infoSchemas) {
             PropertyDto dto = new PropertyDto();
+            boolean isPK = "PRI".equalsIgnoreCase(columnMeta.getColumnKey());
+            dto.setIsPK(isPK);
             dto.setColumnName(columnMeta.getColumnName());
             dto.setPropertyName(StringUtils.underscoreToLowerCamel(columnMeta.getColumnName()));
             JdbcTypeEnum jdbcTypeEnum = calcJavaType(columnMeta);
@@ -50,7 +53,11 @@ public class PersistenceInfoBuildProcessor {
             Class<?> javaType = jdbcTypeEnum.getJavaType();
             dto.setJavaType(javaType);
             dto.setDescription(columnMeta.getColumnComment());
-            persistences.get(columnMeta.getTableName()).getProperties().add(dto);
+            PersistenceDto persistenceDto = persistences.get(columnMeta.getTableName());
+            if (isPK) {
+                persistenceDto.setIsNonePK(false);
+            }
+            persistenceDto.getProperties().add(dto);
         }
         this.persistences = persistences.values();
         return this;

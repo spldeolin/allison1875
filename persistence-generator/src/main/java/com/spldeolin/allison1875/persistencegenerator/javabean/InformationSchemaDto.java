@@ -24,4 +24,6 @@ public class InformationSchemaDto {
 
     private String columnComment;
 
+    private String columnKey;
+
 }
