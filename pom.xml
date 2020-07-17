@@ -48,7 +48,7 @@
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
                 <artifactId>org.eclipse.jgit</artifactId>
-                <version>5.8.0.202006091008-r</version>
+                <version>5.8.1.202007141445-r</version>
             </dependency>
 
             <!-- log4j2 -->
@@ -96,7 +96,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.10</version>
+                <version>3.11</version>
             </dependency>
 
             <!-- commons collections4 -->
@@ -159,7 +159,7 @@
             <dependency>
                 <groupId>jaxen</groupId>
                 <artifactId>jaxen</artifactId>
-                <version>1.2.0</version>
+                <version>1.2.0-atlassian-2</version>
             </dependency>
 
             <!-- hikari cp -->
