@@ -14,7 +14,6 @@ import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultElement;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -204,7 +203,8 @@ public class MainProcessor {
             overwriteNamespace(mapper, root);
 
             // 删除可能存在的resultMap(id=all)标签，并重新生成
-            Element resultMapTag = rebuildElement(root, "./resultMap[@id='all']", "resultMap");
+            Element resultMapTag = Dom4jUtils.findAndRebuildElement(root, "resultMap", "id", "all");
+            resultMapTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
             resultMapTag.addAttribute("id", "all");
             resultMapTag.addAttribute("type", getEntityNameInXml(entityCuCreator));
             Element idTag = resultMapTag.addElement("id");
@@ -217,14 +217,15 @@ public class MainProcessor {
             }
 
             // 删除可能存在的sql(id=all)标签，并重新生成
-            Element sqlTag = rebuildElement(root, "./sql[@id='all']", "sql");
+            Element sqlTag = Dom4jUtils.findAndRebuildElement(root, "sql", "id", "all");
             sqlTag.addAttribute("id", "all");
-            sqlTag.addText(persistence.getProperties().stream().map(PropertyDto::getColumnName)
-                    .collect(Collectors.joining(",")));
+            sqlTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            sqlTag.addText("\r\n" + Strings.repeat(oneIndent, 2) + persistence.getProperties().stream()
+                    .map(PropertyDto::getColumnName).collect(Collectors.joining(",")));
 
             // Mapper.xml#insert
-            Element insertTag = rebuildElement(root, "./insert[@id='insert']", "insert");
-            insertTag.addComment(Constant.PROHIBIT_MODIFICATION);
+            Element insertTag = Dom4jUtils.findAndRebuildElement(root, "insert", "id", "insert");
+            insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
             insertTag.addAttribute("id", "insert");
             insertTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
             insertTag.addAttribute("useGeneratedKeys", "true");
@@ -244,8 +245,8 @@ public class MainProcessor {
 
             // Mapper.xml#updateById
             if (!persistence.getIsNonePK()) {
-                Element updateByIdTag = rebuildElement(root, "./update[@id='updateById']", "update");
-                updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION);
+                Element updateByIdTag = Dom4jUtils.findAndRebuildElement(root, "update", "id", "updateById");
+                updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
                 updateByIdTag.addAttribute("id", "updateById");
                 updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
                 final StringBuilder sql2 = new StringBuilder(64);
@@ -277,17 +278,6 @@ public class MainProcessor {
         } else {
             return entityCuCreator.getPrimaryTypeQualifier();
         }
-    }
-
-
-    private static Element rebuildElement(Element root, String s, String tagName) {
-        Element tag = (Element) root.selectSingleNode(s);
-        if (tag != null) {
-            tag.getParent().remove(tag);
-        }
-        tag = new DefaultElement(tagName);
-        root.elements().add(tag);
-        return tag;
     }
 
     private static void overwriteNamespace(ClassOrInterfaceDeclaration mapper, Element root) {
