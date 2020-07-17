@@ -62,9 +62,11 @@ public class StringUtils {
         return Lists.newArrayList(string.split("\\r?\\n"));
     }
 
-    public static String replaceLast(String string, String target, String replacement) {
-        int ind = string.lastIndexOf(target);
-        return string.substring(0, ind) + replacement + string.substring(ind + 1);
+    public static String replaceLast(CharSequence cs, String target, String replacement) {
+        String string = cs.toString();
+        StringBuilder sb = new StringBuilder(string);
+        sb.replace(string.lastIndexOf(target), string.lastIndexOf(target) + target.length(), replacement);
+        return sb.toString();
     }
 
     public static String capture(String string) {

@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -67,8 +68,9 @@ public class MainProcessor {
         Collection<PersistenceDto> persistences = pibp.getPersistences();
 
         for (PersistenceDto persistence : persistences) {
-            Path entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
-                    persistence.getEntityName() + ".java");
+            Path entityPath = CodeGenerationUtils
+                    .fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
+                            persistence.getEntityName() + ".java");
             if (entityPath.toFile().exists()) {
                 log.info("Entity file exist, overwrite. [{}]", entityPath);
             }
@@ -118,64 +120,77 @@ public class MainProcessor {
                 members.add(0, insert);
             }
 
-            // 删除所有updateById方法，再在前一个方法之后插入int updateById(BizEntity entity);
-            methods = mapper.getMethodsByName("updateById");
-            methods.forEach(Node::remove);
-            MethodDeclaration updateById = new MethodDeclaration();
-            updateById.setJavadocComment(new JavadocComment("根据ID更新数据，忽略值为null的属性" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            updateById.setType(PrimitiveType.intType());
-            updateById.setName("updateById");
-            updateById.addParameter(persistence.getEntityName(), "entity");
-            updateById.setBody(null);
-            members.addAfter(updateById, insert);
+            if (!persistence.getIsNonePK()) {
+                // 删除所有updateById方法，再在前一个方法之后插入int updateById(BizEntity entity);
+                methods = mapper.getMethodsByName("updateById");
+                methods.forEach(Node::remove);
+                MethodDeclaration updateById = new MethodDeclaration();
+                updateById.setJavadocComment(
+                        new JavadocComment("根据ID更新数据，忽略值为null的属性" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                updateById.setType(PrimitiveType.intType());
+                updateById.setName("updateById");
+                updateById.addParameter(persistence.getEntityName(), "entity");
+                updateById.setBody(null);
+                members.add(0, updateById);
+            }
 
-            // 删除所有updateByIdForce方法，再在前一个方法之后插入int updateByIdForce(XxxEntity xxx);
-            methods = mapper.getMethodsByName("updateByIdForce");
-            methods.forEach(Node::remove);
-            MethodDeclaration updateByIdForce = new MethodDeclaration();
-            updateByIdForce.setJavadocComment(new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            updateByIdForce.setType(PrimitiveType.intType());
-            updateByIdForce.setName("updateByIdForce");
-            updateByIdForce.addParameter(persistence.getEntityName(), "entity");
-            updateByIdForce.setBody(null);
-            members.addAfter(updateByIdForce, updateById);
+            if (!persistence.getIsNonePK()) {
+                // 删除所有updateByIdForce方法，再在前一个方法之后插入int updateByIdForce(XxxEntity xxx);
+                methods = mapper.getMethodsByName("updateByIdForce");
+                methods.forEach(Node::remove);
+                MethodDeclaration updateByIdForce = new MethodDeclaration();
+                updateByIdForce.setJavadocComment(
+                        new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                updateByIdForce.setType(PrimitiveType.intType());
+                updateByIdForce.setName("updateByIdForce");
+                updateByIdForce.addParameter(persistence.getEntityName(), "entity");
+                updateByIdForce.setBody(null);
+                members.add(0, updateByIdForce);
+            }
 
-            // 删除所有queryById方法，再在前一个方法之后插入BizEntity queryById(Long id);
-            methods = mapper.getMethodsByName("queryById");
-            methods.forEach(Node::remove);
-            MethodDeclaration queryById = new MethodDeclaration();
-            queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
-            queryById.setName("queryById");
-            queryById.addParameter(PrimitiveType.longType(), "id");
-            queryById.setBody(null);
-            members.addAfter(queryById, updateByIdForce);
+            if (!persistence.getIsNonePK()) {
+                // 删除所有queryById方法，再在前一个方法之后插入BizEntity queryById(Long id);
+                methods = mapper.getMethodsByName("queryById");
+                methods.forEach(Node::remove);
+                MethodDeclaration queryById = new MethodDeclaration();
+                queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
+                queryById.setName("queryById");
+                queryById.addParameter(PrimitiveType.longType(), "id");
+                queryById.setBody(null);
+                members.add(0, queryById);
+            }
 
-            // 删除所有queryByIds方法，再在前一个方法之后插入Collection<BizEntity> queryById(Collection<Long> ids);
-            methods = mapper.getMethodsByName("queryByIds");
-            methods.forEach(Node::remove);
-            MethodDeclaration queryByIds = new MethodDeclaration();
-            queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            queryByIds.setType(StaticJavaParser.parseType("Collection<" + persistence.getEntityName() + ">"));
-            queryByIds.setName("queryByIds");
-            queryByIds.addParameter(StaticJavaParser.parseType("Collection<Long>"), "ids");
-            queryByIds.setBody(null);
-            members.addAfter(queryByIds, queryById);
+            if (!persistence.getIsNonePK()) {
+                // 删除所有queryByIds方法，再在前一个方法之后插入Collection<BizEntity> queryByIds(Collection<Long> ids);
+                methods = mapper.getMethodsByName("queryByIds");
+                methods.forEach(Node::remove);
+                MethodDeclaration queryByIds = new MethodDeclaration();
+                queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                queryByIds.setType(StaticJavaParser.parseType("Collection<" + persistence.getEntityName() + ">"));
+                queryByIds.setName("queryByIds");
+                queryByIds.addParameter(StaticJavaParser.parseType("Collection<Long>"), "ids");
+                queryByIds.setBody(null);
+                members.add(0, queryByIds);
+            }
 
-            // 删除所有queryByIdsAsMap方，再在前一个方法之后插入@MapKey("id") Map<Long, BizEntity> queryByIdsEachId(Collection<Long>
-            // ids);
-            methods = mapper.getMethodsByName("queryByIdsEachId");
-            methods.forEach(Node::remove);
-            MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            queryByIdsEachId.setJavadocComment(new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
-            Imports.ensureImported(mapper, "java.util", false, true);
-            queryByIdsEachId.addAnnotation(StaticJavaParser.parseAnnotation("@MapKey(\"id\")"));
-            queryByIdsEachId.setType(StaticJavaParser.parseType("Map<Long, " + persistence.getEntityName() + ">"));
-            queryByIdsEachId.setName("queryByIdsEachId");
-            queryByIdsEachId.addParameter(StaticJavaParser.parseType("Collection<Long>"), "ids");
-            queryByIdsEachId.setBody(null);
-            members.addAfter(queryByIdsEachId, queryByIds);
+            if (!persistence.getIsNonePK()) {
+                // 删除所有queryByIdsAsMap方，再在前一个方法之后插入@MapKey("id") Map<Long, BizEntity> queryByIdsEachId(Collection<Long>
+                // ids);
+                methods = mapper.getMethodsByName("queryByIdsEachId");
+                methods.forEach(Node::remove);
+                MethodDeclaration queryByIdsEachId = new MethodDeclaration();
+                queryByIdsEachId.setJavadocComment(
+                        new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
+                Imports.ensureImported(mapper, "java.util", false, true);
+                queryByIdsEachId.addAnnotation(StaticJavaParser.parseAnnotation("@MapKey(\"id\")"));
+                queryByIdsEachId.setType(StaticJavaParser.parseType("Map<Long, " + persistence.getEntityName() + ">"));
+                queryByIdsEachId.setName("queryByIdsEachId");
+                queryByIdsEachId.addParameter(StaticJavaParser.parseType("Collection<Long>"), "ids");
+                queryByIdsEachId.setBody(null);
+                members.add(0, queryByIdsEachId);
+            }
 
             cus.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
 
@@ -228,19 +243,26 @@ public class MainProcessor {
             insertTag.addText(sql.toString());
 
             // Mapper.xml#updateById
-            Element updateByIdTag = rebuildElement(root, "./update[@id='updateByIdTag']", "update");
-            updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION);
-            updateByIdTag.addAttribute("id", "updateById");
-            updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-            sql = new StringBuilder(64);
-            sql.append("\r\n").append(Strings.repeat(oneIndent, 2));
-            sql.append("UPDATE ").append(persistence.getTableName()).append(" SET ");
-            for (PropertyDto property : persistence.getProperties()) {
-                sql.append(property.getColumnName()).append("=#{").append(property.getPropertyName()).append("},");
+            if (!persistence.getIsNonePK()) {
+                Element updateByIdTag = rebuildElement(root, "./update[@id='updateById']", "update");
+                updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION);
+                updateByIdTag.addAttribute("id", "updateById");
+                updateByIdTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
+                final StringBuilder sql2 = new StringBuilder(64);
+                sql2.append("\r\n").append(Strings.repeat(oneIndent, 2));
+                sql2.append("UPDATE ").append(persistence.getTableName()).append(" SET ");
+                for (PropertyDto property : persistence.getProperties()) {
+                    sql2.append(property.getColumnName()).append("=#{").append(property.getPropertyName()).append("},");
+                }
+                sql2.deleteCharAt(sql2.lastIndexOf(","));
+                sql2.append(" WHERE ");
+                persistence.getProperties().stream().filter(PropertyDto::getIsPK).forEach(property -> {
+                    sql2.append(property.getColumnName()).append("=#{").append(property.getPropertyName())
+                            .append("} AND ");
+                });
+                String text = StringUtils.replaceLast(sql2.toString(), " AND ", "");
+                updateByIdTag.addText(text);
             }
-            sql.deleteCharAt(sql.lastIndexOf(","));
-            sql.append(" WHERE id=#{id}");
-            updateByIdTag.addText(sql.toString());
 
             Dom4jUtils.write(mapperXmlFile, root);
 
