@@ -133,6 +133,7 @@ public class MainProcessor {
             }
 
             boolean hasPK = persistence.getPkProperties().size() > 0;
+            boolean hasOnlyPK = persistence.getPkProperties().size() == 1;
 
             if (hasPK) {
                 // 删除所有updateById方法，再在前一个方法之后插入int updateById(BizEntity entity);
@@ -163,7 +164,7 @@ public class MainProcessor {
             }
 
             if (hasPK) {
-                // 删除所有queryById方法，再在前一个方法之后插入BizEntity queryById(PkType id);
+                // 删除所有queryById方法，再在前一个方法之后插入BizEntity queryById(@Param PkType id);
                 methods = mapper.getMethodsByName("queryById");
                 methods.forEach(Node::remove);
                 MethodDeclaration queryById = new MethodDeclaration();
@@ -181,13 +182,15 @@ public class MainProcessor {
                 members.add(0, queryById);
             }
 
-            if (persistence.getPkProperties().size() == 1) {
-                // 删除所有queryByIds方法，再在前一个方法之后插入List<BizEntity> queryByIds(Collection<PkType> ids);
+            if (hasOnlyPK) {
+                // 删除所有queryByIds方法，再在前一个方法之后插入List<BizEntity> queryByIds(@Param Collection<PkType> ids);
                 methods = mapper.getMethodsByName("queryByIds");
                 methods.forEach(Node::remove);
                 MethodDeclaration queryByIds = new MethodDeclaration();
                 queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
                 Imports.ensureImported(mapper, "java.util.List");
+                Imports.ensureImported(mapper, "java.util.Collection");
+                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
                 PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
                 queryByIds.setType(parseType("List<" + persistence.getEntityName() + ">"));
                 queryByIds.setName("queryByIds");
@@ -200,7 +203,7 @@ public class MainProcessor {
                 members.add(0, queryByIds);
             }
 
-            if (persistence.getPkProperties().size() == 1) {
+            if (hasOnlyPK) {
                 // 删除所有queryByIdsAsMap方法，再插入@MapKey("id") Map<Long, BizEntity> queryByIdsEachId(Collection<Long> ids);
                 methods = mapper.getMethodsByName("queryByIdsEachId");
                 methods.forEach(Node::remove);
@@ -209,6 +212,8 @@ public class MainProcessor {
                         new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
                 Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
                 Imports.ensureImported(mapper, "java.util.Map");
+                Imports.ensureImported(mapper, "java.util.Collection");
+                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
                 PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
                 String varName = StringUtils.lowerFirstLetter(onlyPk.getPropertyName());
                 String pkTypeName = onlyPk.getJavaType().getSimpleName();
@@ -350,9 +355,40 @@ public class MainProcessor {
                 queryByIdTag.addText(text);
             }
 
+            // Mapper.xml#queryByIds
+            if (hasOnlyPK) {
+                queryByIdsXml(persistence, root, sql, "queryByIds");
+            }
+
+            // Mapper.xml#queryByIdsEachId
+            if (hasOnlyPK) {
+                queryByIdsXml(persistence, root, sql, "queryByIdsEachId");
+            }
+
             Dom4jUtils.write(mapperXmlFile, root);
         }
         cus.forEach(Saves::prettySave);
+    }
+
+    private static void queryByIdsXml(PersistenceDto persistence, Element root, StringBuilder sql, String queryByIds2) {
+        root.addText(newLine);
+        Element queryByIdsTag = Dom4jUtils.findAndRebuildElement(root, "select", "id", queryByIds2);
+        queryByIdsTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        queryByIdsTag.addAttribute("resultMap", "all");
+        queryByIdsTag.addText(newLine + doubleIndex + "SELECT");
+        queryByIdsTag.addElement("include").addAttribute("refid", "all");
+        sql.append(newLine).append(doubleIndex).append("FROM ").append(persistence.getTableName());
+        sql.append(newLine).append(doubleIndex).append("WHERE ");
+        PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
+        sql.append(onlyPk.getColumnName()).append(" IN (");
+        queryByIdsTag.addText(sql.toString());
+        sql.setLength(0);
+        Element foreachTag = queryByIdsTag.addElement("foreach");
+        foreachTag.addAttribute("collection", "ids");
+        foreachTag.addAttribute("item", "id");
+        foreachTag.addAttribute("separator", ",");
+        foreachTag.addText("#{id}");
+        queryByIdsTag.addText(")");
     }
 
     private static String getEntityNameInXml(CuCreator entityCuCreator) {
