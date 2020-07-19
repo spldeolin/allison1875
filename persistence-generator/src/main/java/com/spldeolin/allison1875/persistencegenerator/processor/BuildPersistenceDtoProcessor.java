@@ -16,18 +16,15 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-12
  */
 @Log4j2
-public class PersistenceInfoBuildProcessor {
-
-    private final Collection<InformationSchemaDto> infoSchemas;
+public class BuildPersistenceDtoProcessor {
 
     @Getter
     private Collection<PersistenceDto> persistences;
 
-    public PersistenceInfoBuildProcessor(Collection<InformationSchemaDto> infoSchemas) {
-        this.infoSchemas = infoSchemas;
-    }
+    public BuildPersistenceDtoProcessor process() {
+        // 查询information_schema.COLUMNS、information_schema.TABLES表
+        Collection<InformationSchemaDto> infoSchemas = new QueryInformationSchemaProcessor().process().getInfoSchemas();
 
-    public PersistenceInfoBuildProcessor process() {
         Map<String, PersistenceDto> persistences = Maps.newHashMap();
         for (InformationSchemaDto infoSchema : infoSchemas) {
             PersistenceDto dto = new PersistenceDto();

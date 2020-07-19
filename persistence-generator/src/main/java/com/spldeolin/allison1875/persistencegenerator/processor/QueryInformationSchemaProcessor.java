@@ -22,12 +22,12 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-12
  */
 @Log4j2
-public class InformationSchemaQueryProcessor {
+public class QueryInformationSchemaProcessor {
 
     @Getter
-    private Collection<InformationSchemaDto> columns;
+    private Collection<InformationSchemaDto> infoSchemas;
 
-    public InformationSchemaQueryProcessor process() {
+    public QueryInformationSchemaProcessor process() {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(conf.getJdbcUrl());
@@ -42,10 +42,10 @@ public class InformationSchemaQueryProcessor {
         try {
             String sql = FileUtils.readFileToString(new File(Resources.getResource("information_schema.sql").getFile()),
                     StandardCharsets.UTF_8);
-            this.columns = runner.query(sql, rsh, conf.getSchema());
+            this.infoSchemas = runner.query(sql, rsh, conf.getSchema());
         } catch (Throwable e) {
             log.error("ColumnMetaProcessor.process", e);
-            columns = Lists.newArrayList();
+            infoSchemas = Lists.newArrayList();
         } finally {
             dataSource.close();
         }

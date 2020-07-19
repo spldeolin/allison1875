@@ -1,57 +1,33 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
-import static com.github.javaparser.StaticJavaParser.parse;
-import static com.github.javaparser.StaticJavaParser.parseAnnotation;
-import static com.github.javaparser.StaticJavaParser.parseParameter;
-import static com.github.javaparser.StaticJavaParser.parseType;
-
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import org.atteo.evo.inflector.English;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.Modifier.Keyword;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.PrimitiveType;
-import com.github.javaparser.javadoc.Javadoc;
-import com.github.javaparser.javadoc.JavadocBlockTag;
-import com.github.javaparser.javadoc.JavadocBlockTag.Type;
-import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
-import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
-import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsEachIdProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdProcessor;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -70,168 +46,41 @@ public class MainProcessor {
     private static final String newLine = "\r\n";
 
     public static void main(String[] args) {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
-        Collection<CompilationUnit> cus = Lists.newArrayList();
+        Collection<CompilationUnit> toSave = Lists.newArrayList();
 
-        InformationSchemaQueryProcessor isqp = new InformationSchemaQueryProcessor().process();
-        Collection<InformationSchemaDto> infoSchemas = isqp.getColumns();
+        // 构建并遍历 PersistenceDto对象
+        for (PersistenceDto persistence : new BuildPersistenceDtoProcessor().process().getPersistences()) {
 
-        PersistenceInfoBuildProcessor pibp = new PersistenceInfoBuildProcessor(infoSchemas).process();
-        Collection<PersistenceDto> persistences = pibp.getPersistences();
+            // 重新生成Entity
+            EntityProcessor entityProcessor = new EntityProcessor(persistence).process();
+            CuCreator entityCuCreator = entityProcessor.getEntityCuCreator();
+            toSave.add(entityCuCreator.create(false));
 
-        for (PersistenceDto persistence : persistences) {
-            Path entityPath = CodeGenerationUtils
-                    .fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
-                            persistence.getEntityName() + ".java");
-            if (entityPath.toFile().exists()) {
-                log.info("Entity file exist, overwrite. [{}]", entityPath);
-            }
-
-            // 覆盖生成Entity
-            CuCreator entityCuCreator = new CuCreator(Paths.get(conf.getSourceRoot()), conf.getEntityPackage(),
-                    Lists.newArrayList("java.math.BigDecimal", "java.util.Date", "lombok.Data",
-                            "lombok.experimental.Accessors"), () -> {
-                ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                Javadoc javadoc = new JavadocComment(
-                        persistence.getDescrption() + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
-                javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
-                coid.setJavadocComment(javadoc);
-                coid.addAnnotation(parseAnnotation("@Data"));
-                coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
-                coid.setPublic(true);
-                coid.setName(persistence.getEntityName());
-                for (PropertyDto property : persistence.getProperties()) {
-                    FieldDeclaration field = coid
-                            .addField(property.getJavaType(), property.getPropertyName(), Keyword.PRIVATE);
-                    field.setJavadocComment(property.getDescription());
-                }
-                return coid;
-            });
-            cus.add(entityCuCreator.create(false));
-
-            // 找到Mapper
-            ClassOrInterfaceDeclaration mapper = findMapperOrElseCreate(conf, cus, persistence, entityPath,
-                    entityCuCreator);
-            if (mapper == null) {
+            // 寻找或创建Mapper
+            ClassOrInterfaceDeclaration mapper;
+            try {
+                FindOrCreateMapperProcessor findOrCreateMapper = new FindOrCreateMapperProcessor(persistence,
+                        entityCuCreator).process();
+                mapper = findOrCreateMapper.getMapper();
+                toSave.add(findOrCreateMapper.getCu());
+            } catch (Exception e) {
+                log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
-            NodeList<BodyDeclaration<?>> members = mapper.getMembers();
 
-            // 删除所有insert方法，再在头部插入int insert(BizEntity entity);
-            List<MethodDeclaration> methods = mapper.getMethodsByName("insert");
-            methods.forEach(Node::remove);
-            MethodDeclaration insert = new MethodDeclaration();
-            insert.setJavadocComment(new JavadocComment("插入数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            insert.setType(PrimitiveType.intType());
-            insert.setName("insert");
-            insert.addParameter(persistence.getEntityName(), "entity");
-            insert.setBody(null);
-            if (members.size() == 0) {
-                members.add(insert);
-            } else {
-                members.add(0, insert);
-            }
+            // 在Mapper中生成基础方法
+            new InsertProcessor(persistence, mapper).process();
+            new QueryByIdsEachIdProcessor(persistence, mapper).process();
+            new UpdateByIdProcessor(persistence, mapper).process();
+            new UpdateByIdEvenNullProcessor(persistence, mapper).process();
+            new QueryByIdProcessor(persistence, mapper).process();
+            new QueryByIdsProcessor(persistence, mapper).process();
+            new QueryByIdsEachIdProcessor(persistence, mapper).process();
 
-            boolean hasPK = persistence.getPkProperties().size() > 0;
-            boolean hasOnlyPK = persistence.getPkProperties().size() == 1;
+            // 在Mapper.xml中生成基础方法
 
-            if (hasPK) {
-                // 删除所有updateById方法，再在前一个方法之后插入int updateById(BizEntity entity);
-                methods = mapper.getMethodsByName("updateById");
-                methods.forEach(Node::remove);
-                MethodDeclaration updateById = new MethodDeclaration();
-                updateById.setJavadocComment(
-                        new JavadocComment("根据ID更新数据，忽略值为null的属性" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                updateById.setType(PrimitiveType.intType());
-                updateById.setName("updateById");
-                updateById.addParameter(persistence.getEntityName(), "entity");
-                updateById.setBody(null);
-                members.add(0, updateById);
-            }
-
-            if (hasPK) {
-                // 删除所有updateByIdEvenNull方法，再在前一个方法之后插入int updateByIdEvenNull(XxxEntity xxx);
-                methods = mapper.getMethodsByName("updateByIdEvenNull");
-                methods.forEach(Node::remove);
-                MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
-                updateByIdEvenNull.setJavadocComment(
-                        new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                updateByIdEvenNull.setType(PrimitiveType.intType());
-                updateByIdEvenNull.setName("updateByIdEvenNull");
-                updateByIdEvenNull.addParameter(persistence.getEntityName(), "entity");
-                updateByIdEvenNull.setBody(null);
-                members.add(0, updateByIdEvenNull);
-            }
-
-            if (hasPK) {
-                // 删除所有queryById方法，再在前一个方法之后插入BizEntity queryById(@Param PkType id);
-                methods = mapper.getMethodsByName("queryById");
-                methods.forEach(Node::remove);
-                MethodDeclaration queryById = new MethodDeclaration();
-                queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
-                queryById.setName("queryById");
-                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
-                for (PropertyDto pk : persistence.getPkProperties()) {
-                    String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
-                    Parameter parameter = parseParameter(
-                            "@Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName() + " " + varName);
-                    queryById.addParameter(parameter);
-                }
-                queryById.setBody(null);
-                members.add(0, queryById);
-            }
-
-            if (hasOnlyPK) {
-                // 删除所有queryByIds方法，再在前一个方法之后插入List<BizEntity> queryByIds(@Param Collection<PkType> ids);
-                methods = mapper.getMethodsByName("queryByIds");
-                methods.forEach(Node::remove);
-                MethodDeclaration queryByIds = new MethodDeclaration();
-                queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                Imports.ensureImported(mapper, "java.util.List");
-                Imports.ensureImported(mapper, "java.util.Collection");
-                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
-                PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
-                queryByIds.setType(parseType("List<" + persistence.getEntityName() + ">"));
-                queryByIds.setName("queryByIds");
-                String varsName = English.plural(StringUtils.lowerFirstLetter(onlyPk.getPropertyName()));
-                Parameter parameter = parseParameter(
-                        "@Param(\"" + varsName + "\") Collection<" + onlyPk.getJavaType().getSimpleName() + "> "
-                                + varsName);
-                queryByIds.addParameter(parameter);
-                queryByIds.setBody(null);
-                members.add(0, queryByIds);
-            }
-
-            if (hasOnlyPK) {
-                // 删除所有queryByIdsAsMap方法，再插入@MapKey("id") Map<Long, BizEntity> queryByIdsEachId(Collection<Long> ids);
-                methods = mapper.getMethodsByName("queryByIdsEachId");
-                methods.forEach(Node::remove);
-                MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-                queryByIdsEachId.setJavadocComment(
-                        new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
-                Imports.ensureImported(mapper, "java.util.Map");
-                Imports.ensureImported(mapper, "java.util.Collection");
-                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
-                PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
-                String varName = StringUtils.lowerFirstLetter(onlyPk.getPropertyName());
-                String pkTypeName = onlyPk.getJavaType().getSimpleName();
-                queryByIdsEachId.setType(parseType(
-                        "@MapKey(\"" + varName + "\")" + "Map<" + pkTypeName + ", " + persistence.getEntityName()
-                                + ">"));
-                queryByIdsEachId.setName("queryByIdsEachId");
-                String varsName = English.plural(varName);
-                queryByIdsEachId.addParameter(
-                        parseParameter("@Param(\"" + varsName + "\") Collection<" + pkTypeName + "> " + varsName));
-                queryByIdsEachId.setBody(null);
-                members.add(0, queryByIdsEachId);
-            }
-
-            cus.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
-
-            // Mapper.xml
-            File mapperXmlFile = Paths.get(conf.getMapperXmlPath(), persistence.getMapperName() + ".xml").toFile();
+            File mapperXmlFile = Paths.get(PersistenceGeneratorConfig.getInstace().getMapperXmlPath(),
+                    persistence.getMapperName() + ".xml").toFile();
             Element root = findDom4jRootOrElseCreate(mapperXmlFile);
             if (root == null) {
                 continue;
@@ -266,7 +115,7 @@ public class MainProcessor {
             Element insertTag = Dom4jUtils.findAndRebuildElement(root, "insert", "id", "insert");
             insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
             insertTag.addAttribute("parameterType", getEntityNameInXml(entityCuCreator));
-            if (hasPK) {
+            if (persistence.getPkProperties().size() > 0) {
                 insertTag.addAttribute("useGeneratedKeys", "true");
                 String keyProperty = persistence.getPkProperties().stream().map(PropertyDto::getColumnName)
                         .collect(Collectors.joining(","));
@@ -287,7 +136,7 @@ public class MainProcessor {
             sql.setLength(0);
 
             // Mapper.xml#updateById
-            if (hasPK) {
+            if (persistence.getPkProperties().size() > 0) {
                 root.addText(newLine);
                 Element updateByIdTag = Dom4jUtils.findAndRebuildElement(root, "update", "id", "updateById");
                 updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
@@ -316,7 +165,7 @@ public class MainProcessor {
             }
 
             // Mapper.xml#updateByIdEvenNull
-            if (hasPK) {
+            if (persistence.getPkProperties().size() > 0) {
                 root.addText(newLine);
                 Element updateByIdEvenNullTag = Dom4jUtils
                         .findAndRebuildElement(root, "update", "id", "updateByIdEvenNull");
@@ -338,7 +187,7 @@ public class MainProcessor {
             }
 
             // Mapper.xml#queryById
-            if (hasPK) {
+            if (persistence.getPkProperties().size() > 0) {
                 root.addText(newLine);
                 Element queryByIdTag = Dom4jUtils.findAndRebuildElement(root, "select", "id", "queryById");
                 queryByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
@@ -356,18 +205,19 @@ public class MainProcessor {
             }
 
             // Mapper.xml#queryByIds
-            if (hasOnlyPK) {
+            if (persistence.getPkProperties().size() == 1) {
                 queryByIdsXml(persistence, root, sql, "queryByIds");
             }
 
             // Mapper.xml#queryByIdsEachId
-            if (hasOnlyPK) {
+            if (persistence.getPkProperties().size() == 1) {
                 queryByIdsXml(persistence, root, sql, "queryByIdsEachId");
             }
 
             Dom4jUtils.write(mapperXmlFile, root);
         }
-        cus.forEach(Saves::prettySave);
+
+        toSave.forEach(Saves::prettySave);
     }
 
     private static void queryByIdsXml(PersistenceDto persistence, Element root, StringBuilder sql, String queryByIds2) {
@@ -422,52 +272,6 @@ public class MainProcessor {
             document.addDocType("mapper",
                     "-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd", null);
             return document.addElement("mapper");
-        }
-    }
-
-    private static ClassOrInterfaceDeclaration findMapperOrElseCreate(PersistenceGeneratorConfig conf,
-            Collection<CompilationUnit> cus, PersistenceDto persistence, Path entityPath, CuCreator entityCuCreator) {
-        Path mapperPath = CodeGenerationUtils.fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getMapperPackage(),
-                persistence.getMapperName() + ".java");
-        if (mapperPath.toFile().exists()) {
-            CompilationUnit cu;
-            try {
-                cu = parse(mapperPath);
-            } catch (IOException e) {
-                log.error("Ast parse failed, mapperPath={}", mapperPath, e);
-                return null;
-            }
-            Optional<TypeDeclaration<?>> primaryType = cu.getPrimaryType();
-            if (!primaryType.isPresent()) {
-                log.error("primaryType absent, mapperPath={}", mapperPath);
-                return null;
-            }
-            cus.add(cu);
-            return primaryType.get().asClassOrInterfaceDeclaration();
-        } else {
-            log.info("Mapper file absent, create [{}]", entityPath);
-            CuCreator mapperCuCreator = new CuCreator(Paths.get(conf.getSourceRoot()), conf.getMapperPackage(),
-                    Lists.newArrayList(new ImportDeclaration("java.util", false, true),
-                            new ImportDeclaration(entityCuCreator.getPrimaryTypeQualifier(), false, false),
-                            new ImportDeclaration("org.apache.ibatis.annotations", false, true)), () -> {
-                ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
-                javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityCuCreator.getPrimaryTypeName()));
-                javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
-                coid.setJavadocComment(javadoc);
-                coid.setPublic(true);
-                coid.setInterface(true);
-                coid.setName(persistence.getMapperName());
-                return coid;
-            });
-            cus.add(mapperCuCreator.create(false));
-
-            ClassOrInterfaceDeclaration result = mapperCuCreator.getPt().asClassOrInterfaceDeclaration();
-            if (!result.isInterface()) {
-                log.error("mapper must be a interface, mapperPath={}", mapperPath);
-            }
-            return result;
-
         }
     }
 
