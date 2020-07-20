@@ -13,6 +13,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -53,10 +54,11 @@ public class EntityProcessor {
                 Lists.newArrayList("java.math.BigDecimal", "java.util.Date", "lombok.Data",
                         "lombok.experimental.Accessors"), () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = new JavadocComment(persistence.getDescrption() + Constant.PROHIBIT_MODIFICATION_JAVADOC)
-                    .parse();
-            javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
-            coid.setJavadocComment(javadoc);
+            Javadoc classJavadoc = new JavadocComment(persistence.getDescrption() + Strings.repeat(Constant.newLine, 2)
+                    + "<strong>该类由Allison1875生成，禁止人为修改</strong>").parse();
+            classJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, persistence.getTableName()));
+            classJavadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
+            coid.setJavadocComment(classJavadoc);
             coid.addAnnotation(parseAnnotation("@Data"));
             coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
             coid.setPublic(true);
@@ -64,7 +66,9 @@ public class EntityProcessor {
             for (PropertyDto property : persistence.getProperties()) {
                 FieldDeclaration field = coid
                         .addField(property.getJavaType(), property.getPropertyName(), Keyword.PRIVATE);
-                field.setJavadocComment(property.getDescription());
+                Javadoc fieldJavadoc = new JavadocComment(property.getDescription()).parse();
+                fieldJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, property.getColumnName()));
+                field.setJavadocComment(fieldJavadoc);
             }
             return coid;
         });
