@@ -63,7 +63,7 @@ public class BuildPersistenceDtoProcessor {
     }
 
     private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {
-        JdbcTypeEnum jdbcTypeEnum = JdbcTypeEnum.ofColumnType(columnMeta.getColumnType());
+        JdbcTypeEnum jdbcTypeEnum = JdbcTypeEnum.likeColumnType(columnMeta.getColumnType());
         if (jdbcTypeEnum == null) {
             jdbcTypeEnum = JdbcTypeEnum.ofDataType(columnMeta.getDataType());
         }
