@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +25,6 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.docanalyzer.dto.EnumDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import lombok.extern.log4j.Log4j2;
@@ -103,50 +101,6 @@ class JsgBuildProcessor {
             private static final long serialVersionUID = -3267511125040673149L;
 
             @Override
-            public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-                String[] result = new String[enumValues.length];
-
-                Field codeField = getFirstPropertyField(enumType);
-                if (codeField == null) {
-                    // has no field any more.
-                    return super.findEnumValues(enumType, enumValues, names);
-                }
-
-                Field descriptionField = null;
-                try {
-                    descriptionField = enumType.getDeclaredField("description");
-                    descriptionField.setAccessible(true);
-                } catch (NoSuchFieldException e) {
-                    try {
-                        descriptionField = enumType.getDeclaredField("desc");
-                        descriptionField.setAccessible(true);
-                    } catch (NoSuchFieldException ignore) {
-                        // just enough
-                    }
-                }
-
-                codeField.setAccessible(true);
-                for (int i = 0; i < enumValues.length; i++) {
-                    try {
-                        String code = codeField.get(enumValues[i]).toString();
-                        EnumDto cad = new EnumDto();
-                        cad.setCode(code);
-                        if (descriptionField != null) {
-                            cad.setMeaning(descriptionField.get(enumValues[i]).toString());
-                        } else {
-                            cad.setMeaning(
-                                    enumDescriptions.get(enumType.getName().replace('$', '.'), enumValues[i].name()));
-                        }
-                        result[i] = JsonUtils.toJson(cad);
-                    } catch (IllegalAccessException e) {
-                        // impossible unless bug
-                        return super.findEnumValues(enumType, enumValues, names);
-                    }
-                }
-                return result;
-            }
-
-            @Override
             public String findPropertyDescription(Annotated ann) {
                 Class<?> clazz = getDeclaringClass(ann);
                 if (clazz == null) {
@@ -196,14 +150,57 @@ class JsgBuildProcessor {
                 return null;
             }
 
-            private Field getFirstPropertyField(Class<?> enumType) {
-                for (Field declaredField : enumType.getDeclaredFields()) {
-                    if (declaredField.getType() != enumType) {
-                        return declaredField;
-                    }
-                }
-                return null;
-            }
+//            @Override
+//            public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
+//                String[] result = new String[enumValues.length];
+//
+//                Field codeField = getFirstPropertyField(enumType);
+//                if (codeField == null) {
+//                    // has no field any more.
+//                    return super.findEnumValues(enumType, enumValues, names);
+//                }
+//
+//                Field descriptionField = null;
+//                try {
+//                    descriptionField = enumType.getDeclaredField("description");
+//                    descriptionField.setAccessible(true);
+//                } catch (NoSuchFieldException e) {
+//                    try {
+//                        descriptionField = enumType.getDeclaredField("desc");
+//                        descriptionField.setAccessible(true);
+//                    } catch (NoSuchFieldException ignore) {
+//                        // just enough
+//                    }
+//                }
+//
+//                codeField.setAccessible(true);
+//                for (int i = 0; i < enumValues.length; i++) {
+//                    try {
+//                        String code = codeField.get(enumValues[i]).toString();
+//                        EnumDto cad = new EnumDto();
+//                        cad.setCode(code);
+//                        if (descriptionField != null) {
+//                            cad.setMeaning(descriptionField.get(enumValues[i]).toString());
+//                        } else {
+//                            cad.setMeaning(
+//                                    enumDescriptions.get(enumType.getName().replace('$', '.'), enumValues[i].name()));
+//                        }
+//                        result[i] = JsonUtils.toJson(cad);
+//                    } catch (IllegalAccessException e) {
+//                        // impossible unless bug
+//                        return super.findEnumValues(enumType, enumValues, names);
+//                    }
+//                }
+//                return result;
+//            }
+//            private Field getFirstPropertyField(Class<?> enumType) {
+//                for (Field declaredField : enumType.getDeclaredFields()) {
+//                    if (declaredField.getType() != enumType) {
+//                        return declaredField;
+//                    }
+//                }
+//                return null;
+//            }
 
         });
 
