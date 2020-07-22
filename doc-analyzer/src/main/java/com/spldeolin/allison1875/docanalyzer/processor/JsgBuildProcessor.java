@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Map;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,14 +17,13 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.utils.CodeGenerationUtils;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.dto.EnumDto;
@@ -43,19 +41,19 @@ class JsgBuildProcessor {
 
     private final AstForest astForest;
 
-    private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
+    private final ValidatorProcessor validatorProcessor;
 
-    private final Table<String, String, String> extraFieldDescriptions;
+    private final Table<String, String, String> specificFieldDescriptions;
 
     private final Table<String, String, String> enumDescriptions = HashBasedTable.create();
 
-    private final Table<String, String, JsonPropertyDescriptionValueDto> propertyJpdvs = HashBasedTable.create();
+    private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
     public JsgBuildProcessor(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
-            Table<String, String, String> extraFieldDescriptions) {
+            Table<String, String, String> specificFieldDescriptions) {
         this.astForest = astForest;
-        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
-        this.extraFieldDescriptions = extraFieldDescriptions;
+        this.validatorProcessor = new ValidatorProcessor(analyzeCustomValidationStrategy);
+        this.specificFieldDescriptions = specificFieldDescriptions;
     }
 
     public JsonSchemaGenerator analyzeAstAndBuildJsg() {
@@ -67,7 +65,7 @@ class JsgBuildProcessor {
         for (CompilationUnit cu : astForest) {
             for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
                 td.ifEnumDeclaration(ed -> collectEnumDescription(ed, enumDescriptions));
-                td.ifClassOrInterfaceDeclaration(coid -> collectPropertiesAnnoInfo(coid, propertyJpdvs));
+                td.ifClassOrInterfaceDeclaration(coid -> collectPropertyDescriptions(coid, jpdvs));
             }
         }
     }
@@ -80,46 +78,21 @@ class JsgBuildProcessor {
         });
     }
 
-    private void collectPropertiesAnnoInfo(ClassOrInterfaceDeclaration coid,
+    private void collectPropertyDescriptions(ClassOrInterfaceDeclaration coid,
             Table<String, String, JsonPropertyDescriptionValueDto> table) {
         String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         String javabeanQualifier = qualifier;
         for (FieldDeclaration field : coid.getFields()) {
-            JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
-            jpdv.setDescription(StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(field, "，"), 4096));
             for (VariableDeclarator var : field.getVariables()) {
-                String variableName = var.getNameAsString();
-                try {
-                    jpdv.setRawType(var.getTypeAsString());
-                } catch (Exception ignored) {
+                JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
+                String varName = var.getNameAsString();
+                String description = specificFieldDescriptions.get(javabeanQualifier, varName);
+                if (description == null) {
+                    description = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(field, "，"), 4096);
                 }
-                table.put(javabeanQualifier, variableName, jpdv);
-
-                var.getType().ifPrimitiveType(pt -> {
-                    if (pt.getType().name().equals("boolean")) {
-                        table.put(javabeanQualifier, CodeGenerationUtils.getterName(boolean.class, variableName), jpdv);
-                    }
-                });
+                jpdv.setDescription(description);
+                table.put(javabeanQualifier, varName, jpdv);
             }
-        }
-
-        ValidatorProcessor validatorProcessor = new ValidatorProcessor(analyzeCustomValidationStrategy);
-        try {
-            Class<?> aClass = LoadClassUtils.loadClass(qualifier, this.getClass().getClassLoader());
-            Map<String, JsonPropertyDescriptionValueDto> row = table.row(qualifier);
-            for (Field reflectionField : aClass.getDeclaredFields()) {
-                JsonPropertyDescriptionValueDto jpdv = row.get(reflectionField.getName());
-                if (jpdv != null) {
-                    jpdv.setValidators(validatorProcessor.process(reflectionField));
-                    JsonFormat jsonFormat = AnnotatedElementUtils
-                            .findMergedAnnotation(reflectionField, JsonFormat.class);
-                    if (jsonFormat != null) {
-                        jpdv.setJsonFormatPattern(jsonFormat.pattern());
-                    }
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            log.error("类[{}]无法被加载", qualifier);
         }
     }
 
@@ -128,15 +101,6 @@ class JsgBuildProcessor {
 
         om.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
             private static final long serialVersionUID = -3267511125040673149L;
-
-            private Field getFirstPropertyField(Class<?> enumType) {
-                for (Field declaredField : enumType.getDeclaredFields()) {
-                    if (declaredField.getType() != enumType) {
-                        return declaredField;
-                    }
-                }
-                return null;
-            }
 
             @Override
             public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
@@ -184,37 +148,23 @@ class JsgBuildProcessor {
 
             @Override
             public String findPropertyDescription(Annotated ann) {
-                Class<?> clazz;
-                String className;
-                String fieldName = null;
-                if (ann instanceof AnnotatedField) {
-                    clazz = ((AnnotatedField) ann).getDeclaringClass();
-                    fieldName = ann.getName();
-                } else if (ann instanceof AnnotatedMethod) {
-                    clazz = ((AnnotatedMethod) ann).getDeclaringClass();
-                    if (ann.getName().startsWith("is")) {
-                        fieldName = StringUtils.lowerFirstLetter(ann.getName().substring(2));
-                    }
-                } else {
-                    return "{}";
+                Class<?> clazz = getDeclaringClass(ann);
+                if (clazz == null) {
+                    return JsonUtils.toJson(new JsonPropertyDescriptionValueDto());
                 }
-                className = clazz.getName().replace('$', '.');
+                String className = clazz.getName().replace('$', '.');
+                String fieldName = getFieldName(ann);
 
-                String extraDescription = extraFieldDescriptions.get(className, fieldName);
-                JsonPropertyDescriptionValueDto jpdv = propertyJpdvs.get(className, fieldName);
+                JsonPropertyDescriptionValueDto jpdv = MoreObjects.firstNonNull(jpdvs.get(className, fieldName),
+                        new JsonPropertyDescriptionValueDto().setValidators(Lists.newArrayList()));
 
-                if (jpdv == null) {
-                    jpdv = new JsonPropertyDescriptionValueDto();
-                    if (extraDescription != null) {
-                        jpdv.setDescription(extraDescription);
-                    }
-                    jpdv.setValidators(Lists.newArrayList());
-                    jpdv.setRawType(ann.getRawType().getSimpleName());
-                } else {
-                    if (extraDescription != null) {
-                        jpdv.setDescription(extraDescription);
-                    }
+                jpdv.setValidators(validatorProcessor.process(clazz));
+
+                JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(clazz, JsonFormat.class);
+                if (jsonFormat != null) {
+                    jpdv.setJsonFormatPattern(jsonFormat.pattern());
                 }
+
                 return JsonUtils.toJson(jpdv);
             }
 
@@ -224,6 +174,35 @@ class JsgBuildProcessor {
                     return null;
                 }
                 return super._findAnnotation(annotated, annoClass);
+            }
+
+            private Class<?> getDeclaringClass(Annotated ann) {
+                if (ann instanceof AnnotatedField) {
+                    return ((AnnotatedField) ann).getDeclaringClass();
+                }
+                if (ann instanceof AnnotatedMethod) {
+                    return ((AnnotatedMethod) ann).getDeclaringClass();
+                }
+                return null;
+            }
+
+            private String getFieldName(Annotated ann) {
+                if (ann instanceof AnnotatedField) {
+                    return ann.getName();
+                }
+                if (ann instanceof AnnotatedMethod) {
+                    return StringUtils.lowerFirstLetter(ann.getName().substring(2));
+                }
+                return null;
+            }
+
+            private Field getFirstPropertyField(Class<?> enumType) {
+                for (Field declaredField : enumType.getDeclaredFields()) {
+                    if (declaredField.getType() != enumType) {
+                        return declaredField;
+                    }
+                }
+                return null;
             }
 
         });
