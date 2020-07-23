@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,18 +103,27 @@ class JsgBuildProcessor {
             private static final long serialVersionUID = -3267511125040673149L;
 
             @Override
-            public String findPropertyDescription(Annotated ann) {
-                Class<?> clazz = getDeclaringClass(ann);
+            public String findPropertyDescription(Annotated annotated) {
+                Class<?> clazz = getDeclaringClass(annotated);
                 if (clazz == null) {
                     return JsonUtils.toJson(new JsonPropertyDescriptionValueDto());
                 }
                 String className = clazz.getName().replace('$', '.');
-                String fieldName = getFieldName(ann);
+                String fieldName = getFieldName(annotated);
 
                 JsonPropertyDescriptionValueDto jpdv = MoreObjects.firstNonNull(jpdvs.get(className, fieldName),
                         new JsonPropertyDescriptionValueDto().setValidators(Lists.newArrayList()));
 
                 jpdv.setValidators(validatorProcessor.process(clazz));
+
+                if (annotated instanceof AnnotatedParameterizedType) {
+                    AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) annotated)
+                            .getAnnotatedActualTypeArguments();
+                    if (fieldTypeArguments.length == 1) {
+                        AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
+                        jpdv.setTheOnlyTypeArgumentValidators(validatorProcessor.process(theOnlyTypeArgument));
+                    }
+                }
 
                 JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(clazz, JsonFormat.class);
                 if (jsonFormat != null) {
