@@ -1,9 +1,12 @@
 package com.spldeolin.allison1875.base.util;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
 import com.spldeolin.allison1875.base.exception.DotAbsentInStringException;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +21,16 @@ public class JsonSchemaUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
+    public static final SchemaFactoryWrapper DEFAULT_SCHEMA_FACTORY_WRAPPER = new SchemaFactoryWrapper()
+            .setVisitorContext(new VisitorContext() {
+                @Override
+                public String addSeenSchemaUri(JavaType aSeenSchema) {
+                    return javaTypeToUrn(aSeenSchema);
+                }
+            });
+
     public static final JsonSchemaGenerator DEFAULT_JSG = new JsonSchemaGenerator(
-            JsonUtils.initObjectMapper(new ObjectMapper()));
+            JsonUtils.initObjectMapper(new ObjectMapper()), DEFAULT_SCHEMA_FACTORY_WRAPPER);
 
     public static JsonSchema generateSchema(String describe, JsonSchemaGenerator jsg) throws JsonSchemaException {
         TypeFactory tf = TypeFactory.defaultInstance();

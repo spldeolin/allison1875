@@ -18,12 +18,12 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -98,7 +98,6 @@ class JsgBuildProcessor {
 
     public JsonSchemaGenerator buildJsg() {
         ObjectMapper om = JsonUtils.initObjectMapper(new ObjectMapper());
-
         om.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
             private static final long serialVersionUID = -3267511125040673149L;
 
@@ -111,8 +110,10 @@ class JsgBuildProcessor {
                 String className = clazz.getName().replace('$', '.');
                 String fieldName = getFieldName(annotated);
 
-                JsonPropertyDescriptionValueDto jpdv = MoreObjects.firstNonNull(jpdvs.get(className, fieldName),
-                        new JsonPropertyDescriptionValueDto().setValidators(Lists.newArrayList()));
+                JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldName);
+                if (jpdv == null) {
+                    jpdv = new JsonPropertyDescriptionValueDto().setValidators(Lists.newArrayList());
+                }
 
                 jpdv.setValidators(validatorProcessor.process(clazz));
 
@@ -215,7 +216,9 @@ class JsgBuildProcessor {
 
         });
 
-        return new JsonSchemaGenerator(om);
+        JsonSchemaGenerator jsg = new JsonSchemaGenerator(om, JsonSchemaUtils.DEFAULT_SCHEMA_FACTORY_WRAPPER);
+
+        return jsg;
     }
 
 }
