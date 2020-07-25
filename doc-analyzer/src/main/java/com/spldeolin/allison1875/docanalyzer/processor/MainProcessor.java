@@ -110,8 +110,7 @@ public class MainProcessor {
                 }
 
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
-                builder.description(
-                        StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(handler, "\n"), 4096));
+                builder.description(getDescriptionOrElseName(controller, handler));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthor(handler));
@@ -147,6 +146,14 @@ public class MainProcessor {
             });
         });
         log.info(handlerCount);
+    }
+
+    private String getDescriptionOrElseName(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+        String result = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(handler, "\n"), 4096);
+        if (StringUtils.isBlank(result)) {
+            result = controller.getNameAsString() + "_" + handler.getNameAsString();
+        }
+        return result;
     }
 
     private boolean notContainAuthorNameFromConfig(String author) {
