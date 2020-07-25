@@ -13,6 +13,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import lombok.Getter;
 
@@ -50,9 +51,12 @@ class RequestMappingProcessor {
         combinedVerbs = combineVerb(cVerbs, mVerbs);
 
         // 添加全局前缀
-        ListIterator<String> itr = combinedUrls.listIterator();
-        while (itr.hasNext()) {
-            itr.set(DocAnalyzerConfig.getInstance().getGlobalUrlPrefix() + itr.next());
+        String globalUrlPrefix = DocAnalyzerConfig.getInstance().getGlobalUrlPrefix();
+        if (StringUtils.isNotBlank(globalUrlPrefix)) {
+            ListIterator<String> itr = combinedUrls.listIterator();
+            while (itr.hasNext()) {
+                itr.set(globalUrlPrefix + itr.next());
+            }
         }
     }
 
