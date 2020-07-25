@@ -115,7 +115,7 @@ class JsgBuildProcessor {
                     jpdv = new JsonPropertyDescriptionValueDto().setValidators(Lists.newArrayList());
                 }
 
-                jpdv.setValidators(validatorProcessor.process(clazz));
+                jpdv.setValidators(validatorProcessor.process(annotated.getAnnotated()));
 
                 if (annotated instanceof AnnotatedParameterizedType) {
                     AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) annotated)

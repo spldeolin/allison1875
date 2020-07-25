@@ -55,6 +55,15 @@ public class JsonSchemaUtils {
         try {
             return jsg.generateSchema(tf.constructFromCanonical(innerClassMightDescribe));
         } catch (Throwable e) {
+            if (e instanceof StackOverflowError) {
+                try {
+                    return new JsonSchemaGenerator(JsonUtils.initObjectMapper(new ObjectMapper()))
+                            .generateSchema(tf.constructFromCanonical(innerClassMightDescribe));
+                } catch (Throwable e2) {
+                    innerClassMightDescribe = tryReplaceLastDotToDollar(innerClassMightDescribe);
+                    return generateSchemaRecursively(innerClassMightDescribe, tf, jsg);
+                }
+            }
             innerClassMightDescribe = tryReplaceLastDotToDollar(innerClassMightDescribe);
             return generateSchemaRecursively(innerClassMightDescribe, tf, jsg);
         }
