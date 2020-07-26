@@ -127,6 +127,13 @@
                 <version>6.1.5.Final</version>
             </dependency>
 
+            <!-- okhttp -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>4.8.0</version>
+            </dependency>
+
             <!-- freemarker -->
             <dependency>
                 <groupId>org.freemarker</groupId>
