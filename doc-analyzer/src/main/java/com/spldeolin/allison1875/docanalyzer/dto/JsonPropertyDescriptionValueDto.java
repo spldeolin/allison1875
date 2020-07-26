@@ -27,15 +27,6 @@ public class JsonPropertyDescriptionValueDto {
 
     private String jsonFormatPattern;
 
-    private Boolean isCollection;
-
-    /**
-     * 解析自Field类型的唯一一个泛型上的校验注解（如果有唯一泛型的话）
-     *
-     * e.g: private Collection<@NotBlank @Length(max = 10) String> userNames;
-     */
-    private Collection<ValidatorDto> theOnlyTypeArgumentValidators;
-
     public String toString() {
         StringBuilder sb = new StringBuilder(64);
         if (StringUtils.isNotBlank(description)) {
@@ -52,13 +43,6 @@ public class JsonPropertyDescriptionValueDto {
 
         if (StringUtils.isNotBlank(jsonFormatPattern)) {
             sb.append(jsonFormatPattern).append("\n");
-        }
-
-        if (isCollection && CollectionUtils.isNotEmpty(theOnlyTypeArgumentValidators)) {
-            for (ValidatorDto validator : theOnlyTypeArgumentValidators) {
-                sb.append("内部元素").append(validator.getValidatorType()).append(validator.getNote()).append("，");
-                sb.deleteCharAt(sb.lastIndexOf("，"));
-            }
         }
 
         return sb.toString();

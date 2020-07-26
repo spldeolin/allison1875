@@ -1,8 +1,11 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -29,6 +32,7 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import lombok.extern.log4j.Log4j2;
 
@@ -104,12 +108,14 @@ class JsgBuildProcessor {
 
             @Override
             public String findPropertyDescription(Annotated annotated) {
-                Class<?> clazz = getDeclaringClass(annotated);
-                if (clazz == null) {
+                Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
+                if (field == null) {
                     return JsonUtils.toJson(new JsonPropertyDescriptionValueDto());
                 }
+
+                Class<?> clazz = field.getDeclaringClass();
                 String className = clazz.getName().replace('$', '.');
-                String fieldName = getFieldName(annotated);
+                String fieldName = field.getName();
 
                 JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldName);
                 if (jpdv == null) {
@@ -118,18 +124,25 @@ class JsgBuildProcessor {
 
                 jpdv.setValidators(validatorProcessor.process(annotated.getAnnotated()));
 
-                if (annotated.getType().getRawClass().getSimpleName().equals(Collection.class.getSimpleName())) {
-                    jpdv.setIsCollection(true);
-                    if (annotated instanceof AnnotatedParameterizedType) {
-                        AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) annotated)
+                /*
+                    解析自Field类型的唯一一个泛型上的校验注解（如果有唯一泛型的话）
+                    e.g: private Collection<@NotBlank @Length(max = 10) String> userNames;
+                 */
+                boolean isLikeCollection = annotated.getType().getRawClass().isAssignableFrom(Collection.class);
+                if (isLikeCollection) {
+                    AnnotatedType at = field.getAnnotatedType();
+                    if (at instanceof AnnotatedParameterizedType) {
+                        AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) at)
                                 .getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            jpdv.setTheOnlyTypeArgumentValidators(validatorProcessor.process(theOnlyTypeArgument));
+                            Collection<ValidatorDto> theOnlyElementValidator = validatorProcessor
+                                    .process(theOnlyTypeArgument);
+                            theOnlyElementValidator
+                                    .forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
+                            jpdv.getValidators().addAll(theOnlyElementValidator);
                         }
                     }
-                } else {
-                    jpdv.setIsCollection(false);
                 }
 
                 JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(clazz, JsonFormat.class);
@@ -138,6 +151,31 @@ class JsgBuildProcessor {
                 }
 
                 return JsonUtils.toJson(jpdv);
+            }
+
+            private Field findFieldEvenIfAnnotatedMethod(AnnotatedElement annotated) {
+                if (annotated instanceof Field) {
+                    return (Field) annotated;
+                }
+                if (annotated instanceof Method) {
+                    Method method = (Method) annotated;
+                    String fieldName = StringUtils.lowerFirstLetter(method.getName().substring(2));
+                    try {
+                        return method.getDeclaringClass().getDeclaredField(fieldName);
+                    } catch (NoSuchFieldException e) {
+                        return null;
+                    }
+                }
+                return null;
+            }
+
+            private AnnotatedType getAnntatedType(AnnotatedElement annotated) {
+                if (annotated instanceof Field) {
+                    return ((Field) annotated).getAnnotatedType();
+                } else if (annotated instanceof Method) {
+                    return ((Method) annotated).getAnnotatedReturnType();
+                }
+                return null;
             }
 
             @Override
