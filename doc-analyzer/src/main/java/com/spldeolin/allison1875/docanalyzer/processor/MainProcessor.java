@@ -16,7 +16,6 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
@@ -114,7 +113,7 @@ public class MainProcessor {
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthor(handler));
-                builder.sourceCode(Locations.getRelativePathWithLineNo(handler));
+                builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
 
                 // 根据作者名过滤
                 if (notContainAuthorNameFromConfig(builder.author())) {
