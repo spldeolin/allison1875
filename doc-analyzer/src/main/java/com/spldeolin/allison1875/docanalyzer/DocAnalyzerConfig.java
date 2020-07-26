@@ -60,6 +60,11 @@ public final class DocAnalyzerConfig {
      */
     private String globalUrlPrefix;
 
+    /**
+     * YApi项目的TOKEN
+     */
+    private String yapiToken;
+
     private DocAnalyzerConfig() {
     }
 

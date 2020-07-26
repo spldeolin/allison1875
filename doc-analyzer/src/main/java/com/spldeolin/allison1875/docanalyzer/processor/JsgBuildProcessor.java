@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.util.Collection;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,13 +118,18 @@ class JsgBuildProcessor {
 
                 jpdv.setValidators(validatorProcessor.process(annotated.getAnnotated()));
 
-                if (annotated instanceof AnnotatedParameterizedType) {
-                    AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) annotated)
-                            .getAnnotatedActualTypeArguments();
-                    if (fieldTypeArguments.length == 1) {
-                        AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                        jpdv.setTheOnlyTypeArgumentValidators(validatorProcessor.process(theOnlyTypeArgument));
+                if (annotated.getType().getRawClass().getSimpleName().equals(Collection.class.getSimpleName())) {
+                    jpdv.setIsCollection(true);
+                    if (annotated instanceof AnnotatedParameterizedType) {
+                        AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) annotated)
+                                .getAnnotatedActualTypeArguments();
+                        if (fieldTypeArguments.length == 1) {
+                            AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
+                            jpdv.setTheOnlyTypeArgumentValidators(validatorProcessor.process(theOnlyTypeArgument));
+                        }
                     }
+                } else {
+                    jpdv.setIsCollection(false);
                 }
 
                 JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(clazz, JsonFormat.class);

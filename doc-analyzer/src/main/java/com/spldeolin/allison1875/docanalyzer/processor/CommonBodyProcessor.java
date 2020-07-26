@@ -53,6 +53,7 @@ class CommonBodyProcessor {
             JsonPropertyDescriptionValueDto jpdv = null;
             try {
                 jpdv = JsonUtils.toObject(childSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+                childSchema.setDescription(jpdv.toString());
             } catch (Exception ignored) {
             }
 
