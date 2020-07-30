@@ -4,12 +4,15 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.GenerousBeanProcessor;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.io.FileUtils;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -42,6 +45,14 @@ public class QueryInformationSchemaProcessor {
         try {
             String sql = FileUtils.readFileToString(new File(Resources.getResource("information_schema.sql").getFile()),
                     StandardCharsets.UTF_8);
+            String part = "IS NOT NULL";
+            Collection<String> tables = conf.getTables();
+            if (CollectionUtils.isNotEmpty(tables)) {
+                tables = tables.stream().map(one -> "'" + one + "'").collect(Collectors.toList());
+                part = Joiner.on(',').appendTo(new StringBuilder("IN ("), tables).append(")").toString();
+            }
+            sql = sql.replaceFirst("\\{}", part);
+
             this.infoSchemas = runner.query(sql, rsh, conf.getSchema());
         } catch (Throwable e) {
             log.error("ColumnMetaProcessor.process", e);

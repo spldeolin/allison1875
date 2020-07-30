@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import java.io.IOException;
+import java.util.Collection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
@@ -35,9 +36,11 @@ public class PersistenceGeneratorConfig {
 
     private String password;
 
+    private String author;
+
     private String schema;
 
-    private String author;
+    private Collection<String> tables;
 
     private String mapperPackage;
 
@@ -50,6 +53,8 @@ public class PersistenceGeneratorConfig {
     private String sourceRoot;
 
     private Boolean isEntityUsingAlias;
+
+    private Boolean isEntityEndWithEntity;
 
     public static PersistenceGeneratorConfig getInstace() {
         return instace;

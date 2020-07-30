@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.enums.JdbcTypeEnum;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -30,7 +31,7 @@ public class BuildPersistenceDtoProcessor {
             PersistenceDto dto = new PersistenceDto();
             String domainName = StringUtils.underscoreToUpperCamel(infoSchema.getTableName());
             dto.setTableName(infoSchema.getTableName());
-            dto.setEntityName(domainName + "Entity");
+            dto.setEntityName(domainName + endWith());
             dto.setMapperName(domainName + "Mapper");
             dto.setDescrption(infoSchema.getTableComment());
             dto.setPkProperties(Lists.newArrayList());
@@ -60,6 +61,10 @@ public class BuildPersistenceDtoProcessor {
         }
         this.persistences = persistences.values();
         return this;
+    }
+
+    private String endWith() {
+        return PersistenceGeneratorConfig.getInstace().getIsEntityUsingAlias() ? "Entity" : "";
     }
 
     private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {
