@@ -39,9 +39,6 @@ public class UpdateByIdXmlProcessor {
             for (PropertyDto nonPk : persistence.getNonPkProperties()) {
                 Element ifTag = setTag.addElement("if");
                 String ifTest = nonPk.getPropertyName() + "!=null";
-                if (String.class == nonPk.getJavaType()) {
-                    ifTest += " and " + nonPk.getPropertyName() + "!=''";
-                }
                 ifTag.addAttribute("test", ifTest);
                 ifTag.addText(
                         Constant.newLine + Strings.repeat(Constant.singleIndent, 4) + nonPk.getColumnName() + "=#{"
