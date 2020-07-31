@@ -55,7 +55,7 @@ public class QueryByIdsProcessor {
             queryByIdsEachId.addParameter(
                     parseParameter("@Param(\"" + varsName + "\") Collection<" + pkTypeName + "> " + varsName));
             queryByIdsEachId.setBody(null);
-            mapper.getMembers().addFirst(queryByIdsEachId);
+            mapper.getMembers().addLast(queryByIdsEachId);
         }
         return this;
     }

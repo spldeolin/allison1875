@@ -36,7 +36,7 @@ public class UpdateByIdEvenNullProcessor {
             updateByIdEvenNull.setName("updateByIdEvenNull");
             updateByIdEvenNull.addParameter(persistence.getEntityName(), "entity");
             updateByIdEvenNull.setBody(null);
-            mapper.getMembers().addFirst(updateByIdEvenNull);
+            mapper.getMembers().addLast(updateByIdEvenNull);
         }
         return this;
     }

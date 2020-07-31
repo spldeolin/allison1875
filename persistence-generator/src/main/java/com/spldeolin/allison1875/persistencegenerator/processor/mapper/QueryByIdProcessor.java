@@ -47,7 +47,7 @@ public class QueryByIdProcessor {
                 queryById.addParameter(parameter);
             }
             queryById.setBody(null);
-            mapper.getMembers().addFirst(queryById);
+            mapper.getMembers().addLast(queryById);
         }
         return this;
     }

@@ -35,7 +35,7 @@ public class InsertProcessor {
         insert.setName("insert");
         insert.addParameter(persistence.getEntityName(), "entity");
         insert.setBody(null);
-        mapper.getMembers().addFirst(insert);
+        mapper.getMembers().addLast(insert);
         return this;
     }
 

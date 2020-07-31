@@ -37,7 +37,7 @@ public class UpdateByIdProcessor {
             updateById.setName("updateById");
             updateById.addParameter(persistence.getEntityName(), "entity");
             updateById.setBody(null);
-            mapper.getMembers().addFirst(updateById);
+            mapper.getMembers().addLast(updateById);
         }
         return this;
     }

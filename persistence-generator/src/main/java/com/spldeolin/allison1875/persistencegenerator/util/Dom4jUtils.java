@@ -4,11 +4,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**
  * @author Deolin 2020-07-16
@@ -24,9 +30,25 @@ public class Dom4jUtils {
             XMLWriter outPut = new XMLWriter(new FileWriter(mapperXmlFile), format);
             outPut.write(node.getDocument());
             outPut.close();
+            revmoeContinuousBlankLines(mapperXmlFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void revmoeContinuousBlankLines(File mapperXmlFile) throws IOException {
+        Iterator<String> lines = FileUtils.readLines(mapperXmlFile, StandardCharsets.UTF_8).iterator();
+        Collection<String> newLines = Lists.newArrayList();
+        boolean isLastrowNotBlank = false;
+        while (lines.hasNext()) {
+            String line = lines.next();
+            boolean isCurrentNotBlank = StringUtils.isNotBlank(line);
+            if (isLastrowNotBlank || isCurrentNotBlank) {
+                newLines.add(line);
+            }
+            isLastrowNotBlank = isCurrentNotBlank;
+        }
+        FileUtils.writeLines(mapperXmlFile, newLines);
     }
 
     public static Element findAndRebuildElement(Element ele, String tagName, String attributeName,
@@ -38,7 +60,8 @@ public class Dom4jUtils {
         }
         tag = new DefaultElement(tagName);
         tag.addAttribute(attributeName, attributeValue);
-        ele.elements().add(tag);
+        List<Element> elements = ele.elements();
+        elements.add(elements.size(), tag);
         return tag;
     }
 
