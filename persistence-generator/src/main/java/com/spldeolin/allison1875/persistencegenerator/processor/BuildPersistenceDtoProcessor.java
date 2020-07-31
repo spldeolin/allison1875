@@ -64,7 +64,7 @@ public class BuildPersistenceDtoProcessor {
     }
 
     private String endWith() {
-        return PersistenceGeneratorConfig.getInstace().getIsEntityUsingAlias() ? "Entity" : "";
+        return PersistenceGeneratorConfig.getInstace().getIsEntityEndWithEntity() ? "Entity" : "";
     }
 
     private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {

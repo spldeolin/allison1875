@@ -2,9 +2,12 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 import java.util.TreeSet;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -53,6 +56,7 @@ public class EntityProcessor {
         entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
                 persistence.getEntityName() + ".java");
 
+        List<JavadocBlockTag> authorTags = Lists.newArrayList();
         TreeSet<String> originalVariables = Sets.newTreeSet();
         if (entityPath.toFile().exists()) {
             try {
@@ -62,21 +66,23 @@ public class EntityProcessor {
                         originalVariables.add(variable.getTypeAsString() + " " + variable.getNameAsString());
                     }
                 }
+                this.getAuthorTags(authorTags, cu);
             } catch (Exception e) {
                 log.warn("StaticJavaParser.parse failed entityPath={}", entityPath, e);
             }
             log.info("Entity file exist, overwrite. [{}]", entityPath);
+        } else {
+            authorTags.add(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
         }
 
         // 生成Entity（可能是覆盖）
         entityCuCreator = new CuCreator(Paths.get(conf.getSourceRoot()), conf.getEntityPackage(),
-                Lists.newArrayList("java.math.BigDecimal", "java.util.Date", "lombok.Data",
-                        "lombok.experimental.Accessors"), () -> {
+                this.getImports(persistence), () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc classJavadoc = new JavadocComment(persistence.getDescrption() + Strings.repeat(Constant.newLine, 2)
                     + "<strong>该类由Allison1875生成，禁止人为修改</strong>").parse();
+            classJavadoc.getBlockTags().addAll(authorTags);
             classJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, persistence.getTableName()));
-            classJavadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
             coid.setJavadocComment(classJavadoc);
             coid.addAnnotation(parseAnnotation("@Data"));
             coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
@@ -115,6 +121,28 @@ public class EntityProcessor {
         }
 
         return this;
+    }
+
+    private List<String> getImports(PersistenceDto persistence) {
+        List<String> result = Lists.newArrayList();
+        if (persistence.getProperties().stream().anyMatch(prop -> prop.getJavaType() == BigDecimal.class)) {
+            result.add("java.math.BigDecimal");
+        }
+        if (persistence.getProperties().stream().anyMatch(prop -> prop.getJavaType() == Date.class)) {
+            result.add("java.util.Date");
+        }
+        result.add("lombok.Data");
+        result.add("lombok.experimental.Accessors");
+        return result;
+    }
+
+    private void getAuthorTags(List<JavadocBlockTag> authorTags, CompilationUnit cu) {
+        cu.getPrimaryType()
+                .ifPresent(pt -> pt.getJavadoc().ifPresent(javadoc -> javadoc.getBlockTags().forEach(javadocTag -> {
+                    if (javadocTag.getType() == Type.AUTHOR) {
+                        authorTags.add(javadocTag);
+                    }
+                })));
     }
 
 }
