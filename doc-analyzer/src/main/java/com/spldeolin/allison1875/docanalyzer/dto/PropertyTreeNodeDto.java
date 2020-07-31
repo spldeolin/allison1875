@@ -42,7 +42,7 @@ public class PropertyTreeNodeDto {
 
     @Override
     public String toString() {
-        return JsonUtils.beautify(this);
+        return JsonUtils.toJsonPrettily(this);
     }
 
 }

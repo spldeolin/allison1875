@@ -32,7 +32,7 @@ public class PublicAckProcessor {
             try {
                 String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
                 if (json.startsWith("[")) {
-                    publicAcks.addAll(JsonUtils.toListOfObjects(json, PublicAckDto.class));
+                    publicAcks.addAll(JsonUtils.toListOfObject(json, PublicAckDto.class));
                 } else {
                     publicAcks.add(JsonUtils.toObject(json, PublicAckDto.class));
                 }

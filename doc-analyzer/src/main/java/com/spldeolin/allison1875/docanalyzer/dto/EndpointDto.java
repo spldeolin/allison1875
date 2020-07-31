@@ -56,7 +56,7 @@ public class EndpointDto {
 
     @Override
     public String toString() {
-        return JsonUtils.beautify(this);
+        return JsonUtils.toJsonPrettily(this);
     }
 
 }
