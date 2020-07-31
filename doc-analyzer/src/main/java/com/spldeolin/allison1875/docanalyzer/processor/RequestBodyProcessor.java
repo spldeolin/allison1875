@@ -53,7 +53,7 @@ class RequestBodyProcessor {
                     requestBodySituation = BodySituationEnum.NONE;
                 } else {
                     requestBodySituation = BodySituationEnum.CHAOS;
-                    requestBodyBuilder.requestBodyJsonSchema(JsonUtils.beautify(jsonSchema));
+                    requestBodyBuilder.requestBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
                 }
             } else {
                 requestBodySituation = BodySituationEnum.NONE;

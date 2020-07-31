@@ -60,7 +60,7 @@ class ResponseBodyProcessor {
                         responseBodyInfo.flatResponseProperties(propContainer.getFlatProperties());
                     } else {
                         responseBodySituation = BodySituationEnum.CHAOS;
-                        responseBodyInfo.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
+                        responseBodyInfo.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
                     }
                 } else if (jsonSchema.isObjectSchema()) {
                     responseBodySituation = BodySituationEnum.KEY_VALUE;
@@ -72,7 +72,7 @@ class ResponseBodyProcessor {
                     responseBodySituation = BodySituationEnum.NONE;
                 } else {
                     responseBodySituation = BodySituationEnum.CHAOS;
-                    responseBodyInfo.responseBodyJsonSchema(JsonUtils.beautify(jsonSchema));
+                    responseBodyInfo.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
                 }
             } else {
                 responseBodySituation = BodySituationEnum.NONE;

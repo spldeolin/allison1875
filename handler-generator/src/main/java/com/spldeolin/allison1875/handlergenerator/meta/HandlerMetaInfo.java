@@ -42,7 +42,7 @@ public class HandlerMetaInfo {
     private Collection<DtoMetaInfo> dtos = Lists.newArrayList();
 
     public String toString() {
-        return JsonUtils.beautify(this);
+        return JsonUtils.toJsonPrettily(this);
     }
 
 }
