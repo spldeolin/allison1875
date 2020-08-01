@@ -50,10 +50,8 @@ public class JsonSchemaTraverseUtilsTest {
         });
 
         log.info(names);
-
-        System.out.println(names);
-        System.out.println(paths);
-        System.out.println(types);
+        log.info(paths);
+        log.info(types);
     }
 
 }

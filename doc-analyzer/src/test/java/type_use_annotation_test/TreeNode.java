@@ -15,11 +15,13 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-25
  */
 @Data
+@Log4j2
 public class TreeNode {
 
     @NotNull
@@ -45,11 +47,10 @@ public class TreeNode {
         });
 
         JsonSchema jsonSchema = JsonSchemaGenerateUtils
-                .generateSchema("com.spldeolin.allison1875.docanalyzer.processor.demo.TreeNode",
-                        new JsonSchemaGenerator(om));
+                .generateSchema("type_use_annotation_test.TreeNode", new JsonSchemaGenerator(om));
 
         JsonNode jsonNode = om.readTree(JsonUtils.toJson(jsonSchema));
-        System.out.println(JsonUtils.toJson(jsonSchema));
+        log.info(JsonUtils.toJson(jsonSchema));
     }
 
 }
