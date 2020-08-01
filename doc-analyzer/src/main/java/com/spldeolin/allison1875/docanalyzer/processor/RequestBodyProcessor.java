@@ -35,7 +35,7 @@ class RequestBodyProcessor {
     }
 
     public RequestBodyInfoBuilder analyze(MethodDeclaration handler) {
-        RequestBodyInfoBuilder requestBodyBuilder = new RequestBodyInfoBuilder();
+        RequestBodyInfoBuilder builder = new RequestBodyInfoBuilder();
         BodySituationEnum requestBodySituation;
         String requestBodyDescribe = null;
         try {
@@ -43,17 +43,17 @@ class RequestBodyProcessor {
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(requestBodyDescribe, jsg);
+                builder.requestBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
 
                 if (jsonSchema.isObjectSchema()) {
                     requestBodySituation = BodySituationEnum.KEY_VALUE;
                     PropertiesContainerDto propContainer = common
                             .anaylzeObjectSchema(requestBodyDescribe, jsonSchema.asObjectSchema());
-                    requestBodyBuilder.flatRequestProperties(propContainer.getFlatProperties());
+                    builder.flatRequestProperties(propContainer.getFlatProperties());
                 } else if (common.fieldsAbsent(requestBody)) {
                     requestBodySituation = BodySituationEnum.NONE;
                 } else {
                     requestBodySituation = BodySituationEnum.CHAOS;
-                    requestBodyBuilder.requestBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
                 }
             } else {
                 requestBodySituation = BodySituationEnum.NONE;
@@ -65,8 +65,8 @@ class RequestBodyProcessor {
                     MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
             requestBodySituation = BodySituationEnum.FAIL;
         }
-        requestBodyBuilder.requestBodySituation(requestBodySituation);
-        return requestBodyBuilder;
+        builder.requestBodySituation(requestBodySituation);
+        return builder;
     }
 
     /**

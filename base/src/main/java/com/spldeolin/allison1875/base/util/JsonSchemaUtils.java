@@ -21,6 +21,12 @@ public class JsonSchemaUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
+    public static void main(String[] args) throws JsonSchemaException {
+        JsonSchema jsonSchema = generateSchema("com.spldeolin.allison1875.base.collection.UserDto", DEFAULT_JSG);
+        System.out.println(JsonUtils.toJson(jsonSchema));
+        System.out.println(JsonUtils.toJson(JsonUtils.toJson(jsonSchema)));
+    }
+
     public static final SchemaFactoryWrapper DEFAULT_SCHEMA_FACTORY_WRAPPER = new SchemaFactoryWrapper()
             .setVisitorContext(new VisitorContext() {
                 @Override

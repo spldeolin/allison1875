@@ -1,13 +1,19 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.mutable.MutableInt;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -20,13 +26,13 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.markdown.MarkdownConverter;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
+import com.spldeolin.allison1875.docanalyzer.yapi.YApiProcessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -60,7 +66,8 @@ public class MainProcessor {
                 specificFieldDescriptionsStrategy.provideSpecificFieldDescriptions());
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
-        // handler个数
+        // 收集endpoint
+        Collection<EndpointDto> endpoints = Lists.newArrayList();
         MutableInt handlerCount = new MutableInt(0);
 
         // 再次重头遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
@@ -135,15 +142,39 @@ public class MainProcessor {
                 builder.responseBodyInfo(responseBodyAnalyzeProcessor.analyze(controller, handler));
 
                 // 构建EndpointDto
-                EndpointDto endpoint = builder.build();
-
-                // 转化为视图层
-                new MarkdownConverter().convert(Lists.newArrayList(endpoint), false);
+                endpoints.add(builder.build());
 
                 // handler个数
                 handlerCount.increment();
             });
         });
+
+        Set<String> catNames = endpoints.stream().map(EndpointDto::getGroupNames).collect(Collectors.toSet());
+        catNames.add("回收站");
+        YApiProcessor yApiProcessor = new YApiProcessor();
+        Set<String> yapiCatNames = yApiProcessor.getYapiCatIdsEachName().keySet();
+        yApiProcessor.addCat(Sets.difference(catNames, yapiCatNames));
+        Map<String, Long> catIdsEachName = yApiProcessor.getYapiCatIdsEachName();
+
+        Map<String, JsonNode> yapiUrls = yApiProcessor.listInterfaces();
+        Set<String> urls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
+                .collect(Collectors.toSet());
+
+        // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
+        for (String url : yapiUrls.keySet()) {
+            if (!urls.contains(url)) {
+                yApiProcessor.deleteInterface(yapiUrls.get(url), catIdsEachName.get("回收站"));
+            }
+        }
+
+        // 新增接口
+        for (EndpointDto endpoint : endpoints) {
+            yApiProcessor.addInterface(StringUtils.splitLineByLine(endpoint.getDescription()).get(0),
+                    Iterables.getFirst(endpoint.getUrls(), ""), endpoint.getRequestBodyJsonSchema(),
+                    endpoint.getResponseBodyJsonSchema(), endpoint.getDescription(),
+                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getGroupNames()));
+        }
+
         log.info(handlerCount);
     }
 

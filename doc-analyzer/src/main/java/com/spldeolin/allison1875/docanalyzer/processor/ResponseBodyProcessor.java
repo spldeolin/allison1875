@@ -41,7 +41,7 @@ class ResponseBodyProcessor {
     }
 
     public ResponseBodyInfoBuilder analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        ResponseBodyInfoBuilder responseBodyInfo = new ResponseBodyInfoBuilder();
+        ResponseBodyInfoBuilder builder = new ResponseBodyInfoBuilder();
         BodySituationEnum responseBodySituation;
         String responseBodyDescribe = null;
         try {
@@ -49,6 +49,7 @@ class ResponseBodyProcessor {
             if (responseBody != null) {
                 responseBodyDescribe = responseBody.describe();
                 JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(responseBodyDescribe, jsg);
+                builder.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
 
                 if (jsonSchema.isArraySchema()) {
                     Items items = jsonSchema.asArraySchema().getItems();
@@ -57,22 +58,20 @@ class ResponseBodyProcessor {
                         PropertiesContainerDto propContainer = common.anaylzeObjectSchema(responseBodyDescribe,
                                 items.asSingleItems().getSchema().asObjectSchema());
                         clearAllValidatorAndNullableFlag(propContainer);
-                        responseBodyInfo.flatResponseProperties(propContainer.getFlatProperties());
+                        builder.flatResponseProperties(propContainer.getFlatProperties());
                     } else {
                         responseBodySituation = BodySituationEnum.CHAOS;
-                        responseBodyInfo.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
                     }
                 } else if (jsonSchema.isObjectSchema()) {
                     responseBodySituation = BodySituationEnum.KEY_VALUE;
                     PropertiesContainerDto propContainer = common
                             .anaylzeObjectSchema(responseBodyDescribe, jsonSchema.asObjectSchema());
                     clearAllValidatorAndNullableFlag(propContainer);
-                    responseBodyInfo.flatResponseProperties(propContainer.getFlatProperties());
+                    builder.flatResponseProperties(propContainer.getFlatProperties());
                 } else if (common.fieldsAbsent(responseBody)) {
                     responseBodySituation = BodySituationEnum.NONE;
                 } else {
                     responseBodySituation = BodySituationEnum.CHAOS;
-                    responseBodyInfo.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
                 }
             } else {
                 responseBodySituation = BodySituationEnum.NONE;
@@ -84,8 +83,8 @@ class ResponseBodyProcessor {
                     MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
             responseBodySituation = BodySituationEnum.FAIL;
         }
-        responseBodyInfo.responseBodySituation(responseBodySituation);
-        return responseBodyInfo;
+        builder.responseBodySituation(responseBodySituation);
+        return builder;
     }
 
     /**
