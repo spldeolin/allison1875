@@ -102,7 +102,6 @@ public class YApiProcessor {
         form.put("switch_notice", true);
         form.put("message", "1");
         form.put("desc", MarkdownUtils.convertToHtml(description));
-        form.put("markdown", description);
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", token);

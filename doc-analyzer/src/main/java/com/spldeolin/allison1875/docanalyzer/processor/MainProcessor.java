@@ -169,11 +169,25 @@ public class MainProcessor {
 
         // 新增接口
         for (EndpointDto endpoint : endpoints) {
-            String title = StringUtils.splitLineByLine(endpoint.getDescription()).get(0);
+            String description = endpoint.getDescription();
+            String title = StringUtils.splitLineByLine(description).get(0);
+            String yapiDesc = "";
+            if (endpoint.getIsDeprecated()) {
+                yapiDesc = "> 该接口已被开发者标记为**已废弃**，不建议调用\n";
+            }
+            yapiDesc += "---\n";
+            yapiDesc += "##### 注释\n";
+            yapiDesc += "```\n";
+            yapiDesc += description + "\n";
+            yapiDesc += "```\n";
+            yapiDesc += "##### 开发者\n";
+            yapiDesc += endpoint.getAuthor() + "\n";
+            yapiDesc += "##### 源码\n";
+            yapiDesc += endpoint.getSourceCode() + "\n";
+
             yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""),
-                    endpoint.getRequestBodyJsonSchema(), endpoint.getResponseBodyJsonSchema(),
-                    endpoint.getDescription(), Iterables.getFirst(endpoint.getHttpMethods(), ""),
-                    catIdsEachName.get(endpoint.getGroupNames()));
+                    endpoint.getRequestBodyJsonSchema(), endpoint.getResponseBodyJsonSchema(), yapiDesc,
+                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getGroupNames()));
         }
 
         log.info(handlerCount);
