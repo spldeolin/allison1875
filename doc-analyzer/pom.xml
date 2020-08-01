@@ -37,6 +37,12 @@
             <artifactId>freemarker</artifactId>
         </dependency>
 
+        <!-- flexmark -->
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+        </dependency>
+
         <!-- okhttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>

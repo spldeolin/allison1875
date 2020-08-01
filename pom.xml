@@ -184,6 +184,13 @@
                 <scope>runtime</scope>
             </dependency>
 
+            <!-- flexmark -->
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-all</artifactId>
+                <version>0.62.2</version>
+            </dependency>
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>

@@ -169,10 +169,11 @@ public class MainProcessor {
 
         // 新增接口
         for (EndpointDto endpoint : endpoints) {
-            yApiProcessor.addInterface(StringUtils.splitLineByLine(endpoint.getDescription()).get(0),
-                    Iterables.getFirst(endpoint.getUrls(), ""), endpoint.getRequestBodyJsonSchema(),
-                    endpoint.getResponseBodyJsonSchema(), endpoint.getDescription(),
-                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getGroupNames()));
+            String title = StringUtils.splitLineByLine(endpoint.getDescription()).get(0);
+            yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""),
+                    endpoint.getRequestBodyJsonSchema(), endpoint.getResponseBodyJsonSchema(),
+                    endpoint.getDescription(), Iterables.getFirst(endpoint.getHttpMethods(), ""),
+                    catIdsEachName.get(endpoint.getGroupNames()));
         }
 
         log.info(handlerCount);

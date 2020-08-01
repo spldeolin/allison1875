@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
+import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -100,7 +101,8 @@ public class YApiProcessor {
         form.put("res_body", responseBodyJsonSchema);
         form.put("switch_notice", true);
         form.put("message", "1");
-        form.put("desc", description);
+        form.put("desc", MarkdownUtils.convertToHtml(description));
+        form.put("markdown", description);
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", token);
