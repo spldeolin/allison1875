@@ -9,13 +9,14 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.AnnotatedField;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -27,7 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -169,41 +169,12 @@ class JsgBuildProcessor {
                 return null;
             }
 
-            private AnnotatedType getAnntatedType(AnnotatedElement annotated) {
-                if (annotated instanceof Field) {
-                    return ((Field) annotated).getAnnotatedType();
-                } else if (annotated instanceof Method) {
-                    return ((Method) annotated).getAnnotatedReturnType();
-                }
-                return null;
-            }
-
             @Override
             protected <A extends Annotation> A _findAnnotation(Annotated annotated, Class<A> annoClass) {
                 if (annoClass == JsonSerialize.class) {
                     return null;
                 }
                 return super._findAnnotation(annotated, annoClass);
-            }
-
-            private Class<?> getDeclaringClass(Annotated ann) {
-                if (ann instanceof AnnotatedField) {
-                    return ((AnnotatedField) ann).getDeclaringClass();
-                }
-                if (ann instanceof AnnotatedMethod) {
-                    return ((AnnotatedMethod) ann).getDeclaringClass();
-                }
-                return null;
-            }
-
-            private String getFieldName(Annotated ann) {
-                if (ann instanceof AnnotatedField) {
-                    return ann.getName();
-                }
-                if (ann instanceof AnnotatedMethod) {
-                    return StringUtils.lowerFirstLetter(ann.getName().substring(2));
-                }
-                return null;
             }
 
 //            @Override
@@ -260,7 +231,24 @@ class JsgBuildProcessor {
 
         });
 
-        JsonSchemaGenerator jsg = new JsonSchemaGenerator(om, JsonSchemaUtils.DEFAULT_SCHEMA_FACTORY_WRAPPER);
+        JsonSchemaGenerator jsg = new JsonSchemaGenerator(
+                // OM
+                JsonUtils.initObjectMapper(om), new SchemaFactoryWrapper().setVisitorContext(new VisitorContext() {
+            /**
+             * 多个property是同一个Javabean时
+             * 确保这些property的类型都是ObjectSchema
+             * 而不是一个ObjectSchema外加其他的RefereceSchema
+             */
+            @Override
+            public String addSeenSchemaUri(JavaType aSeenSchema) {
+                return javaTypeToUrn(aSeenSchema);
+            }
+
+            @Override
+            public String javaTypeToUrn(JavaType jt) {
+                return jt.toCanonical();
+            }
+        }));
 
         return jsg;
     }

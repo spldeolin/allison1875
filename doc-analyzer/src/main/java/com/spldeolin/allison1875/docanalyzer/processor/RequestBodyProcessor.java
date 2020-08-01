@@ -9,13 +9,13 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.builder.RequestBodyInfoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.docanalyzer.enums.BodySituationEnum;
+import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -42,7 +42,7 @@ class RequestBodyProcessor {
             ResolvedType requestBody = findRequestBody(handler);
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
-                JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(requestBodyDescribe, jsg);
+                JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
                 builder.requestBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
 
                 if (jsonSchema.isObjectSchema()) {

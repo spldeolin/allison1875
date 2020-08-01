@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
-import com.spldeolin.allison1875.base.util.JsonSchemaUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
@@ -18,6 +17,7 @@ import com.spldeolin.allison1875.docanalyzer.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertyDto;
 import com.spldeolin.allison1875.docanalyzer.enums.BodySituationEnum;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
+import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -48,7 +48,7 @@ class ResponseBodyProcessor {
             ResolvedType responseBody = findResponseBody(controller, handler);
             if (responseBody != null) {
                 responseBodyDescribe = responseBody.describe();
-                JsonSchema jsonSchema = JsonSchemaUtils.generateSchema(responseBodyDescribe, jsg);
+                JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
                 builder.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
 
                 if (jsonSchema.isArraySchema()) {
