@@ -9,7 +9,6 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.builder.RequestBodyInfoBuilder;
@@ -43,7 +42,7 @@ class RequestBodyProcessor {
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
-                builder.requestBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
+                builder.requestBodyJsonSchema(jsonSchema);
 
                 if (jsonSchema.isObjectSchema()) {
                     requestBodySituation = BodySituationEnum.KEY_VALUE;

@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
@@ -34,7 +35,7 @@ public class MarkdownConverter {
 
             // 参数结构
             vo.setRequestBodySituation(endpoint.getRequestBodySituation().getValue());
-            vo.setRequestBodyJsonSchema(endpoint.getRequestBodyJsonSchema());
+            vo.setRequestBodyJsonSchema(JsonUtils.toJsonPrettily(endpoint.getRequestBodyJsonSchema()));
             if (endpoint.getRequestBodyProperties() != null) {
                 boolean isAnyRequestBodyPropertyEnum = false;
                 boolean anyObjectLiekTypeExistInRequestBody = false;
@@ -72,7 +73,7 @@ public class MarkdownConverter {
 
             // 返回值结构
             vo.setResponseBodySituation(endpoint.getResponseBodySituation().getValue());
-            vo.setResponseBodyJsonSchema(endpoint.getResponseBodyJsonSchema());
+            vo.setResponseBodyJsonSchema(JsonUtils.toJsonPrettily(endpoint.getResponseBodyJsonSchema()));
             if (endpoint.getResponseBodyProperties() != null) {
                 Collection<ResponseBodyPropertyVo> propVos = Lists.newArrayList();
                 boolean isAnyResponseBodyPropertyEnum = false;

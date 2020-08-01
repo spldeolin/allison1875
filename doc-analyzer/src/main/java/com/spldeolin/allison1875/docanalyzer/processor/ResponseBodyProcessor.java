@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
-import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
@@ -49,7 +48,7 @@ class ResponseBodyProcessor {
             if (responseBody != null) {
                 responseBodyDescribe = responseBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
-                builder.responseBodyJsonSchema(JsonUtils.toJsonPrettily(jsonSchema));
+                builder.responseBodyJsonSchema(jsonSchema);
 
                 if (jsonSchema.isArraySchema()) {
                     Items items = jsonSchema.asArraySchema().getItems();

@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
@@ -186,7 +187,8 @@ public class MainProcessor {
             yapiDesc += endpoint.getSourceCode() + "\n";
 
             yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""),
-                    endpoint.getRequestBodyJsonSchema(), endpoint.getResponseBodyJsonSchema(), yapiDesc,
+                    JsonUtils.toJson(endpoint.getRequestBodyJsonSchema()),
+                    JsonUtils.toJson(endpoint.getResponseBodyJsonSchema()), yapiDesc,
                     Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getGroupNames()));
         }
 

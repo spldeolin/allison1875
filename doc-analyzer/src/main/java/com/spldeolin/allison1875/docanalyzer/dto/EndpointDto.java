@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.dto;
 
 import java.util.Collection;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.BodySituationEnum;
 import lombok.Data;
@@ -28,10 +29,7 @@ public class EndpointDto {
 
     private BodySituationEnum requestBodySituation;
 
-    /**
-     * requestBodySituation为CHAOS时，不为null，内容是raw json
-     */
-    private String requestBodyJsonSchema;
+    private JsonSchema requestBodyJsonSchema;
 
     /**
      * requestBodySituation为NEITHER时，不为null
@@ -40,10 +38,7 @@ public class EndpointDto {
 
     private BodySituationEnum responseBodySituation;
 
-    /**
-     * responseBodySituation为CHAOS时，不为null，内容是raw json
-     */
-    private String responseBodyJsonSchema;
+    private JsonSchema responseBodyJsonSchema;
 
     /**
      * responseBodySituation为NEITHER时，不为null
