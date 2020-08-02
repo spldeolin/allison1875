@@ -1,18 +1,28 @@
-package com.spldeolin.allison1875.docanalyzer.yapi;
+package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
+import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
+import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
+import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils.EveryJsonSchemaHandler;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
+import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.ProjectGetRespDto;
@@ -37,6 +47,60 @@ public class YApiProcessor {
                 });
         ensureSuccess(resp);
         projectId = resp.getData().getId();
+    }
+
+    public void syncYApi(Collection<EndpointDto> endpoints) {
+        Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
+        catNames.add("回收站");
+        Set<String> yapiCatNames = this.getYapiCatIdsEachName().keySet();
+        this.addCat(Sets.difference(catNames, yapiCatNames));
+        Map<String, Long> catIdsEachName = this.getYapiCatIdsEachName();
+
+        Map<String, JsonNode> yapiUrls = this.listInterfaces();
+        Set<String> urls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
+                .collect(Collectors.toSet());
+
+        // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
+        for (String url : yapiUrls.keySet()) {
+            if (!urls.contains(url)) {
+                this.deleteInterface(yapiUrls.get(url), catIdsEachName.get("回收站"));
+            }
+        }
+
+        // 新增接口
+        for (EndpointDto endpoint : endpoints) {
+            Collection<String> descriptionLines = endpoint.getDescriptionLines();
+            String title = Iterables.getFirst(descriptionLines, null);
+            if (title == null || title.length() == 0) {
+                title = endpoint.getHandlerSimpleName();
+            }
+            String yapiDesc = endpoint.toStringPrettily();
+
+            EveryJsonSchemaHandler everyJsonSchemaHandler = (propertyName, jsonSchema, parentJsonSchema) -> {
+                JsonPropertyDescriptionValueDto jpdv = JsonUtils
+                        .toObjectSkipNull(jsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+                if (jpdv == null) {
+                    return;
+                }
+                jsonSchema.setDescription(jpdv.toStringPrettily());
+            };
+
+            String reqJs = "";
+            JsonSchema requestJsonSchema = endpoint.getRequestBodyJsonSchema();
+            if (requestJsonSchema != null) {
+                JsonSchemaTraverseUtils.traverse(requestJsonSchema, everyJsonSchemaHandler);
+                reqJs = JsonUtils.toJson(requestJsonSchema);
+            }
+            String respJs = "";
+            JsonSchema responseJsonSchema = endpoint.getResponseBodyJsonSchema();
+            if (responseJsonSchema != null) {
+                JsonSchemaTraverseUtils.traverse(responseJsonSchema, everyJsonSchemaHandler);
+                respJs = JsonUtils.toJson(responseJsonSchema);
+            }
+
+            this.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
+                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getCat()));
+        }
     }
 
     public Map<String, Long> getYapiCatIdsEachName() {

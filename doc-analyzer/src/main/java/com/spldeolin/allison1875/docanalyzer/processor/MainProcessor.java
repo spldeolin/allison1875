@@ -2,21 +2,14 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.mutable.MutableInt;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
@@ -26,16 +19,12 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
-import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
-import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils.EveryJsonSchemaHandler;
-import com.spldeolin.allison1875.docanalyzer.yapi.YApiProcessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -77,7 +66,7 @@ public class MainProcessor {
         Collection<EndpointDto> endpoints = Lists.newArrayList();
         MutableInt handlerCount = new MutableInt(0);
 
-        // 再次重头遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
+        // 再次遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
         ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
         controllerIterateProcessor.iterate(controller -> {
 
@@ -132,7 +121,6 @@ public class MainProcessor {
                 builder.cat(handlerCat);
                 builder.handlerSimpleName(controller.getName() + "_" + handler.getName());
                 builder.descriptionLines(JavadocDescriptions.getEveryLine(handler));
-                builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthor(handler));
                 builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
@@ -164,61 +152,12 @@ public class MainProcessor {
             });
         });
 
-        Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
-        catNames.add("回收站");
-        YApiProcessor yApiProcessor = new YApiProcessor();
-        Set<String> yapiCatNames = yApiProcessor.getYapiCatIdsEachName().keySet();
-        yApiProcessor.addCat(Sets.difference(catNames, yapiCatNames));
-        Map<String, Long> catIdsEachName = yApiProcessor.getYapiCatIdsEachName();
-
-        Map<String, JsonNode> yapiUrls = yApiProcessor.listInterfaces();
-        Set<String> urls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
-                .collect(Collectors.toSet());
-
-        // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
-        for (String url : yapiUrls.keySet()) {
-            if (!urls.contains(url)) {
-                yApiProcessor.deleteInterface(yapiUrls.get(url), catIdsEachName.get("回收站"));
-            }
-        }
-
-        // 新增接口
-        for (EndpointDto endpoint : endpoints) {
-            Collection<String> descriptionLines = endpoint.getDescriptionLines();
-            String title = Iterables.getFirst(descriptionLines, null);
-            if (title == null || title.length() == 0) {
-                title = endpoint.getHandlerSimpleName();
-            }
-            String yapiDesc = endpoint.toStringPrettily();
-
-            EveryJsonSchemaHandler everyJsonSchemaHandler = (propertyName, jsonSchema, parentJsonSchema) -> {
-                JsonPropertyDescriptionValueDto jpdv = JsonUtils
-                        .toObjectSkipNull(jsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
-                if (jpdv == null) {
-                    return;
-                }
-                jsonSchema.setDescription(jpdv.toStringPrettily());
-            };
-
-            String reqJs = "";
-            JsonSchema requestJsonSchema = endpoint.getRequestBodyJsonSchema();
-            if (requestJsonSchema != null) {
-                JsonSchemaTraverseUtils.traverse(requestJsonSchema, everyJsonSchemaHandler);
-                reqJs = JsonUtils.toJson(requestJsonSchema);
-            }
-            String respJs = "";
-            JsonSchema responseJsonSchema = endpoint.getResponseBodyJsonSchema();
-            if (responseJsonSchema != null) {
-                JsonSchemaTraverseUtils.traverse(responseJsonSchema, everyJsonSchemaHandler);
-                respJs = JsonUtils.toJson(responseJsonSchema);
-            }
-
-            yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
-                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getCat()));
-        }
+        // 同步到YApi
+        new YApiProcessor().syncYApi(endpoints);
 
         log.info(handlerCount);
     }
+
 
     private String findControllerCat(ClassOrInterfaceDeclaration controller) {
         String controllerCat = findCat(controller);

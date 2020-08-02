@@ -23,8 +23,6 @@ public class EndpointDto {
 
     private Collection<String> httpMethods;
 
-    private String endpointVersion;
-
     private Boolean isDeprecated;
 
     private BodySituationEnum requestBodySituation;

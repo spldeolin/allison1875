@@ -21,8 +21,6 @@ public class EndpointDtoBuilder {
 
     private Collection<String> descriptionLines;
 
-    private String version;
-
     private boolean isDeprecated;
 
     private Collection<String> combinedUrls;
@@ -45,7 +43,6 @@ public class EndpointDtoBuilder {
         result.setUrls(combinedUrls);
         result.setHttpMethods(
                 combinedVerbs.stream().map(one -> StringUtils.lowerCase(one.name())).collect(Collectors.toList()));
-        result.setEndpointVersion(version);
         result.setIsDeprecated(isDeprecated);
         result.setRequestBodySituation(requestBodyInfo.requestBodySituation());
         result.setRequestBodyJsonSchema(requestBodyInfo.requestBodyJsonSchema());
