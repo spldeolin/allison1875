@@ -187,12 +187,22 @@ public class JsonUtils {
      *
      * @throws JsonException 转化失败时，抛出这个Runtime异常，如果需要补偿处理，可以捕获这个异常
      */
-    public static <T> T toParameterizedObject(String json) {
+    public static <T> T toParameterizedObject(String json, TypeReference<T> typeReference) {
+        return toParameterizedObject(json, typeReference, om);
+    }
+
+    /**
+     * JSON -> 参数化的对象
+     *
+     * 示例： Collection<<User<UserAddress>> users = JsonUtils.toParameterizedObject(text);
+     *
+     * @throws JsonException 转化失败时，抛出这个Runtime异常，如果需要补偿处理，可以捕获这个异常
+     */
+    public static <T> T toParameterizedObject(String json, TypeReference<T> typeReference, ObjectMapper om) {
         try {
-            return om.readValue(json, new TypeReference<T>() {
-            });
-        } catch (IOException e) {
-            log.error("json={}", json, e);
+            return om.readValue(json, typeReference);
+        } catch (JsonProcessingException e) {
+            log.error("json={}, typeReference={}", json, typeReference, e);
             throw new JsonException(e);
         }
     }

@@ -259,8 +259,8 @@ public class MainProcessor {
         Collection<String> lines = JavadocDescriptions.getEveryLine(node);
         for (String line : lines) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docCat)) {
-                String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line, docCat);
-                if (StringUtils.isNotBlank(catContent)) {
+                String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line, docCat).trim();
+                if (catContent.length() > 0) {
                     return catContent;
                 }
             }

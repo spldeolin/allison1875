@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer.yapi;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
@@ -34,15 +36,17 @@ public class YApiProcessor {
     }
 
     public Map<String, Long> getYapiCatIdsEachName() {
-        JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(
-                HttpUtils.get(url + "/api/interface/list_menu" + "?token=" + token + "&project_id" + projectId));
+        String json = HttpUtils.get(url + "/api/interface/list_menu" + "?token=" + token + "&project_id" + projectId);
+
+        YApiCommonRespDto<List<InterfaceListMenuRespDto>> resp = JsonUtils
+                .toParameterizedObject(json, new TypeReference<YApiCommonRespDto<List<InterfaceListMenuRespDto>>>() {
+                });
         Map<String, Long> result = Maps.newHashMap();
-        for (JsonNode cat : interfaceListMenuDto) {
-            result.put(cat.get("name").asText(), cat.get("_id").asLong());
+        for (InterfaceListMenuRespDto cat : resp.getData()) {
+            result.put(cat.getName(), cat.getId());
         }
         return result;
     }
-
 
     public void addCat(Collection<String> catNames) {
         for (String catName : catNames) {
