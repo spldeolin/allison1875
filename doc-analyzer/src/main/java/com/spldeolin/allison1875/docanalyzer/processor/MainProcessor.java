@@ -208,7 +208,7 @@ public class MainProcessor {
                             sb.append("\n");
                         }
                     }
-                    comment = sb.toString();
+                    comment = sb.deleteCharAt(sb.length() - 1).toString();
                 }
                 String validatorInfo = null;
                 if (jpdv.getValidators().size() > 0) {
@@ -216,8 +216,7 @@ public class MainProcessor {
                     for (ValidatorDto validator : jpdv.getValidators()) {
                         sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
                     }
-                    sb.deleteCharAt(sb.length() - 1);
-                    validatorInfo = sb.toString();
+                    validatorInfo = sb.deleteCharAt(sb.length() - 1).toString();
                 }
                 String format = null;
                 if (jpdv.getJsonFormatPattern() != null) {
