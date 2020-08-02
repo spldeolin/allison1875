@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.resolution.types.ResolvedType;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.IdUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -53,7 +54,6 @@ class CommonBodyProcessor {
             JsonPropertyDescriptionValueDto jpdv = null;
             try {
                 jpdv = JsonUtils.toObject(childSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
-                childSchema.setDescription(jpdv.toString());
             } catch (Exception ignored) {
             }
 
@@ -104,7 +104,7 @@ class CommonBodyProcessor {
             child.setEnums(enums);
 
             if (jpdv != null) {
-                child.setDescription(jpdv.getDescription());
+                child.setDescription(Joiner.on("，").join(jpdv.getDescriptionLines()));
                 child.setValidators(jpdv.getValidators());
                 child.setDatetimePattern(jpdv.getJsonFormatPattern());
             }

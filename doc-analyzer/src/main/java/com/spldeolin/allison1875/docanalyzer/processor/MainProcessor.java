@@ -6,11 +6,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.mutable.MutableInt;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -27,12 +29,16 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
+import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
+import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
+import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils.EveryJsonSchemaHandler;
 import com.spldeolin.allison1875.docanalyzer.yapi.YApiProcessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -186,9 +192,55 @@ public class MainProcessor {
             yapiDesc += "##### 源码\n";
             yapiDesc += endpoint.getSourceCode() + "\n";
 
-            yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""),
-                    JsonUtils.toJson(endpoint.getRequestBodyJsonSchema()),
-                    JsonUtils.toJson(endpoint.getResponseBodyJsonSchema()), yapiDesc,
+            EveryJsonSchemaHandler everyJsonSchemaHandler = (propertyName, jsonSchema, parentJsonSchema) -> {
+                String raw = jsonSchema.getDescription();
+                if (raw == null) {
+                    return;
+                }
+                JsonPropertyDescriptionValueDto jpdv = JsonUtils.toObject(raw, JsonPropertyDescriptionValueDto.class);
+                String comment = null;
+                if (jpdv.getDescriptionLines().size() > 0) {
+                    StringBuilder sb = new StringBuilder("注释\n");
+                    for (String line : jpdv.getDescriptionLines()) {
+                        if (StringUtils.isNotBlank(line)) {
+                            sb.append("\t").append(line).append("\n");
+                        } else {
+                            sb.append("\n");
+                        }
+                    }
+                    comment = sb.toString();
+                }
+                String validatorInfo = null;
+                if (jpdv.getValidators().size() > 0) {
+                    StringBuilder sb = new StringBuilder("校验项\n");
+                    for (ValidatorDto validator : jpdv.getValidators()) {
+                        sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    validatorInfo = sb.toString();
+                }
+                String format = null;
+                if (jpdv.getJsonFormatPattern() != null) {
+                    format = "格式\n";
+                    format += "\t" + jpdv.getJsonFormatPattern();
+                }
+                jsonSchema.setDescription(Joiner.on("\n\n").skipNulls().join(comment, validatorInfo, format));
+            };
+
+            String reqJs = "";
+            JsonSchema requestJsonSchema = endpoint.getRequestBodyJsonSchema();
+            if (requestJsonSchema != null) {
+                JsonSchemaTraverseUtils.traverse(requestJsonSchema, everyJsonSchemaHandler);
+                reqJs = JsonUtils.toJson(requestJsonSchema);
+            }
+            String respJs = "";
+            JsonSchema responseJsonSchema = endpoint.getResponseBodyJsonSchema();
+            if (responseJsonSchema != null) {
+                JsonSchemaTraverseUtils.traverse(responseJsonSchema, everyJsonSchemaHandler);
+                respJs = JsonUtils.toJson(responseJsonSchema);
+            }
+
+            yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
                     Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getGroupNames()));
         }
 

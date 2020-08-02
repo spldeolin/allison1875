@@ -78,7 +78,7 @@ class JsgBuildProcessor {
     private void collectEnumDescription(EnumDeclaration ed, Table<String, String, String> table) {
         String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         ed.getEntries().forEach(entry -> {
-            String comment = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(entry, "，"), 4096);
+            String comment = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(entry, "\n"), 4096);
             table.put(qualifier, entry.getNameAsString(), comment);
         });
     }
@@ -93,9 +93,10 @@ class JsgBuildProcessor {
                 String varName = var.getNameAsString();
                 String description = specificFieldDescriptions.get(javabeanQualifier, varName);
                 if (description == null) {
-                    description = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(field, "，"), 4096);
+                    jpdv.setDescriptionLines(JavadocDescriptions.getEveryLine(field));
+                } else {
+                    jpdv.setDescriptionLines(Lists.newArrayList(description));
                 }
-                jpdv.setDescription(description);
                 table.put(javabeanQualifier, varName, jpdv);
             }
         }
@@ -145,7 +146,7 @@ class JsgBuildProcessor {
                     }
                 }
 
-                JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(clazz, JsonFormat.class);
+                JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(field, JsonFormat.class);
                 if (jsonFormat != null) {
                     jpdv.setJsonFormatPattern(jsonFormat.pattern());
                 }
