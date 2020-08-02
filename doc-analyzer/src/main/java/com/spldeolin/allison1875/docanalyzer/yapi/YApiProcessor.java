@@ -10,8 +10,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
+import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
+import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
+import com.spldeolin.allison1875.docanalyzer.yapi.javabean.ProjectGetRespDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -20,27 +24,28 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class YApiProcessor {
 
-    final String url = "http://localhost:3000";
+    private static final String url = DocAnalyzerConfig.getInstance().getYapiUrl();
 
-    final String token = "c43cae37d890bc0cbef59cd2bb1b4066c7877f181f9fed44dce646da1fa142ea";
+    private static final String token = DocAnalyzerConfig.getInstance().getYapiToken();
 
-    final Long projectId;
+    private static final Long projectId;
 
-    public YApiProcessor() {
-        JsonNode projectGetDto = ensureSusscessAndToGetData(
-                HttpUtils.get(url + "/api/project/get" + "?token=" + token));
-        if (projectGetDto == null) {
-            throw new RuntimeException("YApi project absent.");
-        }
-        projectId = projectGetDto.get("_id").asLong();
+    static {
+        String json = HttpUtils.get(url + "/api/project/get?token=" + token);
+        CommonRespDto<ProjectGetRespDto> resp = JsonUtils
+                .toParameterizedObject(json, new TypeReference<CommonRespDto<ProjectGetRespDto>>() {
+                });
+        ensureSuccess(resp);
+        projectId = resp.getData().getId();
     }
 
     public Map<String, Long> getYapiCatIdsEachName() {
-        String json = HttpUtils.get(url + "/api/interface/list_menu" + "?token=" + token + "&project_id" + projectId);
-
-        YApiCommonRespDto<List<InterfaceListMenuRespDto>> resp = JsonUtils
-                .toParameterizedObject(json, new TypeReference<YApiCommonRespDto<List<InterfaceListMenuRespDto>>>() {
+        String json = HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId);
+        CommonRespDto<List<InterfaceListMenuRespDto>> resp = JsonUtils
+                .toParameterizedObject(json, new TypeReference<CommonRespDto<List<InterfaceListMenuRespDto>>>() {
                 });
+        ensureSuccess(resp);
+
         Map<String, Long> result = Maps.newHashMap();
         for (InterfaceListMenuRespDto cat : resp.getData()) {
             result.put(cat.getName(), cat.getId());
@@ -62,7 +67,7 @@ public class YApiProcessor {
 
     public Map<String, JsonNode> listInterfaces() {
         JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(
-                HttpUtils.get(url + "/api/interface/list_menu" + "?token=" + token + "&project_id" + projectId));
+                HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId));
 
         Map<String, JsonNode> result = Maps.newHashMap();
         for (JsonNode jsonNode : interfaceListMenuDto) {
@@ -136,6 +141,12 @@ public class YApiProcessor {
             log.error(e);
         }
         return null;
+    }
+
+    private static void ensureSuccess(CommonRespDto<?> resp) throws YapiException {
+        if (resp.getCode() != 0) {
+            throw new YapiException(resp.getErrmsg());
+        }
     }
 
 }

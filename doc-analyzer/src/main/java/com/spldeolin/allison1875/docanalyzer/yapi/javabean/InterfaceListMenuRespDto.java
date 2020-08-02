@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.yapi;
+package com.spldeolin.allison1875.docanalyzer.yapi.javabean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -13,5 +13,7 @@ public class InterfaceListMenuRespDto {
     private Long id;
 
     private String name;
+
+    // and more...
 
 }
