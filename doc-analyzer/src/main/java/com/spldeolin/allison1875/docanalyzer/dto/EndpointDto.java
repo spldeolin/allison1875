@@ -15,7 +15,7 @@ public class EndpointDto {
     /**
      * 所在组的名称，如果是多层组的话，名称间使用半角句号分割
      */
-    private String groupNames;
+    private String cat;
 
     private String description;
 

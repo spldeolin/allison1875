@@ -22,18 +22,25 @@ public class JavadocDescriptions {
     }
 
     /**
-     * 获取Javadoc中注释部分的第一行
+     * 获取Javadoc中注释部分的第一行（经trim）
      */
-    public static String getFirstLine(Javadoc javadoc) {
+    public static String getTrimmedFirstLine(Javadoc javadoc, boolean emptyToNull) {
         Collection<String> strings = getEveryLine(javadoc);
-        return Iterables.getFirst(strings, "");
+        String result = Iterables.getFirst(strings, null);
+        if (result != null) {
+            result = result.trim();
+            if (emptyToNull && result.length() == 0) {
+                return null;
+            }
+        }
+        return result;
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getFirstLine(com.github.javaparser.javadoc.Javadoc)}
+     * 重载自 {@linkplain JavadocDescriptions#getTrimmedFirstLine(com.github.javaparser.javadoc.Javadoc)}
      */
-    public static String getFirstLine(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(JavadocDescriptions::getFirstLine).orElse("");
+    public static String getTrimmedFirstLine(NodeWithJavadoc<?> node, boolean emptyToNull) {
+        return node.getJavadoc().map(jd -> getTrimmedFirstLine(jd, emptyToNull)).orElse(null);
     }
 
     /**

@@ -8,15 +8,13 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
-import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
@@ -51,6 +49,10 @@ import lombok.extern.log4j.Log4j2;
 @Accessors(fluent = true)
 public class MainProcessor {
 
+    private final static String docIgnore = "doc-ignore";
+
+    private final static String docCat = "doc-cat";
+
     @Setter
     private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
             new DefaultObtainConcernedResponseBodyStrategy();
@@ -79,7 +81,7 @@ public class MainProcessor {
         ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
         controllerIterateProcessor.iterate(controller -> {
 
-            // DOC-IGNORE标志
+            // doc-ignore标志
             if (findIgnoreFlag(controller)) {
                 return;
             }
@@ -96,9 +98,8 @@ public class MainProcessor {
             Map<String, MethodDeclaration> methodsByShortestQualifier = new MethodCollectProcessor()
                     .collectMethods(controller);
 
-            // 收集分组信息
-            EndpointDtoBuilder builder = new EndpointDtoBuilder();
-            builder.groupNames(findGroupNames(controller));
+            // doc-cat标志
+            String controllerCat = findControllerCat(controller);
 
             // 处理@RequestMapping（controller的RequestMapping）
             RequestMappingProcessor requestMappingProcessor = new RequestMappingProcessor(controllerClass);
@@ -115,12 +116,20 @@ public class MainProcessor {
                     return;
                 }
 
-                // DOC-IGNORE标志
+                // doc-ignore标志
                 if (findIgnoreFlag(handler)) {
                     return;
                 }
 
+                // doc-cat标志
+                String handlerCat = findCat(handler);
+                if (handlerCat == null) {
+                    handlerCat = controllerCat;
+                }
+
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
+                EndpointDtoBuilder builder = new EndpointDtoBuilder();
+                builder.cat(handlerCat);
                 builder.description(getDescriptionOrElseName(controller, handler));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
@@ -154,7 +163,7 @@ public class MainProcessor {
             });
         });
 
-        Set<String> catNames = endpoints.stream().map(EndpointDto::getGroupNames).collect(Collectors.toSet());
+        Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
         catNames.add("回收站");
         YApiProcessor yApiProcessor = new YApiProcessor();
         Set<String> yapiCatNames = yApiProcessor.getYapiCatIdsEachName().keySet();
@@ -213,10 +222,21 @@ public class MainProcessor {
             }
 
             yApiProcessor.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
-                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getGroupNames()));
+                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getCat()));
         }
 
         log.info(handlerCount);
+    }
+
+    private String findControllerCat(ClassOrInterfaceDeclaration controller) {
+        String controllerCat = findCat(controller);
+        if (controllerCat == null) {
+            controllerCat = JavadocDescriptions.getTrimmedFirstLine(controller, true);
+        }
+        if (controllerCat == null) {
+            controllerCat = controller.getNameAsString();
+        }
+        return controllerCat;
     }
 
     private String getDescriptionOrElseName(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
@@ -235,34 +255,22 @@ public class MainProcessor {
         return !author.contains(filterByAuthorName);
     }
 
-    private String findGroupNames(ClassOrInterfaceDeclaration controller) {
-        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        String result = null;
-        for (Comment oc : cu.getOrphanComments()) {
-            if (oc.isLineComment() && StringUtils.lowerCase(oc.getContent().trim()).startsWith("doc-group")) {
-                result = oc.getContent().substring("doc-group".length() + 1).trim();
-                break;
+    private String findCat(NodeWithJavadoc<?> node) {
+        Collection<String> lines = JavadocDescriptions.getEveryLine(node);
+        for (String line : lines) {
+            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docCat)) {
+                String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line, docCat);
+                if (StringUtils.isNotBlank(catContent)) {
+                    return catContent;
+                }
             }
         }
-        if (StringUtils.isBlank(result)) {
-            result = "未分类";
-        }
-        return result;
+        return null;
     }
 
-    private boolean findIgnoreFlag(ClassOrInterfaceDeclaration controller) {
-        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        for (Comment oc : cu.getOrphanComments()) {
-            if (oc.isLineComment() && StringUtils.lowerCase(oc.getContent().trim()).startsWith("doc-ignore")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean findIgnoreFlag(MethodDeclaration handler) {
-        for (String line : JavadocDescriptions.getEveryLine(handler)) {
-            if (line.equalsIgnoreCase("doc-ignore")) {
+    private boolean findIgnoreFlag(NodeWithJavadoc<?> node) {
+        for (String line : JavadocDescriptions.getEveryLine(node)) {
+            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docIgnore)) {
                 return true;
             }
         }

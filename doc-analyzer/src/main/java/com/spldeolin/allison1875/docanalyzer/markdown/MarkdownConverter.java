@@ -115,7 +115,7 @@ public class MarkdownConverter {
             String fileName =
                     Iterables.getFirst(StringUtils.splitLineByLine(description), uriFirstLine).replace('/', '-')
                             + ".md";
-            String groupNames = endpoint.getGroupNames();
+            String groupNames = endpoint.getCat();
             File dir = Paths.get(DocAnalyzerConfig.getInstance().getDocOutputDirectoryPath())
                     .resolve(groupNames.replace('.', File.separatorChar)).toFile();
             if (!dir.exists()) {
