@@ -198,6 +198,8 @@ public class MainProcessor {
             yapiDesc += endpoint.getAuthor() + "\n";
             yapiDesc += "##### 源码\n";
             yapiDesc += endpoint.getSourceCode() + "\n";
+            yapiDesc += "\n---\n";
+            yapiDesc += "*该YApi文档由Allison 1875生成，请勿人为修改*";
 
             EveryJsonSchemaHandler everyJsonSchemaHandler = (propertyName, jsonSchema, parentJsonSchema) -> {
                 JsonPropertyDescriptionValueDto jpdv = JsonUtils
