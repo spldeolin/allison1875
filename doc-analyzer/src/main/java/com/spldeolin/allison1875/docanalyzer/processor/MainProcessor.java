@@ -126,7 +126,7 @@ public class MainProcessor {
                 builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
 
                 // 根据作者名过滤
-                if (notContainAuthorNameFromConfig(builder.author())) {
+                if (filterByConfig(builder.author())) {
                     return;
                 }
 
@@ -170,7 +170,7 @@ public class MainProcessor {
         return controllerCat;
     }
 
-    private boolean notContainAuthorNameFromConfig(String author) {
+    private boolean filterByConfig(String author) {
         String filterByAuthorName = DocAnalyzerConfig.getInstance().getFilterByAuthorName();
         if (StringUtils.isEmpty(filterByAuthorName)) {
             return false;
