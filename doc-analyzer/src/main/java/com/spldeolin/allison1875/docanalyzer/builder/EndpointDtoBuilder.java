@@ -17,7 +17,9 @@ public class EndpointDtoBuilder {
 
     private String cat;
 
-    private String description;
+    private String handlerSimpleName;
+
+    private Collection<String> descriptionLines;
 
     private String version;
 
@@ -38,7 +40,8 @@ public class EndpointDtoBuilder {
     public EndpointDto build() {
         EndpointDto result = new EndpointDto();
         result.setCat(cat);
-        result.setDescription(description);
+        result.setHandlerSimpleName(handlerSimpleName);
+        result.setDescriptionLines(descriptionLines);
         result.setUrls(combinedUrls);
         result.setHttpMethods(
                 combinedVerbs.stream().map(one -> StringUtils.lowerCase(one.name())).collect(Collectors.toList()));

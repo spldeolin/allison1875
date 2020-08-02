@@ -31,7 +31,7 @@ public class MarkdownConverter {
             // 概要
             vo.setUri(Joiner.on("\n").join(endpoint.getUrls()));
             vo.setHttpMethod(Joiner.on("\n").join(endpoint.getHttpMethods()));
-            vo.setDescription(endpoint.getDescription());
+            vo.setDescription(Joiner.on("\n").join(endpoint.getDescriptionLines()));
 
             // 参数结构
             vo.setRequestBodySituation(endpoint.getRequestBodySituation().getValue());

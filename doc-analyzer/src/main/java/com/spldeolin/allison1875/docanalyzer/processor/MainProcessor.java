@@ -130,7 +130,8 @@ public class MainProcessor {
                 // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
                 EndpointDtoBuilder builder = new EndpointDtoBuilder();
                 builder.cat(handlerCat);
-                builder.description(getDescriptionOrElseName(controller, handler));
+                builder.handlerSimpleName(controller.getName() + "_" + handler.getName());
+                builder.descriptionLines(JavadocDescriptions.getEveryLine(handler));
                 builder.version("");
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthor(handler));
@@ -183,23 +184,12 @@ public class MainProcessor {
 
         // 新增接口
         for (EndpointDto endpoint : endpoints) {
-            String description = endpoint.getDescription();
-            String title = StringUtils.splitLineByLine(description).get(0);
-            String yapiDesc = "";
-            if (endpoint.getIsDeprecated()) {
-                yapiDesc = "> 该接口已被开发者标记为**已废弃**，不建议调用\n";
+            Collection<String> descriptionLines = endpoint.getDescriptionLines();
+            String title = Iterables.getFirst(descriptionLines, null);
+            if (title == null || title.length() == 0) {
+                title = endpoint.getHandlerSimpleName();
             }
-            yapiDesc += "---\n";
-            yapiDesc += "##### 注释\n";
-            yapiDesc += "```\n";
-            yapiDesc += description + "\n";
-            yapiDesc += "```\n";
-            yapiDesc += "##### 开发者\n";
-            yapiDesc += endpoint.getAuthor() + "\n";
-            yapiDesc += "##### 源码\n";
-            yapiDesc += endpoint.getSourceCode() + "\n";
-            yapiDesc += "\n---\n";
-            yapiDesc += "*该YApi文档由Allison 1875生成，请勿人为修改*";
+            String yapiDesc = endpoint.toStringPrettily();
 
             EveryJsonSchemaHandler everyJsonSchemaHandler = (propertyName, jsonSchema, parentJsonSchema) -> {
                 JsonPropertyDescriptionValueDto jpdv = JsonUtils
@@ -239,14 +229,6 @@ public class MainProcessor {
             controllerCat = controller.getNameAsString();
         }
         return controllerCat;
-    }
-
-    private String getDescriptionOrElseName(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        String result = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(handler, "\n"), 4096);
-        if (StringUtils.isBlank(result)) {
-            result = controller.getNameAsString() + "_" + handler.getNameAsString();
-        }
-        return result;
     }
 
     private boolean notContainAuthorNameFromConfig(String author) {

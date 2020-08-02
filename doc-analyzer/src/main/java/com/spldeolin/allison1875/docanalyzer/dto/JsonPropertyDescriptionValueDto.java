@@ -30,7 +30,7 @@ public class JsonPropertyDescriptionValueDto {
     public String toStringPrettily() {
         String comment = null;
         if (descriptionLines.size() > 0) {
-            StringBuilder sb = new StringBuilder("注释\n");
+            StringBuilder sb = new StringBuilder();
             for (String line : descriptionLines) {
                 if (StringUtils.isNotBlank(line)) {
                     sb.append("\t").append(line).append("\n");
@@ -38,7 +38,11 @@ public class JsonPropertyDescriptionValueDto {
                     sb.append("\n");
                 }
             }
-            comment = sb.deleteCharAt(sb.length() - 1).toString();
+            // sb并不是只有换号符时
+            if (StringUtils.isNotBlank(sb)) {
+                sb.insert(0, "注释\n");
+                comment = sb.deleteCharAt(sb.length() - 1).toString();
+            }
         }
         String validatorInfo = null;
         if (validators.size() > 0) {
