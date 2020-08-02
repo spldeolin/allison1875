@@ -24,8 +24,7 @@ public class MarkdownConverter {
 
     private static final String horizontalLine = "-";
 
-    public void convert(Collection<EndpointDto> endpoints, boolean alsoSendToShowdoc) {
-        int sequence = 0;
+    public void convert(Collection<EndpointDto> endpoints) {
         for (EndpointDto endpoint : endpoints) {
             EndpointVo vo = new EndpointVo();
             // 概要
