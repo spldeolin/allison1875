@@ -23,8 +23,6 @@ public class JavadocDescriptions {
 
     /**
      * 获取Javadoc中注释部分的第一行
-     *
-     * @return trim()后的字符串，或者""
      */
     public static String getFirstLine(Javadoc javadoc) {
         Collection<String> strings = getEveryLine(javadoc);
@@ -40,8 +38,6 @@ public class JavadocDescriptions {
 
     /**
      * 获取Javadoc中注释部分的每一行，并使用参数sep拼接成一行
-     *
-     * @return trim()后的字符串，或者""
      */
     public static String getEveryLineInOne(Javadoc javadoc, String sep) {
         return Joiner.on(sep).join(getEveryLine(javadoc));
@@ -56,8 +52,6 @@ public class JavadocDescriptions {
 
     /**
      * 获取Javadoc中注释部分的每一行
-     *
-     * @retrun 每个String均已trim()
      */
     public static Collection<String> getEveryLine(Javadoc javadoc) {
         JavadocDescription description = javadoc.getDescription();
@@ -73,12 +67,10 @@ public class JavadocDescriptions {
 
     /**
      * 获取Javadoc中注释部分的每一行
-     * @return 每个String均已trim()
      */
     public static Collection<String> getEveryLine(JavadocDescription description) {
         String rawComment = description.toText();
         List<String> lines = StringUtils.splitLineByLine(rawComment);
-        lines.replaceAll(String::trim);
         return lines;
     }
 
