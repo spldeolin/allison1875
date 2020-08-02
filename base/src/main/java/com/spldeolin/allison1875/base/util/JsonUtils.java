@@ -136,6 +136,27 @@ public class JsonUtils {
     }
 
     /**
+     * 将JSON转化为对象，如果参数json是null，则跳过转化直接返回null
+     *
+     * @throws JsonException 转化失败时，抛出这个Runtime异常，如果需要补偿处理，可以捕获这个异常
+     */
+    public static <T> T toObjectSkipNull(String json, Class<T> clazz) {
+        return toObjectSkipNull(json, clazz, om);
+    }
+
+    /**
+     * 将JSON转化为对象，如果参数json是null，则跳过转化直接返回null
+     *
+     * @throws JsonException 转化失败时，抛出这个Runtime异常，如果需要补偿处理，可以捕获这个异常
+     */
+    public static <T> T toObjectSkipNull(String json, Class<T> clazz, ObjectMapper om) {
+        if (json == null) {
+            return null;
+        }
+        return toObject(json, clazz, om);
+    }
+
+    /**
      * 将JSON转化为对象列表
      *
      * @throws JsonException 转化失败时，抛出这个Runtime异常，如果需要补偿处理，可以捕获这个异常

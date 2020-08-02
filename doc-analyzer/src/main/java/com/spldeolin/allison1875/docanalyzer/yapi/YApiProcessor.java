@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
 import lombok.extern.log4j.Log4j2;
@@ -73,15 +74,25 @@ public class YApiProcessor {
             // 已在"回收站"分类中
             return;
         }
+        Long id = jsonNode.get("_id").asLong();
+
+        JsonNode detail = ensureSusscessAndToGetData(
+                HttpUtils.get(url + "/api/interface/get?id=" + id + "&token=" + token));
+
         Map<String, Object> form = Maps.newHashMap();
-        form.put("id", jsonNode.get("_id").asLong());
+        form.put("id", id);
         form.put("catid", recycleBinCatId);
         String desc = "";
-        JsonNode descNode = jsonNode.get("desc");
+        JsonNode descNode = detail.get("desc");
         if (descNode != null) {
             desc = descNode.asText();
         }
-        form.put("desc", "<h1 align='center' style='color:red'>这个URL已不再使用</h1>" + desc);
+        String deleteMessage = MarkdownUtils.convertToHtml("> 该接口已被删除，或是它的URL已被更改，**禁止调用**\n");
+        deleteMessage = StringUtils
+                .replaceLast(deleteMessage, "<strong>", "<span style='background:black;color:#FFD9E6'>");
+        deleteMessage = StringUtils.replaceLast(deleteMessage, "</strong>", "</span>");
+
+        form.put("desc", deleteMessage + desc);
         form.put("token", token);
         String resp = HttpUtils.postForm(url + "/api/interface/up", form);
         log.info(resp);

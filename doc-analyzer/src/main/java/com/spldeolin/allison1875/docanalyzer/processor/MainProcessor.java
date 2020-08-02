@@ -12,7 +12,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -30,7 +29,6 @@ import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
@@ -193,37 +191,12 @@ public class MainProcessor {
             yapiDesc += endpoint.getSourceCode() + "\n";
 
             EveryJsonSchemaHandler everyJsonSchemaHandler = (propertyName, jsonSchema, parentJsonSchema) -> {
-                String raw = jsonSchema.getDescription();
-                if (raw == null) {
+                JsonPropertyDescriptionValueDto jpdv = JsonUtils
+                        .toObjectSkipNull(jsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+                if (jpdv == null) {
                     return;
                 }
-                JsonPropertyDescriptionValueDto jpdv = JsonUtils.toObject(raw, JsonPropertyDescriptionValueDto.class);
-                String comment = null;
-                if (jpdv.getDescriptionLines().size() > 0) {
-                    StringBuilder sb = new StringBuilder("注释\n");
-                    for (String line : jpdv.getDescriptionLines()) {
-                        if (StringUtils.isNotBlank(line)) {
-                            sb.append("\t").append(line).append("\n");
-                        } else {
-                            sb.append("\n");
-                        }
-                    }
-                    comment = sb.deleteCharAt(sb.length() - 1).toString();
-                }
-                String validatorInfo = null;
-                if (jpdv.getValidators().size() > 0) {
-                    StringBuilder sb = new StringBuilder("校验项\n");
-                    for (ValidatorDto validator : jpdv.getValidators()) {
-                        sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
-                    }
-                    validatorInfo = sb.deleteCharAt(sb.length() - 1).toString();
-                }
-                String format = null;
-                if (jpdv.getJsonFormatPattern() != null) {
-                    format = "格式\n";
-                    format += "\t" + jpdv.getJsonFormatPattern();
-                }
-                jsonSchema.setDescription(Joiner.on("\n\n").skipNulls().join(comment, validatorInfo, format));
+                jsonSchema.setDescription(jpdv.toStringPrettily());
             };
 
             String reqJs = "";
