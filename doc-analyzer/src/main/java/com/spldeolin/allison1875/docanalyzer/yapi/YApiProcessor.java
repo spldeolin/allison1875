@@ -125,7 +125,7 @@ public class YApiProcessor {
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", token);
-        String resp = HttpUtils.postForm(this.url + "/api/interface/save", form);
+        String resp = HttpUtils.postForm(YApiProcessor.url + "/api/interface/save", form);
         log.info(resp);
     }
 
@@ -144,7 +144,7 @@ public class YApiProcessor {
     }
 
     private static void ensureSuccess(CommonRespDto<?> resp) throws YapiException {
-        if (resp.getCode() != 0) {
+        if (resp.getErrcode() != 0) {
             throw new YapiException(resp.getErrmsg());
         }
     }

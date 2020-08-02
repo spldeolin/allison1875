@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class CommonRespDto<T> {
 
-    private Integer code;
+    private Integer errcode;
 
     private String errmsg;
 
