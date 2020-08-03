@@ -16,6 +16,4 @@ public class ResponseBodyPropertyVo {
 
     private String detailedJsonType;
 
-    private String enums;
-
 }

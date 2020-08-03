@@ -19,7 +19,6 @@ import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -50,8 +49,6 @@ class JsgBuildProcessor {
 
     private final Table<String, String, String> specificFieldDescriptions;
 
-    private final Table<String, String, String> enumDescriptions = HashBasedTable.create();
-
     private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
     public JsgBuildProcessor(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
@@ -69,18 +66,9 @@ class JsgBuildProcessor {
     private void analyze(AstForest astForest) {
         for (CompilationUnit cu : astForest) {
             for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
-                td.ifEnumDeclaration(ed -> collectEnumDescription(ed, enumDescriptions));
                 td.ifClassOrInterfaceDeclaration(coid -> collectPropertyDescriptions(coid, jpdvs));
             }
         }
-    }
-
-    private void collectEnumDescription(EnumDeclaration ed, Table<String, String, String> table) {
-        String qualifier = ed.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        ed.getEntries().forEach(entry -> {
-            String comment = StringUtils.limitLength(JavadocDescriptions.getEveryLineInOne(entry, "\n"), 4096);
-            table.put(qualifier, entry.getNameAsString(), comment);
-        });
     }
 
     private void collectPropertyDescriptions(ClassOrInterfaceDeclaration coid,
@@ -177,58 +165,6 @@ class JsgBuildProcessor {
                 }
                 return super._findAnnotation(annotated, annoClass);
             }
-
-//            @Override
-//            public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-//                String[] result = new String[enumValues.length];
-//
-//                Field codeField = getFirstPropertyField(enumType);
-//                if (codeField == null) {
-//                    // has no field any more.
-//                    return super.findEnumValues(enumType, enumValues, names);
-//                }
-//
-//                Field descriptionField = null;
-//                try {
-//                    descriptionField = enumType.getDeclaredField("description");
-//                    descriptionField.setAccessible(true);
-//                } catch (NoSuchFieldException e) {
-//                    try {
-//                        descriptionField = enumType.getDeclaredField("desc");
-//                        descriptionField.setAccessible(true);
-//                    } catch (NoSuchFieldException ignore) {
-//                        // just enough
-//                    }
-//                }
-//
-//                codeField.setAccessible(true);
-//                for (int i = 0; i < enumValues.length; i++) {
-//                    try {
-//                        String code = codeField.get(enumValues[i]).toString();
-//                        EnumDto cad = new EnumDto();
-//                        cad.setCode(code);
-//                        if (descriptionField != null) {
-//                            cad.setMeaning(descriptionField.get(enumValues[i]).toString());
-//                        } else {
-//                            cad.setMeaning(
-//                                    enumDescriptions.get(enumType.getName().replace('$', '.'), enumValues[i].name()));
-//                        }
-//                        result[i] = JsonUtils.toJson(cad);
-//                    } catch (IllegalAccessException e) {
-//                        // impossible unless bug
-//                        return super.findEnumValues(enumType, enumValues, names);
-//                    }
-//                }
-//                return result;
-//            }
-//            private Field getFirstPropertyField(Class<?> enumType) {
-//                for (Field declaredField : enumType.getDeclaredFields()) {
-//                    if (declaredField.getType() != enumType) {
-//                        return declaredField;
-//                    }
-//                }
-//                return null;
-//            }
 
         });
 

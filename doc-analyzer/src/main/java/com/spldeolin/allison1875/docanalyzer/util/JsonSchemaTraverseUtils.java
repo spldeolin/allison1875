@@ -38,6 +38,9 @@ public class JsonSchemaTraverseUtils {
     private static void traverseArray(ArraySchema arraySchema, EveryJsonSchemaHandler handler,
             JsonSchema parentJsonSchema) {
         Items items = arraySchema.getItems();
+        if (items == null) {
+            return;
+        }
         if (items.isArrayItems()) {
             // Java没有tuple语法，所以这个情况不可能存在
             for (JsonSchema tupleElementJsonSchema : items.asArrayItems().getJsonSchemas()) {

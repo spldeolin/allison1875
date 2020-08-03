@@ -31,8 +31,6 @@ public class PropertyDto {
 
     private Boolean isEnum;
 
-    private Collection<EnumDto> enums;
-
     private Collection<ValidatorDto> validators;
 
     /**
@@ -54,8 +52,6 @@ public class PropertyDto {
         result.setJsonType(treeNode.getJsonType());
         result.setIsFloat(treeNode.getIsFloat());
         result.setDatetimePattern(treeNode.getDatetimePattern());
-        result.setIsEnum(treeNode.getIsEnum());
-        result.setEnums(treeNode.getEnums());
         result.setValidators(treeNode.getValidators());
         if (treeNode.getParent() != null) {
             result.setParentId(treeNode.getParent().getId());

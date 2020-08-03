@@ -18,6 +18,4 @@ public class RequestBodyPropertyVo {
 
     private String validators;
 
-    private String enums;
-
 }

@@ -30,10 +30,6 @@ public class PropertyTreeNodeDto {
 
     private String datetimePattern;
 
-    private Boolean isEnum;
-
-    private Collection<EnumDto> enums;
-
     private Collection<ValidatorDto> validators;
 
     private PropertyTreeNodeDto parent;

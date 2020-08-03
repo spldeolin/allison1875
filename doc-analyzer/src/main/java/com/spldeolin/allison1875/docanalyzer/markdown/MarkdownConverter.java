@@ -11,7 +11,6 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.dto.EnumDto;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertyDto;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +35,6 @@ public class MarkdownConverter {
             vo.setRequestBodySituation(endpoint.getRequestBodySituation().getValue());
             vo.setRequestBodyJsonSchema(JsonUtils.toJsonPrettily(endpoint.getRequestBodyJsonSchema()));
             if (endpoint.getRequestBodyProperties() != null) {
-                boolean isAnyRequestBodyPropertyEnum = false;
                 boolean anyObjectLiekTypeExistInRequestBody = false;
                 Collection<RequestBodyPropertyVo> propVos = Lists.newArrayList();
                 for (PropertyDto dto : endpoint.getRequestBodyProperties()) {
@@ -53,19 +51,12 @@ public class MarkdownConverter {
                     }
                     propVo.setDetailedJsonType(fullJsonType);
                     propVo.setValidators(convertValidators(dto.getValidators()));
-                    if (Boolean.TRUE.equals(dto.getIsEnum())) {
-                        isAnyRequestBodyPropertyEnum = true;
-                        propVo.setEnums(convertEnums(dto.getEnums()));
-                    } else {
-                        propVo.setEnums("-");
-                    }
                     if (dto.getJsonType().isObjectLike()) {
                         anyObjectLiekTypeExistInRequestBody = true;
                     }
                     propVos.add(propVo);
                 }
                 vo.setRequestBodyProperties(propVos);
-                vo.setIsAnyRequestBodyPropertyEnum(isAnyRequestBodyPropertyEnum);
                 vo.setAnyObjectLiekTypeExistInRequestBody(anyObjectLiekTypeExistInRequestBody);
                 vo.setAnyValidatorsExist(propVos.stream().anyMatch(one -> !horizontalLine.equals(one.getValidators())));
             }
@@ -75,7 +66,6 @@ public class MarkdownConverter {
             vo.setResponseBodyJsonSchema(JsonUtils.toJsonPrettily(endpoint.getResponseBodyJsonSchema()));
             if (endpoint.getResponseBodyProperties() != null) {
                 Collection<ResponseBodyPropertyVo> propVos = Lists.newArrayList();
-                boolean isAnyResponseBodyPropertyEnum = false;
                 boolean anyObjectLiekTypeExistInResponseBody = false;
                 for (PropertyDto dto : endpoint.getResponseBodyProperties()) {
                     ResponseBodyPropertyVo propVo = new ResponseBodyPropertyVo();
@@ -90,19 +80,12 @@ public class MarkdownConverter {
                         fullJsonType += " (" + dto.getDatetimePattern() + ")";
                     }
                     propVo.setDetailedJsonType(fullJsonType);
-                    if (Boolean.TRUE.equals(dto.getIsEnum())) {
-                        isAnyResponseBodyPropertyEnum = true;
-                        propVo.setEnums(convertEnums(dto.getEnums()));
-                    } else {
-                        propVo.setEnums("-");
-                    }
                     if (dto.getJsonType().isObjectLike()) {
                         anyObjectLiekTypeExistInResponseBody = true;
                     }
                     propVos.add(propVo);
                 }
                 vo.setResponseBodyProperties(propVos);
-                vo.setIsAnyResponseBodyPropertyEnum(isAnyResponseBodyPropertyEnum);
                 vo.setAnyObjectLiekTypeExistInResponseBody(anyObjectLiekTypeExistInResponseBody);
             }
 
@@ -131,18 +114,6 @@ public class MarkdownConverter {
             }
         }
 
-    }
-
-    private String convertEnums(Collection<EnumDto> enums) {
-        StringBuilder sb = new StringBuilder(64);
-        for (EnumDto anEnum : enums) {
-            sb.append(anEnum.getCode());
-            sb.append("-");
-            sb.append(anEnum.getMeaning());
-            sb.append(",");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        return StringUtils.limitLength(sb, 4096);
     }
 
     private String emptyToHorizontalLine(String linkName) {

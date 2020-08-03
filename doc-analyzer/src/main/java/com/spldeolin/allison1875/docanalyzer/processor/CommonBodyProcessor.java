@@ -15,7 +15,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.IdUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.dto.EnumDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertiesContainerDto;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertyTreeNodeDto;
@@ -59,16 +58,11 @@ class CommonBodyProcessor {
 
             JsonTypeEnum jsonType;
             Boolean isFloat = null;
-            Boolean isEnum = null;
-            Collection<EnumDto> enums = null;
             if (childSchema.isValueTypeSchema()) {
                 ValueTypeSchema valueSchema = childSchema.asValueTypeSchema();
                 jsonType = calcValueType(valueSchema, false);
                 isFloat = isFloat(valueSchema);
-                isEnum = isEnum(valueSchema);
-                if (isEnum) {
-                    enums = calcEnum(valueSchema);
-                }
+
             } else if (childSchema.isObjectSchema()) {
                 jsonType = calcObjectTypeWithRecur(child, childSchema.asObjectSchema(), false);
             } else if (childSchema.isArraySchema()) {
@@ -81,10 +75,6 @@ class CommonBodyProcessor {
                         ValueTypeSchema valueSchema = eleSchema.asValueTypeSchema();
                         jsonType = calcValueType(valueSchema, true);
                         isFloat = isFloat(valueSchema);
-                        isEnum = isEnum(valueSchema);
-                        if (isEnum) {
-                            enums = calcEnum(valueSchema);
-                        }
                     } else if (eleSchema.isObjectSchema()) {
                         jsonType = calcObjectTypeWithRecur(child, eleSchema.asObjectSchema(), true);
                     } else if (eleSchema instanceof ReferenceSchema) {
@@ -100,8 +90,6 @@ class CommonBodyProcessor {
             }
             child.setJsonType(jsonType);
             child.setIsFloat(isFloat);
-            child.setIsEnum(isEnum);
-            child.setEnums(enums);
 
             if (jpdv != null) {
                 if (jpdv.getDescriptionLines() != null) {
@@ -148,15 +136,6 @@ class CommonBodyProcessor {
 
     public Boolean isEnum(ValueTypeSchema valueSchema) {
         return !CollectionUtils.isEmpty(valueSchema.getEnums());
-    }
-
-    public Collection<EnumDto> calcEnum(ValueTypeSchema valueSchema) {
-        Collection<EnumDto> result = Lists.newArrayList();
-        for (String enumJson : valueSchema.getEnums()) {
-            EnumDto cad = JsonUtils.toObject(enumJson, EnumDto.class);
-            result.add(cad);
-        }
-        return result;
     }
 
     public boolean fieldsAbsent(ResolvedType requestBody) {
