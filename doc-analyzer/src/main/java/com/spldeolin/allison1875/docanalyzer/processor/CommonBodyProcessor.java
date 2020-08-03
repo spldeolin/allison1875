@@ -104,7 +104,9 @@ class CommonBodyProcessor {
             child.setEnums(enums);
 
             if (jpdv != null) {
-                child.setDescription(Joiner.on("，").join(jpdv.getDescriptionLines()));
+                if (jpdv.getDescriptionLines() != null) {
+                    child.setDescription(Joiner.on("，").join(jpdv.getDescriptionLines()));
+                }
                 child.setValidators(jpdv.getValidators());
                 child.setDatetimePattern(jpdv.getJsonFormatPattern());
             }

@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.dto;
 
 import java.util.Collection;
+import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Joiner;
@@ -29,7 +30,7 @@ public class JsonPropertyDescriptionValueDto {
 
     public String toStringPrettily() {
         String comment = null;
-        if (descriptionLines.size() > 0) {
+        if (CollectionUtils.isNotEmpty(descriptionLines)) {
             StringBuilder sb = new StringBuilder();
             for (String line : descriptionLines) {
                 if (StringUtils.isNotBlank(line)) {
@@ -45,7 +46,7 @@ public class JsonPropertyDescriptionValueDto {
             }
         }
         String validatorInfo = null;
-        if (validators.size() > 0) {
+        if (CollectionUtils.isNotEmpty(validators)) {
             StringBuilder sb = new StringBuilder("校验项\n");
             for (ValidatorDto validator : validators) {
                 sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
