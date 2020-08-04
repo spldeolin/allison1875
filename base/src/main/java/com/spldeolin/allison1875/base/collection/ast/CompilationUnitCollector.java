@@ -50,7 +50,7 @@ class CompilationUnitCollector {
         if (count > 0) {
             log.info("CompilationUnit collected. [{} of {} at {} in {}ms]", count,
                     English.plural("CompilationUnit", count),
-                    BaseConfig.getInstace().getCommonPart().relativize(sourceRoot.getRoot()),
+                    BaseConfig.getInstance().getCommonPart().relativize(sourceRoot.getRoot()),
                     System.currentTimeMillis() - start);
         }
         return result;

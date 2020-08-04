@@ -1,15 +1,11 @@
 package com.spldeolin.allison1875.docanalyzer.markdown;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.Collection;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.exception.FreeMarkerPrintExcpetion;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.PropertyDto;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
@@ -98,20 +94,21 @@ public class MarkdownConverter {
                     Iterables.getFirst(StringUtils.splitLineByLine(description), uriFirstLine).replace('/', '-')
                             + ".md";
             String groupNames = endpoint.getCat();
-            File dir = Paths.get(DocAnalyzerConfig.getInstance().getDocOutputDirectoryPath())
-                    .resolve(groupNames.replace('.', File.separatorChar)).toFile();
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    log.warn("mkdirs [{}] failed.", dir);
-                    continue;
-                }
-            }
-            File output = dir.toPath().resolve(fileName).toFile();
-            try {
-                FreeMarkerPrinter.printToFile(vo, output);
-            } catch (FreeMarkerPrintExcpetion e) {
-                log.warn("FreeMarkerPrinter print failed.", e);
-            }
+            // 暂时移除输出到本地的功能
+//            File dir = Paths.get(DocAnalyzerConfig.getInstance().getDocOutputDirectoryPath())
+//                    .resolve(groupNames.replace('.', File.separatorChar)).toFile();
+//            if (!dir.exists()) {
+//                if (!dir.mkdirs()) {
+//                    log.warn("mkdirs [{}] failed.", dir);
+//                    continue;
+//                }
+//            }
+//            File output = dir.toPath().resolve(fileName).toFile();
+//            try {
+//                FreeMarkerPrinter.printToFile(vo, output);
+//            } catch (FreeMarkerPrintExcpetion e) {
+//                log.warn("FreeMarkerPrinter print failed.", e);
+//            }
         }
 
     }

@@ -24,7 +24,7 @@ class SourceRootCollector {
             result.addAll(sourceRoots);
         }
         for (SourceRoot sr : result) {
-            log.info("SourceRoot collected. [{}]", BaseConfig.getInstace().getCommonPart().relativize(sr.getRoot()));
+            log.info("SourceRoot collected. [{}]", BaseConfig.getInstance().getCommonPart().relativize(sr.getRoot()));
         }
         return result;
     }

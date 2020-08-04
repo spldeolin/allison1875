@@ -25,7 +25,7 @@ public class Locations {
      * @return e.g.: project-name/module-name/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */
     public static Path getRelativePath(Node node) {
-        return BaseConfig.getInstace().getCommonPart().relativize(getAbsolutePath(node)).normalize();
+        return BaseConfig.getInstance().getCommonPart().relativize(getAbsolutePath(node)).normalize();
     }
 
     /**

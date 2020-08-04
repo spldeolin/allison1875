@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 public class StaticVcsContainer {
 
     private static VcsContainer fromConfigPath = new VcsContainer(
-            Paths.get(Iterables.getFirst(BaseConfig.getInstace().getProjectPaths(), null)));
+            Paths.get(Iterables.getFirst(BaseConfig.getInstance().getProjectPaths(), null)));
 
     public static Path getProjectPath() {
         return fromConfigPath.getProjectPath();

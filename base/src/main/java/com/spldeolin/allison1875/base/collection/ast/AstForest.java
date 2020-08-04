@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AstForest implements Iterable<CompilationUnit> {
 
-    private static final AstForest instance = new AstForest(stringToPath(BaseConfig.getInstace().getProjectPaths()));
+    private static final AstForest instance = new AstForest(stringToPath(BaseConfig.getInstance().getProjectPaths()));
 
     private AstCursor cursor;
 
@@ -43,7 +43,7 @@ public class AstForest implements Iterable<CompilationUnit> {
     public AstForest reset() {
         log.info("Astforest reset.");
         Collection<SourceRoot> sourceRoots = new SourceRootCollector()
-                .collect(stringToPath(BaseConfig.getInstace().getProjectPaths()));
+                .collect(stringToPath(BaseConfig.getInstance().getProjectPaths()));
         this.cursor = new AstCursor(sourceRoots);
         return this;
     }

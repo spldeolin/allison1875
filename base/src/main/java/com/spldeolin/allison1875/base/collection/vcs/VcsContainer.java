@@ -36,7 +36,7 @@ public class VcsContainer {
         try {
             GitLoader loader = new GitLoader().projectPath(projectPath).openAndLoad();
             addedFiles = new AddedFileCollector()
-                    .collectSinceTime(loader, BaseConfig.getInstace().getTargetFileSince());
+                    .collectSinceTime(loader, BaseConfig.getInstance().getTargetFileSince());
             loader.close();
         } catch (IOException | GitAPIException e) {
             log.error(e);
