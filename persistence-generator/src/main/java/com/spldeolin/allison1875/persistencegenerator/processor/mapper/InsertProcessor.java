@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
@@ -30,7 +31,9 @@ public class InsertProcessor {
         List<MethodDeclaration> methods = mapper.getMethodsByName("insert");
         methods.forEach(Node::remove);
         MethodDeclaration insert = new MethodDeclaration();
-        insert.setJavadocComment(new JavadocComment("插入数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+        String ex = PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()
+                ? Constant.PROHIBIT_MODIFICATION_JAVADOC : "";
+        insert.setJavadocComment(new JavadocComment("插入数据" + ex));
         insert.setType(PrimitiveType.intType());
         insert.setName("insert");
         insert.addParameter(persistence.getEntityName(), "entity");

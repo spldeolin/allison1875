@@ -79,8 +79,10 @@ public class EntityProcessor {
         entityCuCreator = new CuCreator(Paths.get(conf.getSourceRoot()), conf.getEntityPackage(),
                 this.getImports(persistence), () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc classJavadoc = new JavadocComment(persistence.getDescrption() + Strings.repeat(Constant.newLine, 2)
-                    + "<strong>该类由Allison1875生成，禁止人为修改</strong>").parse();
+            String ex = PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()
+                    ? "<strong>该类由Allison1875生成，请勿人为修改</strong>" : "";
+            Javadoc classJavadoc = new JavadocComment(
+                    persistence.getDescrption() + Strings.repeat(Constant.newLine, 2) + ex).parse();
             classJavadoc.getBlockTags().addAll(authorTags);
             classJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, persistence.getTableName()));
             coid.setJavadocComment(classJavadoc);

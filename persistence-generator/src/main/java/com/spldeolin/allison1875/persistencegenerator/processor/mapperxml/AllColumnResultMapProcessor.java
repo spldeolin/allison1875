@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import org.dom4j.Element;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -28,7 +29,9 @@ public class AllColumnResultMapProcessor {
     public AllColumnResultMapProcessor process() {
         root.addText(Constant.newLine);
         Element resultMapTag = Dom4jUtils.findAndRebuildElement(root, "resultMap", "id", "all");
-        resultMapTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
+            resultMapTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        }
         resultMapTag.addAttribute("type", entityName);
         for (PropertyDto pk : persistence.getPkProperties()) {
             Element resultTag = resultMapTag.addElement("id");

@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.stream.Collectors;
 import org.dom4j.Element;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -26,7 +27,9 @@ public class AllColumnSqlProcessor {
     public AllColumnSqlProcessor process() {
         root.addText(Constant.newLine);
         Element sqlTag = Dom4jUtils.findAndRebuildElement(root, "sql", "id", "all");
-        sqlTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
+            sqlTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        }
         sqlTag.addText(Constant.newLine + Constant.doubleIndex + persistence.getProperties().stream()
                 .map(PropertyDto::getColumnName).collect(Collectors.joining(",")));
         return this;

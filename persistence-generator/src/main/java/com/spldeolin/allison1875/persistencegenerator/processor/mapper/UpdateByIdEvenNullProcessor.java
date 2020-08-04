@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
@@ -30,8 +31,9 @@ public class UpdateByIdEvenNullProcessor {
             List<MethodDeclaration> methods = mapper.getMethodsByName("updateByIdEvenNull");
             methods.forEach(Node::remove);
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
-            updateByIdEvenNull.setJavadocComment(
-                    new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            String ex = PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()
+                    ? Constant.PROHIBIT_MODIFICATION_JAVADOC : "";
+            updateByIdEvenNull.setJavadocComment(new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + ex));
             updateByIdEvenNull.setType(PrimitiveType.intType());
             updateByIdEvenNull.setName("updateByIdEvenNull");
             updateByIdEvenNull.addParameter(persistence.getEntityName(), "entity");

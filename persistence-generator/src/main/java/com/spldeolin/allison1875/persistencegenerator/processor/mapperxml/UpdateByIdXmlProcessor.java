@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 import org.dom4j.Element;
 import com.google.common.base.Strings;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -31,7 +32,9 @@ public class UpdateByIdXmlProcessor {
         if (persistence.getPkProperties().size() > 0) {
             root.addText(Constant.newLine);
             Element updateByIdTag = Dom4jUtils.findAndRebuildElement(root, "update", "id", "updateById");
-            updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
+                updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            }
             updateByIdTag.addAttribute("parameterType", entityName);
             updateByIdTag.addText(Constant.newLine + Constant.doubleIndex + "UPDATE " + persistence.getTableName());
 

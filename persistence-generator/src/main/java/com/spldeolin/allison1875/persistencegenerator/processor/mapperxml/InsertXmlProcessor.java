@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.stream.Collectors;
 import org.dom4j.Element;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -29,7 +30,9 @@ public class InsertXmlProcessor {
     public InsertXmlProcessor process() {
         root.addText(Constant.newLine);
         Element insertTag = Dom4jUtils.findAndRebuildElement(root, "insert", "id", "insert");
-        insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
+            insertTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+        }
         insertTag.addAttribute("parameterType", entityName);
         if (persistence.getPkProperties().size() > 0) {
             insertTag.addAttribute("useGeneratedKeys", "true");

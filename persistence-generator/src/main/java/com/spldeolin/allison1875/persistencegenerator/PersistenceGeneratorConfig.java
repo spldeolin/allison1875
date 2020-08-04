@@ -56,6 +56,8 @@ public class PersistenceGeneratorConfig {
 
     private Boolean isEntityEndWithEntity;
 
+    private Boolean printAllison1875Message;
+
     public static PersistenceGeneratorConfig getInstace() {
         return instace;
     }

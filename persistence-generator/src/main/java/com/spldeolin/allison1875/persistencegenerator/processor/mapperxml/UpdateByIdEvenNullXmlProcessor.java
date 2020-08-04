@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import org.dom4j.Element;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -31,7 +32,9 @@ public class UpdateByIdEvenNullXmlProcessor {
             root.addText(Constant.newLine);
             Element updateByIdEvenNullTag = Dom4jUtils
                     .findAndRebuildElement(root, "update", "id", "updateByIdEvenNull");
-            updateByIdEvenNullTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
+                updateByIdEvenNullTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            }
             updateByIdEvenNullTag.addAttribute("parameterType", entityName);
             StringBuilder sb = new StringBuilder(64);
             sb.append(Constant.newLine).append(Constant.doubleIndex).append("UPDATE ")

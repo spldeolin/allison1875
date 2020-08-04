@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import org.dom4j.Element;
 import com.google.common.collect.Iterables;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -30,7 +31,9 @@ public class QueryByIdsXmlProcessor {
         if (persistence.getPkProperties().size() == 1) {
             root.addText(Constant.newLine);
             Element queryByIdsTag = Dom4jUtils.findAndRebuildElement(root, "select", "id", tagId);
-            queryByIdsTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
+                queryByIdsTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
+            }
             queryByIdsTag.addAttribute("resultMap", "all");
             queryByIdsTag.addText(Constant.newLine + Constant.doubleIndex + "SELECT");
             queryByIdsTag.addElement("include").addAttribute("refid", "all");
