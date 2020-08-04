@@ -56,7 +56,7 @@ public class YApiProcessor {
         this.addCat(Sets.difference(catNames, yapiCatNames));
         Map<String, Long> catIdsEachName = this.getYapiCatIdsEachName();
 
-        Map<String, JsonNode> yapiUrls = this.listInterfaces();
+        Map<String, JsonNode> yapiUrls = this.listAutoInterfaces();
         Set<String> urls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
                 .collect(Collectors.toSet());
 
@@ -129,14 +129,17 @@ public class YApiProcessor {
 
     }
 
-    public Map<String, JsonNode> listInterfaces() {
+    public Map<String, JsonNode> listAutoInterfaces() {
         JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(
                 HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId));
 
         Map<String, JsonNode> result = Maps.newHashMap();
         for (JsonNode jsonNode : interfaceListMenuDto) {
             for (JsonNode interf : jsonNode.get("list")) {
-                result.put(interf.get("path").asText(), interf);
+                JsonNode desc = interf.get("desc");
+                if (desc != null && desc.asText("").contains("该YApi文档由Allison 1875生成")) {
+                    result.put(interf.get("path").asText(), interf);
+                }
             }
         }
         return result;
