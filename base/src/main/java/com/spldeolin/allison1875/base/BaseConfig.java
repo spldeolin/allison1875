@@ -61,8 +61,8 @@ public final class BaseConfig {
                     "base-config.yml not exist.");
             baseConfig = om.readValue(inputStream, BaseConfig.class);
         } catch (IOException e) {
-            log.error("BaseConfig static block failed.", e);
-            throw new ConfigLoadingException(e);
+            log.error("读取配置文件失败：{}", e.getMessage());
+            throw new ConfigLoadingException();
         }
 
         baseConfig.getProjectPaths().removeIf(Objects::isNull);
