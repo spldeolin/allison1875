@@ -23,7 +23,9 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -171,6 +173,8 @@ class JsgBuildProcessor {
         JsonSchemaGenerator jsg = new JsonSchemaGenerator(
                 // OM
                 JsonUtils.initObjectMapper(om), new SchemaFactoryWrapper().setVisitorContext(new VisitorContext() {
+            private final Multiset<JavaType> seenSchemasWithCount = HashMultiset.create();
+
             /**
              * 多个property是同一个Javabean时
              * 确保这些property的类型都是ObjectSchema
@@ -178,7 +182,17 @@ class JsgBuildProcessor {
              */
             @Override
             public String addSeenSchemaUri(JavaType aSeenSchema) {
-                return javaTypeToUrn(aSeenSchema);
+                if (aSeenSchema != null && !aSeenSchema.isPrimitive()) {
+                    seenSchemasWithCount.add(aSeenSchema);
+                    return javaTypeToUrn(aSeenSchema);
+                }
+                return null;
+            }
+
+            @Override
+            public String getSeenSchemaUri(JavaType aSeenSchema) {
+                int limit = 10; // 一般不会存在10个相同Type的Field，超过这个数字认为是递归了
+                return (seenSchemasWithCount.count(aSeenSchema) > limit) ? javaTypeToUrn(aSeenSchema) : null;
             }
 
             @Override
