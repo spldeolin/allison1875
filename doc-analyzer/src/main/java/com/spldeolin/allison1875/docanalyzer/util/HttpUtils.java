@@ -161,7 +161,7 @@ public class HttpUtils {
      * 为POST请求，构造body是JSON的request对象
      */
     private static Request buildJsonPostRequest(String url, String json) {
-        RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
         return new Request.Builder().url(url).post(body).build();
     }
 

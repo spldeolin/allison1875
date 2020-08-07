@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -33,6 +34,10 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class YApiProcessor {
+
+    private static final String ALLISON_1875_TAG = "Allison 1875";
+
+    private static final String DELETE_TAG = "已删除";
 
     private static final String url = DocAnalyzerConfig.getInstance().getYapiUrl();
 
@@ -136,8 +141,8 @@ public class YApiProcessor {
         Map<String, JsonNode> result = Maps.newHashMap();
         for (JsonNode jsonNode : interfaceListMenuDto) {
             for (JsonNode interf : jsonNode.get("list")) {
-                JsonNode desc = interf.get("desc");
-                if (desc != null && desc.asText("").contains("该YApi文档由Allison 1875生成")) {
+                List<String> tags = JsonUtils.toListOfObject(interf.get("tag").toString(), String.class);
+                if (tags.contains(ALLISON_1875_TAG)) {
                     result.put(interf.get("path").asText(), interf);
                 }
             }
@@ -158,6 +163,10 @@ public class YApiProcessor {
         Map<String, Object> form = Maps.newHashMap();
         form.put("id", id);
         form.put("catid", recycleBinCatId);
+        List<String> tags = JsonUtils.toListOfObject(jsonNode.get("tag").toString(), String.class);
+        tags.add(DELETE_TAG);
+        form.put("tag", tags);
+
         String desc = "";
         JsonNode descNode = detail.get("desc");
         if (descNode != null) {
@@ -170,7 +179,7 @@ public class YApiProcessor {
 
         form.put("desc", deleteMessage + desc);
         form.put("token", token);
-        String resp = HttpUtils.postForm(url + "/api/interface/up", form);
+        String resp = HttpUtils.postJson(url + "/api/interface/up", JsonUtils.toJson(form));
         log.info(resp);
     }
 
@@ -188,11 +197,12 @@ public class YApiProcessor {
         form.put("res_body", responseBodyJsonSchema);
         form.put("switch_notice", true);
         form.put("message", "1");
+        form.put("tag", Lists.newArrayList(ALLISON_1875_TAG));
         form.put("desc", MarkdownUtils.convertToHtml(description));
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", token);
-        String resp = HttpUtils.postForm(YApiProcessor.url + "/api/interface/save", form);
+        String resp = HttpUtils.postJson(YApiProcessor.url + "/api/interface/save", JsonUtils.toJson(form));
         log.info(resp);
     }
 
