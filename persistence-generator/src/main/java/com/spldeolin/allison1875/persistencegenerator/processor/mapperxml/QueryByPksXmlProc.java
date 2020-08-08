@@ -13,11 +13,13 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的select(id=xxx)标签，并重新生成
+ * 这个Proc生成2中方法：
+ * 1. 根据主键列表查询
+ * 2. 根据主键列表查询，并把结果集以主键为key，映射到Map中
  *
  * @author Deolin 2020-07-19
  */
-public class QueryByIdsXmlProcessor implements SourceCodeGetter {
+public class QueryByPksXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
@@ -26,12 +28,12 @@ public class QueryByIdsXmlProcessor implements SourceCodeGetter {
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByIdsXmlProcessor(PersistenceDto persistence, String tagId) {
+    public QueryByPksXmlProc(PersistenceDto persistence, String tagId) {
         this.persistence = persistence;
         this.tagId = tagId;
     }
 
-    public QueryByIdsXmlProcessor process() {
+    public QueryByPksXmlProc process() {
         if (persistence.getPkProperties().size() == 1) {
             Element queryByIdsTag = new DefaultElement("select");
             queryByIdsTag.addAttribute("id", tagId);

@@ -10,8 +10,7 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
- * 删除所有insert方法
- * 再在头部插入int insert(BizEntity entity);
+ * 插入
  *
  * @author Deolin 2020-07-18
  */
@@ -30,7 +29,7 @@ public class InsertProcessor {
         List<MethodDeclaration> methods = mapper.getMethodsByName("insert");
         methods.forEach(Node::remove);
         MethodDeclaration insert = new MethodDeclaration();
-        insert.setJavadocComment(new JavadocComment("插入数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+        insert.setJavadocComment(new JavadocComment("插入" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
         insert.setType(PrimitiveType.intType());
         insert.setName("insert");
         insert.addParameter(persistence.getEntityName(), "entity");

@@ -12,11 +12,11 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的update(id=updateByIdEvenNull)标签，并重新生成
+ * 根据主键更新，即便属性的值为null，也更新为null
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByIdEvenNullXmlProcessor implements SourceCodeGetter {
+public class UpdateByPkEvenNullXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
@@ -25,12 +25,12 @@ public class UpdateByIdEvenNullXmlProcessor implements SourceCodeGetter {
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public UpdateByIdEvenNullXmlProcessor(PersistenceDto persistence, String entityName) {
+    public UpdateByPkEvenNullXmlProc(PersistenceDto persistence, String entityName) {
         this.persistence = persistence;
         this.entityName = entityName;
     }
 
-    public UpdateByIdEvenNullXmlProcessor process() {
+    public UpdateByPkEvenNullXmlProc process() {
         if (persistence.getPkProperties().size() > 0) {
             Element updateByIdEvenNullTag = new DefaultElement("update");
             updateByIdEvenNullTag.addAttribute("id", "updateByIdEvenNull");

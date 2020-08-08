@@ -16,6 +16,10 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
+ * 根据外键查询，表中每有几个外键，这个Proc就生成几个方法
+ *
+ * 以_id结尾的字段算作外键
+ *
  * @author Deolin 2020-08-08
  */
 public class QueryByFkProcessor {

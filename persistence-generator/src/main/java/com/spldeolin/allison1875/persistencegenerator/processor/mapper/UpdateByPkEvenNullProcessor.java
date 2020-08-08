@@ -10,28 +10,28 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
- * 删除所有updateByIdEvenNull方法，再在头部插入int updateByIdEvenNull(XxxEntity xxx);
+ * 根据主键更新，即便属性的值为null，也更新为null
  *
  * @author Deolin 2020-07-18
  */
-public class UpdateByIdEvenNullProcessor {
+public class UpdateByPkEvenNullProcessor {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public UpdateByIdEvenNullProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public UpdateByPkEvenNullProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public UpdateByIdEvenNullProcessor process() {
+    public UpdateByPkEvenNullProcessor process() {
         if (persistence.getPkProperties().size() > 0) {
             List<MethodDeclaration> methods = mapper.getMethodsByName("updateByIdEvenNull");
             methods.forEach(Node::remove);
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
             updateByIdEvenNull.setJavadocComment(
-                    new JavadocComment("根据ID更新数据，值为null的属性强制更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                    new JavadocComment("根据ID更新数据，即便属性的值为null，也更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             updateByIdEvenNull.setType(PrimitiveType.intType());
             updateByIdEvenNull.setName("updateByIdEvenNull");
             updateByIdEvenNull.addParameter(persistence.getEntityName(), "entity");

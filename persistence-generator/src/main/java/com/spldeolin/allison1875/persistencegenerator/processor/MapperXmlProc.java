@@ -19,7 +19,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.SourceCodeGetter;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.XmlProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +28,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2020-07-18
  */
 @Slf4j
-public class MapperXmlProcessor {
+public class MapperXmlProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    private final List<SourceCodeGetter> processors;
+    private final List<XmlProc> processors;
 
     @Getter
     private File mapperXmlFile;
@@ -42,15 +42,14 @@ public class MapperXmlProcessor {
     @Getter
     private Element root;
 
-    public MapperXmlProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
-            SourceCodeGetter... processors) {
+    public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, XmlProc... processors) {
         this.persistence = persistence;
         this.mapper = mapper;
         this.processors = Lists.newArrayList(processors);
     }
 
 
-    public MapperXmlProcessor process() throws IOException {
+    public MapperXmlProc process() throws IOException {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
 
         // find
@@ -112,7 +111,7 @@ public class MapperXmlProcessor {
         String rightAnchor = RandomStringUtils.randomAlphanumeric(6);
         auto.add(Constant.singleIndent + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML, leftAnchor, leftAnchor, rightAnchor));
-        for (SourceCodeGetter proc : processors) {
+        for (XmlProc proc : processors) {
             if (CollectionUtils.isNotEmpty(proc.getSourceCodeLines())) {
                 for (String line : proc.getSourceCodeLines()) {
                     if (StringUtils.isNotBlank(line)) {

@@ -25,12 +25,12 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-12
  */
 @Log4j2
-public class QueryInformationSchemaProcessor {
+public class QueryInformationSchemaProc {
 
     @Getter
     private Collection<InformationSchemaDto> infoSchemas;
 
-    public QueryInformationSchemaProcessor process() {
+    public QueryInformationSchemaProc process() {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(conf.getJdbcUrl());

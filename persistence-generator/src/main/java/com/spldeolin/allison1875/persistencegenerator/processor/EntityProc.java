@@ -37,7 +37,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-18
  */
 @Log4j2
-public class EntityProcessor {
+public class EntityProc {
 
     private final PersistenceDto persistence;
 
@@ -47,11 +47,11 @@ public class EntityProcessor {
     @Getter
     private CuCreator entityCuCreator;
 
-    public EntityProcessor(PersistenceDto persistence) {
+    public EntityProc(PersistenceDto persistence) {
         this.persistence = persistence;
     }
 
-    public EntityProcessor process() {
+    public EntityProc process() {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
         entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(conf.getSourceRoot(), conf.getEntityPackage(),
                 persistence.getEntityName() + ".java");

@@ -16,22 +16,22 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
- * 删除所有queryById方法，再在头部插入BizEntity queryById(@Param PkType id);
+ * 根据主键查询
  *
  * @author Deolin 2020-07-18
  */
-public class QueryByIdProcessor {
+public class QueryByPkProcessor {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public QueryByIdProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public QueryByPkProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public QueryByIdProcessor process() {
+    public QueryByPkProcessor process() {
         if (persistence.getPkProperties().size() > 0) {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryById");
             methods.forEach(Node::remove);

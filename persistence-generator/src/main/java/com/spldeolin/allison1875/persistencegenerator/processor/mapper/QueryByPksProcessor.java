@@ -18,24 +18,24 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
- * 删除所有queryByIdsAsMap方法
- * 再在头部插入@MapKey("id") Map<Long, BizEntity> queryByIdsEachId(Collection<Long> ids);
- * 只有单主键时才会生成
+ * 根据主键列表查询
+ *
+ * 表是联合主键时，这个Proc不生成方法
  *
  * @author Deolin 2020-07-18
  */
-public class QueryByIdsProcessor {
+public class QueryByPksProcessor {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public QueryByIdsProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public QueryByPksProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public QueryByIdsProcessor process() {
+    public QueryByPksProcessor process() {
         if (persistence.getPkProperties().size() == 1) {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryByIds");
             methods.forEach(Node::remove);

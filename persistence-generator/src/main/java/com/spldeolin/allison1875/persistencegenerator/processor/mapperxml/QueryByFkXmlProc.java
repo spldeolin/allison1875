@@ -13,20 +13,22 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
+ * 根据外键查询，表中每有几个外键，这个Proc就生成几个方法
+ *
  * @author Deolin 2020-07-19
  */
-public class QueryByFkXmlProcessor implements SourceCodeGetter {
+public class QueryByFkXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByFkXmlProcessor(PersistenceDto persistence) {
+    public QueryByFkXmlProc(PersistenceDto persistence) {
         this.persistence = persistence;
     }
 
-    public QueryByFkXmlProcessor process() {
+    public QueryByFkXmlProc process() {
         if (persistence.getFkProperties().size() > 0) {
             sourceCodeLines = Lists.newArrayList();
             for (PropertyDto fk : persistence.getFkProperties()) {

@@ -10,23 +10,22 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
- * 删除所有updateById方法
- * 再在头部插入int updateById(BizEntity entity);
+ * 根据ID更新数据，忽略值为null的属性
  *
  * @author Deolin 2020-07-18
  */
-public class UpdateByIdProcessor {
+public class UpdateByPkProcessor {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public UpdateByIdProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public UpdateByPkProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public UpdateByIdProcessor process() {
+    public UpdateByPkProcessor process() {
         if (persistence.getPkProperties().size() > 0) {
             List<MethodDeclaration> methods = mapper.getMethodsByName("updateById");
             methods.forEach(Node::remove);

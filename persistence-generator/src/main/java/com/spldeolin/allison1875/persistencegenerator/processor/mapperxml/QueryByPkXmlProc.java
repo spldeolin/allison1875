@@ -12,22 +12,22 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的select(id=queryById)标签，并重新生成
+ * 根据主键查询
  *
  * @author Deolin 2020-07-19
  */
-public class QueryByIdXmlProcessor implements SourceCodeGetter {
+public class QueryByPkXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByIdXmlProcessor(PersistenceDto persistence) {
+    public QueryByPkXmlProc(PersistenceDto persistence) {
         this.persistence = persistence;
     }
 
-    public QueryByIdXmlProcessor process() {
+    public QueryByPkXmlProc process() {
         if (persistence.getPkProperties().size() > 0) {
             Element queryByIdTag = new DefaultElement("select");
             queryByIdTag.addAttribute("id", "queryById");

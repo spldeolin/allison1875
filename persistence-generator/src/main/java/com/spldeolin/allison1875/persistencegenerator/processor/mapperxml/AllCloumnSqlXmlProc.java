@@ -12,22 +12,22 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的sql(id=all)标签，并重新生成
+ * <sql id="all"></sql> 标签
  *
  * @author Deolin 2020-07-19
  */
-public class AllColumnSqlProcessor implements SourceCodeGetter {
+public class AllCloumnSqlXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public AllColumnSqlProcessor(PersistenceDto persistence) {
+    public AllCloumnSqlXmlProc(PersistenceDto persistence) {
         this.persistence = persistence;
     }
 
-    public AllColumnSqlProcessor process() {
+    public AllCloumnSqlXmlProc process() {
         Element sqlTag = new DefaultElement("sql");
         sqlTag.addAttribute("id", "all");
         sqlTag.addText(Constant.newLine);

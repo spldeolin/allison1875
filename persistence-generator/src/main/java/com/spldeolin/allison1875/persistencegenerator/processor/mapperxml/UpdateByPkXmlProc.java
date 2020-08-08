@@ -13,11 +13,11 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的update(id=updateById)标签，并重新生成
+ * 根据ID更新数据，忽略值为null的属性
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByIdXmlProcessor implements SourceCodeGetter {
+public class UpdateByPkXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
@@ -26,12 +26,12 @@ public class UpdateByIdXmlProcessor implements SourceCodeGetter {
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public UpdateByIdXmlProcessor(PersistenceDto persistence, String entityName) {
+    public UpdateByPkXmlProc(PersistenceDto persistence, String entityName) {
         this.persistence = persistence;
         this.entityName = entityName;
     }
 
-    public UpdateByIdXmlProcessor process() {
+    public UpdateByPkXmlProc process() {
         if (persistence.getPkProperties().size() > 0) {
             Element updateByIdTag = new DefaultElement("update");
             updateByIdTag.addAttribute("id", "updateById");

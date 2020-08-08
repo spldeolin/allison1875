@@ -10,11 +10,11 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的resultMap(id=all)标签，并重新生成
+ * ResultMap
  *
  * @author Deolin 2020-07-19
  */
-public class AllColumnResultMapProcessor implements SourceCodeGetter {
+public class ResultMapXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
@@ -23,12 +23,12 @@ public class AllColumnResultMapProcessor implements SourceCodeGetter {
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public AllColumnResultMapProcessor(PersistenceDto persistence, String entityName) {
+    public ResultMapXmlProc(PersistenceDto persistence, String entityName) {
         this.persistence = persistence;
         this.entityName = entityName;
     }
 
-    public AllColumnResultMapProcessor process() {
+    public ResultMapXmlProc process() {
         Element resultMapTag = new DefaultElement("resultMap");
         resultMapTag.addAttribute("id", "all");
         resultMapTag.addAttribute("type", entityName);

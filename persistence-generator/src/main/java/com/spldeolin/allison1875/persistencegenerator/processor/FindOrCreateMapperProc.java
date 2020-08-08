@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2020-07-18
  */
 @Slf4j
-public class FindOrCreateMapperProcessor {
+public class FindOrCreateMapperProc {
 
     private final PersistenceDto persistence;
 
@@ -39,12 +39,12 @@ public class FindOrCreateMapperProcessor {
     @Getter
     private CompilationUnit cu;
 
-    public FindOrCreateMapperProcessor(PersistenceDto persistence, CuCreator entityCuCreator) {
+    public FindOrCreateMapperProc(PersistenceDto persistence, CuCreator entityCuCreator) {
         this.persistence = persistence;
         this.entityCuCreator = entityCuCreator;
     }
 
-    public FindOrCreateMapperProcessor process() throws IOException {
+    public FindOrCreateMapperProc process() throws IOException {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
 
         // find

@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * @author Deolin 2020-08-08
  */
-public interface SourceCodeGetter {
+public interface XmlProc {
 
     Collection<String> getSourceCodeLines();
 

@@ -11,11 +11,11 @@ import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 删除可能存在的insert(id=insert)标签，并重新生成
+ * 插入
  *
  * @author Deolin 2020-07-19
  */
-public class InsertXmlProcessor implements SourceCodeGetter {
+public class InsertXmlProc implements XmlProc {
 
     private final PersistenceDto persistence;
 
@@ -24,12 +24,12 @@ public class InsertXmlProcessor implements SourceCodeGetter {
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public InsertXmlProcessor(PersistenceDto persistence, String entityName) {
+    public InsertXmlProc(PersistenceDto persistence, String entityName) {
         this.persistence = persistence;
         this.entityName = entityName;
     }
 
-    public InsertXmlProcessor process() {
+    public InsertXmlProc process() {
         Element insertTag = new DefaultElement("insert");
         insertTag.addAttribute("id", "insert");
         insertTag.addAttribute("parameterType", entityName);
