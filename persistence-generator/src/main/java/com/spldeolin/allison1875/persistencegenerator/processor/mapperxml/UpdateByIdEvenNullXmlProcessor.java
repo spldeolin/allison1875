@@ -1,56 +1,53 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
 import org.dom4j.Element;
+import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
+import lombok.Getter;
 
 /**
  * 删除可能存在的update(id=updateByIdEvenNull)标签，并重新生成
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByIdEvenNullXmlProcessor {
+public class UpdateByIdEvenNullXmlProcessor implements SourceCodeGetter {
 
     private final PersistenceDto persistence;
 
     private final String entityName;
 
-    private final Element root;
+    @Getter
+    private Collection<String> sourceCodeLines;
 
-    public UpdateByIdEvenNullXmlProcessor(PersistenceDto persistence, String entityName, Element root) {
+    public UpdateByIdEvenNullXmlProcessor(PersistenceDto persistence, String entityName) {
         this.persistence = persistence;
         this.entityName = entityName;
-        this.root = root;
     }
 
     public UpdateByIdEvenNullXmlProcessor process() {
         if (persistence.getPkProperties().size() > 0) {
-            root.addText(Constant.newLine);
-            Element updateByIdEvenNullTag = Dom4jUtils
-                    .findAndRebuildElement(root, "update", "id", "updateByIdEvenNull");
-            if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
-                updateByIdEvenNullTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-            }
+            Element updateByIdEvenNullTag = new DefaultElement("update");
+            updateByIdEvenNullTag.addAttribute("id", "updateByIdEvenNull");
             updateByIdEvenNullTag.addAttribute("parameterType", entityName);
-            StringBuilder sb = new StringBuilder(64);
-            sb.append(Constant.newLine).append(Constant.doubleIndex).append("UPDATE ")
-                    .append(persistence.getTableName());
-            sb.append(Constant.newLine).append(Constant.doubleIndex).append("SET ");
-            for (PropertyDto nonPk : persistence.getNonPkProperties()) {
-                sb.append(nonPk.getColumnName()).append("=#{").append(nonPk.getPropertyName()).append("},");
-            }
-            sb.deleteCharAt(sb.lastIndexOf(","));
-            sb.append(Constant.newLine).append(Constant.doubleIndex).append("WHERE ");
-            for (PropertyDto pk : persistence.getPkProperties()) {
-                sb.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("} AND ");
-            }
-            String text = StringUtils.removeLast(sb, " AND ");
-            sb.setLength(0);
-            updateByIdEvenNullTag.addText(text);
+            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdEvenNullTag.addText("UPDATE ").addText(persistence.getTableName());
+            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdEvenNullTag.addText("SET ");
+            updateByIdEvenNullTag.addText(persistence.getNonPkProperties().stream()
+                    .map(npk -> npk.getColumnName() + "=#{" + npk.getPropertyName() + "}")
+                    .collect(Collectors.joining(", ")));
+            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdEvenNullTag.addText("WHERE ");
+            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdEvenNullTag.addText(persistence.getPkProperties().stream()
+                    .map(pk -> pk.getColumnName() + "=#{" + pk.getPropertyName() + "}")
+                    .collect(Collectors.joining(" AND ")));
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(updateByIdEvenNullTag));
         }
         return this;
     }

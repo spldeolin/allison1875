@@ -1,48 +1,48 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
 import org.dom4j.Element;
+import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
+import lombok.Getter;
 
 /**
  * 删除可能存在的select(id=queryById)标签，并重新生成
  *
  * @author Deolin 2020-07-19
  */
-public class QueryByIdXmlProcessor {
+public class QueryByIdXmlProcessor implements SourceCodeGetter {
 
     private final PersistenceDto persistence;
 
-    private final Element root;
+    @Getter
+    private Collection<String> sourceCodeLines;
 
-    public QueryByIdXmlProcessor(PersistenceDto persistence, Element root) {
+    public QueryByIdXmlProcessor(PersistenceDto persistence) {
         this.persistence = persistence;
-        this.root = root;
     }
 
     public QueryByIdXmlProcessor process() {
         if (persistence.getPkProperties().size() > 0) {
-            root.addText(Constant.newLine);
-            Element queryByIdTag = Dom4jUtils.findAndRebuildElement(root, "select", "id", "queryById");
-            if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
-                queryByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-            }
+            Element queryByIdTag = new DefaultElement("select");
+            queryByIdTag.addAttribute("id", "queryById");
             queryByIdTag.addAttribute("resultMap", "all");
-            queryByIdTag.addText(Constant.newLine + Constant.doubleIndex + "SELECT");
+            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            queryByIdTag.addText("SELECT");
             queryByIdTag.addElement("include").addAttribute("refid", "all");
-            StringBuilder sb = new StringBuilder(64);
-            sb.append(Constant.newLine).append(Constant.doubleIndex).append("FROM ").append(persistence.getTableName());
-            sb.append(Constant.newLine).append(Constant.doubleIndex).append("WHERE ");
-            for (PropertyDto pk : persistence.getPkProperties()) {
-                sb.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("},");
-            }
-            String text = StringUtils.removeLast(sb, ",");
-            sb.setLength(0);
-            queryByIdTag.addText(text);
+            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            queryByIdTag.addText("FROM ").addText(persistence.getTableName());
+            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            queryByIdTag.addText("WHERE ");
+            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            queryByIdTag.addText(persistence.getPkProperties().stream()
+                    .map(pk -> pk.getColumnName() + "=#{" + pk.getPropertyName() + "}")
+                    .collect(Collectors.joining(", ")));
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(queryByIdTag));
         }
         return this;
     }

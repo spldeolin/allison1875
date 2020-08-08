@@ -1,9 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
-import java.io.File;
 import java.util.Collection;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
@@ -24,7 +21,6 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdsXmlProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProcessor;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -69,31 +65,22 @@ public class MainProcessor {
             new QueryByIdsProcessor(persistence, mapper).process();
             new QueryByIdsEachIdProcessor(persistence, mapper).process();
 
-            // 寻找或创建Mapper.xml
-            File mapperXmlFile;
-            Element root;
-            try {
-                FindOrCreateMapperXmlProcessor processor = new FindOrCreateMapperXmlProcessor(persistence, mapper)
-                        .process();
-                mapperXmlFile = processor.getMapperXmlFile();
-                root = processor.getRoot();
-            } catch (DocumentException e) {
-                log.error("寻找或创建Mapper.xml时发生异常 persistence={}", persistence, e);
-                continue;
-            }
-
             // 在Mapper.xml中生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
-            new AllColumnResultMapProcessor(persistence, entityName, root).process();
-            new AllColumnSqlProcessor(persistence, root).process();
-            new InsertXmlProcessor(persistence, entityName, root).process();
-            new UpdateByIdXmlProcessor(persistence, entityName, root).process();
-            new UpdateByIdEvenNullXmlProcessor(persistence, entityName, root).process();
-            new QueryByIdXmlProcessor(persistence, root).process();
-            new QueryByIdsXmlProcessor(persistence, root, "queryByIds").process();
-            new QueryByIdsXmlProcessor(persistence, root, "queryByIdsEachId").process();
+            try {
+                new MapperXmlProcessor(persistence, mapper,
+                        new AllColumnResultMapProcessor(persistence, entityName).process(),
+                        new AllColumnSqlProcessor(persistence).process(),
+                        new InsertXmlProcessor(persistence, entityName).process(),
+                        new UpdateByIdXmlProcessor(persistence, entityName).process(),
+                        new UpdateByIdEvenNullXmlProcessor(persistence, entityName).process(),
+                        new QueryByIdXmlProcessor(persistence).process(),
+                        new QueryByIdsXmlProcessor(persistence, "queryByIds").process(),
+                        new QueryByIdsXmlProcessor(persistence, "queryByIdsEachId").process()).process();
+            } catch (Exception e) {
+                log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
+            }
 
-            Dom4jUtils.write(mapperXmlFile, root);
         }
 
         toSave.forEach(Saves::prettySave);

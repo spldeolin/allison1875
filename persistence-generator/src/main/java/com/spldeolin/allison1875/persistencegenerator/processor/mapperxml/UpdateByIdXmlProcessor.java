@@ -1,61 +1,58 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
 import org.dom4j.Element;
-import com.google.common.base.Strings;
+import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
+import lombok.Getter;
 
 /**
  * 删除可能存在的update(id=updateById)标签，并重新生成
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByIdXmlProcessor {
+public class UpdateByIdXmlProcessor implements SourceCodeGetter {
 
     private final PersistenceDto persistence;
 
     private final String entityName;
 
-    private final Element root;
+    @Getter
+    private Collection<String> sourceCodeLines;
 
-    public UpdateByIdXmlProcessor(PersistenceDto persistence, String entityName, Element root) {
+    public UpdateByIdXmlProcessor(PersistenceDto persistence, String entityName) {
         this.persistence = persistence;
         this.entityName = entityName;
-        this.root = root;
     }
 
     public UpdateByIdXmlProcessor process() {
         if (persistence.getPkProperties().size() > 0) {
-            root.addText(Constant.newLine);
-            Element updateByIdTag = Dom4jUtils.findAndRebuildElement(root, "update", "id", "updateById");
-            if (PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()) {
-                updateByIdTag.addComment(Constant.PROHIBIT_MODIFICATION_XML);
-            }
+            Element updateByIdTag = new DefaultElement("update");
+            updateByIdTag.addAttribute("id", "updateById");
             updateByIdTag.addAttribute("parameterType", entityName);
-            updateByIdTag.addText(Constant.newLine + Constant.doubleIndex + "UPDATE " + persistence.getTableName());
 
+            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdTag.addText("UPDATE ").addText(persistence.getTableName());
             Element setTag = updateByIdTag.addElement("set");
             for (PropertyDto nonPk : persistence.getNonPkProperties()) {
                 Element ifTag = setTag.addElement("if");
-                String ifTest = nonPk.getPropertyName() + "!=null";
-                ifTag.addAttribute("test", ifTest);
-                ifTag.addText(
-                        Constant.newLine + Strings.repeat(Constant.singleIndent, 4) + nonPk.getColumnName() + "=#{"
-                                + nonPk.getPropertyName() + "},\r\n" + Constant.trebleIndex);
+                ifTag.addAttribute("test", nonPk.getPropertyName() + "!=null");
+                ifTag.addText(Constant.newLine).addText(Constant.trebleIndex);
+                ifTag.addText(nonPk.getColumnName() + "=#{" + nonPk.getPropertyName() + "},");
+                ifTag.addText(Constant.newLine).addText(Constant.doubleIndex);
             }
-
-            StringBuilder sb = new StringBuilder(64);
-            sb.append(" WHERE ");
-            for (PropertyDto pk : persistence.getPkProperties()) {
-                sb.append(pk.getColumnName()).append("=#{").append(pk.getPropertyName()).append("} AND ");
-            }
-            String text = StringUtils.removeLast(sb.toString(), " AND ");
-            sb.setLength(0);
-            updateByIdTag.addText(text);
+            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdTag.addText("WHERE ");
+            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdTag.addText(persistence.getPkProperties().stream()
+                    .map(pk -> pk.getColumnName() + "=#{" + pk.getPropertyName() + "}")
+                    .collect(Collectors.joining(" AND ")));
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(updateByIdTag));
         }
         return this;
     }
