@@ -6,7 +6,6 @@ import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
@@ -32,28 +31,28 @@ public class UpdateByPkEvenNullXmlProc extends XmlProc {
 
     public UpdateByPkEvenNullXmlProc process() {
         if (persistence.getPkProperties().size() > 0) {
-            Element updateByIdEvenNullTag = new DefaultElement("update");
-            updateByIdEvenNullTag.addAttribute("id", "updateByIdEvenNull");
-            updateByIdEvenNullTag.addAttribute("parameterType", entityName);
-            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdEvenNullTag.addText("UPDATE ").addText(persistence.getTableName());
-            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdEvenNullTag.addText("SET ");
-            updateByIdEvenNullTag.addText(persistence.getNonPkProperties().stream()
+            Element stmt = new DefaultElement("update");
+            stmt.addAttribute("id", "updateByIdEvenNull");
+            stmt.addAttribute("parameterType", entityName);
+            newLineWithIndent(stmt);
+            stmt.addText("UPDATE ").addText(persistence.getTableName());
+            newLineWithIndent(stmt);
+            stmt.addText("SET ");
+            stmt.addText(persistence.getNonPkProperties().stream()
                     .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}")
                     .collect(Collectors.joining(", ")));
-            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdEvenNullTag.addText("WHERE ");
-            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            newLineWithIndent(stmt);
+            stmt.addText("WHERE ");
+            newLineWithIndent(stmt);
             if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
-                updateByIdEvenNullTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-                updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
-                updateByIdEvenNullTag.addText("AND ");
+                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                newLineWithIndent(stmt);
+                stmt.addText("AND ");
             }
-            updateByIdEvenNullTag.addText(persistence.getPkProperties().stream()
+            stmt.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(updateByIdEvenNullTag));
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
         }
         return this;
     }

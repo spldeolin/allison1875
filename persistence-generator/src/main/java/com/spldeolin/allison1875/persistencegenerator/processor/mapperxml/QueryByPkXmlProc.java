@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
+import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
@@ -29,26 +29,29 @@ public class QueryByPkXmlProc extends XmlProc {
 
     public QueryByPkXmlProc process() {
         if (persistence.getPkProperties().size() > 0) {
-            Element queryByIdTag = new DefaultElement("select");
-            queryByIdTag.addAttribute("id", "queryById");
-            queryByIdTag.addAttribute("resultMap", "all");
-            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdTag.addText("SELECT");
-            queryByIdTag.addElement("include").addAttribute("refid", "all");
-            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdTag.addText("FROM ").addText(persistence.getTableName());
-            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdTag.addText("WHERE ");
-            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
-                queryByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-                queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-                queryByIdTag.addText("AND ");
+            Element stmt = new DefaultElement("select");
+            stmt.addAttribute("id", "queryById");
+            if (persistence.getPkProperties().size() == 1) {
+                addParameterType(stmt, Iterables.getOnlyElement(persistence.getPkProperties()));
             }
-            queryByIdTag.addText(persistence.getPkProperties().stream()
+            stmt.addAttribute("resultMap", "all");
+            newLineWithIndent(stmt);
+            stmt.addText("SELECT");
+            stmt.addElement("include").addAttribute("refid", "all");
+            newLineWithIndent(stmt);
+            stmt.addText("FROM ").addText(persistence.getTableName());
+            newLineWithIndent(stmt);
+            stmt.addText("WHERE ");
+            newLineWithIndent(stmt);
+            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
+                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                newLineWithIndent(stmt);
+                stmt.addText("AND ");
+            }
+            stmt.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(", ")));
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(queryByIdTag));
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
         }
         return this;
     }

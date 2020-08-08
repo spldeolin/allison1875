@@ -30,8 +30,7 @@ public class AllCloumnSqlXmlProc extends XmlProc {
     public AllCloumnSqlXmlProc process() {
         Element sqlTag = new DefaultElement("sql");
         sqlTag.addAttribute("id", "all");
-        sqlTag.addText(Constant.newLine);
-        sqlTag.addText(Constant.singleIndent);
+        newLineWithIndent(sqlTag);
         sqlTag.addText(
                 persistence.getProperties().stream().map(PropertyDto::getColumnName).collect(Collectors.joining(", ")));
         sqlTag.addText(Constant.newLine);

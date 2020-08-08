@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
@@ -39,11 +40,20 @@ public class QueryByPkProc {
             queryById.setJavadocComment(new JavadocComment("根据ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName("queryById");
-            Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
-            for (PropertyDto pk : persistence.getPkProperties()) {
-                String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
-                Parameter parameter = parseParameter(pk.getJavaType().getSimpleName() + " " + varName);
+
+            if (persistence.getPkProperties().size() == 1) {
+                PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
+                Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + StringUtils
+                        .lowerFirstLetter(onlyPk.getPropertyName()));
                 queryById.addParameter(parameter);
+            } else {
+                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
+                for (PropertyDto pk : persistence.getPkProperties()) {
+                    String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
+                    Parameter parameter = parseParameter(
+                            "@Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName() + " " + varName);
+                    queryById.addParameter(parameter);
+                }
             }
             queryById.setBody(null);
             mapper.getMembers().addLast(queryById);

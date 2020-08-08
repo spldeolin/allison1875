@@ -6,7 +6,6 @@ import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
@@ -33,32 +32,31 @@ public class UpdateByPkXmlProc extends XmlProc {
 
     public UpdateByPkXmlProc process() {
         if (persistence.getPkProperties().size() > 0) {
-            Element updateByIdTag = new DefaultElement("update");
-            updateByIdTag.addAttribute("id", "updateById");
-            updateByIdTag.addAttribute("parameterType", entityName);
-
-            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdTag.addText("UPDATE ").addText(persistence.getTableName());
-            Element setTag = updateByIdTag.addElement("set");
+            Element stmt = new DefaultElement("update");
+            stmt.addAttribute("id", "updateById");
+            stmt.addAttribute("parameterType", entityName);
+            newLineWithIndent(stmt);
+            stmt.addText("UPDATE ").addText(persistence.getTableName());
+            Element setTag = stmt.addElement("set");
             for (PropertyDto nonPk : persistence.getNonPkProperties()) {
                 Element ifTag = setTag.addElement("if");
                 ifTag.addAttribute("test", nonPk.getPropertyName() + "!=null");
-                ifTag.addText(Constant.newLine).addText(Constant.trebleIndex);
+                newLineWithIndent(stmt);
                 ifTag.addText(nonPk.getColumnName() + " = #{" + nonPk.getPropertyName() + "},");
-                ifTag.addText(Constant.newLine).addText(Constant.doubleIndex);
+                newLineWithIndent(stmt);
             }
-            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdTag.addText("WHERE ");
-            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            newLineWithIndent(stmt);
+            stmt.addText("WHERE ");
+            newLineWithIndent(stmt);
             if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
-                updateByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-                updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-                updateByIdTag.addText("AND ");
+                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                newLineWithIndent(stmt);
+                stmt.addText("AND ");
             }
-            updateByIdTag.addText(persistence.getPkProperties().stream()
+            stmt.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(updateByIdTag));
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
         }
         return this;
     }

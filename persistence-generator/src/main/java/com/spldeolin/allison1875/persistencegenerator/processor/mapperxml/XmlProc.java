@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.Collection;
+import org.dom4j.Element;
+import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
@@ -10,8 +12,12 @@ public abstract class XmlProc {
 
     public abstract Collection<String> getSourceCodeLines();
 
-    protected String getParameterType(PropertyDto propertyDto) {
-        return propertyDto.getJavaType().getName().replaceFirst("java\\.lang\\.", "");
+    protected void addParameterType(Element stmt, PropertyDto propertyDto) {
+        stmt.addAttribute("parameterType", propertyDto.getJavaType().getName().replaceFirst("java\\.lang\\.", ""));
+    }
+
+    protected void newLineWithIndent(Element stmt) {
+        stmt.addText(Constant.newLine).addText(Constant.singleIndent);
     }
 
 }

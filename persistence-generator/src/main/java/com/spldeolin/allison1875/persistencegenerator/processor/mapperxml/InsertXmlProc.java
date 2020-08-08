@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 import lombok.Getter;
@@ -30,25 +29,25 @@ public class InsertXmlProc extends XmlProc {
     }
 
     public InsertXmlProc process() {
-        Element insertTag = new DefaultElement("insert");
-        insertTag.addAttribute("id", "insert");
-        insertTag.addAttribute("parameterType", entityName);
+        Element stmt = new DefaultElement("insert");
+        stmt.addAttribute("id", "insert");
+        stmt.addAttribute("parameterType", entityName);
 //        if (persistence.getPkProperties().size() > 0) {
-//            insertTag.addAttribute("useGeneratedKeys", "true");
+//            stmt.addAttribute("useGeneratedKeys", "true");
 //            String keyProperty = persistence.getPkProperties().stream().map(PropertyDto::getColumnName)
 //                    .collect(Collectors.joining(", "));
-//            insertTag.addAttribute("keyProperty", keyProperty);
+//            stmt.addAttribute("keyProperty", keyProperty);
 //        }
-        insertTag.addText(Constant.newLine).addText(Constant.singleIndent);
-        insertTag.addText("INSERT INTO ").addText(persistence.getTableName()).addText(" (");
-        insertTag.addElement("include").addAttribute("refid", "all");
-        insertTag.addText(") VALUES (");
-        insertTag.addText(Constant.newLine).addText(Constant.singleIndent);
-        insertTag.addText(persistence.getProperties().stream().map(prop -> "#{" + prop.getPropertyName() + "}")
+        newLineWithIndent(stmt);
+        stmt.addText("INSERT INTO ").addText(persistence.getTableName()).addText(" (");
+        stmt.addElement("include").addAttribute("refid", "all");
+        stmt.addText(") VALUES (");
+        newLineWithIndent(stmt);
+        stmt.addText(persistence.getProperties().stream().map(prop -> "#{" + prop.getPropertyName() + "}")
                 .collect(Collectors.joining(", ")));
-        insertTag.addText(")");
+        stmt.addText(")");
 
-        sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(insertTag));
+        sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
         return this;
     }
 

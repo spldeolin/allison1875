@@ -6,7 +6,6 @@ import org.dom4j.tree.DefaultElement;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
@@ -35,28 +34,29 @@ public class QueryByPksXmlProc extends XmlProc {
 
     public QueryByPksXmlProc process() {
         if (persistence.getPkProperties().size() == 1) {
-            Element queryByIdsTag = new DefaultElement("select");
-            queryByIdsTag.addAttribute("id", tagId);
-            queryByIdsTag.addAttribute("resultMap", "all");
-            queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdsTag.addText("SELECT");
-            queryByIdsTag.addElement("include").addAttribute("refid", "all");
-            queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdsTag.addText("FROM ").addText(persistence.getTableName());
-            queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdsTag.addText("WHERE ");
-            queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
-                queryByIdsTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-                queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
-                queryByIdsTag.addText("AND ");
-            }
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
-            queryByIdsTag.addText(onlyPk.getColumnName()).addText(" IN (");
-            queryByIdsTag.addElement("foreach").addAttribute("collection", "ids").addAttribute("item", "id")
+            Element stmt = new DefaultElement("select");
+            stmt.addAttribute("id", tagId);
+            addParameterType(stmt, onlyPk);
+            stmt.addAttribute("resultMap", "all");
+            newLineWithIndent(stmt);
+            stmt.addText("SELECT");
+            stmt.addElement("include").addAttribute("refid", "all");
+            newLineWithIndent(stmt);
+            stmt.addText("FROM ").addText(persistence.getTableName());
+            newLineWithIndent(stmt);
+            stmt.addText("WHERE ");
+            newLineWithIndent(stmt);
+            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
+                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                newLineWithIndent(stmt);
+                stmt.addText("AND ");
+            }
+            stmt.addText(onlyPk.getColumnName()).addText(" IN (");
+            stmt.addElement("foreach").addAttribute("collection", "ids").addAttribute("item", "id")
                     .addAttribute("separator", ",").addText("#{id}");
-            queryByIdsTag.addText(")");
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(queryByIdsTag));
+            stmt.addText(")");
+            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
         }
         return this;
     }

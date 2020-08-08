@@ -38,17 +38,17 @@ public class DeleteByFkXmlProc extends XmlProc {
                 for (PropertyDto fk : persistence.getFkProperties()) {
                     Element stmt = new DefaultElement("update");
                     stmt.addAttribute("id", "deleteBy" + StringUtils.upperFirstLetter(fk.getPropertyName()));
-                    stmt.addAttribute("parameterType", getParameterType(fk));
-                    stmt.addText(Constant.newLine).addText(Constant.singleIndent);
+                    addParameterType(stmt, fk);
+                    newLineWithIndent(stmt);
                     stmt.addText("UPDATE ").addText(persistence.getTableName());
-                    stmt.addText(Constant.newLine).addText(Constant.singleIndent);
+                    newLineWithIndent(stmt);
                     stmt.addText("SET ").addText(deletedSql);
-                    stmt.addText(Constant.newLine).addText(Constant.singleIndent);
+                    newLineWithIndent(stmt);
                     stmt.addText("WHERE ");
-                    stmt.addText(Constant.newLine).addText(Constant.singleIndent);
+                    newLineWithIndent(stmt);
                     if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
                         stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-                        stmt.addText(Constant.newLine).addText(Constant.singleIndent);
+                        newLineWithIndent(stmt);
                         stmt.addText("AND ");
                     }
                     stmt.addText(fk.getColumnName() + " = #{" + fk.getPropertyName() + "}");
