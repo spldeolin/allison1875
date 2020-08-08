@@ -15,11 +15,6 @@ public class Imports {
         ensureImported(node, importName, false, false);
     }
 
-    /**
-     * 你好
-     *
-     * WARNING 这个方法由Allison1875生成，禁止人为修改 WARNING
-     */
     public static void ensureImported(Node node, String importName, boolean isStatic, boolean isAsterisk) {
         CompilationUnit cu = node.findCompilationUnit().orElseThrow(CuAbsentException::new);
         NodeList<ImportDeclaration> imports = cu.getImports();

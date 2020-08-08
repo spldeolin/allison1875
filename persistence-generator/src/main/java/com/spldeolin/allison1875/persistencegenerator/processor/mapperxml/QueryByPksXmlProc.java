@@ -46,8 +46,11 @@ public class QueryByPksXmlProc implements XmlProc {
             queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
             queryByIdsTag.addText("WHERE ");
             queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            queryByIdsTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-            queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
+                queryByIdsTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
+                queryByIdsTag.addText("AND ");
+            }
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
             queryByIdsTag.addText(onlyPk.getColumnName()).addText(" IN (");
             queryByIdsTag.addElement("foreach").addAttribute("collection", "ids").addAttribute("item", "id")

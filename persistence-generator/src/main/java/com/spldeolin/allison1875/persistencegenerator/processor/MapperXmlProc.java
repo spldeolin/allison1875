@@ -107,10 +107,10 @@ public class MapperXmlProc {
 
     private List<String> getGeneratedLines() {
         List<String> auto = Lists.newArrayList();
-        String leftAnchor = RandomStringUtils.randomAlphanumeric(6);
-        String rightAnchor = RandomStringUtils.randomAlphanumeric(6);
+        String leftAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
+        String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         auto.add(Constant.singleIndent + String
-                .format(Constant.PROHIBIT_MODIFICATION_XML, leftAnchor, leftAnchor, rightAnchor));
+                .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
         for (XmlProc proc : processors) {
             if (CollectionUtils.isNotEmpty(proc.getSourceCodeLines())) {
                 for (String line : proc.getSourceCodeLines()) {
@@ -121,8 +121,8 @@ public class MapperXmlProc {
             }
 
         }
-        auto.add(Constant.singleIndent + String
-                .format(Constant.PROHIBIT_MODIFICATION_XML, rightAnchor, leftAnchor, rightAnchor));
+        auto.add(
+                Constant.singleIndent + String.format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
         return auto;
     }
 

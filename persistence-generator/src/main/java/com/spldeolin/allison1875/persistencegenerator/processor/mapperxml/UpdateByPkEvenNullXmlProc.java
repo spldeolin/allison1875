@@ -45,8 +45,11 @@ public class UpdateByPkEvenNullXmlProc implements XmlProc {
             updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdEvenNullTag.addText("WHERE ");
             updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdEvenNullTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
+                updateByIdEvenNullTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+                updateByIdEvenNullTag.addText("AND ");
+            }
             updateByIdEvenNullTag.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));

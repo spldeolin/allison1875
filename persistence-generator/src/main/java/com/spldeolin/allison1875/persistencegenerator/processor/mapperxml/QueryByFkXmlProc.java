@@ -43,8 +43,11 @@ public class QueryByFkXmlProc implements XmlProc {
                 queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
                 queryByIdTag.addText("WHERE ");
                 queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-                queryByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-                queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+                if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
+                    queryByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                    queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+                    queryByIdTag.addText("AND ");
+                }
                 queryByIdTag.addText(fk.getColumnName() + " = #{" + fk.getPropertyName() + "}");
                 sourceCodeLines.addAll(StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(queryByIdTag)));
             }

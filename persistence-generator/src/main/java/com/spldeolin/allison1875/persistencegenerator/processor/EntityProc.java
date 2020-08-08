@@ -25,6 +25,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
@@ -79,8 +80,9 @@ public class EntityProc {
         entityCuCreator = new CuCreator(Paths.get(conf.getSourceRoot()), conf.getEntityPackage(),
                 this.getImports(persistence), () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc classJavadoc = new JavadocComment(persistence.getDescrption() + Strings.repeat(Constant.newLine, 2)
-                    + "<strong>该类由Allison1875生成，请勿人为修改</strong>").parse();
+            Javadoc classJavadoc = new JavadocComment(
+                    persistence.getDescrption() + Strings.repeat(Constant.newLine, 2) + "<strong>该类"
+                            + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
             classJavadoc.getBlockTags().addAll(authorTags);
             classJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, persistence.getTableName()));
             coid.setJavadocComment(classJavadoc);

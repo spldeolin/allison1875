@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.dto;
 import java.util.Collection;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.base.Joiner;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.BodySituationEnum;
 import lombok.Data;
@@ -81,7 +82,7 @@ public class EndpointDto {
         code += sourceCode;
 
         String allison1875Note = "\n---\n";
-        allison1875Note += "*该YApi文档由Allison 1875生成，请勿人为修改*";
+        allison1875Note += "*该YApi文档" + BaseConstant.BY_ALLISON_1875 + "*";
 
         return Joiner.on('\n').skipNulls().join(deprecatedNode, comment, developer, code, allison1875Note);
     }

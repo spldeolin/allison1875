@@ -50,8 +50,11 @@ public class UpdateByPkXmlProc implements XmlProc {
             updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdTag.addText("WHERE ");
             updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
-            updateByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
-            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
+                updateByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+                updateByIdTag.addText("AND ");
+            }
             updateByIdTag.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
