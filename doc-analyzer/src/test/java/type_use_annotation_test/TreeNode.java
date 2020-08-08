@@ -13,7 +13,7 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
+import com.spldeolin.allison1875.da.util.JsonSchemaGenerateUtils;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
-import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
+import com.spldeolin.allison1875.da.util.JsonSchemaGenerateUtils;
+import com.spldeolin.allison1875.da.util.JsonSchemaTraverseUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
