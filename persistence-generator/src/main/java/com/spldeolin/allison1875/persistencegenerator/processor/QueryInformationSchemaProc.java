@@ -55,7 +55,7 @@ public class QueryInformationSchemaProc {
 
             this.infoSchemas = runner.query(sql, rsh, conf.getSchema());
         } catch (Throwable e) {
-            log.error("ColumnMetaProcessor.process", e);
+            log.error("ColumnMetaProc.process", e);
             infoSchemas = Lists.newArrayList();
         } finally {
             dataSource.close();

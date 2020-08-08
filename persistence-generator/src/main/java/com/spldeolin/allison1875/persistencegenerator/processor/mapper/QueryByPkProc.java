@@ -20,18 +20,18 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
  *
  * @author Deolin 2020-07-18
  */
-public class QueryByPkProcessor {
+public class QueryByPkProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public QueryByPkProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public QueryByPkProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public QueryByPkProcessor process() {
+    public QueryByPkProc process() {
         if (persistence.getPkProperties().size() > 0) {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryById");
             methods.forEach(Node::remove);

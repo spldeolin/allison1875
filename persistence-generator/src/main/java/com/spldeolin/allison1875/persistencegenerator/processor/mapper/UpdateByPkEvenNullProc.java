@@ -14,18 +14,18 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
  *
  * @author Deolin 2020-07-18
  */
-public class UpdateByPkEvenNullProcessor {
+public class UpdateByPkEvenNullProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public UpdateByPkEvenNullProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public UpdateByPkEvenNullProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public UpdateByPkEvenNullProcessor process() {
+    public UpdateByPkEvenNullProc process() {
         if (persistence.getPkProperties().size() > 0) {
             List<MethodDeclaration> methods = mapper.getMethodsByName("updateByIdEvenNull");
             methods.forEach(Node::remove);

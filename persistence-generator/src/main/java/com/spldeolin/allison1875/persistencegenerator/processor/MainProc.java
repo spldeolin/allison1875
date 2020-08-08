@@ -8,13 +8,13 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProcessor;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByFkProcessor;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByPkProcessor;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByPksEachPkProcessor;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByPksProcessor;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByPkEvenNullProcessor;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByPkProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByFkProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByPkProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByPksEachPkProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByPksProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByPkEvenNullProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByPkProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllCloumnSqlXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProc;
@@ -42,30 +42,30 @@ public class MainProc {
         for (PersistenceDto persistence : new BuildPersistenceDtoProc().process().getPersistences()) {
 
             // 重新生成Entity
-            EntityProc entityProcessor = new EntityProc(persistence).process();
-            CuCreator entityCuCreator = entityProcessor.getEntityCuCreator();
+            EntityProc entityProc = new EntityProc(persistence).process();
+            CuCreator entityCuCreator = entityProc.getEntityCuCreator();
             toSave.add(entityCuCreator.create(false));
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
-                FindOrCreateMapperProc processor = new FindOrCreateMapperProc(persistence, entityCuCreator).process();
-                mapper = processor.getMapper();
-                toSave.add(processor.getCu());
+                FindOrCreateMapperProc proc = new FindOrCreateMapperProc(persistence, entityCuCreator).process();
+                mapper = proc.getMapper();
+                toSave.add(proc.getCu());
             } catch (Exception e) {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
 
             // 在Mapper中生成基础方法
-            new InsertProcessor(persistence, mapper).process();
-            new QueryByPkProcessor(persistence, mapper).process();
-            new UpdateByPkProcessor(persistence, mapper).process();
-            new UpdateByPkEvenNullProcessor(persistence, mapper).process();
-            new QueryByPkProcessor(persistence, mapper).process();
-            new QueryByPksEachPkProcessor(persistence, mapper).process();
-            new QueryByPksProcessor(persistence, mapper).process();
-            new QueryByFkProcessor(persistence, mapper).process();
+            new InsertProc(persistence, mapper).process();
+            new QueryByPkProc(persistence, mapper).process();
+            new UpdateByPkProc(persistence, mapper).process();
+            new UpdateByPkEvenNullProc(persistence, mapper).process();
+            new QueryByPkProc(persistence, mapper).process();
+            new QueryByPksEachPkProc(persistence, mapper).process();
+            new QueryByPksProc(persistence, mapper).process();
+            new QueryByFkProc(persistence, mapper).process();
 
             // 在Mapper.xml中生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);

@@ -22,18 +22,18 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
  *
  * @author Deolin 2020-08-08
  */
-public class QueryByFkProcessor {
+public class QueryByFkProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public QueryByFkProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public QueryByFkProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public QueryByFkProcessor process() {
+    public QueryByFkProc process() {
         for (PropertyDto fk : persistence.getFkProperties()) {
             String methodName = "queryBy" + StringUtils.upperFirstLetter(fk.getPropertyName());
             List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);

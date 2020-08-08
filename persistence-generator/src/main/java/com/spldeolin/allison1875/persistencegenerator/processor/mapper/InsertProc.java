@@ -14,18 +14,18 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
  *
  * @author Deolin 2020-07-18
  */
-public class InsertProcessor {
+public class InsertProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public InsertProcessor(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public InsertProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public InsertProcessor process() {
+    public InsertProc process() {
         List<MethodDeclaration> methods = mapper.getMethodsByName("insert");
         methods.forEach(Node::remove);
         MethodDeclaration insert = new MethodDeclaration();

@@ -14,6 +14,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -34,7 +35,7 @@ public class MapperXmlProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    private final List<XmlProc> processors;
+    private final List<XmlProc> procs;
 
     @Getter
     private File mapperXmlFile;
@@ -42,10 +43,10 @@ public class MapperXmlProc {
     @Getter
     private Element root;
 
-    public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, XmlProc... processors) {
+    public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, XmlProc... procs) {
         this.persistence = persistence;
         this.mapper = mapper;
-        this.processors = Lists.newArrayList(processors);
+        this.procs = Lists.newArrayList(procs);
     }
 
 
@@ -70,18 +71,18 @@ public class MapperXmlProc {
         String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
         List<String> lines = StringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines();
-        if (content.contains(Constant.BY_ALLISON_1875)) {
+        if (content.contains(BaseConstant.BY_ALLISON_1875)) {
             boolean inAnchorRange = false;
             for (String line : lines) {
                 if (!inAnchorRange) {
-                    if (line.contains(Constant.BY_ALLISON_1875)) {
+                    if (line.contains(BaseConstant.BY_ALLISON_1875)) {
                         // 从 范围外 进入
                         inAnchorRange = true;
                     } else {
                         newLines.add(line);
                     }
                 } else {
-                    if (line.contains(Constant.BY_ALLISON_1875)) {
+                    if (line.contains(BaseConstant.BY_ALLISON_1875)) {
                         // 从 范围内 离开
                         inAnchorRange = false;
                         newLines.addAll(generatedLines);
@@ -111,7 +112,7 @@ public class MapperXmlProc {
         String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         auto.add(Constant.singleIndent + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
-        for (XmlProc proc : processors) {
+        for (XmlProc proc : procs) {
             if (CollectionUtils.isNotEmpty(proc.getSourceCodeLines())) {
                 for (String line : proc.getSourceCodeLines()) {
                     if (StringUtils.isNotBlank(line)) {
