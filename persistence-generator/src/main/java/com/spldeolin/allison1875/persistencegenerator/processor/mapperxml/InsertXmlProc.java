@@ -15,7 +15,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-19
  */
-public class InsertXmlProc implements XmlProc {
+public class InsertXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 

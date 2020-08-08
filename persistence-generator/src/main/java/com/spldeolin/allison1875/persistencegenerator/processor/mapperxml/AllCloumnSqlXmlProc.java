@@ -16,7 +16,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-19
  */
-public class AllCloumnSqlXmlProc implements XmlProc {
+public class AllCloumnSqlXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 

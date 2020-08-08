@@ -17,7 +17,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByPkXmlProc implements XmlProc {
+public class UpdateByPkXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
