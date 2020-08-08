@@ -9,6 +9,7 @@ import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByFkProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsEachIdProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProcessor;
@@ -17,6 +18,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByI
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllColumnResultMapProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllColumnSqlProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProcessor;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByFkXmlProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdXmlProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdsXmlProcessor;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProcessor;
@@ -58,12 +60,13 @@ public class MainProcessor {
 
             // 在Mapper中生成基础方法
             new InsertProcessor(persistence, mapper).process();
-            new QueryByIdsEachIdProcessor(persistence, mapper).process();
+            new QueryByIdProcessor(persistence, mapper).process();
             new UpdateByIdProcessor(persistence, mapper).process();
             new UpdateByIdEvenNullProcessor(persistence, mapper).process();
             new QueryByIdProcessor(persistence, mapper).process();
-            new QueryByIdsProcessor(persistence, mapper).process();
             new QueryByIdsEachIdProcessor(persistence, mapper).process();
+            new QueryByIdsProcessor(persistence, mapper).process();
+            new QueryByFkProcessor(persistence, mapper).process();
 
             // 在Mapper.xml中生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
@@ -76,7 +79,8 @@ public class MainProcessor {
                         new UpdateByIdEvenNullXmlProcessor(persistence, entityName).process(),
                         new QueryByIdXmlProcessor(persistence).process(),
                         new QueryByIdsXmlProcessor(persistence, "queryByIds").process(),
-                        new QueryByIdsXmlProcessor(persistence, "queryByIdsEachId").process()).process();
+                        new QueryByIdsXmlProcessor(persistence, "queryByIdsEachId").process(),
+                        new QueryByFkXmlProcessor(persistence).process()).process();
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

@@ -36,6 +36,7 @@ public class BuildPersistenceDtoProcessor {
             dto.setDescrption(infoSchema.getTableComment());
             dto.setPkProperties(Lists.newArrayList());
             dto.setNonPkProperties(Lists.newArrayList());
+            dto.setFkProperties(Lists.newArrayList());
             dto.setProperties(Lists.newArrayList());
             persistences.put(infoSchema.getTableName(), dto);
         }
@@ -57,7 +58,11 @@ public class BuildPersistenceDtoProcessor {
                 persistence.getPkProperties().add(property);
             } else {
                 persistence.getNonPkProperties().add(property);
+                if (columnMeta.getColumnName().endsWith("_id")) {
+                    persistence.getFkProperties().add(property);
+                }
             }
+
         }
         this.persistences = persistences.values();
         return this;

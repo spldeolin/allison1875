@@ -36,14 +36,13 @@ public class QueryByIdProcessor {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryById");
             methods.forEach(Node::remove);
             MethodDeclaration queryById = new MethodDeclaration();
-            queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            queryById.setJavadocComment(new JavadocComment("根据ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName("queryById");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
             for (PropertyDto pk : persistence.getPkProperties()) {
                 String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
-                Parameter parameter = parseParameter(
-                        "@Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName() + " " + varName);
+                Parameter parameter = parseParameter(pk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
             }
             queryById.setBody(null);
