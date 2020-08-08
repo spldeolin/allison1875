@@ -12,7 +12,6 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -40,9 +39,8 @@ public class QueryByIdsProcessor {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryByIdsEachId");
             methods.forEach(Node::remove);
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            String ex = PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()
-                    ? Constant.PROHIBIT_MODIFICATION_JAVADOC : "";
-            queryByIdsEachId.setJavadocComment(new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + ex));
+            queryByIdsEachId.setJavadocComment(
+                    new JavadocComment("根据ID查询数据，并以ID为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
             Imports.ensureImported(mapper, "java.util.Map");
             Imports.ensureImported(mapper, "java.util.Collection");

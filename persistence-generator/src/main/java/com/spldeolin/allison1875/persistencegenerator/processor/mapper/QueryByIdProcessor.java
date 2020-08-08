@@ -11,7 +11,6 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -37,9 +36,7 @@ public class QueryByIdProcessor {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryById");
             methods.forEach(Node::remove);
             MethodDeclaration queryById = new MethodDeclaration();
-            String ex = PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()
-                    ? Constant.PROHIBIT_MODIFICATION_JAVADOC : "";
-            queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + ex));
+            queryById.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName("queryById");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -43,14 +44,16 @@ public class UpdateByIdXmlProcessor implements SourceCodeGetter {
                 Element ifTag = setTag.addElement("if");
                 ifTag.addAttribute("test", nonPk.getPropertyName() + "!=null");
                 ifTag.addText(Constant.newLine).addText(Constant.trebleIndex);
-                ifTag.addText(nonPk.getColumnName() + "=#{" + nonPk.getPropertyName() + "},");
+                ifTag.addText(nonPk.getColumnName() + " = #{" + nonPk.getPropertyName() + "},");
                 ifTag.addText(Constant.newLine).addText(Constant.doubleIndex);
             }
             updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdTag.addText("WHERE ");
             updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+            updateByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdTag.addText(persistence.getPkProperties().stream()
-                    .map(pk -> pk.getColumnName() + "=#{" + pk.getPropertyName() + "}")
+                    .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
             sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(updateByIdTag));
         }

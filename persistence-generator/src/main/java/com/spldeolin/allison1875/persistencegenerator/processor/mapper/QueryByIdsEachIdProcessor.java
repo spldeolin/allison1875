@@ -13,7 +13,6 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -41,9 +40,7 @@ public class QueryByIdsEachIdProcessor {
             List<MethodDeclaration> methods = mapper.getMethodsByName("queryByIds");
             methods.forEach(Node::remove);
             MethodDeclaration queryByIds = new MethodDeclaration();
-            String ex = PersistenceGeneratorConfig.getInstace().getPrintAllison1875Message()
-                    ? Constant.PROHIBIT_MODIFICATION_JAVADOC : "";
-            queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + ex));
+            queryByIds.setJavadocComment(new JavadocComment("根据ID查询数据" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             Imports.ensureImported(mapper, "java.util.List");
             Imports.ensureImported(mapper, "java.util.Collection");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");

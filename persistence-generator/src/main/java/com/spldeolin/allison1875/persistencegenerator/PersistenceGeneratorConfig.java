@@ -56,7 +56,9 @@ public class PersistenceGeneratorConfig {
 
     private Boolean isEntityEndWithEntity;
 
-    private Boolean printAllison1875Message;
+    private String deletedSql;
+
+    private String notDeletedSql;
 
     public static PersistenceGeneratorConfig getInstace() {
         return instace;

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
@@ -39,13 +40,15 @@ public class UpdateByIdEvenNullXmlProcessor implements SourceCodeGetter {
             updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdEvenNullTag.addText("SET ");
             updateByIdEvenNullTag.addText(persistence.getNonPkProperties().stream()
-                    .map(npk -> npk.getColumnName() + "=#{" + npk.getPropertyName() + "}")
+                    .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}")
                     .collect(Collectors.joining(", ")));
             updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdEvenNullTag.addText("WHERE ");
             updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            updateByIdEvenNullTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+            updateByIdEvenNullTag.addText(Constant.newLine).addText(Constant.singleIndent);
             updateByIdEvenNullTag.addText(persistence.getPkProperties().stream()
-                    .map(pk -> pk.getColumnName() + "=#{" + pk.getPropertyName() + "}")
+                    .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
             sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(updateByIdEvenNullTag));
         }

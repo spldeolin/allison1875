@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
@@ -39,8 +40,10 @@ public class QueryByIdXmlProcessor implements SourceCodeGetter {
             queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
             queryByIdTag.addText("WHERE ");
             queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            queryByIdTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+            queryByIdTag.addText(Constant.newLine).addText(Constant.singleIndent);
             queryByIdTag.addText(persistence.getPkProperties().stream()
-                    .map(pk -> pk.getColumnName() + "=#{" + pk.getPropertyName() + "}")
+                    .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(", ")));
             sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(queryByIdTag));
         }

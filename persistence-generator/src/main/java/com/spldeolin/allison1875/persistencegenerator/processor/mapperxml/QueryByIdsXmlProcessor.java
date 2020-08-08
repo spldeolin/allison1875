@@ -5,6 +5,7 @@ import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -42,6 +43,8 @@ public class QueryByIdsXmlProcessor implements SourceCodeGetter {
             queryByIdsTag.addText("FROM ").addText(persistence.getTableName());
             queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
             queryByIdsTag.addText("WHERE ");
+            queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
+            queryByIdsTag.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
             queryByIdsTag.addText(Constant.newLine).addText(Constant.singleIndent);
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
             queryByIdsTag.addText(onlyPk.getColumnName()).addText(" IN (");
