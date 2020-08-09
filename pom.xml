@@ -12,11 +12,11 @@
     <modules>
         <module>base</module>
         <module>doc-analyzer</module>
-        <module>transformer</module>
-        <module>inspector</module>
         <module>handler-generator</module>
+        <module>inspector</module>
         <module>persistence-generator</module>
         <module>persistence-query-transformer</module>
+        <module>handler-transformer</module>
     </modules>
 
     <name>allison1875</name>
