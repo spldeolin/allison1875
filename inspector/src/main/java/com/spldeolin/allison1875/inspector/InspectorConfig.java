@@ -1,12 +1,9 @@
 package com.spldeolin.allison1875.inspector;
 
 import java.nio.file.Path;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ext.NioPathDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.spldeolin.allison1875.base.exception.ConfigLoadingException;
+import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -18,22 +15,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public final class InspectorConfig {
 
-    private static final InspectorConfig instance;
-
-    static {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        SimpleModule forNioPath = new SimpleModule();
-        forNioPath.addDeserializer(Path.class, new NioPathDeserializer());
-        mapper.registerModule(forNioPath);
-
-        try {
-            instance = mapper.readValue(ClassLoader.getSystemResourceAsStream("inspector-config.yml"),
-                    InspectorConfig.class);
-        } catch (Exception e) {
-            log.error("InspectorConfig static block failed.", e);
-            throw new ConfigLoadingException();
-        }
-    }
+    @Getter
+    private static final InspectorConfig instance = YamlUtils.toObject("inspector-config.yml", InspectorConfig.class);
 
     /**
      * 分页包装类的全限定名
@@ -51,10 +34,6 @@ public final class InspectorConfig {
     private Path lawlessCsvOutputDirectoryPath;
 
     private InspectorConfig() {
-    }
-
-    public static InspectorConfig getInstance() {
-        return instance;
     }
 
 }
