@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.pg.constant.Constant;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
@@ -33,7 +33,7 @@ public class AllCloumnSqlXmlProc extends XmlProc {
         newLineWithIndent(sqlTag);
         sqlTag.addText(
                 persistence.getProperties().stream().map(PropertyDto::getColumnName).collect(Collectors.joining(", ")));
-        sqlTag.addText(Constant.newLine);
+        sqlTag.addText(BaseConstant.NEW_LINE);
         sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(sqlTag));
         return this;
     }

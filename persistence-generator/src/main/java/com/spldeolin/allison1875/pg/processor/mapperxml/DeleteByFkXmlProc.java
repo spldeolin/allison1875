@@ -4,9 +4,9 @@ import java.util.Collection;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.pg.constant.Constant;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
@@ -52,7 +52,7 @@ public class DeleteByFkXmlProc extends XmlProc {
                         stmt.addText("AND ");
                     }
                     stmt.addText(fk.getColumnName() + " = #{" + fk.getPropertyName() + "}");
-                    stmt.addText(Constant.newLine);
+                    stmt.addText(BaseConstant.NEW_LINE);
                     sourceCodeLines.addAll(StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt)));
                 }
 

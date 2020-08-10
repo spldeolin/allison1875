@@ -110,4 +110,12 @@ public class StringUtils {
         return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, string);
     }
 
+    public static String lowerCamelToUnderscore(String string) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, string);
+    }
+
+    public static String upperCamelToUnderscore(String string) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, string);
+    }
+
 }

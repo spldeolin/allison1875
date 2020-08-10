@@ -28,7 +28,6 @@ import com.google.common.collect.Sets.SetView;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.pg.constant.Constant;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
 import lombok.Getter;
@@ -81,7 +80,7 @@ public class EntityProc {
                 this.getImports(persistence), () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc classJavadoc = new JavadocComment(
-                    persistence.getDescrption() + Strings.repeat(Constant.newLine, 2) + "<strong>该类"
+                    persistence.getDescrption() + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<strong>该类"
                             + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
             classJavadoc.getBlockTags().addAll(authorTags);
             classJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, persistence.getTableName()));

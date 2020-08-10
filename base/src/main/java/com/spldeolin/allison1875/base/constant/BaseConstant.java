@@ -7,4 +7,8 @@ public interface BaseConstant {
 
     String BY_ALLISON_1875 = "由Allison 1875生成，请勿人为修改";
 
+    String SINGLE_INDENT = "    ";
+
+    String NEW_LINE = "\r\n";
+
 }

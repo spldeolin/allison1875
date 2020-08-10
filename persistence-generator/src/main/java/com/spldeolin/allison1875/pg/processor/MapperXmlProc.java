@@ -61,7 +61,7 @@ public class MapperXmlProc {
             Document document = DocumentHelper.createDocument();
             document.addDocType("mapper",
                     "-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd", null);
-            root = document.addElement("mapper").addText(Constant.newLine);
+            root = document.addElement("mapper").addText(BaseConstant.NEW_LINE);
             root.addAttribute("namespace", mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
             Dom4jUtils.write(mapperXmlFile, document);
         }
@@ -110,20 +110,20 @@ public class MapperXmlProc {
         List<String> auto = Lists.newArrayList();
         String leftAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
-        auto.add(Constant.singleIndent + String
+        auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
         for (XmlProc proc : procs) {
             if (CollectionUtils.isNotEmpty(proc.getSourceCodeLines())) {
                 for (String line : proc.getSourceCodeLines()) {
                     if (StringUtils.isNotBlank(line)) {
-                        auto.add(Constant.singleIndent + line);
+                        auto.add(BaseConstant.SINGLE_INDENT + line);
                     }
                 }
             }
 
         }
-        auto.add(
-                Constant.singleIndent + String.format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
+        auto.add(BaseConstant.SINGLE_INDENT + String
+                .format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
         return auto;
     }
 

@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.pg.processor.mapperxml;
 
 import java.util.Collection;
 import org.dom4j.Element;
-import com.spldeolin.allison1875.pg.constant.Constant;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
 
 /**
@@ -17,7 +17,7 @@ public abstract class XmlProc {
     }
 
     protected void newLineWithIndent(Element stmt) {
-        stmt.addText(Constant.newLine).addText(Constant.singleIndent);
+        stmt.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
     }
 
 }
