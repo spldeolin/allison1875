@@ -7,10 +7,12 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -22,6 +24,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
@@ -97,11 +100,29 @@ class JsgBuildProcessor {
         om.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
             private static final long serialVersionUID = -3267511125040673149L;
 
+            private final Multiset<JavaType> count = HashMultiset.create();
+
+            @Override
+            public PropertyName findNameForSerialization(Annotated a) {
+                if (a.getAnnotated() instanceof Method && a.getAnnotation(AssertTrue.class) != null) {
+                    count.add(a.getType());
+                    return PropertyName
+                            .construct("跨字段校验项" + Strings.repeat(String.valueOf('\u0000'), count.count(a.getType())));
+                }
+                return super.findNameForSerialization(a);
+            }
+
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
                 if (field == null) {
-                    return JsonUtils.toJson(new JsonPropertyDescriptionValueDto());
+                    JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
+                    if (annotated.getAnnotated() instanceof Method
+                            && annotated.getAnnotation(AssertTrue.class) != null) {
+                        jpdv.setIsFieldCrossingValidators(true);
+                        jpdv.setValidators(validatorProcessor.process(annotated.getAnnotated()));
+                    }
+                    return JsonUtils.toJson(jpdv);
                 }
 
                 Class<?> clazz = field.getDeclaringClass();
@@ -110,7 +131,7 @@ class JsgBuildProcessor {
 
                 JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldName);
                 if (jpdv == null) {
-                    jpdv = new JsonPropertyDescriptionValueDto().setValidators(Lists.newArrayList());
+                    jpdv = new JsonPropertyDescriptionValueDto();
                 }
 
                 jpdv.setValidators(validatorProcessor.process(annotated.getAnnotated()));
@@ -123,14 +144,11 @@ class JsgBuildProcessor {
                 if (isLikeCollection) {
                     AnnotatedType at = field.getAnnotatedType();
                     if (at instanceof AnnotatedParameterizedType) {
-                        AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) at)
-                                .getAnnotatedActualTypeArguments();
+                        AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) at).getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            Collection<ValidatorDto> theOnlyElementValidator = validatorProcessor
-                                    .process(theOnlyTypeArgument);
-                            theOnlyElementValidator
-                                    .forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
+                            Collection<ValidatorDto> theOnlyElementValidator = validatorProcessor.process(theOnlyTypeArgument);
+                            theOnlyElementValidator.forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
                             jpdv.getValidators().addAll(theOnlyElementValidator);
                         }
                     }

@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -24,41 +25,52 @@ public class JsonPropertyDescriptionValueDto {
      *
      * e.g: @NotEmpty private Collection<String> userNames;
      */
-    private Collection<ValidatorDto> validators;
+    private Collection<ValidatorDto> validators = Lists.newArrayList();
 
     private String jsonFormatPattern;
 
+    private Boolean isFieldCrossingValidators = false;
+
     public String toStringPrettily() {
-        String comment = null;
-        if (CollectionUtils.isNotEmpty(descriptionLines)) {
-            StringBuilder sb = new StringBuilder();
-            for (String line : descriptionLines) {
-                if (StringUtils.isNotBlank(line)) {
-                    sb.append("\t").append(line).append("\n");
-                } else {
-                    sb.append("\n");
+        if (isFieldCrossingValidators) {
+            StringBuilder sb = new StringBuilder(64);
+            for (ValidatorDto validator : validators) {
+                sb.append(validator.getValidatorType()).append(validator.getNote()).append("\n");
+            }
+            return sb.toString();
+        } else {
+
+            String comment = null;
+            if (CollectionUtils.isNotEmpty(descriptionLines)) {
+                StringBuilder sb = new StringBuilder();
+                for (String line : descriptionLines) {
+                    if (StringUtils.isNotBlank(line)) {
+                        sb.append("\t").append(line).append("\n");
+                    } else {
+                        sb.append("\n");
+                    }
+                }
+                // sb并不是只有换号符时
+                if (StringUtils.isNotBlank(sb)) {
+                    sb.insert(0, "注释\n");
+                    comment = sb.deleteCharAt(sb.length() - 1).toString();
                 }
             }
-            // sb并不是只有换号符时
-            if (StringUtils.isNotBlank(sb)) {
-                sb.insert(0, "注释\n");
-                comment = sb.deleteCharAt(sb.length() - 1).toString();
+            String validatorInfo = null;
+            if (CollectionUtils.isNotEmpty(validators)) {
+                StringBuilder sb = new StringBuilder("校验项\n");
+                for (ValidatorDto validator : validators) {
+                    sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
+                }
+                validatorInfo = sb.deleteCharAt(sb.length() - 1).toString();
             }
-        }
-        String validatorInfo = null;
-        if (CollectionUtils.isNotEmpty(validators)) {
-            StringBuilder sb = new StringBuilder("校验项\n");
-            for (ValidatorDto validator : validators) {
-                sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
+            String format = null;
+            if (jsonFormatPattern != null) {
+                format = "格式\n";
+                format += "\t" + jsonFormatPattern;
             }
-            validatorInfo = sb.deleteCharAt(sb.length() - 1).toString();
+            return Joiner.on("\n\n").skipNulls().join(comment, validatorInfo, format);
         }
-        String format = null;
-        if (jsonFormatPattern != null) {
-            format = "格式\n";
-            format += "\t" + jsonFormatPattern;
-        }
-        return Joiner.on("\n\n").skipNulls().join(comment, validatorInfo, format);
     }
 
 }

@@ -3,15 +3,18 @@ package com.spldeolin.allison1875.da.processor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Future;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Negative;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
+import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
@@ -101,9 +104,19 @@ public class ValidatorProcessor {
             result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.FUTURE.getValue()));
         }
 
+        FutureOrPresent futureOrPresent = find(annotatedElement, FutureOrPresent.class);
+        if (futureOrPresent != null) {
+            result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.FUTURE_OR_PRESENT.getValue()));
+        }
+
         Past past = find(annotatedElement, Past.class);
         if (past != null) {
             result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.PAST.getValue()));
+        }
+
+        PastOrPresent pastOrPresent = find(annotatedElement, PastOrPresent.class);
+        if (pastOrPresent != null) {
+            result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.PAST_OR_PRESENT.getValue()));
         }
 
         Digits digits = find(annotatedElement, Digits.class);
@@ -128,6 +141,12 @@ public class ValidatorProcessor {
         if (pattern != null) {
             result.add(
                     new ValidatorDto().setValidatorType(ValidatorTypeEnum.REGEX.getValue()).setNote(pattern.regexp()));
+        }
+
+        AssertTrue assertTrue = find(annotatedElement, AssertTrue.class);
+        if (assertTrue != null) {
+            result.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.FIELD_CROSSING.getValue())
+                    .setNote(assertTrue.message()));
         }
 
         result.addAll(analyzeCustomValidationStrategy.analyzeCustomValidation(annotatedElement));

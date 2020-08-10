@@ -24,9 +24,13 @@ public enum ValidatorTypeEnum {
 
     MIN_NUMBER("最小值："),
 
-    FUTURE("必须是未来的时间"),
+    FUTURE("必须是未来"),
 
-    PAST("必须是过去的时间"),
+    FUTURE_OR_PRESENT("必须是未来或现在"),
+
+    PAST("必须是过去"),
+
+    PAST_OR_PRESENT("必须是过去或现在"),
 
     MAX_INTEGRAL_DIGITS("最大整数位数："),
 
@@ -36,7 +40,9 @@ public enum ValidatorTypeEnum {
 
     NEGATIVE("必须是小数"),
 
-    REGEX("正则表达式：");
+    REGEX("正则表达式："),
+
+    FIELD_CROSSING("");
 
     private final String value;
 
