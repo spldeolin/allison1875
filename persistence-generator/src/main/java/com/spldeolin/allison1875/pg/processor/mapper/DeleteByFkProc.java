@@ -39,7 +39,7 @@ public class DeleteByFkProc {
             methods.forEach(Node::remove);
             MethodDeclaration method = new MethodDeclaration();
             method.setJavadocComment(
-                    new JavadocComment("根据" + fk.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                    new JavadocComment("根据" + fk.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
             method.setType(PrimitiveType.intType());
             method.setName(methodName);
             String varName = StringUtils.lowerFirstLetter(fk.getPropertyName());

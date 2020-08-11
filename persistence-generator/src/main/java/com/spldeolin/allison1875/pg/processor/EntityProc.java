@@ -80,10 +80,10 @@ public class EntityProc {
                 this.getImports(persistence), () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc classJavadoc = new JavadocComment(
-                    persistence.getDescrption() + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<strong>该类"
-                            + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
+                    persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
+                            .repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型" + BaseConstant.BY_ALLISON_1875
+                            + "</strong>").parse();
             classJavadoc.getBlockTags().addAll(authorTags);
-            classJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, persistence.getTableName()));
             coid.setJavadocComment(classJavadoc);
             coid.addAnnotation(parseAnnotation("@Data"));
             coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
@@ -93,8 +93,8 @@ public class EntityProc {
                 String type = property.getJavaType().getSimpleName();
                 String name = property.getPropertyName();
                 FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
-                Javadoc fieldJavadoc = new JavadocComment(property.getDescription()).parse();
-                fieldJavadoc.addBlockTag(new JavadocBlockTag(Type.SEE, property.getColumnName()));
+                Javadoc fieldJavadoc = new JavadocComment(
+                        property.getDescription() + BaseConstant.NEW_LINE + "<p>" + property.getColumnName()).parse();
                 field.setJavadocComment(fieldJavadoc);
 
             }
