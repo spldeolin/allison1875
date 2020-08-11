@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum ValidatorTypeEnum {
+public enum ValidTypeEnum {
 
     NOT_NULL("不能为null"),
 

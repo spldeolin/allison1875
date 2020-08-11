@@ -51,7 +51,7 @@ class JsgBuildProc {
 
     private final AstForest astForest;
 
-    private final ValidatorProc validatorProcessor;
+    private final ValidProc validatorProcessor;
 
     private final Table<String, String, String> specificFieldDescriptions;
 
@@ -60,7 +60,7 @@ class JsgBuildProc {
     public JsgBuildProc(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
             Table<String, String, String> specificFieldDescriptions) {
         this.astForest = astForest;
-        this.validatorProcessor = new ValidatorProc(analyzeCustomValidationStrategy);
+        this.validatorProcessor = new ValidProc(analyzeCustomValidationStrategy);
         this.specificFieldDescriptions = specificFieldDescriptions;
     }
 
