@@ -22,7 +22,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-06-10
  */
-class RequestMappingProcessor {
+class RequestMappingProc {
 
     private static final PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -36,7 +36,7 @@ class RequestMappingProcessor {
     @Getter
     private Collection<RequestMethod> combinedVerbs;
 
-    public RequestMappingProcessor(Class<?> controllerClass) {
+    public RequestMappingProc(Class<?> controllerClass) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         cPaths = findValueFromAnno(controllerRequestMapping);
         cVerbs = findVerbFromAnno(controllerRequestMapping);

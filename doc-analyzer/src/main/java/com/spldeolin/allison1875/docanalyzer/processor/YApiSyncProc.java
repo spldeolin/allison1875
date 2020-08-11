@@ -30,10 +30,12 @@ import com.spldeolin.allison1875.docanalyzer.yapi.javabean.ProjectGetRespDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * 将endpoints同步到YApi
+ *
  * @author Deolin 2020-07-26
  */
 @Log4j2
-public class YApiProcessor {
+public class YApiSyncProc {
 
     private static final String ALLISON_1875_TAG = "Allison 1875";
 
@@ -43,32 +45,39 @@ public class YApiProcessor {
 
     private static final String token = DocAnalyzerConfig.getInstance().getYapiToken();
 
-    private static final Long projectId;
+    private static final Long projectId = getProjectIdFromYApi();
 
-    static {
+    private final Collection<EndpointDto> endpoints;
+
+    private static Long getProjectIdFromYApi() {
         String json = HttpUtils.get(url + "/api/project/get?token=" + token);
         CommonRespDto<ProjectGetRespDto> resp = JsonUtils
                 .toParameterizedObject(json, new TypeReference<CommonRespDto<ProjectGetRespDto>>() {
                 });
         ensureSuccess(resp);
-        projectId = resp.getData().getId();
+        return resp.getData().getId();
     }
 
-    public void syncYApi(Collection<EndpointDto> endpoints) {
+    public YApiSyncProc(Collection<EndpointDto> endpoints) {
+        this.endpoints = endpoints;
+    }
+
+    public void process() {
         Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
         catNames.add("回收站");
         Set<String> yapiCatNames = this.getYapiCatIdsEachName().keySet();
-        this.addCat(Sets.difference(catNames, yapiCatNames));
-        Map<String, Long> catIdsEachName = this.getYapiCatIdsEachName();
+        this.createYApiCat(Sets.difference(catNames, yapiCatNames));
+
+        Map<String, Long> catName2catId = this.getYapiCatIdsEachName();
 
         Map<String, JsonNode> yapiUrls = this.listAutoInterfaces();
-        Set<String> urls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
+        Set<String> analysisUrls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
                 .collect(Collectors.toSet());
 
         // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
-        for (String url : yapiUrls.keySet()) {
-            if (!urls.contains(url)) {
-                this.deleteInterface(yapiUrls.get(url), catIdsEachName.get("回收站"));
+        for (String yapiUrl : yapiUrls.keySet()) {
+            if (!analysisUrls.contains(yapiUrl)) {
+                this.deleteInterface(yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
             }
         }
 
@@ -103,8 +112,8 @@ public class YApiProcessor {
                 respJs = JsonUtils.toJson(responseJsonSchema);
             }
 
-            this.addInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
-                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catIdsEachName.get(endpoint.getCat()));
+            this.createYApiInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
+                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catName2catId.get(endpoint.getCat()));
         }
     }
 
@@ -122,7 +131,7 @@ public class YApiProcessor {
         return result;
     }
 
-    public void addCat(Collection<String> catNames) {
+    public void createYApiCat(Collection<String> catNames) {
         for (String catName : catNames) {
             Map<String, String> form = Maps.newHashMap();
             form.put("desc", "");
@@ -183,8 +192,8 @@ public class YApiProcessor {
         log.info(resp);
     }
 
-    public void addInterface(String title, String url, String requestBodyJsonSchema, String responseBodyJsonSchema,
-            String description, String httpMethod, Long catId) {
+    public void createYApiInterface(String title, String url, String requestBodyJsonSchema,
+            String responseBodyJsonSchema, String description, String httpMethod, Long catId) {
         Map<String, Object> form = Maps.newHashMap();
         form.put("title", title);
         form.put("path", url);
@@ -202,7 +211,7 @@ public class YApiProcessor {
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", token);
-        String resp = HttpUtils.postJson(YApiProcessor.url + "/api/interface/save", JsonUtils.toJson(form));
+        String resp = HttpUtils.postJson(YApiSyncProc.url + "/api/interface/save", JsonUtils.toJson(form));
         log.info(resp);
     }
 

@@ -47,20 +47,20 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class JsgBuildProcessor {
+class JsgBuildProc {
 
     private final AstForest astForest;
 
-    private final ValidatorProcessor validatorProcessor;
+    private final ValidatorProc validatorProcessor;
 
     private final Table<String, String, String> specificFieldDescriptions;
 
     private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
-    public JsgBuildProcessor(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
+    public JsgBuildProc(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
             Table<String, String, String> specificFieldDescriptions) {
         this.astForest = astForest;
-        this.validatorProcessor = new ValidatorProcessor(analyzeCustomValidationStrategy);
+        this.validatorProcessor = new ValidatorProc(analyzeCustomValidationStrategy);
         this.specificFieldDescriptions = specificFieldDescriptions;
     }
 

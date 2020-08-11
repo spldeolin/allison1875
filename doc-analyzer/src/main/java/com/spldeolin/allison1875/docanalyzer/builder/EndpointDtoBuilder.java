@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -27,9 +28,9 @@ public class EndpointDtoBuilder {
 
     private Collection<RequestMethod> combinedVerbs;
 
-    private RequestBodyInfoBuilder requestBodyInfo;
+    private JsonSchema requestBodyJsonSchema;
 
-    private ResponseBodyInfoBuilder responseBodyInfo;
+    private JsonSchema responseBodyJsonSchema;
 
     private String author;
 
@@ -44,12 +45,8 @@ public class EndpointDtoBuilder {
         result.setHttpMethods(
                 combinedVerbs.stream().map(one -> StringUtils.lowerCase(one.name())).collect(Collectors.toList()));
         result.setIsDeprecated(isDeprecated);
-        result.setRequestBodySituation(requestBodyInfo.requestBodySituation());
-        result.setRequestBodyJsonSchema(requestBodyInfo.requestBodyJsonSchema());
-        result.setRequestBodyProperties(requestBodyInfo.flatRequestProperties());
-        result.setResponseBodySituation(responseBodyInfo.responseBodySituation());
-        result.setResponseBodyJsonSchema(responseBodyInfo.responseBodyJsonSchema());
-        result.setResponseBodyProperties(responseBodyInfo.flatResponseProperties());
+        result.setRequestBodyJsonSchema(requestBodyJsonSchema);
+        result.setResponseBodyJsonSchema(responseBodyJsonSchema);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
         return result;

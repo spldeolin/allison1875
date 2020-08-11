@@ -13,11 +13,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class HandlerIterateProcessor {
+class HandlerIterateProc {
 
     private final Class<?> controllerClass;
 
-    public HandlerIterateProcessor(Class<?> controllerClass) {
+    public HandlerIterateProc(Class<?> controllerClass) {
         this.controllerClass = controllerClass;
     }
 

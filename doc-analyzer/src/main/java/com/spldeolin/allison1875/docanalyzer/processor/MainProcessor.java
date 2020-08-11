@@ -58,7 +58,7 @@ public class MainProcessor {
         AstForest astForest = AstForest.getInstance();
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsgBuildProcessor jsgProcessor = new JsgBuildProcessor(astForest, analyzeCustomValidationStrategy,
+        JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationStrategy,
                 specificFieldDescriptionsStrategy.provideSpecificFieldDescriptions());
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
@@ -67,7 +67,7 @@ public class MainProcessor {
         MutableInt handlerCount = new MutableInt(0);
 
         // 再次遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
-        ControllerIterateProcessor controllerIterateProcessor = new ControllerIterateProcessor(astForest.reset());
+        ControllerIterateProc controllerIterateProcessor = new ControllerIterateProc(astForest.reset());
         controllerIterateProcessor.iterate(controller -> {
 
             // doc-ignore标志
@@ -84,17 +84,17 @@ public class MainProcessor {
             }
 
             // 收集controller内的所有方法
-            Map<String, MethodDeclaration> methodsByShortestQualifier = new MethodCollectProcessor()
+            Map<String, MethodDeclaration> methodsByShortestQualifier = new MethodCollectProc()
                     .collectMethods(controller);
 
             // doc-cat标志
             String controllerCat = findControllerCat(controller);
 
             // 处理@RequestMapping（controller的RequestMapping）
-            RequestMappingProcessor requestMappingProcessor = new RequestMappingProcessor(controllerClass);
+            RequestMappingProc requestMappingProcessor = new RequestMappingProc(controllerClass);
 
             // 遍历handler
-            HandlerIterateProcessor handlerIterateProcessor = new HandlerIterateProcessor(controllerClass);
+            HandlerIterateProc handlerIterateProcessor = new HandlerIterateProc(controllerClass);
             handlerIterateProcessor.iterate(reflectionMethod -> {
 
                 MethodDeclaration handler = methodsByShortestQualifier
@@ -116,7 +116,7 @@ public class MainProcessor {
                     handlerCat = controllerCat;
                 }
 
-                // 收集handler的描述、版本号、是否过去、作者、源码位置 等基本信息
+                // 收集handler的描述、是否过时、作者、源码位置 等基本信息
                 EndpointDtoBuilder builder = new EndpointDtoBuilder();
                 builder.cat(handlerCat);
                 builder.handlerSimpleName(controller.getName() + "_" + handler.getName());
@@ -136,13 +136,13 @@ public class MainProcessor {
                 builder.combinedVerbs(requestMappingProcessor.getCombinedVerbs());
 
                 // 分析Request Body
-                RequestBodyProcessor requestBodyAnalyzeProcessor = new RequestBodyProcessor(jsg);
-                builder.requestBodyInfo(requestBodyAnalyzeProcessor.analyze(handler));
+                RequestBodyProc requestBodyAnalyzeProcessor = new RequestBodyProc(jsg);
+                builder.requestBodyJsonSchema(requestBodyAnalyzeProcessor.analyze(handler));
 
                 // 分析Response Body
-                ResponseBodyProcessor responseBodyAnalyzeProcessor = new ResponseBodyProcessor(jsg,
+                ResponseBodyProc responseBodyAnalyzeProcessor = new ResponseBodyProc(jsg,
                         obtainConcernedResponseBodyStrategy);
-                builder.responseBodyInfo(responseBodyAnalyzeProcessor.analyze(controller, handler));
+                builder.responseBodyJsonSchema(responseBodyAnalyzeProcessor.analyze(controller, handler));
 
                 // 构建EndpointDto
                 endpoints.add(builder.build());
@@ -153,11 +153,10 @@ public class MainProcessor {
         });
 
         // 同步到YApi
-        new YApiProcessor().syncYApi(endpoints);
+        new YApiSyncProc(endpoints).process();
 
         log.info(handlerCount);
     }
-
 
     private String findControllerCat(ClassOrInterfaceDeclaration controller) {
         String controllerCat = findCat(controller);

@@ -34,11 +34,11 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class ValidatorProcessor {
+public class ValidatorProc {
 
     private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
 
-    public ValidatorProcessor(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
+    public ValidatorProc(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
         this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
     }
 

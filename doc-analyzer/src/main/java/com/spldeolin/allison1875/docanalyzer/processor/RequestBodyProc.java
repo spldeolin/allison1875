@@ -11,9 +11,6 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.builder.RequestBodyInfoBuilder;
-import com.spldeolin.allison1875.docanalyzer.dto.PropertiesContainerDto;
-import com.spldeolin.allison1875.docanalyzer.enums.BodySituationEnum;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,49 +20,29 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class RequestBodyProcessor {
-
-    private static final CommonBodyProcessor common = new CommonBodyProcessor();
+class RequestBodyProc {
 
     private final JsonSchemaGenerator jsg;
 
-    public RequestBodyProcessor(JsonSchemaGenerator jsg) {
+    public RequestBodyProc(JsonSchemaGenerator jsg) {
         this.jsg = jsg;
     }
 
-    public RequestBodyInfoBuilder analyze(MethodDeclaration handler) {
-        RequestBodyInfoBuilder builder = new RequestBodyInfoBuilder();
-        BodySituationEnum requestBodySituation;
+    public JsonSchema analyze(MethodDeclaration handler) {
         String requestBodyDescribe = null;
         try {
             ResolvedType requestBody = findRequestBody(handler);
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
-                builder.requestBodyJsonSchema(jsonSchema);
-
-                if (jsonSchema.isObjectSchema()) {
-                    requestBodySituation = BodySituationEnum.KEY_VALUE;
-                    PropertiesContainerDto propContainer = common
-                            .anaylzeObjectSchema(requestBodyDescribe, jsonSchema.asObjectSchema());
-                    builder.flatRequestProperties(propContainer.getFlatProperties());
-                } else if (common.fieldsAbsent(requestBody)) {
-                    requestBodySituation = BodySituationEnum.NONE;
-                } else {
-                    requestBodySituation = BodySituationEnum.CHAOS;
-                }
-            } else {
-                requestBodySituation = BodySituationEnum.NONE;
+                return jsonSchema;
             }
         } catch (JsonSchemaException ignore) {
-            requestBodySituation = BodySituationEnum.FAIL;
         } catch (Exception e) {
             log.error("BodySituation.FAIL method={} describe={}",
                     MethodQualifiers.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
-            requestBodySituation = BodySituationEnum.FAIL;
         }
-        builder.requestBodySituation(requestBodySituation);
-        return builder;
+        return null;
     }
 
     /**

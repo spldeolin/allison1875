@@ -14,11 +14,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class ControllerIterateProcessor {
+class ControllerIterateProc {
 
     private final AstForest astForest;
 
-    public ControllerIterateProcessor(AstForest astForest) {
+    public ControllerIterateProc(AstForest astForest) {
         this.astForest = astForest;
     }
 

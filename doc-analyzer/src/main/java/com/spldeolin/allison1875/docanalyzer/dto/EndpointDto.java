@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.base.Joiner;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.enums.BodySituationEnum;
 import lombok.Data;
 
 /**
@@ -26,23 +25,9 @@ public class EndpointDto {
 
     private Boolean isDeprecated;
 
-    private BodySituationEnum requestBodySituation;
-
     private JsonSchema requestBodyJsonSchema;
 
-    /**
-     * requestBodySituation为NEITHER时，不为null
-     */
-    private Collection<PropertyDto> requestBodyProperties;
-
-    private BodySituationEnum responseBodySituation;
-
     private JsonSchema responseBodyJsonSchema;
-
-    /**
-     * responseBodySituation为NEITHER时，不为null
-     */
-    private Collection<PropertyDto> responseBodyProperties;
 
     private String author;
 
