@@ -41,9 +41,7 @@ public class UpdateByPkXmlProc extends XmlProc {
             for (PropertyDto nonPk : persistence.getNonPkProperties()) {
                 Element ifTag = setTag.addElement("if");
                 ifTag.addAttribute("test", nonPk.getPropertyName() + "!=null");
-                newLineWithIndent(stmt);
                 ifTag.addText(nonPk.getColumnName() + " = #{" + nonPk.getPropertyName() + "},");
-                newLineWithIndent(stmt);
             }
             newLineWithIndent(stmt);
             stmt.addText("WHERE ");

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
+import com.google.common.base.Strings;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
@@ -38,9 +40,11 @@ public class UpdateByPkEvenNullXmlProc extends XmlProc {
             stmt.addText("UPDATE ").addText(persistence.getTableName());
             newLineWithIndent(stmt);
             stmt.addText("SET ");
+            newLineWithIndent(stmt);
+            stmt.addText(BaseConstant.SINGLE_INDENT);
             stmt.addText(persistence.getNonPkProperties().stream()
-                    .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}")
-                    .collect(Collectors.joining(", ")));
+                    .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}").collect(Collectors
+                            .joining(", " + BaseConstant.NEW_LINE + Strings.repeat(BaseConstant.SINGLE_INDENT, 2))));
             newLineWithIndent(stmt);
             stmt.addText("WHERE ");
             newLineWithIndent(stmt);

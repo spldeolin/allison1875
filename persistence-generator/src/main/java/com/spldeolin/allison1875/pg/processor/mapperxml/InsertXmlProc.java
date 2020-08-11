@@ -1,11 +1,11 @@
 package com.spldeolin.allison1875.pg.processor.mapperxml;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
+import com.spldeolin.allison1875.pg.javabean.PropertyDto;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -29,25 +29,33 @@ public class InsertXmlProc extends XmlProc {
     }
 
     public InsertXmlProc process() {
-        Element stmt = new DefaultElement("insert");
-        stmt.addAttribute("id", "insert");
-        stmt.addAttribute("parameterType", entityName);
+        Element insertTag = new DefaultElement("insert");
+        insertTag.addAttribute("id", "insert");
+        insertTag.addAttribute("parameterType", entityName);
 //        if (persistence.getPkProperties().size() > 0) {
-//            stmt.addAttribute("useGeneratedKeys", "true");
+//            insertTag.addAttribute("useGeneratedKeys", "true");
 //            String keyProperty = persistence.getPkProperties().stream().map(PropertyDto::getColumnName)
 //                    .collect(Collectors.joining(", "));
-//            stmt.addAttribute("keyProperty", keyProperty);
+//            insertTag.addAttribute("keyProperty", keyProperty);
 //        }
-        newLineWithIndent(stmt);
-        stmt.addText("INSERT INTO ").addText(persistence.getTableName()).addText(" (");
-        stmt.addElement("include").addAttribute("refid", "all");
-        stmt.addText(") VALUES (");
-        newLineWithIndent(stmt);
-        stmt.addText(persistence.getProperties().stream().map(prop -> "#{" + prop.getPropertyName() + "}")
-                .collect(Collectors.joining(", ")));
-        stmt.addText(")");
+        newLineWithIndent(insertTag);
+        insertTag.addText("INSERT INTO ").addText(persistence.getTableName());
+        Element trimTag1 = insertTag.addElement("trim").addAttribute("prefix", "(").addAttribute("suffix", ")")
+                .addAttribute("suffixOverrides", ",");
+        for (PropertyDto property : persistence.getProperties()) {
+            Element ifTag = trimTag1.addElement("if");
+            ifTag.addAttribute("test", property.getPropertyName() + "!=null");
+            ifTag.addText(property.getColumnName() + ",");
+        }
+        Element trimTag2 = insertTag.addElement("trim").addAttribute("prefix", "VALUES (").addAttribute("suffix", ")")
+                .addAttribute("suffixOverrides", ",");
+        for (PropertyDto property : persistence.getProperties()) {
+            Element ifTag = trimTag2.addElement("if");
+            ifTag.addAttribute("test", property.getPropertyName() + "!=null");
+            ifTag.addText("#{" + property.getPropertyName() + "},");
+        }
 
-        sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
+        sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(insertTag));
         return this;
     }
 
