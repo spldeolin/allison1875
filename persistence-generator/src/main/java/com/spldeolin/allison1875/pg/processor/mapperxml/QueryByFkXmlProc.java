@@ -49,7 +49,7 @@ public class QueryByFkXmlProc extends XmlProc {
                     stmt.addText("AND ");
                 }
                 stmt.addText(fk.getColumnName() + " = #{" + fk.getPropertyName() + "}");
-                sourceCodeLines.addAll(StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt)));
+                sourceCodeLines.addAll(Dom4jUtils.toSourceCodeLines(stmt));
             }
 
         }

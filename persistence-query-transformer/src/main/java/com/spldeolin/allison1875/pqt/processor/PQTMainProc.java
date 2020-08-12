@@ -25,6 +25,7 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.pqt.PersistenceQueryTransformerConfig;
+import com.spldeolin.allison1875.pqt.util.Dom4jUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -64,6 +65,8 @@ public class PQTMainProc {
                         method.setName(methodName);
                         method.addParameter(StaticJavaParser.parseParameter(queryTypeName + " query"));
 
+                        Collection<String> xmlLines = Lists.newArrayList();
+
                         Element selectTag = new DefaultElement("select").addAttribute("id", methodName);
                         selectTag.addAttribute("parameterType", queryTypeQualifier);
                         selectTag.addAttribute("resultMap", "all");
@@ -73,8 +76,9 @@ public class PQTMainProc {
                         selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
                         selectTag.addText("WHERE");
                         selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
+                        Dom4jUtils.toSourceCode(selectTag);
 
-                        Collection<String> whereLines = Lists.newArrayList();
+
                         for (FieldDeclaration field : query.getFields()) {
                             VariableDeclarator var = field.getVariable(0);
                             if (var.getNameAsString().equals("entity")) {
@@ -93,13 +97,13 @@ public class PQTMainProc {
 
                             switch (operator) {
                                 case "eq":
-                                    whereLines.add(columnName + " = #{" + propertyName + "}");
+                                    xmlLines.add(columnName + " = #{" + propertyName + "}");
                                     break;
                                 case "ne":
-                                    whereLines.add(columnName + " != #{" + propertyName + "}");
+                                    xmlLines.add(columnName + " != #{" + propertyName + "}");
                                     break;
                                 case "in":
-                                    whereLines.add(columnName + " IN <foreach collection='" + propertyPluralName
+                                    xmlLines.add(columnName + " IN <foreach collection='" + propertyPluralName
                                             + "' item='one' separator=','>#{one}</foreach>");
                                     break;
                                 case "gt":

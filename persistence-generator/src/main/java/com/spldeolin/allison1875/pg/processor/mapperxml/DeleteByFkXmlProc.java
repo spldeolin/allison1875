@@ -53,7 +53,7 @@ public class DeleteByFkXmlProc extends XmlProc {
                     }
                     stmt.addText(fk.getColumnName() + " = #{" + fk.getPropertyName() + "}");
                     stmt.addText(BaseConstant.NEW_LINE);
-                    sourceCodeLines.addAll(StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt)));
+                    sourceCodeLines.addAll(Dom4jUtils.toSourceCodeLines(stmt));
                 }
 
             }

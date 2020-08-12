@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.pg.util;
+package com.spldeolin.allison1875.pqt.util;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -39,7 +39,7 @@ public class Dom4jUtils {
         }
     }
 
-    public static Collection<String> toSourceCodeLines(Element element) {
+    public static String toSourceCode(Element element) {
         try {
             StringWriter out = new StringWriter();
             OutputFormat prettyPrint = OutputFormat.createPrettyPrint();
@@ -48,10 +48,10 @@ public class Dom4jUtils {
             XMLWriter writer = new XMLWriter(out, prettyPrint);
             writer.write(element);
             writer.flush();
-            return StringUtils.splitLineByLine(out.toString());
+            return out.toString();
         } catch (Exception e) {
             log.error(e);
-            return Lists.newArrayList();
+            return "";
         }
     }
 

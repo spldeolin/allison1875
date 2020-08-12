@@ -4,7 +4,6 @@ import java.util.Collection;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.google.common.collect.Iterables;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
@@ -53,10 +52,11 @@ public class QueryByPksXmlProc extends XmlProc {
                 stmt.addText("AND ");
             }
             stmt.addText(onlyPk.getColumnName()).addText(" IN (");
+            stmt.addText("<foreach collection='ids' item='id separator=','>#{id}</foreach>");
             stmt.addElement("foreach").addAttribute("collection", "ids").addAttribute("item", "id")
                     .addAttribute("separator", ",").addText("#{id}");
             stmt.addText(")");
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
+            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
     }

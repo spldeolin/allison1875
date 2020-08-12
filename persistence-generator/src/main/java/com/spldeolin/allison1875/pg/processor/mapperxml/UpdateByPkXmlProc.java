@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
@@ -54,7 +53,7 @@ public class UpdateByPkXmlProc extends XmlProc {
             stmt.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
+            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
     }

@@ -6,7 +6,6 @@ import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.google.common.base.Strings;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
@@ -56,7 +55,7 @@ public class UpdateByPkEvenNullXmlProc extends XmlProc {
             stmt.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
+            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
     }

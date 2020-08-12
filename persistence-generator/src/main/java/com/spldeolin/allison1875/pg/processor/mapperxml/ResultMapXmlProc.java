@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.pg.processor.mapperxml;
 import java.util.Collection;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
@@ -42,7 +41,7 @@ public class ResultMapXmlProc extends XmlProc {
             resultTag.addAttribute("column", nonPk.getColumnName());
             resultTag.addAttribute("property", nonPk.getPropertyName());
         }
-        sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(resultMapTag));
+        sourceCodeLines = Dom4jUtils.toSourceCodeLines(resultMapTag);
         return this;
     }
 

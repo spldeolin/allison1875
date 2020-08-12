@@ -51,7 +51,7 @@ public class QueryByPkXmlProc extends XmlProc {
             stmt.addText(persistence.getPkProperties().stream()
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(", ")));
-            sourceCodeLines = StringUtils.splitLineByLine(Dom4jUtils.toSourceCode(stmt));
+            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
     }
