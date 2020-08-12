@@ -25,19 +25,19 @@ public class JsonPropertyDescriptionValueDto {
      *
      * e.g: @NotEmpty private Collection<String> userNames;
      */
-    private Collection<ValidatorDto> validators = Lists.newArrayList();
+    private Collection<ValidatorDto> valids = Lists.newArrayList();
 
     private String jsonFormatPattern;
 
-    private Boolean isFieldCrossingValidators = false;
+    private Boolean isFieldCrossingValids = false;
 
     private Boolean docIgnore = false;
 
     public String toStringPrettily() {
-        if (isFieldCrossingValidators) {
+        if (isFieldCrossingValids) {
             StringBuilder sb = new StringBuilder(64);
-            for (ValidatorDto validator : validators) {
-                sb.append(validator.getValidatorType()).append(validator.getNote()).append("\n");
+            for (ValidatorDto valid : valids) {
+                sb.append(valid.getValidatorType()).append(valid.getNote()).append("\n");
             }
             return sb.toString();
         } else {
@@ -58,20 +58,20 @@ public class JsonPropertyDescriptionValueDto {
                     comment = sb.deleteCharAt(sb.length() - 1).toString();
                 }
             }
-            String validatorInfo = null;
-            if (CollectionUtils.isNotEmpty(validators)) {
+            String validInfo = null;
+            if (CollectionUtils.isNotEmpty(valids)) {
                 StringBuilder sb = new StringBuilder("校验项\n");
-                for (ValidatorDto validator : validators) {
-                    sb.append("\t").append(validator.getValidatorType()).append(validator.getNote()).append("\n");
+                for (ValidatorDto valid : valids) {
+                    sb.append("\t").append(valid.getValidatorType()).append(valid.getNote()).append("\n");
                 }
-                validatorInfo = sb.deleteCharAt(sb.length() - 1).toString();
+                validInfo = sb.deleteCharAt(sb.length() - 1).toString();
             }
             String format = null;
             if (jsonFormatPattern != null) {
                 format = "格式\n";
                 format += "\t" + jsonFormatPattern;
             }
-            return Joiner.on("\n\n").skipNulls().join(comment, validatorInfo, format);
+            return Joiner.on("\n\n").skipNulls().join(comment, validInfo, format);
         }
     }
 

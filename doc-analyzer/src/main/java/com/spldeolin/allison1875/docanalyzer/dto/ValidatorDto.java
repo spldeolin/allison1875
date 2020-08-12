@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.spldeolin.allison1875.docanalyzer.enums.ValidTypeEnum;
+import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 public class ValidatorDto {
 
     /**
-     * @see ValidTypeEnum
+     * @see ValidatorTypeEnum
      */
     private String validatorType;
 
