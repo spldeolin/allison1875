@@ -39,7 +39,7 @@ public class Dom4jUtils {
         }
     }
 
-    public static String toSourceCode(Element element) {
+    public static Collection<String> toSourceCodeLines(Element element) {
         try {
             StringWriter out = new StringWriter();
             OutputFormat prettyPrint = OutputFormat.createPrettyPrint();
@@ -48,10 +48,10 @@ public class Dom4jUtils {
             XMLWriter writer = new XMLWriter(out, prettyPrint);
             writer.write(element);
             writer.flush();
-            return out.toString();
+            return StringUtils.splitLineByLine(out.toString());
         } catch (Exception e) {
             log.error(e);
-            return "";
+            return Lists.newArrayList();
         }
     }
 

@@ -3,10 +3,10 @@ package com.spldeolin.allison1875.pqt.processor;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.atteo.evo.inflector.English;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.github.javaparser.StaticJavaParser;
@@ -25,6 +25,7 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.pqt.PersistenceQueryTransformerConfig;
+import com.spldeolin.allison1875.pqt.javabean.PropertyDto;
 import com.spldeolin.allison1875.pqt.util.Dom4jUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -65,81 +66,133 @@ public class PQTMainProc {
                         method.setName(methodName);
                         method.addParameter(StaticJavaParser.parseParameter(queryTypeName + " query"));
 
-                        Collection<String> xmlLines = Lists.newArrayList();
+                        Collection<PropertyDto> properties = Lists.newArrayList();
+                        for (FieldDeclaration field : query.getFields()) {
+                            VariableDeclarator var = field.getVariable(0);
+                            String varName = var.getNameAsString();
+                            if (varName.equals("entity")) {
+                                continue;
+                            }
+
+                            String propertyName = findPropertyName(var);
+                            String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
+                            String dollarVar = "#{" + varName + "}";
+                            String operator = StringUtils
+                                    .lowerCase(JavadocDescriptions.getTrimmedFirstLine(field, false));
+                            if (StringUtils.isEmpty(operator)) {
+                                operator = "eq";
+                            }
+                            PropertyDto dto = new PropertyDto();
+                            dto.setPropertyName(propertyName);
+                            dto.setColumnName(columnName);
+                            dto.setDollarVar(dollarVar);
+                            dto.setOperator(operator);
+                            properties.add(dto);
+                        }
+
+                        List<String> xmlLines = Lists.newArrayList();
 
                         Element selectTag = new DefaultElement("select").addAttribute("id", methodName);
                         selectTag.addAttribute("parameterType", queryTypeQualifier);
                         selectTag.addAttribute("resultMap", "all");
+                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
                         selectTag.addText("SELECT");
                         selectTag.addElement("include").addAttribute("refid", "all");
+                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
                         selectTag.addText("FROM ").addText(tableName);
                         selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
                         selectTag.addText("WHERE");
-                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
-                        Dom4jUtils.toSourceCode(selectTag);
+                        xmlLines.addAll(Dom4jUtils.toSourceCodeLines(selectTag));
+                        xmlLines.remove(xmlLines.size() - 1);
 
-
+                        boolean needAnd = false;
                         for (FieldDeclaration field : query.getFields()) {
                             VariableDeclarator var = field.getVariable(0);
-                            if (var.getNameAsString().equals("entity")) {
+                            String varName = var.getNameAsString();
+                            if (varName.equals("entity")) {
                                 continue;
                             }
-                            String operator = JavadocDescriptions.getTrimmedFirstLine(field, false);
+                            String operator = StringUtils
+                                    .lowerCase(JavadocDescriptions.getTrimmedFirstLine(field, false));
                             if (StringUtils.isEmpty(operator)) {
                                 operator = "eq";
                             }
 
-
                             String propertyName = findPropertyName(var);
-                            String propertyPluralName = English.plural(propertyName);
                             String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
+                            String dollarVar = "#{" + varName + "}";
 
-
+                            StringBuilder sb = new StringBuilder(BaseConstant.SINGLE_INDENT);
+                            sb.append(needAnd ? "AND " : BaseConstant.SINGLE_INDENT);
                             switch (operator) {
                                 case "eq":
-                                    xmlLines.add(columnName + " = #{" + propertyName + "}");
+                                    sb.append(columnName).append(" = ").append(dollarVar);
                                     break;
                                 case "ne":
-                                    xmlLines.add(columnName + " != #{" + propertyName + "}");
+                                    sb.append(columnName).append(" != ").append(dollarVar);
                                     break;
                                 case "in":
-                                    xmlLines.add(columnName + " IN <foreach collection='" + propertyPluralName
-                                            + "' item='one' separator=','>#{one}</foreach>");
+                                    sb.append(columnName).append(" IN (<foreach collection='").append(varName);
+                                    sb.append("' item='one' separator=','>#{one}</foreach>)");
                                     break;
                                 case "gt":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" > ").append(dollarVar);
                                     break;
                                 case "ge":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" >= ").append(dollarVar);
                                     break;
                                 case "lt":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" < ").append(dollarVar);
                                     break;
                                 case "le":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" <= ").append(dollarVar);
                                     break;
                                 case "notnull":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" IS NOT NULL");
                                     break;
                                 case "isnull":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" IS NULL");
                                     break;
                                 case "like":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" LIKE CONCAT('%', ").append(dollarVar)
+                                            .append(", '%')");
                                     break;
+                            }
+                            needAnd = true;
+                            xmlLines.add(sb.toString());
+                        }
+
+                        StringBuilder sb = new StringBuilder(64);
+                        sb.append(BaseConstant.SINGLE_INDENT).append("ORDER BY ");
+                        for (FieldDeclaration field : query.getFields()) {
+                            VariableDeclarator var = field.getVariable(0);
+
+                            String propertyName = findPropertyName(var);
+                            String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
+
+                            String operator = StringUtils
+                                    .lowerCase(JavadocDescriptions.getTrimmedFirstLine(field, false));
+                            if (operator == null) {
+                                continue;
+                            }
+
+                            switch (operator) {
                                 case "asc":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(", ");
                                     break;
                                 case "desc":
-                                    System.out.println(1);
-                                    break;
-                                case "limit":
-                                    System.out.println(1);
+                                    sb.append(columnName).append(" DESC, ");
                                     break;
                             }
                         }
+                        if (!sb.toString().trim().endsWith("ORDER BY")) {
+                            xmlLines.add(StringUtils.removeLast(sb, ", "));
+                        }
 
-                        mapper.getMethods().forEach(m -> log.info(m.getNameAsString()));
+
+                        xmlLines.add("</select>");
+                        xmlLines.forEach(log::info);
+
                     }
 
                 }
@@ -149,7 +202,12 @@ public class PQTMainProc {
     }
 
     private String findTableName(String entityTypeName) {
-        String tmp = StringUtils.replaceLast(entityTypeName, "Entity", "");
+        String tmp;
+        if (entityTypeName.contains("Entity")) {
+            tmp = StringUtils.replaceLast(entityTypeName, "Entity", "");
+        } else {
+            tmp = entityTypeName;
+        }
         return StringUtils.upperCamelToUnderscore(tmp);
     }
 
@@ -158,8 +216,8 @@ public class PQTMainProc {
         if (var.getInitializer().filter(Expression::isMethodCallExpr).isPresent()) {
             MethodCallExpr mce = var.getInitializer().get().asMethodCallExpr();
             String getterName = mce.getNameAsString();
-            if (getterName.startsWith("getter")) {
-                return StringUtils.lowerFirstLetter(getterName.replaceFirst("get", ""));
+            if (getterName.startsWith("get")) {
+                return StringUtils.upperCamelToUnderscore(getterName.replaceFirst("get", ""));
             }
         }
         // 否则使用var name作为属性名（可能是不准确的，需要准确的话需要通过反射）
@@ -176,7 +234,12 @@ public class PQTMainProc {
     }
 
     public ClassOrInterfaceDeclaration findMapper(String entityTypeName) {
-        String mapperName = StringUtils.replaceLast(entityTypeName, "Entity", "") + "Mapper";
+        String mapperName;
+        if (entityTypeName.contains("Entity")) {
+            mapperName = StringUtils.replaceLast(entityTypeName, "Entity", "") + "Mapper";
+        } else {
+            mapperName = entityTypeName + "Mapper";
+        }
         File sourceRoot = new File(PersistenceQueryTransformerConfig.getInstance().getSourceRoot());
         Iterator<File> fileIterator = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
         while (fileIterator.hasNext()) {
