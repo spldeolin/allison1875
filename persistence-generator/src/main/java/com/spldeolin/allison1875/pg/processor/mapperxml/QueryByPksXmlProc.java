@@ -52,7 +52,6 @@ public class QueryByPksXmlProc extends XmlProc {
                 stmt.addText("AND ");
             }
             stmt.addText(onlyPk.getColumnName()).addText(" IN (");
-            stmt.addText("<foreach collection='ids' item='id separator=','>#{id}</foreach>");
             stmt.addElement("foreach").addAttribute("collection", "ids").addAttribute("item", "id")
                     .addAttribute("separator", ",").addText("#{id}");
             stmt.addText(")");
