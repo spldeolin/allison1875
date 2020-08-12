@@ -21,12 +21,12 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-18
  */
-@Slf4j
+@Log4j2
 public class FindOrCreateMapperProc {
 
     private final PersistenceDto persistence;

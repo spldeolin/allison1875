@@ -23,12 +23,12 @@ import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.processor.mapperxml.XmlProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-18
  */
-@Slf4j
+@Log4j2
 public class MapperXmlProc {
 
     private final PersistenceDto persistence;
