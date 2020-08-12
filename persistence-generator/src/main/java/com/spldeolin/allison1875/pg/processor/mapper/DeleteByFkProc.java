@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.constant.Constant;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
@@ -33,20 +34,23 @@ public class DeleteByFkProc {
     }
 
     public DeleteByFkProc process() {
-        for (PropertyDto fk : persistence.getFkProperties()) {
-            String methodName = "deleteBy" + StringUtils.upperFirstLetter(fk.getPropertyName());
-            List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
-            methods.forEach(Node::remove);
-            MethodDeclaration method = new MethodDeclaration();
-            method.setJavadocComment(
-                    new JavadocComment("根据" + fk.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
-            method.setType(PrimitiveType.intType());
-            method.setName(methodName);
-            String varName = StringUtils.lowerFirstLetter(fk.getPropertyName());
-            Parameter parameter = parseParameter(fk.getJavaType().getSimpleName() + " " + varName);
-            method.addParameter(parameter);
-            method.setBody(null);
-            mapper.getMembers().addLast(method);
+        String deletedSql = PersistenceGeneratorConfig.getInstace().getDeletedSql();
+        if (deletedSql != null) {
+            for (PropertyDto fk : persistence.getFkProperties()) {
+                String methodName = "deleteBy" + StringUtils.upperFirstLetter(fk.getPropertyName());
+                List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
+                methods.forEach(Node::remove);
+                MethodDeclaration method = new MethodDeclaration();
+                method.setJavadocComment(
+                        new JavadocComment("根据" + fk.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+                method.setType(PrimitiveType.intType());
+                method.setName(methodName);
+                String varName = StringUtils.lowerFirstLetter(fk.getPropertyName());
+                Parameter parameter = parseParameter(fk.getJavaType().getSimpleName() + " " + varName);
+                method.addParameter(parameter);
+                method.setBody(null);
+                mapper.getMembers().addLast(method);
+            }
         }
         return this;
     }

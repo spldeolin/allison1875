@@ -1,10 +1,12 @@
 package com.spldeolin.allison1875.pqt.processor;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.atteo.evo.inflector.English;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.github.javaparser.StaticJavaParser;
@@ -16,6 +18,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -28,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-08-09
  */
 @Log4j2
-public class MainProc {
+public class PQTMainProc {
 
     public void process() {
         for (CompilationUnit cu : AstForest.getInstance()) {
@@ -61,6 +64,17 @@ public class MainProc {
                         method.setName(methodName);
                         method.addParameter(StaticJavaParser.parseParameter(queryTypeName + " query"));
 
+                        Element selectTag = new DefaultElement("select").addAttribute("id", methodName);
+                        selectTag.addAttribute("parameterType", queryTypeQualifier);
+                        selectTag.addAttribute("resultMap", "all");
+                        selectTag.addText("SELECT");
+                        selectTag.addElement("include").addAttribute("refid", "all");
+                        selectTag.addText("FROM ").addText(tableName);
+                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
+                        selectTag.addText("WHERE");
+                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
+
+                        Collection<String> whereLines = Lists.newArrayList();
                         for (FieldDeclaration field : query.getFields()) {
                             VariableDeclarator var = field.getVariable(0);
                             if (var.getNameAsString().equals("entity")) {
@@ -73,27 +87,20 @@ public class MainProc {
 
 
                             String propertyName = findPropertyName(var);
-                            String cloumnName = StringUtils.lowerCamelToUnderscore(propertyName);
+                            String propertyPluralName = English.plural(propertyName);
+                            String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
 
-                            Element selectTag = new DefaultElement("select").addAttribute("id", methodName);
-                            selectTag.addAttribute("parameterType", queryTypeQualifier);
-                            selectTag.addAttribute("resultMap", "all");
-                            selectTag.addText("SELECT");
-                            selectTag.addElement("include").addAttribute("refid", "all");
-                            selectTag.addText("FROM ").addText(tableName);
-                            selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
-                            selectTag.addText("WHERE");
-                            selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
 
                             switch (operator) {
                                 case "eq":
-                                    System.out.println(1);
+                                    whereLines.add(columnName + " = #{" + propertyName + "}");
                                     break;
                                 case "ne":
-                                    System.out.println(1);
+                                    whereLines.add(columnName + " != #{" + propertyName + "}");
                                     break;
                                 case "in":
-                                    System.out.println(1);
+                                    whereLines.add(columnName + " IN <foreach collection='" + propertyPluralName
+                                            + "' item='one' separator=','>#{one}</foreach>");
                                     break;
                                 case "gt":
                                     System.out.println(1);
@@ -200,7 +207,7 @@ public class MainProc {
     }
 
     public static void main(String[] args) {
-        new MainProc().process();
+        new PQTMainProc().process();
     }
 
 }
