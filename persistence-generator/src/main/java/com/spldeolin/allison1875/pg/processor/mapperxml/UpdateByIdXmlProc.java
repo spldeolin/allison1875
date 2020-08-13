@@ -4,51 +4,48 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
-import com.google.common.base.Strings;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
-import com.spldeolin.allison1875.pg.processor.mapper.UpdateByPkEvenNullProc;
+import com.spldeolin.allison1875.pg.javabean.PropertyDto;
+import com.spldeolin.allison1875.pg.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
 /**
- * 根据主键更新，即便属性的值为null，也更新为null
+ * 根据ID更新数据，忽略值为null的属性
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByPkEvenNullXmlProc extends XmlProc {
+public class UpdateByIdXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
     private final String entityName;
 
-    private final UpdateByPkEvenNullProc updateByPkEvenNullProc;
+    private final UpdateByIdProc updateByPkProc;
 
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public UpdateByPkEvenNullXmlProc(PersistenceDto persistence, String entityName,
-            UpdateByPkEvenNullProc updateByPkEvenNullProc) {
+    public UpdateByIdXmlProc(PersistenceDto persistence, String entityName, UpdateByIdProc updateByPkProc) {
         this.persistence = persistence;
         this.entityName = entityName;
-        this.updateByPkEvenNullProc = updateByPkEvenNullProc;
+        this.updateByPkProc = updateByPkProc;
     }
 
-    public UpdateByPkEvenNullXmlProc process() {
-        if (updateByPkEvenNullProc.getGenerateOrNot() && persistence.getPkProperties().size() > 0) {
+    public UpdateByIdXmlProc process() {
+        if (updateByPkProc.getGenerateOrNot() && persistence.getPkProperties().size() > 0) {
             Element stmt = new DefaultElement("update");
-            stmt.addAttribute("id", "updateByIdEvenNull");
+            stmt.addAttribute("id", "updateById");
             stmt.addAttribute("parameterType", entityName);
             newLineWithIndent(stmt);
             stmt.addText("UPDATE ").addText(persistence.getTableName());
-            newLineWithIndent(stmt);
-            stmt.addText("SET ");
-            newLineWithIndent(stmt);
-            stmt.addText(BaseConstant.SINGLE_INDENT);
-            stmt.addText(persistence.getNonPkProperties().stream()
-                    .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}").collect(Collectors
-                            .joining(", " + BaseConstant.NEW_LINE + Strings.repeat(BaseConstant.SINGLE_INDENT, 2))));
+            Element setTag = stmt.addElement("set");
+            for (PropertyDto nonPk : persistence.getNonPkProperties()) {
+                Element ifTag = setTag.addElement("if");
+                ifTag.addAttribute("test", nonPk.getPropertyName() + "!=null");
+                ifTag.addText(nonPk.getColumnName() + " = #{" + nonPk.getPropertyName() + "},");
+            }
             newLineWithIndent(stmt);
             stmt.addText("WHERE ");
             newLineWithIndent(stmt);

@@ -20,7 +20,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-18
  */
-public class QueryByPkProc extends MapperProc {
+public class QueryByIdProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
@@ -29,12 +29,12 @@ public class QueryByPkProc extends MapperProc {
     @Getter
     private Boolean generateOrNot = true;
 
-    public QueryByPkProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public QueryByIdProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public QueryByPkProc process() {
+    public QueryByIdProc process() {
         if (persistence.getPkProperties().size() > 0) {
             if (super.existDeclared(mapper, "queryById")) {
                 generateOrNot = false;

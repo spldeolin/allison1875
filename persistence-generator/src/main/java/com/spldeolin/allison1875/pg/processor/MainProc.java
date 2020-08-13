@@ -8,23 +8,23 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
-import com.spldeolin.allison1875.pg.processor.mapper.DeleteByFkProc;
+import com.spldeolin.allison1875.pg.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.pg.processor.mapper.InsertProc;
-import com.spldeolin.allison1875.pg.processor.mapper.QueryByFkProc;
-import com.spldeolin.allison1875.pg.processor.mapper.QueryByPkProc;
-import com.spldeolin.allison1875.pg.processor.mapper.QueryByPksEachPkProc;
-import com.spldeolin.allison1875.pg.processor.mapper.QueryByPksProc;
-import com.spldeolin.allison1875.pg.processor.mapper.UpdateByPkEvenNullProc;
-import com.spldeolin.allison1875.pg.processor.mapper.UpdateByPkProc;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByKeyProc;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByIdProc;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByIdsEachPkProc;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByIdsProc;
+import com.spldeolin.allison1875.pg.processor.mapper.UpdateByIdEvenNullProc;
+import com.spldeolin.allison1875.pg.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.pg.processor.mapperxml.AllCloumnSqlXmlProc;
-import com.spldeolin.allison1875.pg.processor.mapperxml.DeleteByFkXmlProc;
+import com.spldeolin.allison1875.pg.processor.mapperxml.DeleteByKeyXmlProc;
 import com.spldeolin.allison1875.pg.processor.mapperxml.InsertXmlProc;
-import com.spldeolin.allison1875.pg.processor.mapperxml.QueryByFkXmlProc;
-import com.spldeolin.allison1875.pg.processor.mapperxml.QueryByPkXmlProc;
-import com.spldeolin.allison1875.pg.processor.mapperxml.QueryByPksXmlProc;
+import com.spldeolin.allison1875.pg.processor.mapperxml.QueryByKeyXmlProc;
+import com.spldeolin.allison1875.pg.processor.mapperxml.QueryByIdXmlProc;
+import com.spldeolin.allison1875.pg.processor.mapperxml.QueryByIdsXmlProc;
 import com.spldeolin.allison1875.pg.processor.mapperxml.ResultMapXmlProc;
-import com.spldeolin.allison1875.pg.processor.mapperxml.UpdateByPkEvenNullXmlProc;
-import com.spldeolin.allison1875.pg.processor.mapperxml.UpdateByPkXmlProc;
+import com.spldeolin.allison1875.pg.processor.mapperxml.UpdateByIdEvenNullXmlProc;
+import com.spldeolin.allison1875.pg.processor.mapperxml.UpdateByIdXmlProc;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -61,13 +61,13 @@ public class MainProc {
 
             // 在Mapper中生成基础方法
             InsertProc insertProc = new InsertProc(persistence, mapper).process();
-            QueryByPkProc queryByPkProc = new QueryByPkProc(persistence, mapper).process();
-            UpdateByPkProc updateByPkProc = new UpdateByPkProc(persistence, mapper).process();
-            UpdateByPkEvenNullProc updateByPkEvenNullProc = new UpdateByPkEvenNullProc(persistence, mapper).process();
-            new QueryByPksEachPkProc(persistence, mapper).process();
-            QueryByPksProc queryByPksProc = new QueryByPksProc(persistence, mapper).process();
-            QueryByFkProc queryByFkProc = new QueryByFkProc(persistence, mapper).process();
-            DeleteByFkProc deleteByFkProc = new DeleteByFkProc(persistence, mapper).process();
+            QueryByIdProc queryByPkProc = new QueryByIdProc(persistence, mapper).process();
+            UpdateByIdProc updateByPkProc = new UpdateByIdProc(persistence, mapper).process();
+            UpdateByIdEvenNullProc updateByPkEvenNullProc = new UpdateByIdEvenNullProc(persistence, mapper).process();
+            new QueryByIdsEachPkProc(persistence, mapper).process();
+            QueryByIdsProc queryByPksProc = new QueryByIdsProc(persistence, mapper).process();
+            QueryByKeyProc queryByFkProc = new QueryByKeyProc(persistence, mapper).process();
+            DeleteByKeyProc deleteByFkProc = new DeleteByKeyProc(persistence, mapper).process();
 
             // 在Mapper.xml中生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
@@ -75,13 +75,13 @@ public class MainProc {
                 new MapperXmlProc(persistence, mapper, new ResultMapXmlProc(persistence, entityName).process(),
                         new AllCloumnSqlXmlProc(persistence).process(),
                         new InsertXmlProc(persistence, entityName, insertProc).process(),
-                        new QueryByPkXmlProc(persistence, queryByPkProc).process(),
-                        new UpdateByPkXmlProc(persistence, entityName, updateByPkProc).process(),
-                        new UpdateByPkEvenNullXmlProc(persistence, entityName, updateByPkEvenNullProc).process(),
-                        new QueryByPksXmlProc(persistence, "queryByIds", queryByPksProc).process(),
-                        new QueryByPksXmlProc(persistence, "queryByIdsEachId", queryByPksProc).process(),
-                        new QueryByFkXmlProc(persistence, queryByFkProc).process(),
-                        new DeleteByFkXmlProc(persistence, deleteByFkProc).process()).process();
+                        new QueryByIdXmlProc(persistence, queryByPkProc).process(),
+                        new UpdateByIdXmlProc(persistence, entityName, updateByPkProc).process(),
+                        new UpdateByIdEvenNullXmlProc(persistence, entityName, updateByPkEvenNullProc).process(),
+                        new QueryByIdsXmlProc(persistence, "queryByIds", queryByPksProc).process(),
+                        new QueryByIdsXmlProc(persistence, "queryByIdsEachId", queryByPksProc).process(),
+                        new QueryByKeyXmlProc(persistence, queryByFkProc).process(),
+                        new DeleteByKeyXmlProc(persistence, deleteByFkProc).process()).process();
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

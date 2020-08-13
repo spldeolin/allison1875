@@ -21,7 +21,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-08-08
  */
-public class QueryByFkProc extends MapperProc {
+public class QueryByKeyProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
@@ -30,12 +30,12 @@ public class QueryByFkProc extends MapperProc {
     @Getter
     private Boolean generateOrNot = true;
 
-    public QueryByFkProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public QueryByKeyProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public QueryByFkProc process() {
+    public QueryByKeyProc process() {
         for (PropertyDto fk : persistence.getFkProperties()) {
             String methodName = "queryBy" + StringUtils.upperFirstLetter(fk.getPropertyName());
             if (super.existDeclared(mapper, methodName)) {

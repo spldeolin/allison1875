@@ -21,7 +21,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-08-08
  */
-public class DeleteByFkProc extends MapperProc {
+public class DeleteByKeyProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
@@ -30,12 +30,12 @@ public class DeleteByFkProc extends MapperProc {
     @Getter
     private Boolean generateOrNot = true;
 
-    public DeleteByFkProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public DeleteByKeyProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public DeleteByFkProc process() {
+    public DeleteByKeyProc process() {
         String deletedSql = PersistenceGeneratorConfig.getInstace().getDeletedSql();
         if (deletedSql != null) {
             for (PropertyDto fk : persistence.getFkProperties()) {

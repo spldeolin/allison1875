@@ -8,7 +8,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
-import com.spldeolin.allison1875.pg.processor.mapper.QueryByFkProc;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByKeyProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -17,21 +17,21 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-19
  */
-public class QueryByFkXmlProc extends XmlProc {
+public class QueryByKeyXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
-    private final QueryByFkProc queryByFkProc;
+    private final QueryByKeyProc queryByFkProc;
 
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByFkXmlProc(PersistenceDto persistence, QueryByFkProc queryByFkProc) {
+    public QueryByKeyXmlProc(PersistenceDto persistence, QueryByKeyProc queryByFkProc) {
         this.persistence = persistence;
         this.queryByFkProc = queryByFkProc;
     }
 
-    public QueryByFkXmlProc process() {
+    public QueryByKeyXmlProc process() {
         if (queryByFkProc.getGenerateOrNot() && persistence.getFkProperties().size() > 0) {
             sourceCodeLines = Lists.newArrayList();
             for (PropertyDto fk : persistence.getFkProperties()) {

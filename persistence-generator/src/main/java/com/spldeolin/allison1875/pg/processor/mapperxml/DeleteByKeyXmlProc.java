@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
-import com.spldeolin.allison1875.pg.processor.mapper.DeleteByFkProc;
+import com.spldeolin.allison1875.pg.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -20,21 +20,21 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-19
  */
-public class DeleteByFkXmlProc extends XmlProc {
+public class DeleteByKeyXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
-    private final DeleteByFkProc deleteByFkProc;
+    private final DeleteByKeyProc deleteByFkProc;
 
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public DeleteByFkXmlProc(PersistenceDto persistence, DeleteByFkProc deleteByFkProc) {
+    public DeleteByKeyXmlProc(PersistenceDto persistence, DeleteByKeyProc deleteByFkProc) {
         this.persistence = persistence;
         this.deleteByFkProc = deleteByFkProc;
     }
 
-    public DeleteByFkXmlProc process() {
+    public DeleteByKeyXmlProc process() {
         String deletedSql = PersistenceGeneratorConfig.getInstace().getDeletedSql();
         if (deleteByFkProc.getGenerateOrNot() && deletedSql != null) {
             if (persistence.getFkProperties().size() > 0) {

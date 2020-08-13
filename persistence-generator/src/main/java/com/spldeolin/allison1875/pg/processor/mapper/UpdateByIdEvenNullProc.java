@@ -13,7 +13,7 @@ import lombok.Getter;
  *
  * @author Deolin 2020-07-18
  */
-public class UpdateByPkEvenNullProc extends MapperProc {
+public class UpdateByIdEvenNullProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
@@ -22,12 +22,12 @@ public class UpdateByPkEvenNullProc extends MapperProc {
     @Getter
     private Boolean generateOrNot = true;
 
-    public UpdateByPkEvenNullProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public UpdateByIdEvenNullProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.mapper = mapper;
     }
 
-    public UpdateByPkEvenNullProc process() {
+    public UpdateByIdEvenNullProc process() {
         if (persistence.getPkProperties().size() > 0) {
             if (super.existDeclared(mapper, "updateByIdEvenNull")) {
                 generateOrNot = false;
