@@ -5,6 +5,7 @@ import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
+import com.spldeolin.allison1875.pg.processor.mapper.InsertProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -19,15 +20,22 @@ public class InsertXmlProc extends XmlProc {
 
     private final String entityName;
 
+    private final InsertProc insertProc;
+
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public InsertXmlProc(PersistenceDto persistence, String entityName) {
+    public InsertXmlProc(PersistenceDto persistence, String entityName, InsertProc insertProc) {
         this.persistence = persistence;
         this.entityName = entityName;
+        this.insertProc = insertProc;
     }
 
     public InsertXmlProc process() {
+        if (!insertProc.getGenerateOrNot()) {
+            return this;
+        }
+
         Element insertTag = new DefaultElement("insert");
         insertTag.addAttribute("id", "insert");
         insertTag.addAttribute("parameterType", entityName);

@@ -60,29 +60,28 @@ public class MainProc {
             }
 
             // 在Mapper中生成基础方法
-            new InsertProc(persistence, mapper).process();
-            new QueryByPkProc(persistence, mapper).process();
-            new UpdateByPkProc(persistence, mapper).process();
-            new UpdateByPkEvenNullProc(persistence, mapper).process();
-            new QueryByPkProc(persistence, mapper).process();
+            InsertProc insertProc = new InsertProc(persistence, mapper).process();
+            QueryByPkProc queryByPkProc = new QueryByPkProc(persistence, mapper).process();
+            UpdateByPkProc updateByPkProc = new UpdateByPkProc(persistence, mapper).process();
+            UpdateByPkEvenNullProc updateByPkEvenNullProc = new UpdateByPkEvenNullProc(persistence, mapper).process();
             new QueryByPksEachPkProc(persistence, mapper).process();
-            new QueryByPksProc(persistence, mapper).process();
-            new QueryByFkProc(persistence, mapper).process();
-            new DeleteByFkProc(persistence, mapper).process();
+            QueryByPksProc queryByPksProc = new QueryByPksProc(persistence, mapper).process();
+            QueryByFkProc queryByFkProc = new QueryByFkProc(persistence, mapper).process();
+            DeleteByFkProc deleteByFkProc = new DeleteByFkProc(persistence, mapper).process();
 
             // 在Mapper.xml中生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
             try {
                 new MapperXmlProc(persistence, mapper, new ResultMapXmlProc(persistence, entityName).process(),
                         new AllCloumnSqlXmlProc(persistence).process(),
-                        new InsertXmlProc(persistence, entityName).process(),
-                        new UpdateByPkXmlProc(persistence, entityName).process(),
-                        new UpdateByPkEvenNullXmlProc(persistence, entityName).process(),
-                        new QueryByPkXmlProc(persistence).process(),
-                        new QueryByPksXmlProc(persistence, "queryByIds").process(),
-                        new QueryByPksXmlProc(persistence, "queryByIdsEachId").process(),
-                        new QueryByFkXmlProc(persistence).process(), new DeleteByFkXmlProc(persistence).process())
-                        .process();
+                        new InsertXmlProc(persistence, entityName, insertProc).process(),
+                        new QueryByPkXmlProc(persistence, queryByPkProc).process(),
+                        new UpdateByPkXmlProc(persistence, entityName, updateByPkProc).process(),
+                        new UpdateByPkEvenNullXmlProc(persistence, entityName, updateByPkEvenNullProc).process(),
+                        new QueryByPksXmlProc(persistence, "queryByIds", queryByPksProc).process(),
+                        new QueryByPksXmlProc(persistence, "queryByIdsEachId", queryByPksProc).process(),
+                        new QueryByFkXmlProc(persistence, queryByFkProc).process(),
+                        new DeleteByFkXmlProc(persistence, deleteByFkProc).process()).process();
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

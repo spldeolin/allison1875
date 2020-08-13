@@ -7,6 +7,7 @@ import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
+import com.spldeolin.allison1875.pg.processor.mapper.UpdateByPkProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -21,16 +22,19 @@ public class UpdateByPkXmlProc extends XmlProc {
 
     private final String entityName;
 
+    private final UpdateByPkProc updateByPkProc;
+
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public UpdateByPkXmlProc(PersistenceDto persistence, String entityName) {
+    public UpdateByPkXmlProc(PersistenceDto persistence, String entityName, UpdateByPkProc updateByPkProc) {
         this.persistence = persistence;
         this.entityName = entityName;
+        this.updateByPkProc = updateByPkProc;
     }
 
     public UpdateByPkXmlProc process() {
-        if (persistence.getPkProperties().size() > 0) {
+        if (updateByPkProc.getGenerateOrNot() && persistence.getPkProperties().size() > 0) {
             Element stmt = new DefaultElement("update");
             stmt.addAttribute("id", "updateById");
             stmt.addAttribute("parameterType", entityName);

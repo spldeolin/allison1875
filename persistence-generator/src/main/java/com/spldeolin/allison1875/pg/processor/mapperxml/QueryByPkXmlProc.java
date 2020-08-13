@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultElement;
 import com.google.common.collect.Iterables;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByPkProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -20,15 +20,18 @@ public class QueryByPkXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
+    private final QueryByPkProc queryByPkProc;
+
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByPkXmlProc(PersistenceDto persistence) {
+    public QueryByPkXmlProc(PersistenceDto persistence, QueryByPkProc queryByPkProc) {
         this.persistence = persistence;
+        this.queryByPkProc = queryByPkProc;
     }
 
     public QueryByPkXmlProc process() {
-        if (persistence.getPkProperties().size() > 0) {
+        if (queryByPkProc.getGenerateOrNot() && persistence.getPkProperties().size() > 0) {
             Element stmt = new DefaultElement("select");
             stmt.addAttribute("id", "queryById");
             if (persistence.getPkProperties().size() == 1) {

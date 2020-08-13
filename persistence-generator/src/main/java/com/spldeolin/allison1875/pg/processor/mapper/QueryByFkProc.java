@@ -3,8 +3,6 @@ package com.spldeolin.allison1875.pg.processor.mapper;
 import static com.github.javaparser.StaticJavaParser.parseParameter;
 import static com.github.javaparser.StaticJavaParser.parseType;
 
-import java.util.List;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -14,6 +12,7 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.pg.constant.Constant;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
+import lombok.Getter;
 
 /**
  * 根据外键查询，表中每有几个外键，这个Proc就生成几个方法
@@ -22,11 +21,14 @@ import com.spldeolin.allison1875.pg.javabean.PropertyDto;
  *
  * @author Deolin 2020-08-08
  */
-public class QueryByFkProc {
+public class QueryByFkProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
+
+    @Getter
+    private Boolean generateOrNot = true;
 
     public QueryByFkProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
@@ -36,8 +38,10 @@ public class QueryByFkProc {
     public QueryByFkProc process() {
         for (PropertyDto fk : persistence.getFkProperties()) {
             String methodName = "queryBy" + StringUtils.upperFirstLetter(fk.getPropertyName());
-            List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
-            methods.forEach(Node::remove);
+            if (super.existDeclared(mapper, methodName)) {
+                generateOrNot = false;
+                return this;
+            }
             MethodDeclaration method = new MethodDeclaration();
             method.setJavadocComment(
                     new JavadocComment("根据" + fk.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));

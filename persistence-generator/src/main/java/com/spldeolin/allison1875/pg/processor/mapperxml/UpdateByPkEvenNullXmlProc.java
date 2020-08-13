@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
+import com.spldeolin.allison1875.pg.processor.mapper.UpdateByPkEvenNullProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -22,16 +23,20 @@ public class UpdateByPkEvenNullXmlProc extends XmlProc {
 
     private final String entityName;
 
+    private final UpdateByPkEvenNullProc updateByPkEvenNullProc;
+
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public UpdateByPkEvenNullXmlProc(PersistenceDto persistence, String entityName) {
+    public UpdateByPkEvenNullXmlProc(PersistenceDto persistence, String entityName,
+            UpdateByPkEvenNullProc updateByPkEvenNullProc) {
         this.persistence = persistence;
         this.entityName = entityName;
+        this.updateByPkEvenNullProc = updateByPkEvenNullProc;
     }
 
     public UpdateByPkEvenNullXmlProc process() {
-        if (persistence.getPkProperties().size() > 0) {
+        if (updateByPkEvenNullProc.getGenerateOrNot() && persistence.getPkProperties().size() > 0) {
             Element stmt = new DefaultElement("update");
             stmt.addAttribute("id", "updateByIdEvenNull");
             stmt.addAttribute("parameterType", entityName);

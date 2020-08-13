@@ -7,6 +7,7 @@ import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByPksProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -23,16 +24,19 @@ public class QueryByPksXmlProc extends XmlProc {
 
     private final String tagId;
 
+    private final QueryByPksProc queryByPksProc;
+
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByPksXmlProc(PersistenceDto persistence, String tagId) {
+    public QueryByPksXmlProc(PersistenceDto persistence, String tagId, QueryByPksProc queryByPksProc) {
         this.persistence = persistence;
         this.tagId = tagId;
+        this.queryByPksProc = queryByPksProc;
     }
 
     public QueryByPksXmlProc process() {
-        if (persistence.getPkProperties().size() == 1) {
+        if (queryByPksProc.getGenerateOrNot() && persistence.getPkProperties().size() == 1) {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getPkProperties());
             Element stmt = new DefaultElement("select");
             stmt.addAttribute("id", tagId);

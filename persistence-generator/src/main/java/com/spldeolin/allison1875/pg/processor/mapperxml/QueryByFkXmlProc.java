@@ -8,6 +8,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.pg.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.pg.javabean.PersistenceDto;
 import com.spldeolin.allison1875.pg.javabean.PropertyDto;
+import com.spldeolin.allison1875.pg.processor.mapper.QueryByFkProc;
 import com.spldeolin.allison1875.pg.util.Dom4jUtils;
 import lombok.Getter;
 
@@ -20,15 +21,18 @@ public class QueryByFkXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
+    private final QueryByFkProc queryByFkProc;
+
     @Getter
     private Collection<String> sourceCodeLines;
 
-    public QueryByFkXmlProc(PersistenceDto persistence) {
+    public QueryByFkXmlProc(PersistenceDto persistence, QueryByFkProc queryByFkProc) {
         this.persistence = persistence;
+        this.queryByFkProc = queryByFkProc;
     }
 
     public QueryByFkXmlProc process() {
-        if (persistence.getFkProperties().size() > 0) {
+        if (queryByFkProc.getGenerateOrNot() && persistence.getFkProperties().size() > 0) {
             sourceCodeLines = Lists.newArrayList();
             for (PropertyDto fk : persistence.getFkProperties()) {
                 Element stmt = new DefaultElement("select");
