@@ -1,16 +1,21 @@
 package com.spldeolin.allison1875.pqt.processor;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -19,13 +24,14 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.pqt.PersistenceQueryTransformerConfig;
 import com.spldeolin.allison1875.pqt.javabean.PropertyDto;
 import lombok.extern.log4j.Log4j2;
@@ -37,7 +43,7 @@ import lombok.extern.log4j.Log4j2;
 public class PQTMainProc {
 
     public void process() {
-        Set<CompilationUnit> cus = Sets.newHashSet();
+        Map<CompilationUnit, String> cus = Maps.newHashMap();
 
         for (CompilationUnit cu : AstForest.getInstance()) {
             for (TypeDeclaration<?> type : cu.getTypes()) {
@@ -60,7 +66,7 @@ public class PQTMainProc {
                         if (mapperXml == null) {
                             continue;
                         }
-                        cus.add(cu);
+                        cus.put(cu, cu.toString());
 
                         String tableName = findTableName(entityTypeName);
 
@@ -190,7 +196,18 @@ public class PQTMainProc {
 
         }
 
-        cus.forEach(Saves::prettySave);
+        cus.forEach((cu, code) -> {
+            Storage storage = cu.getStorage().orElseThrow(StorageAbsentException::new);
+            Path path = storage.getPath();
+            try {
+                FileUtils.write(new File(String.format("%s.%s.back", path.toString(),
+                        TimeUtils.toString(LocalDateTime.now(), "yyyyMMddHHmmss"))), code, StandardCharsets.UTF_8);
+                storage.save();
+            } catch (IOException e) {
+                log.error(e);
+            }
+        });
+
     }
 
     private void removeVarWithField(FieldDeclaration field, VariableDeclarator var) {
