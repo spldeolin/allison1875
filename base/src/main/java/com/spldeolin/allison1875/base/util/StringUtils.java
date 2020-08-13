@@ -55,6 +55,13 @@ public class StringUtils {
         return org.apache.commons.lang3.StringUtils.lowerCase(str);
     }
 
+    /**
+     * @see org.apache.commons.lang3.StringUtils#upperCase(java.lang.String)
+     */
+    public static String upperCase(String str) {
+        return org.apache.commons.lang3.StringUtils.upperCase(str);
+    }
+
     public static List<String> splitLineByLine(String string) {
         if (string == null) {
             return Lists.newArrayList();

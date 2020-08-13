@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -19,14 +19,15 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.pqt.PersistenceQueryTransformerConfig;
 import com.spldeolin.allison1875.pqt.javabean.PropertyDto;
-import com.spldeolin.allison1875.pqt.util.Dom4jUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -36,6 +37,8 @@ import lombok.extern.log4j.Log4j2;
 public class PQTMainProc {
 
     public void process() {
+        Set<CompilationUnit> cus = Sets.newHashSet();
+
         for (CompilationUnit cu : AstForest.getInstance()) {
             for (TypeDeclaration<?> type : cu.getTypes()) {
                 if (type.isClassOrInterfaceDeclaration()) {
@@ -57,6 +60,8 @@ public class PQTMainProc {
                         if (mapperXml == null) {
                             continue;
                         }
+                        cus.add(cu);
+
                         String tableName = findTableName(entityTypeName);
 
                         MethodDeclaration method = new MethodDeclaration();
@@ -66,12 +71,13 @@ public class PQTMainProc {
                         method.setName(methodName);
                         method.addParameter(StaticJavaParser.parseParameter(queryTypeName + " query"));
 
-                        Collection<PropertyDto> properties = Lists.newArrayList();
+                        Collection<PropertyDto> whereProperties = Lists.newArrayList();
+                        Collection<PropertyDto> orderbyProperties = Lists.newArrayList();
                         for (FieldDeclaration field : query.getFields()) {
                             VariableDeclarator var = field.getVariable(0);
                             String varName = var.getNameAsString();
                             if (varName.equals("entity")) {
-                                continue;
+                                removeVarWithField(field, var);
                             }
 
                             String propertyName = findPropertyName(var);
@@ -83,114 +89,97 @@ public class PQTMainProc {
                                 operator = "eq";
                             }
                             PropertyDto dto = new PropertyDto();
-                            dto.setPropertyName(propertyName);
-                            dto.setColumnName(columnName);
-                            dto.setDollarVar(dollarVar);
-                            dto.setOperator(operator);
-                            properties.add(dto);
+                            dto.propertyName(propertyName);
+                            dto.columnName(columnName);
+                            dto.varName(varName);
+                            dto.dollarVar(dollarVar);
+                            dto.operator(operator);
+
+                            if (StringUtils.equalsAny(operator, "asc", "desc")) {
+                                orderbyProperties.add(dto);
+                            } else {
+                                whereProperties.add(dto);
+                            }
+
+                            field.setPrivate(true);
+                            var.removeInitializer();
+                            if ("entity".equals(varName)) {
+                                var.remove();
+                            }
+                            if (StringUtils.equalsAny(operator, "asc", "desc")) {
+                                removeVarWithField(field, var);
+                            }
                         }
 
                         List<String> xmlLines = Lists.newArrayList();
-
-                        Element selectTag = new DefaultElement("select").addAttribute("id", methodName);
-                        selectTag.addAttribute("parameterType", queryTypeQualifier);
-                        selectTag.addAttribute("resultMap", "all");
-                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
-                        selectTag.addText("SELECT");
-                        selectTag.addElement("include").addAttribute("refid", "all");
-                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
-                        selectTag.addText("FROM ").addText(tableName);
-                        selectTag.addText(BaseConstant.NEW_LINE).addText(BaseConstant.SINGLE_INDENT);
-                        selectTag.addText("WHERE");
-                        xmlLines.addAll(Dom4jUtils.toSourceCodeLines(selectTag));
-                        xmlLines.remove(xmlLines.size() - 1);
-
-                        boolean needAnd = false;
-                        for (FieldDeclaration field : query.getFields()) {
-                            VariableDeclarator var = field.getVariable(0);
-                            String varName = var.getNameAsString();
-                            if (varName.equals("entity")) {
-                                continue;
-                            }
-                            String operator = StringUtils
-                                    .lowerCase(JavadocDescriptions.getTrimmedFirstLine(field, false));
-                            if (StringUtils.isEmpty(operator)) {
-                                operator = "eq";
-                            }
-
-                            String propertyName = findPropertyName(var);
-                            String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
-                            String dollarVar = "#{" + varName + "}";
-
-                            StringBuilder sb = new StringBuilder(BaseConstant.SINGLE_INDENT);
-                            sb.append(needAnd ? "AND " : BaseConstant.SINGLE_INDENT);
-                            switch (operator) {
-                                case "eq":
-                                    sb.append(columnName).append(" = ").append(dollarVar);
-                                    break;
-                                case "ne":
-                                    sb.append(columnName).append(" != ").append(dollarVar);
-                                    break;
-                                case "in":
-                                    sb.append(columnName).append(" IN (<foreach collection='").append(varName);
-                                    sb.append("' item='one' separator=','>#{one}</foreach>)");
-                                    break;
-                                case "gt":
-                                    sb.append(columnName).append(" > ").append(dollarVar);
-                                    break;
-                                case "ge":
-                                    sb.append(columnName).append(" >= ").append(dollarVar);
-                                    break;
-                                case "lt":
-                                    sb.append(columnName).append(" < ").append(dollarVar);
-                                    break;
-                                case "le":
-                                    sb.append(columnName).append(" <= ").append(dollarVar);
-                                    break;
-                                case "notnull":
-                                    sb.append(columnName).append(" IS NOT NULL");
-                                    break;
-                                case "isnull":
-                                    sb.append(columnName).append(" IS NULL");
-                                    break;
-                                case "like":
-                                    sb.append(columnName).append(" LIKE CONCAT('%', ").append(dollarVar)
-                                            .append(", '%')");
-                                    break;
-                            }
-                            needAnd = true;
-                            xmlLines.add(sb.toString());
-                        }
-
-                        StringBuilder sb = new StringBuilder(64);
-                        sb.append(BaseConstant.SINGLE_INDENT).append("ORDER BY ");
-                        for (FieldDeclaration field : query.getFields()) {
-                            VariableDeclarator var = field.getVariable(0);
-
-                            String propertyName = findPropertyName(var);
-                            String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
-
-                            String operator = StringUtils
-                                    .lowerCase(JavadocDescriptions.getTrimmedFirstLine(field, false));
-                            if (operator == null) {
-                                continue;
-                            }
-
-                            switch (operator) {
-                                case "asc":
-                                    sb.append(columnName).append(", ");
-                                    break;
-                                case "desc":
-                                    sb.append(columnName).append(" DESC, ");
-                                    break;
+                        xmlLines.add(String.format("<select id='%s' parameterType='%s' resultMap='all'>", methodName,
+                                queryTypeQualifier));
+                        xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
+                        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid='all' />");
+                        xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM");
+                        xmlLines.add(BaseConstant.DOUBLE_INDENT + tableName);
+                        if (whereProperties.size() > 0) {
+                            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE");
+                            boolean firstLoop = true;
+                            for (PropertyDto where : whereProperties) {
+                                String andPart = firstLoop ? BaseConstant.SINGLE_INDENT : "AND ";
+                                firstLoop = false;
+                                switch (where.operator()) {
+                                    case "eq":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " = "
+                                                + where.dollarVar());
+                                        break;
+                                    case "ne":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " != "
+                                                + where.dollarVar());
+                                        break;
+                                    case "in":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
+                                                + " IN (<forearch collection='" + where.varName()
+                                                + "' item='one' separator=','>#{one}</foreach>)");
+                                        break;
+                                    case "gt":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " > "
+                                                + where.dollarVar());
+                                        break;
+                                    case "ge":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " >= "
+                                                + where.dollarVar());
+                                        break;
+                                    case "lt":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " < "
+                                                + where.dollarVar());
+                                        break;
+                                    case "le":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " <= "
+                                                + where.dollarVar());
+                                        break;
+                                    case "notnull":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
+                                                + " IS NOT NULL");
+                                        break;
+                                    case "isnull":
+                                        xmlLines.add(
+                                                BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " IS NULL");
+                                        break;
+                                    case "like":
+                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
+                                                + " LIKE CONCAT('%', '" + where.dollarVar() + "', '%')");
+                                        break;
+                                }
                             }
                         }
-                        if (!sb.toString().trim().endsWith("ORDER BY")) {
-                            xmlLines.add(StringUtils.removeLast(sb, ", "));
+                        if (orderbyProperties.size() > 0) {
+                            xmlLines.add(BaseConstant.SINGLE_INDENT + "ORDER BY");
+                            String orderbys = orderbyProperties.stream()
+                                    .map(one -> one.columnName() + " " + StringUtils.upperCase(one.operator()))
+                                    .collect(Collectors.joining(", "));
+                            xmlLines.add(BaseConstant.DOUBLE_INDENT + orderbys);
                         }
-
 
                         xmlLines.add("</select>");
+
+
                         xmlLines.forEach(log::info);
 
                     }
@@ -198,6 +187,16 @@ public class PQTMainProc {
                 }
 
             }
+
+        }
+
+        cus.forEach(Saves::prettySave);
+    }
+
+    private void removeVarWithField(FieldDeclaration field, VariableDeclarator var) {
+        var.remove();
+        if (field.getVariables().size() == 0) {
+            field.remove();
         }
     }
 
