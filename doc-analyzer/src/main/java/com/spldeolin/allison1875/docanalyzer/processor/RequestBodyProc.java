@@ -35,6 +35,7 @@ class RequestBodyProc {
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
+                new ReferenceSchemaProc(jsonSchema).process();
                 return jsonSchema;
             }
         } catch (JsonSchemaException ignore) {

@@ -19,7 +19,7 @@ public class EndpointDto {
 
     private Collection<String> descriptionLines;
 
-    private Collection<String> urls;
+    private String url;
 
     private Collection<String> httpMethods;
 

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -71,8 +70,7 @@ public class YApiSyncProc {
         Map<String, Long> catName2catId = this.getYapiCatIdsEachName();
 
         Map<String, JsonNode> yapiUrls = this.listAutoInterfaces();
-        Set<String> analysisUrls = endpoints.stream().map(one -> Iterables.getFirst(one.getUrls(), ""))
-                .collect(Collectors.toSet());
+        Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
 
         // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
         for (String yapiUrl : yapiUrls.keySet()) {
@@ -91,65 +89,17 @@ public class YApiSyncProc {
             String yapiDesc = endpoint.toStringPrettily();
 
 
-            String reqJs = getString(endpoint.getRequestBodyJsonSchema());
-            String respJs = getString(endpoint.getResponseBodyJsonSchema());
+            String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
+            String respJs = toJson(endpoint.getResponseBodyJsonSchema());
 
-            this.createYApiInterface(title, Iterables.getFirst(endpoint.getUrls(), ""), reqJs, respJs, yapiDesc,
+            this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
                     Iterables.getFirst(endpoint.getHttpMethods(), ""), catName2catId.get(endpoint.getCat()));
         }
     }
 
-    private String getString(JsonSchema bodyJsonSchema) {
+    private String toJson(JsonSchema bodyJsonSchema) {
         String json = "";
         if (bodyJsonSchema != null) {
-            Map<String, String> pathsEachId = Maps.newHashMap();
-            Map<JsonSchema, String> paths = Maps.newLinkedHashMap();
-            if (bodyJsonSchema.isObjectSchema()) {
-                pathsEachId.put(bodyJsonSchema.getId(), "根节点");
-            }
-
-            // 处理ReferenceSchema
-            JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
-                JsonPropertyDescriptionValueDto jpdv = JsonUtils
-                        .toObjectSkipNull(jsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
-                String path = paths.get(parentJsonSchema);
-                if (path == null) {
-                    path = "";
-                } else {
-                    if (parentJsonSchema.isArraySchema()) {
-                        path += "[]";
-                    }
-                    if (parentJsonSchema.isObjectSchema()) {
-                        path += ".";
-                    }
-                }
-                path = path + propertyName;
-                paths.put(jsonSchema, path);
-                if (jsonSchema.getId() != null) {
-                    pathsEachId.put(jsonSchema.getId(), path);
-                }
-
-                if (jsonSchema instanceof ReferenceSchema) {
-                    String referencePath = pathsEachId.get(jsonSchema.get$ref());
-                    if (jpdv != null) {
-                        jpdv.setReferencePath(referencePath);
-                    }
-                    if (parentJsonSchema.isArraySchema()) {
-                        JsonPropertyDescriptionValueDto parentJpdv = JsonUtils
-                                .toObjectSkipNull(parentJsonSchema.getDescription(),
-                                        JsonPropertyDescriptionValueDto.class);
-                        if (parentJpdv != null) {
-                            parentJpdv.setReferencePath(referencePath);
-                            parentJsonSchema.setDescription(JsonUtils.toJson(parentJpdv));
-                        }
-                    }
-                }
-
-                if (jpdv != null) {
-                    jsonSchema.setDescription(JsonUtils.toJson(jpdv));
-                }
-            });
-
             // jpdv -> Pretty String
             JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
                 JsonPropertyDescriptionValueDto jpdv = JsonUtils

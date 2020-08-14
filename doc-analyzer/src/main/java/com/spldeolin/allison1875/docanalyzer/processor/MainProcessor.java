@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
 import java.util.Map;
-import org.apache.commons.lang3.mutable.MutableInt;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -64,7 +63,6 @@ public class MainProcessor {
 
         // 收集endpoint
         Collection<EndpointDto> endpoints = Lists.newArrayList();
-        MutableInt handlerCount = new MutableInt(0);
 
         // 再次遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
         ControllerIterateProc controllerIterateProcessor = new ControllerIterateProc(astForest.reset());
@@ -145,17 +143,15 @@ public class MainProcessor {
                 builder.responseBodyJsonSchema(responseBodyAnalyzeProcessor.analyze(controller, handler));
 
                 // 构建EndpointDto
-                endpoints.add(builder.build());
+                endpoints.addAll(builder.build());
 
-                // handler个数
-                handlerCount.increment();
             });
         });
 
         // 同步到YApi
         new YApiSyncProc(endpoints).process();
 
-        log.info(handlerCount);
+        log.info(endpoints.size());
     }
 
     private String findControllerCat(ClassOrInterfaceDeclaration controller) {
