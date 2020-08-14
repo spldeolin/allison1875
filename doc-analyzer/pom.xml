@@ -41,12 +41,6 @@
             <artifactId>hibernate-validator</artifactId>
         </dependency>
 
-        <!-- freemarker -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-        </dependency>
-
         <!-- flexmark -->
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
