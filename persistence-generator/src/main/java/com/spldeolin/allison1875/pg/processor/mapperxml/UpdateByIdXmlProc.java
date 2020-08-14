@@ -47,7 +47,7 @@ public class UpdateByIdXmlProc extends XmlProc {
                 ifTag.addText(nonPk.getColumnName() + " = #{" + nonPk.getPropertyName() + "},");
             }
             newLineWithIndent(stmt);
-            stmt.addText("WHERE ");
+            stmt.addText("WHERE");
             newLineWithIndent(stmt);
             if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
                 stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());

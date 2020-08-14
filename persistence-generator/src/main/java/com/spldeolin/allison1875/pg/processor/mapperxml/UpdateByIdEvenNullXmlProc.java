@@ -50,7 +50,7 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
                     .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}").collect(Collectors
                             .joining(", " + BaseConstant.NEW_LINE + Strings.repeat(BaseConstant.SINGLE_INDENT, 2))));
             newLineWithIndent(stmt);
-            stmt.addText("WHERE ");
+            stmt.addText("WHERE");
             newLineWithIndent(stmt);
             if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
                 stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());

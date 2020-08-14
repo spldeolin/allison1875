@@ -45,7 +45,7 @@ public class QueryByKeyXmlProc extends XmlProc {
                 newLineWithIndent(stmt);
                 stmt.addText("FROM ").addText(persistence.getTableName());
                 newLineWithIndent(stmt);
-                stmt.addText("WHERE ");
+                stmt.addText("WHERE");
                 newLineWithIndent(stmt);
                 if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
                     stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());

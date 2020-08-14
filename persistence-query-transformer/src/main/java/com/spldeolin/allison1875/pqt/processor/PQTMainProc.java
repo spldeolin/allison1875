@@ -3,19 +3,16 @@ package com.spldeolin.allison1875.pqt.processor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -24,14 +21,17 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
+import com.spldeolin.allison1875.base.util.FileBackupUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.base.util.TimeUtils;
+import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.pqt.PersistenceQueryTransformerConfig;
 import com.spldeolin.allison1875.pqt.javabean.PropertyDto;
 import lombok.extern.log4j.Log4j2;
@@ -43,10 +43,10 @@ import lombok.extern.log4j.Log4j2;
 public class PQTMainProc {
 
     public void process() {
-        Map<CompilationUnit, String> cus = Maps.newHashMap();
+        Collection<CompilationUnit> cus = Lists.newArrayList();
 
-        for (CompilationUnit cu : AstForest.getInstance()) {
-            for (TypeDeclaration<?> type : cu.getTypes()) {
+        for (CompilationUnit queryCu : AstForest.getInstance()) {
+            for (TypeDeclaration<?> type : queryCu.getTypes()) {
                 if (type.isClassOrInterfaceDeclaration()) {
                     ClassOrInterfaceDeclaration query = type.asClassOrInterfaceDeclaration();
                     String queryTypeName = query.getNameAsString();
@@ -57,18 +57,23 @@ public class PQTMainProc {
                         if (!entityField.isPresent()) {
                             continue;
                         }
+
                         String entityTypeName = entityField.get().getCommonType().asString();
                         ClassOrInterfaceDeclaration mapper = findMapper(entityTypeName);
                         if (mapper == null) {
                             continue;
                         }
+
                         File mapperXml = findMapperXml(mapper.getNameAsString());
                         if (mapperXml == null) {
                             continue;
                         }
-                        cus.put(cu, cu.toString());
 
-                        String tableName = findTableName(entityTypeName);
+                        FileBackupUtils.backup(queryCu.getStorage().orElseThrow(StorageAbsentException::new).getPath());
+                        FileBackupUtils.backup(Locations.getStorage(mapper).getPath());
+                        FileBackupUtils.backup(mapperXml);
+                        cus.add(queryCu);
+                        cus.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
 
                         MethodDeclaration method = new MethodDeclaration();
                         query.getJavadocComment().ifPresent(method::setJavadocComment);
@@ -76,6 +81,9 @@ public class PQTMainProc {
                         String methodName = "queryVia" + StringUtils.removeLast(queryTypeName, "Query");
                         method.setName(methodName);
                         method.addParameter(StaticJavaParser.parseParameter(queryTypeName + " query"));
+                        method.setBody(null);
+                        mapper.addMember(method);
+                        Imports.ensureImported(mapper, queryTypeQualifier);
 
                         Collection<PropertyDto> whereProperties = Lists.newArrayList();
                         Collection<PropertyDto> orderbyProperties = Lists.newArrayList();
@@ -84,8 +92,8 @@ public class PQTMainProc {
                             String varName = var.getNameAsString();
                             if (varName.equals("entity")) {
                                 removeVarWithField(field, var);
+                                continue;
                             }
-
                             String propertyName = findPropertyName(var);
                             String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
                             String dollarVar = "#{" + varName + "}";
@@ -109,9 +117,6 @@ public class PQTMainProc {
 
                             field.setPrivate(true);
                             var.removeInitializer();
-                            if ("entity".equals(varName)) {
-                                var.remove();
-                            }
                             if (StringUtils.equalsAny(operator, "asc", "desc")) {
                                 removeVarWithField(field, var);
                             }
@@ -123,7 +128,7 @@ public class PQTMainProc {
                         xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
                         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid='all' />");
                         xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM");
-                        xmlLines.add(BaseConstant.DOUBLE_INDENT + tableName);
+                        xmlLines.add(BaseConstant.DOUBLE_INDENT + findTableName(entityTypeName));
                         if (whereProperties.size() > 0) {
                             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE");
                             boolean firstLoop = true;
@@ -141,7 +146,7 @@ public class PQTMainProc {
                                         break;
                                     case "in":
                                         xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
-                                                + " IN (<forearch collection='" + where.varName()
+                                                + " IN (<foreach collection='" + where.varName()
                                                 + "' item='one' separator=','>#{one}</foreach>)");
                                         break;
                                     case "gt":
@@ -153,12 +158,14 @@ public class PQTMainProc {
                                                 + where.dollarVar());
                                         break;
                                     case "lt":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " < "
-                                                + where.dollarVar());
+                                        xmlLines.add(
+                                                BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " &lt; "
+                                                        + where.dollarVar());
                                         break;
                                     case "le":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " <= "
-                                                + where.dollarVar());
+                                        xmlLines.add(
+                                                BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " &lt;= "
+                                                        + where.dollarVar());
                                         break;
                                     case "notnull":
                                         xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
@@ -185,8 +192,25 @@ public class PQTMainProc {
 
                         xmlLines.add("</select>");
 
+                        List<String> newLines = Lists.newArrayList();
+                        try {
+                            List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
+                            Collections.reverse(lines);
+                            for (String line : lines) {
+                                newLines.add(line);
+                                if (line.contains("</mapper>")) {
+                                    Collections.reverse(xmlLines);
+                                    for (String xmlLine : xmlLines) {
+                                        newLines.add(BaseConstant.SINGLE_INDENT + xmlLine);
+                                    }
+                                }
+                            }
+                            Collections.reverse(newLines);
 
-                        xmlLines.forEach(log::info);
+                            FileUtils.writeLines(mapperXml, newLines);
+                        } catch (IOException e) {
+                            log.error(e);
+                        }
 
                     }
 
@@ -196,18 +220,7 @@ public class PQTMainProc {
 
         }
 
-        cus.forEach((cu, code) -> {
-            Storage storage = cu.getStorage().orElseThrow(StorageAbsentException::new);
-            Path path = storage.getPath();
-            try {
-                FileUtils.write(new File(String.format("%s.%s.back", path.toString(),
-                        TimeUtils.toString(LocalDateTime.now(), "yyyyMMddHHmmss"))), code, StandardCharsets.UTF_8);
-                storage.save();
-            } catch (IOException e) {
-                log.error(e);
-            }
-        });
-
+        cus.forEach(Saves::prettySave);
     }
 
     private void removeVarWithField(FieldDeclaration field, VariableDeclarator var) {

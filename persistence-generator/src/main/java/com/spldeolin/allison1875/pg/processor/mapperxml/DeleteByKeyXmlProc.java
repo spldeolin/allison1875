@@ -48,7 +48,7 @@ public class DeleteByKeyXmlProc extends XmlProc {
                     newLineWithIndent(stmt);
                     stmt.addText("SET ").addText(deletedSql);
                     newLineWithIndent(stmt);
-                    stmt.addText("WHERE ");
+                    stmt.addText("WHERE");
                     newLineWithIndent(stmt);
                     if (PersistenceGeneratorConfig.getInstace().getNotDeletedSql() != null) {
                         stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
