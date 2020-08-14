@@ -22,36 +22,37 @@ public class JsonSchemaTraverseUtils {
 
     }
 
-    public static void traverse(JsonSchema jsonSchema, EveryJsonSchemaHandler handler) {
+    public static void traverse(String propName, JsonSchema jsonSchema, EveryJsonSchemaHandler handler) {
         if (jsonSchema.isObjectSchema()) {
             Map<String, JsonSchema> properties = jsonSchema.asObjectSchema().getProperties();
-            properties.forEach((propName, childJsonSchema) -> {
-                handler.handle(propName, childJsonSchema, jsonSchema);
-                traverse(childJsonSchema, handler);
+            properties.forEach((childPropName, childJsonSchema) -> {
+                handler.handle(childPropName, childJsonSchema, jsonSchema);
+                traverse(childPropName, childJsonSchema, handler);
             });
         }
         if (jsonSchema.isArraySchema()) {
-            traverseArray(jsonSchema.asArraySchema(), handler, jsonSchema);
+            traverseArray(propName, jsonSchema.asArraySchema(), handler, jsonSchema);
         }
     }
 
-    private static void traverseArray(ArraySchema arraySchema, EveryJsonSchemaHandler handler,
+    private static void traverseArray(String propName, ArraySchema arraySchema, EveryJsonSchemaHandler handler,
             JsonSchema parentJsonSchema) {
         Items items = arraySchema.getItems();
         if (items == null) {
             return;
         }
+        String elementPropName = propName + "[]";
         if (items.isArrayItems()) {
             // Java没有tuple语法，所以这个情况不可能存在
             for (JsonSchema tupleElementJsonSchema : items.asArrayItems().getJsonSchemas()) {
-                handler.handle("", tupleElementJsonSchema, parentJsonSchema);
-                traverse(tupleElementJsonSchema, handler);
+                handler.handle(elementPropName, tupleElementJsonSchema, parentJsonSchema);
+                traverse(elementPropName, tupleElementJsonSchema, handler);
             }
         }
         if (items.isSingleItems()) {
             JsonSchema elementJsonSchema = items.asSingleItems().getSchema();
-            handler.handle("", elementJsonSchema, parentJsonSchema);
-            traverse(elementJsonSchema, handler);
+            handler.handle(elementPropName, elementJsonSchema, parentJsonSchema);
+            traverse(elementPropName, elementJsonSchema, handler);
         }
     }
 

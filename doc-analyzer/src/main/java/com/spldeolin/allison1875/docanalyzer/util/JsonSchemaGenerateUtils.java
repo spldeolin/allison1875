@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.util;
 
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -24,24 +23,7 @@ public class JsonSchemaGenerateUtils {
     }
 
     public static final JsonSchemaGenerator DEFAULT_JSG = new JsonSchemaGenerator(
-            // OM
-            JsonUtils.initObjectMapper(new ObjectMapper()),
-            new SchemaFactoryWrapper().setVisitorContext(new VisitorContext() {
-                /**
-                 * 多个property是同一个Javabean时
-                 * 确保这些property的类型都是ObjectSchema
-                 * 而不是一个ObjectSchema外加其他的RefereceSchema
-                 */
-                @Override
-                public String addSeenSchemaUri(JavaType aSeenSchema) {
-                    return javaTypeToUrn(aSeenSchema);
-                }
-
-                @Override
-                public String javaTypeToUrn(JavaType jt) {
-                    return jt.toCanonical();
-                }
-            }));
+            JsonUtils.initObjectMapper(new ObjectMapper()));
 
     public static JsonSchema generateSchema(String describe, ObjectMapper om,
             AnnotationIntrospector annotationIntrospector, VisitorContext visitorContext) throws JsonSchemaException {

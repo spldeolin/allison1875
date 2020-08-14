@@ -33,6 +33,8 @@ public class JsonPropertyDescriptionValueDto {
 
     private Boolean docIgnore = false;
 
+    private String referencePath;
+
     public String toStringPrettily() {
         if (isFieldCrossingValids) {
             StringBuilder sb = new StringBuilder(64);
@@ -42,6 +44,10 @@ public class JsonPropertyDescriptionValueDto {
             return sb.toString();
         } else {
 
+            String ref = null;
+            if (referencePath != null) {
+                ref = "复用类型\n" + "\t数据结构同：" + referencePath;
+            }
             String comment = null;
             if (CollectionUtils.isNotEmpty(descriptionLines)) {
                 StringBuilder sb = new StringBuilder();
@@ -71,7 +77,7 @@ public class JsonPropertyDescriptionValueDto {
                 format = "格式\n";
                 format += "\t" + jsonFormatPattern;
             }
-            return Joiner.on("\n\n").skipNulls().join(comment, validInfo, format);
+            return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format);
         }
     }
 

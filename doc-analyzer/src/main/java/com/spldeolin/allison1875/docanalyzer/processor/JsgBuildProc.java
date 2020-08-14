@@ -18,8 +18,6 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
-import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -108,8 +106,8 @@ class JsgBuildProc {
     }
 
     public JsonSchemaGenerator buildJsg() {
-        ObjectMapper om = JsonUtils.initObjectMapper(new ObjectMapper());
-        om.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
+        ObjectMapper customOm = JsonUtils.initObjectMapper(new ObjectMapper());
+        customOm.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
             private static final long serialVersionUID = -3267511125040673149L;
 
             private final Multiset<JavaType> count = HashMultiset.create();
@@ -217,36 +215,7 @@ class JsgBuildProc {
 
         });
 
-        JsonSchemaGenerator jsg = new JsonSchemaGenerator(
-                // OM
-                JsonUtils.initObjectMapper(om), new SchemaFactoryWrapper().setVisitorContext(new VisitorContext() {
-            private final Multiset<JavaType> seenSchemasWithCount = HashMultiset.create();
-
-            /**
-             * 多个property是同一个Javabean时
-             * 确保这些property的类型都是ObjectSchema
-             * 而不是一个ObjectSchema外加其他的RefereceSchema
-             */
-            @Override
-            public String addSeenSchemaUri(JavaType aSeenSchema) {
-                if (aSeenSchema != null && !aSeenSchema.isPrimitive()) {
-                    seenSchemasWithCount.add(aSeenSchema);
-                    return javaTypeToUrn(aSeenSchema);
-                }
-                return null;
-            }
-
-            @Override
-            public String getSeenSchemaUri(JavaType aSeenSchema) {
-                int limit = 10; // 一般不会存在10个相同Type的Field，超过这个数字认为是递归了
-                return (seenSchemasWithCount.count(aSeenSchema) > limit) ? javaTypeToUrn(aSeenSchema) : null;
-            }
-
-            @Override
-            public String javaTypeToUrn(JavaType jt) {
-                return jt.toCanonical();
-            }
-        }));
+        JsonSchemaGenerator jsg = new JsonSchemaGenerator(customOm);
 
         return jsg;
     }
