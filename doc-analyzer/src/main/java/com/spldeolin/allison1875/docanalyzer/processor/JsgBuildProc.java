@@ -9,10 +9,9 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
@@ -23,11 +22,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
 import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -107,20 +103,15 @@ class JsgBuildProc {
 
     public JsonSchemaGenerator buildJsg() {
         ObjectMapper customOm = JsonUtils.initObjectMapper(new ObjectMapper());
+        // 只有类属性可见，类的getter、setter、构造方法里的字段不会被当作JSON的字段
+        customOm.setVisibility(customOm.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY).withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
         customOm.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
             private static final long serialVersionUID = -3267511125040673149L;
-
-            private final Multiset<JavaType> count = HashMultiset.create();
-
-            @Override
-            public PropertyName findNameForSerialization(Annotated a) {
-                if (a.getAnnotated() instanceof Method && a.getAnnotation(AssertTrue.class) != null) {
-                    count.add(a.getType());
-                    return PropertyName
-                            .construct("跨字段校验项" + Strings.repeat(String.valueOf('\u0000'), count.count(a.getType())));
-                }
-                return super.findNameForSerialization(a);
-            }
 
             @Override
             public boolean hasIgnoreMarker(AnnotatedMember m) {

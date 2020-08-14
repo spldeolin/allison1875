@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
@@ -147,12 +146,6 @@ public class ValidProc {
         if (pattern != null) {
             valids.add(
                     new ValidatorDto().setValidatorType(ValidatorTypeEnum.REGEX.getValue()).setNote(pattern.regexp()));
-        }
-
-        AssertTrue assertTrue = find(annotatedElement, AssertTrue.class);
-        if (assertTrue != null) {
-            valids.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.FIELD_CROSSING.getValue())
-                    .setNote(assertTrue.message()));
         }
 
         valids.addAll(analyzeCustomValidationStrategy.analyzeCustomValidation(annotatedElement));

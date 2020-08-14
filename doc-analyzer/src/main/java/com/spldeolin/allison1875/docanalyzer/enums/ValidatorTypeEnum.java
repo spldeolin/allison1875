@@ -42,7 +42,7 @@ public enum ValidatorTypeEnum {
 
     REGEX("正则表达式："),
 
-    FIELD_CROSSING("");
+    ;
 
     private final String value;
 
