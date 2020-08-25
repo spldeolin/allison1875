@@ -92,8 +92,8 @@ public class YApiSyncProc {
             String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
             String respJs = toJson(endpoint.getResponseBodyJsonSchema());
 
-            this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
-                    Iterables.getFirst(endpoint.getHttpMethods(), ""), catName2catId.get(endpoint.getCat()));
+            this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc, endpoint.getHttpMethod(),
+                    catName2catId.get(endpoint.getCat()));
         }
     }
 

@@ -16,11 +16,13 @@ public class Annotations {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-    public static <A extends Annotation> boolean isAnnotationPresent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
+    public static <A extends Annotation> boolean isAnnotationPresent(NodeWithAnnotations<?> node,
+            Class<A> annotationClass) {
         return getAnnotation(node, annotationClass) != null;
     }
 
-    public static <A extends Annotation> boolean isAnnotationAbsent(NodeWithAnnotations<?> node, Class<A> annotationClass) {
+    public static <A extends Annotation> boolean isAnnotationAbsent(NodeWithAnnotations<?> node,
+            Class<A> annotationClass) {
         return !isAnnotationPresent(node, annotationClass);
     }
 

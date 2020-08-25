@@ -41,18 +41,17 @@ public class JsonSchemaTraverseUtils {
         if (items == null) {
             return;
         }
-        String elementPropName = propName + "[]";
         if (items.isArrayItems()) {
             // Java没有tuple语法，所以这个情况不可能存在
             for (JsonSchema tupleElementJsonSchema : items.asArrayItems().getJsonSchemas()) {
-                handler.handle(elementPropName, tupleElementJsonSchema, parentJsonSchema);
-                traverse(elementPropName, tupleElementJsonSchema, handler);
+                handler.handle(propName, tupleElementJsonSchema, parentJsonSchema);
+                traverse(propName, tupleElementJsonSchema, handler);
             }
         }
         if (items.isSingleItems()) {
             JsonSchema elementJsonSchema = items.asSingleItems().getSchema();
-            handler.handle(elementPropName, elementJsonSchema, parentJsonSchema);
-            traverse(elementPropName, elementJsonSchema, handler);
+            handler.handle(propName, elementJsonSchema, parentJsonSchema);
+            traverse(propName, elementJsonSchema, handler);
         }
     }
 

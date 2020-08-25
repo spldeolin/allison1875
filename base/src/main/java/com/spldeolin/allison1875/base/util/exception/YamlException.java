@@ -9,6 +9,10 @@ public class YamlException extends RuntimeException {
         super();
     }
 
+    public YamlException(Throwable cause) {
+        super(cause);
+    }
+
     public YamlException(String message) {
         super(message);
     }

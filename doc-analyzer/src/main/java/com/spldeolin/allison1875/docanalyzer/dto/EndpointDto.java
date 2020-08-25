@@ -21,7 +21,7 @@ public class EndpointDto {
 
     private String url;
 
-    private Collection<String> httpMethods;
+    private String httpMethod;
 
     private Boolean isDeprecated;
 

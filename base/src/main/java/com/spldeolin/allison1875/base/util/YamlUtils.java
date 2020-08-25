@@ -2,9 +2,9 @@ package com.spldeolin.allison1875.base.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.spldeolin.allison1875.base.util.exception.JsonException;
 import com.spldeolin.allison1875.base.util.exception.YamlException;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,8 +26,14 @@ public class YamlUtils {
             return om.readValue(is, clazz);
         } catch (IOException e) {
             log.error("yamlPath={}, clazz={}", yamlPath, clazz, e);
-            throw new JsonException(e);
+            throw new YamlException(e);
         }
+    }
+
+    public static <T> T toObjectAndThen(String yamlPath, Class<T> clazz, Consumer<T> andThen) {
+        T result = toObject(yamlPath, clazz);
+        andThen.accept(result);
+        return result;
     }
 
 }

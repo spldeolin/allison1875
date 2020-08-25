@@ -5,8 +5,6 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
@@ -52,24 +50,36 @@ class RequestBodyProc {
      * 异常均会被log.error，除非目标项目源码更新后没有及时编译，否则不应该抛出异常
      */
     private ResolvedType findRequestBody(MethodDeclaration method) {
+        ResolvedType result = null;
+
+        String name = MethodQualifiers.getTypeQualifierWithMethodName(method);
         for (Parameter parameter : method.getParameters()) {
-            Type type = parameter.getType();
-            for (AnnotationExpr annotation : parameter.getAnnotations()) {
-                try {
-                    ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                    if (QualifierConstants.REQUEST_BODY.equals(resolve.getQualifiedName())) {
-                        try {
-                            return type.resolve();
-                        } catch (Exception e) {
-                            log.error(e);
+            try {
+                boolean isRequestBody = false;
+                for (AnnotationExpr annotation : parameter.getAnnotations()) {
+                    if (QualifierConstants.REQUEST_BODY.equals(annotation.resolve().getQualifiedName())) {
+                        if (result == null) {
+                            result = parameter.getType().resolve();
+                            isRequestBody = true;
+                            break;
+                        } else {
+                            log.warn("方法[{}]存在不止一个RequestBody", name);
                         }
                     }
-                } catch (Exception e) {
-                    log.error(e);
                 }
+
+                if (!isRequestBody) {
+                    log.warn("方法[{}]存在RequestBody以外的参数[{}]，忽略", name, parameter);
+                }
+            } catch (Exception e) {
+                log.error(e);
             }
         }
-        return null;
+
+        if (result == null) {
+            log.info("方法[{}]没有RequestBody", name);
+        }
+        return result;
     }
 
 }
