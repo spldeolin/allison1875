@@ -5,6 +5,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
+import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**
  * @author Deolin 2020-07-12
@@ -12,7 +13,11 @@ import com.spldeolin.allison1875.base.exception.CuAbsentException;
 public class Imports {
 
     public static void ensureImported(Node node, String importName) {
-        ensureImported(node, importName, false, false);
+        if (importName.endsWith(".*")) {
+            ensureImported(node, StringUtils.replaceLast(importName, ".*", ""), false, true);
+        } else {
+            ensureImported(node, importName, false, false);
+        }
     }
 
     public static void ensureImported(Node node, String importName, boolean isStatic, boolean isAsterisk) {

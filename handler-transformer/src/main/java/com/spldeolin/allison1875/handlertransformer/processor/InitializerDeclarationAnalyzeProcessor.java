@@ -22,9 +22,9 @@ import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.PackageAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
 import com.spldeolin.allison1875.handlertransformer.meta.HandlerMetaInfo;
-import com.spldeolin.allison1875.handlertransformer.strategy.PackageStrategy;
 import com.spldeolin.allison1875.handlertransformer.util.BlockStmts;
 
 /**
@@ -35,22 +35,18 @@ public class InitializerDeclarationAnalyzeProcessor {
 
     private final ClassOrInterfaceDeclaration controller;
 
-    private final PackageStrategy packageStrategy;
-
-    public InitializerDeclarationAnalyzeProcessor(ClassOrInterfaceDeclaration controller,
-            PackageStrategy packageStrategy) {
+    public InitializerDeclarationAnalyzeProcessor(ClassOrInterfaceDeclaration controller) {
         this.controller = controller;
-        this.packageStrategy = packageStrategy;
     }
 
-    HandlerMetaInfo analyze(InitializerDeclaration init) {
+    HandlerMetaInfo analyze(InitializerDeclaration blueprint) {
         // metaInfo meta
         HandlerMetaInfo metaInfo = new HandlerMetaInfo();
         metaInfo.setController(controller);
         CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        metaInfo.setSourceRoot(Locations.getStorage(controller).getSourceRoot().getRoot());
+        metaInfo.setSourceRoot(Locations.getStorage(controller).getSourceRoot());
 
-        for (Statement stmtInInit : init.getBody().getStatements()) {
+        for (Statement stmtInInit : blueprint.getBody().getStatements()) {
             stmtInInit.ifExpressionStmt(exprInInit -> exprInInit.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     vd.getInitializer().ifPresent(i -> {
@@ -61,12 +57,6 @@ public class InitializerDeclarationAnalyzeProcessor {
                                 break;
                             case "desc":
                                 metaInfo.setHandlerDescription(value);
-                                break;
-                            case "service":
-                                metaInfo.setServiceName(StringUtils.upperFirstLetter(value));
-                                break;
-                            case "author":
-                                metaInfo.setAuthor(value);
                                 break;
                         }
                     });
@@ -80,19 +70,40 @@ public class InitializerDeclarationAnalyzeProcessor {
 
         // dto meta
         Map<BlockStmt, DtoMetaInfo> dtos = Maps.newLinkedHashMap();
-        List<BlockStmt> allBlockStmt = init.findAll(BlockStmt.class);
+        List<BlockStmt> allBlockStmt = blueprint.findAll(BlockStmt.class);
         allBlockStmt.remove(0);
-        for (int i = 0; i < allBlockStmt.size(); i++) {
-            BlockStmt blockStmt = allBlockStmt.get(i);
+        BlockStmt reqBlockStmt = null;
+        for (BlockStmt blockStmt : allBlockStmt) {
             DtoMetaInfo dtoBuilder = new DtoMetaInfo();
+            boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
+
+            HandlerTransformerConfig conf = HandlerTransformerConfig.getInstance();
+            if (isReqOrRespLevel(blockStmt, blueprint) && metaInfo.getReqBody() != null) {
+                dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto");
+                dtoBuilder.packageName(conf.getRespDtoPackage());
+                dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
+                dtoBuilder.dtoName("resp");
+                metaInfo.setRespBody(dtoBuilder);
+            }
+            if (isReqOrRespLevel(blockStmt, blueprint) && metaInfo.getReqBody() == null) {
+                dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto");
+                dtoBuilder.packageName(conf.getReqDtoPackage());
+                dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
+                dtoBuilder.dtoName("req");
+                metaInfo.setReqBody(dtoBuilder);
+                reqBlockStmt = blockStmt;
+            }
+
             for (VariableDeclarationExpr vde : BlockStmts.listExpressions(blockStmt, VariableDeclarationExpr.class)) {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     String variableName = removeLastDollars(vd.getNameAsString());
                     if (StringUtils.equalsAny(variableName, "dto", "dtos")) {
                         vd.getInitializer().ifPresent(ir -> {
                             String rawDtoName = ir.asStringLiteralExpr().getValue();
-                            dtoBuilder.typeName(StringUtils.upperFirstLetter(rawDtoName) + "Dto");
-                            dtoBuilder.packageName(packageStrategy.calcDtoPackage(controllerPackage));
+                            String typeName = StringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp");
+                            dtoBuilder.typeName(typeName + "Dto");
+                            dtoBuilder.packageName(
+                                    (inReqScope ? conf.getReqDtoPackage() : conf.getRespDtoPackage()) + ".dto");
                             dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
                             String asVariableDeclarator;
                             String dtoName;
@@ -113,23 +124,8 @@ public class InitializerDeclarationAnalyzeProcessor {
                 }
             }
 
-            if (dtoBuilder.typeName() == null) {
-                if (i == 0) {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto");
-                    dtoBuilder.packageName(packageStrategy.calcReqPackage(controllerPackage));
-                    dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
-                    dtoBuilder.dtoName("req");
-                    metaInfo.setReqBodyDto(dtoBuilder);
-                } else {
-                    dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto");
-                    dtoBuilder.packageName(packageStrategy.calcRespPackage(controllerPackage));
-                    dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
-                    dtoBuilder.dtoName("resp");
-                    metaInfo.setRespBodyDto(dtoBuilder);
-                }
-                metaInfo.getImports().add(dtoBuilder.typeQualifier());
-                dtoBuilder.asVariableDeclarator(dtoBuilder.typeName() + " " + dtoBuilder.dtoName());
-            }
+            metaInfo.getImports().add(dtoBuilder.typeQualifier());
+            dtoBuilder.asVariableDeclarator(dtoBuilder.typeName() + " " + dtoBuilder.dtoName());
             dtos.put(blockStmt, dtoBuilder);
         }
         metaInfo.setDtos(dtos.values());
@@ -140,6 +136,17 @@ public class InitializerDeclarationAnalyzeProcessor {
                     parentMeta.imports().add(dtoBuilder.typeQualifier());
                 }));
         return metaInfo;
+    }
+
+    private boolean isInReqScope(BlockStmt blockStmt, BlockStmt reqBlockStmt) {
+        if (reqBlockStmt == null) {
+            return false;
+        }
+        return reqBlockStmt.isAncestorOf(blockStmt);
+    }
+
+    private boolean isReqOrRespLevel(BlockStmt blockStmt, InitializerDeclaration init) {
+        return blockStmt.getParentNode().filter(parent -> parent.equals(init.getBody())).isPresent();
     }
 
     private String removeLastDollars(String text) {
