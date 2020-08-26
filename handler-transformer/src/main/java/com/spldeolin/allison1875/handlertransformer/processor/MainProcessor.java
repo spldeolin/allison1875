@@ -82,7 +82,8 @@ public class MainProcessor {
         handler.setType(
                 String.format(HandlerTransformerConfig.getInstance().getResult(), metaInfo.getRespBody().typeName()));
         handler.setName(handlerName);
-        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().asVariableDeclarator());
+        Parameter requestBody = StaticJavaParser
+                .parseParameter(metaInfo.getReqBody().asVariableDeclarator().getRight());
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
         handler.addParameter(requestBody);
@@ -111,8 +112,14 @@ public class MainProcessor {
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Data"))
                         .addAnnotation(StaticJavaParser.parseAnnotation("@Accessors(chain = true)"));
                 coid.setPublic(true).setName(dto.typeName());
-                for (String vd : dto.variableDeclarators()) {
-                    coid.addMember(StaticJavaParser.parseBodyDeclaration("private " + vd + ";"));
+                for (Pair<String, String> pair : dto.variableDeclarators()) {
+                    FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(pair.getRight() + ";")
+                            .asFieldDeclaration();
+                    field.setPrivate(true);
+                    if (pair.getLeft() != null) {
+                        field.setJavadocComment(pair.getLeft());
+                    }
+                    coid.addMember(field);
                 }
                 return coid;
             });

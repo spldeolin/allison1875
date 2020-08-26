@@ -1,25 +1,23 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
-import static com.github.javaparser.utils.CodeGenerationUtils.f;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.lang3.tuple.Pair;
 import org.atteo.evo.inflector.English;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.ArrayType;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.PackageAbsentException;
+import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -96,6 +94,7 @@ public class InitializerDeclarationAnalyzeProcessor {
 
             for (VariableDeclarationExpr vde : BlockStmts.listExpressions(blockStmt, VariableDeclarationExpr.class)) {
                 VariableDeclarator vd = vde.getVariable(0);
+                String lineComment = getLineComment(vde);
                 String variableName = removeLastDollars(vd.getNameAsString());
                 if (StringUtils.equalsAny(variableName, "dto", "dtos")) {
                     vd.getInitializer().ifPresent(ir -> {
@@ -115,17 +114,20 @@ public class InitializerDeclarationAnalyzeProcessor {
                             asVariableDeclarator = dtoBuilder.typeName() + " " + dtoName;
                         }
                         dtoBuilder.dtoName(dtoName);
-                        dtoBuilder.asVariableDeclarator(asVariableDeclarator);
+                        dtoBuilder.asVariableDeclarator(Pair.of(lineComment, asVariableDeclarator));
                     });
                 } else {
-                    String standradVd = standardizeVd(vd);
-                    dtoBuilder.variableDeclarators().add(standradVd);
+                    arrayToCollectionMight(vd);
+                    dtoBuilder.variableDeclarators().add(Pair.of(lineComment, vde.toString()));
                 }
+            }
 
+            // 大括号内没有指定任何dto和dtos时
+            if (dtoBuilder.asVariableDeclarator() == null) {
+                dtoBuilder.asVariableDeclarator(Pair.of(null, dtoBuilder.typeName() + " " + dtoBuilder.dtoName()));
             }
 
             metaInfo.getImports().add(dtoBuilder.typeQualifier());
-            dtoBuilder.asVariableDeclarator(dtoBuilder.typeName() + " " + dtoBuilder.dtoName());
             dtos.put(blockStmt, dtoBuilder);
         }
         metaInfo.setDtos(dtos.values());
@@ -136,6 +138,11 @@ public class InitializerDeclarationAnalyzeProcessor {
                     parentMeta.imports().add(dtoBuilder.typeQualifier());
                 }));
         return metaInfo;
+    }
+
+    private String getLineComment(VariableDeclarationExpr vde) {
+        Optional<Comment> comment = vde.getParentNode().orElseThrow(ParentAbsentException::new).getComment();
+        return comment.map(Comment::getContent).orElse(null);
     }
 
     private boolean isInReqScope(BlockStmt blockStmt, BlockStmt reqBlockStmt) {
@@ -161,22 +168,9 @@ public class InitializerDeclarationAnalyzeProcessor {
         }
     }
 
-    private String standardizeVd(VariableDeclarator variable) {
-        com.github.javaparser.ast.type.Type varType = variable.getType();
-        if (varType.isArrayType()) {
-            varType = arrayTypeToCollectionType(varType.asArrayType());
-        }
-        String varName = removeLastDollars(variable.getNameAsString());
-        return f("%s %s", varType, varName);
-    }
-
-    private ClassOrInterfaceType arrayTypeToCollectionType(ArrayType arrayType) {
-        com.github.javaparser.ast.type.Type componentType = arrayType.getComponentType();
-        ClassOrInterfaceType result = new ClassOrInterfaceType();
-        result.setName(Collection.class.getSimpleName());
-        NodeList<Type> typeArguments = new NodeList<>(componentType);
-        result.setTypeArguments(typeArguments);
-        return result;
+    private void arrayToCollectionMight(VariableDeclarator vd) {
+        vd.getType().ifArrayType(arrayType -> vd
+                .setType(StaticJavaParser.parseType("Collection<" + arrayType.getComponentType() + ">")));
     }
 
 }
