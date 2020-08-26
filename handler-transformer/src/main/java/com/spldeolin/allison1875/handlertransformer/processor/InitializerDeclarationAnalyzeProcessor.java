@@ -95,33 +95,33 @@ public class InitializerDeclarationAnalyzeProcessor {
             }
 
             for (VariableDeclarationExpr vde : BlockStmts.listExpressions(blockStmt, VariableDeclarationExpr.class)) {
-                for (VariableDeclarator vd : vde.getVariables()) {
-                    String variableName = removeLastDollars(vd.getNameAsString());
-                    if (StringUtils.equalsAny(variableName, "dto", "dtos")) {
-                        vd.getInitializer().ifPresent(ir -> {
-                            String rawDtoName = ir.asStringLiteralExpr().getValue();
-                            String typeName = StringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp");
-                            dtoBuilder.typeName(typeName + "Dto");
-                            dtoBuilder.packageName(
-                                    (inReqScope ? conf.getReqDtoPackage() : conf.getRespDtoPackage()) + ".dto");
-                            dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
-                            String asVariableDeclarator;
-                            String dtoName;
-                            if ("dtos".equals(vd.getNameAsString())) {
-                                dtoName = English.plural(rawDtoName);
-                                asVariableDeclarator = "Collection<" + dtoBuilder.typeName() + "> " + dtoName;
-                            } else {
-                                dtoName = rawDtoName;
-                                asVariableDeclarator = dtoBuilder.typeName() + " " + dtoName;
-                            }
-                            dtoBuilder.dtoName(dtoName);
-                            dtoBuilder.asVariableDeclarator(asVariableDeclarator);
-                        });
-                    } else {
-                        String standradVd = standardizeVd(vd);
-                        dtoBuilder.variableDeclarators().add(standradVd);
-                    }
+                VariableDeclarator vd = vde.getVariable(0);
+                String variableName = removeLastDollars(vd.getNameAsString());
+                if (StringUtils.equalsAny(variableName, "dto", "dtos")) {
+                    vd.getInitializer().ifPresent(ir -> {
+                        String rawDtoName = ir.asStringLiteralExpr().getValue();
+                        String typeName = StringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp");
+                        dtoBuilder.typeName(typeName + "Dto");
+                        dtoBuilder.packageName(
+                                (inReqScope ? conf.getReqDtoPackage() : conf.getRespDtoPackage()) + ".dto");
+                        dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
+                        String asVariableDeclarator;
+                        String dtoName;
+                        if ("dtos".equals(vd.getNameAsString())) {
+                            dtoName = English.plural(rawDtoName);
+                            asVariableDeclarator = "Collection<" + dtoBuilder.typeName() + "> " + dtoName;
+                        } else {
+                            dtoName = rawDtoName;
+                            asVariableDeclarator = dtoBuilder.typeName() + " " + dtoName;
+                        }
+                        dtoBuilder.dtoName(dtoName);
+                        dtoBuilder.asVariableDeclarator(asVariableDeclarator);
+                    });
+                } else {
+                    String standradVd = standardizeVd(vd);
+                    dtoBuilder.variableDeclarators().add(standradVd);
                 }
+
             }
 
             metaInfo.getImports().add(dtoBuilder.typeQualifier());
