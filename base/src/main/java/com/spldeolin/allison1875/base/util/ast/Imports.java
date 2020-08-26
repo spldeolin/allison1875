@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.google.common.collect.ImmutableList;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 
@@ -18,6 +19,11 @@ public class Imports {
         } else {
             ensureImported(node, importName, false, false);
         }
+    }
+
+    public static ImmutableList<ImportDeclaration> listImports(Node node) {
+        CompilationUnit cu = node.findCompilationUnit().orElseThrow(CuAbsentException::new);
+        return ImmutableList.copyOf(cu.getImports());
     }
 
     public static void ensureImported(Node node, String importName, boolean isStatic, boolean isAsterisk) {

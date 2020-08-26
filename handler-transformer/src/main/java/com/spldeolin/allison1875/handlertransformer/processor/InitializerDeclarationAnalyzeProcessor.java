@@ -24,10 +24,12 @@ import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
 import com.spldeolin.allison1875.handlertransformer.meta.HandlerMetaInfo;
 import com.spldeolin.allison1875.handlertransformer.util.BlockStmts;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-06-27
  */
+@Slf4j
 public class InitializerDeclarationAnalyzeProcessor {
 
 
@@ -123,8 +125,9 @@ public class InitializerDeclarationAnalyzeProcessor {
             }
 
             // 大括号内没有指定任何dto和dtos时
-            if (dtoBuilder.asVariableDeclarator() == null) {
-                dtoBuilder.asVariableDeclarator(Pair.of(null, dtoBuilder.typeName() + " " + dtoBuilder.dtoName()));
+            if (dtoBuilder.typeName() == null) {
+                log.warn("{}中未指定dto或者dtos属性", blockStmt.toString().replaceAll("\\r?\\n", " "));
+                break;
             }
 
             metaInfo.getImports().add(dtoBuilder.typeQualifier());

@@ -45,7 +45,7 @@ public class MainProcessor {
                 InitializerDeclarationAnalyzeProcessor analyzeProcessor = new InitializerDeclarationAnalyzeProcessor(
                         controllerAndInit.getLeft());
                 HandlerMetaInfo metaInfo = analyzeProcessor.analyze(controllerAndInit.getRight());
-                cus.addAll(generateDtos(cu, metaInfo.getDtos()));
+                cus.addAll(generateDtos(cu, metaInfo.getDtos(), Imports.listImports(controllerAndInit.getLeft())));
 
                 GenerateServicesProc generateServicesProc = new GenerateServicesProc(metaInfo).process();
                 cus.add(generateServicesProc.getServiceCu());
@@ -82,8 +82,7 @@ public class MainProcessor {
         handler.setType(
                 String.format(HandlerTransformerConfig.getInstance().getResult(), metaInfo.getRespBody().typeName()));
         handler.setName(handlerName);
-        Parameter requestBody = StaticJavaParser
-                .parseParameter(metaInfo.getReqBody().asVariableDeclarator().getRight());
+        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().typeName() + " req");
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
         handler.addParameter(requestBody);
@@ -97,13 +96,15 @@ public class MainProcessor {
         return controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
     }
 
-    private Collection<CompilationUnit> generateDtos(CompilationUnit cu, Collection<DtoMetaInfo> dtos) {
+    private Collection<CompilationUnit> generateDtos(CompilationUnit cu, Collection<DtoMetaInfo> dtos,
+            Collection<ImportDeclaration> importsFromController) {
         Collection<CompilationUnit> result = Lists.newArrayList();
         Path sourceRoot = Locations.getStorage(cu).getSourceRoot();
         for (DtoMetaInfo dto : dtos) {
-            Collection<ImportDeclaration> imports = Lists.newArrayList(new ImportDeclaration("java.util", false, true),
-                    new ImportDeclaration("lombok.Data", false, false),
-                    new ImportDeclaration("lombok.experimental.Accessors", false, false));
+
+            Collection<ImportDeclaration> imports = Lists.newArrayList(importsFromController);
+            imports.add(new ImportDeclaration("lombok.Data", false, false));
+            imports.add(new ImportDeclaration("lombok.experimental.Accessors", false, false));
             for (String anImport : dto.imports()) {
                 imports.add(new ImportDeclaration(anImport, false, false));
             }
