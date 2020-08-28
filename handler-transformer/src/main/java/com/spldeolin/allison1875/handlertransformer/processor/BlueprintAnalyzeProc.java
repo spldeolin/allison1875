@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
@@ -143,19 +144,28 @@ public class BlueprintAnalyzeProc {
             dtos.put(blockStmt, dtoBuilder);
         }
 
-        Collection<DtoMetaInfo> dtoMetas = Lists.newArrayList();
+        // 把子BlockStmt的asVariableDeclarator添加到父BlockStmt的variableDeclarators中
+        // 把子BlockStmt的typeQualifier添加到父BlockStmt的imports中
         for (Entry<BlockStmt, DtoMetaInfo.DtoMetaInfoBuilder> entry : dtos.entrySet()) {
             BlockStmt blockStmt = entry.getKey();
             DtoMetaInfo dtoMeta = entry.getValue().build();
-            dtoMetas.add(dtoMeta);
 
             BlockStmt parent = (BlockStmt) blockStmt.getParentNode().orElseThrow(ParentAbsentException::new);
-            DtoMetaInfo parentMeta = dtos.get(parent).build();
-            parentMeta.getImports().add(new ImportDeclaration(dtoMeta.getTypeQualifier(), false, false));
-            parentMeta.getVariableDeclarators().add(dtoMeta.getAsVariableDeclarator());
+            DtoMetaInfo.DtoMetaInfoBuilder parentMetaBuilder = dtos.get(parent);
+            DtoMetaInfo build = parentMetaBuilder.build();
+
+            List<ImportDeclaration> importDeclarations = Lists.newArrayList(build.getImports());
+            importDeclarations.add(new ImportDeclaration(dtoMeta.getTypeQualifier(), false, false));
+            parentMetaBuilder.imports(ImmutableList.copyOf(importDeclarations));
+
+            List<Pair<String, String>> pairs = Lists.newArrayList(build.getVariableDeclarators());
+            pairs.add(dtoMeta.getAsVariableDeclarator());
+            parentMetaBuilder.variableDeclarators(ImmutableList.copyOf(pairs));
         }
 
-        builder.dtos(ImmutableList.copyOf(dtoMetas));
+        builder.dtos(ImmutableList.copyOf(dtos.values().stream().map(DtoMetaInfo.DtoMetaInfoBuilder::build)
+                .collect(Collectors.toList())));
+
         metaInfo = builder.build();
         return this;
     }
