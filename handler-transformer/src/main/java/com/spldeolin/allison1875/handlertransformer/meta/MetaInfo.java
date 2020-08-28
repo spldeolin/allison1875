@@ -1,39 +1,47 @@
 package com.spldeolin.allison1875.handlertransformer.meta;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.spldeolin.allison1875.base.util.StringUtils;
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-26
  */
 @Data
-@Accessors(chain = true)
+@Builder
+@Log4j2
 public class MetaInfo {
 
-    private Path sourceRoot;
+    private final String location;
 
-    private String controllerPackage;
+    private final Path sourceRoot;
 
-    private ClassOrInterfaceDeclaration controller;
+    private final ClassOrInterfaceDeclaration controller;
 
-    private String handlerName = "";
+    private final String handlerName;
 
-    private String handlerDescription = "";
+    private final String handlerDescription;
 
-    private Collection<String> imports = Lists.newArrayList();
+    private final DtoMetaInfo reqBody;
 
-    private DtoMetaInfo reqBody;
+    private final DtoMetaInfo respBody;
 
-    private DtoMetaInfo respBody;
+    private final ImmutableList<DtoMetaInfo> dtos;
 
-    private String autowiredServiceField;
-
-    private String callServiceExpr;
-
-    private Collection<DtoMetaInfo> dtos = Lists.newArrayList();
+    public boolean isLack() {
+        if (StringUtils.isBlank(handlerName)) {
+            log.warn("Blueprint[{}]缺少hanlderName", location);
+            return true;
+        }
+        if (StringUtils.isBlank(handlerDescription)) {
+            log.warn("Blueprint[{}]缺少handlerDescription", location);
+            return true;
+        }
+        return false;
+    }
 
 }

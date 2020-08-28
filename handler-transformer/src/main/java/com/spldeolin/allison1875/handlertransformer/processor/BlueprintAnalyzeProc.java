@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -14,9 +13,8 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.exception.PackageAbsentException;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -46,10 +44,10 @@ public class BlueprintAnalyzeProc {
     }
 
     BlueprintAnalyzeProc process() {
-        metaInfo = new MetaInfo();
-        metaInfo.setController(controller);
-        CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        metaInfo.setSourceRoot(Locations.getStorage(controller).getSourceRoot());
+        MetaInfo.MetaInfoBuilder builder = MetaInfo.builder();
+        builder.location(Locations.getRelativePathWithLineNo(blueprint));
+        builder.controller(controller);
+        builder.sourceRoot(Locations.getStorage(controller).getSourceRoot());
 
         for (Statement stmtInInit : blueprint.getBody().getStatements()) {
             stmtInInit.ifExpressionStmt(exprInInit -> exprInInit.getExpression().ifVariableDeclarationExpr(vde -> {
@@ -58,10 +56,10 @@ public class BlueprintAnalyzeProc {
                         String value = i.asStringLiteralExpr().getValue();
                         switch (vd.getNameAsString()) {
                             case "handler":
-                                metaInfo.setHandlerName(StringUtils.lowerFirstLetter(value));
+                                builder.handlerName(StringUtils.lowerFirstLetter(value));
                                 break;
                             case "desc":
-                                metaInfo.setHandlerDescription(value);
+                                builder.handlerDescription(value);
                                 break;
                         }
                     });
@@ -69,33 +67,29 @@ public class BlueprintAnalyzeProc {
             }));
         }
 
-        String controllerPackage = cu.getPackageDeclaration().orElseThrow(PackageAbsentException::new)
-                .getNameAsString();
-        metaInfo.setControllerPackage(controllerPackage);
-
         // dto meta
         Map<BlockStmt, DtoMetaInfo> dtos = Maps.newLinkedHashMap();
         List<BlockStmt> allBlockStmt = blueprint.findAll(BlockStmt.class);
         allBlockStmt.remove(0);
         BlockStmt reqBlockStmt = null;
         for (BlockStmt blockStmt : allBlockStmt) {
-            DtoMetaInfo dtoBuilder = new DtoMetaInfo();
+            DtoMetaInfo dtoMetaInfo = new DtoMetaInfo();
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
 
             HandlerTransformerConfig conf = HandlerTransformerConfig.getInstance();
             if (isReqOrRespLevel(blockStmt, blueprint) && metaInfo.getReqBody() != null) {
-                dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto");
-                dtoBuilder.packageName(conf.getRespDtoPackage());
-                dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
-                dtoBuilder.dtoName("resp");
-                metaInfo.setRespBody(dtoBuilder);
+                dtoMetaInfo.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto");
+                dtoMetaInfo.packageName(conf.getRespDtoPackage());
+                dtoMetaInfo.typeQualifier(dtoMetaInfo.packageName() + "." + dtoMetaInfo.typeName());
+                dtoMetaInfo.dtoName("resp");
+                builder.respBody(dtoMetaInfo);
             }
             if (isReqOrRespLevel(blockStmt, blueprint) && metaInfo.getReqBody() == null) {
-                dtoBuilder.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto");
-                dtoBuilder.packageName(conf.getReqDtoPackage());
-                dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
-                dtoBuilder.dtoName("req");
-                metaInfo.setReqBody(dtoBuilder);
+                dtoMetaInfo.typeName(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto");
+                dtoMetaInfo.packageName(conf.getReqDtoPackage());
+                dtoMetaInfo.typeQualifier(dtoMetaInfo.packageName() + "." + dtoMetaInfo.typeName());
+                dtoMetaInfo.dtoName("req");
+                builder.reqBody(dtoMetaInfo);
                 reqBlockStmt = blockStmt;
             }
 
@@ -107,44 +101,46 @@ public class BlueprintAnalyzeProc {
                     vd.getInitializer().ifPresent(ir -> {
                         String rawDtoName = ir.asStringLiteralExpr().getValue();
                         String typeName = StringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp");
-                        dtoBuilder.typeName(typeName + "Dto");
-                        dtoBuilder.packageName(
+                        dtoMetaInfo.typeName(typeName + "Dto");
+                        dtoMetaInfo.packageName(
                                 (inReqScope ? conf.getReqDtoPackage() : conf.getRespDtoPackage()) + ".dto");
-                        dtoBuilder.typeQualifier(dtoBuilder.packageName() + "." + dtoBuilder.typeName());
+                        dtoMetaInfo.typeQualifier(dtoMetaInfo.packageName() + "." + dtoMetaInfo.typeName());
                         String asVariableDeclarator;
                         String dtoName;
                         if ("dtos".equals(vd.getNameAsString())) {
                             dtoName = English.plural(rawDtoName);
-                            asVariableDeclarator = "Collection<" + dtoBuilder.typeName() + "> " + dtoName;
+                            asVariableDeclarator = "Collection<" + dtoMetaInfo.typeName() + "> " + dtoName;
                         } else {
                             dtoName = rawDtoName;
-                            asVariableDeclarator = dtoBuilder.typeName() + " " + dtoName;
+                            asVariableDeclarator = dtoMetaInfo.typeName() + " " + dtoName;
                         }
-                        dtoBuilder.dtoName(dtoName);
-                        dtoBuilder.asVariableDeclarator(Pair.of(lineComment, asVariableDeclarator));
+                        dtoMetaInfo.dtoName(dtoName);
+                        dtoMetaInfo.asVariableDeclarator(Pair.of(lineComment, asVariableDeclarator));
                     });
                 } else {
                     arrayToCollectionMight(vd);
-                    dtoBuilder.variableDeclarators().add(Pair.of(lineComment, vde.toString()));
+                    dtoMetaInfo.variableDeclarators().add(Pair.of(lineComment, vde.toString()));
                 }
             }
 
             // 大括号内没有指定任何dto和dtos时
-            if (dtoBuilder.typeName() == null) {
+            if (dtoMetaInfo.typeName() == null) {
                 log.warn("{}中未指定dto或者dtos属性", blockStmt.toString().replaceAll("\\r?\\n", " "));
                 break;
             }
 
-            metaInfo.getImports().add(dtoBuilder.typeQualifier());
-            dtos.put(blockStmt, dtoBuilder);
+            dtos.put(blockStmt, dtoMetaInfo);
         }
-        metaInfo.setDtos(dtos.values());
+        builder.dtos(ImmutableList.copyOf(dtos.values()));
+
         dtos.forEach((blockStmt, dtoBuilder) -> blockStmt.getParentNode().filter(dtos::containsKey)
                 .ifPresent(parentBlock -> {
                     DtoMetaInfo parentMeta = dtos.get(parentBlock);
                     parentMeta.variableDeclarators().add(dtoBuilder.asVariableDeclarator());
                     parentMeta.imports().add(dtoBuilder.typeQualifier());
                 }));
+
+        metaInfo = builder.build();
         return this;
     }
 

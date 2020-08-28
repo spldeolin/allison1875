@@ -21,11 +21,10 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
 import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
+import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
 import lombok.experimental.Accessors;
 
 /**
@@ -47,7 +46,11 @@ public class MainProc {
                 BlueprintAnalyzeProc blueprintAnalyzeProc = new BlueprintAnalyzeProc(controller, blueprint).process();
                 MetaInfo metaInfo = blueprintAnalyzeProc.getMetaInfo();
 
-                cus.addAll(generateDtos(cu, metaInfo.getDtos(), Imports.listImports(controller)));
+                if (metaInfo.isLack()) {
+                    continue;
+                }
+
+                cus.addAll(generateDtos(metaInfo.getSourceRoot(), metaInfo.getDtos(), Imports.listImports(controller)));
                 GenerateServicesProc generateServicesProc = new GenerateServicesProc(metaInfo).process();
                 cus.add(generateServicesProc.getServiceCu());
                 cus.add(generateServicesProc.getServiceImplCu());
@@ -97,10 +100,11 @@ public class MainProc {
         return controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
     }
 
-    private Collection<CompilationUnit> generateDtos(CompilationUnit cu, Collection<DtoMetaInfo> dtos,
+    private Collection<CompilationUnit> generateDtos(Path sourceRoot, Collection<DtoMetaInfo> dtos,
             Collection<ImportDeclaration> importsFromController) {
         Collection<CompilationUnit> result = Lists.newArrayList();
-        Path sourceRoot = Locations.getStorage(cu).getSourceRoot();
+
+
         for (DtoMetaInfo dto : dtos) {
 
             Collection<ImportDeclaration> imports = Lists.newArrayList(importsFromController);
