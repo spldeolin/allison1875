@@ -19,6 +19,8 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.spldeolin.allison1875.base.json.DeserializeIgnoreNullElementModule;
+import com.spldeolin.allison1875.base.json.StringTrimModule;
 import com.spldeolin.allison1875.base.util.exception.JsonException;
 import lombok.extern.log4j.Log4j2;
 
@@ -41,6 +43,12 @@ public class JsonUtils {
     }
 
     public static ObjectMapper initObjectMapper(ObjectMapper om) {
+        // 反序列化时，忽略Collection中为null的元素
+        om.registerModule(new DeserializeIgnoreNullElementModule());
+
+        // 反序列化时，为每个String进行trim()
+        om.registerModule(new StringTrimModule());
+
         // Java8时间类型的全局格式
         om.registerModule(timeModule());
 

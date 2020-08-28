@@ -9,12 +9,10 @@ import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-06-22
  */
-@Accessors(chain = true)
 public class MainProc {
 
     public void process() {
