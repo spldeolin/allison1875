@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.meta;
 
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,7 +16,7 @@ public class DtoMetaInfo {
 
     private String packageName;
 
-    private Collection<String> imports = Lists.newArrayList();
+    private Collection<ImportDeclaration> imports = Lists.newArrayList();
 
     private String typeQualifier;
 

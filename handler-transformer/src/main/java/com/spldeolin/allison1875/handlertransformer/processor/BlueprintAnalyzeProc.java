@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -137,7 +138,7 @@ public class BlueprintAnalyzeProc {
                 .ifPresent(parentBlock -> {
                     DtoMetaInfo parentMeta = dtos.get(parentBlock);
                     parentMeta.variableDeclarators().add(dtoBuilder.asVariableDeclarator());
-                    parentMeta.imports().add(dtoBuilder.typeQualifier());
+                    parentMeta.imports().add(new ImportDeclaration(dtoBuilder.typeQualifier(), false, false));
                 }));
 
         metaInfo = builder.build();

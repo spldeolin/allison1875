@@ -23,8 +23,8 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
 import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
+import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
 import lombok.experimental.Accessors;
 
 /**
@@ -50,7 +50,7 @@ public class MainProc {
                     continue;
                 }
 
-                cus.addAll(generateDtos(metaInfo.getSourceRoot(), metaInfo.getDtos(), Imports.listImports(controller)));
+                cus.addAll(generateDtos(metaInfo.getSourceRoot(), metaInfo.getDtos()));
                 GenerateServicesProc generateServicesProc = new GenerateServicesProc(metaInfo).process();
                 cus.add(generateServicesProc.getServiceCu());
                 cus.add(generateServicesProc.getServiceImplCu());
@@ -100,19 +100,14 @@ public class MainProc {
         return controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
     }
 
-    private Collection<CompilationUnit> generateDtos(Path sourceRoot, Collection<DtoMetaInfo> dtos,
-            Collection<ImportDeclaration> importsFromController) {
+    private Collection<CompilationUnit> generateDtos(Path sourceRoot, Collection<DtoMetaInfo> dtos) {
         Collection<CompilationUnit> result = Lists.newArrayList();
 
-
         for (DtoMetaInfo dto : dtos) {
-
-            Collection<ImportDeclaration> imports = Lists.newArrayList(importsFromController);
+            Collection<ImportDeclaration> imports = dto.imports();
             imports.add(new ImportDeclaration("lombok.Data", false, false));
             imports.add(new ImportDeclaration("lombok.experimental.Accessors", false, false));
-            for (String anImport : dto.imports()) {
-                imports.add(new ImportDeclaration(anImport, false, false));
-            }
+
             CuCreator cuCreator = new CuCreator(sourceRoot, dto.packageName(), imports, () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Data"))
