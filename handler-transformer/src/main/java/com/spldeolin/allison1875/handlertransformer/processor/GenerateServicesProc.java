@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import lombok.Getter;
 
 /**
@@ -37,14 +37,14 @@ public class GenerateServicesProc {
     GenerateServicesProc process() {
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
-        absMethod.setType(metaInfo.getRespBody().typeName());
+        absMethod.setType(metaInfo.getRespBody().getTypeName());
         absMethod.setName(metaInfo.getHandlerName());
-        absMethod.addParameter(StaticJavaParser.parseType(metaInfo.getReqBody().typeName()), "req");
+        absMethod.addParameter(StaticJavaParser.parseType(metaInfo.getReqBody().getTypeName()), "req");
         MethodDeclaration method = absMethod.clone();
 
         List<String> imports = Lists.newArrayList();
-        imports.add(metaInfo.getReqBody().typeQualifier());
-        imports.add(metaInfo.getRespBody().typeQualifier());
+        imports.add(metaInfo.getReqBody().getTypeQualifier());
+        imports.add(metaInfo.getRespBody().getTypeQualifier());
         CuCreator serviceCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServicePackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();

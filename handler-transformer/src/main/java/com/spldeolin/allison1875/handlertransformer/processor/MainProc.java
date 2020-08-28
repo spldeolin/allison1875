@@ -23,8 +23,8 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
-import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import lombok.experimental.Accessors;
 
 /**
@@ -63,8 +63,8 @@ public class MainProc {
 
     private CompilationUnit generateHandler(MetaInfo metaInfo, String serviceQualifier) {
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
-        Imports.ensureImported(controller, metaInfo.getReqBody().typeQualifier());
-        Imports.ensureImported(controller, metaInfo.getRespBody().typeQualifier());
+        Imports.ensureImported(controller, metaInfo.getReqBody().getTypeQualifier());
+        Imports.ensureImported(controller, metaInfo.getRespBody().getTypeQualifier());
         Imports.ensureImported(controller, serviceQualifier);
         for (String controllerImport : HandlerTransformerConfig.getInstance().getControllerImports()) {
             Imports.ensureImported(controller, controllerImport);
@@ -83,10 +83,10 @@ public class MainProc {
             handler.addAnnotation(StaticJavaParser.parseAnnotation("@" + handlerAnnotation));
         }
         handler.setPublic(true);
-        handler.setType(
-                String.format(HandlerTransformerConfig.getInstance().getResult(), metaInfo.getRespBody().typeName()));
+        handler.setType(String.format(HandlerTransformerConfig.getInstance().getResult(),
+                metaInfo.getRespBody().getTypeName()));
         handler.setName(handlerName);
-        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().typeName() + " req");
+        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().getTypeName() + " req");
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
         requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
         handler.addParameter(requestBody);
@@ -104,16 +104,16 @@ public class MainProc {
         Collection<CompilationUnit> result = Lists.newArrayList();
 
         for (DtoMetaInfo dto : dtos) {
-            Collection<ImportDeclaration> imports = dto.imports();
+            Collection<ImportDeclaration> imports = dto.getImports();
             imports.add(new ImportDeclaration("lombok.Data", false, false));
             imports.add(new ImportDeclaration("lombok.experimental.Accessors", false, false));
 
-            CuCreator cuCreator = new CuCreator(sourceRoot, dto.packageName(), imports, () -> {
+            CuCreator cuCreator = new CuCreator(sourceRoot, dto.getPackageName(), imports, () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Data"))
                         .addAnnotation(StaticJavaParser.parseAnnotation("@Accessors(chain = true)"));
-                coid.setPublic(true).setName(dto.typeName());
-                for (Pair<String, String> pair : dto.variableDeclarators()) {
+                coid.setPublic(true).setName(dto.getTypeName());
+                for (Pair<String, String> pair : dto.getVariableDeclarators()) {
                     FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(pair.getRight() + ";")
                             .asFieldDeclaration();
                     field.setPrivate(true);

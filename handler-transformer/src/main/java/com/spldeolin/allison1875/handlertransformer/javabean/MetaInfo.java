@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.meta;
+package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.nio.file.Path;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
