@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-27
  */
 @Log4j2
-public class BlueprintCollectProc {
+class BlueprintCollectProc {
 
     private final CompilationUnit cu;
 

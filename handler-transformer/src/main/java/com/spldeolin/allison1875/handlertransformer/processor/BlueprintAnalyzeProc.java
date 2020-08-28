@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2020-06-27
  */
 @Slf4j
-public class BlueprintAnalyzeProc {
+class BlueprintAnalyzeProc {
 
     private final ClassOrInterfaceDeclaration controller;
 

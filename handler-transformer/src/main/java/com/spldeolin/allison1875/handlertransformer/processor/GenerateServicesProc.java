@@ -17,7 +17,7 @@ import lombok.Getter;
 /**
  * @author Deolin 2020-08-26
  */
-public class GenerateServicesProc {
+class GenerateServicesProc {
 
     private final MetaInfo metaInfo;
 
