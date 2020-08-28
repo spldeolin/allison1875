@@ -22,26 +22,31 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.meta.DtoMetaInfo;
-import com.spldeolin.allison1875.handlertransformer.meta.HandlerMetaInfo;
+import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
 import com.spldeolin.allison1875.handlertransformer.util.BlockStmts;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-06-27
  */
 @Slf4j
-public class InitializerDeclarationAnalyzeProcessor {
-
+public class BlueprintAnalyzeProc {
 
     private final ClassOrInterfaceDeclaration controller;
 
-    public InitializerDeclarationAnalyzeProcessor(ClassOrInterfaceDeclaration controller) {
+    private final InitializerDeclaration blueprint;
+
+    @Getter
+    private MetaInfo metaInfo;
+
+    BlueprintAnalyzeProc(ClassOrInterfaceDeclaration controller, InitializerDeclaration blueprint) {
         this.controller = controller;
+        this.blueprint = blueprint;
     }
 
-    HandlerMetaInfo analyze(InitializerDeclaration blueprint) {
-        // metaInfo meta
-        HandlerMetaInfo metaInfo = new HandlerMetaInfo();
+    BlueprintAnalyzeProc process() {
+        metaInfo = new MetaInfo();
         metaInfo.setController(controller);
         CompilationUnit cu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         metaInfo.setSourceRoot(Locations.getStorage(controller).getSourceRoot());
@@ -140,7 +145,7 @@ public class InitializerDeclarationAnalyzeProcessor {
                     parentMeta.variableDeclarators().add(dtoBuilder.asVariableDeclarator());
                     parentMeta.imports().add(dtoBuilder.typeQualifier());
                 }));
-        return metaInfo;
+        return this;
     }
 
     private String getLineComment(VariableDeclarationExpr vde) {

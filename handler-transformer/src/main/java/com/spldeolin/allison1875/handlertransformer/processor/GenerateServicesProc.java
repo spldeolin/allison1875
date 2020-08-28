@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.meta.HandlerMetaInfo;
+import com.spldeolin.allison1875.handlertransformer.meta.MetaInfo;
 import lombok.Getter;
 
 /**
@@ -19,7 +19,7 @@ import lombok.Getter;
  */
 public class GenerateServicesProc {
 
-    private final HandlerMetaInfo metaInfo;
+    private final MetaInfo metaInfo;
 
     @Getter
     private CompilationUnit serviceCu;
@@ -30,11 +30,11 @@ public class GenerateServicesProc {
     @Getter
     private String serviceQualifier;
 
-    public GenerateServicesProc(HandlerMetaInfo metaInfo) {
+    GenerateServicesProc(MetaInfo metaInfo) {
         this.metaInfo = metaInfo;
     }
 
-    public GenerateServicesProc process() {
+    GenerateServicesProc process() {
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
         absMethod.setType(metaInfo.getRespBody().typeName());

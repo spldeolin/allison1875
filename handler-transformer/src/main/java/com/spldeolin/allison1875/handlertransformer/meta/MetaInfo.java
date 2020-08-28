@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class HandlerMetaInfo {
+public class MetaInfo {
 
     private Path sourceRoot;
 
