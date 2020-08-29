@@ -33,9 +33,10 @@ class GenerateDtosProc {
     GenerateDtosProc process() {
         dtoCus = Lists.newArrayList();
         for (DtoMetaInfo dtoMetaInfo : dtoMetaInfos) {
-            Collection<ImportDeclaration> imports = dtoMetaInfo.getImports();
+            Collection<ImportDeclaration> imports = Lists.newArrayList(dtoMetaInfo.getImports());
             imports.add(new ImportDeclaration("lombok.Data", false, false));
             imports.add(new ImportDeclaration("lombok.experimental.Accessors", false, false));
+            imports.add(new ImportDeclaration("java.util.Collection", false, false));
 
             CuCreator cuCreator = new CuCreator(sourceRoot, dtoMetaInfo.getPackageName(), imports, () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();

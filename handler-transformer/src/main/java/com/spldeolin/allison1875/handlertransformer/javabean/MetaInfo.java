@@ -34,7 +34,7 @@ public class MetaInfo {
 
     public boolean isLack() {
         if (StringUtils.isBlank(handlerName)) {
-            log.warn("Blueprint[{}]缺少hanlderName", location);
+            log.warn("Blueprint[{}]缺少handlerName", location);
             return true;
         }
         if (StringUtils.isBlank(handlerDescription)) {

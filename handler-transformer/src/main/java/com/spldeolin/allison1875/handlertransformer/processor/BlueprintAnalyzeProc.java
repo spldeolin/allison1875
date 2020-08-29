@@ -54,8 +54,8 @@ class BlueprintAnalyzeProc {
         builder.controller(controller);
         builder.sourceRoot(Locations.getStorage(controller).getSourceRoot());
 
-        for (Statement stmtInInit : blueprint.getBody().getStatements()) {
-            stmtInInit.ifExpressionStmt(exprInInit -> exprInInit.getExpression().ifVariableDeclarationExpr(vde -> {
+        for (Statement stmtInBlueprint : blueprint.getBody().getStatements()) {
+            stmtInBlueprint.ifExpressionStmt(exprInInit -> exprInInit.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     vd.getInitializer().ifPresent(i -> {
                         String value = i.asStringLiteralExpr().getValue();
@@ -72,6 +72,12 @@ class BlueprintAnalyzeProc {
             }));
         }
 
+        String handlerName = builder.build().getHandlerName();
+        if (handlerName == null) {
+            metaInfo = builder.build();
+            return this;
+        }
+
         // dto meta
         Map<BlockStmt, DtoMetaInfo.DtoMetaInfoBuilder> dtos = Maps.newLinkedHashMap();
         List<BlockStmt> allBlockStmt = blueprint.findAll(BlockStmt.class);
@@ -84,7 +90,7 @@ class BlueprintAnalyzeProc {
 
             HandlerTransformerConfig conf = HandlerTransformerConfig.getInstance();
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody != null) {
-                String typeName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto";
+                String typeName = StringUtils.upperFirstLetter(handlerName) + "RespDto";
                 String respPackageName = conf.getRespDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(respPackageName);
@@ -93,7 +99,7 @@ class BlueprintAnalyzeProc {
                 builder.respBody(dtoBuilder.build());
             }
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody == null) {
-                String typeName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto";
+                String typeName = StringUtils.upperFirstLetter(handlerName) + "ReqDto";
                 String packageName = conf.getReqDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(packageName);
@@ -142,6 +148,7 @@ class BlueprintAnalyzeProc {
                 log.warn("存在未指定dto或者dtos属性的区域，忽略这个blueprint[{}]", builder.build().getLocation());
                 break;
             }
+            dtoBuilder.imports(ImmutableList.of());
 
             dtos.put(blockStmt, dtoBuilder);
         }
@@ -154,6 +161,11 @@ class BlueprintAnalyzeProc {
 
             BlockStmt parent = (BlockStmt) blockStmt.getParentNode().orElseThrow(ParentAbsentException::new);
             DtoMetaInfo.DtoMetaInfoBuilder parentMetaBuilder = dtos.get(parent);
+            if (parentMetaBuilder == null) {
+                // parent是blueprint时
+                continue;
+            }
+
             DtoMetaInfo build = parentMetaBuilder.build();
 
             List<ImportDeclaration> importDeclarations = Lists.newArrayList(build.getImports());

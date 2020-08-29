@@ -36,7 +36,8 @@ public class HandlerTransformer implements Allison1875ModuleMainProc {
                     continue;
                 }
 
-                GenerateDtosProc generateDtosProc = new GenerateDtosProc(metaInfo.getSourceRoot(), metaInfo.getDtos());
+                GenerateDtosProc generateDtosProc = new GenerateDtosProc(metaInfo.getSourceRoot(), metaInfo.getDtos())
+                        .process();
                 cus.addAll(generateDtosProc.getDtoCus());
 
                 GenerateServicesProc generateServicesProc = new GenerateServicesProc(metaInfo).process();
@@ -44,8 +45,8 @@ public class HandlerTransformer implements Allison1875ModuleMainProc {
                 cus.add(generateServicesProc.getServiceImplCu());
 
                 GenerateHandlerProc generateHandlerProc = new GenerateHandlerProc(metaInfo,
-                        generateServicesProc.getServiceQualifier());
-                cus.add(generateHandlerProc.process().getControllerCu());
+                        generateServicesProc.getServiceQualifier()).process();
+                cus.add(generateHandlerProc.getControllerCu());
             }
         }
 
