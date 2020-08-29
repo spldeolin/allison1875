@@ -54,7 +54,7 @@ public class EntityProc {
     }
 
     public EntityProc process() {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstace();
+        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
         entityPath = CodeGenerationUtils
                 .fileInPackageAbsolutePath(pathProc.getSourceRootPath(), conf.getEntityPackage(),
                         persistence.getEntityName() + ".java");

@@ -5,7 +5,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.Node;
 import com.google.common.base.Joiner;
-import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
@@ -25,7 +25,7 @@ public class Locations {
      * @return e.g.: project-name/module-name/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
      */
     public static Path getRelativePath(Node node) {
-        return BaseConfig.getInstance().getCommonPart().relativize(getAbsolutePath(node)).normalize();
+        return AstForestContext.getCurrent().getCommonPathPart().relativize(getAbsolutePath(node)).normalize();
     }
 
     /**

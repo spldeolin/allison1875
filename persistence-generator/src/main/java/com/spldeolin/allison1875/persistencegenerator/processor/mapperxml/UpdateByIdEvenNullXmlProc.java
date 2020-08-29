@@ -36,7 +36,7 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
     }
 
     public UpdateByIdEvenNullXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableUpdateByIdEvenNull()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableUpdateByIdEvenNull()) {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {
@@ -56,7 +56,7 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
             stmt.addText("WHERE");
             newLineWithIndent(stmt);
             if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
                 newLineWithIndent(stmt);
                 stmt.addText("AND ");
             }

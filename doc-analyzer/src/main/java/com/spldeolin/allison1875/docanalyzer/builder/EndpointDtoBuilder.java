@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -47,7 +48,12 @@ public class EndpointDtoBuilder {
             if (combinedVerbs.contains(RequestMethod.POST)) {
                 dto.setHttpMethod("post");
             } else {
-                dto.setHttpMethod(Iterables.getFirst(combinedUrls, null));
+                RequestMethod first = Iterables.getFirst(combinedVerbs, null);
+                if (first != null) {
+                    dto.setHttpMethod(StringUtils.lowerCase(first.toString()));
+                } else {
+                    dto.setHttpMethod("");
+                }
             }
             dto.setIsDeprecated(isDeprecated);
             dto.setRequestBodyJsonSchema(requestBodyJsonSchema);

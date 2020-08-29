@@ -77,12 +77,13 @@ class BlueprintAnalyzeProc {
         List<BlockStmt> allBlockStmt = blueprint.findAll(BlockStmt.class);
         allBlockStmt.remove(0);
         BlockStmt reqBlockStmt = null;
+        DtoMetaInfo reqBody = null;
         for (BlockStmt blockStmt : allBlockStmt) {
             DtoMetaInfo.DtoMetaInfoBuilder dtoBuilder = DtoMetaInfo.builder();
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
 
             HandlerTransformerConfig conf = HandlerTransformerConfig.getInstance();
-            if (isReqOrRespLevel(blockStmt, blueprint) && metaInfo.getReqBody() != null) {
+            if (isReqOrRespLevel(blockStmt, blueprint) && reqBody != null) {
                 String typeName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "RespDto";
                 String respPackageName = conf.getRespDtoPackage();
                 dtoBuilder.typeName(typeName);
@@ -91,14 +92,15 @@ class BlueprintAnalyzeProc {
                 dtoBuilder.dtoName("resp");
                 builder.respBody(dtoBuilder.build());
             }
-            if (isReqOrRespLevel(blockStmt, blueprint) && metaInfo.getReqBody() == null) {
+            if (isReqOrRespLevel(blockStmt, blueprint) && reqBody == null) {
                 String typeName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "ReqDto";
                 String packageName = conf.getReqDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(packageName);
                 dtoBuilder.typeQualifier(packageName + "." + typeName);
                 dtoBuilder.dtoName("req");
-                builder.reqBody(dtoBuilder.build());
+                reqBody = dtoBuilder.build();
+                builder.reqBody(reqBody);
                 reqBlockStmt = blockStmt;
             }
 

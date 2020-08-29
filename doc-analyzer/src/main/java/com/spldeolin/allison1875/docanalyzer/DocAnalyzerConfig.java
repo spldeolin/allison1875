@@ -1,7 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer;
 
 
+import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.Configs;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
@@ -20,6 +23,12 @@ public final class DocAnalyzerConfig {
     @Getter
     private static final DocAnalyzerConfig instance = YamlUtils
             .toObjectAndThen("doc-analyzer-config.yml", DocAnalyzerConfig.class, Configs::validate);
+
+    /**
+     * 目标项目handler方法签名所依赖的项目的源码路径
+     */
+    @NotNull
+    private Collection<@NotEmpty String> dependencyProjectPaths = Lists.newArrayList();
 
     /**
      * 根据作者名过滤

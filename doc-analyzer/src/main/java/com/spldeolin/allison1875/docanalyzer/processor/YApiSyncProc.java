@@ -34,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-26
  */
 @Log4j2
-public class YApiSyncProc {
+class YApiSyncProc {
 
     private static final String ALLISON_1875_TAG = "Allison 1875";
 
@@ -57,11 +57,11 @@ public class YApiSyncProc {
         return resp.getData().getId();
     }
 
-    public YApiSyncProc(Collection<EndpointDto> endpoints) {
+    YApiSyncProc(Collection<EndpointDto> endpoints) {
         this.endpoints = endpoints;
     }
 
-    public void process() {
+    void process() {
         Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
         catNames.add("回收站");
         Set<String> yapiCatNames = this.getYapiCatIdsEachName().keySet();
@@ -114,7 +114,7 @@ public class YApiSyncProc {
         return json;
     }
 
-    public Map<String, Long> getYapiCatIdsEachName() {
+    Map<String, Long> getYapiCatIdsEachName() {
         String json = HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId);
         CommonRespDto<List<InterfaceListMenuRespDto>> resp = JsonUtils
                 .toParameterizedObject(json, new TypeReference<CommonRespDto<List<InterfaceListMenuRespDto>>>() {
@@ -128,7 +128,7 @@ public class YApiSyncProc {
         return result;
     }
 
-    public void createYApiCat(Collection<String> catNames) {
+    private void createYApiCat(Collection<String> catNames) {
         for (String catName : catNames) {
             Map<String, String> form = Maps.newHashMap();
             form.put("desc", "");
@@ -140,7 +140,7 @@ public class YApiSyncProc {
 
     }
 
-    public Map<String, JsonNode> listAutoInterfaces() {
+    private Map<String, JsonNode> listAutoInterfaces() {
         JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(
                 HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId));
 
@@ -156,7 +156,7 @@ public class YApiSyncProc {
         return result;
     }
 
-    public void deleteInterface(JsonNode jsonNode, Long recycleBinCatId) {
+    private void deleteInterface(JsonNode jsonNode, Long recycleBinCatId) {
         if (recycleBinCatId.equals(jsonNode.get("catid").asLong())) {
             // 已在"回收站"分类中
             return;
@@ -189,7 +189,7 @@ public class YApiSyncProc {
         log.info(resp);
     }
 
-    public void createYApiInterface(String title, String url, String requestBodyJsonSchema,
+    private void createYApiInterface(String title, String url, String requestBodyJsonSchema,
             String responseBodyJsonSchema, String description, String httpMethod, Long catId) {
         Map<String, Object> form = Maps.newHashMap();
         form.put("title", title);

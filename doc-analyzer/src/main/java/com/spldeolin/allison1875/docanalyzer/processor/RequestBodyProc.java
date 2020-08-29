@@ -22,11 +22,11 @@ class RequestBodyProc {
 
     private final JsonSchemaGenerator jsg;
 
-    public RequestBodyProc(JsonSchemaGenerator jsg) {
+    RequestBodyProc(JsonSchemaGenerator jsg) {
         this.jsg = jsg;
     }
 
-    public JsonSchema analyze(MethodDeclaration handler) {
+    JsonSchema analyze(MethodDeclaration handler) {
         String requestBodyDescribe = null;
         try {
             ResolvedType requestBody = findRequestBody(handler);

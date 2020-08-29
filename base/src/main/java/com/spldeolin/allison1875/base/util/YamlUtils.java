@@ -19,7 +19,7 @@ public class YamlUtils {
     public static <T> T toObject(String yamlPath, Class<T> clazz) {
         InputStream is = ClassLoader.getSystemResourceAsStream(yamlPath);
         if (is == null) {
-            throw new YamlException("资源文件[" + yamlPath + "]不存在");
+            throw new YamlException("配置文件[" + yamlPath + "]不存在");
         }
 
         try {

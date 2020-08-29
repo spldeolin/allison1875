@@ -29,7 +29,7 @@ public class UpdateByIdEvenNullProc extends MapperProc {
     }
 
     public UpdateByIdEvenNullProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableUpdateByIdEvenNull()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableUpdateByIdEvenNull()) {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {

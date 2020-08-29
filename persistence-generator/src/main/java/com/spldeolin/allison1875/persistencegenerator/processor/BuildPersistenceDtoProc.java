@@ -79,8 +79,8 @@ public class BuildPersistenceDtoProc {
     }
 
     private String getDeleteFlagName() {
-        String sql = PersistenceGeneratorConfig.getInstace().getNotDeletedSql();
-        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(PersistenceGeneratorConfig.getInstace().getDeletedSql())) {
+        String sql = PersistenceGeneratorConfig.getInstance().getNotDeletedSql();
+        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(PersistenceGeneratorConfig.getInstance().getDeletedSql())) {
             return null;
         }
         if (!sql.contains("=")) {
@@ -91,7 +91,7 @@ public class BuildPersistenceDtoProc {
     }
 
     private String endWith() {
-        return PersistenceGeneratorConfig.getInstace().getIsEntityEndWithEntity() ? "Entity" : "";
+        return PersistenceGeneratorConfig.getInstance().getIsEntityEndWithEntity() ? "Entity" : "";
     }
 
     private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {

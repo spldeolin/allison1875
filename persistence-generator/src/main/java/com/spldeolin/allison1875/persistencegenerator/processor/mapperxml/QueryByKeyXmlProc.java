@@ -30,7 +30,7 @@ public class QueryByKeyXmlProc extends XmlProc {
     }
 
     public QueryByKeyXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableQueryByKey()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByKey()) {
             return this;
         }
         for (QueryByKeyProc queryByKeyProc : queryByKeyProcs) {
@@ -47,7 +47,7 @@ public class QueryByKeyXmlProc extends XmlProc {
             stmt.addText("WHERE");
             newLineWithIndent(stmt);
             if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
                 newLineWithIndent(stmt);
                 stmt.addText("AND ");
             }

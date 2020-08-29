@@ -1,12 +1,11 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.BaseConfig;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -17,14 +16,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class SourceRootCollector {
 
-    Collection<SourceRoot> collect(Collection<Path> projectPaths) {
-        Collection<SourceRoot> result = Lists.newArrayList();
-        for (Path projectPath : projectPaths) {
-            List<SourceRoot> sourceRoots = new SymbolSolverCollectionStrategy().collect(projectPath).getSourceRoots();
+    Collection<SourceRoot> collect(Collection<String> projectPaths) {
+        List<SourceRoot> result = Lists.newArrayList();
+        for (String projectPath : projectPaths) {
+            List<SourceRoot> sourceRoots = new SymbolSolverCollectionStrategy().collect(Paths.get(projectPath))
+                    .getSourceRoots();
             result.addAll(sourceRoots);
-        }
-        for (SourceRoot sr : result) {
-            log.info("SourceRoot collected. [{}]", BaseConfig.getInstance().getCommonPart().relativize(sr.getRoot()));
         }
         return result;
     }

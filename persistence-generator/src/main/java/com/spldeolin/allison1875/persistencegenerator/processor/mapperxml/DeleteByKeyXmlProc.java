@@ -42,12 +42,12 @@ public class DeleteByKeyXmlProc extends XmlProc {
                 newLineWithIndent(stmt);
                 stmt.addText("UPDATE ").addText(persistence.getTableName());
                 newLineWithIndent(stmt);
-                stmt.addText("SET ").addText(PersistenceGeneratorConfig.getInstace().getDeletedSql());
+                stmt.addText("SET ").addText(PersistenceGeneratorConfig.getInstance().getDeletedSql());
                 newLineWithIndent(stmt);
                 stmt.addText("WHERE");
                 newLineWithIndent(stmt);
                 if (persistence.getIsDeleteFlagExist()) {
-                    stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                    stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
                     newLineWithIndent(stmt);
                     stmt.addText("AND ");
                 }

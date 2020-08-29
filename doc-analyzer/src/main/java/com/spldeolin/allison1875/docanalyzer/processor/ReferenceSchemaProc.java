@@ -11,15 +11,15 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 /**
  * @author Deolin 2020-08-14
  */
-public class ReferenceSchemaProc {
+class ReferenceSchemaProc {
 
     private final JsonSchema rootJsonSchema;
 
-    public ReferenceSchemaProc(JsonSchema rootJsonSchema) {
+    ReferenceSchemaProc(JsonSchema rootJsonSchema) {
         this.rootJsonSchema = rootJsonSchema;
     }
 
-    public void process() {
+    void process() {
         Map<String, String> pathsEachId = Maps.newHashMap();
         Map<JsonSchema, String> paths = Maps.newLinkedHashMap();
         if (rootJsonSchema.isObjectSchema()) {

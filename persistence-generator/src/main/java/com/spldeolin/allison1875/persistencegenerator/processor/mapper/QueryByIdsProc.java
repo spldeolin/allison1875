@@ -39,7 +39,7 @@ public class QueryByIdsProc extends MapperProc {
     }
 
     public QueryByIdsProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableQueryByIds()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByIds()) {
             return this;
         }
         if (persistence.getIdProperties().size() == 1) {

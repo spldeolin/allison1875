@@ -1,12 +1,11 @@
-package com.spldeolin.allison1875.base.collection.vcs;
+package com.spldeolin.allison1875.inspector.vcs;
 
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import com.github.javaparser.ast.Node;
-import com.google.common.collect.Iterables;
-import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
@@ -18,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
 public class StaticVcsContainer {
 
     private static VcsContainer fromConfigPath = new VcsContainer(
-            Paths.get(Iterables.getFirst(BaseConfig.getInstance().getProjectPaths(), null)));
+            Paths.get(InspectorConfig.getInstance().getProjectLocalGitPath()));
 
     public static Path getProjectPath() {
         return fromConfigPath.getProjectPath();

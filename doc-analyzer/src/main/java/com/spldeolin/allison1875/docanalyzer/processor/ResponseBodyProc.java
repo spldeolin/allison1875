@@ -26,13 +26,12 @@ class ResponseBodyProc {
 
     private final ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy;
 
-    public ResponseBodyProc(JsonSchemaGenerator jsg,
-            ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy) {
+    ResponseBodyProc(JsonSchemaGenerator jsg, ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy) {
         this.jsg = jsg;
         this.obtainConcernedResponseBodyStrategy = obtainConcernedResponseBodyStrategy;
     }
 
-    public JsonSchema analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+    JsonSchema analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         String responseBodyDescribe = null;
         try {
             ResolvedType responseBody = findResponseBody(controller, handler);

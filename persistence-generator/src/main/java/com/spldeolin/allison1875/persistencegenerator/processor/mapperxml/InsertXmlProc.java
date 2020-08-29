@@ -33,7 +33,7 @@ public class InsertXmlProc extends XmlProc {
     }
 
     public InsertXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableInsert()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableInsert()) {
             return this;
         }
         Element insertTag = new DefaultElement("insert");

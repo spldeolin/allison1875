@@ -17,11 +17,11 @@ class HandlerIterateProc {
 
     private final Class<?> controllerClass;
 
-    public HandlerIterateProc(Class<?> controllerClass) {
+    HandlerIterateProc(Class<?> controllerClass) {
         this.controllerClass = controllerClass;
     }
 
-    public void iterate(Consumer<Method> eachMethod) {
+    void iterate(Consumer<Method> eachMethod) {
         Arrays.stream(controllerClass.getDeclaredMethods()).filter(this::isHandler).forEach(relectionMethod -> {
             try {
                 eachMethod.accept(relectionMethod);

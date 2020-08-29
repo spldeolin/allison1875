@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.base.collection.ast;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import lombok.extern.log4j.Log4j2;
@@ -15,12 +17,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class AstCursor implements Iterator<CompilationUnit> {
 
+    private final Path commonPathPart;
+
     private final Iterator<SourceRoot> sourceRootItr;
 
     private Iterator<CompilationUnit> cuItr = Collections.emptyIterator();
 
-    AstCursor(Collection<SourceRoot> sourceRoots) {
-        sourceRootItr = sourceRoots.iterator();
+    AstCursor(Path commonPathPart, Collection<Path> sourceRootPaths) {
+        this.commonPathPart = commonPathPart;
+        this.sourceRootItr = sourceRootPaths.stream().map(SourceRoot::new).collect(Collectors.toList()).iterator();
     }
 
     @Override
@@ -37,7 +42,7 @@ class AstCursor implements Iterator<CompilationUnit> {
             }
 
             SourceRoot sourceRoot = sourceRootItr.next();
-            Collection<CompilationUnit> cus = new CompilationUnitCollector().collect(sourceRoot);
+            Collection<CompilationUnit> cus = new CompilationUnitCollector(commonPathPart).collect(sourceRoot);
             cuItr = cus.iterator();
             // 递归的目的是这个sourceRoot可能没源码
             return hasNext();

@@ -45,7 +45,7 @@ public class QueryByKeysProc extends MapperProc {
     }
 
     public QueryByKeysProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableQueryByKeys()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByKeys()) {
             return this;
         }
         methodName = calcMethodName(mapper,

@@ -49,13 +49,13 @@ public class QueryByIdsXmlProc extends XmlProc {
             Element stmt = new DefaultElement("select");
             String methodName = null;
             if (queryByIdsProc != null) {
-                if (PersistenceGeneratorConfig.getInstace().getDisableQueryByIds()) {
+                if (PersistenceGeneratorConfig.getInstance().getDisableQueryByIds()) {
                     return this;
                 }
                 methodName = queryByIdsProc.getMethodName();
             }
             if (queryByIdsEachIdProc != null) {
-                if (PersistenceGeneratorConfig.getInstace().getDisableQueryByIdsEachId()) {
+                if (PersistenceGeneratorConfig.getInstance().getDisableQueryByIdsEachId()) {
                     return this;
                 }
                 methodName = queryByIdsEachIdProc.getMethodName();
@@ -72,7 +72,7 @@ public class QueryByIdsXmlProc extends XmlProc {
             stmt.addText("WHERE");
             newLineWithIndent(stmt);
             if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
                 newLineWithIndent(stmt);
                 stmt.addText("AND ");
             }

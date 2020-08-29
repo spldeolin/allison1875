@@ -29,7 +29,7 @@ public class UpdateByIdProc extends MapperProc {
     }
 
     public UpdateByIdProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableUpdateById()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableUpdateById()) {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {

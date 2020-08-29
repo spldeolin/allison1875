@@ -18,11 +18,11 @@ class ControllerIterateProc {
 
     private final AstForest astForest;
 
-    public ControllerIterateProc(AstForest astForest) {
+    ControllerIterateProc(AstForest astForest) {
         this.astForest = astForest;
     }
 
-    public void iterate(Consumer<ClassOrInterfaceDeclaration> eachCoid) {
+    void iterate(Consumer<ClassOrInterfaceDeclaration> eachCoid) {
         astForest
                 .forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class, this::isController).forEach(controller -> {
                     try {

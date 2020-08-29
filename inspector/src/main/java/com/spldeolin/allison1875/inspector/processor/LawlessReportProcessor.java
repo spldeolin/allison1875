@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.inspector.processor;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +29,7 @@ public class LawlessReportProcessor {
         String csvContent = CsvUtils.writeCsv(lawlesses, LawlessDto.class);
 
         String fileName = "lawless-" + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd");
-        Path outputDirectory = InspectorConfig.getInstance().getLawlessCsvOutputDirectoryPath();
+        Path outputDirectory = Paths.get(InspectorConfig.getInstance().getLawlessCsvOutputDirectoryPath());
         Path csvFile = outputDirectory.resolve(fileName + ".csv");
         Path csvGbkFile = outputDirectory.resolve(fileName + "-gbk.csv");
         try {

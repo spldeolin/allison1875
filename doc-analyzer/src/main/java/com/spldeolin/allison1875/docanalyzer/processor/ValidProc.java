@@ -32,7 +32,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-09
  */
 @Log4j2
-public class ValidProc {
+class ValidProc {
 
     private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
 
@@ -41,13 +41,12 @@ public class ValidProc {
     @Getter
     private Collection<ValidatorDto> valids;
 
-    public ValidProc(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
-            AnnotatedElement annotatedElement) {
+    ValidProc(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy, AnnotatedElement annotatedElement) {
         this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
         this.annotatedElement = annotatedElement;
     }
 
-    public ValidProc process() {
+    ValidProc process() {
         valids = Lists.newArrayList();
         NotNull notNull = find(annotatedElement, NotNull.class);
         if (notNull != null) {

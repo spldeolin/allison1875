@@ -6,19 +6,23 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.common.collect.Sets;
+import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 
 /**
  * @author Deolin 2020-06-22
  */
-public class MainProc {
+public class HandlerTransformer implements Allison1875ModuleMainProc {
 
-    public void process() {
+    @Override
+    public void process(AstForest astForest) {
+        AstForestContext.setCurrent(astForest);
         Collection<CompilationUnit> cus = Sets.newHashSet();
 
-        for (CompilationUnit cu : AstForest.getInstance()) {
+        for (CompilationUnit cu : AstForestContext.getCurrent()) {
             for (Pair<ClassOrInterfaceDeclaration, InitializerDeclaration> pair : new BlueprintCollectProc(cu).process()
                     .getControllerAndBlueprints()) {
 

@@ -31,7 +31,7 @@ public class QueryByIdXmlProc extends XmlProc {
     }
 
     public QueryByIdXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableQueryById()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableQueryById()) {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {
@@ -50,7 +50,7 @@ public class QueryByIdXmlProc extends XmlProc {
             stmt.addText("WHERE");
             newLineWithIndent(stmt);
             if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstace().getNotDeletedSql());
+                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
                 newLineWithIndent(stmt);
                 stmt.addText("AND ");
             }

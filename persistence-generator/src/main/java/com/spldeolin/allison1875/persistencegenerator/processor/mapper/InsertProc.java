@@ -31,7 +31,7 @@ public class InsertProc extends MapperProc {
     }
 
     public InsertProc process() {
-        if (PersistenceGeneratorConfig.getInstace().getDisableInsert()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableInsert()) {
             return this;
         }
         methodName = super.calcMethodName(mapper, "insert");

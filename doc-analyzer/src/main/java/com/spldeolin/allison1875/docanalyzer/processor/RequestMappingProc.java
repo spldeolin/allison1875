@@ -36,13 +36,13 @@ class RequestMappingProc {
     @Getter
     private Collection<RequestMethod> combinedVerbs;
 
-    public RequestMappingProc(Class<?> controllerClass) {
+    RequestMappingProc(Class<?> controllerClass) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         cPaths = findValueFromAnno(controllerRequestMapping);
         cVerbs = findVerbFromAnno(controllerRequestMapping);
     }
 
-    public void analyze(Method reflectionMethod) {
+    void analyze(Method reflectionMethod) {
         RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
         String[] mPaths = methodRequestMapping.value();
         RequestMethod[] mVerbs = methodRequestMapping.method();

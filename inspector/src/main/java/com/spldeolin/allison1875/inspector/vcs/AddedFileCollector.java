@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.collection.vcs;
+package com.spldeolin.allison1875.inspector.vcs;
 
 import java.io.IOException;
 import java.nio.file.Path;

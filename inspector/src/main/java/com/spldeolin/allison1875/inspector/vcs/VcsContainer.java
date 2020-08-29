@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.collection.vcs;
+package com.spldeolin.allison1875.inspector.vcs;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,8 +10,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import com.github.javaparser.ast.Node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +36,7 @@ public class VcsContainer {
         try {
             GitLoader loader = new GitLoader().projectPath(projectPath).openAndLoad();
             addedFiles = new AddedFileCollector()
-                    .collectSinceTime(loader, BaseConfig.getInstance().getTargetFileSince());
+                    .collectSinceTime(loader, InspectorConfig.getInstance().getTargetFileSince());
             loader.close();
         } catch (IOException | GitAPIException e) {
             log.error(e);

@@ -4,6 +4,9 @@ import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
+import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -34,15 +37,17 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-11
  */
 @Log4j2
-public class MainProc {
+public class PersistenceGenerator implements Allison1875ModuleMainProc {
 
     private final Class<?> anyClassFromTargetProject;
 
-    public MainProc(Class<?> anyClassFromTargetProject) {
+    public PersistenceGenerator(Class<?> anyClassFromTargetProject) {
         this.anyClassFromTargetProject = anyClassFromTargetProject;
     }
 
-    public void process() {
+    @Override
+    public void process(AstForest astForest) {
+        AstForestContext.setCurrent(astForest);
         PathProc pathProc = new PathProc(anyClassFromTargetProject).process();
 
         Collection<CompilationUnit> toSave = Lists.newArrayList();
@@ -106,7 +111,7 @@ public class MainProc {
     }
 
     private static String getEntityNameInXml(CuCreator entityCuCreator) {
-        if (PersistenceGeneratorConfig.getInstace().getIsEntityUsingAlias()) {
+        if (PersistenceGeneratorConfig.getInstance().getIsEntityUsingAlias()) {
             return entityCuCreator.getPrimaryTypeName();
         } else {
             return entityCuCreator.getPrimaryTypeQualifier();

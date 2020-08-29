@@ -72,7 +72,7 @@ public class HandlerTransformerConfig {
     /**
      * handler 当不需要返回业务数据时，方法体内包装返回值的代码
      */
-    @NotEmpty
+    @NotEmpty(message = "不能为空，如果不需要返回值则指定为;")
     private String returnWrappedResultVoid;
 
     /**

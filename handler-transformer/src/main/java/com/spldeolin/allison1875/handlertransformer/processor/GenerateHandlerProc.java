@@ -52,7 +52,7 @@ class GenerateHandlerProc {
         String handlerName = metaInfo.getHandlerName();
         handler.addAnnotation(StaticJavaParser.parseAnnotation("@PostMapping(\"/" + handlerName + "\")"));
         for (String handlerAnnotation : HandlerTransformerConfig.getInstance().getHandlerAnnotations()) {
-            handler.addAnnotation(StaticJavaParser.parseAnnotation("@" + handlerAnnotation));
+            handler.addAnnotation(StaticJavaParser.parseAnnotation(handlerAnnotation));
         }
         handler.setPublic(true);
         handler.setType(String.format(HandlerTransformerConfig.getInstance().getResult(),

@@ -51,14 +51,14 @@ class JsgBuildProc {
 
     private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
-    public JsgBuildProc(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
+    JsgBuildProc(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
             Table<String, String, String> specificFieldDescriptions) {
         this.astForest = astForest;
         this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
         this.specificFieldDescriptions = specificFieldDescriptions;
     }
 
-    public JsonSchemaGenerator analyzeAstAndBuildJsg() {
+    JsonSchemaGenerator analyzeAstAndBuildJsg() {
         analyze(astForest);
         return buildJsg();
     }
@@ -101,7 +101,7 @@ class JsgBuildProc {
         return false;
     }
 
-    public JsonSchemaGenerator buildJsg() {
+    JsonSchemaGenerator buildJsg() {
         ObjectMapper customOm = JsonUtils.initObjectMapper(new ObjectMapper());
         // 只有类属性可见，类的getter、setter、构造方法里的字段不会被当作JSON的字段
         customOm.setVisibility(customOm.getSerializationConfig().getDefaultVisibilityChecker()

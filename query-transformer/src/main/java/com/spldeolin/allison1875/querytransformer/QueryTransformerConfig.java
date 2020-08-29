@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer;
 
+import javax.validation.constraints.NotEmpty;
 import com.spldeolin.allison1875.base.util.Configs;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
@@ -15,9 +16,11 @@ public class QueryTransformerConfig {
     private static final QueryTransformerConfig instance = YamlUtils
             .toObjectAndThen("query-transformer-config.yml", QueryTransformerConfig.class, Configs::validate);
 
-    private String sourceRoot;
-
-    private String mapperXmlPath;
+    /**
+     * mapper.xml所在目录的相对路径（根据目标工程的情况填写）
+     */
+    @NotEmpty
+    private String mapperXmlDirectoryPath;
 
     private QueryTransformerConfig() {
     }

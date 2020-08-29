@@ -21,7 +21,9 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -40,12 +42,14 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-08-09
  */
 @Log4j2
-public class PQTMainProc {
+public class QueryTransformer implements Allison1875ModuleMainProc {
 
-    public void process() {
+    @Override
+    public void process(AstForest astForest) {
+        AstForestContext.setCurrent(astForest);
         Collection<CompilationUnit> cus = Lists.newArrayList();
 
-        for (CompilationUnit queryCu : AstForest.getInstance()) {
+        for (CompilationUnit queryCu : AstForestContext.getCurrent()) {
             for (TypeDeclaration<?> type : queryCu.getTypes()) {
                 if (type.isClassOrInterfaceDeclaration()) {
                     ClassOrInterfaceDeclaration query = type.asClassOrInterfaceDeclaration();
@@ -269,7 +273,7 @@ public class PQTMainProc {
         } else {
             mapperName = entityTypeName + "Mapper";
         }
-        File sourceRoot = new File(QueryTransformerConfig.getInstance().getSourceRoot());
+        File sourceRoot = AstForestContext.getCurrent().getHostSourceRoot().toFile();
         Iterator<File> fileIterator = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
         while (fileIterator.hasNext()) {
             File file = fileIterator.next();
@@ -290,7 +294,8 @@ public class PQTMainProc {
     }
 
     public File findMapperXml(String mapperName) {
-        File xmlPath = new File(QueryTransformerConfig.getInstance().getMapperXmlPath());
+        File xmlPath = AstForestContext.getCurrent().getHost()
+                .resolve(QueryTransformerConfig.getInstance().getMapperXmlDirectoryPath()).toFile();
         Iterator<File> fileIterator = FileUtils.iterateFiles(xmlPath, new String[]{"xml"}, true);
         while (fileIterator.hasNext()) {
             File file = fileIterator.next();
@@ -300,10 +305,6 @@ public class PQTMainProc {
         }
         log.warn("找不到MapperXml mapperName={}", mapperName);
         return null;
-    }
-
-    public static void main(String[] args) {
-        new PQTMainProc().process();
     }
 
 }

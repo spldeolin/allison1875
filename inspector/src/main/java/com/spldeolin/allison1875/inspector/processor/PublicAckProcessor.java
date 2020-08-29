@@ -25,7 +25,7 @@ public class PublicAckProcessor {
 
     public PublicAckProcessor process() {
         Iterator<File> fileIterator = FileUtils
-                .iterateFiles(InspectorConfig.getInstance().getPublicAckJsonDirectoryPath().toFile(),
+                .iterateFiles(new File(InspectorConfig.getInstance().getPublicAckJsonDirectoryPath()),
                         new String[]{"json"}, true);
         if (fileIterator.hasNext()) {
             File jsonFile = fileIterator.next();

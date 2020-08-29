@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.nio.file.Path;
 import com.github.javaparser.utils.CodeGenerationUtils;
+import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -28,9 +29,9 @@ public class PathProc {
     public PathProc process() {
         projectPath = CodeGenerationUtils.mavenModuleRoot(anyClassFromTargetProject);
         log.info("projectPath={}", projectPath);
-        sourceRootPath = projectPath.resolve(PersistenceGeneratorConfig.getInstace().getJavaDirectoryLayout());
+        sourceRootPath = projectPath.resolve(BaseConfig.getInstance().getJavaDirectoryLayout());
         log.info("sourceRootPath={}", sourceRootPath);
-        mapperXmlPath = projectPath.resolve(PersistenceGeneratorConfig.getInstace().getMapperXmlDirectoryPath());
+        mapperXmlPath = projectPath.resolve(PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath());
         log.info("mapperXmlPath={}", mapperXmlPath);
         return this;
     }

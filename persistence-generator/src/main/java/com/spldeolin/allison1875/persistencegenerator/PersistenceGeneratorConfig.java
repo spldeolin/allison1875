@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 public class PersistenceGeneratorConfig {
 
     @Getter
-    private static final PersistenceGeneratorConfig instace = YamlUtils
+    private static final PersistenceGeneratorConfig instance = YamlUtils
             .toObjectAndThen("persistence-generator-config.yml", PersistenceGeneratorConfig.class, Configs::validate);
 
     /**
@@ -57,13 +57,7 @@ public class PersistenceGeneratorConfig {
     private Collection<String> tables = Lists.newArrayList();
 
     /**
-     * Maven工程源码的布局（一般不需要改动此项）
-     */
-    @NotEmpty
-    private String javaDirectoryLayout;
-
-    /**
-     * mapper.xml所在目录的相对路径（根据目标工程的情况填写，一般不需要改动此项）
+     * mapper.xml所在目录的相对路径（根据目标工程的情况填写）
      */
     @NotEmpty
     private String mapperXmlDirectoryPath;

@@ -7,7 +7,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -35,7 +37,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class MainProcessor {
+public class DocAnalyzer implements Allison1875ModuleMainProc {
 
     private final static String docIgnore = "doc-ignore";
 
@@ -53,8 +55,9 @@ public class MainProcessor {
     private SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
             new DefaultSpecificFieldDescriptionsStrategy();
 
-    public void process() {
-        AstForest astForest = AstForest.getInstance();
+    @Override
+    public void process(AstForest astForest) {
+        AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
         JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationStrategy,
