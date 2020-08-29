@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.docanalyzer;
 
 
+import javax.validation.constraints.NotEmpty;
+import com.spldeolin.allison1875.base.util.Configs;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
@@ -17,7 +19,7 @@ public final class DocAnalyzerConfig {
 
     @Getter
     private static final DocAnalyzerConfig instance = YamlUtils
-            .toObject("doc-analyzer-config.yml", DocAnalyzerConfig.class);
+            .toObjectAndThen("doc-analyzer-config.yml", DocAnalyzerConfig.class, Configs::validate);
 
     /**
      * 根据作者名过滤
@@ -32,11 +34,13 @@ public final class DocAnalyzerConfig {
     /**
      * YApi请求URL
      */
+    @NotEmpty
     private String yapiUrl;
 
     /**
      * YApi项目的TOKEN
      */
+    @NotEmpty
     private String yapiToken;
 
     private DocAnalyzerConfig() {

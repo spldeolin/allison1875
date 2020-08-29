@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.inspector;
 
 import java.nio.file.Path;
+import com.spldeolin.allison1875.base.util.Configs;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
@@ -16,7 +17,8 @@ import lombok.extern.log4j.Log4j2;
 public final class InspectorConfig {
 
     @Getter
-    private static final InspectorConfig instance = YamlUtils.toObject("inspector-config.yml", InspectorConfig.class);
+    private static final InspectorConfig instance = YamlUtils
+            .toObjectAndThen("inspector-config.yml", InspectorConfig.class, Configs::validate);
 
     /**
      * 分页包装类的全限定名

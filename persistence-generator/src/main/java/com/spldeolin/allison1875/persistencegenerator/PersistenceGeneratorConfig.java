@@ -1,14 +1,10 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import java.util.Collection;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.exception.ConfigInvalidException;
+import com.spldeolin.allison1875.base.util.Configs;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
@@ -23,17 +19,7 @@ public class PersistenceGeneratorConfig {
 
     @Getter
     private static final PersistenceGeneratorConfig instace = YamlUtils
-            .toObjectAndThen("persistence-generator-config.yml", PersistenceGeneratorConfig.class,
-                    PersistenceGeneratorConfig::validate);
-
-    private static void validate(PersistenceGeneratorConfig config) {
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        Set<ConstraintViolation<PersistenceGeneratorConfig>> valids = validator.validate(config);
-        valids.forEach(valid -> log.error("配置项校验未通过：{}{}", valid.getPropertyPath(), valid.getMessage()));
-        if (valids.size() > 0) {
-            throw new ConfigInvalidException();
-        }
-    }
+            .toObjectAndThen("persistence-generator-config.yml", PersistenceGeneratorConfig.class, Configs::validate);
 
     /**
      * 数据库连接
