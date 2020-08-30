@@ -128,7 +128,7 @@ class BlueprintAnalyzeProc {
                         dtoBuilder.typeQualifier(packageName + "." + typeName);
                         String asVariableDeclarator;
                         String dtoName;
-                        if ("dtos".equals(vd.getNameAsString())) {
+                        if ("dtos".equals(variableName)) {
                             dtoName = English.plural(rawDtoName);
                             asVariableDeclarator = "Collection<" + typeName + "> " + dtoName;
                         } else {
