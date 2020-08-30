@@ -10,11 +10,14 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-22
  */
+@Log4j2
 public class HandlerTransformer implements Allison1875MainProc {
 
     @Override
@@ -38,15 +41,25 @@ public class HandlerTransformer implements Allison1875MainProc {
 
                 GenerateDtosProc generateDtosProc = new GenerateDtosProc(metaInfo.getSourceRoot(), metaInfo.getDtos())
                         .process();
-                cus.addAll(generateDtosProc.getDtoCus());
+                Collection<CompilationUnit> dtoCus = generateDtosProc.getDtoCus();
 
                 GenerateServicesProc generateServicesProc = new GenerateServicesProc(metaInfo).process();
-                cus.add(generateServicesProc.getServiceCu());
-                cus.add(generateServicesProc.getServiceImplCu());
+                CompilationUnit serviceCu = generateServicesProc.getServiceCu();
+                CompilationUnit serviceImplCu = generateServicesProc.getServiceImplCu();
 
-                GenerateHandlerProc generateHandlerProc = new GenerateHandlerProc(metaInfo,
-                        generateServicesProc.getServiceQualifier()).process();
-                cus.add(generateHandlerProc.getControllerCu());
+                try {
+                    GenerateHandlerProc generateHandlerProc = new GenerateHandlerProc(metaInfo,
+                            generateServicesProc.getServiceQualifier()).process();
+                    cus.add(generateHandlerProc.getControllerCu());
+                } catch (HandlerNameConflictException e) {
+                    log.warn("handler[{}]在controller[{}]已存在了同名方法，不再生成", metaInfo.getHandlerName(),
+                            metaInfo.getController().getName());
+                    continue;
+                }
+
+                cus.addAll(dtoCus);
+                cus.add(serviceCu);
+                cus.add(serviceImplCu);
             }
         }
 

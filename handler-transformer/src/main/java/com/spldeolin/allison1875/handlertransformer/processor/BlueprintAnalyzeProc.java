@@ -147,7 +147,7 @@ class BlueprintAnalyzeProc {
 
             // 大括号内没有指定任何dto和dtos时
             if (dtoBuilder.build().getTypeName() == null) {
-                log.warn("存在未指定dto或者dtos属性的区域，忽略这个blueprint[{}]", builder.build().getLocation());
+                log.warn("存在未指定dto或者dtos属性的区域，忽略这个dto[{}]", builder.build().getLocation());
                 break;
             }
             dtoBuilder.imports(Imports.listImports(controller));

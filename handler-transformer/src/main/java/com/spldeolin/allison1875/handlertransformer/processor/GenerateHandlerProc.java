@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import lombok.Getter;
 
@@ -33,7 +34,7 @@ class GenerateHandlerProc {
         this.serviceQualifier = serviceQualifier;
     }
 
-    GenerateHandlerProc process() {
+    GenerateHandlerProc process() throws HandlerNameConflictException {
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
         Imports.ensureImported(controller, metaInfo.getReqBody().getTypeQualifier());
         Imports.ensureImported(controller, metaInfo.getRespBody().getTypeQualifier());
@@ -41,6 +42,10 @@ class GenerateHandlerProc {
         for (String controllerImport : HandlerTransformerConfig.getInstance().getControllerImports()) {
             Imports.ensureImported(controller, controllerImport);
         }
+        if (controller.getMethodsByName(metaInfo.getHandlerName()).size() > 0) {
+            throw new HandlerNameConflictException();
+        }
+
         FieldDeclaration field = controller
                 .addField(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service",
                         metaInfo.getHandlerName() + "Service");
