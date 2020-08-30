@@ -224,7 +224,7 @@ public class QueryTransformer implements Allison1875MainProc {
 
         }
 
-        cus.forEach(Saves::prettySave);
+        cus.forEach(Saves::save);
     }
 
     private void removeVarWithField(FieldDeclaration field, VariableDeclarator var) {

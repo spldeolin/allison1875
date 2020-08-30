@@ -107,7 +107,7 @@ public class PersistenceGenerator implements Allison1875MainProc {
             }
         }
 
-        toSave.forEach(Saves::prettySave);
+        toSave.forEach(Saves::save);
     }
 
     private static String getEntityNameInXml(CuCreator entityCuCreator) {

@@ -68,7 +68,7 @@ public class CuCreator {
         cu.addType(primaryType);
 
         if (saveNow) {
-            Saves.prettySave(cu);
+            Saves.save(cu);
         }
 
         this.cu = cu;

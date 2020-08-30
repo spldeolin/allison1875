@@ -16,7 +16,7 @@ public class FileBackupUtils {
 
     public static void backup(File src) throws FileBackupException {
         String srcPath = src.getPath();
-        String destPath = srcPath + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMddHHmmss") + ".back";
+        String destPath = srcPath + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss") + ".bak";
         try {
             FileUtils.copyFile(src, new File(destPath));
             log.info("文件[{}]备份到了[{}]", srcPath, destPath);

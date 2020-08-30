@@ -63,7 +63,7 @@ public class HandlerTransformer implements Allison1875MainProc {
             }
         }
 
-        Saves.prettySave(cus);
+        Saves.save(cus);
     }
 
 }
