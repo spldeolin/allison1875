@@ -4,7 +4,7 @@ import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.creator.CuCreator;
@@ -37,7 +37,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-11
  */
 @Log4j2
-public class PersistenceGenerator implements Allison1875ModuleMainProc {
+public class PersistenceGenerator implements Allison1875MainProc {
 
     private final Class<?> anyClassFromTargetProject;
 

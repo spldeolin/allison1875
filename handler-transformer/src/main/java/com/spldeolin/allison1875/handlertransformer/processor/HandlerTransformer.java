@@ -6,7 +6,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Saves;
@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 /**
  * @author Deolin 2020-06-22
  */
-public class HandlerTransformer implements Allison1875ModuleMainProc {
+public class HandlerTransformer implements Allison1875MainProc {
 
     @Override
     public void process(AstForest astForest) {

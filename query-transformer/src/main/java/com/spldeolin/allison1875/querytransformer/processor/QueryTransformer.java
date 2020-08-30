@@ -21,7 +21,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.ancestor.Allison1875ModuleMainProc;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainProc;
 import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
@@ -42,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-08-09
  */
 @Log4j2
-public class QueryTransformer implements Allison1875ModuleMainProc {
+public class QueryTransformer implements Allison1875MainProc {
 
     @Override
     public void process(AstForest astForest) {
