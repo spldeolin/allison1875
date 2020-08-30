@@ -22,9 +22,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo.DtoMetaInfoBuilder;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import com.spldeolin.allison1875.handlertransformer.util.BlockStmts;
 import lombok.Getter;
@@ -148,7 +150,7 @@ class BlueprintAnalyzeProc {
                 log.warn("存在未指定dto或者dtos属性的区域，忽略这个blueprint[{}]", builder.build().getLocation());
                 break;
             }
-            dtoBuilder.imports(ImmutableList.of());
+            dtoBuilder.imports(Imports.listImports(controller));
 
             dtos.put(blockStmt, dtoBuilder);
         }
@@ -166,19 +168,20 @@ class BlueprintAnalyzeProc {
                 continue;
             }
 
-            DtoMetaInfo build = parentMetaBuilder.build();
+            DtoMetaInfo parentMetaInfo = parentMetaBuilder.build();
 
-            List<ImportDeclaration> importDeclarations = Lists.newArrayList(build.getImports());
+            List<ImportDeclaration> importDeclarations = Lists.newArrayList(parentMetaInfo.getImports());
             importDeclarations.add(new ImportDeclaration(dtoMeta.getTypeQualifier(), false, false));
             parentMetaBuilder.imports(ImmutableList.copyOf(importDeclarations));
 
-            List<Pair<String, String>> pairs = Lists.newArrayList(build.getVariableDeclarators());
+            List<Pair<String, String>> pairs = Lists.newArrayList(parentMetaInfo.getVariableDeclarators());
             pairs.add(dtoMeta.getAsVariableDeclarator());
             parentMetaBuilder.variableDeclarators(ImmutableList.copyOf(pairs));
         }
 
-        builder.dtos(ImmutableList.copyOf(dtos.values().stream().map(DtoMetaInfo.DtoMetaInfoBuilder::build)
-                .collect(Collectors.toList())));
+        List<DtoMetaInfo> dtoMetaInfos = dtos.values().stream().map(DtoMetaInfoBuilder::build)
+                .collect(Collectors.toList());
+        builder.dtos(ImmutableList.copyOf(dtoMetaInfos));
 
         metaInfo = builder.build();
         return this;
