@@ -8,7 +8,6 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -74,20 +73,23 @@ class GenerateHandlerProc {
             requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
             handler.addParameter(requestBody);
         }
-        BlockStmt body = new BlockStmt();
-        String serviceCallExpr = metaInfo.getHandlerName() + "Service." + metaInfo.getHandlerName() + "(req)";
+
         String handlerPattern;
         if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
             handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPatternInNoResponseBodySituation();
         } else {
             handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPattern();
         }
-        body.addStatement(StaticJavaParser.parseStatement(String.format(handlerPattern, serviceCallExpr)));
-        handler.setBody(body);
+        String serviceCallExpr = metaInfo.getHandlerName() + "Service." + metaInfo.getHandlerName();
+        if (CollectionUtils.isEmpty(metaInfo.getReqBody().getVariableDeclarators())) {
+            serviceCallExpr += "()";
+        } else {
+            serviceCallExpr += "(req)";
+        }
+        handler.setBody(StaticJavaParser.parseBlock(String.format(handlerPattern, serviceCallExpr)));
         controller.addMember(handler);
 
         controllerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-
         return this;
     }
 

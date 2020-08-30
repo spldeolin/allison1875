@@ -1,12 +1,14 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -37,9 +39,15 @@ class GenerateServicesProc {
     GenerateServicesProc process() {
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
-        absMethod.setType(metaInfo.getRespBody().getTypeName());
+        if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+            absMethod.setType("void");
+        } else {
+            absMethod.setType(metaInfo.getRespBody().getTypeName());
+        }
         absMethod.setName(metaInfo.getHandlerName());
-        absMethod.addParameter(StaticJavaParser.parseType(metaInfo.getReqBody().getTypeName()), "req");
+        if (CollectionUtils.isNotEmpty(metaInfo.getReqBody().getVariableDeclarators())) {
+            absMethod.addParameter(StaticJavaParser.parseType(metaInfo.getReqBody().getTypeName()), "req");
+        }
         MethodDeclaration method = absMethod.clone();
 
         List<String> imports = Lists.newArrayList();
@@ -66,7 +74,12 @@ class GenerateServicesProc {
 
             method.addAnnotation(StaticJavaParser.parseAnnotation("@Override"));
             method.setPublic(true);
-            method.setBody(new BlockStmt(new NodeList<>(StaticJavaParser.parseStatement("return null;"))));
+
+            NodeList<Statement> stmts = new NodeList<>();
+            if (CollectionUtils.isNotEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+                stmts.add(StaticJavaParser.parseStatement("return null;"));
+            }
+            method.setBody(new BlockStmt(stmts));
             coid.addMember(method);
             return coid;
         });
