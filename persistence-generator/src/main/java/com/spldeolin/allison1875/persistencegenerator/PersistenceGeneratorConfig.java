@@ -98,23 +98,23 @@ public class PersistenceGeneratorConfig {
      */
     private String notDeletedSql;
 
-    private Boolean disableInsert = true;
+    private Boolean disableInsert = false;
 
-    private Boolean disableQueryById = true;
+    private Boolean disableQueryById = false;
 
-    private Boolean disableUpdateById = true;
+    private Boolean disableUpdateById = false;
 
-    private Boolean disableUpdateByIdEvenNull = true;
+    private Boolean disableUpdateByIdEvenNull = false;
 
-    private Boolean disableQueryByIds = true;
+    private Boolean disableQueryByIds = false;
 
-    private Boolean disableQueryByIdsEachId = true;
+    private Boolean disableQueryByIdsEachId = false;
 
-    private Boolean disableQueryByKey = true;
+    private Boolean disableQueryByKey = false;
 
-    private Boolean disableDeleteByKey = true;
+    private Boolean disableDeleteByKey = false;
 
-    private Boolean disableQueryByKeys = true;
+    private Boolean disableQueryByKeys = false;
 
     private PersistenceGeneratorConfig() {
     }

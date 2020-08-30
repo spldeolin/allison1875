@@ -1,8 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.nio.file.Path;
-import com.github.javaparser.utils.CodeGenerationUtils;
-import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.base.collection.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -11,27 +10,29 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-08-21
  */
 @Log4j2
-@Getter
 public class PathProc {
 
-    private final Class<?> anyClassFromTargetProject;
+    private final AstForest astForest;
 
-    private Path projectPath;
+    @Getter
+    private Path hostPath;
 
-    private Path sourceRootPath;
+    @Getter
+    private Path sourceRoot;
 
+    @Getter
     private Path mapperXmlPath;
 
-    public PathProc(Class<?> anyClassFromTargetProject) {
-        this.anyClassFromTargetProject = anyClassFromTargetProject;
+    public PathProc(AstForest astForest) {
+        this.astForest = astForest;
     }
 
     public PathProc process() {
-        projectPath = CodeGenerationUtils.mavenModuleRoot(anyClassFromTargetProject);
-        log.info("projectPath={}", projectPath);
-        sourceRootPath = projectPath.resolve(BaseConfig.getInstance().getJavaDirectoryLayout());
-        log.info("sourceRootPath={}", sourceRootPath);
-        mapperXmlPath = projectPath.resolve(PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath());
+        hostPath = astForest.getHost();
+        log.info("hostPath={}", hostPath);
+        sourceRoot = astForest.getHostSourceRoot();
+        log.info("sourceRoot={}", sourceRoot);
+        mapperXmlPath = hostPath.resolve(PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath());
         log.info("mapperXmlPath={}", mapperXmlPath);
         return this;
     }

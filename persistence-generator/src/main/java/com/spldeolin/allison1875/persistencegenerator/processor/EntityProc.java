@@ -55,9 +55,8 @@ public class EntityProc {
 
     public EntityProc process() {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
-        entityPath = CodeGenerationUtils
-                .fileInPackageAbsolutePath(pathProc.getSourceRootPath(), conf.getEntityPackage(),
-                        persistence.getEntityName() + ".java");
+        entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(pathProc.getSourceRoot(), conf.getEntityPackage(),
+                persistence.getEntityName() + ".java");
 
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
         TreeSet<String> originalVariables = Sets.newTreeSet();
@@ -79,17 +78,17 @@ public class EntityProc {
         }
 
         // 生成Entity（可能是覆盖）
-        entityCuCreator = new CuCreator(pathProc.getSourceRootPath(), conf.getEntityPackage(),
-                this.getImports(persistence), () -> {
-            ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc classJavadoc = new JavadocComment(
-                    persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
-                            .repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型" + BaseConstant.BY_ALLISON_1875
-                            + "</strong>").parse();
-            classJavadoc.getBlockTags().addAll(authorTags);
-            coid.setJavadocComment(classJavadoc);
-            coid.addAnnotation(parseAnnotation("@Data"));
-            coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
+        entityCuCreator = new CuCreator(pathProc.getSourceRoot(), conf.getEntityPackage(), this.getImports(persistence),
+                () -> {
+                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+                    Javadoc classJavadoc = new JavadocComment(
+                            persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
+                                    + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
+                                    + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
+                    classJavadoc.getBlockTags().addAll(authorTags);
+                    coid.setJavadocComment(classJavadoc);
+                    coid.addAnnotation(parseAnnotation("@Data"));
+                    coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
             coid.setPublic(true);
             coid.setName(persistence.getEntityName());
             for (PropertyDto property : persistence.getProperties()) {

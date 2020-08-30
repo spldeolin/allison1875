@@ -39,16 +39,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class PersistenceGenerator implements Allison1875MainProc {
 
-    private final Class<?> anyClassFromTargetProject;
-
-    public PersistenceGenerator(Class<?> anyClassFromTargetProject) {
-        this.anyClassFromTargetProject = anyClassFromTargetProject;
-    }
-
     @Override
     public void process(AstForest astForest) {
         AstForestContext.setCurrent(astForest);
-        PathProc pathProc = new PathProc(anyClassFromTargetProject).process();
+        PathProc pathProc = new PathProc(astForest).process();
 
         Collection<CompilationUnit> toSave = Lists.newArrayList();
 
