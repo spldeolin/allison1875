@@ -98,7 +98,8 @@ class BlueprintAnalyzeProc {
                 dtoBuilder.packageName(respPackageName);
                 dtoBuilder.typeQualifier(respPackageName + "." + typeName);
                 dtoBuilder.dtoName("resp");
-                builder.respBody(dtoBuilder.build());
+                DtoMetaInfo respBody = dtoBuilder.build();
+                builder.respBody(respBody);
             }
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody == null) {
                 String typeName = StringUtils.upperFirstLetter(handlerName) + "ReqDto";
@@ -147,9 +148,14 @@ class BlueprintAnalyzeProc {
 
             // 大括号内没有指定任何dto和dtos时
             if (dtoBuilder.build().getTypeName() == null) {
-                log.warn("存在未指定dto或者dtos属性的区域，忽略这个dto[{}]", builder.build().getLocation());
+                log.warn("存在未指定dto或者dtos属性的区域，忽略这个dto[{}]", Locations.getRelativePathWithLineNo(blueprint));
                 break;
             }
+            // 大括号内没有除dto或dtos以外的vde
+            if (dtoBuilder.build().getVariableDeclarators().size() == 0) {
+                log.warn("存在没有指定除dto或dtos以外属性的区域，忽略这个dto[{}]", Locations.getRelativePathWithLineNo(blueprint));
+            }
+
             dtoBuilder.imports(Imports.listImports(controller));
 
             dtos.put(blockStmt, dtoBuilder);

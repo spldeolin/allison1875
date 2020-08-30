@@ -64,16 +64,16 @@ public class HandlerTransformerConfig {
     private String resultVoid;
 
     /**
-     * handler 方法体内包装返回值业务数据部分的代码（使用%s占位符代替调用service获取返回值）
+     * handler方法体的格式（使用%s占位符代替调用service的表达式）
      */
     @NotEmpty
-    private String returnWrappedResult;
+    private String handlerBodyPattern;
 
     /**
-     * handler 当不需要返回业务数据时，方法体内包装返回值的代码
+     * handler不需要返回ResponseBody的场景，handler方法体的格式（使用%s占位符代替调用service的表达式）
      */
     @NotEmpty(message = "不能为空，如果不需要返回值则指定为;")
-    private String returnWrappedResultVoid;
+    private String handlerBodyPatternInNoResponseBodySituation;
 
     /**
      * controller需要确保存在的import

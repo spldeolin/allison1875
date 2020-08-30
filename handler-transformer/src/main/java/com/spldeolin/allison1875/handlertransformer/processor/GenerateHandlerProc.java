@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
+import org.apache.commons.collections4.CollectionUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -60,18 +61,28 @@ class GenerateHandlerProc {
             handler.addAnnotation(StaticJavaParser.parseAnnotation(handlerAnnotation));
         }
         handler.setPublic(true);
-        handler.setType(String.format(HandlerTransformerConfig.getInstance().getResult(),
-                metaInfo.getRespBody().getTypeName()));
+        if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+            handler.setType(HandlerTransformerConfig.getInstance().getResultVoid());
+        } else {
+            handler.setType(String.format(HandlerTransformerConfig.getInstance().getResult(),
+                    metaInfo.getRespBody().getTypeName()));
+        }
         handler.setName(handlerName);
-        Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().getTypeName() + " req");
-        requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
-        requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
-        handler.addParameter(requestBody);
+        if (CollectionUtils.isNotEmpty(metaInfo.getReqBody().getVariableDeclarators())) {
+            Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().getTypeName() + " req");
+            requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
+            requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
+            handler.addParameter(requestBody);
+        }
         BlockStmt body = new BlockStmt();
         String serviceCallExpr = metaInfo.getHandlerName() + "Service." + metaInfo.getHandlerName() + "(req)";
-        String returnStatement = String
-                .format(HandlerTransformerConfig.getInstance().getReturnWrappedResult(), serviceCallExpr);
-        body.addStatement(StaticJavaParser.parseStatement(returnStatement));
+        String handlerPattern;
+        if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+            handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPatternInNoResponseBodySituation();
+        } else {
+            handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPattern();
+        }
+        body.addStatement(StaticJavaParser.parseStatement(String.format(handlerPattern, serviceCallExpr)));
         handler.setBody(body);
         controller.addMember(handler);
 
