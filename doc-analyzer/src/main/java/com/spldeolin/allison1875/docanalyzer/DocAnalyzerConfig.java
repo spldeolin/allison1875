@@ -52,6 +52,18 @@ public final class DocAnalyzerConfig {
     @NotEmpty
     private String yapiToken;
 
+    /**
+     * Redis服务，用于作为分布式锁防止多个doc-analyzer并发同步YApi
+     */
+    @NotEmpty
+    private String redisAddress;
+
+    /**
+     * Redis服务的密码
+     */
+    @NotEmpty
+    private String redisPassword;
+
     private DocAnalyzerConfig() {
     }
 

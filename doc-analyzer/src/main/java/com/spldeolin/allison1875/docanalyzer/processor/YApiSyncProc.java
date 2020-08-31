@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.redisson.api.RLock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,6 +21,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.redis.RedissonFactory;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
@@ -62,38 +65,48 @@ class YApiSyncProc {
     }
 
     void process() {
-        Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
-        catNames.add("回收站");
-        Set<String> yapiCatNames = this.getYapiCatIdsEachName().keySet();
-        this.createYApiCat(Sets.difference(catNames, yapiCatNames));
+        RLock lock = RedissonFactory.getSingleServer().getLock("allison1875_docanalyzer_" + url + "_" + projectId);
+        try {
+            // 尝试加锁，最多等待100秒，上锁以后30秒自动解锁
+            if (lock.tryLock(100, 20, TimeUnit.SECONDS)) {
+                try {
+                    Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
+                    catNames.add("回收站");
+                    Set<String> yapiCatNames = this.getYapiCatIdsEachName().keySet();
+                    this.createYApiCat(Sets.difference(catNames, yapiCatNames));
 
-        Map<String, Long> catName2catId = this.getYapiCatIdsEachName();
+                    Map<String, Long> catName2catId = this.getYapiCatIdsEachName();
 
-        Map<String, JsonNode> yapiUrls = this.listAutoInterfaces();
-        Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
+                    Map<String, JsonNode> yapiUrls = this.listAutoInterfaces();
+                    Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
 
-        // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
-        for (String yapiUrl : yapiUrls.keySet()) {
-            if (!analysisUrls.contains(yapiUrl)) {
-                this.deleteInterface(yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
+                    // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
+                    for (String yapiUrl : yapiUrls.keySet()) {
+                        if (!analysisUrls.contains(yapiUrl)) {
+                            this.deleteInterface(yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
+                        }
+                    }
+
+                    // 新增接口
+                    for (EndpointDto endpoint : endpoints) {
+                        Collection<String> descriptionLines = endpoint.getDescriptionLines();
+                        String title = Iterables.getFirst(descriptionLines, null);
+                        if (title == null || title.length() == 0) {
+                            title = endpoint.getHandlerSimpleName();
+                        }
+                        String yapiDesc = endpoint.toStringPrettily();
+
+                        String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
+                        String respJs = toJson(endpoint.getResponseBodyJsonSchema());
+
+                        this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
+                                endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
+                    }
+                } finally {
+                    lock.unlock();
+                }
             }
-        }
-
-        // 新增接口
-        for (EndpointDto endpoint : endpoints) {
-            Collection<String> descriptionLines = endpoint.getDescriptionLines();
-            String title = Iterables.getFirst(descriptionLines, null);
-            if (title == null || title.length() == 0) {
-                title = endpoint.getHandlerSimpleName();
-            }
-            String yapiDesc = endpoint.toStringPrettily();
-
-
-            String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
-            String respJs = toJson(endpoint.getResponseBodyJsonSchema());
-
-            this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc, endpoint.getHttpMethod(),
-                    catName2catId.get(endpoint.getCat()));
+        } catch (InterruptedException ignored) {
         }
     }
 
