@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
-import com.spldeolin.allison1875.inspector.dto.PublicAckDto;
+import com.spldeolin.allison1875.inspector.dto.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.StatuteEnum;
 import com.spldeolin.allison1875.inspector.vcs.StaticVcsContainer;
 import lombok.Getter;
@@ -19,15 +19,15 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class InspectionProcessor {
+public class JudgeByStatutesProc {
 
     @Setter
-    private Collection<PublicAckDto> publicAcks;
+    private Collection<PardonDto> pardons;
 
     @Getter
     private final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 
-    public InspectionProcessor process() {
+    public JudgeByStatutesProc process() {
         AstForestContext.getCurrent().forEach(cu -> {
             if (StaticVcsContainer.contain(cu)) {
                 long start = System.currentTimeMillis();
@@ -54,7 +54,7 @@ public class InspectionProcessor {
         String qualifier = vo.getQualifier();
         String sourceCode = vo.getSourceCode();
 
-        for (PublicAckDto pa : publicAcks) {
+        for (PardonDto pa : pardons) {
             if (statuteNo.equals(pa.getStatuteNo())) {
                 if (qualifier != null && qualifier.equals(pa.getQualifier())) {
                     return false;

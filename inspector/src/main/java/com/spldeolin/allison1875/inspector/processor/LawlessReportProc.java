@@ -20,12 +20,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class LawlessReportProcessor {
+public class LawlessReportProc {
 
     @Setter
     private Collection<LawlessDto> lawlesses;
 
-    public void report() {
+    public void process() {
         String csvContent = CsvUtils.writeCsv(lawlesses, LawlessDto.class);
 
         String fileName = "lawless-" + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd");

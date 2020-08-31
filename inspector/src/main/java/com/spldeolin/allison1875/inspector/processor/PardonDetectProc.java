@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
-import com.spldeolin.allison1875.inspector.dto.PublicAckDto;
+import com.spldeolin.allison1875.inspector.dto.PardonDto;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -18,12 +18,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Accessors(fluent = true)
-public class PublicAckProcessor {
+public class PardonDetectProc {
 
     @Getter
-    private final Collection<PublicAckDto> publicAcks = Lists.newArrayList();
+    private final Collection<PardonDto> pardons = Lists.newArrayList();
 
-    public PublicAckProcessor process() {
+    public PardonDetectProc process() {
         Iterator<File> fileIterator = FileUtils
                 .iterateFiles(new File(InspectorConfig.getInstance().getPublicAckJsonDirectoryPath()),
                         new String[]{"json"}, true);
@@ -32,9 +32,9 @@ public class PublicAckProcessor {
             try {
                 String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
                 if (json.startsWith("[")) {
-                    publicAcks.addAll(JsonUtils.toListOfObject(json, PublicAckDto.class));
+                    pardons.addAll(JsonUtils.toListOfObject(json, PardonDto.class));
                 } else {
-                    publicAcks.add(JsonUtils.toObject(json, PublicAckDto.class));
+                    pardons.add(JsonUtils.toObject(json, PardonDto.class));
                 }
             } catch (Exception e) {
                 log.error("Cannot load public ack from json file. [{}]", jsonFile, e);

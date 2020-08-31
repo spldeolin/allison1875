@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.inspector.dto;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -14,6 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class LawlessDto {
 
+    @JsonProperty("源码位置")
     private String sourceCode;
 
     /**
@@ -22,27 +24,29 @@ public class LawlessDto {
      * - method qualifier
      * - or else null
      */
+    @JsonProperty("全限定名")
     private String qualifier;
 
+    @JsonProperty("规约号")
     private String statuteNo;
 
+    @JsonProperty("详细信息")
     private String message;
 
+    @JsonProperty("作者")
     private String author;
 
+    @JsonProperty("修复者")
     private String fixer;
 
+    @JsonProperty("修复时间")
     private LocalDateTime fixedAt;
 
-    public LawlessDto(Node node, String qualifier) {
-        sourceCode = Locations.getRelativePathWithLineNo(node);
+    public LawlessDto(Node node, String qualifier, String message) {
+        this.sourceCode = Locations.getRelativePathWithLineNo(node);
         this.qualifier = qualifier;
-        author = Authors.getAuthor(node);
-    }
-
-    public LawlessDto(Node node) {
-        sourceCode = Locations.getRelativePathWithLineNo(node);
-        author = Authors.getAuthor(node);
+        this.message = message;
+        this.author = Authors.getAuthor(node);
     }
 
 }

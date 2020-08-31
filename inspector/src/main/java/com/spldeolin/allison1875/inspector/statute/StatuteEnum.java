@@ -11,10 +11,13 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum StatuteEnum {
-    ;
 
-    private String no;
+    METHOD_LINE("0013", new MethodLine()),
 
-    private Statute statute;
+    NUMBER_MAGIC_VALUE("0019", new NumberMagicValue());
+
+    private final String no;
+
+    private final Statute statute;
 
 }

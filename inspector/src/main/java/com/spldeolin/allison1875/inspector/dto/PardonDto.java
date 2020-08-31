@@ -7,7 +7,7 @@ import lombok.Data;
  * @author Deolin 2020-02-24
  */
 @Data
-public class PublicAckDto {
+public class PardonDto {
 
     @JsonProperty("源码位置")
     private String sourceCode;

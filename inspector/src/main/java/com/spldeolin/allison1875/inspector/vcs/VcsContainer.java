@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
 public class VcsContainer {
 
     @Getter
-    private Path projectPath;
+    private final Path projectPath;
 
     private Optional<Set<Path>> addedFiles;
 
