@@ -42,6 +42,9 @@ public class BuildPersistenceDtoProc {
             persistences.put(infoSchema.getTableName(), dto);
         }
         for (InformationSchemaDto columnMeta : infoSchemas) {
+            if (PersistenceGeneratorConfig.getInstance().getHiddenColumns().contains(columnMeta.getColumnName())) {
+                continue;
+            }
             PropertyDto property = new PropertyDto();
             String columnName = columnMeta.getColumnName();
             property.setColumnName(columnName);

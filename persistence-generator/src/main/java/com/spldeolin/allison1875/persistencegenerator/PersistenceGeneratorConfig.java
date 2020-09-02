@@ -98,6 +98,11 @@ public class PersistenceGeneratorConfig {
      */
     private String notDeletedSql;
 
+    /**
+     * 对项目隐藏，仅在数据库中可见的表字段
+     */
+    private Collection<String> hiddenColumns = Lists.newArrayList();
+
     private Boolean disableInsert = false;
 
     private Boolean disableQueryById = false;
