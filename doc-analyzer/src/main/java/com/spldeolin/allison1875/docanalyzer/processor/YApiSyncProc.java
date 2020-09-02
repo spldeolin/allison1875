@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,7 +22,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.redis.RedissonFactory;
+import com.spldeolin.allison1875.docanalyzer.util.RedissonUtils;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
@@ -65,7 +66,8 @@ class YApiSyncProc {
     }
 
     void process() {
-        RLock lock = RedissonFactory.getSingleServer().getLock("allison1875_docanalyzer_" + url + "_" + projectId);
+        RedissonClient redisson = RedissonUtils.getSingleServer();
+        RLock lock = redisson.getLock("allison1875_docanalyzer_" + url + "_" + projectId);
         try {
             // 尝试加锁，最多等待100秒，上锁以后30秒自动解锁
             if (lock.tryLock(100, 20, TimeUnit.SECONDS)) {
@@ -104,6 +106,7 @@ class YApiSyncProc {
                     }
                 } finally {
                     lock.unlock();
+                    RedissonUtils.close(redisson);
                 }
             }
         } catch (InterruptedException ignored) {
