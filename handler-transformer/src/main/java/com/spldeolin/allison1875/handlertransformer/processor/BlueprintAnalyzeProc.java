@@ -86,6 +86,7 @@ class BlueprintAnalyzeProc {
         allBlockStmt.remove(0);
         BlockStmt reqBlockStmt = null;
         DtoMetaInfo reqBody = null;
+        DtoMetaInfo respBody = null;
         for (BlockStmt blockStmt : allBlockStmt) {
             DtoMetaInfo.DtoMetaInfoBuilder dtoBuilder = DtoMetaInfo.builder();
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
@@ -98,8 +99,7 @@ class BlueprintAnalyzeProc {
                 dtoBuilder.packageName(respPackageName);
                 dtoBuilder.typeQualifier(respPackageName + "." + typeName);
                 dtoBuilder.dtoName("resp");
-                DtoMetaInfo respBody = dtoBuilder.build();
-                builder.respBody(respBody);
+                respBody = dtoBuilder.build();
             }
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody == null) {
                 String typeName = StringUtils.upperFirstLetter(handlerName) + "ReqDto";
@@ -109,7 +109,6 @@ class BlueprintAnalyzeProc {
                 dtoBuilder.typeQualifier(packageName + "." + typeName);
                 dtoBuilder.dtoName("req");
                 reqBody = dtoBuilder.build();
-                builder.reqBody(reqBody);
                 reqBlockStmt = blockStmt;
             }
 
@@ -188,6 +187,20 @@ class BlueprintAnalyzeProc {
         List<DtoMetaInfo> dtoMetaInfos = dtos.values().stream().map(DtoMetaInfoBuilder::build)
                 .collect(Collectors.toList());
         builder.dtos(ImmutableList.copyOf(dtoMetaInfos));
+
+        Map<String, DtoMetaInfo> dtoMetaInfoMap = Maps.newHashMap();
+        dtoMetaInfos.forEach(one -> dtoMetaInfoMap.put(one.getTypeQualifier(), one));
+
+        if (reqBody != null) {
+            builder.reqBody(dtoMetaInfoMap.get(reqBody.getTypeQualifier()));
+        } else {
+            throw new RuntimeException("Blueprint不能缺少代表req的block");
+        }
+        if (respBody != null) {
+            builder.respBody(dtoMetaInfoMap.get(respBody.getTypeQualifier()));
+        } else {
+            throw new RuntimeException("Blueprint不能缺少代表resp的block");
+        }
 
         metaInfo = builder.build();
         return this;
