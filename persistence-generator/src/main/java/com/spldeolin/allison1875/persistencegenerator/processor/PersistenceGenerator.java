@@ -65,6 +65,9 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 continue;
             }
 
+            // 删除Mapper中所有Allison 1875生成的方法
+            new DeleteAllison1875MethodProc(mapper).process();
+
             // 在Mapper中生成基础方法
             InsertProc insertProc = new InsertProc(persistence, mapper).process();
             QueryByIdProc queryByIdProc = new QueryByIdProc(persistence, mapper).process();
@@ -81,7 +84,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 queryByKeysProcs.add(new QueryByKeysProc(persistence, key, mapper).process());
             }
 
-            // 在Mapper.xml中生成基础方法
+            // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
             try {
                 new MapperXmlProc(persistence, mapper, pathProc.getMapperXmlPath(),

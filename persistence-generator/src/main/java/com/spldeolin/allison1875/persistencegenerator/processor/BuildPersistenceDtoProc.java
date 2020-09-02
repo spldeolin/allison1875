@@ -23,6 +23,7 @@ public class BuildPersistenceDtoProc {
     private Collection<PersistenceDto> persistences;
 
     public BuildPersistenceDtoProc process() {
+        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
         // 查询information_schema.COLUMNS、information_schema.TABLES表
         Collection<InformationSchemaDto> infoSchemas = new QueryInformationSchemaProc().process().getInfoSchemas();
         String deleteFlag = getDeleteFlagName();
@@ -42,11 +43,11 @@ public class BuildPersistenceDtoProc {
             persistences.put(infoSchema.getTableName(), dto);
         }
         for (InformationSchemaDto columnMeta : infoSchemas) {
-            if (PersistenceGeneratorConfig.getInstance().getHiddenColumns().contains(columnMeta.getColumnName())) {
+            String columnName = columnMeta.getColumnName();
+            if (conf.getHiddenColumns().contains(columnName)) {
                 continue;
             }
             PropertyDto property = new PropertyDto();
-            String columnName = columnMeta.getColumnName();
             property.setColumnName(columnName);
             property.setPropertyName(StringUtils.underscoreToLowerCamel(columnName));
             JdbcTypeEnum jdbcTypeEnum = calcJavaType(columnMeta);
@@ -66,7 +67,7 @@ public class BuildPersistenceDtoProc {
                 persistence.getIdProperties().add(property);
             } else {
                 persistence.getNonIdProperties().add(property);
-                if (columnName.endsWith("_id")) {
+                if (columnName.endsWith("_id") && !conf.getNotKeyColumns().contains(columnName)) {
                     persistence.getKeyProperties().add(property);
                 }
             }

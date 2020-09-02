@@ -103,6 +103,11 @@ public class PersistenceGeneratorConfig {
      */
     private Collection<String> hiddenColumns = Lists.newArrayList();
 
+    /**
+     * 即便符合persistence-generator对外键的定义，也不会被当作外键的表字段（一般用于忽略为创建人ID和更新人ID生成query方法）
+     */
+    private Collection<String> notKeyColumns = Lists.newArrayList();
+
     private Boolean disableInsert = false;
 
     private Boolean disableQueryById = false;
