@@ -66,9 +66,11 @@ class GenerateServicesProc {
 
         List<String> imports4Impl = Lists.newArrayList(imports);
         imports4Impl.add(serviceCreator.getPrimaryTypeQualifier());
+        imports4Impl.add("org.springframework.stereotype.Service");
         CuCreator serviceImplCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServiceImplPackage(), imports4Impl, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+            coid.addAnnotation(StaticJavaParser.parseAnnotation("@Service"));
             coid.setPublic(true).setInterface(false).setName(serviceName + "Impl");
             coid.addImplementedType(serviceName);
 
@@ -77,7 +79,12 @@ class GenerateServicesProc {
 
             NodeList<Statement> stmts = new NodeList<>();
             if (CollectionUtils.isNotEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
-                stmts.add(StaticJavaParser.parseStatement("return null;"));
+                String newWhat = method.getTypeAsString();
+                if (method.getType().isClassOrInterfaceType() && method.getType().asClassOrInterfaceType()
+                        .getTypeArguments().isPresent()) {
+                    newWhat += "<>";
+                }
+                stmts.add(StaticJavaParser.parseStatement("return new " + newWhat + "();"));
             }
             method.setBody(new BlockStmt(stmts));
             coid.addMember(method);
