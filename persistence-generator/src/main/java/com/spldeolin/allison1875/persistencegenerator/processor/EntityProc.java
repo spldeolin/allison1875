@@ -89,18 +89,18 @@ public class EntityProc {
                     coid.setJavadocComment(classJavadoc);
                     coid.addAnnotation(parseAnnotation("@Data"));
                     coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
-            coid.setPublic(true);
-            coid.setName(persistence.getEntityName());
-            for (PropertyDto property : persistence.getProperties()) {
-                String type = property.getJavaType().getSimpleName();
-                String name = property.getPropertyName();
-                FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
-                Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
-                field.setJavadocComment(fieldJavadoc);
+                    coid.setPublic(true);
+                    coid.setName(persistence.getEntityName());
+                    for (PropertyDto property : persistence.getProperties()) {
+                        String type = property.getJavaType().getSimpleName();
+                        String name = property.getPropertyName();
+                        FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
+                        Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
+                        field.setJavadocComment(fieldJavadoc);
 
-            }
-            return coid;
-        });
+                    }
+                    return coid;
+                });
 
         TreeSet<String> destinedVariables = Sets.newTreeSet();
         for (PropertyDto property : persistence.getProperties()) {

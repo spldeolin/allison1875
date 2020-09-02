@@ -86,7 +86,7 @@ class GenerateHandlerProc {
         } else {
             serviceCallExpr += "(req)";
         }
-        handler.setBody(StaticJavaParser.parseBlock(String.format(handlerPattern, serviceCallExpr)));
+        handler.setBody(StaticJavaParser.parseBlock("{" + String.format(handlerPattern, serviceCallExpr) + "}"));
         controller.addMember(handler);
 
         controllerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
