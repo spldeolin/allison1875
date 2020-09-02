@@ -5,7 +5,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.Node;
 import com.google.common.base.Joiner;
-import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
+import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.collection.ast;
+package com.spldeolin.allison1875.base.ast;
 
 /**
  * @author Deolin 2020-08-29

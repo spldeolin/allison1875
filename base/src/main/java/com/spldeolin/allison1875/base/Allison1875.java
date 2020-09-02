@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.base;
 
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
-import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.AstForest;
 
 /**
  * Allison1875的嵌入式启动类

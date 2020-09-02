@@ -2,8 +2,8 @@ package com.spldeolin.allison1875.inspector.processor;
 
 import java.util.Collection;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
-import com.spldeolin.allison1875.base.collection.ast.AstForest;
-import com.spldeolin.allison1875.base.collection.ast.AstForestContext;
+import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
 

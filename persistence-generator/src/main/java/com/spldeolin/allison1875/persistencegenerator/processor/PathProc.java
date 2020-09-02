@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.nio.file.Path;
-import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;

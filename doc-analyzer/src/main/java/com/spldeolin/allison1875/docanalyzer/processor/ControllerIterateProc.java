@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
-import com.spldeolin.allison1875.base.collection.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import lombok.extern.log4j.Log4j2;
 
