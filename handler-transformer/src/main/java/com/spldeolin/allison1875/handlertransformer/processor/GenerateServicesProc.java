@@ -67,10 +67,12 @@ class GenerateServicesProc {
         List<String> imports4Impl = Lists.newArrayList(imports);
         imports4Impl.add(serviceCreator.getPrimaryTypeQualifier());
         imports4Impl.add("org.springframework.stereotype.Service");
+        imports4Impl.add("lombok.extern.slf4j.Slf4j");
         CuCreator serviceImplCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServiceImplPackage(), imports4Impl, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Service"));
+            coid.addAnnotation(StaticJavaParser.parseAnnotation("@Slf4j"));
             coid.setPublic(true).setInterface(false).setName(serviceName + "Impl");
             coid.addImplementedType(serviceName);
 
