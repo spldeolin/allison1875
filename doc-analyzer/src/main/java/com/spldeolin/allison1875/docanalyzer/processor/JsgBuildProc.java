@@ -102,7 +102,7 @@ class JsgBuildProc {
     }
 
     JsonSchemaGenerator buildJsg() {
-        ObjectMapper customOm = JsonUtils.initObjectMapper(new ObjectMapper());
+        ObjectMapper customOm = new ObjectMapper();
         // 只有类属性可见，类的getter、setter、构造方法里的字段不会被当作JSON的字段
         customOm.setVisibility(customOm.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY).withGetterVisibility(JsonAutoDetect.Visibility.NONE)

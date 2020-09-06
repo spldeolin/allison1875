@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
 import com.spldeolin.allison1875.base.exception.DotAbsentInStringException;
-import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,9 +20,6 @@ public class JsonSchemaGenerateUtils {
     private JsonSchemaGenerateUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
-
-    public static final JsonSchemaGenerator DEFAULT_JSG = new JsonSchemaGenerator(
-            JsonUtils.initObjectMapper(new ObjectMapper()));
 
     public static JsonSchema generateSchema(String describe, ObjectMapper om,
             AnnotationIntrospector annotationIntrospector, VisitorContext visitorContext) throws JsonSchemaException {

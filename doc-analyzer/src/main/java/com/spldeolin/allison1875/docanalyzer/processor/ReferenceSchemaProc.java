@@ -28,8 +28,7 @@ class ReferenceSchemaProc {
 
         // 处理ReferenceSchema
         JsonSchemaTraverseUtils.traverse("根节点", rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
-            JsonPropertyDescriptionValueDto jpdv = JsonUtils
-                    .toObjectSkipNull(jsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+            JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(parentJsonSchema.getDescription());
             String path = paths.get(parentJsonSchema);
             if (path == null) {
                 path = "";
@@ -62,8 +61,7 @@ class ReferenceSchemaProc {
                     jpdv.setReferencePath(referencePath);
                 }
                 if (parentJsonSchema.isArraySchema()) {
-                    JsonPropertyDescriptionValueDto parentJpdv = JsonUtils
-                            .toObjectSkipNull(parentJsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+                    JsonPropertyDescriptionValueDto parentJpdv = toJpdvSkipNull(parentJsonSchema.getDescription());
                     if (parentJpdv == null) {
                         parentJpdv = new JsonPropertyDescriptionValueDto();
                     }
@@ -76,6 +74,13 @@ class ReferenceSchemaProc {
                 jsonSchema.setDescription(JsonUtils.toJson(jpdv));
             }
         });
+    }
+
+    private JsonPropertyDescriptionValueDto toJpdvSkipNull(String nullableJson) {
+        if (nullableJson == null) {
+            return null;
+        }
+        return JsonUtils.toObject(nullableJson, JsonPropertyDescriptionValueDto.class);
     }
 
 }

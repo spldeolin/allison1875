@@ -16,7 +16,8 @@ import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
-public class DeserializeIgnoreNullElementModule extends SimpleModule {
+
+public class CollectionIgnoreNullElementDeserializerModule extends SimpleModule {
 
     private static class CustomizedCollectionDeserializer extends CollectionDeserializer {
 
