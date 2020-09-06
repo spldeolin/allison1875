@@ -8,10 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -22,10 +20,10 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.util.RedissonUtils;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
+import com.spldeolin.allison1875.docanalyzer.util.RedissonUtils;
 import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
@@ -118,8 +116,7 @@ class YApiSyncProc {
         if (bodyJsonSchema != null) {
             // jpdv -> Pretty String
             JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
-                JsonPropertyDescriptionValueDto jpdv = JsonUtils
-                        .toObjectSkipNull(jsonSchema.getDescription(), JsonPropertyDescriptionValueDto.class);
+                JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
                 if (jpdv != null) {
                     jsonSchema.setDescription(jpdv.toStringPrettily());
                 }
@@ -229,15 +226,9 @@ class YApiSyncProc {
     }
 
     private JsonNode ensureSusscessAndToGetData(String respJson) {
-        ObjectMapper om = JsonUtils.initObjectMapper(new ObjectMapper());
-        JsonNode jsonNode;
-        try {
-            jsonNode = om.readTree(respJson);
-            if (jsonNode.get("errcode").asInt() == 0) {
-                return jsonNode.get("data");
-            }
-        } catch (JsonProcessingException e) {
-            log.error(e);
+        JsonNode jsonNode = JsonUtils.toTree(respJson);
+        if (jsonNode.get("errcode").asInt() == 0) {
+            return jsonNode.get("data");
         }
         return null;
     }
@@ -246,6 +237,13 @@ class YApiSyncProc {
         if (resp.getErrcode() != 0) {
             throw new YapiException(resp.getErrmsg());
         }
+    }
+
+    private JsonPropertyDescriptionValueDto toJpdvSkipNull(String nullableJson) {
+        if (nullableJson == null) {
+            return null;
+        }
+        return JsonUtils.toObject(nullableJson, JsonPropertyDescriptionValueDto.class);
     }
 
 }

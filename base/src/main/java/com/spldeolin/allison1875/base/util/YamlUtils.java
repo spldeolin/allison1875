@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class YamlUtils {
 
-    private static final ObjectMapper om = JsonUtils.initObjectMapper(new ObjectMapper(new YAMLFactory()));
+    private static final ObjectMapper om = new ObjectMapper(new YAMLFactory());
 
     public static <T> T toObject(String yamlPath, Class<T> clazz) {
         InputStream is = ClassLoader.getSystemResourceAsStream(yamlPath);
