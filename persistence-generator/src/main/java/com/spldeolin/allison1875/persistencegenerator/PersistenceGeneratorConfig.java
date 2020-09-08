@@ -108,6 +108,16 @@ public class PersistenceGeneratorConfig {
      */
     private Collection<String> notKeyColumns = Lists.newArrayList();
 
+    /**
+     * Entity父类的全限定名
+     */
+    private String superEntityQualifier;
+
+    /**
+     * 已在Entit父类中声明，无需在具体Entity中再次声明的表字段
+     */
+    private Collection<String> alreadyInSuperEntity = Lists.newArrayList();
+
     private Boolean disableInsert = false;
 
     private Boolean disableQueryById = false;

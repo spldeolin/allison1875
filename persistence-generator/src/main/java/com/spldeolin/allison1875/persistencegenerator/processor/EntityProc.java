@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier.Keyword;
@@ -78,29 +79,41 @@ public class EntityProc {
         }
 
         // 生成Entity（可能是覆盖）
-        entityCuCreator = new CuCreator(pathProc.getSourceRoot(), conf.getEntityPackage(), this.getImports(persistence),
-                () -> {
-                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                    Javadoc classJavadoc = new JavadocComment(
-                            persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
-                                    + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
-                                    + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
-                    classJavadoc.getBlockTags().addAll(authorTags);
-                    coid.setJavadocComment(classJavadoc);
-                    coid.addAnnotation(parseAnnotation("@Data"));
-                    coid.addAnnotation(parseAnnotation("@Accessors(chain = true)"));
-                    coid.setPublic(true);
-                    coid.setName(persistence.getEntityName());
-                    for (PropertyDto property : persistence.getProperties()) {
-                        String type = property.getJavaType().getSimpleName();
-                        String name = property.getPropertyName();
-                        FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
-                        Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
-                        field.setJavadocComment(fieldJavadoc);
-
-                    }
-                    return coid;
-                });
+        List<String> imports = this.getImports(persistence);
+        String superEntityQualifier = PersistenceGeneratorConfig.getInstance().getSuperEntityQualifier();
+        if (StringUtils.isNotEmpty(superEntityQualifier)) {
+            imports.add(superEntityQualifier);
+            imports.add("lombok.EqualsAndHashCode");
+        }
+        entityCuCreator = new CuCreator(pathProc.getSourceRoot(), conf.getEntityPackage(), imports, () -> {
+            ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+            Javadoc classJavadoc = new JavadocComment(
+                    persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
+                            .repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型" + BaseConstant.BY_ALLISON_1875
+                            + "</strong>").parse();
+            classJavadoc.getBlockTags().addAll(authorTags);
+            coid.setJavadocComment(classJavadoc);
+            coid.addAnnotation(parseAnnotation("@Data"));
+            coid.setPublic(true);
+            coid.setName(persistence.getEntityName());
+            if (StringUtils.isNotEmpty(superEntityQualifier)) {
+                coid.addAnnotation(StaticJavaParser.parseAnnotation("@EqualsAndHashCode(callSuper = true)"));
+                String superEntityName = superEntityQualifier.substring(superEntityQualifier.lastIndexOf('.') + 1);
+                coid.addExtendedType(superEntityName);
+            }
+            for (PropertyDto property : persistence.getProperties()) {
+                if (PersistenceGeneratorConfig.getInstance().getAlreadyInSuperEntity()
+                        .contains(property.getColumnName())) {
+                    continue;
+                }
+                String type = property.getJavaType().getSimpleName();
+                String name = property.getPropertyName();
+                FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
+                Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
+                field.setJavadocComment(fieldJavadoc);
+            }
+            return coid;
+        });
 
         TreeSet<String> destinedVariables = Sets.newTreeSet();
         for (PropertyDto property : persistence.getProperties()) {
@@ -153,7 +166,6 @@ public class EntityProc {
             result.add("java.util.Date");
         }
         result.add("lombok.Data");
-        result.add("lombok.experimental.Accessors");
         return result;
     }
 
