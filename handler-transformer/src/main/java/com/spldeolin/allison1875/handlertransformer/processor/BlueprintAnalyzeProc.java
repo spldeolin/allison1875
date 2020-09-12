@@ -81,14 +81,14 @@ class BlueprintAnalyzeProc {
         }
 
         // dto meta
-        Map<BlockStmt, DtoMetaInfo.DtoMetaInfoBuilder> dtos = Maps.newLinkedHashMap();
+        Map<BlockStmt, DtoMetaInfoBuilder> dtos = Maps.newLinkedHashMap();
         List<BlockStmt> allBlockStmt = blueprint.findAll(BlockStmt.class);
         allBlockStmt.remove(0);
         BlockStmt reqBlockStmt = null;
         DtoMetaInfo reqBody = null;
         DtoMetaInfo respBody = null;
         for (BlockStmt blockStmt : allBlockStmt) {
-            DtoMetaInfo.DtoMetaInfoBuilder dtoBuilder = DtoMetaInfo.builder();
+            DtoMetaInfoBuilder dtoBuilder = DtoMetaInfo.builder();
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
 
             HandlerTransformerConfig conf = HandlerTransformerConfig.getInstance();
@@ -162,12 +162,12 @@ class BlueprintAnalyzeProc {
 
         // 把子BlockStmt的asVariableDeclarator添加到父BlockStmt的variableDeclarators中
         // 把子BlockStmt的typeQualifier添加到父BlockStmt的imports中
-        for (Entry<BlockStmt, DtoMetaInfo.DtoMetaInfoBuilder> entry : dtos.entrySet()) {
+        for (Entry<BlockStmt, DtoMetaInfoBuilder> entry : dtos.entrySet()) {
             BlockStmt blockStmt = entry.getKey();
             DtoMetaInfo dtoMeta = entry.getValue().build();
 
             BlockStmt parent = (BlockStmt) blockStmt.getParentNode().orElseThrow(ParentAbsentException::new);
-            DtoMetaInfo.DtoMetaInfoBuilder parentMetaBuilder = dtos.get(parent);
+            DtoMetaInfoBuilder parentMetaBuilder = dtos.get(parent);
             if (parentMetaBuilder == null) {
                 // parent是blueprint时
                 continue;

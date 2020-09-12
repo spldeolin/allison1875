@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import com.github.javaparser.StaticJavaParser;
@@ -8,10 +7,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -59,9 +56,6 @@ class GenerateServicesProc {
         CuCreator serviceCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServicePackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = new JavadocComment("").parse().addBlockTag("author",
-                    HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
-            coid.setJavadocComment(javadoc);
             coid.setPublic(true).setInterface(true).setName(serviceName);
             MethodDeclaration decl = absMethod.setBody(null);
             coid.addMember(decl);
@@ -77,9 +71,6 @@ class GenerateServicesProc {
         CuCreator serviceImplCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServiceImplPackage(), imports4Impl, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = new JavadocComment("").parse().addBlockTag("author",
-                    HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
-            coid.setJavadocComment(javadoc);
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Service"));
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Slf4j"));
             coid.setPublic(true).setInterface(false).setName(serviceName + "Impl");
