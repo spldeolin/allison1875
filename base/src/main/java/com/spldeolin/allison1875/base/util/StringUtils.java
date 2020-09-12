@@ -14,49 +14,49 @@ public class StringUtils {
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#isEmpty(java.lang.CharSequence)
+     * @see org.apache.commons.lang3.StringUtils#isEmpty(CharSequence)
      */
     public static boolean isEmpty(CharSequence cs) {
         return org.apache.commons.lang3.StringUtils.isEmpty(cs);
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#isNotBlank(java.lang.CharSequence)
+     * @see org.apache.commons.lang3.StringUtils#isNotBlank(CharSequence)
      */
     public static boolean isNotBlank(CharSequence cs) {
         return org.apache.commons.lang3.StringUtils.isNotBlank(cs);
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#equalsAny(java.lang.CharSequence, java.lang.CharSequence...)
+     * @see org.apache.commons.lang3.StringUtils#equalsAny(CharSequence, CharSequence...)
      */
     public static boolean equalsAny(final CharSequence string, final CharSequence... searchStrings) {
         return org.apache.commons.lang3.StringUtils.equalsAny(string, searchStrings);
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#isBlank(java.lang.CharSequence)
+     * @see org.apache.commons.lang3.StringUtils#isBlank(CharSequence)
      */
     public static boolean isBlank(CharSequence cs) {
         return org.apache.commons.lang3.StringUtils.isBlank(cs);
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#containsAny(java.lang.CharSequence, java.lang.CharSequence...)
+     * @see org.apache.commons.lang3.StringUtils#containsAny(CharSequence, CharSequence...)
      */
     public static boolean containsAny(CharSequence cs, CharSequence... searchCharSequences) {
         return org.apache.commons.lang3.StringUtils.containsAny(cs, searchCharSequences);
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#lowerCase(java.lang.String)
+     * @see org.apache.commons.lang3.StringUtils#lowerCase(String)
      */
     public static String lowerCase(String str) {
         return org.apache.commons.lang3.StringUtils.lowerCase(str);
     }
 
     /**
-     * @see org.apache.commons.lang3.StringUtils#upperCase(java.lang.String)
+     * @see org.apache.commons.lang3.StringUtils#upperCase(String)
      */
     public static String upperCase(String str) {
         return org.apache.commons.lang3.StringUtils.upperCase(str);

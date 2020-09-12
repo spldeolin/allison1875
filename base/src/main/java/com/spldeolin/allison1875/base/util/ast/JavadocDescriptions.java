@@ -37,7 +37,7 @@ public class JavadocDescriptions {
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getTrimmedFirstLine(com.github.javaparser.javadoc.Javadoc)}
+     * 重载自 {@linkplain JavadocDescriptions#getTrimmedFirstLine(Javadoc)}
      */
     public static String getTrimmedFirstLine(NodeWithJavadoc<?> node, boolean emptyToNull) {
         return node.getJavadoc().map(jd -> getTrimmedFirstLine(jd, emptyToNull)).orElse(null);
@@ -51,7 +51,7 @@ public class JavadocDescriptions {
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getEveryLineInOne(com.github.javaparser.javadoc.Javadoc, java.lang.String)}
+     * 重载自 {@linkplain JavadocDescriptions#getEveryLineInOne(Javadoc, String)}
      */
     public static String getEveryLineInOne(NodeWithJavadoc<?> node, String sep) {
         return node.getJavadoc().map(javadoc -> getEveryLineInOne(javadoc, sep)).orElse("");
@@ -66,7 +66,7 @@ public class JavadocDescriptions {
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getEveryLine(com.github.javaparser.javadoc.Javadoc)}
+     * 重载自 {@linkplain JavadocDescriptions#getEveryLine(Javadoc)}
      */
     public static Collection<String> getEveryLine(NodeWithJavadoc<?> node) {
         return node.getJavadoc().map(JavadocDescriptions::getEveryLine).orElse(Lists.newArrayList());

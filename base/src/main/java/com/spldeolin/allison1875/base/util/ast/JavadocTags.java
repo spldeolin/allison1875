@@ -38,8 +38,8 @@ public class JavadocTags {
     }
 
     /**
-     * 重载自 {@linkplain JavadocTags#getEveryLineByTag(com.github.javaparser.javadoc.Javadoc,
-     * com.github.javaparser.javadoc.JavadocBlockTag.Type)}
+     * 重载自 {@linkplain JavadocTags#getEveryLineByTag(Javadoc,
+     * Type)}
      */
     public static Collection<String> getEveryLineByTag(NodeWithJavadoc<?> node, Type blockTagType) {
         return node.getJavadoc().map(javadoc -> getEveryLineByTag(javadoc, blockTagType)).orElse(Lists.newArrayList());

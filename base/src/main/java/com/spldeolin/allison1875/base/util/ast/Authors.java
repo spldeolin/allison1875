@@ -29,7 +29,7 @@ public class Authors {
      * <p>
      * 如果有与文件名同名的TypeDeclaration，则获取这个TypeDeclaration的所有作者信息，
      * 否则获取所有最外层类型声明的所有作者信息，
-     * 获取方式参考{@link Authors#getEveryAuthor(com.github.javaparser.ast.Node)}
+     * 获取方式参考{@link Authors#getEveryAuthor(Node)}
      *
      * @return 如果有多个作者，去重后每个作者信息为一行，每行均已trim
      */
@@ -53,7 +53,7 @@ public class Authors {
     /**
      * 获取一个Node的所有作者
      * <p>
-     * 获取方式参考{@link Authors#getEveryAuthor(com.github.javaparser.ast.Node)}
+     * 获取方式参考{@link Authors#getEveryAuthor(Node)}
      *
      * @return 如果有多个作者，去重后每个作者信息为一行，每行均已trim
      */
