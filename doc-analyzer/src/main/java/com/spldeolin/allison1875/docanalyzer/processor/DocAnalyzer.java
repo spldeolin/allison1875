@@ -21,7 +21,9 @@ import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
+import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeEnumConstantStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
+import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeEnumConstantStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
@@ -55,13 +57,16 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     private SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
             new DefaultSpecificFieldDescriptionsStrategy();
 
+    @Setter
+    private AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
+
     @Override
     public void process(AstForest astForest) {
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
         JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationStrategy,
-                specificFieldDescriptionsStrategy.provideSpecificFieldDescriptions());
+                specificFieldDescriptionsStrategy.provideSpecificFieldDescriptions(), analyzeEnumConstantStrategy);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // 收集endpoint

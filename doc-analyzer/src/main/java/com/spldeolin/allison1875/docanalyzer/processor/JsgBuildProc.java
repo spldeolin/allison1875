@@ -11,6 +11,7 @@ import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
@@ -33,6 +34,7 @@ import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
+import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeEnumConstantStrategy;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -49,13 +51,17 @@ class JsgBuildProc {
 
     private final Table<String, String, String> specificFieldDescriptions;
 
+    private final AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy;
+
     private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
     JsgBuildProc(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
-            Table<String, String, String> specificFieldDescriptions) {
+            Table<String, String, String> specificFieldDescriptions,
+            AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy) {
         this.astForest = astForest;
         this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
         this.specificFieldDescriptions = specificFieldDescriptions;
+        this.analyzeEnumConstantStrategy = analyzeEnumConstantStrategy;
     }
 
     JsonSchemaGenerator analyzeAstAndBuildJsg() {
@@ -201,9 +207,29 @@ class JsgBuildProc {
                 if (annoClass == JsonSerialize.class) {
                     return null;
                 }
+                if (annoClass == JsonValue.class) {
+                    if (annotated instanceof AnnotatedMember) {
+                        Class<?> enumTypeMight = ((AnnotatedMember) annotated).getDeclaringClass();
+                        if (enumTypeMight.isEnum() && analyzeEnumConstantStrategy.supportEnumType(enumTypeMight)) {
+                            return null;
+                        }
+                    }
+                }
                 return super._findAnnotation(annotated, annoClass);
             }
 
+            @Override
+            public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
+                if (analyzeEnumConstantStrategy.supportEnumType(enumType)) {
+                    Object[] enumConstants = enumType.getEnumConstants();
+                    Collection<String> ecat = Lists.newArrayList();
+                    for (Object enumConstant : enumConstants) {
+                        ecat.add(JsonUtils.toJson(analyzeEnumConstantStrategy.analyzeEnumConstant(enumConstant)));
+                    }
+                    return ecat.toArray(new String[0]);
+                }
+                return super.findEnumValues(enumType, enumValues, names);
+            }
         });
 
         JsonSchemaGenerator jsg = new JsonSchemaGenerator(customOm);
