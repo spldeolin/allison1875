@@ -44,7 +44,7 @@ class GenerateDtosProc {
 
             CuCreator cuCreator = new CuCreator(sourceRoot, dtoMetaInfo.getPackageName(), imports, () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                Javadoc javadoc = new JavadocComment().parse().addBlockTag("author",
+                Javadoc javadoc = new JavadocComment("").parse().addBlockTag("author",
                         HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
                 coid.setJavadocComment(javadoc);
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Data"));
