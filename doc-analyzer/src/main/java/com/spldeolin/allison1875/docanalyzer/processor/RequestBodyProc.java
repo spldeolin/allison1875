@@ -34,6 +34,7 @@ class RequestBodyProc {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
                 new ReferenceSchemaProc(jsonSchema).process();
+                new EnumSchemaProc(jsonSchema).process();
                 return jsonSchema;
             }
         } catch (JsonSchemaException ignore) {

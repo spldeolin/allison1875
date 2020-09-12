@@ -1,11 +1,14 @@
 package com.spldeolin.allison1875.docanalyzer.dto;
 
 import java.util.Collection;
+import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -34,6 +37,8 @@ public class JsonPropertyDescriptionValueDto {
     private Boolean docIgnore = false;
 
     private String referencePath;
+
+    private Collection<EnumCodeAndTitleDto> ecats;
 
     public String toStringPrettily() {
         if (isFieldCrossingValids) {
@@ -77,7 +82,19 @@ public class JsonPropertyDescriptionValueDto {
                 format = "格式\n";
                 format += "\t" + jsonFormatPattern;
             }
-            return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format);
+            String enumInfo = null;
+            if (ecats != null) {
+                StringBuilder sb = new StringBuilder("枚举项\n");
+                Map<String, String> catsMap = Maps.newHashMap();
+                for (EnumCodeAndTitleDto ecat : ecats) {
+                    catsMap.put(ecat.getCode(), ecat.getTitle());
+                }
+                for (String line : StringUtils.splitLineByLine(JsonUtils.toJsonPrettily(catsMap))) {
+                    sb.append("\t").append(line).append("\n");
+                }
+                enumInfo = sb.deleteCharAt(sb.length() - 1).toString();
+            }
+            return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format, enumInfo);
         }
     }
 
