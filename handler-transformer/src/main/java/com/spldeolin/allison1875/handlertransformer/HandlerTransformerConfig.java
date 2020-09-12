@@ -81,6 +81,12 @@ public class HandlerTransformerConfig {
     @NotEmpty
     private Collection<@NotEmpty String> controllerImports;
 
+    /**
+     * 为生成的代码指定作者
+     */
+    @NotEmpty
+    private String author;
+
     private HandlerTransformerConfig() {
     }
 
