@@ -83,7 +83,7 @@ public class JsonPropertyDescriptionValueDto {
                 format += "\t" + jsonFormatPattern;
             }
             String enumInfo = null;
-            if (ecats != null) {
+            if (CollectionUtils.isNotEmpty(ecats)) {
                 StringBuilder sb = new StringBuilder("枚举项\n");
                 Map<String, String> catsMap = Maps.newHashMap();
                 for (EnumCodeAndTitleDto ecat : ecats) {
