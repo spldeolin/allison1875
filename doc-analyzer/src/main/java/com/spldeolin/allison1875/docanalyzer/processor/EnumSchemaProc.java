@@ -25,7 +25,6 @@ public class EnumSchemaProc {
             if (jsonSchema.isValueTypeSchema()) {
                 Set<String> enums = jsonSchema.asValueTypeSchema().getEnums();
                 if (enums != null) {
-                    jsonSchema.asValueTypeSchema().getEnums().clear();
                     String jpd = jsonSchema.getDescription();
                     if (jpd != null) {
                         JsonPropertyDescriptionValueDto jpdv = JsonUtils
@@ -36,6 +35,7 @@ public class EnumSchemaProc {
                         }
                         jpdv.setEcats(ecats);
                         jsonSchema.setDescription(JsonUtils.toJson(jpdv));
+                        enums.clear();
                     }
                 }
             }
