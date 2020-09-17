@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapper;
 
+import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 import static com.github.javaparser.StaticJavaParser.parseParameter;
 import static com.github.javaparser.StaticJavaParser.parseType;
 
@@ -53,8 +54,8 @@ public class QueryByIdsEachIdProc extends MapperProc {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             String varName = StringUtils.lowerFirstLetter(onlyPk.getPropertyName());
             String pkTypeName = onlyPk.getJavaType().getSimpleName();
-            queryByIdsEachId.setType(parseType(
-                    "@MapKey(\"" + varName + "\")" + "Map<" + pkTypeName + ", " + persistence.getEntityName() + ">"));
+            queryByIdsEachId.addAnnotation(parseAnnotation("@MapKey(\"" + varName + "\")"));
+            queryByIdsEachId.setType(parseType("Map<" + pkTypeName + ", " + persistence.getEntityName() + ">"));
             queryByIdsEachId.setName(methodName);
             String varsName = English.plural(varName);
             queryByIdsEachId.addParameter(
