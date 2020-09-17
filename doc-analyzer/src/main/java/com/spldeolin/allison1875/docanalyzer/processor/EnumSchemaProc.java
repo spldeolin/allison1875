@@ -25,21 +25,39 @@ public class EnumSchemaProc {
             if (jsonSchema.isValueTypeSchema()) {
                 Set<String> enums = jsonSchema.asValueTypeSchema().getEnums();
                 if (enums != null) {
+                    Collection<EnumCodeAndTitleDto> ecats = Lists.newArrayList();
+                    for (String anEnum : enums) {
+                        ecats.add(JsonUtils.toObject(anEnum, EnumCodeAndTitleDto.class));
+                    }
+
                     String jpd = jsonSchema.getDescription();
                     if (jpd != null) {
                         JsonPropertyDescriptionValueDto jpdv = JsonUtils
                                 .toObject(jpd, JsonPropertyDescriptionValueDto.class);
-                        Collection<EnumCodeAndTitleDto> ecats = Lists.newArrayList();
-                        for (String anEnum : enums) {
-                            ecats.add(JsonUtils.toObject(anEnum, EnumCodeAndTitleDto.class));
-                        }
                         jpdv.setEcats(ecats);
                         jsonSchema.setDescription(JsonUtils.toJson(jpdv));
-                        enums.clear();
                     }
+
+                    if (parentJsonSchema.isArraySchema()) {
+                        JsonPropertyDescriptionValueDto parentJpdv = toJpdvSkipNull(parentJsonSchema.getDescription());
+                        if (parentJpdv == null) {
+                            parentJpdv = new JsonPropertyDescriptionValueDto();
+                        }
+                        parentJpdv.setEcats(ecats);
+                        parentJsonSchema.setDescription(JsonUtils.toJson(parentJpdv));
+                    }
+
+                    enums.clear();
                 }
             }
         });
+    }
+
+    private JsonPropertyDescriptionValueDto toJpdvSkipNull(String nullableJson) {
+        if (nullableJson == null) {
+            return null;
+        }
+        return JsonUtils.toObject(nullableJson, JsonPropertyDescriptionValueDto.class);
     }
 
 }
