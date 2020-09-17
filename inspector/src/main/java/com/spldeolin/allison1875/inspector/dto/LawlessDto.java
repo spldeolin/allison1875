@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.inspector.dto;
 
 import java.time.LocalDateTime;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.base.util.ast.Authors;
@@ -47,6 +48,12 @@ public class LawlessDto {
         this.qualifier = qualifier;
         this.message = message;
         this.author = Authors.getAuthor(node);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append("\n\t源码位置", sourceCode).append("\n\t全限定名", qualifier)
+                .append("\n\t规约号", statuteNo).append("\n\t详细信息", message).append("\n\t作者", author).toString();
     }
 
 }

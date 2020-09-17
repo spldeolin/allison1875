@@ -2,6 +2,8 @@ package com.spldeolin.allison1875.inspector.processor;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -28,6 +30,7 @@ public class JudgeByStatutesProc {
     private final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 
     public JudgeByStatutesProc process() {
+        final Collection<LawlessDto> lawlesses = Lists.newArrayList();
         AstForestContext.getCurrent().forEach(cu -> {
             if (StaticVcsContainer.contain(cu)) {
                 long start = System.currentTimeMillis();
@@ -45,6 +48,9 @@ public class JudgeByStatutesProc {
                         System.currentTimeMillis() - start);
             }
         });
+
+        this.lawlesses.addAll(lawlesses.stream().sorted(Comparator.comparing(LawlessDto::getStatuteNo))
+                .collect(Collectors.toList()));
 
         log.info("All inspections completed");
         return this;

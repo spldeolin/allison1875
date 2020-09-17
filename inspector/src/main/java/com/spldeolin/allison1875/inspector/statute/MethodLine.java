@@ -20,9 +20,9 @@ public class MethodLine implements Statute {
         for (MethodDeclaration method : cu.findAll(MethodDeclaration.class)) {
             Range range = method.getRange().orElseThrow(RangeAbsentException::new);
             int i = range.end.line - range.begin.line + 1;
-            if (i > 10) {
+            if (i > 200) {
                 result.add(new LawlessDto(method, MethodQualifiers.getTypeQualifierWithMethodName(method),
-                        String.format("方法不能超过10行，当前%s行", i)));
+                        String.format("方法不能超过200行，当前%s行", i)));
             }
         }
         return result;

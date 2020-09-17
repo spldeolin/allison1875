@@ -23,8 +23,10 @@ public class NumberMagicValue implements Statute, Serializable {
                 for (LiteralExpr literalExpr : bodyDeclaration.findAll(LiteralExpr.class)) {
                     if (literalExpr.isDoubleLiteralExpr() || literalExpr.isIntegerLiteralExpr() || literalExpr
                             .isLongLiteralExpr()) {
-                        result.add(
-                                new LawlessDto(literalExpr, null, String.format("出现了魔法值[%s]", literalExpr.toString())));
+                        if (!literalExpr.toString().equals("0")) {
+                            result.add(new LawlessDto(literalExpr, null,
+                                    String.format("出现了魔法值[%s]", literalExpr.toString())));
+                        }
                     }
                 }
             }

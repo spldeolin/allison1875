@@ -16,13 +16,13 @@ public class Inspector implements Allison1875MainProcessor {
     public void process(AstForest astForest) {
         AstForestContext.setCurrent(astForest);
 
-        PardonDetectProc pardonDetectProc = new PardonDetectProc().process();
+        DetectPardonProc pardonDetectProc = new DetectPardonProc().process();
         Collection<PardonDto> pardons = pardonDetectProc.pardons();
 
         JudgeByStatutesProc judgeByStatutesProc = new JudgeByStatutesProc().pardons(pardons).process();
         Collection<LawlessDto> lawlesses = judgeByStatutesProc.lawlesses();
 
-        new LawlessReportProc().lawlesses(lawlesses).process();
+        new ReportLawlessProc().lawlesses(lawlesses).process();
     }
 
 }
