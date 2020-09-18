@@ -216,6 +216,20 @@
                 <version>3.13.4</version>
             </dependency>
 
+            <!-- easy random -->
+            <dependency>
+                <groupId>org.jeasy</groupId>
+                <artifactId>easy-random-core</artifactId>
+                <version>4.2.0</version>
+            </dependency>
+
+            <!-- reflections -->
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.12</version>
+            </dependency>
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
