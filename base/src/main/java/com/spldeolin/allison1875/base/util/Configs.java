@@ -4,7 +4,6 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import com.spldeolin.allison1875.base.exception.ConfigInvalidException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,7 +21,7 @@ public class Configs {
         Set<ConstraintViolation<Object>> valids = validator.validate(config);
         valids.forEach(valid -> log.error("配置项校验未通过：{}{}", valid.getPropertyPath(), valid.getMessage()));
         if (valids.size() > 0) {
-            throw new ConfigInvalidException();
+            System.exit(-9);
         }
     }
 
