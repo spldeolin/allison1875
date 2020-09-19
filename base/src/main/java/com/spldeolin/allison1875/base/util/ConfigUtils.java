@@ -10,9 +10,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-08-28
  */
 @Log4j2
-public class Configs {
+public class ConfigUtils {
 
-    private Configs() {
+    private ConfigUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

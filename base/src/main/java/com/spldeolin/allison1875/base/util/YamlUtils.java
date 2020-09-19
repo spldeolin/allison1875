@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.spldeolin.allison1875.base.util.exception.YamlAbsentException;
 import com.spldeolin.allison1875.base.util.exception.YamlException;
 import lombok.extern.log4j.Log4j2;
@@ -15,11 +14,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class YamlUtils {
 
-    private static final ObjectMapper om = getObjectMapper();
+    private static final ObjectMapper om = createObjectMapper();
 
-    private static ObjectMapper getObjectMapper() {
-        ObjectMapper om = new ObjectMapper(new YAMLFactory());
-        om.registerModule(JsonUtils.java8TimeModule());
+    private static ObjectMapper createObjectMapper() {
+        // 缺省配置
+        ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
+
         return om;
     }
 

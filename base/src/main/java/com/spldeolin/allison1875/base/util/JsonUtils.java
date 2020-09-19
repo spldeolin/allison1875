@@ -1,31 +1,12 @@
 package com.spldeolin.allison1875.base.util;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.TimeZone;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import com.spldeolin.allison1875.base.json.CollectionIgnoreNullElementDeserializerModule;
-import com.spldeolin.allison1875.base.json.NumberToStringMightJsonSerializer;
-import com.spldeolin.allison1875.base.json.StringTrimDeserializer;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.exception.JsonException;
 import lombok.extern.log4j.Log4j2;
 
@@ -33,20 +14,7 @@ import lombok.extern.log4j.Log4j2;
  * JSON工具类
  *
  * <pre>
- * 特性：
- * 1. 支持Guava的数据结构，如Multimap、Table等
- * 2. 反系列化时，忽略JSON中提供了而Javabean中不存在的属性，不抛出异常
- * 3. 序列化时，支持将Long、long、BigInteger类型转化为String，作用范围可指定
- *    （可通过@JsonSerializer覆盖这个特性）
- * 4. 支持Java8 time包下的LocalDate、LocalTime、LocalDateTime，缺省pattern分别为"yyyy-MM-dd"、"HH:mm:ss"、"yyyy-MM-dd HH:mm:ss"
- *    （可通过@JsonFormat覆盖这个特性）
- * 5. java.util.Date的缺省pattern为yyyy-MM-dd HH:mm:ss
- *    （可通过@JsonFormat覆盖这个特性）
- * 6. 时区默认为东8区
- *    （可通过@JsonFormat覆盖这个特性）
- * 7. 反序列化时，忽略Collection中为null的元素，不add(null)到容器对象中
- * 8. 反序列化时，对每个String进行trim
- *    （可通过@JsonDeserializer覆盖这个特性）
+ * 序列化与反序列化策略参考{@link ObjectMapperUtils#initDefault}
  * </pre>
  *
  * @author Deolin 2018-04-02
@@ -54,70 +22,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JsonUtils {
 
-    private static final ObjectMapper om = createObjectMapper();
+    private static final ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
 
     private JsonUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
-    }
-
-    public static ObjectMapper createObjectMapper() {
-        return createObjectMapper(new NumberToStringMightJsonSerializer());
-    }
-
-    public static ObjectMapper createObjectMapper(NumberToStringMightJsonSerializer numberToStringMightJsonSerializer) {
-        ObjectMapper result = new ObjectMapper();
-        // Guava的数据结构
-        result.registerModule(new GuavaModule());
-
-        // 忽略json中存在，但Javabean中不存在的属性
-        result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        // Long to String
-        result.registerModule(toStringModule(numberToStringMightJsonSerializer));
-
-        // Java8 time
-        result.registerModule(java8TimeModule());
-
-        // java.util.Date
-        result.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-
-        // 反序列化时，忽略Collection中为null的元素
-        result.registerModule(new CollectionIgnoreNullElementDeserializerModule());
-
-        // 反序列化时，对每个String进行trim
-        result.registerModule(stringTrimModule());
-
-        // 时区
-        result.setTimeZone(TimeZone.getDefault());
-        return result;
-    }
-
-    public static SimpleModule stringTrimModule() {
-        SimpleModule result = new SimpleModule();
-        result.addDeserializer(String.class, new StringTrimDeserializer());
-        return result;
-    }
-
-    public static SimpleModule java8TimeModule() {
-        SimpleModule result = new JavaTimeModule();
-        DateTimeFormatter date = TimeUtils.DEFAULT_DATE_FORMATTER;
-        DateTimeFormatter time = TimeUtils.DEFAULT_TIME_FORMATTER;
-        DateTimeFormatter dateTime = TimeUtils.DEFAULT_DATE_TIME_FORMATTER;
-        result.addSerializer(LocalDate.class, new LocalDateSerializer(date))
-                .addDeserializer(LocalDate.class, new LocalDateDeserializer(date))
-                .addSerializer(LocalTime.class, new LocalTimeSerializer(time))
-                .addDeserializer(LocalTime.class, new LocalTimeDeserializer(time))
-                .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTime))
-                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTime));
-        return result;
-    }
-
-    private static SimpleModule toStringModule(NumberToStringMightJsonSerializer numberToStringMightJsonSerializer) {
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(BigInteger.class, numberToStringMightJsonSerializer);
-        simpleModule.addSerializer(Long.class, numberToStringMightJsonSerializer);
-        simpleModule.addSerializer(Long.TYPE, numberToStringMightJsonSerializer);
-        return simpleModule;
     }
 
     /**
@@ -195,11 +103,13 @@ public class JsonUtils {
      *
      * @throws JsonException 任何原因转化失败时，抛出这个异常，如果需要补偿处理，可以进行捕获
      */
+
     public static <T> List<T> toListOfObject(String json, Class<T> clazz, ObjectMapper om) {
         try {
-            return om.readValue(json, new TypeReference<List<T>>() {
-            });
-        } catch (IOException e) {
+            @SuppressWarnings("unchecked") Class<T[]> arrayClass = (Class<T[]>) Class
+                    .forName("[L" + clazz.getName() + ";");
+            return Lists.newArrayList(om.readValue(json, arrayClass));
+        } catch (IOException | ClassNotFoundException e) {
             log.error("json={}, clazz={}", json, clazz, e);
             throw new JsonException(e);
         }
@@ -235,7 +145,7 @@ public class JsonUtils {
     /**
      * JSON -> JsonNode对象
      *
-     * <strong>不建议使用</strong>
+     * <strong>除非JSON对应数据结构在运行时是变化的，否则不建议使这个方法</strong>
      *
      * @throws JsonException 任何原因转化失败时，抛出这个异常，如果需要补偿处理，可以进行捕获
      */
@@ -246,7 +156,7 @@ public class JsonUtils {
     /**
      * JSON -> JsonNode对象
      *
-     * <strong>不建议使用</strong>
+     * <strong>除非JSON对应数据结构在运行时是变化的，否则不建议使这个方法</strong>
      *
      * @throws JsonException 任何原因转化失败时，抛出这个异常，如果需要补偿处理，可以进行捕获
      */

@@ -4,7 +4,7 @@ import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.Configs;
+import com.spldeolin.allison1875.base.util.ConfigUtils;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
@@ -19,7 +19,8 @@ public class PersistenceGeneratorConfig {
 
     @Getter
     private static final PersistenceGeneratorConfig instance = YamlUtils
-            .toObjectAndThen("persistence-generator-config.yml", PersistenceGeneratorConfig.class, Configs::validate);
+            .toObjectAndThen("persistence-generator-config.yml", PersistenceGeneratorConfig.class,
+                    ConfigUtils::validate);
 
     /**
      * 数据库连接

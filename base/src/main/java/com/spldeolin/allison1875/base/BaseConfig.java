@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.base;
 
 import javax.validation.constraints.NotEmpty;
-import com.spldeolin.allison1875.base.util.Configs;
+import com.spldeolin.allison1875.base.util.ConfigUtils;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import com.spldeolin.allison1875.base.util.exception.YamlAbsentException;
 import lombok.Data;
@@ -25,7 +25,7 @@ public final class BaseConfig {
     private static BaseConfig buildFromYamlMight() {
         BaseConfig result;
         try {
-            result = YamlUtils.toObjectAndThen("base-config.yml", BaseConfig.class, Configs::validate);
+            result = YamlUtils.toObjectAndThen("base-config.yml", BaseConfig.class, ConfigUtils::validate);
         } catch (YamlAbsentException e) {
             return new BaseConfig();
         }

@@ -30,12 +30,12 @@ import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo.DtoMeta
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import com.spldeolin.allison1875.handlertransformer.util.BlockStmts;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-27
  */
-@Slf4j
+@Log4j2
 class BlueprintAnalyzeProc {
 
     private final ClassOrInterfaceDeclaration controller;

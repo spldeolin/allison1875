@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.inspector;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.base.util.Configs;
+import com.spldeolin.allison1875.base.util.ConfigUtils;
 import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
@@ -19,7 +19,7 @@ public final class InspectorConfig {
 
     @Getter
     private static final InspectorConfig instance = YamlUtils
-            .toObjectAndThen("inspector-config.yml", InspectorConfig.class, Configs::validate);
+            .toObjectAndThen("inspector-config.yml", InspectorConfig.class, ConfigUtils::validate);
 
     /**
      * 工程所在的Git本地仓库的路径

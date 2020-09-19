@@ -6,12 +6,12 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-13
  */
-@Slf4j
+@Log4j2
 public abstract class MapperProc {
 
     protected String calcMethodName(ClassOrInterfaceDeclaration mapper, String expectMethodName) {
