@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.Data;
@@ -33,7 +34,7 @@ public class TreeNode {
     private Collection<@NotBlank TreeNode>[][] children;
 
     public static void main(String[] args) throws JsonSchemaException, JsonProcessingException {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
         om.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
             private static final long serialVersionUID = 4963154137655948984L;
 

@@ -29,6 +29,7 @@ import com.google.common.collect.Table;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
@@ -108,7 +109,9 @@ class JsgBuildProc {
     }
 
     JsonSchemaGenerator buildJsg() {
-        ObjectMapper customOm = new ObjectMapper();
+        // 缺省配置
+        ObjectMapper customOm = ObjectMapperUtils.initDefault(new ObjectMapper());
+
         // 只有类属性可见，类的getter、setter、构造方法里的字段不会被当作JSON的字段
         customOm.setVisibility(customOm.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY).withGetterVisibility(JsonAutoDetect.Visibility.NONE)
