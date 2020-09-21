@@ -12,10 +12,6 @@ import lombok.Getter;
 @Getter
 public enum StatuteEnum {
 
-    S_0013("[1]", "任何方法禁止超过200行", new MethodLine()),
-
-    S_0019("[2]", "代码中禁止出现数字魔法值", new NumberMagicValue()),
-
     ;
 
     private final String no;
