@@ -115,8 +115,17 @@ public class EntityProc {
             return coid;
         });
 
+        this.reportDiff(originalVariables);
+
+        return this;
+    }
+
+    private void reportDiff(TreeSet<String> originalVariables) {
         TreeSet<String> destinedVariables = Sets.newTreeSet();
         for (PropertyDto property : persistence.getProperties()) {
+            if (PersistenceGeneratorConfig.getInstance().getAlreadyInSuperEntity().contains(property.getColumnName())) {
+                continue;
+            }
             destinedVariables.add(property.getJavaType().getSimpleName() + " " + property.getPropertyName());
         }
 
@@ -134,8 +143,6 @@ public class EntityProc {
             }
 
         }
-
-        return this;
     }
 
     private String buildCommentDescription(PropertyDto property) {
