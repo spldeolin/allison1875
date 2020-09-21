@@ -7,7 +7,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
-import com.spldeolin.allison1875.inspector.statute.StatuteEnum;
+import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
 public class Inspector implements Allison1875MainProcessor {
 
     @Setter
-    private Collection<StatuteEnum> statuteEnums = Lists.newArrayList();
+    private Collection<Statute> statutes = Lists.newArrayList();
 
     @Override
     public void process(AstForest astForest) {
@@ -27,7 +27,7 @@ public class Inspector implements Allison1875MainProcessor {
         DetectPardonProc pardonDetectProc = new DetectPardonProc().process();
         Collection<PardonDto> pardons = pardonDetectProc.pardons();
 
-        JudgeByStatutesProc judgeByStatutesProc = new JudgeByStatutesProc().statuteEnums(statuteEnums).pardons(pardons)
+        JudgeByStatutesProc judgeByStatutesProc = new JudgeByStatutesProc().statutes(statutes).pardons(pardons)
                 .process();
         Collection<LawlessDto> lawlesses = judgeByStatutesProc.lawlesses();
 

@@ -3,13 +3,12 @@ package com.spldeolin.allison1875.inspector.processor;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
-import com.spldeolin.allison1875.inspector.statute.StatuteEnum;
+import com.spldeolin.allison1875.inspector.statute.Statute;
 import com.spldeolin.allison1875.inspector.vcs.StaticVcsContainer;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +26,7 @@ public class JudgeByStatutesProc {
     private Collection<PardonDto> pardons;
 
     @Setter
-    private Collection<StatuteEnum> statuteEnums;
+    private Collection<Statute> statutes;
 
     @Getter
     private final Collection<LawlessDto> lawlesses = Lists.newArrayList();
@@ -38,20 +37,17 @@ public class JudgeByStatutesProc {
             if (StaticVcsContainer.contain(cu)) {
                 long start = System.currentTimeMillis();
 
-                Collection<StatuteEnum> statutes = Lists.newArrayList(StatuteEnum.values());
-                if (CollectionUtils.isNotEmpty(statuteEnums)) {
-                    statutes.addAll(statuteEnums);
-                }
-
-                for (StatuteEnum statuteEnum : statutes) {
-                    Collection<LawlessDto> dtos = statuteEnum.getStatute().inspect(cu);
-                    dtos.forEach(dto -> {
-                        String statuteNo = statuteEnum.getNo();
-                        if (isNotInPublicAcks(dto, statuteNo)) {
-                            dto.setStatuteNo(statuteNo);
-                            lawlesses.add(dto);
-                        }
-                    });
+                if (statutes != null) {
+                    for (Statute statute : statutes) {
+                        Collection<LawlessDto> dtos = statute.inspect(cu);
+                        dtos.forEach(dto -> {
+                            String statuteNo = statute.declareStatuteNo();
+                            if (isNotInPublicAcks(dto, statuteNo)) {
+                                dto.setStatuteNo(statuteNo);
+                                lawlesses.add(dto);
+                            }
+                        });
+                    }
                 }
 
                 log.info("CompilationUnit [{}] inspection completed with [{}]ms.", Locations.getRelativePath(cu),
