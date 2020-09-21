@@ -1,9 +1,6 @@
 package com.spldeolin.allison1875.base;
 
 import javax.validation.constraints.NotEmpty;
-import com.spldeolin.allison1875.base.util.ConfigUtils;
-import com.spldeolin.allison1875.base.util.YamlUtils;
-import com.spldeolin.allison1875.base.util.exception.YamlAbsentException;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -20,17 +17,7 @@ import lombok.extern.log4j.Log4j2;
 public final class BaseConfig {
 
     @Getter
-    private static final BaseConfig instance = buildFromYamlMight();
-
-    private static BaseConfig buildFromYamlMight() {
-        BaseConfig result;
-        try {
-            result = YamlUtils.toObjectAndThen("base-config.yml", BaseConfig.class, ConfigUtils::validate);
-        } catch (YamlAbsentException e) {
-            return new BaseConfig();
-        }
-        return result;
-    }
+    private static final BaseConfig instance = new BaseConfig();
 
     /**
      * Maven工程Java源码的布局（一般不需要改动此项）

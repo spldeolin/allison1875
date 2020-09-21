@@ -2,8 +2,6 @@ package com.spldeolin.allison1875.handlertransformer;
 
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
-import com.spldeolin.allison1875.base.util.ConfigUtils;
-import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +16,7 @@ import lombok.extern.log4j.Log4j2;
 public class HandlerTransformerConfig {
 
     @Getter
-    private static final HandlerTransformerConfig instance = YamlUtils
-            .toObjectAndThen("handler-transformer-config.yml", HandlerTransformerConfig.class, ConfigUtils::validate);
+    private static final HandlerTransformerConfig instance = new HandlerTransformerConfig();
 
     /**
      * 控制层 @RequestBody类型所在包的包名

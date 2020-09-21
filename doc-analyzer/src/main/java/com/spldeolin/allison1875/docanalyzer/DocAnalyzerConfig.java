@@ -5,8 +5,6 @@ import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.ConfigUtils;
-import com.spldeolin.allison1875.base.util.YamlUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -21,8 +19,7 @@ import lombok.extern.log4j.Log4j2;
 public final class DocAnalyzerConfig {
 
     @Getter
-    private static final DocAnalyzerConfig instance = YamlUtils
-            .toObjectAndThen("doc-analyzer-config.yml", DocAnalyzerConfig.class, ConfigUtils::validate);
+    private static final DocAnalyzerConfig instance = new DocAnalyzerConfig();
 
     /**
      * 目标项目handler方法签名所依赖的项目的源码路径
