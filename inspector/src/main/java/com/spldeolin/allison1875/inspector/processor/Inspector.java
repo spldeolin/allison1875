@@ -9,10 +9,12 @@ import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.StatuteEnum;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-08-31
  */
+@Accessors(fluent = true)
 public class Inspector implements Allison1875MainProcessor {
 
     @Setter
