@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.util;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.redisson.config.SingleServerConfig;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 
 /**
@@ -11,10 +12,14 @@ import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 public class RedissonUtils {
 
     public static RedissonClient getSingleServer() {
-        Config config = new Config();
+        Config redissonConfig = new Config();
         DocAnalyzerConfig conf = DocAnalyzerConfig.getInstance();
-        config.useSingleServer().setAddress(conf.getRedisAddress()).setPassword(conf.getRedisPassword());
-        return Redisson.create(config);
+        SingleServerConfig singleServerConfig = redissonConfig.useSingleServer();
+        singleServerConfig.setAddress(conf.getRedisAddress());
+        if (conf.getRedisPassword() != null) {
+            singleServerConfig.setPassword(conf.getRedisPassword());
+        }
+        return Redisson.create(redissonConfig);
     }
 
     public static void close(RedissonClient redissonClient) {

@@ -22,15 +22,10 @@ public final class DocAnalyzerConfig {
     private static final DocAnalyzerConfig instance = new DocAnalyzerConfig();
 
     /**
-     * 目标项目handler方法签名所依赖的项目的源码路径
+     * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
      */
     @NotNull
     private Collection<@NotEmpty String> dependencyProjectPaths = Lists.newArrayList();
-
-    /**
-     * 根据作者名过滤
-     */
-    private String filterByAuthorName;
 
     /**
      * 全局URL前缀
@@ -58,7 +53,6 @@ public final class DocAnalyzerConfig {
     /**
      * Redis服务的密码
      */
-    @NotEmpty
     private String redisPassword;
 
     private DocAnalyzerConfig() {

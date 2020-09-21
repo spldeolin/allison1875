@@ -12,7 +12,6 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -132,11 +131,6 @@ public class DocAnalyzer implements Allison1875MainProcessor {
                 builder.author(Authors.getAuthor(handler));
                 builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
 
-                // 根据作者名过滤
-                if (filterByConfig(builder.author())) {
-                    return;
-                }
-
                 // 处理@RequestMapping（handler的RequestMapping）
                 requestMappingProcessor.analyze(reflectionMethod);
                 builder.combinedUrls(requestMappingProcessor.getCombinedUrls());
@@ -172,14 +166,6 @@ public class DocAnalyzer implements Allison1875MainProcessor {
             controllerCat = controller.getNameAsString();
         }
         return controllerCat;
-    }
-
-    private boolean filterByConfig(String author) {
-        String filterByAuthorName = DocAnalyzerConfig.getInstance().getFilterByAuthorName();
-        if (StringUtils.isEmpty(filterByAuthorName)) {
-            return false;
-        }
-        return !author.contains(filterByAuthorName);
     }
 
     private String findCat(NodeWithJavadoc<?> node) {
