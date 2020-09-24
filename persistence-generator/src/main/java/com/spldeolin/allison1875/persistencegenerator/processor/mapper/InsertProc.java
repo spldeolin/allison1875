@@ -4,6 +4,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -36,7 +37,10 @@ public class InsertProc extends MapperProc {
         }
         methodName = super.calcMethodName(mapper, "insert");
         MethodDeclaration insert = new MethodDeclaration();
-        insert.setJavadocComment(new JavadocComment("插入" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+        Javadoc javadoc = new JavadocComment("插入" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+        javadoc.addBlockTag("param", "entity", persistence.getDescrption());
+        javadoc.addBlockTag("return", "插入条数");
+        insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(persistence.getEntityName(), "entity");

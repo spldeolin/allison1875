@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -42,11 +43,15 @@ public class DeleteByKeyProc extends MapperProc {
         if (persistence.getIsDeleteFlagExist()) {
             methodName = calcMethodName(mapper, "deleteBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
             MethodDeclaration method = new MethodDeclaration();
-            method.setJavadocComment(
-                    new JavadocComment("根据" + key.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            String varName = StringUtils.lowerFirstLetter(key.getPropertyName());
+            Javadoc javadoc = new JavadocComment(
+                    "根据" + key.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            javadoc.addBlockTag("param", varName, key.getDescription());
+            javadoc.addBlockTag("return", "删除条数");
+            method.setJavadocComment(javadoc);
             method.setType(PrimitiveType.intType());
             method.setName(methodName);
-            String varName = StringUtils.lowerFirstLetter(key.getPropertyName());
+
             Parameter parameter = parseParameter(key.getJavaType().getSimpleName() + " " + varName);
             method.addParameter(parameter);
             method.setBody(null);

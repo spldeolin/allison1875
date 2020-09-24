@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -45,7 +46,8 @@ public class QueryByIdsProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
-            queryByIds.setJavadocComment(new JavadocComment("根据多个ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            Javadoc javadoc = new JavadocComment("根据多个ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            queryByIds.setJavadocComment(javadoc);
             Imports.ensureImported(mapper, "java.util.List");
             Imports.ensureImported(mapper, "java.util.Collection");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
@@ -58,6 +60,8 @@ public class QueryByIdsProc extends MapperProc {
                             + varsName);
             queryByIds.addParameter(parameter);
             queryByIds.setBody(null);
+            javadoc.addBlockTag("param", varsName, "（多个）" + onlyPk.getDescription());
+            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
             mapper.getMembers().addLast(queryByIds);
         }
         return this;

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -42,15 +43,18 @@ public class QueryByIdProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
-            queryById.setJavadocComment(new JavadocComment("根据ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+            Javadoc javadoc = new JavadocComment("根据ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
+            queryById.setJavadocComment(javadoc);
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName(methodName);
 
             if (persistence.getIdProperties().size() == 1) {
                 PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
-                Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + StringUtils
-                        .lowerFirstLetter(onlyPk.getPropertyName()));
+                String varName = StringUtils.lowerFirstLetter(onlyPk.getPropertyName());
+                Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
+                javadoc.addBlockTag("param", varName, onlyPk.getDescription());
             } else {
                 Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
                 for (PropertyDto pk : persistence.getIdProperties()) {
@@ -58,6 +62,7 @@ public class QueryByIdProc extends MapperProc {
                     Parameter parameter = parseParameter(
                             "@Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName() + " " + varName);
                     queryById.addParameter(parameter);
+                    javadoc.addBlockTag("param", varName, pk.getDescription());
                 }
             }
             queryById.setBody(null);

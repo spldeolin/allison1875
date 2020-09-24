@@ -8,6 +8,7 @@ import org.atteo.evo.inflector.English;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -45,8 +46,11 @@ public class QueryByIdsEachIdProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIdsEachId");
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            queryByIdsEachId.setJavadocComment(
-                    new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+
+            Javadoc javadoc = new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC)
+                    .parse();
+
+            queryByIdsEachId.setJavadocComment(javadoc);
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
             Imports.ensureImported(mapper, "java.util.Map");
             Imports.ensureImported(mapper, "java.util.Collection");
@@ -61,6 +65,8 @@ public class QueryByIdsEachIdProc extends MapperProc {
             queryByIdsEachId.addParameter(
                     parseParameter("@Param(\"" + varsName + "\") Collection<" + pkTypeName + "> " + varsName));
             queryByIdsEachId.setBody(null);
+            javadoc.addBlockTag("param", varsName, "（多个）" + onlyPk.getDescription());
+            javadoc.addBlockTag("return", "（多个）（以ID为key）" + onlyPk.getDescription());
             mapper.getMembers().addLast(queryByIdsEachId);
         }
         return this;

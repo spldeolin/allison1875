@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -46,8 +47,9 @@ public class QueryByKeyProc extends MapperProc {
         }
         methodName = calcMethodName(mapper, "queryBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
-        method.setJavadocComment(
-                new JavadocComment("根据" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC));
+        Javadoc javadoc = new JavadocComment(
+                "根据" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+        method.setJavadocComment(javadoc);
         Imports.ensureImported(mapper, "java.util.List");
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));
         method.setName(methodName);
@@ -55,6 +57,8 @@ public class QueryByKeyProc extends MapperProc {
         Parameter parameter = parseParameter(key.getJavaType().getSimpleName() + " " + varName);
         method.addParameter(parameter);
         method.setBody(null);
+        javadoc.addBlockTag("param", varName, key.getDescription());
+        javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
         mapper.getMembers().addLast(method);
         return this;
     }
