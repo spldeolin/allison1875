@@ -63,7 +63,7 @@ public class QueryByIdsEachIdProc extends MapperProc {
                     parseParameter("@Param(\"" + varsName + "\") Collection<" + pkTypeName + "> " + varsName));
             queryByIdsEachId.setBody(null);
             javadoc.addBlockTag("param", varsName, "（多个）" + onlyPk.getDescription());
-            javadoc.addBlockTag("return", "（多个）（以ID为key）" + onlyPk.getDescription());
+            javadoc.addBlockTag("return", "（多个）（以ID为key）" + persistence.getDescrption());
             queryByIdsEachId.setJavadocComment(javadoc);
             mapper.getMembers().addLast(queryByIdsEachId);
         }
