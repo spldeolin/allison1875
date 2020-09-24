@@ -44,8 +44,6 @@ public class QueryByIdProc extends MapperProc {
             methodName = super.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
             Javadoc javadoc = new JavadocComment("根据ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
-            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
-            queryById.setJavadocComment(javadoc);
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName(methodName);
 
@@ -65,6 +63,8 @@ public class QueryByIdProc extends MapperProc {
                     javadoc.addBlockTag("param", varName, pk.getDescription());
                 }
             }
+            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
+            queryById.setJavadocComment(javadoc);
             queryById.setBody(null);
             mapper.getMembers().addLast(queryById);
         }

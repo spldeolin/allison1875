@@ -46,11 +46,8 @@ public class QueryByIdsEachIdProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIdsEachId");
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-
             Javadoc javadoc = new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC)
                     .parse();
-
-            queryByIdsEachId.setJavadocComment(javadoc);
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
             Imports.ensureImported(mapper, "java.util.Map");
             Imports.ensureImported(mapper, "java.util.Collection");
@@ -67,6 +64,7 @@ public class QueryByIdsEachIdProc extends MapperProc {
             queryByIdsEachId.setBody(null);
             javadoc.addBlockTag("param", varsName, "（多个）" + onlyPk.getDescription());
             javadoc.addBlockTag("return", "（多个）（以ID为key）" + onlyPk.getDescription());
+            queryByIdsEachId.setJavadocComment(javadoc);
             mapper.getMembers().addLast(queryByIdsEachId);
         }
         return this;

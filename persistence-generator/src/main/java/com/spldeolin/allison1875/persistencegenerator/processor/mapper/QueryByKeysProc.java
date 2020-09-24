@@ -54,7 +54,6 @@ public class QueryByKeysProc extends MapperProc {
         MethodDeclaration method = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
                 "根据多个" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
-        method.setJavadocComment(javadoc);
         Imports.ensureImported(mapper, "java.util.List");
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));
         method.setName(methodName);
@@ -66,6 +65,7 @@ public class QueryByKeysProc extends MapperProc {
         method.setBody(null);
         javadoc.addBlockTag("param", varsName, "（多个）" + key.getDescription());
         javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
+        method.setJavadocComment(javadoc);
         mapper.getMembers().addLast(method);
         return this;
     }

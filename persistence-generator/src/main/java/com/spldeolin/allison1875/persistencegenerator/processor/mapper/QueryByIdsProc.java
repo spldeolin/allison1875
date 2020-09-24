@@ -47,7 +47,6 @@ public class QueryByIdsProc extends MapperProc {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
             Javadoc javadoc = new JavadocComment("根据多个ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
-            queryByIds.setJavadocComment(javadoc);
             Imports.ensureImported(mapper, "java.util.List");
             Imports.ensureImported(mapper, "java.util.Collection");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
@@ -62,6 +61,7 @@ public class QueryByIdsProc extends MapperProc {
             queryByIds.setBody(null);
             javadoc.addBlockTag("param", varsName, "（多个）" + onlyPk.getDescription());
             javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
+            queryByIds.setJavadocComment(javadoc);
             mapper.getMembers().addLast(queryByIds);
         }
         return this;
