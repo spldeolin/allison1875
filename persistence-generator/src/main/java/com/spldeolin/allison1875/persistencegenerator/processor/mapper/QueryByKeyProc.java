@@ -58,7 +58,7 @@ public class QueryByKeyProc extends MapperProc {
         method.addParameter(parameter);
         method.setBody(null);
         javadoc.addBlockTag("param", varName, key.getDescription());
-        javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
+        javadoc.addBlockTag("return", "" + persistence.getDescrption());
         method.setJavadocComment(javadoc);
         mapper.getMembers().addLast(method);
         return this;
