@@ -87,12 +87,7 @@ class JsgBuildProc {
             for (VariableDeclarator var : field.getVariables()) {
                 JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
                 String varName = var.getNameAsString();
-                String description = specificFieldDescriptions.get(javabeanQualifier, varName);
-                if (description == null) {
-                    jpdv.setDescriptionLines(javadocDescLines);
-                } else {
-                    jpdv.setDescriptionLines(Lists.newArrayList(description));
-                }
+                jpdv.setDescriptionLines(javadocDescLines);
                 jpdv.setDocIgnore(findIgnoreFlag(javadocDescLines));
                 table.put(javabeanQualifier, varName, jpdv);
             }
@@ -157,6 +152,10 @@ class JsgBuildProc {
                 JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
                 if (jpdv == null) {
                     jpdv = new JsonPropertyDescriptionValueDto();
+                    String specificDesc = specificFieldDescriptions.get(className, fieldNameMight);
+                    if (specificDesc != null) {
+                        jpdv.setDescriptionLines(Lists.newArrayList(specificDesc));
+                    }
                 }
 
                 jpdv.setValids(validProc.getValids());
