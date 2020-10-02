@@ -6,7 +6,6 @@ import org.dom4j.tree.DefaultElement;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * ResultMap
@@ -19,7 +18,6 @@ public class ResultMapXmlProc extends XmlProc {
 
     private final String entityName;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public ResultMapXmlProc(PersistenceDto persistence, String entityName) {
@@ -43,6 +41,10 @@ public class ResultMapXmlProc extends XmlProc {
         }
         sourceCodeLines = Dom4jUtils.toSourceCodeLines(resultMapTag);
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

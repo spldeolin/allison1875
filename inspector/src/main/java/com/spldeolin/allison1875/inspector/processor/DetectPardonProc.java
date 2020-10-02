@@ -11,12 +11,10 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-02-24
  */
-@Accessors(fluent = true)
 public class DetectPardonProc {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(DetectPardonProc.class);

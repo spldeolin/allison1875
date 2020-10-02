@@ -1,11 +1,8 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
-import lombok.experimental.Accessors;
-
 /**
  * @author Deolin 2020-07-12
  */
-@Accessors(chain = true)
 public class PropertyDto {
 
     private String columnName;

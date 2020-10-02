@@ -40,7 +40,7 @@
 // *
 // * @author Deolin 2020-06-05
 // */
-//instance4j2
+//@Log4j2
 //public class MassAnalyzer {
 //
 //    public static void main(String[] args) {

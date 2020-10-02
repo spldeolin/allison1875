@@ -8,7 +8,6 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import lombok.Getter;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
@@ -21,7 +20,6 @@ public class UpdateByIdEvenNullProc extends MapperProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    @Getter
     private String methodName;
 
     public UpdateByIdEvenNullProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
@@ -48,6 +46,10 @@ public class UpdateByIdEvenNullProc extends MapperProc {
             mapper.getMembers().addLast(updateByIdEvenNull);
         }
         return this;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
     }
 
 }

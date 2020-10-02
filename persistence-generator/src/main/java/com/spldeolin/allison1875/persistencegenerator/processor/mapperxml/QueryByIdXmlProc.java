@@ -9,7 +9,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * 根据主键查询
@@ -22,7 +21,6 @@ public class QueryByIdXmlProc extends XmlProc {
 
     private final QueryByIdProc queryByIdProc;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public QueryByIdXmlProc(PersistenceDto persistence, QueryByIdProc queryByIdProc) {
@@ -60,6 +58,10 @@ public class QueryByIdXmlProc extends XmlProc {
             sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

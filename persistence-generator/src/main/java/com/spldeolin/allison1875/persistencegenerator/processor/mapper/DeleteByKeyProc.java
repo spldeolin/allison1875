@@ -12,7 +12,6 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import lombok.Getter;
 
 /**
  * 根据外键删除
@@ -25,12 +24,10 @@ public class DeleteByKeyProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
-    @Getter
     private final PropertyDto key;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    @Getter
     private String methodName;
 
     public DeleteByKeyProc(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
@@ -58,6 +55,14 @@ public class DeleteByKeyProc extends MapperProc {
             mapper.getMembers().addLast(method);
         }
         return this;
+    }
+
+    public PropertyDto getKey() {
+        return this.key;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
     }
 
 }

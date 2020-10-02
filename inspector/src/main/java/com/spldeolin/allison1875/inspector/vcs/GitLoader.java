@@ -8,27 +8,18 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.collect.Lists;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-02-26
  */
-@Accessors(fluent = true)
 public class GitLoader {
 
-    @Setter
-    @Getter
     private Path projectPath;
 
-    @Getter
     private Git git;
 
-    @Getter
     private Repository repo;
 
-    @Getter
     private List<RevCommit> commits;
 
     public GitLoader openAndLoad() throws IOException, GitAPIException {
@@ -42,6 +33,27 @@ public class GitLoader {
         if (git != null) {
             git.close();
         }
+    }
+
+    public Path projectPath() {
+        return this.projectPath;
+    }
+
+    public Git git() {
+        return this.git;
+    }
+
+    public Repository repo() {
+        return this.repo;
+    }
+
+    public List<RevCommit> commits() {
+        return this.commits;
+    }
+
+    public GitLoader projectPath(Path projectPath) {
+        this.projectPath = projectPath;
+        return this;
     }
 
 }

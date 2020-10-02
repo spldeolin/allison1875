@@ -9,7 +9,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * 根据外键删除
@@ -24,7 +23,6 @@ public class DeleteByKeyXmlProc extends XmlProc {
 
     private final Collection<DeleteByKeyProc> deleteByKeyProcs;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public DeleteByKeyXmlProc(PersistenceDto persistence, Collection<DeleteByKeyProc> deleteByKeyProcs) {
@@ -59,6 +57,10 @@ public class DeleteByKeyXmlProc extends XmlProc {
             }
         }
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

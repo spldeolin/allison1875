@@ -4,14 +4,10 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 /**
  * @author Deolin 2020-07-12
  */
-@Getter
-@AllArgsConstructor
 public enum JdbcTypeEnum {
 
     VARCHAR("varchar", null, String.class),
@@ -46,6 +42,12 @@ public enum JdbcTypeEnum {
 
     private final Class<?> javaType;
 
+    JdbcTypeEnum(String dataType, String columnType, Class<?> javaType) {
+        this.dataType = dataType;
+        this.columnType = columnType;
+        this.javaType = javaType;
+    }
+
     public static JdbcTypeEnum ofDataType(String dataType) {
         if (dataType == null) {
             throw new IllegalArgumentException("illegal dataType [null]");
@@ -63,4 +65,15 @@ public enum JdbcTypeEnum {
                 .findFirst().orElse(null);
     }
 
+    public String getDataType() {
+        return this.dataType;
+    }
+
+    public String getColumnType() {
+        return this.columnType;
+    }
+
+    public Class<?> getJavaType() {
+        return this.javaType;
+    }
 }

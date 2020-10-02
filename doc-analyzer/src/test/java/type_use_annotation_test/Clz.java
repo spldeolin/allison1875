@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
-import lombok.SneakyThrows;
 
 /**
  * @author Deolin 2020-07-22
@@ -21,8 +20,7 @@ public class Clz {
 
     private Collection<@NotEmpty String> strings;
 
-    @SneakyThrows
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchFieldException {
         Method myMethod = Clz.class.getDeclaredMethods()[0];
 
         Field strings = Clz.class.getDeclaredField("strings");

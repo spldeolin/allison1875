@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
-import lombok.Getter;
 
 /**
  * 内聚了 对请求URL和请求动词解析的功能
@@ -30,10 +29,8 @@ class RequestMappingProc {
 
     private final RequestMethod[] cVerbs;
 
-    @Getter
     private Collection<String> combinedUrls;
 
-    @Getter
     private Collection<RequestMethod> combinedVerbs;
 
     RequestMappingProc(Class<?> controllerClass) {
@@ -114,6 +111,14 @@ class RequestMappingProc {
             result.add(url);
         }
         return result;
+    }
+
+    public Collection<String> getCombinedUrls() {
+        return this.combinedUrls;
+    }
+
+    public Collection<RequestMethod> getCombinedVerbs() {
+        return this.combinedVerbs;
     }
 
 }

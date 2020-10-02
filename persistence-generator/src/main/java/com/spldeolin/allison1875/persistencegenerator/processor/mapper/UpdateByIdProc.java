@@ -8,7 +8,6 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import lombok.Getter;
 
 /**
  * 根据ID更新数据，忽略值为null的属性
@@ -21,7 +20,6 @@ public class UpdateByIdProc extends MapperProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    @Getter
     private String methodName;
 
     public UpdateByIdProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
@@ -48,6 +46,10 @@ public class UpdateByIdProc extends MapperProc {
             mapper.getMembers().addLast(updateById);
         }
         return this;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
     }
 
 }

@@ -17,7 +17,6 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
-import lombok.Getter;
 
 /**
  * @author Deolin 2020-08-26
@@ -26,13 +25,10 @@ class GenerateServicesProc {
 
     private final MetaInfo metaInfo;
 
-    @Getter
     private CompilationUnit serviceCu;
 
-    @Getter
     private CompilationUnit serviceImplCu;
 
-    @Getter
     private String serviceQualifier;
 
     GenerateServicesProc(MetaInfo metaInfo) {
@@ -104,6 +100,18 @@ class GenerateServicesProc {
         serviceImplCu = serviceImplCreator.create(false);
 
         return this;
+    }
+
+    public CompilationUnit getServiceCu() {
+        return this.serviceCu;
+    }
+
+    public CompilationUnit getServiceImplCu() {
+        return this.serviceImplCu;
+    }
+
+    public String getServiceQualifier() {
+        return this.serviceQualifier;
     }
 
 }

@@ -230,12 +230,6 @@
                 <version>0.9.12</version>
             </dependency>
 
-            <!-- lombok -->
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.12</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

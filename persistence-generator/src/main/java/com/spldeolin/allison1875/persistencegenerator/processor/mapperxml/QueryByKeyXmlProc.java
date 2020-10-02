@@ -8,7 +8,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * 根据外键查询，表中每有几个外键，这个Proc就生成几个方法
@@ -21,7 +20,6 @@ public class QueryByKeyXmlProc extends XmlProc {
 
     private final Collection<QueryByKeyProc> queryByKeyProcs;
 
-    @Getter
     private final Collection<String> sourceCodeLines = Lists.newArrayList();
 
     public QueryByKeyXmlProc(PersistenceDto persistence, Collection<QueryByKeyProc> queryByKeyProcs) {
@@ -56,6 +54,10 @@ public class QueryByKeyXmlProc extends XmlProc {
             sourceCodeLines.addAll(Dom4jUtils.toSourceCodeLines(stmt));
         }
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

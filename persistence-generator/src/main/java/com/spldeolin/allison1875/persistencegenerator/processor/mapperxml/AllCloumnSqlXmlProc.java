@@ -8,7 +8,6 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * <sql id="all"></sql> 标签
@@ -19,7 +18,6 @@ public class AllCloumnSqlXmlProc extends XmlProc {
 
     private final PersistenceDto persistence;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public AllCloumnSqlXmlProc(PersistenceDto persistence) {
@@ -35,6 +33,10 @@ public class AllCloumnSqlXmlProc extends XmlProc {
         sqlTag.addText(BaseConstant.NEW_LINE);
         sourceCodeLines = Dom4jUtils.toSourceCodeLines(sqlTag);
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

@@ -15,7 +15,6 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
-import lombok.Getter;
 
 /**
  * @author Deolin 2020-08-28
@@ -26,7 +25,6 @@ class GenerateDtosProc {
 
     private final Collection<DtoMetaInfo> dtoMetaInfos;
 
-    @Getter
     private Collection<CompilationUnit> dtoCus;
 
     GenerateDtosProc(Path sourceRoot, Collection<DtoMetaInfo> dtoMetaInfos) {
@@ -64,6 +62,10 @@ class GenerateDtosProc {
             dtoCus.add(cuCreator.create(false));
         }
         return this;
+    }
+
+    public Collection<CompilationUnit> getDtoCus() {
+        return dtoCus;
     }
 
 }

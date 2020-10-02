@@ -9,7 +9,6 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * 根据ID更新数据，忽略值为null的属性
@@ -24,7 +23,6 @@ public class UpdateByIdXmlProc extends XmlProc {
 
     private final UpdateByIdProc updateByIdProc;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public UpdateByIdXmlProc(PersistenceDto persistence, String entityName, UpdateByIdProc updateByPkProc) {
@@ -63,6 +61,10 @@ public class UpdateByIdXmlProc extends XmlProc {
             sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

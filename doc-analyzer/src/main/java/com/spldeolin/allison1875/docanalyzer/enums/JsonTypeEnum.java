@@ -1,14 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 /**
  * @author Deolin 2019-12-03
  */
-@AllArgsConstructor
-@Getter
 public enum JsonTypeEnum {
 
     STRING("string"),
@@ -36,6 +32,10 @@ public enum JsonTypeEnum {
     UNKNOWN("unknown");
 
     private final String value;
+
+    JsonTypeEnum(String value) {
+        this.value = value;
+    }
 
     public boolean isArrayLike() {
         return STRING_ARRAY == this || NUMBER_ARRAY == this || BOOLEAN_ARRAY == this || OBJECT_ARRAY == this

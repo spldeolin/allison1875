@@ -10,7 +10,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
@@ -25,7 +24,6 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
 
     private final UpdateByIdEvenNullProc updateByIdEvenNullProc;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public UpdateByIdEvenNullXmlProc(PersistenceDto persistence, String entityName,
@@ -66,6 +64,10 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
             sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
         }
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

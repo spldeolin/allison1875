@@ -8,7 +8,6 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
 
 /**
  * 插入
@@ -23,7 +22,6 @@ public class InsertXmlProc extends XmlProc {
 
     private final InsertProc insertProc;
 
-    @Getter
     private Collection<String> sourceCodeLines;
 
     public InsertXmlProc(PersistenceDto persistence, String entityName, InsertProc insertProc) {
@@ -64,6 +62,10 @@ public class InsertXmlProc extends XmlProc {
 
         sourceCodeLines = Dom4jUtils.toSourceCodeLines(insertTag);
         return this;
+    }
+
+    public Collection<String> getSourceCodeLines() {
+        return this.sourceCodeLines;
     }
 
 }

@@ -15,7 +15,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import lombok.Getter;
 
 /**
  * 根据外键列表查询，表中每有几个外键，这个Proc就生成几个方法
@@ -28,15 +27,12 @@ public class QueryByKeysProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
-    @Getter
     private final PropertyDto key;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    @Getter
     private String methodName;
 
-    @Getter
     private String varsName;
 
     public QueryByKeysProc(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
@@ -68,6 +64,18 @@ public class QueryByKeysProc extends MapperProc {
         method.setJavadocComment(javadoc);
         mapper.getMembers().addLast(method);
         return this;
+    }
+
+    public PropertyDto getKey() {
+        return this.key;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
+    }
+
+    public String getVarsName() {
+        return this.varsName;
     }
 
 }

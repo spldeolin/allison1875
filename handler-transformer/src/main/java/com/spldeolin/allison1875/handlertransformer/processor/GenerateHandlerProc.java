@@ -15,7 +15,6 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
-import lombok.Getter;
 
 /**
  * @author Deolin 2020-08-28
@@ -26,7 +25,6 @@ class GenerateHandlerProc {
 
     private final String serviceQualifier;
 
-    @Getter
     private CompilationUnit controllerCu;
 
     GenerateHandlerProc(MetaInfo metaInfo, String serviceQualifier) {
@@ -91,6 +89,10 @@ class GenerateHandlerProc {
 
         controllerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         return this;
+    }
+
+    public CompilationUnit getControllerCu() {
+        return this.controllerCu;
     }
 
 }

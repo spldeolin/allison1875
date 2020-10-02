@@ -6,12 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Locations;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-02-22
  */
-@Accessors(chain = true)
 public class LawlessDto {
 
     @JsonProperty("源码位置")

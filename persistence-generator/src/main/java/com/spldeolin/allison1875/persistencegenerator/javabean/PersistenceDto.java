@@ -1,12 +1,10 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
 import java.util.Collection;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-07-12
  */
-@Accessors(chain = true)
 public class PersistenceDto {
 
     private String tableName;

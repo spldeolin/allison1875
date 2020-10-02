@@ -16,7 +16,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import lombok.Getter;
 
 /**
  * 根据主键列表查询
@@ -31,7 +30,6 @@ public class QueryByIdsProc extends MapperProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    @Getter
     private String methodName;
 
     public QueryByIdsProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
@@ -65,6 +63,10 @@ public class QueryByIdsProc extends MapperProc {
             mapper.getMembers().addLast(queryByIds);
         }
         return this;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
     }
 
 }
