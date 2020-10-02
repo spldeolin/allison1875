@@ -36,14 +36,12 @@ import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeEnumConstantStrategy;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
  *
  * @author Deolin 2020-06-10
  */
-@Log4j2
 class JsgBuildProc {
 
     private final AstForest astForest;

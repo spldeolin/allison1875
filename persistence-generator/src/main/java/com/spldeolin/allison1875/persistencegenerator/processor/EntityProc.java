@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier.Keyword;
@@ -30,23 +31,20 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-18
  */
-@Log4j2
 public class EntityProc {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(EntityProc.class);
 
     private final PersistenceDto persistence;
 
     private final PathProc pathProc;
 
-    @Getter
     private Path entityPath;
 
-    @Getter
     private CuCreator entityCuCreator;
 
     public EntityProc(PersistenceDto persistence, PathProc pathProc) {
@@ -183,6 +181,14 @@ public class EntityProc {
                         authorTags.add(javadocTag);
                     }
                 })));
+    }
+
+    public Path getEntityPath() {
+        return this.entityPath;
+    }
+
+    public CuCreator getEntityCuCreator() {
+        return this.entityCuCreator;
     }
 
 }

@@ -2,15 +2,16 @@ package com.spldeolin.allison1875.base.util.ast;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-10
  */
-@Log4j2
 public class Annotations {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(Annotations.class);
 
     private Annotations() {
         throw new UnsupportedOperationException("Never instantiate me.");

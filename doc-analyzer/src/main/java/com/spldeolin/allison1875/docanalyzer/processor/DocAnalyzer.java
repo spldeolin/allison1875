@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
 import java.util.Map;
+import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -27,36 +28,29 @@ import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResp
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * doc-analyzer的主流程
  *
  * @author Deolin 2020-06-10
  */
-@Log4j2
-@Accessors(fluent = true)
 public class DocAnalyzer implements Allison1875MainProcessor {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(DocAnalyzer.class);
 
     private final static String docIgnore = "doc-ignore";
 
     private final static String docCat = "doc-cat";
 
-    @Setter
     private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
             new DefaultObtainConcernedResponseBodyStrategy();
 
-    @Setter
     private AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
             new DefaultAnalyzeCustomValidationStrategy();
 
-    @Setter
     private SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
             new DefaultSpecificFieldDescriptionsStrategy();
 
-    @Setter
     private AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
 
     @Override
@@ -204,6 +198,29 @@ public class DocAnalyzer implements Allison1875MainProcessor {
             log.error("类[{}]无法被加载", qualifier);
             throw e;
         }
+    }
+
+    public DocAnalyzer obtainConcernedResponseBodyStrategy(
+            ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy) {
+        this.obtainConcernedResponseBodyStrategy = obtainConcernedResponseBodyStrategy;
+        return this;
+    }
+
+    public DocAnalyzer analyzeCustomValidationStrategy(
+            AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
+        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
+        return this;
+    }
+
+    public DocAnalyzer specificFieldDescriptionsStrategy(
+            SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy) {
+        this.specificFieldDescriptionsStrategy = specificFieldDescriptionsStrategy;
+        return this;
+    }
+
+    public DocAnalyzer analyzeEnumConstantStrategy(AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy) {
+        this.analyzeEnumConstantStrategy = analyzeEnumConstantStrategy;
+        return this;
     }
 
 }

@@ -1,20 +1,21 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.function.Consumer;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 内聚了 遍历AstForest中每一个controller的功能
  *
  * @author Deolin 2020-06-10
  */
-@Log4j2
 class ControllerIterateProc {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(ControllerIterateProc.class);
 
     private final AstForest astForest;
 

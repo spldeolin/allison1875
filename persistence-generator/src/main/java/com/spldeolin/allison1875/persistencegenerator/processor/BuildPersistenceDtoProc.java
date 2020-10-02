@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
 import java.util.Map;
+import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -10,16 +11,14 @@ import com.spldeolin.allison1875.persistencegenerator.enums.JdbcTypeEnum;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-12
  */
-@Log4j2
 public class BuildPersistenceDtoProc {
 
-    @Getter
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BuildPersistenceDtoProc.class);
+
     private Collection<PersistenceDto> persistences;
 
     public BuildPersistenceDtoProc process() {
@@ -109,6 +108,10 @@ public class BuildPersistenceDtoProc {
             return null;
         }
         return jdbcTypeEnum;
+    }
+
+    public Collection<PersistenceDto> getPersistences() {
+        return this.persistences;
     }
 
 }

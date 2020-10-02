@@ -2,20 +2,14 @@ package com.spldeolin.allison1875.handlertransformer;
 
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
-import lombok.Data;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Allison1875[handler-transformer]的配置
  *
  * @author Deolin 2020-08-25
  */
-@Data
-@Log4j2
 public class HandlerTransformerConfig {
 
-    @Getter
     private static final HandlerTransformerConfig instance = new HandlerTransformerConfig();
 
     /**
@@ -85,6 +79,223 @@ public class HandlerTransformerConfig {
     private String author;
 
     private HandlerTransformerConfig() {
+    }
+
+    public static HandlerTransformerConfig getInstance() {
+        return HandlerTransformerConfig.instance;
+    }
+
+    public @NotEmpty String getReqDtoPackage() {
+        return this.reqDtoPackage;
+    }
+
+    public @NotEmpty String getRespDtoPackage() {
+        return this.respDtoPackage;
+    }
+
+    public @NotEmpty String getServicePackage() {
+        return this.servicePackage;
+    }
+
+    public @NotEmpty String getServiceImplPackage() {
+        return this.serviceImplPackage;
+    }
+
+    public @NotEmpty Collection<@NotEmpty String> getHandlerAnnotations() {
+        return this.handlerAnnotations;
+    }
+
+    public @NotEmpty String getResult() {
+        return this.result;
+    }
+
+    public @NotEmpty String getResultVoid() {
+        return this.resultVoid;
+    }
+
+    public @NotEmpty String getHandlerBodyPattern() {
+        return this.handlerBodyPattern;
+    }
+
+    public @NotEmpty(message = "不能为空，如果不需要返回值则指定为;") String getHandlerBodyPatternInNoResponseBodySituation() {
+        return this.handlerBodyPatternInNoResponseBodySituation;
+    }
+
+    public @NotEmpty Collection<@NotEmpty String> getControllerImports() {
+        return this.controllerImports;
+    }
+
+    public @NotEmpty String getAuthor() {
+        return this.author;
+    }
+
+    public void setReqDtoPackage(@NotEmpty String reqDtoPackage) {
+        this.reqDtoPackage = reqDtoPackage;
+    }
+
+    public void setRespDtoPackage(@NotEmpty String respDtoPackage) {
+        this.respDtoPackage = respDtoPackage;
+    }
+
+    public void setServicePackage(@NotEmpty String servicePackage) {
+        this.servicePackage = servicePackage;
+    }
+
+    public void setServiceImplPackage(@NotEmpty String serviceImplPackage) {
+        this.serviceImplPackage = serviceImplPackage;
+    }
+
+    public void setHandlerAnnotations(@NotEmpty Collection<@NotEmpty String> handlerAnnotations) {
+        this.handlerAnnotations = handlerAnnotations;
+    }
+
+    public void setResult(@NotEmpty String result) {
+        this.result = result;
+    }
+
+    public void setResultVoid(@NotEmpty String resultVoid) {
+        this.resultVoid = resultVoid;
+    }
+
+    public void setHandlerBodyPattern(@NotEmpty String handlerBodyPattern) {
+        this.handlerBodyPattern = handlerBodyPattern;
+    }
+
+    public void setHandlerBodyPatternInNoResponseBodySituation(
+            @NotEmpty(message = "不能为空，如果不需要返回值则指定为;") String handlerBodyPatternInNoResponseBodySituation) {
+        this.handlerBodyPatternInNoResponseBodySituation = handlerBodyPatternInNoResponseBodySituation;
+    }
+
+    public void setControllerImports(@NotEmpty Collection<@NotEmpty String> controllerImports) {
+        this.controllerImports = controllerImports;
+    }
+
+    public void setAuthor(@NotEmpty String author) {
+        this.author = author;
+    }
+
+    public boolean equals(final Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof HandlerTransformerConfig)) {
+            return false;
+        }
+        final HandlerTransformerConfig other = (HandlerTransformerConfig) o;
+        if (!other.canEqual((Object) this)) {
+            return false;
+        }
+        final Object this$reqDtoPackage = this.getReqDtoPackage();
+        final Object other$reqDtoPackage = other.getReqDtoPackage();
+        if (this$reqDtoPackage == null ? other$reqDtoPackage != null
+                : !this$reqDtoPackage.equals(other$reqDtoPackage)) {
+            return false;
+        }
+        final Object this$respDtoPackage = this.getRespDtoPackage();
+        final Object other$respDtoPackage = other.getRespDtoPackage();
+        if (this$respDtoPackage == null ? other$respDtoPackage != null
+                : !this$respDtoPackage.equals(other$respDtoPackage)) {
+            return false;
+        }
+        final Object this$servicePackage = this.getServicePackage();
+        final Object other$servicePackage = other.getServicePackage();
+        if (this$servicePackage == null ? other$servicePackage != null
+                : !this$servicePackage.equals(other$servicePackage)) {
+            return false;
+        }
+        final Object this$serviceImplPackage = this.getServiceImplPackage();
+        final Object other$serviceImplPackage = other.getServiceImplPackage();
+        if (this$serviceImplPackage == null ? other$serviceImplPackage != null
+                : !this$serviceImplPackage.equals(other$serviceImplPackage)) {
+            return false;
+        }
+        final Object this$handlerAnnotations = this.getHandlerAnnotations();
+        final Object other$handlerAnnotations = other.getHandlerAnnotations();
+        if (this$handlerAnnotations == null ? other$handlerAnnotations != null
+                : !this$handlerAnnotations.equals(other$handlerAnnotations)) {
+            return false;
+        }
+        final Object this$result = this.getResult();
+        final Object other$result = other.getResult();
+        if (this$result == null ? other$result != null : !this$result.equals(other$result)) {
+            return false;
+        }
+        final Object this$resultVoid = this.getResultVoid();
+        final Object other$resultVoid = other.getResultVoid();
+        if (this$resultVoid == null ? other$resultVoid != null : !this$resultVoid.equals(other$resultVoid)) {
+            return false;
+        }
+        final Object this$handlerBodyPattern = this.getHandlerBodyPattern();
+        final Object other$handlerBodyPattern = other.getHandlerBodyPattern();
+        if (this$handlerBodyPattern == null ? other$handlerBodyPattern != null
+                : !this$handlerBodyPattern.equals(other$handlerBodyPattern)) {
+            return false;
+        }
+        final Object this$handlerBodyPatternInNoResponseBodySituation = this
+                .getHandlerBodyPatternInNoResponseBodySituation();
+        final Object other$handlerBodyPatternInNoResponseBodySituation = other
+                .getHandlerBodyPatternInNoResponseBodySituation();
+        if (this$handlerBodyPatternInNoResponseBodySituation == null ? other$handlerBodyPatternInNoResponseBodySituation
+                != null : !this$handlerBodyPatternInNoResponseBodySituation
+                .equals(other$handlerBodyPatternInNoResponseBodySituation)) {
+            return false;
+        }
+        final Object this$controllerImports = this.getControllerImports();
+        final Object other$controllerImports = other.getControllerImports();
+        if (this$controllerImports == null ? other$controllerImports != null
+                : !this$controllerImports.equals(other$controllerImports)) {
+            return false;
+        }
+        final Object this$author = this.getAuthor();
+        final Object other$author = other.getAuthor();
+        if (this$author == null ? other$author != null : !this$author.equals(other$author)) {
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean canEqual(final Object other) {
+        return other instanceof HandlerTransformerConfig;
+    }
+
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final Object $reqDtoPackage = this.getReqDtoPackage();
+        result = result * PRIME + ($reqDtoPackage == null ? 43 : $reqDtoPackage.hashCode());
+        final Object $respDtoPackage = this.getRespDtoPackage();
+        result = result * PRIME + ($respDtoPackage == null ? 43 : $respDtoPackage.hashCode());
+        final Object $servicePackage = this.getServicePackage();
+        result = result * PRIME + ($servicePackage == null ? 43 : $servicePackage.hashCode());
+        final Object $serviceImplPackage = this.getServiceImplPackage();
+        result = result * PRIME + ($serviceImplPackage == null ? 43 : $serviceImplPackage.hashCode());
+        final Object $handlerAnnotations = this.getHandlerAnnotations();
+        result = result * PRIME + ($handlerAnnotations == null ? 43 : $handlerAnnotations.hashCode());
+        final Object $result = this.getResult();
+        result = result * PRIME + ($result == null ? 43 : $result.hashCode());
+        final Object $resultVoid = this.getResultVoid();
+        result = result * PRIME + ($resultVoid == null ? 43 : $resultVoid.hashCode());
+        final Object $handlerBodyPattern = this.getHandlerBodyPattern();
+        result = result * PRIME + ($handlerBodyPattern == null ? 43 : $handlerBodyPattern.hashCode());
+        final Object $handlerBodyPatternInNoResponseBodySituation = this
+                .getHandlerBodyPatternInNoResponseBodySituation();
+        result = result * PRIME + ($handlerBodyPatternInNoResponseBodySituation == null ? 43
+                : $handlerBodyPatternInNoResponseBodySituation.hashCode());
+        final Object $controllerImports = this.getControllerImports();
+        result = result * PRIME + ($controllerImports == null ? 43 : $controllerImports.hashCode());
+        final Object $author = this.getAuthor();
+        result = result * PRIME + ($author == null ? 43 : $author.hashCode());
+        return result;
+    }
+
+    public String toString() {
+        return "HandlerTransformerConfig(reqDtoPackage=" + this.getReqDtoPackage() + ", respDtoPackage=" + this
+                .getRespDtoPackage() + ", servicePackage=" + this.getServicePackage() + ", serviceImplPackage=" + this
+                .getServiceImplPackage() + ", handlerAnnotations=" + this.getHandlerAnnotations() + ", result=" + this
+                .getResult() + ", resultVoid=" + this.getResultVoid() + ", handlerBodyPattern=" + this
+                .getHandlerBodyPattern() + ", handlerBodyPatternInNoResponseBodySituation=" + this
+                .getHandlerBodyPatternInNoResponseBodySituation() + ", controllerImports=" + this.getControllerImports()
+                + ", author=" + this.getAuthor() + ")";
     }
 
 }

@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
@@ -31,13 +32,13 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProc;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-11
  */
-@Log4j2
 public class PersistenceGenerator implements Allison1875MainProcessor {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGenerator.class);
 
     @Override
     public void process(AstForest astForest) {

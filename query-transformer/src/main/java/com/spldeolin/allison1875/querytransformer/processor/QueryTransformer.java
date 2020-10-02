@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -36,13 +37,13 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.javabean.PropertyDto;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-09
  */
-@Log4j2
 public class QueryTransformer implements Allison1875MainProcessor {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(QueryTransformer.class);
 
     @Override
     public void process(AstForest astForest) {

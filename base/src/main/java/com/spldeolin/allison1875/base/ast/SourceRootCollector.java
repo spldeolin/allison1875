@@ -6,14 +6,12 @@ import java.util.List;
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * SourceRoot对象的收集器
  *
  * @author Deolin 2020-05-01
  */
-@Log4j2
 class SourceRootCollector {
 
     Collection<SourceRoot> collect(Collection<String> projectPaths) {

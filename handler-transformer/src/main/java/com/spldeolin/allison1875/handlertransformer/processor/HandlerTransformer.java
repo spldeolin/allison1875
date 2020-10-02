@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -12,13 +13,13 @@ import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-22
  */
-@Log4j2
 public class HandlerTransformer implements Allison1875MainProcessor {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(HandlerTransformer.class);
 
     @Override
     public void process(AstForest astForest) {

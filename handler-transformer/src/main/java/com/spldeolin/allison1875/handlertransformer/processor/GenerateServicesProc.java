@@ -59,8 +59,8 @@ class GenerateServicesProc {
         CuCreator serviceCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServicePackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = new JavadocComment("").parse().addBlockTag("author",
-                    HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
+            Javadoc javadoc = new JavadocComment("").parse()
+                    .addBlockTag("author", HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
             coid.setJavadocComment(javadoc);
             coid.setPublic(true).setInterface(true).setName(serviceName);
             MethodDeclaration decl = absMethod.setBody(null);
@@ -77,8 +77,8 @@ class GenerateServicesProc {
         CuCreator serviceImplCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServiceImplPackage(), imports4Impl, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = new JavadocComment("").parse().addBlockTag("author",
-                    HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
+            Javadoc javadoc = new JavadocComment("").parse()
+                    .addBlockTag("author", HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
             coid.setJavadocComment(javadoc);
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Service"));
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Slf4j"));

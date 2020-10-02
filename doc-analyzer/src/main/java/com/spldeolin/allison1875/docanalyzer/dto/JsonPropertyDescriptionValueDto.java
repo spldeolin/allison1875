@@ -10,14 +10,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-04-27
  */
-@Data
-@Accessors(chain = true)
 @JsonInclude(Include.NON_NULL)
 public class JsonPropertyDescriptionValueDto {
 
@@ -39,6 +35,9 @@ public class JsonPropertyDescriptionValueDto {
     private String referencePath;
 
     private Collection<EnumCodeAndTitleDto> ecats;
+
+    public JsonPropertyDescriptionValueDto() {
+    }
 
     public String toStringPrettily() {
         if (isFieldCrossingValids) {
@@ -96,6 +95,153 @@ public class JsonPropertyDescriptionValueDto {
             }
             return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format, enumInfo);
         }
+    }
+
+    public Collection<String> getDescriptionLines() {
+        return this.descriptionLines;
+    }
+
+    public Collection<ValidatorDto> getValids() {
+        return this.valids;
+    }
+
+    public String getJsonFormatPattern() {
+        return this.jsonFormatPattern;
+    }
+
+    public Boolean getIsFieldCrossingValids() {
+        return this.isFieldCrossingValids;
+    }
+
+    public Boolean getDocIgnore() {
+        return this.docIgnore;
+    }
+
+    public String getReferencePath() {
+        return this.referencePath;
+    }
+
+    public Collection<EnumCodeAndTitleDto> getEcats() {
+        return this.ecats;
+    }
+
+    public JsonPropertyDescriptionValueDto setDescriptionLines(Collection<String> descriptionLines) {
+        this.descriptionLines = descriptionLines;
+        return this;
+    }
+
+    public JsonPropertyDescriptionValueDto setValids(Collection<ValidatorDto> valids) {
+        this.valids = valids;
+        return this;
+    }
+
+    public JsonPropertyDescriptionValueDto setJsonFormatPattern(String jsonFormatPattern) {
+        this.jsonFormatPattern = jsonFormatPattern;
+        return this;
+    }
+
+    public JsonPropertyDescriptionValueDto setIsFieldCrossingValids(Boolean isFieldCrossingValids) {
+        this.isFieldCrossingValids = isFieldCrossingValids;
+        return this;
+    }
+
+    public JsonPropertyDescriptionValueDto setDocIgnore(Boolean docIgnore) {
+        this.docIgnore = docIgnore;
+        return this;
+    }
+
+    public JsonPropertyDescriptionValueDto setReferencePath(String referencePath) {
+        this.referencePath = referencePath;
+        return this;
+    }
+
+    public JsonPropertyDescriptionValueDto setEcats(Collection<EnumCodeAndTitleDto> ecats) {
+        this.ecats = ecats;
+        return this;
+    }
+
+    public boolean equals(final Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof JsonPropertyDescriptionValueDto)) {
+            return false;
+        }
+        final JsonPropertyDescriptionValueDto other = (JsonPropertyDescriptionValueDto) o;
+        if (!other.canEqual((Object) this)) {
+            return false;
+        }
+        final Object this$descriptionLines = this.getDescriptionLines();
+        final Object other$descriptionLines = other.getDescriptionLines();
+        if (this$descriptionLines == null ? other$descriptionLines != null
+                : !this$descriptionLines.equals(other$descriptionLines)) {
+            return false;
+        }
+        final Object this$valids = this.getValids();
+        final Object other$valids = other.getValids();
+        if (this$valids == null ? other$valids != null : !this$valids.equals(other$valids)) {
+            return false;
+        }
+        final Object this$jsonFormatPattern = this.getJsonFormatPattern();
+        final Object other$jsonFormatPattern = other.getJsonFormatPattern();
+        if (this$jsonFormatPattern == null ? other$jsonFormatPattern != null
+                : !this$jsonFormatPattern.equals(other$jsonFormatPattern)) {
+            return false;
+        }
+        final Object this$isFieldCrossingValids = this.getIsFieldCrossingValids();
+        final Object other$isFieldCrossingValids = other.getIsFieldCrossingValids();
+        if (this$isFieldCrossingValids == null ? other$isFieldCrossingValids != null
+                : !this$isFieldCrossingValids.equals(other$isFieldCrossingValids)) {
+            return false;
+        }
+        final Object this$docIgnore = this.getDocIgnore();
+        final Object other$docIgnore = other.getDocIgnore();
+        if (this$docIgnore == null ? other$docIgnore != null : !this$docIgnore.equals(other$docIgnore)) {
+            return false;
+        }
+        final Object this$referencePath = this.getReferencePath();
+        final Object other$referencePath = other.getReferencePath();
+        if (this$referencePath == null ? other$referencePath != null
+                : !this$referencePath.equals(other$referencePath)) {
+            return false;
+        }
+        final Object this$ecats = this.getEcats();
+        final Object other$ecats = other.getEcats();
+        if (this$ecats == null ? other$ecats != null : !this$ecats.equals(other$ecats)) {
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean canEqual(final Object other) {
+        return other instanceof JsonPropertyDescriptionValueDto;
+    }
+
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final Object $descriptionLines = this.getDescriptionLines();
+        result = result * PRIME + ($descriptionLines == null ? 43 : $descriptionLines.hashCode());
+        final Object $valids = this.getValids();
+        result = result * PRIME + ($valids == null ? 43 : $valids.hashCode());
+        final Object $jsonFormatPattern = this.getJsonFormatPattern();
+        result = result * PRIME + ($jsonFormatPattern == null ? 43 : $jsonFormatPattern.hashCode());
+        final Object $isFieldCrossingValids = this.getIsFieldCrossingValids();
+        result = result * PRIME + ($isFieldCrossingValids == null ? 43 : $isFieldCrossingValids.hashCode());
+        final Object $docIgnore = this.getDocIgnore();
+        result = result * PRIME + ($docIgnore == null ? 43 : $docIgnore.hashCode());
+        final Object $referencePath = this.getReferencePath();
+        result = result * PRIME + ($referencePath == null ? 43 : $referencePath.hashCode());
+        final Object $ecats = this.getEcats();
+        result = result * PRIME + ($ecats == null ? 43 : $ecats.hashCode());
+        return result;
+    }
+
+    public String toString() {
+        return "JsonPropertyDescriptionValueDto(descriptionLines=" + this.getDescriptionLines() + ", valids=" + this
+                .getValids() + ", jsonFormatPattern=" + this.getJsonFormatPattern() + ", isFieldCrossingValids=" + this
+                .getIsFieldCrossingValids() + ", docIgnore=" + this.getDocIgnore() + ", referencePath=" + this
+                .getReferencePath() + ", ecats=" + this.getEcats() + ")";
     }
 
 }

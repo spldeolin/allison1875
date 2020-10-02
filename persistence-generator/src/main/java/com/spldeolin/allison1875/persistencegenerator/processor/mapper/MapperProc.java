@@ -2,17 +2,18 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapper;
 
 import java.util.Collection;
 import java.util.List;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-13
  */
-@Log4j2
 public abstract class MapperProc {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(MapperProc.class);
 
     protected String calcMethodName(ClassOrInterfaceDeclaration mapper, String expectMethodName) {
         int v = 2;

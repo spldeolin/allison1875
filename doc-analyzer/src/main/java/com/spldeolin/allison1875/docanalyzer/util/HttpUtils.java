@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Map;
 import javax.imageio.ImageIO;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import com.google.common.base.Strings;
-import lombok.extern.log4j.Log4j2;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -28,8 +28,9 @@ import okhttp3.ResponseBody;
  *
  * @author Deolin
  */
-@Log4j2
 public class HttpUtils {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(HttpUtils.class);
 
     private static final OkHttpClient client = new OkHttpClient();
 

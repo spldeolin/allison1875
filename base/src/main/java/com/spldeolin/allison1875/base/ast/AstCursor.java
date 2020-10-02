@@ -7,14 +7,12 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 抽象语法树迭代子
  *
  * @author Deolin 2020-04-23
  */
-@Log4j2
 class AstCursor implements Iterator<CompilationUnit> {
 
     private final Path commonPathPart;

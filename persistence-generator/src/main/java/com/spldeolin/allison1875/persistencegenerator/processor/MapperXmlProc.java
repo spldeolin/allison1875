@@ -21,13 +21,10 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.XmlProc;
 import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-18
  */
-@Log4j2
 public class MapperXmlProc {
 
     private final PersistenceDto persistence;
@@ -38,10 +35,8 @@ public class MapperXmlProc {
 
     private final Path mapperXmlDirectory;
 
-    @Getter
     private File mapperXmlFile;
 
-    @Getter
     private Element root;
 
     public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
@@ -126,6 +121,14 @@ public class MapperXmlProc {
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
         return auto;
+    }
+
+    public File getMapperXmlFile() {
+        return this.mapperXmlFile;
+    }
+
+    public Element getRoot() {
+        return this.root;
     }
 
 }

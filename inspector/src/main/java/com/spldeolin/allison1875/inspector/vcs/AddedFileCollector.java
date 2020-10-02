@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -19,15 +20,15 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.TimeUtils;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 每个文件的初次添加者的收集器
  *
  * @author Deolin 2020-02-26
  */
-@Log4j2
 class AddedFileCollector {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AddedFileCollector.class);
 
     Optional<Set<Path>> collectSinceTime(GitLoader loader, LocalDateTime since) throws GitAPIException, IOException {
         if (since == null) {

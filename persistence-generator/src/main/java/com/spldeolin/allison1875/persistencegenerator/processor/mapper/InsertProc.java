@@ -8,22 +8,18 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 插入
  *
  * @author Deolin 2020-07-18
  */
-@Log4j2
 public class InsertProc extends MapperProc {
 
     private final PersistenceDto persistence;
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    @Getter
     private String methodName;
 
     public InsertProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
@@ -47,6 +43,10 @@ public class InsertProc extends MapperProc {
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return this;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
     }
 
 }

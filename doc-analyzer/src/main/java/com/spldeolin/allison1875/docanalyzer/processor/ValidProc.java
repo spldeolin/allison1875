@@ -23,22 +23,18 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 校验项
  *
  * @author Deolin 2019-12-09
  */
-@Log4j2
 class ValidProc {
 
     private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
 
     private final AnnotatedElement annotatedElement;
 
-    @Getter
     private Collection<ValidatorDto> valids;
 
     ValidProc(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy, AnnotatedElement annotatedElement) {
@@ -162,6 +158,10 @@ class ValidProc {
                 one.setNote("");
             }
         });
+    }
+
+    public Collection<ValidatorDto> getValids() {
+        return this.valids;
     }
 
 }

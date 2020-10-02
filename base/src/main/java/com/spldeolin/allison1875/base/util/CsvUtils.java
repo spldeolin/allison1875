@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.base.util;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -11,15 +12,15 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.exception.CsvException;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * CSV工具类
  *
  * @author Deolin 2019-01-14
  */
-@Log4j2
 public class CsvUtils {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(CsvUtils.class);
 
     public static final CsvMapper cm = createCsvMapper();
 

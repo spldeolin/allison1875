@@ -1,26 +1,23 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.nio.file.Path;
+import org.apache.logging.log4j.Logger;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-21
  */
-@Log4j2
 public class PathProc {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PathProc.class);
 
     private final AstForest astForest;
 
-    @Getter
     private Path hostPath;
 
-    @Getter
     private Path sourceRoot;
 
-    @Getter
     private Path mapperXmlPath;
 
     public PathProc(AstForest astForest) {
@@ -35,6 +32,18 @@ public class PathProc {
         mapperXmlPath = hostPath.resolve(PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath());
         log.info("mapperXmlPath={}", mapperXmlPath);
         return this;
+    }
+
+    public Path getHostPath() {
+        return this.hostPath;
+    }
+
+    public Path getSourceRoot() {
+        return this.sourceRoot;
+    }
+
+    public Path getMapperXmlPath() {
+        return this.mapperXmlPath;
     }
 
 }

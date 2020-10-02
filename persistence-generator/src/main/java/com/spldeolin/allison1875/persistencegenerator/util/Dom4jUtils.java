@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.Logger;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
@@ -16,13 +17,13 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-16
  */
-@Log4j2
 public class Dom4jUtils {
+
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(Dom4jUtils.class);
 
     public static void write(File mapperXmlFile, Node node) {
         try {

@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
@@ -12,31 +13,26 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.BaseConfig;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 可遍历的抽象语法树森林
  *
  * @author Deolin 2020-04-24
  */
-@Log4j2
 public class AstForest implements Iterable<CompilationUnit> {
 
-    @Getter
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AstForest.class);
+
     private final Class<?> anyClassFromHost;
 
     private final ImmutableList<String> dependencyProjectPaths;
 
-    @Getter
     private final Path host;
 
-    @Getter
     private final Path hostSourceRoot;
 
     private final ImmutableList<Path> hostAndDependencySourceRoots;
 
-    @Getter
     private final Path commonPathPart;
 
     private AstCursor cursor;
@@ -109,6 +105,22 @@ public class AstForest implements Iterable<CompilationUnit> {
         return "AstForest{" + "anyClassFromHost=" + anyClassFromHost + ", dependencyProjectPaths="
                 + dependencyProjectPaths + ", hostSourceRoot=" + hostSourceRoot + ", hostAndDependencySourceRoots="
                 + hostAndDependencySourceRoots + ", commonPathPart=" + commonPathPart + '}';
+    }
+
+    public Class<?> getAnyClassFromHost() {
+        return this.anyClassFromHost;
+    }
+
+    public Path getHost() {
+        return this.host;
+    }
+
+    public Path getHostSourceRoot() {
+        return this.hostSourceRoot;
+    }
+
+    public Path getCommonPathPart() {
+        return this.commonPathPart;
     }
 
 }
