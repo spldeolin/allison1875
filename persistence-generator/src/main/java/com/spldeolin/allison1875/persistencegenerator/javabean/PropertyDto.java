@@ -96,7 +96,7 @@ public class PropertyDto {
             return false;
         }
         final PropertyDto other = (PropertyDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$columnName = this.getColumnName();
@@ -131,10 +131,7 @@ public class PropertyDto {
         }
         final Object this$defaultV = this.getDefaultV();
         final Object other$defaultV = other.getDefaultV();
-        if (this$defaultV == null ? other$defaultV != null : !this$defaultV.equals(other$defaultV)) {
-            return false;
-        }
-        return true;
+        return this$defaultV == null ? other$defaultV == null : this$defaultV.equals(other$defaultV);
     }
 
     protected boolean canEqual(final Object other) {

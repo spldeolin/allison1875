@@ -116,7 +116,7 @@ public class InformationSchemaDto {
             return false;
         }
         final InformationSchemaDto other = (InformationSchemaDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$tableName = this.getTableName();
@@ -168,11 +168,8 @@ public class InformationSchemaDto {
         }
         final Object this$columnDefault = this.getColumnDefault();
         final Object other$columnDefault = other.getColumnDefault();
-        if (this$columnDefault == null ? other$columnDefault != null
-                : !this$columnDefault.equals(other$columnDefault)) {
-            return false;
-        }
-        return true;
+        return this$columnDefault == null ? other$columnDefault == null
+                : this$columnDefault.equals(other$columnDefault);
     }
 
     protected boolean canEqual(final Object other) {

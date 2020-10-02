@@ -47,7 +47,7 @@ public class ValidatorDto {
             return false;
         }
         final ValidatorDto other = (ValidatorDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$validatorType = this.getValidatorType();
@@ -58,10 +58,7 @@ public class ValidatorDto {
         }
         final Object this$note = this.getNote();
         final Object other$note = other.getNote();
-        if (this$note == null ? other$note != null : !this$note.equals(other$note)) {
-            return false;
-        }
-        return true;
+        return this$note == null ? other$note == null : this$note.equals(other$note);
     }
 
     protected boolean canEqual(final Object other) {

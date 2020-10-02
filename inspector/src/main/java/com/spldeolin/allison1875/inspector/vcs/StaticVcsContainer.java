@@ -38,10 +38,7 @@ public class StaticVcsContainer {
             return false;
         }
         final StaticVcsContainer other = (StaticVcsContainer) o;
-        if (!other.canEqual((Object) this)) {
-            return false;
-        }
-        return true;
+        return other.canEqual(this);
     }
 
     protected boolean canEqual(final Object other) {

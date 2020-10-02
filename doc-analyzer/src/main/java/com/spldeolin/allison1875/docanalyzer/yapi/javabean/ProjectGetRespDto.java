@@ -29,15 +29,12 @@ public class ProjectGetRespDto {
             return false;
         }
         final ProjectGetRespDto other = (ProjectGetRespDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$id = this.getId();
         final Object other$id = other.getId();
-        if (this$id == null ? other$id != null : !this$id.equals(other$id)) {
-            return false;
-        }
-        return true;
+        return this$id == null ? other$id == null : this$id.equals(other$id);
     }
 
     protected boolean canEqual(final Object other) {

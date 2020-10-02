@@ -134,7 +134,7 @@ public class PersistenceDto {
             return false;
         }
         final PersistenceDto other = (PersistenceDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$tableName = this.getTableName();
@@ -181,11 +181,8 @@ public class PersistenceDto {
         }
         final Object this$isDeleteFlagExist = this.getIsDeleteFlagExist();
         final Object other$isDeleteFlagExist = other.getIsDeleteFlagExist();
-        if (this$isDeleteFlagExist == null ? other$isDeleteFlagExist != null
-                : !this$isDeleteFlagExist.equals(other$isDeleteFlagExist)) {
-            return false;
-        }
-        return true;
+        return this$isDeleteFlagExist == null ? other$isDeleteFlagExist == null
+                : this$isDeleteFlagExist.equals(other$isDeleteFlagExist);
     }
 
     protected boolean canEqual(final Object other) {

@@ -38,16 +38,13 @@ public class QueryTransformerConfig {
             return false;
         }
         final QueryTransformerConfig other = (QueryTransformerConfig) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$mapperXmlDirectoryPath = this.getMapperXmlDirectoryPath();
         final Object other$mapperXmlDirectoryPath = other.getMapperXmlDirectoryPath();
-        if (this$mapperXmlDirectoryPath == null ? other$mapperXmlDirectoryPath != null
-                : !this$mapperXmlDirectoryPath.equals(other$mapperXmlDirectoryPath)) {
-            return false;
-        }
-        return true;
+        return this$mapperXmlDirectoryPath == null ? other$mapperXmlDirectoryPath == null
+                : this$mapperXmlDirectoryPath.equals(other$mapperXmlDirectoryPath);
     }
 
     protected boolean canEqual(final Object other) {

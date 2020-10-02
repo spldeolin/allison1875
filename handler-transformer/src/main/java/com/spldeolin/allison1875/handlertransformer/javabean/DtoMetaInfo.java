@@ -75,7 +75,7 @@ public class DtoMetaInfo {
             return false;
         }
         final DtoMetaInfo other = (DtoMetaInfo) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$packageName = this.getPackageName();
@@ -112,11 +112,8 @@ public class DtoMetaInfo {
         }
         final Object this$variableDeclarators = this.getVariableDeclarators();
         final Object other$variableDeclarators = other.getVariableDeclarators();
-        if (this$variableDeclarators == null ? other$variableDeclarators != null
-                : !this$variableDeclarators.equals(other$variableDeclarators)) {
-            return false;
-        }
-        return true;
+        return this$variableDeclarators == null ? other$variableDeclarators == null
+                : this$variableDeclarators.equals(other$variableDeclarators);
     }
 
     protected boolean canEqual(final Object other) {

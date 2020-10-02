@@ -125,7 +125,7 @@ public class LawlessDto {
             return false;
         }
         final LawlessDto other = (LawlessDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$sourceCode = this.getSourceCode();
@@ -160,10 +160,7 @@ public class LawlessDto {
         }
         final Object this$fixedAt = this.getFixedAt();
         final Object other$fixedAt = other.getFixedAt();
-        if (this$fixedAt == null ? other$fixedAt != null : !this$fixedAt.equals(other$fixedAt)) {
-            return false;
-        }
-        return true;
+        return this$fixedAt == null ? other$fixedAt == null : this$fixedAt.equals(other$fixedAt);
     }
 
     protected boolean canEqual(final Object other) {

@@ -97,7 +97,7 @@ public class MetaInfo {
             return false;
         }
         final MetaInfo other = (MetaInfo) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$location = this.getLocation();
@@ -138,10 +138,7 @@ public class MetaInfo {
         }
         final Object this$dtos = this.getDtos();
         final Object other$dtos = other.getDtos();
-        if (this$dtos == null ? other$dtos != null : !this$dtos.equals(other$dtos)) {
-            return false;
-        }
-        return true;
+        return this$dtos == null ? other$dtos == null : this$dtos.equals(other$dtos);
     }
 
     protected boolean canEqual(final Object other) {

@@ -46,11 +46,8 @@ public final class BaseConfig {
         final BaseConfig other = (BaseConfig) o;
         final Object this$javaDirectoryLayout = this.getJavaDirectoryLayout();
         final Object other$javaDirectoryLayout = other.getJavaDirectoryLayout();
-        if (this$javaDirectoryLayout == null ? other$javaDirectoryLayout != null
-                : !this$javaDirectoryLayout.equals(other$javaDirectoryLayout)) {
-            return false;
-        }
-        return true;
+        return this$javaDirectoryLayout == null ? other$javaDirectoryLayout == null
+                : this$javaDirectoryLayout.equals(other$javaDirectoryLayout);
     }
 
     public int hashCode() {

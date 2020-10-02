@@ -182,7 +182,7 @@ public class HandlerTransformerConfig {
             return false;
         }
         final HandlerTransformerConfig other = (HandlerTransformerConfig) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$reqDtoPackage = this.getReqDtoPackage();
@@ -248,10 +248,7 @@ public class HandlerTransformerConfig {
         }
         final Object this$author = this.getAuthor();
         final Object other$author = other.getAuthor();
-        if (this$author == null ? other$author != null : !this$author.equals(other$author)) {
-            return false;
-        }
-        return true;
+        return this$author == null ? other$author == null : this$author.equals(other$author);
     }
 
     protected boolean canEqual(final Object other) {

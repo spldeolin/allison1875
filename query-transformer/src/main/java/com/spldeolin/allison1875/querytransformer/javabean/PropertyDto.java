@@ -74,7 +74,7 @@ public class PropertyDto {
             return false;
         }
         final PropertyDto other = (PropertyDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$propertyName = this.propertyName();
@@ -99,10 +99,7 @@ public class PropertyDto {
         }
         final Object this$operator = this.operator();
         final Object other$operator = other.operator();
-        if (this$operator == null ? other$operator != null : !this$operator.equals(other$operator)) {
-            return false;
-        }
-        return true;
+        return this$operator == null ? other$operator == null : this$operator.equals(other$operator);
     }
 
     protected boolean canEqual(final Object other) {

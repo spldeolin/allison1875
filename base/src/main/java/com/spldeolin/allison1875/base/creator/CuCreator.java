@@ -137,7 +137,7 @@ public class CuCreator {
             return false;
         }
         final CuCreator other = (CuCreator) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$cu = this.getCu();
@@ -185,11 +185,8 @@ public class CuCreator {
         }
         final Object this$primaryTypeCreator = this.getPrimaryTypeCreator();
         final Object other$primaryTypeCreator = other.getPrimaryTypeCreator();
-        if (this$primaryTypeCreator == null ? other$primaryTypeCreator != null
-                : !this$primaryTypeCreator.equals(other$primaryTypeCreator)) {
-            return false;
-        }
-        return true;
+        return this$primaryTypeCreator == null ? other$primaryTypeCreator == null
+                : this$primaryTypeCreator.equals(other$primaryTypeCreator);
     }
 
     protected boolean canEqual(final Object other) {

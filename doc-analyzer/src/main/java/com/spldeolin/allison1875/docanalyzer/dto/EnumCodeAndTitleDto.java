@@ -36,7 +36,7 @@ public class EnumCodeAndTitleDto {
             return false;
         }
         final EnumCodeAndTitleDto other = (EnumCodeAndTitleDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$code = this.getCode();
@@ -46,10 +46,7 @@ public class EnumCodeAndTitleDto {
         }
         final Object this$title = this.getTitle();
         final Object other$title = other.getTitle();
-        if (this$title == null ? other$title != null : !this$title.equals(other$title)) {
-            return false;
-        }
-        return true;
+        return this$title == null ? other$title == null : this$title.equals(other$title);
     }
 
     protected boolean canEqual(final Object other) {

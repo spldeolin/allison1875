@@ -141,11 +141,8 @@ public final class DocAnalyzerConfig {
         }
         final Object this$redisPassword = this.getRedisPassword();
         final Object other$redisPassword = other.getRedisPassword();
-        if (this$redisPassword == null ? other$redisPassword != null
-                : !this$redisPassword.equals(other$redisPassword)) {
-            return false;
-        }
-        return true;
+        return this$redisPassword == null ? other$redisPassword == null
+                : this$redisPassword.equals(other$redisPassword);
     }
 
     public int hashCode() {

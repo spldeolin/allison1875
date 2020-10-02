@@ -168,7 +168,7 @@ public class JsonPropertyDescriptionValueDto {
             return false;
         }
         final JsonPropertyDescriptionValueDto other = (JsonPropertyDescriptionValueDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$descriptionLines = this.getDescriptionLines();
@@ -207,10 +207,7 @@ public class JsonPropertyDescriptionValueDto {
         }
         final Object this$ecats = this.getEcats();
         final Object other$ecats = other.getEcats();
-        if (this$ecats == null ? other$ecats != null : !this$ecats.equals(other$ecats)) {
-            return false;
-        }
-        return true;
+        return this$ecats == null ? other$ecats == null : this$ecats.equals(other$ecats);
     }
 
     protected boolean canEqual(final Object other) {

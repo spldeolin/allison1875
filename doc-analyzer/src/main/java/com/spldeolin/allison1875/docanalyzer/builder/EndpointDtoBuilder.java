@@ -162,7 +162,7 @@ public class EndpointDtoBuilder {
             return false;
         }
         final EndpointDtoBuilder other = (EndpointDtoBuilder) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$cat = this.cat();
@@ -215,10 +215,7 @@ public class EndpointDtoBuilder {
         }
         final Object this$sourceCode = this.sourceCode();
         final Object other$sourceCode = other.sourceCode();
-        if (this$sourceCode == null ? other$sourceCode != null : !this$sourceCode.equals(other$sourceCode)) {
-            return false;
-        }
-        return true;
+        return this$sourceCode == null ? other$sourceCode == null : this$sourceCode.equals(other$sourceCode);
     }
 
     protected boolean canEqual(final Object other) {

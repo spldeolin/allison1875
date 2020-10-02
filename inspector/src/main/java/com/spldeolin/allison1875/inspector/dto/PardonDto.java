@@ -57,7 +57,7 @@ public class PardonDto {
             return false;
         }
         final PardonDto other = (PardonDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$sourceCode = this.getSourceCode();
@@ -72,10 +72,7 @@ public class PardonDto {
         }
         final Object this$statuteNo = this.getStatuteNo();
         final Object other$statuteNo = other.getStatuteNo();
-        if (this$statuteNo == null ? other$statuteNo != null : !this$statuteNo.equals(other$statuteNo)) {
-            return false;
-        }
-        return true;
+        return this$statuteNo == null ? other$statuteNo == null : this$statuteNo.equals(other$statuteNo);
     }
 
     protected boolean canEqual(final Object other) {

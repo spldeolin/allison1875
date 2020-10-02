@@ -161,7 +161,7 @@ public class EndpointDto {
             return false;
         }
         final EndpointDto other = (EndpointDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$cat = this.getCat();
@@ -215,10 +215,7 @@ public class EndpointDto {
         }
         final Object this$sourceCode = this.getSourceCode();
         final Object other$sourceCode = other.getSourceCode();
-        if (this$sourceCode == null ? other$sourceCode != null : !this$sourceCode.equals(other$sourceCode)) {
-            return false;
-        }
-        return true;
+        return this$sourceCode == null ? other$sourceCode == null : this$sourceCode.equals(other$sourceCode);
     }
 
     protected boolean canEqual(final Object other) {

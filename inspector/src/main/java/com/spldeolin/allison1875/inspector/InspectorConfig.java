@@ -101,11 +101,8 @@ public final class InspectorConfig {
         }
         final Object this$lawlessDirectoryPath = this.getLawlessDirectoryPath();
         final Object other$lawlessDirectoryPath = other.getLawlessDirectoryPath();
-        if (this$lawlessDirectoryPath == null ? other$lawlessDirectoryPath != null
-                : !this$lawlessDirectoryPath.equals(other$lawlessDirectoryPath)) {
-            return false;
-        }
-        return true;
+        return this$lawlessDirectoryPath == null ? other$lawlessDirectoryPath == null
+                : this$lawlessDirectoryPath.equals(other$lawlessDirectoryPath);
     }
 
     public int hashCode() {

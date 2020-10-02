@@ -353,7 +353,7 @@ public class PersistenceGeneratorConfig {
             return false;
         }
         final PersistenceGeneratorConfig other = (PersistenceGeneratorConfig) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$jdbcUrl = this.getJdbcUrl();
@@ -501,11 +501,8 @@ public class PersistenceGeneratorConfig {
         }
         final Object this$disableQueryByKeys = this.getDisableQueryByKeys();
         final Object other$disableQueryByKeys = other.getDisableQueryByKeys();
-        if (this$disableQueryByKeys == null ? other$disableQueryByKeys != null
-                : !this$disableQueryByKeys.equals(other$disableQueryByKeys)) {
-            return false;
-        }
-        return true;
+        return this$disableQueryByKeys == null ? other$disableQueryByKeys == null
+                : this$disableQueryByKeys.equals(other$disableQueryByKeys);
     }
 
     protected boolean canEqual(final Object other) {
