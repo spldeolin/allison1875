@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -38,20 +37,24 @@ class GenerateServicesProc {
     GenerateServicesProc process() {
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
-        if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+        if (metaInfo.isRespAbsent()) {
             absMethod.setType("void");
         } else {
             absMethod.setType(metaInfo.getRespBody().getTypeName());
         }
         absMethod.setName(metaInfo.getHandlerName());
-        if (CollectionUtils.isNotEmpty(metaInfo.getReqBody().getVariableDeclarators())) {
+        if (!metaInfo.isReqAbsent()) {
             absMethod.addParameter(StaticJavaParser.parseType(metaInfo.getReqBody().getTypeName()), "req");
         }
         MethodDeclaration method = absMethod.clone();
 
         List<String> imports = Lists.newArrayList();
-        imports.add(metaInfo.getReqBody().getTypeQualifier());
-        imports.add(metaInfo.getRespBody().getTypeQualifier());
+        if (!metaInfo.isReqAbsent()) {
+            imports.add(metaInfo.getReqBody().getTypeQualifier());
+        }
+        if (!metaInfo.isRespAbsent()) {
+            imports.add(metaInfo.getRespBody().getTypeQualifier());
+        }
         CuCreator serviceCreator = new CuCreator(metaInfo.getSourceRoot(),
                 HandlerTransformerConfig.getInstance().getServicePackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
@@ -85,7 +88,7 @@ class GenerateServicesProc {
             method.setPublic(true);
 
             NodeList<Statement> stmts = new NodeList<>();
-            if (CollectionUtils.isNotEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+            if (!metaInfo.isRespAbsent()) {
                 String newWhat = method.getTypeAsString();
                 if (method.getType().isClassOrInterfaceType() && method.getType().asClassOrInterfaceType()
                         .getTypeArguments().isPresent()) {

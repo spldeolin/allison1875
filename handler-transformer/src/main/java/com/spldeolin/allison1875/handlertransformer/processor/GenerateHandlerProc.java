@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
-import org.apache.commons.collections4.CollectionUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -34,8 +33,12 @@ class GenerateHandlerProc {
 
     GenerateHandlerProc process() throws HandlerNameConflictException {
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
-        Imports.ensureImported(controller, metaInfo.getReqBody().getTypeQualifier());
-        Imports.ensureImported(controller, metaInfo.getRespBody().getTypeQualifier());
+        if (!metaInfo.isReqAbsent()) {
+            Imports.ensureImported(controller, metaInfo.getReqBody().getTypeQualifier());
+        }
+        if (!metaInfo.isRespAbsent()) {
+            Imports.ensureImported(controller, metaInfo.getRespBody().getTypeQualifier());
+        }
         Imports.ensureImported(controller, serviceQualifier);
         for (String controllerImport : HandlerTransformerConfig.getInstance().getControllerImports()) {
             Imports.ensureImported(controller, controllerImport);
@@ -58,14 +61,14 @@ class GenerateHandlerProc {
             handler.addAnnotation(StaticJavaParser.parseAnnotation(handlerAnnotation));
         }
         handler.setPublic(true);
-        if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+        if (metaInfo.isRespAbsent()) {
             handler.setType(HandlerTransformerConfig.getInstance().getResultVoid());
         } else {
             handler.setType(String.format(HandlerTransformerConfig.getInstance().getResult(),
                     metaInfo.getRespBody().getTypeName()));
         }
         handler.setName(handlerName);
-        if (CollectionUtils.isNotEmpty(metaInfo.getReqBody().getVariableDeclarators())) {
+        if (!metaInfo.isReqAbsent()) {
             Parameter requestBody = StaticJavaParser.parseParameter(metaInfo.getReqBody().getTypeName() + " req");
             requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@RequestBody"));
             requestBody.addAnnotation(StaticJavaParser.parseAnnotation("@Valid"));
@@ -73,13 +76,13 @@ class GenerateHandlerProc {
         }
 
         String handlerPattern;
-        if (CollectionUtils.isEmpty(metaInfo.getRespBody().getVariableDeclarators())) {
+        if (metaInfo.isRespAbsent()) {
             handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPatternInNoResponseBodySituation();
         } else {
             handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPattern();
         }
         String serviceCallExpr = metaInfo.getHandlerName() + "Service." + metaInfo.getHandlerName();
-        if (CollectionUtils.isEmpty(metaInfo.getReqBody().getVariableDeclarators())) {
+        if (metaInfo.isReqAbsent()) {
             serviceCallExpr += "()";
         } else {
             serviceCallExpr += "(req)";

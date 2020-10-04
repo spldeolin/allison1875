@@ -147,11 +147,12 @@ class BlueprintAnalyzeProc {
             // 大括号内没有指定任何dto和dtos时
             if (dtoBuilder.build().getTypeName() == null) {
                 log.warn("存在未指定dto或者dtos属性的区域，忽略这个dto[{}]", Locations.getRelativePathWithLineNo(blueprint));
-                break;
+                continue;
             }
             // 大括号内没有除dto或dtos以外的vde
             if (dtoBuilder.build().getVariableDeclarators().size() == 0) {
                 log.warn("存在没有指定除dto或dtos以外属性的区域，忽略这个dto[{}]", Locations.getRelativePathWithLineNo(blueprint));
+                continue;
             }
 
             dtoBuilder.imports(Imports.listImports(controller));

@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.nio.file.Path;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.ImmutableList;
@@ -55,6 +56,14 @@ public class MetaInfo {
             return true;
         }
         return false;
+    }
+
+    public boolean isReqAbsent() {
+        return reqBody == null || CollectionUtils.isEmpty(reqBody.getVariableDeclarators());
+    }
+
+    public boolean isRespAbsent() {
+        return respBody == null || CollectionUtils.isEmpty(respBody.getVariableDeclarators());
     }
 
     public String getLocation() {
