@@ -19,8 +19,7 @@ class DeleteAllison1875MethodProc {
 
     void process() {
         for (MethodDeclaration method : mapper.getMethods()) {
-            boolean byAllison1875 = JavadocDescriptions.getEveryLineInOne(method, ",")
-                    .contains(BaseConstant.BY_ALLISON_1875);
+            boolean byAllison1875 = JavadocDescriptions.getRaw(method).contains(BaseConstant.BY_ALLISON_1875);
             if (byAllison1875) {
                 method.remove();
             }

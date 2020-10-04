@@ -121,7 +121,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
                 EndpointDtoBuilder builder = new EndpointDtoBuilder();
                 builder.cat(handlerCat);
                 builder.handlerSimpleName(controller.getName() + "_" + handler.getName());
-                builder.descriptionLines(JavadocDescriptions.getEveryLine(handler));
+                builder.descriptionLines(JavadocDescriptions.getAsLines(handler));
                 builder.isDeprecated(isDeprecated(controller, handler));
                 builder.author(Authors.getAuthor(handler));
                 builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
@@ -155,17 +155,13 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     private String findControllerCat(ClassOrInterfaceDeclaration controller) {
         String controllerCat = findCat(controller);
         if (controllerCat == null) {
-            controllerCat = JavadocDescriptions.getTrimmedFirstLine(controller, true);
-        }
-        if (controllerCat == null) {
-            controllerCat = controller.getNameAsString();
+            controllerCat = JavadocDescriptions.getFirstLine(controller);
         }
         return controllerCat;
     }
 
     private String findCat(NodeWithJavadoc<?> node) {
-        Collection<String> lines = JavadocDescriptions.getEveryLine(node);
-        for (String line : lines) {
+        for (String line : JavadocDescriptions.getAsLines(node)) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docCat)) {
                 String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line, docCat).trim();
                 if (catContent.length() > 0) {
@@ -177,7 +173,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     }
 
     private boolean findIgnoreFlag(NodeWithJavadoc<?> node) {
-        for (String line : JavadocDescriptions.getEveryLine(node)) {
+        for (String line : JavadocDescriptions.getAsLines(node)) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docIgnore)) {
                 return true;
             }

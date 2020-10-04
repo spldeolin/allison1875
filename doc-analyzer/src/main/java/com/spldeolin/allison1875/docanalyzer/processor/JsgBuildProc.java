@@ -81,7 +81,7 @@ class JsgBuildProc {
         String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         String javabeanQualifier = qualifier;
         for (FieldDeclaration field : coid.getFields()) {
-            Collection<String> javadocDescLines = JavadocDescriptions.getEveryLine(field);
+            Collection<String> javadocDescLines = JavadocDescriptions.getAsLines(field);
             for (VariableDeclarator var : field.getVariables()) {
                 JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
                 String varName = var.getNameAsString();

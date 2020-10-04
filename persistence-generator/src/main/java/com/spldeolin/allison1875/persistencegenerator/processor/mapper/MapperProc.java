@@ -32,7 +32,7 @@ public abstract class MapperProc {
     protected boolean existDeclared(ClassOrInterfaceDeclaration mapper, String methodName) {
         List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
         for (MethodDeclaration method : methods) {
-            Collection<String> descriptionLines = JavadocDescriptions.getEveryLine(method);
+            Collection<String> descriptionLines = JavadocDescriptions.getAsLines(method);
             if (descriptionLines.stream().anyMatch(line -> line.contains(BaseConstant.BY_ALLISON_1875))) {
                 method.remove();
             }

@@ -30,7 +30,7 @@ public class JavadocTags {
         for (JavadocBlockTag blockTag : javadoc.getBlockTags()) {
             if (blockTag.getType() == blockTagType) {
                 JavadocDescription content = blockTag.getContent();
-                Collection<String> lines = JavadocDescriptions.getEveryLine(content);
+                Collection<String> lines = JavadocDescriptions.getAsLines(content);
                 result.addAll(lines);
             }
         }

@@ -102,8 +102,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                             String propertyName = findPropertyName(var);
                             String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
                             String dollarVar = "#{" + varName + "}";
-                            String operator = StringUtils
-                                    .lowerCase(JavadocDescriptions.getTrimmedFirstLine(field, false));
+                            String operator = StringUtils.lowerCase(JavadocDescriptions.getFirstLine(field));
                             if (StringUtils.isEmpty(operator)) {
                                 operator = "eq";
                             }

@@ -1,17 +1,15 @@
 package com.spldeolin.allison1875.base.util.ast;
 
 import java.util.Collection;
-import java.util.List;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**
- * 获取Javadoc注释部分
+ * 获取Javadoc注释部分，若Javadoc不存在时，所有方法均返回""
  *
  * @author Deolin 2019-12-23
  */
@@ -22,63 +20,66 @@ public class JavadocDescriptions {
     }
 
     /**
-     * 获取Javadoc中注释部分的第一行（经trim）
+     * 获取原始的description
      */
-    public static String getTrimmedFirstLine(Javadoc javadoc, boolean emptyToNull) {
-        Collection<String> strings = getEveryLine(javadoc);
-        String result = Iterables.getFirst(strings, null);
-        if (result != null) {
-            result = result.trim();
-            if (emptyToNull && result.length() == 0) {
-                return null;
-            }
-        }
-        return result;
+    static String getRaw(JavadocDescription javadocDescription) {
+        return javadocDescription.toText();
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getTrimmedFirstLine(Javadoc)}
+     * 获取原始的description
      */
-    public static String getTrimmedFirstLine(NodeWithJavadoc<?> node, boolean emptyToNull) {
-        return node.getJavadoc().map(jd -> getTrimmedFirstLine(jd, emptyToNull)).orElse(null);
+    public static String getRaw(Javadoc javadoc) {
+        return getRaw(javadoc.getDescription());
     }
 
     /**
-     * 获取Javadoc中注释部分的每一行，并使用参数sep拼接成一行
+     * 获取原始的description
      */
-    public static String getEveryLineInOne(Javadoc javadoc, String sep) {
-        return Joiner.on(sep).join(getEveryLine(javadoc));
+    public static String getRaw(NodeWithJavadoc<?> node) {
+        return node.getJavadoc().map(JavadocDescriptions::getRaw).orElse("");
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getEveryLineInOne(Javadoc, String)}
+     * 获取description，并按行分割到Collection中
      */
-    public static String getEveryLineInOne(NodeWithJavadoc<?> node, String sep) {
-        return node.getJavadoc().map(javadoc -> getEveryLineInOne(javadoc, sep)).orElse("");
+    static Collection<String> getAsLines(JavadocDescription javadocDescription) {
+        return StringUtils.splitLineByLine(getRaw(javadocDescription));
     }
 
     /**
-     * 获取Javadoc中注释部分的每一行
+     * 获取description，并按行分割到Collection中
      */
-    public static Collection<String> getEveryLine(Javadoc javadoc) {
-        JavadocDescription description = javadoc.getDescription();
-        return getEveryLine(description);
+    public static Collection<String> getAsLines(Javadoc javadoc) {
+        return getAsLines(javadoc.getDescription());
     }
 
     /**
-     * 重载自 {@linkplain JavadocDescriptions#getEveryLine(Javadoc)}
+     * 获取description，并按行分割到Collection中
      */
-    public static Collection<String> getEveryLine(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(JavadocDescriptions::getEveryLine).orElse(Lists.newArrayList());
+    public static Collection<String> getAsLines(NodeWithJavadoc<?> node) {
+        return node.getJavadoc().map(JavadocDescriptions::getAsLines).orElse(Lists.newArrayList());
     }
 
     /**
-     * 获取Javadoc中注释部分的每一行
+     * 获取description的第一行
      */
-    public static Collection<String> getEveryLine(JavadocDescription description) {
-        String rawComment = description.toText();
-        List<String> lines = StringUtils.splitLineByLine(rawComment);
-        return lines;
+    static String getFirstLine(JavadocDescription javadocDescription) {
+        return Iterables.getFirst(getAsLines(javadocDescription), "");
+    }
+
+    /**
+     * 获取description的第一行
+     */
+    public static String getFirstLine(Javadoc javadoc) {
+        return getFirstLine(javadoc.getDescription());
+    }
+
+    /**
+     * 获取description的第一行
+     */
+    public static String getFirstLine(NodeWithJavadoc<?> node) {
+        return node.getJavadoc().map(JavadocDescriptions::getFirstLine).orElse("");
     }
 
 }
