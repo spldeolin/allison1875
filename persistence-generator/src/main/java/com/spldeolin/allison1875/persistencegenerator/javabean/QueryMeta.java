@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
+import java.util.Collection;
+
 /**
  * @author Deolin 2020-10-06
  */
@@ -14,6 +16,8 @@ public class QueryMeta {
     private String mapperName;
 
     private String mapperRelativePath;
+
+    private Collection<String> propertyNames;
 
     public String getEntityQualifier() {
         return entityQualifier;
@@ -53,6 +57,14 @@ public class QueryMeta {
 
     public void setMapperRelativePath(String mapperRelativePath) {
         this.mapperRelativePath = mapperRelativePath;
+    }
+
+    public Collection<String> getPropertyNames() {
+        return propertyNames;
+    }
+
+    public void setPropertyNames(Collection<String> propertyNames) {
+        this.propertyNames = propertyNames;
     }
 
 }

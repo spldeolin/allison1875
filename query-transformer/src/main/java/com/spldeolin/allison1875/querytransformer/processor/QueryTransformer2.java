@@ -20,7 +20,9 @@ import com.google.common.collect.Queues;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 
@@ -68,11 +70,23 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                         log.warn("QueryDesign编写方式不正确");
                     }
 
-                    Collection<ConditionDto> conditions = Lists.newArrayList(new ConditionDto());
-                    boolean conditionComplete = false;
+                    Collection<ConditionDto> conditions = Lists.newArrayList();
                     parts.descendingIterator().forEachRemaining(part -> {
-                        ConditionDto condition = conditionComplete ? new ConditionDto() : Iterables.getLast(conditions);
-
+                        ConditionDto condition;
+                        if (queryMeta.getPropertyNames().contains(part)) {
+                            condition = new ConditionDto();
+                            conditions.add(condition);
+                            condition.propertyName(part);
+                            condition.columnName(StringUtils.lowerCamelToUnderscore(part));
+                            condition.dollarVar("#{" + part + "}");
+                        } else {
+                            condition = Iterables.getLast(conditions);
+                            if (OperatorEnum.isValid(part)) {
+                                condition.operator(part);
+                            } else {
+                                condition.varName(part);
+                            }
+                        }
                     });
 
                     // overwirte init

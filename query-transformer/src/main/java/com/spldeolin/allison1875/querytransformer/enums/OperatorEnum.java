@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.enums;
 
+import java.util.Arrays;
+
 /**
  * @author Deolin 2020-10-06
  */
@@ -38,4 +40,9 @@ public enum OperatorEnum {
     public String getValue() {
         return value;
     }
+
+    public static boolean isValid(String value) {
+        return Arrays.stream(OperatorEnum.values()).anyMatch(one -> one.getValue().equals(value));
+    }
+
 }

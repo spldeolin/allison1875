@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -102,6 +103,8 @@ public class QueryDesignProc {
                     queryMeta.setMapperRelativePath(
                             PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath() + File.separator
                                     + persistence.getMapperName());
+                    queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
+                            .collect(Collectors.toList()));
                     coid.addOrphanComment(new LineComment(JsonUtils.toJson(queryMeta)));
                     return coid;
                 });
