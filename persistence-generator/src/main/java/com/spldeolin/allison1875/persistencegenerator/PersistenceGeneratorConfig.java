@@ -56,7 +56,6 @@ public class PersistenceGeneratorConfig {
     @NotEmpty
     private String mapperXmlDirectoryPath;
 
-
     /**
      * mapper接口的包名（根据目标工程的情况填写）
      */
@@ -70,11 +69,27 @@ public class PersistenceGeneratorConfig {
     private String entityPackage;
 
     /**
+     * 是否为[query-transformer]生成Query类
+     */
+    @NotNull
+    private Boolean enableGenerateQueryDesign;
+
+    /**
+     * QueryDesign类的包名（根据目标工程的情况填写）
+     */
+    @NotEmpty
+    private String queryDesignPackage;
+
+    /**
+     * QueryPredicate类的全限定名（根据目标工程的情况填写）
+     */
+    private String queryPredicateQualifier;
+
+    /**
      * mapper.xml的标签中，是否使用别名来引用Entity类
      */
     @NotNull
     private Boolean isEntityUsingAlias;
-
 
     /**
      * # 生成出的Entity类是否以Entity作为类名的结尾
@@ -171,6 +186,18 @@ public class PersistenceGeneratorConfig {
 
     public @NotEmpty String getEntityPackage() {
         return this.entityPackage;
+    }
+
+    public @NotNull Boolean getEnableGenerateQueryDesign() {
+        return this.enableGenerateQueryDesign;
+    }
+
+    public @NotEmpty String getQueryDesignPackage() {
+        return this.queryDesignPackage;
+    }
+
+    public @NotEmpty String getQueryPredicateQualifier() {
+        return this.queryPredicateQualifier;
     }
 
     public @NotNull Boolean getIsEntityUsingAlias() {
@@ -275,6 +302,18 @@ public class PersistenceGeneratorConfig {
 
     public void setEntityPackage(@NotEmpty String entityPackage) {
         this.entityPackage = entityPackage;
+    }
+
+    public void setEnableGenerateQueryDesign(@NotNull Boolean enableGenerateQueryDesign) {
+        this.enableGenerateQueryDesign = enableGenerateQueryDesign;
+    }
+
+    public void setQueryDesignPackage(@NotEmpty String queryDesignPackage) {
+        this.queryDesignPackage = queryDesignPackage;
+    }
+
+    public void setQueryPredicateQualifier(@NotEmpty String queryPredicateQualifier) {
+        this.queryPredicateQualifier = queryPredicateQualifier;
     }
 
     public void setIsEntityUsingAlias(@NotNull Boolean isEntityUsingAlias) {

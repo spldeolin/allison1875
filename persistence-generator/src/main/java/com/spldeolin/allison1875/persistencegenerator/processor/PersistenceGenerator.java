@@ -54,7 +54,6 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             EntityProc entityProc = new EntityProc(persistence, pathProc).process();
             CuCreator entityCuCreator = entityProc.getEntityCuCreator();
             toSave.add(entityCuCreator.create(false));
-
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
@@ -65,6 +64,9 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
+
+            // 重新生成QueryDesign
+            new QueryDesignProc(persistence, entityCuCreator, mapper).process();
 
             // 删除Mapper中所有Allison 1875生成的方法
             new DeleteAllison1875MethodProc(mapper).process();
