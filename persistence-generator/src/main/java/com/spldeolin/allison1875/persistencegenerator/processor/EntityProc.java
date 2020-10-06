@@ -2,8 +2,6 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -15,13 +13,10 @@ import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier.Keyword;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
@@ -146,22 +141,6 @@ public class EntityProc {
             }
 
         }
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        CompilationUnit cu = StaticJavaParser.parse(new File(
-                "/Users/deolin/Documents/project-repo/allison1875/persistence-generator/src/main/java/com/spldeolin"
-                        + "/allison1875/persistencegenerator/processor/EntityProc.java"));
-
-        MethodDeclaration methodDeclaration = cu.getType(0).getMethods().get(2);
-        NodeList<Statement> statements = methodDeclaration.getBody().get().getStatements();
-
-        Statement statement = statements.get(2);
-        statements.replace(statement, StaticJavaParser.parseStatement("System.out.println(2);"));
-
-        cu.getStorage().get().save();
-
-        System.out.println(1);
     }
 
     private String buildCommentDescription(PropertyDto property) {

@@ -86,6 +86,12 @@ public class QueryDesignProc {
                     coid.setJavadocComment(classJavadoc);
                     coid.setPublic(true);
                     coid.setName(calcQueryDesignName(conf));
+                    setDefaultConstructorPrivate(coid);
+                    addStaticFactory(coid);
+                    for (PropertyDto property : persistence.getProperties()) {
+                        addIntermediateField(coid, property);
+                    }
+                    addTerminalMethod(coid, persistence);
 
                     QueryMeta queryMeta = new QueryMeta();
                     queryMeta.setEntityQualifier(entityCuCreator.getPrimaryTypeQualifier());
@@ -97,13 +103,6 @@ public class QueryDesignProc {
                             PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath() + File.separator
                                     + persistence.getMapperName());
                     coid.addOrphanComment(new LineComment(JsonUtils.toJson(queryMeta)));
-
-                    setDefaultConstructorPrivate(coid);
-                    addStaticFactory(coid);
-                    for (PropertyDto property : persistence.getProperties()) {
-                        addIntermediateField(coid, property);
-                    }
-                    addTerminalMethod(coid, persistence);
                     return coid;
                 });
         cuCreator.create(true);
