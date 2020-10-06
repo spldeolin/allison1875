@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 /**
  * @author Deolin 2020-08-12
  */
-public class PropertyDto {
+public class ConditionDto {
 
     private String propertyName;
 
@@ -15,7 +15,7 @@ public class PropertyDto {
 
     private String operator;
 
-    public PropertyDto() {
+    public ConditionDto() {
     }
 
     public String propertyName() {
@@ -38,27 +38,27 @@ public class PropertyDto {
         return this.operator;
     }
 
-    public PropertyDto propertyName(String propertyName) {
+    public ConditionDto propertyName(String propertyName) {
         this.propertyName = propertyName;
         return this;
     }
 
-    public PropertyDto columnName(String columnName) {
+    public ConditionDto columnName(String columnName) {
         this.columnName = columnName;
         return this;
     }
 
-    public PropertyDto varName(String varName) {
+    public ConditionDto varName(String varName) {
         this.varName = varName;
         return this;
     }
 
-    public PropertyDto dollarVar(String dollarVar) {
+    public ConditionDto dollarVar(String dollarVar) {
         this.dollarVar = dollarVar;
         return this;
     }
 
-    public PropertyDto operator(String operator) {
+    public ConditionDto operator(String operator) {
         this.operator = operator;
         return this;
     }
@@ -67,10 +67,10 @@ public class PropertyDto {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof PropertyDto)) {
+        if (!(o instanceof ConditionDto)) {
             return false;
         }
-        final PropertyDto other = (PropertyDto) o;
+        final ConditionDto other = (ConditionDto) o;
         if (!other.canEqual(this)) {
             return false;
         }
@@ -100,7 +100,7 @@ public class PropertyDto {
     }
 
     protected boolean canEqual(final Object other) {
-        return other instanceof PropertyDto;
+        return other instanceof ConditionDto;
     }
 
     public int hashCode() {

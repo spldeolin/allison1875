@@ -36,7 +36,7 @@ import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
-import com.spldeolin.allison1875.querytransformer.javabean.PropertyDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
 
 /**
  * @author Deolin 2020-08-09
@@ -90,8 +90,8 @@ public class QueryTransformer implements Allison1875MainProcessor {
                         mapper.addMember(method);
                         Imports.ensureImported(mapper, queryTypeQualifier);
 
-                        Collection<PropertyDto> whereProperties = Lists.newArrayList();
-                        Collection<PropertyDto> orderbyProperties = Lists.newArrayList();
+                        Collection<ConditionDto> whereProperties = Lists.newArrayList();
+                        Collection<ConditionDto> orderbyProperties = Lists.newArrayList();
                         for (FieldDeclaration field : query.getFields()) {
                             VariableDeclarator var = field.getVariable(0);
                             String varName = var.getNameAsString();
@@ -106,7 +106,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                             if (StringUtils.isEmpty(operator)) {
                                 operator = "eq";
                             }
-                            PropertyDto dto = new PropertyDto();
+                            ConditionDto dto = new ConditionDto();
                             dto.propertyName(propertyName);
                             dto.columnName(columnName);
                             dto.varName(varName);
@@ -136,7 +136,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                         if (whereProperties.size() > 0) {
                             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE");
                             boolean firstLoop = true;
-                            for (PropertyDto where : whereProperties) {
+                            for (ConditionDto where : whereProperties) {
                                 String andPart = firstLoop ? BaseConstant.SINGLE_INDENT : "AND ";
                                 firstLoop = false;
                                 switch (where.operator()) {
