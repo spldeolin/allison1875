@@ -58,8 +58,9 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                         continue;
                     }
 
-                    QueryMeta queryMeta = JsonUtils
-                            .toObject(queryDesign.getOrphanComments().get(0).getContent(), QueryMeta.class);
+                    QueryMeta queryMeta = JsonUtils.toObject(
+                            queryDesign.getOrphanComments().get(0).getContent().replaceAll("\\r?\\n", "")
+                                    .replaceAll(" ", ""), QueryMeta.class);
 
 
                     Deque<String> parts = Queues.newArrayDeque();
