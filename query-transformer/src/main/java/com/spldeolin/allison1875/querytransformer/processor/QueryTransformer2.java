@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -121,6 +122,10 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                                 StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", propertyName)));
                         parameter.setType(propertyType);
                         parameter.setName(propertyName);
+                        for (ImportDeclaration anImport : queryDesign.findCompilationUnit()
+                                .orElseThrow(CuAbsentException::new).getImports()) {
+                            Imports.ensureImported(mapper, anImport.getNameAsString());
+                        }
                         queryMethod.addParameter(parameter);
                         queryMethod.setBody(null);
                     }
