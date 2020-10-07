@@ -19,6 +19,8 @@ public class QueryMeta {
 
     private Collection<String> propertyNames;
 
+    private String tableName;
+
     public String getEntityQualifier() {
         return entityQualifier;
     }
@@ -65,6 +67,14 @@ public class QueryMeta {
 
     public void setPropertyNames(Collection<String> propertyNames) {
         this.propertyNames = propertyNames;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
 }

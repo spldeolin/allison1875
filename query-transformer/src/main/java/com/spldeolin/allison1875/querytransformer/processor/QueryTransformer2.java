@@ -1,10 +1,15 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -131,6 +137,91 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                     }
                     mapper.getMembers().add(0, queryMethod);
                     Saves.save(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
+
+                    // xml
+                    File mapperXml = astForest.getHost().resolve(queryMeta.getMapperRelativePath()).toFile();
+
+                    List<String> xmlLines = Lists.newArrayList();
+                    xmlLines.add(String.format("<select id='%s' resultMap='all'>", queryMethodName));
+                    xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
+                    xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid='all' />");
+                    xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM");
+                    xmlLines.add(BaseConstant.DOUBLE_INDENT + queryMeta.getTableName());
+                    if (conditions.size() > 0) {
+                        xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE");
+                        boolean firstLoop = true;
+                        for (ConditionDto cond : conditions) {
+                            String andPart = firstLoop ? BaseConstant.SINGLE_INDENT : "AND ";
+                            firstLoop = false;
+                            OperatorEnum operator = OperatorEnum.of(cond.operator());
+                            if (operator == OperatorEnum.EQUALS) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " = " + cond
+                                        .dollarVar());
+                            }
+                            if (operator == OperatorEnum.NOT_EQUALS) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " != " + cond
+                                        .dollarVar());
+                            }
+                            if (operator == OperatorEnum.IN) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName()
+                                        + " IN (<foreach collection='" + cond.varName()
+                                        + "' item='one' separator=','>#{one}</foreach>)");
+                            }
+                            if (operator == OperatorEnum.NOT_IN) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName()
+                                        + " NOT IN (<foreach collection='" + cond.varName()
+                                        + "' item='one' separator=','>#{one}</foreach>)");
+                            }
+                            if (operator == OperatorEnum.GREATER_THEN) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " > " + cond
+                                        .dollarVar());
+                            }
+                            if (operator == OperatorEnum.GREATER_OR_EQUALS) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " >= " + cond
+                                        .dollarVar());
+                            }
+                            if (operator == OperatorEnum.LESS_THEN) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " &lt; " + cond
+                                        .dollarVar());
+                            }
+                            if (operator == OperatorEnum.LESS_OR_EQUALS) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " &lt;= " + cond
+                                        .dollarVar());
+                            }
+                            if (operator == OperatorEnum.NOT_NULL) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " IS NOT NULL");
+                            }
+                            if (operator == OperatorEnum.IS_NULL) {
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " IS NULL");
+                            }
+                            if (operator == OperatorEnum.LIKE) {
+                                xmlLines.add(
+                                        BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " LIKE CONCAT('%', '"
+                                                + cond.dollarVar() + "', '%')");
+                            }
+                        }
+                    }
+                    xmlLines.add("</select>");
+
+                    List<String> newLines = Lists.newArrayList();
+                    try {
+                        List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
+                        Collections.reverse(lines);
+                        for (String line : lines) {
+                            newLines.add(line);
+                            if (line.contains("</mapper>")) {
+                                Collections.reverse(xmlLines);
+                                for (String xmlLine : xmlLines) {
+                                    newLines.add(BaseConstant.SINGLE_INDENT + xmlLine);
+                                }
+                            }
+                        }
+                        Collections.reverse(newLines);
+
+                        FileUtils.writeLines(mapperXml, newLines);
+                    } catch (IOException e) {
+                        log.error(e);
+                    }
 
                     // overwirte init
                     VariableDeclarator vd = (VariableDeclarator) mce.getParentNode().get();

@@ -102,9 +102,10 @@ public class QueryDesignProc {
                     queryMeta.setMapperName(mapper.getNameAsString());
                     queryMeta.setMapperRelativePath(
                             PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath() + File.separator
-                                    + persistence.getMapperName());
+                                    + persistence.getMapperName() + ".xml");
                     queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
                             .collect(Collectors.toList()));
+                    queryMeta.setTableName(persistence.getTableName());
                     coid.addOrphanComment(new LineComment(JsonUtils.toJson(queryMeta)));
                     return coid;
                 });
