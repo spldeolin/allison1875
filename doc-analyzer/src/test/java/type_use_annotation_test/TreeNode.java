@@ -88,7 +88,7 @@ public class TreeNode {
             return false;
         }
         final TreeNode other = (TreeNode) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$id = this.getId();
@@ -101,10 +101,7 @@ public class TreeNode {
         if (this$title == null ? other$title != null : !this$title.equals(other$title)) {
             return false;
         }
-        if (!java.util.Arrays.deepEquals(this.getChildren(), other.getChildren())) {
-            return false;
-        }
-        return true;
+        return java.util.Arrays.deepEquals(this.getChildren(), other.getChildren());
     }
 
     protected boolean canEqual(final Object other) {

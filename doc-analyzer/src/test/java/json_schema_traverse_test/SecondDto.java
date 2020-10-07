@@ -55,7 +55,7 @@ public class SecondDto {
             return false;
         }
         final SecondDto other = (SecondDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$age = this.getAge();
@@ -68,10 +68,7 @@ public class SecondDto {
         }
         final Object this$aaaa = this.getAaaa();
         final Object other$aaaa = other.getAaaa();
-        if (this$aaaa == null ? other$aaaa != null : !this$aaaa.equals(other$aaaa)) {
-            return false;
-        }
-        return true;
+        return this$aaaa == null ? other$aaaa == null : this$aaaa.equals(other$aaaa);
     }
 
     protected boolean canEqual(final Object other) {

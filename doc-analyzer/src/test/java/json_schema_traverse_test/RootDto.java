@@ -55,7 +55,7 @@ public class RootDto {
             return false;
         }
         final RootDto other = (RootDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$id = this.getId();
@@ -68,10 +68,7 @@ public class RootDto {
         if (this$name == null ? other$name != null : !this$name.equals(other$name)) {
             return false;
         }
-        if (!java.util.Arrays.deepEquals(this.getDtos(), other.getDtos())) {
-            return false;
-        }
-        return true;
+        return java.util.Arrays.deepEquals(this.getDtos(), other.getDtos());
     }
 
     protected boolean canEqual(final Object other) {

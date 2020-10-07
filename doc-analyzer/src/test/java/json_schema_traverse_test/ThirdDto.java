@@ -39,7 +39,7 @@ public class ThirdDto {
             return false;
         }
         final ThirdDto other = (ThirdDto) o;
-        if (!other.canEqual((Object) this)) {
+        if (!other.canEqual(this)) {
             return false;
         }
         final Object this$a = this.getA();
@@ -47,10 +47,7 @@ public class ThirdDto {
         if (this$a == null ? other$a != null : !this$a.equals(other$a)) {
             return false;
         }
-        if (!java.util.Arrays.deepEquals(this.getRootDto(), other.getRootDto())) {
-            return false;
-        }
-        return true;
+        return java.util.Arrays.deepEquals(this.getRootDto(), other.getRootDto());
     }
 
     protected boolean canEqual(final Object other) {
