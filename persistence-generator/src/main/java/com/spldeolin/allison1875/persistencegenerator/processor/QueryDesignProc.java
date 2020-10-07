@@ -13,8 +13,8 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
@@ -106,7 +106,7 @@ public class QueryDesignProc {
                     queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
                             .collect(Collectors.toList()));
                     queryMeta.setTableName(persistence.getTableName());
-                    coid.addOrphanComment(new LineComment(JsonUtils.toJson(queryMeta)));
+                    coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
                     return coid;
                 });
         cuCreator.create(true);
