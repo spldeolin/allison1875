@@ -45,4 +45,8 @@ public enum OperatorEnum {
         return Arrays.stream(OperatorEnum.values()).anyMatch(one -> one.getValue().equals(value));
     }
 
+    public static OperatorEnum of(String value) {
+        return Arrays.stream(OperatorEnum.values()).filter(one -> one.getValue().equals(value)).findAny().orElse(null);
+    }
+
 }
