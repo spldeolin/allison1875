@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.Logger;
@@ -107,7 +106,7 @@ public class QueryDesignProc {
                     queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
                             .collect(Collectors.toList()));
                     queryMeta.setTableName(persistence.getTableName());
-                    coid.addOrphanComment(new BlockComment(Arrays.toString(JsonUtils.toJson(queryMeta).getBytes())));
+                    coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
                     return coid;
                 });
         cuCreator.create(true);
