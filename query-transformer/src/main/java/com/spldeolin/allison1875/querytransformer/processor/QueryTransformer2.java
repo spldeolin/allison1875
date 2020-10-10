@@ -124,6 +124,7 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                         String propertyName = condition.propertyName();
                         String propertyType = entity.getFieldByName(propertyName).orElseThrow(FieldAbsentException::new)
                                 .getCommonType().toString();
+                        condition.propertyType(propertyType);
                         Parameter parameter = new Parameter();
                         parameter.addAnnotation(
                                 StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", propertyName)));
@@ -149,55 +150,62 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                     xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM");
                     xmlLines.add(BaseConstant.DOUBLE_INDENT + queryMeta.getTableName());
                     if (conditions.size() > 0) {
-                        xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE");
-                        boolean firstLoop = true;
+                        xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
                         for (ConditionDto cond : conditions) {
-                            String andPart = firstLoop ? BaseConstant.SINGLE_INDENT : "AND ";
-                            firstLoop = false;
                             OperatorEnum operator = OperatorEnum.of(cond.operator());
+                            String ifTag =
+                                    BaseConstant.SINGLE_INDENT + "<if test=\"" + cond.propertyName() + " != null";
+                            if (cond.propertyType().equals("String")) {
+                                ifTag += " and " + cond.propertyName() + " != ''";
+                            }
+                            ifTag += "\">";
                             if (operator == OperatorEnum.EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " = " + cond
+                                xmlLines.add(ifTag);
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "and " + cond.columnName() + " = " + cond
                                         .dollarVar());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.NOT_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " != " + cond
+                                xmlLines.add(ifTag);
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "and " + cond.columnName() + " != " + cond
                                         .dollarVar());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.IN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName()
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName()
                                         + " IN (<foreach collection='" + cond.varName()
                                         + "' item='one' separator=','>#{one}</foreach>)");
                             }
                             if (operator == OperatorEnum.NOT_IN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName()
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName()
                                         + " NOT IN (<foreach collection='" + cond.varName()
                                         + "' item='one' separator=','>#{one}</foreach>)");
                             }
                             if (operator == OperatorEnum.GREATER_THEN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " > " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " > " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.GREATER_OR_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " >= " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " >= " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.LESS_THEN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " &lt; " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " &lt; " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.LESS_OR_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " &lt;= " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " &lt;= " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.NOT_NULL) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " IS NOT NULL");
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " IS NOT NULL");
                             }
                             if (operator == OperatorEnum.IS_NULL) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " IS NULL");
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " IS NULL");
                             }
                             if (operator == OperatorEnum.LIKE) {
                                 xmlLines.add(
-                                        BaseConstant.SINGLE_INDENT + andPart + cond.columnName() + " LIKE CONCAT('%', '"
+                                        BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " LIKE CONCAT('%', '"
                                                 + cond.dollarVar() + "', '%')");
                             }
                         }

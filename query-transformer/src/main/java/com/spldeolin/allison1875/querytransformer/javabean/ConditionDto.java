@@ -15,6 +15,8 @@ public class ConditionDto {
 
     private String operator;
 
+    private String propertyType;
+
     public ConditionDto() {
     }
 
@@ -36,6 +38,10 @@ public class ConditionDto {
 
     public String operator() {
         return this.operator;
+    }
+
+    public String propertyType() {
+        return this.propertyType;
     }
 
     public ConditionDto propertyName(String propertyName) {
@@ -60,6 +66,11 @@ public class ConditionDto {
 
     public ConditionDto operator(String operator) {
         this.operator = operator;
+        return this;
+    }
+
+    public ConditionDto propertyType(String propertyType) {
+        this.propertyType = propertyType;
         return this;
     }
 
