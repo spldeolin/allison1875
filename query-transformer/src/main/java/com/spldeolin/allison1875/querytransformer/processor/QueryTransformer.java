@@ -1,45 +1,53 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
+import static com.spldeolin.allison1875.base.constant.BaseConstant.DOUBLE_INDENT;
+import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
+import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.exception.StorageAbsentException;
-import com.spldeolin.allison1875.base.util.FileBackupUtils;
+import com.spldeolin.allison1875.base.exception.FieldAbsentException;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
+import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 
 /**
- * @author Deolin 2020-08-09
+ * @author Deolin 2020-10-06
  */
 public class QueryTransformer implements Allison1875MainProcessor {
 
@@ -47,264 +55,297 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        AstForestContext.setCurrent(astForest);
-        Collection<CompilationUnit> cus = Lists.newArrayList();
+        for (CompilationUnit cu : astForest) {
+            for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {
+                if (mce.getNameAsString().equals("over") && mce.getParentNode().isPresent()) {
 
-        for (CompilationUnit queryCu : AstForestContext.getCurrent()) {
-            for (TypeDeclaration<?> type : queryCu.getTypes()) {
-                if (type.isClassOrInterfaceDeclaration()) {
-                    ClassOrInterfaceDeclaration query = type.asClassOrInterfaceDeclaration();
-                    String queryTypeName = query.getNameAsString();
-                    String queryTypeQualifier = query.getFullyQualifiedName()
-                            .orElseThrow(QualifierAbsentException::new);
-                    if (queryTypeName.endsWith("Query") && allFieldHasOnlyVar(query)) {
-                        Optional<FieldDeclaration> entityField = query.getFieldByName("entity");
-                        if (!entityField.isPresent()) {
-                            continue;
-                        }
+                    ClassOrInterfaceDeclaration queryDesign = findQueryDesign(cu, mce);
+                    if (queryDesign == null) {
+                        continue;
+                    }
 
-                        String entityTypeName = entityField.get().getCommonType().asString();
-                        ClassOrInterfaceDeclaration mapper = findMapper(entityTypeName);
-                        if (mapper == null) {
-                            continue;
-                        }
+                    QueryMeta queryMeta = JsonUtils.toObject(
+                            queryDesign.getOrphanComments().get(0).getContent().replaceAll("\\r?\\n", "")
+                                    .replaceAll(" ", ""), QueryMeta.class);
 
-                        File mapperXml = findMapperXml(mapper.getNameAsString());
-                        if (mapperXml == null) {
-                            continue;
-                        }
 
-                        FileBackupUtils.backup(queryCu.getStorage().orElseThrow(StorageAbsentException::new).getPath());
-                        FileBackupUtils.backup(Locations.getStorage(mapper).getPath());
-                        FileBackupUtils.backup(mapperXml);
-                        cus.add(queryCu);
-                        cus.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
+                    Deque<String> parts = Queues.newArrayDeque();
+                    collectCondition(parts, mce);
+                    if (parts.size() < 3) {
+                        log.warn("QueryDesign编写方式不正确");
+                    }
+                    if (!Objects.equals(parts.pollFirst(), "over")) {
+                        log.warn("QueryDesign编写方式不正确");
+                    }
+                    String queryMethodName = parts.pollLast();
+                    if (queryMethodName == null || !queryMethodName.startsWith("\"") || !queryMethodName
+                            .endsWith("\"")) {
+                        log.warn("QueryDesign的design方法必须使用String字面量作为实际参数");
+                        continue;
+                    }
+                    queryMethodName = queryMethodName.substring(1, queryMethodName.length() - 1);
+                    if (!Objects.equals(parts.pollLast(), "design")) {
+                        log.warn("QueryDesign编写方式不正确");
+                    }
 
-                        MethodDeclaration method = new MethodDeclaration();
-                        query.getJavadocComment().ifPresent(method::setJavadocComment);
-                        method.setType(StaticJavaParser.parseType("List<" + entityTypeName + ">"));
-                        String methodName = "queryVia" + StringUtils.removeLast(queryTypeName, "Query");
-                        method.setName(methodName);
-                        method.addParameter(StaticJavaParser.parseParameter(queryTypeName + " query"));
-                        method.setBody(null);
-                        mapper.addMember(method);
-                        Imports.ensureImported(mapper, queryTypeQualifier);
-
-                        Collection<ConditionDto> whereProperties = Lists.newArrayList();
-                        Collection<ConditionDto> orderbyProperties = Lists.newArrayList();
-                        for (FieldDeclaration field : query.getFields()) {
-                            VariableDeclarator var = field.getVariable(0);
-                            String varName = var.getNameAsString();
-                            if (varName.equals("entity")) {
-                                removeVarWithField(field, var);
-                                continue;
-                            }
-                            String propertyName = findPropertyName(var);
-                            String columnName = StringUtils.lowerCamelToUnderscore(propertyName);
-                            String dollarVar = "#{" + varName + "}";
-                            String operator = StringUtils.lowerCase(JavadocDescriptions.getFirstLine(field));
-                            if (StringUtils.isEmpty(operator)) {
-                                operator = "eq";
-                            }
-                            ConditionDto dto = new ConditionDto();
-                            dto.propertyName(propertyName);
-                            dto.columnName(columnName);
-                            dto.varName(varName);
-                            dto.dollarVar(dollarVar);
-                            dto.operator(operator);
-
-                            if (StringUtils.equalsAny(operator, "asc", "desc")) {
-                                orderbyProperties.add(dto);
+                    Collection<ConditionDto> conditions = Lists.newArrayList();
+                    parts.descendingIterator().forEachRemaining(part -> {
+                        ConditionDto condition;
+                        if (queryMeta.getPropertyNames().contains(part)) {
+                            condition = new ConditionDto();
+                            conditions.add(condition);
+                            condition.propertyName(part);
+                            condition.columnName(StringUtils.lowerCamelToUnderscore(part));
+                            condition.dollarVar("#{" + part + "}");
+                        } else {
+                            condition = Iterables.getLast(conditions);
+                            if (OperatorEnum.isValid(part)) {
+                                condition.operator(part);
                             } else {
-                                whereProperties.add(dto);
-                            }
-
-                            field.setPrivate(true);
-                            var.removeInitializer();
-                            if (StringUtils.equalsAny(operator, "asc", "desc")) {
-                                removeVarWithField(field, var);
+                                condition.varName(part);
                             }
                         }
+                    });
 
-                        List<String> xmlLines = Lists.newArrayList();
-                        xmlLines.add(String.format("<select id='%s' parameterType='%s' resultMap='all'>", methodName,
-                                queryTypeQualifier));
-                        xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-                        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid='all' />");
-                        xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM");
-                        xmlLines.add(BaseConstant.DOUBLE_INDENT + findTableName(entityTypeName));
-                        if (whereProperties.size() > 0) {
-                            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE");
-                            boolean firstLoop = true;
-                            for (ConditionDto where : whereProperties) {
-                                String andPart = firstLoop ? BaseConstant.SINGLE_INDENT : "AND ";
-                                firstLoop = false;
-                                switch (where.operator()) {
-                                    case "eq":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " = "
-                                                + where.dollarVar());
-                                        break;
-                                    case "ne":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " != "
-                                                + where.dollarVar());
-                                        break;
-                                    case "in":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
-                                                + " IN (<foreach collection='" + where.varName()
+                    ClassOrInterfaceDeclaration entity = findEntity(cu, queryMeta);
+                    if (entity == null) {
+                        continue;
+                    }
+
+                    ClassOrInterfaceDeclaration mapper = findMapper(cu, queryMeta);
+                    if (mapper == null) {
+                        continue;
+                    }
+
+                    // create queryMethod for mapper
+                    MethodDeclaration queryMethod = new MethodDeclaration();
+                    queryMethod
+                            .setType(StaticJavaParser.parseType(String.format("List<%s>", queryMeta.getEntityName())));
+                    queryMethod.setName(queryMethodName);
+                    for (ConditionDto condition : conditions) {
+                        OperatorEnum operator = OperatorEnum.of(condition.operator());
+                        if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
+                            continue;
+                        }
+                        String propertyName = condition.propertyName();
+                        Optional<FieldDeclaration> field = entity.getFieldByName(propertyName);
+                        String propertyType;
+                        if (field.isPresent()) {
+                            propertyType = field.orElseThrow(FieldAbsentException::new).getCommonType().toString();
+                        } else {
+                            propertyType = QueryTransformerConfig.getInstance().getEntityCommonPropertyTypes()
+                                    .get(propertyName);
+                        }
+                        if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                            propertyType = "Collection<" + propertyType + ">";
+                        }
+                        condition.propertyType(propertyType);
+                        Parameter parameter = new Parameter();
+                        String argumentName = propertyName;
+                        if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                            argumentName = English.plural(propertyName);
+                        }
+                        parameter.addAnnotation(
+                                StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", argumentName)));
+                        parameter.setType(propertyType);
+                        parameter.setName(argumentName);
+                        for (ImportDeclaration anImport : queryDesign.findCompilationUnit()
+                                .orElseThrow(CuAbsentException::new).getImports()) {
+                            Imports.ensureImported(mapper, anImport.getNameAsString());
+                        }
+                        queryMethod.addParameter(parameter);
+                        queryMethod.setBody(null);
+                    }
+                    mapper.getMembers().add(0, queryMethod);
+                    Saves.save(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
+
+                    // xml
+                    File mapperXml = astForest.getHost().resolve(queryMeta.getMapperRelativePath()).toFile();
+
+                    List<String> xmlLines = Lists.newArrayList();
+                    xmlLines.add(String.format("<select id='%s' resultMap='all'>", queryMethodName));
+                    xmlLines.add(SINGLE_INDENT + "SELECT");
+                    xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
+                    xmlLines.add(SINGLE_INDENT + "FROM");
+                    xmlLines.add(DOUBLE_INDENT + queryMeta.getTableName());
+                    if (conditions.size() > 0) {
+                        xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
+                        for (ConditionDto cond : conditions) {
+                            OperatorEnum operator = OperatorEnum.of(cond.operator());
+                            String ifTag = SINGLE_INDENT + "<if test=\"" + cond.propertyName() + " != null";
+                            if ("String".equals(cond.propertyType())) {
+                                ifTag += " and " + cond.propertyName() + " != ''";
+                            }
+                            ifTag += "\">";
+                            if (operator == OperatorEnum.EQUALS) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " = " + cond.dollarVar());
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.NOT_EQUALS) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " != " + cond.dollarVar());
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                                String argumentName = English.plural(cond.propertyName());
+                                xmlLines.add(SINGLE_INDENT + "<if test=\"" + argumentName + " != null\">");
+                                xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() != 0\">");
+                                xmlLines.add(
+                                        TREBLE_INDENT + "AND " + cond.columnName() + (operator == OperatorEnum.NOT_IN
+                                                ? " NOT" : "") + " IN (<foreach collection='" + argumentName
                                                 + "' item='one' separator=','>#{one}</foreach>)");
-                                        break;
-                                    case "gt":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " > "
-                                                + where.dollarVar());
-                                        break;
-                                    case "ge":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " >= "
-                                                + where.dollarVar());
-                                        break;
-                                    case "lt":
-                                        xmlLines.add(
-                                                BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " &lt; "
-                                                        + where.dollarVar());
-                                        break;
-                                    case "le":
-                                        xmlLines.add(
-                                                BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " &lt;= "
-                                                        + where.dollarVar());
-                                        break;
-                                    case "notnull":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
-                                                + " IS NOT NULL");
-                                        break;
-                                    case "isnull":
-                                        xmlLines.add(
-                                                BaseConstant.SINGLE_INDENT + andPart + where.columnName() + " IS NULL");
-                                        break;
-                                    case "like":
-                                        xmlLines.add(BaseConstant.SINGLE_INDENT + andPart + where.columnName()
-                                                + " LIKE CONCAT('%', '" + where.dollarVar() + "', '%')");
-                                        break;
+                                xmlLines.add(DOUBLE_INDENT + "</if>");
+                                xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() == 0\">");
+                                xmlLines.add(TREBLE_INDENT + "AND FALSE");
+                                xmlLines.add(DOUBLE_INDENT + "</if>");
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.GREATER_THEN) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " > " + cond.dollarVar());
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.GREATER_OR_EQUALS) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " >= " + cond.dollarVar());
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.LESS_THEN) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " &lt; " + cond.dollarVar());
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.LESS_OR_EQUALS) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " &lt;= " + cond.dollarVar());
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                            if (operator == OperatorEnum.NOT_NULL) {
+                                xmlLines.add(SINGLE_INDENT + "AND " + cond.columnName() + " IS NOT NULL");
+                            }
+                            if (operator == OperatorEnum.IS_NULL) {
+                                xmlLines.add(SINGLE_INDENT + "AND " + cond.columnName() + " IS NULL");
+                            }
+                            if (operator == OperatorEnum.LIKE) {
+                                xmlLines.add(ifTag);
+                                xmlLines.add(DOUBLE_INDENT + "AND " + cond.columnName() + " LIKE CONCAT('%', '" + cond
+                                        .dollarVar() + "', '%')");
+                                xmlLines.add(SINGLE_INDENT + "</if>");
+                            }
+                        }
+                    }
+                    xmlLines.add("</select>");
+
+                    List<String> newLines = Lists.newArrayList();
+                    try {
+                        List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
+                        Collections.reverse(lines);
+                        for (String line : lines) {
+                            newLines.add(line);
+                            if (line.contains("</mapper>")) {
+                                Collections.reverse(xmlLines);
+                                for (String xmlLine : xmlLines) {
+                                    newLines.add(SINGLE_INDENT + xmlLine);
                                 }
                             }
                         }
-                        if (orderbyProperties.size() > 0) {
-                            xmlLines.add(BaseConstant.SINGLE_INDENT + "ORDER BY");
-                            String orderbys = orderbyProperties.stream()
-                                    .map(one -> one.columnName() + " " + StringUtils.upperCase(one.operator()))
-                                    .collect(Collectors.joining(", "));
-                            xmlLines.add(BaseConstant.DOUBLE_INDENT + orderbys);
-                        }
+                        Collections.reverse(newLines);
 
-                        xmlLines.add("</select>");
-
-                        List<String> newLines = Lists.newArrayList();
-                        try {
-                            List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
-                            Collections.reverse(lines);
-                            for (String line : lines) {
-                                newLines.add(line);
-                                if (line.contains("</mapper>")) {
-                                    Collections.reverse(xmlLines);
-                                    for (String xmlLine : xmlLines) {
-                                        newLines.add(BaseConstant.SINGLE_INDENT + xmlLine);
-                                    }
-                                }
-                            }
-                            Collections.reverse(newLines);
-
-                            FileUtils.writeLines(mapperXml, newLines);
-                        } catch (IOException e) {
-                            log.error(e);
-                        }
-
+                        FileUtils.writeLines(mapperXml, newLines);
+                    } catch (IOException e) {
+                        log.error(e);
                     }
 
-                }
-
-            }
-
-        }
-
-        cus.forEach(Saves::save);
-    }
-
-    private void removeVarWithField(FieldDeclaration field, VariableDeclarator var) {
-        var.remove();
-        if (field.getVariables().size() == 0) {
-            field.remove();
-        }
-    }
-
-    private String findTableName(String entityTypeName) {
-        String tmp;
-        if (entityTypeName.contains("Entity")) {
-            tmp = StringUtils.replaceLast(entityTypeName, "Entity", "");
-        } else {
-            tmp = entityTypeName;
-        }
-        return StringUtils.upperCamelToUnderscore(tmp);
-    }
-
-    private String findPropertyName(VariableDeclarator var) {
-        // 如果field var 调用getter初始化，那么使用根据getter方法名获取属性名
-        if (var.getInitializer().filter(Expression::isMethodCallExpr).isPresent()) {
-            MethodCallExpr mce = var.getInitializer().get().asMethodCallExpr();
-            String getterName = mce.getNameAsString();
-            if (getterName.startsWith("get")) {
-                return StringUtils.upperCamelToUnderscore(getterName.replaceFirst("get", ""));
-            }
-        }
-        // 否则使用var name作为属性名（可能是不准确的，需要准确的话需要通过反射）
-        return var.getNameAsString();
-    }
-
-    private boolean allFieldHasOnlyVar(ClassOrInterfaceDeclaration query) {
-        for (FieldDeclaration field : query.getFields()) {
-            if (field.getVariables().size() > 1) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public ClassOrInterfaceDeclaration findMapper(String entityTypeName) {
-        String mapperName;
-        if (entityTypeName.contains("Entity")) {
-            mapperName = StringUtils.replaceLast(entityTypeName, "Entity", "") + "Mapper";
-        } else {
-            mapperName = entityTypeName + "Mapper";
-        }
-        File sourceRoot = AstForestContext.getCurrent().getHostSourceRoot().toFile();
-        Iterator<File> fileIterator = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
-        while (fileIterator.hasNext()) {
-            File file = fileIterator.next();
-            if (FilenameUtils.getBaseName(file.getName()).equals(mapperName)) {
-                try {
-                    Optional<TypeDeclaration<?>> primaryType = StaticJavaParser.parse(file).getPrimaryType();
-                    if (primaryType.filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
-                        return primaryType.get().asClassOrInterfaceDeclaration();
+                    // overwirte init
+                    MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
+                            StringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
+                            .asMethodCallExpr();
+                    for (ConditionDto condition : conditions) {
+                        OperatorEnum operator = OperatorEnum.of(condition.operator());
+                        if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
+                            continue;
+                        }
+                        callQueryMethod.addArgument(condition.varName());
                     }
-                } catch (Exception e) {
-                    log.warn("解析失败 file={}", file, e);
-                    return null;
+                    Node parent = mce.getParentNode().get();
+                    parent.replace(mce, callQueryMethod);
+
+                    // 确保service import 和 autowired 了 mapper
+                    parent.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
+                        if (!service.getFieldByName(StringUtils.lowerFirstLetter(mapper.getNameAsString()))
+                                .isPresent()) {
+                            service.getMembers().add(0, StaticJavaParser.parseBodyDeclaration(
+                                    String.format("@Autowired private %s %s;", mapper.getNameAsString(),
+                                            StringUtils.lowerFirstLetter(mapper.getNameAsString()))));
+                            Imports.ensureImported(service, queryMeta.getMapperQualifier());
+                            Imports.ensureImported(service, "org.springframework.beans.factory.annotation.Autowired");
+                        }
+                    });
+
+                    Saves.save(cu);
                 }
             }
         }
-        log.warn("找不到Mapper mapperName={}", mapperName);
-        return null;
+
     }
 
-    public File findMapperXml(String mapperName) {
-        File xmlPath = AstForestContext.getCurrent().getHost()
-                .resolve(QueryTransformerConfig.getInstance().getMapperXmlDirectoryPath()).toFile();
-        Iterator<File> fileIterator = FileUtils.iterateFiles(xmlPath, new String[]{"xml"}, true);
-        while (fileIterator.hasNext()) {
-            File file = fileIterator.next();
-            if (FilenameUtils.getBaseName(file.getName()).equals(mapperName)) {
-                return file;
-            }
+    private ClassOrInterfaceDeclaration findEntity(CompilationUnit cu, QueryMeta queryMeta) {
+        try {
+            String mapperQualifier = queryMeta.getEntityQualifier();
+            Path mapperPath = Locations.getStorage(cu).getSourceRoot()
+                    .resolve(mapperQualifier.replace('.', File.separatorChar) + ".java");
+            return StaticJavaParser.parse(mapperPath).getTypes().get(0).asClassOrInterfaceDeclaration();
+        } catch (Exception e) {
+            log.warn("寻找Entity失败", e);
+            return null;
         }
-        log.warn("找不到MapperXml mapperName={}", mapperName);
-        return null;
+    }
+
+    private ClassOrInterfaceDeclaration findMapper(CompilationUnit cu, QueryMeta queryMeta) {
+        try {
+            String mapperQualifier = queryMeta.getMapperQualifier();
+            Path mapperPath = Locations.getStorage(cu).getSourceRoot()
+                    .resolve(mapperQualifier.replace('.', File.separatorChar) + ".java");
+            return StaticJavaParser.parse(mapperPath).getTypes().get(0).asClassOrInterfaceDeclaration();
+        } catch (Exception e) {
+            log.warn("寻找Mapper失败", e);
+            return null;
+        }
+    }
+
+    private ClassOrInterfaceDeclaration findQueryDesign(CompilationUnit cu, MethodCallExpr mce) {
+        ClassOrInterfaceDeclaration queryDesign;
+        try {
+            String queryDesignQualifier = mce.findAll(NameExpr.class).get(0).calculateResolvedType().describe();
+            Path queryDesignPath = Locations.getStorage(cu).getSourceRoot()
+                    .resolve(queryDesignQualifier.replace('.', File.separatorChar) + ".java");
+            CompilationUnit queryDesignCu = StaticJavaParser.parse(queryDesignPath);
+            queryDesign = queryDesignCu.getType(0).asClassOrInterfaceDeclaration();
+        } catch (Exception e) {
+            log.warn("QueryDesign编写方式不正确", e);
+            return null;
+        }
+        return queryDesign;
+    }
+
+
+    private void collectCondition(Deque<String> parts, Expression scope) {
+        scope.ifMethodCallExpr(mce -> {
+            String operator = mce.getNameAsString();
+            parts.add(operator);
+            NodeList<Expression> arguments = scope.asMethodCallExpr().getArguments();
+            if (arguments.size() > 0) {
+                parts.add(arguments.get(0).toString());
+            }
+            mce.getScope().ifPresent(scopeEx -> this.collectCondition(parts, scopeEx));
+        });
+
+        scope.ifFieldAccessExpr(fae -> {
+            String propertyName = scope.asFieldAccessExpr().getNameAsString();
+            parts.add(propertyName);
+            this.collectCondition(parts, fae.getScope());
+        });
     }
 
 }
