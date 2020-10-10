@@ -171,8 +171,8 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                             OperatorEnum operator = OperatorEnum.of(cond.operator());
                             String ifTag =
                                     BaseConstant.SINGLE_INDENT + "<if test=\"" + cond.propertyName() + " != null";
-                            if (cond.propertyType().equals("String")) {
-                                ifTag += " AND " + cond.propertyName() + " != ''";
+                            if ("String".equals(cond.propertyType())) {
+                                ifTag += " and " + cond.propertyName() + " != ''";
                             }
                             ifTag += "\">";
                             if (operator == OperatorEnum.EQUALS) {
@@ -203,20 +203,28 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                                 xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.GREATER_THEN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " > " + cond
+                                xmlLines.add(ifTag);
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " > " + cond
                                         .dollarVar());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.GREATER_OR_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " >= " + cond
+                                xmlLines.add(ifTag);
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " >= " + cond
                                         .dollarVar());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.LESS_THEN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " &lt; " + cond
+                                xmlLines.add(ifTag);
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " &lt; " + cond
                                         .dollarVar());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.LESS_OR_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " &lt;= " + cond
+                                xmlLines.add(ifTag);
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " &lt;= " + cond
                                         .dollarVar());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.NOT_NULL) {
                                 xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " IS NOT NULL");
@@ -225,9 +233,11 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                                 xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " IS NULL");
                             }
                             if (operator == OperatorEnum.LIKE) {
+                                xmlLines.add(ifTag);
                                 xmlLines.add(
-                                        BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " LIKE CONCAT('%', '"
+                                        BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " LIKE CONCAT('%', '"
                                                 + cond.dollarVar() + "', '%')");
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                         }
                     }
