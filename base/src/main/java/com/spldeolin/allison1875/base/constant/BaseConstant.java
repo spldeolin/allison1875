@@ -13,6 +13,8 @@ public interface BaseConstant {
 
     String DOUBLE_INDENT = Strings.repeat(SINGLE_INDENT, 2);
 
+    String TREBLE_INDENT = Strings.repeat(SINGLE_INDENT, 3);
+
     String NEW_LINE = "\r\n";
 
 }

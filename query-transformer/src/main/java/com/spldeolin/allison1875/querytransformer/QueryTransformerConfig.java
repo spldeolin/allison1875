@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.querytransformer;
 
+import java.util.Map;
 import javax.validation.constraints.NotEmpty;
+import com.google.common.collect.Maps;
 
 /**
  * @author Deolin 2020-08-09
@@ -15,6 +17,11 @@ public class QueryTransformerConfig {
     @NotEmpty
     private String mapperXmlDirectoryPath;
 
+    /**
+     * Entity通用属性的类型
+     */
+    private Map<String, String> entityCommonPropertyTypes = Maps.newHashMap();
+
     private QueryTransformerConfig() {
     }
 
@@ -22,12 +29,20 @@ public class QueryTransformerConfig {
         return QueryTransformerConfig.instance;
     }
 
-    public @NotEmpty String getMapperXmlDirectoryPath() {
-        return this.mapperXmlDirectoryPath;
+    public String getMapperXmlDirectoryPath() {
+        return mapperXmlDirectoryPath;
     }
 
-    public void setMapperXmlDirectoryPath(@NotEmpty String mapperXmlDirectoryPath) {
+    public void setMapperXmlDirectoryPath(String mapperXmlDirectoryPath) {
         this.mapperXmlDirectoryPath = mapperXmlDirectoryPath;
+    }
+
+    public Map<String, String> getEntityCommonPropertyTypes() {
+        return entityCommonPropertyTypes;
+    }
+
+    public void setEntityCommonPropertyTypes(Map<String, String> entityCommonPropertyTypes) {
+        this.entityCommonPropertyTypes = entityCommonPropertyTypes;
     }
 
     public boolean equals(final Object o) {

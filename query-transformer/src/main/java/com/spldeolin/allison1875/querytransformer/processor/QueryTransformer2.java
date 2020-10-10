@@ -9,16 +9,19 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -35,6 +38,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
@@ -50,8 +54,7 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
     public void process(AstForest astForest) {
         for (CompilationUnit cu : astForest) {
             for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {
-                if (mce.getNameAsString().equals("over") && mce.getParentNode()
-                        .filter(parent -> parent instanceof VariableDeclarator).isPresent()) {
+                if (mce.getNameAsString().equals("over") && mce.getParentNode().isPresent()) {
 
                     ClassOrInterfaceDeclaration queryDesign = findQueryDesign(cu, mce);
                     if (queryDesign == null) {
@@ -122,14 +125,27 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                             continue;
                         }
                         String propertyName = condition.propertyName();
-                        String propertyType = entity.getFieldByName(propertyName).orElseThrow(FieldAbsentException::new)
-                                .getCommonType().toString();
+                        Optional<FieldDeclaration> field = entity.getFieldByName(propertyName);
+                        String propertyType;
+                        if (field.isPresent()) {
+                            propertyType = field.orElseThrow(FieldAbsentException::new).getCommonType().toString();
+                        } else {
+                            propertyType = QueryTransformerConfig.getInstance().getEntityCommonPropertyTypes()
+                                    .get(propertyName);
+                        }
+                        if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                            propertyType = "Collection<" + propertyType + ">";
+                        }
                         condition.propertyType(propertyType);
                         Parameter parameter = new Parameter();
+                        String argumentName = propertyName;
+                        if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                            argumentName = English.plural(propertyName);
+                        }
                         parameter.addAnnotation(
-                                StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", propertyName)));
+                                StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", argumentName)));
                         parameter.setType(propertyType);
-                        parameter.setName(propertyName);
+                        parameter.setName(argumentName);
                         for (ImportDeclaration anImport : queryDesign.findCompilationUnit()
                                 .orElseThrow(CuAbsentException::new).getImports()) {
                             Imports.ensureImported(mapper, anImport.getNameAsString());
@@ -156,56 +172,61 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                             String ifTag =
                                     BaseConstant.SINGLE_INDENT + "<if test=\"" + cond.propertyName() + " != null";
                             if (cond.propertyType().equals("String")) {
-                                ifTag += " and " + cond.propertyName() + " != ''";
+                                ifTag += " AND " + cond.propertyName() + " != ''";
                             }
                             ifTag += "\">";
                             if (operator == OperatorEnum.EQUALS) {
                                 xmlLines.add(ifTag);
-                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "and " + cond.columnName() + " = " + cond
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " = " + cond
                                         .dollarVar());
                                 xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.NOT_EQUALS) {
                                 xmlLines.add(ifTag);
-                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "and " + cond.columnName() + " != " + cond
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + cond.columnName() + " != " + cond
                                         .dollarVar());
                                 xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
-                            if (operator == OperatorEnum.IN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName()
-                                        + " IN (<foreach collection='" + cond.varName()
-                                        + "' item='one' separator=','>#{one}</foreach>)");
-                            }
-                            if (operator == OperatorEnum.NOT_IN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName()
-                                        + " NOT IN (<foreach collection='" + cond.varName()
-                                        + "' item='one' separator=','>#{one}</foreach>)");
+                            if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                                String argumentName = English.plural(cond.propertyName());
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "<if test=\"" + argumentName + " != null\">");
+                                xmlLines.add(
+                                        BaseConstant.DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() != 0\">");
+                                xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + cond.columnName() + (
+                                        operator == OperatorEnum.NOT_IN ? " NOT" : "") + " IN (<foreach collection='"
+                                        + argumentName + "' item='one' separator=','>#{one}</foreach>)");
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "</if>");
+                                xmlLines.add(
+                                        BaseConstant.DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() == 0\">");
+                                xmlLines.add(BaseConstant.TREBLE_INDENT + "AND FALSE");
+                                xmlLines.add(BaseConstant.DOUBLE_INDENT + "</if>");
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "</if>");
                             }
                             if (operator == OperatorEnum.GREATER_THEN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " > " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " > " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.GREATER_OR_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " >= " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " >= " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.LESS_THEN) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " &lt; " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " &lt; " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.LESS_OR_EQUALS) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " &lt;= " + cond
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " &lt;= " + cond
                                         .dollarVar());
                             }
                             if (operator == OperatorEnum.NOT_NULL) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " IS NOT NULL");
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " IS NOT NULL");
                             }
                             if (operator == OperatorEnum.IS_NULL) {
-                                xmlLines.add(BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " IS NULL");
+                                xmlLines.add(BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " IS NULL");
                             }
                             if (operator == OperatorEnum.LIKE) {
                                 xmlLines.add(
-                                        BaseConstant.SINGLE_INDENT + "and " + cond.columnName() + " LIKE CONCAT('%', '"
+                                        BaseConstant.SINGLE_INDENT + "AND " + cond.columnName() + " LIKE CONCAT('%', '"
                                                 + cond.dollarVar() + "', '%')");
                             }
                         }
@@ -233,7 +254,6 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                     }
 
                     // overwirte init
-                    VariableDeclarator vd = (VariableDeclarator) mce.getParentNode().get();
                     MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
                             StringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
                             .asMethodCallExpr();
@@ -244,10 +264,11 @@ public class QueryTransformer2 implements Allison1875MainProcessor {
                         }
                         callQueryMethod.addArgument(condition.varName());
                     }
-                    vd.setInitializer(callQueryMethod);
+                    Node parent = mce.getParentNode().get();
+                    parent.replace(mce, callQueryMethod);
 
                     // 确保service import 和 autowired 了 mapper
-                    vd.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
+                    parent.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
                         if (!service.getFieldByName(StringUtils.lowerFirstLetter(mapper.getNameAsString()))
                                 .isPresent()) {
                             service.getMembers().add(0, StaticJavaParser.parseBodyDeclaration(
