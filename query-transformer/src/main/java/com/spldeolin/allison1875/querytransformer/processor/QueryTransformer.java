@@ -68,7 +68,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                 if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
                     continue;
                 }
-                callQueryMethod.addArgument(criterion.getVarName());
+                callQueryMethod.addArgument(criterion.getArgumentExpr());
             }
             parent.replace(mce, callQueryMethod);
 

@@ -5,27 +5,27 @@ package com.spldeolin.allison1875.querytransformer.javabean;
  */
 public class CriterionDto {
 
-    private String propertyName;
+    private String parameterName;
 
     private String columnName;
 
-    private String varName;
+    private String argumentExpr;
 
-    private String dollarVar;
+    private String dollarParameterName;
 
     private String operator;
 
-    private String propertyType;
+    private String parameterType;
 
     public CriterionDto() {
     }
 
-    public String getPropertyName() {
-        return propertyName;
+    public String getParameterName() {
+        return parameterName;
     }
 
-    public void setPropertyName(String propertyName) {
-        this.propertyName = propertyName;
+    public void setParameterName(String parameterName) {
+        this.parameterName = parameterName;
     }
 
     public String getColumnName() {
@@ -36,20 +36,20 @@ public class CriterionDto {
         this.columnName = columnName;
     }
 
-    public String getVarName() {
-        return varName;
+    public String getArgumentExpr() {
+        return argumentExpr;
     }
 
-    public void setVarName(String varName) {
-        this.varName = varName;
+    public void setArgumentExpr(String argumentExpr) {
+        this.argumentExpr = argumentExpr;
     }
 
-    public String getDollarVar() {
-        return dollarVar;
+    public String getDollarParameterName() {
+        return dollarParameterName;
     }
 
-    public void setDollarVar(String dollarVar) {
-        this.dollarVar = dollarVar;
+    public void setDollarParameterName(String dollarParameterName) {
+        this.dollarParameterName = dollarParameterName;
     }
 
     public String getOperator() {
@@ -60,12 +60,12 @@ public class CriterionDto {
         this.operator = operator;
     }
 
-    public String getPropertyType() {
-        return propertyType;
+    public String getParameterType() {
+        return parameterType;
     }
 
-    public void setPropertyType(String propertyType) {
-        this.propertyType = propertyType;
+    public void setParameterType(String parameterType) {
+        this.parameterType = parameterType;
     }
 
 }

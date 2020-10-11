@@ -55,23 +55,24 @@ class GenerateMapperXmlQueryMethodProc {
             xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
             for (CriterionDto cond : criterions) {
                 OperatorEnum operator = OperatorEnum.of(cond.getOperator());
-                String ifTag = SINGLE_INDENT + "<if test=\"" + cond.getPropertyName() + " != null";
-                if ("String".equals(cond.getPropertyType())) {
-                    ifTag += " and " + cond.getPropertyName() + " != ''";
+                String ifTag = SINGLE_INDENT + "<if test=\"" + cond.getParameterName() + " != null";
+                if ("String".equals(cond.getParameterType())) {
+                    ifTag += " and " + cond.getParameterName() + " != ''";
                 }
                 ifTag += "\">";
                 if (operator == OperatorEnum.EQUALS) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " = " + cond.getDollarVar());
+                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " = " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.NOT_EQUALS) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " != " + cond.getDollarVar());
+                    xmlLines.add(
+                            DOUBLE_INDENT + "AND " + cond.getColumnName() + " != " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
-                    String argumentName = English.plural(cond.getPropertyName());
+                    String argumentName = English.plural(cond.getParameterName());
                     xmlLines.add(SINGLE_INDENT + "<if test=\"" + argumentName + " != null\">");
                     xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() != 0\">");
                     xmlLines.add(
@@ -86,22 +87,25 @@ class GenerateMapperXmlQueryMethodProc {
                 }
                 if (operator == OperatorEnum.GREATER_THEN) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " > " + cond.getDollarVar());
+                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " > " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.GREATER_OR_EQUALS) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " >= " + cond.getDollarVar());
+                    xmlLines.add(
+                            DOUBLE_INDENT + "AND " + cond.getColumnName() + " >= " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.LESS_THEN) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " &lt; " + cond.getDollarVar());
+                    xmlLines.add(
+                            DOUBLE_INDENT + "AND " + cond.getColumnName() + " &lt; " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.LESS_OR_EQUALS) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " &lt;= " + cond.getDollarVar());
+                    xmlLines.add(
+                            DOUBLE_INDENT + "AND " + cond.getColumnName() + " &lt;= " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.NOT_NULL) {
@@ -112,9 +116,8 @@ class GenerateMapperXmlQueryMethodProc {
                 }
                 if (operator == OperatorEnum.LIKE) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(
-                            DOUBLE_INDENT + "AND " + cond.getColumnName() + " LIKE CONCAT('%', '" + cond.getDollarVar()
-                                    + "', '%')");
+                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " LIKE CONCAT('%', '" + cond
+                            .getDollarParameterName() + "', '%')");
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
             }

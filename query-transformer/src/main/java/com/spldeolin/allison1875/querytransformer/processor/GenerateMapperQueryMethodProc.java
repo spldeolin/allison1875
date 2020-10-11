@@ -66,7 +66,7 @@ class GenerateMapperQueryMethodProc {
             if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
                 continue;
             }
-            String propertyName = criterion.getPropertyName();
+            String propertyName = criterion.getParameterName();
             Optional<FieldDeclaration> field = entity.getFieldByName(propertyName);
             String propertyType;
             if (field.isPresent()) {
@@ -77,7 +77,7 @@ class GenerateMapperQueryMethodProc {
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
                 propertyType = "Collection<" + propertyType + ">";
             }
-            criterion.setPropertyType(propertyType);
+            criterion.setParameterType(propertyType);
             Parameter parameter = new Parameter();
             String argumentName = propertyName;
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
