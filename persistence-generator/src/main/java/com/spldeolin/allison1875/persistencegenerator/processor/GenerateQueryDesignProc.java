@@ -35,7 +35,7 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.QueryMeta;
 /**
  * @author Deolin 2020-10-06
  */
-public class QueryDesignProc {
+public class GenerateQueryDesignProc {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(EntityProc.class);
 
@@ -45,13 +45,14 @@ public class QueryDesignProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    public QueryDesignProc(PersistenceDto persistence, CuCreator entityCuCreator, ClassOrInterfaceDeclaration mapper) {
+    public GenerateQueryDesignProc(PersistenceDto persistence, CuCreator entityCuCreator,
+            ClassOrInterfaceDeclaration mapper) {
         this.persistence = persistence;
         this.entityCuCreator = entityCuCreator;
         this.mapper = mapper;
     }
 
-    public QueryDesignProc process() {
+    public GenerateQueryDesignProc process() {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
         if (!conf.getEnableGenerateQueryDesign()) {
             return this;

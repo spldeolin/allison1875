@@ -66,7 +66,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
 
             // 重新生成QueryDesign
-            new QueryDesignProc(persistence, entityCuCreator, mapper).process();
+            new GenerateQueryDesignProc(persistence, entityCuCreator, mapper).process();
 
             // 删除Mapper中所有Allison 1875生成的方法
             new DeleteAllison1875MethodProc(mapper).process();
