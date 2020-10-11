@@ -16,7 +16,7 @@ import org.atteo.evo.inflector.English;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
-import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
+import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 
 /**
@@ -24,7 +24,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
  */
 class GenerateMapperXmlQueryMethodProc {
 
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeSqlTokenProc.class);
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeCriterionProc.class);
 
     private final AstForest astForest;
 
@@ -32,14 +32,14 @@ class GenerateMapperXmlQueryMethodProc {
 
     private final String queryMethodName;
 
-    private final Collection<ConditionDto> conditions;
+    private final Collection<CriterionDto> criterions;
 
     GenerateMapperXmlQueryMethodProc(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
-            Collection<ConditionDto> conditions) {
+            Collection<CriterionDto> criterions) {
         this.astForest = astForest;
         this.queryMeta = queryMeta;
         this.queryMethodName = queryMethodName;
-        this.conditions = conditions;
+        this.criterions = criterions;
     }
 
     void process() {
@@ -51,9 +51,9 @@ class GenerateMapperXmlQueryMethodProc {
         xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
         xmlLines.add(SINGLE_INDENT + "FROM");
         xmlLines.add(DOUBLE_INDENT + queryMeta.getTableName());
-        if (conditions.size() > 0) {
+        if (criterions.size() > 0) {
             xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
-            for (ConditionDto cond : conditions) {
+            for (CriterionDto cond : criterions) {
                 OperatorEnum operator = OperatorEnum.of(cond.operator());
                 String ifTag = SINGLE_INDENT + "<if test=\"" + cond.propertyName() + " != null";
                 if ("String".equals(cond.propertyType())) {

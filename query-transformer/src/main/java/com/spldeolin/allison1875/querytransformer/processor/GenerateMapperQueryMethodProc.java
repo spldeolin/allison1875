@@ -20,7 +20,7 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
-import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
+import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 
 /**
@@ -28,7 +28,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
  */
 class GenerateMapperQueryMethodProc {
 
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeSqlTokenProc.class);
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeCriterionProc.class);
 
     private final CompilationUnit cu;
 
@@ -36,16 +36,16 @@ class GenerateMapperQueryMethodProc {
 
     private final String queryMethodName;
 
-    private final Collection<ConditionDto> conditions;
+    private final Collection<CriterionDto> criterions;
 
     private ClassOrInterfaceDeclaration mapper;
 
     GenerateMapperQueryMethodProc(CompilationUnit cu, QueryMeta queryMeta, String queryMethodName,
-            Collection<ConditionDto> conditions) {
+            Collection<CriterionDto> criterions) {
         this.cu = cu;
         this.queryMeta = queryMeta;
         this.queryMethodName = queryMethodName;
-        this.conditions = conditions;
+        this.criterions = criterions;
     }
 
     GenerateMapperQueryMethodProc process() {
@@ -61,12 +61,12 @@ class GenerateMapperQueryMethodProc {
         MethodDeclaration queryMethod = new MethodDeclaration();
         queryMethod.setType(StaticJavaParser.parseType(String.format("List<%s>", queryMeta.getEntityName())));
         queryMethod.setName(queryMethodName);
-        for (ConditionDto condition : conditions) {
-            OperatorEnum operator = OperatorEnum.of(condition.operator());
+        for (CriterionDto criterion : criterions) {
+            OperatorEnum operator = OperatorEnum.of(criterion.operator());
             if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
                 continue;
             }
-            String propertyName = condition.propertyName();
+            String propertyName = criterion.propertyName();
             Optional<FieldDeclaration> field = entity.getFieldByName(propertyName);
             String propertyType;
             if (field.isPresent()) {
@@ -77,7 +77,7 @@ class GenerateMapperQueryMethodProc {
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
                 propertyType = "Collection<" + propertyType + ">";
             }
-            condition.propertyType(propertyType);
+            criterion.propertyType(propertyType);
             Parameter parameter = new Parameter();
             String argumentName = propertyName;
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {

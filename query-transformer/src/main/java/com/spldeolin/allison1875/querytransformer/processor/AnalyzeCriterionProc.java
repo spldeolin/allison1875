@@ -15,30 +15,30 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
-import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
+import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 
 /**
  * @author Deolin 2020-10-10
  */
-class AnalyzeSqlTokenProc {
+class AnalyzeCriterionProc {
 
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeSqlTokenProc.class);
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeCriterionProc.class);
 
     private final MethodCallExpr mce;
 
     private final QueryMeta queryMeta;
 
-    private Collection<ConditionDto> conditions;
+    private Collection<CriterionDto> criterions;
 
     private String queryMethodName;
 
-    AnalyzeSqlTokenProc(MethodCallExpr mce, QueryMeta queryMeta) {
+    AnalyzeCriterionProc(MethodCallExpr mce, QueryMeta queryMeta) {
         this.mce = mce;
         this.queryMeta = queryMeta;
     }
 
-    AnalyzeSqlTokenProc process() {
+    AnalyzeCriterionProc process() {
         List<MethodCallExpr> tokenMces = mce
                 .findAll(MethodCallExpr.class, mce -> mce.getScope().filter(Expression::isFieldAccessExpr).isPresent());
         Collections.reverse(tokenMces);
@@ -72,21 +72,21 @@ class AnalyzeSqlTokenProc {
             return this;
         }
 
-        conditions = Lists.newArrayList();
+        criterions = Lists.newArrayList();
         parts.descendingIterator().forEachRemaining(part -> {
-            ConditionDto condition;
+            CriterionDto criterion;
             if (queryMeta.getPropertyNames().contains(part)) {
-                condition = new ConditionDto();
-                conditions.add(condition);
-                condition.propertyName(part);
-                condition.columnName(StringUtils.lowerCamelToUnderscore(part));
-                condition.dollarVar("#{" + part + "}");
+                criterion = new CriterionDto();
+                criterions.add(criterion);
+                criterion.propertyName(part);
+                criterion.columnName(StringUtils.lowerCamelToUnderscore(part));
+                criterion.dollarVar("#{" + part + "}");
             } else {
-                condition = Iterables.getLast(conditions);
+                criterion = Iterables.getLast(criterions);
                 if (OperatorEnum.isValid(part)) {
-                    condition.operator(part);
+                    criterion.operator(part);
                 } else {
-                    condition.varName(part);
+                    criterion.varName(part);
                 }
             }
         });
@@ -111,8 +111,8 @@ class AnalyzeSqlTokenProc {
         });
     }
 
-    public Collection<ConditionDto> getConditions() {
-        return conditions;
+    public Collection<CriterionDto> getCriterions() {
+        return criterions;
     }
 
     public String getQueryMethodName() {

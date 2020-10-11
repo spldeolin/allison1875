@@ -20,7 +20,7 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
-import com.spldeolin.allison1875.querytransformer.javabean.ConditionDto;
+import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 
 /**
@@ -46,29 +46,29 @@ public class QueryTransformer implements Allison1875MainProcessor {
                     queryDesign.getOrphanComments().get(0).getContent().replaceAll("\\r?\\n", "").replaceAll(" ", ""),
                     QueryMeta.class);
 
-            AnalyzeSqlTokenProc analyzeSqlTokenProc = new AnalyzeSqlTokenProc(mce, queryMeta).process();
+            AnalyzeCriterionProc analyzeSqlTokenProc = new AnalyzeCriterionProc(mce, queryMeta).process();
             String queryMethodName = analyzeSqlTokenProc.getQueryMethodName();
-            Collection<ConditionDto> conditions = analyzeSqlTokenProc.getConditions();
+            Collection<CriterionDto> criterions = analyzeSqlTokenProc.getCriterions();
 
 
             // create queryMethod in mapper
             GenerateMapperQueryMethodProc createMapperQueryMethodProc = new GenerateMapperQueryMethodProc(cu, queryMeta,
-                    queryMethodName, conditions).process();
+                    queryMethodName, criterions).process();
             ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc.getMapper();
 
             // create queryMethod in mapper.xml
-            new GenerateMapperXmlQueryMethodProc(astForest, queryMeta, queryMethodName, conditions).process();
+            new GenerateMapperXmlQueryMethodProc(astForest, queryMeta, queryMethodName, criterions).process();
 
             // overwirte service
             MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
                     StringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
                     .asMethodCallExpr();
-            for (ConditionDto condition : conditions) {
-                OperatorEnum operator = OperatorEnum.of(condition.operator());
+            for (CriterionDto criterion : criterions) {
+                OperatorEnum operator = OperatorEnum.of(criterion.operator());
                 if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
                     continue;
                 }
-                callQueryMethod.addArgument(condition.varName());
+                callQueryMethod.addArgument(criterion.varName());
             }
             parent.replace(mce, callQueryMethod);
 

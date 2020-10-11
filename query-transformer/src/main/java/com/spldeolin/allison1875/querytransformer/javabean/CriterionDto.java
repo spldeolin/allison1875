@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 /**
  * @author Deolin 2020-08-12
  */
-public class ConditionDto {
+public class CriterionDto {
 
     private String propertyName;
 
@@ -17,7 +17,7 @@ public class ConditionDto {
 
     private String propertyType;
 
-    public ConditionDto() {
+    public CriterionDto() {
     }
 
     public String propertyName() {
@@ -44,32 +44,32 @@ public class ConditionDto {
         return this.propertyType;
     }
 
-    public ConditionDto propertyName(String propertyName) {
+    public CriterionDto propertyName(String propertyName) {
         this.propertyName = propertyName;
         return this;
     }
 
-    public ConditionDto columnName(String columnName) {
+    public CriterionDto columnName(String columnName) {
         this.columnName = columnName;
         return this;
     }
 
-    public ConditionDto varName(String varName) {
+    public CriterionDto varName(String varName) {
         this.varName = varName;
         return this;
     }
 
-    public ConditionDto dollarVar(String dollarVar) {
+    public CriterionDto dollarVar(String dollarVar) {
         this.dollarVar = dollarVar;
         return this;
     }
 
-    public ConditionDto operator(String operator) {
+    public CriterionDto operator(String operator) {
         this.operator = operator;
         return this;
     }
 
-    public ConditionDto propertyType(String propertyType) {
+    public CriterionDto propertyType(String propertyType) {
         this.propertyType = propertyType;
         return this;
     }
@@ -78,10 +78,10 @@ public class ConditionDto {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof ConditionDto)) {
+        if (!(o instanceof CriterionDto)) {
             return false;
         }
-        final ConditionDto other = (ConditionDto) o;
+        final CriterionDto other = (CriterionDto) o;
         if (!other.canEqual(this)) {
             return false;
         }
@@ -111,7 +111,7 @@ public class ConditionDto {
     }
 
     protected boolean canEqual(final Object other) {
-        return other instanceof ConditionDto;
+        return other instanceof CriterionDto;
     }
 
     public int hashCode() {
