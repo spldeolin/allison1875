@@ -62,11 +62,11 @@ class GenerateMapperQueryMethodProc {
         queryMethod.setType(StaticJavaParser.parseType(String.format("List<%s>", queryMeta.getEntityName())));
         queryMethod.setName(queryMethodName);
         for (CriterionDto criterion : criterions) {
-            OperatorEnum operator = OperatorEnum.of(criterion.operator());
+            OperatorEnum operator = OperatorEnum.of(criterion.getOperator());
             if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
                 continue;
             }
-            String propertyName = criterion.propertyName();
+            String propertyName = criterion.getPropertyName();
             Optional<FieldDeclaration> field = entity.getFieldByName(propertyName);
             String propertyType;
             if (field.isPresent()) {
@@ -77,7 +77,7 @@ class GenerateMapperQueryMethodProc {
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
                 propertyType = "Collection<" + propertyType + ">";
             }
-            criterion.propertyType(propertyType);
+            criterion.setPropertyType(propertyType);
             Parameter parameter = new Parameter();
             String argumentName = propertyName;
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {

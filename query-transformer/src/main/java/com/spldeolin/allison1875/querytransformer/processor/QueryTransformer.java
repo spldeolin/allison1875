@@ -64,11 +64,11 @@ public class QueryTransformer implements Allison1875MainProcessor {
                     StringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
                     .asMethodCallExpr();
             for (CriterionDto criterion : criterions) {
-                OperatorEnum operator = OperatorEnum.of(criterion.operator());
+                OperatorEnum operator = OperatorEnum.of(criterion.getOperator());
                 if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
                     continue;
                 }
-                callQueryMethod.addArgument(criterion.varName());
+                callQueryMethod.addArgument(criterion.getVarName());
             }
             parent.replace(mce, callQueryMethod);
 

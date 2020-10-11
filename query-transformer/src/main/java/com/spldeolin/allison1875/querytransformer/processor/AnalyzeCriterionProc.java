@@ -78,15 +78,15 @@ class AnalyzeCriterionProc {
             if (queryMeta.getPropertyNames().contains(part)) {
                 criterion = new CriterionDto();
                 criterions.add(criterion);
-                criterion.propertyName(part);
-                criterion.columnName(StringUtils.lowerCamelToUnderscore(part));
-                criterion.dollarVar("#{" + part + "}");
+                criterion.setPropertyName(part);
+                criterion.setColumnName(StringUtils.lowerCamelToUnderscore(part));
+                criterion.setDollarVar("#{" + part + "}");
             } else {
                 criterion = Iterables.getLast(criterions);
                 if (OperatorEnum.isValid(part)) {
-                    criterion.operator(part);
+                    criterion.setOperator(part);
                 } else {
-                    criterion.varName(part);
+                    criterion.setVarName(part);
                 }
             }
         });
