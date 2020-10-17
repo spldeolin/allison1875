@@ -25,7 +25,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <javaparser.version>3.16.1</javaparser.version>
+        <javaparser.version>3.16.2</javaparser.version>
         <log4j2.version>2.13.3</log4j2.version>
         <jackson.version>2.11.2</jackson.version>
     </properties>
@@ -104,7 +104,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>29.0-jre</version>
+                <version>30.0-jre</version>
             </dependency>
 
             <!-- commons lang3 -->
@@ -213,7 +213,7 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
-                <version>3.13.5</version>
+                <version>3.13.6</version>
             </dependency>
 
             <!-- easy random -->
