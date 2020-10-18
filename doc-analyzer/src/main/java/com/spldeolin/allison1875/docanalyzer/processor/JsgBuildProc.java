@@ -23,6 +23,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -181,6 +182,18 @@ class JsgBuildProc {
                 JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(field, JsonFormat.class);
                 if (jsonFormat != null) {
                     jpdv.setJsonFormatPattern(jsonFormat.pattern());
+                }
+
+                // TODO 抽取到strategy
+                {
+                    if (field.getType().isEnum()) {
+                        String enumName = field.getType().getSimpleName();
+                        if (enumName.endsWith("Enum")) {
+                            enumName = enumName.substring(0, enumName.length() - 4);
+                        }
+                        enumName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, enumName);
+                        jpdv.setExtraInfo(enumName);
+                    }
                 }
 
                 return JsonUtils.toJson(jpdv);

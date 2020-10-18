@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 
 /**
  * @author Deolin 2020-04-27
@@ -35,6 +36,14 @@ public class JsonPropertyDescriptionValueDto {
     private String referencePath;
 
     private Collection<EnumCodeAndTitleDto> ecats;
+
+    /**
+     * 类型名
+     *
+     * e.g.: String
+     * UserStatusEnum
+     */
+    private String extraInfo;
 
     public JsonPropertyDescriptionValueDto() {
     }
@@ -93,7 +102,17 @@ public class JsonPropertyDescriptionValueDto {
                 }
                 enumInfo = sb.deleteCharAt(sb.length() - 1).toString();
             }
-            return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format, enumInfo);
+            String extra = null;
+            if (extraInfo != null) {
+
+                // TODO 抽取到strategy
+                StringBuilder sb = new StringBuilder("枚举名\n");
+                String appName = DocAnalyzerConfig.getInstance().getGlobalUrlPrefix().replace("/", "");
+                sb.append("\t").append(appName).append(":").append(extraInfo);
+                extra = sb.toString();
+            }
+
+            return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format, enumInfo, extra);
         }
     }
 
@@ -158,6 +177,14 @@ public class JsonPropertyDescriptionValueDto {
     public JsonPropertyDescriptionValueDto setEcats(Collection<EnumCodeAndTitleDto> ecats) {
         this.ecats = ecats;
         return this;
+    }
+
+    public String getExtraInfo() {
+        return extraInfo;
+    }
+
+    public void setExtraInfo(String extraInfo) {
+        this.extraInfo = extraInfo;
     }
 
     public boolean equals(final Object o) {
