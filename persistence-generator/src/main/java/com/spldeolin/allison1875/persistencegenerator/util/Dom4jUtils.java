@@ -31,6 +31,10 @@ public class Dom4jUtils {
             format.setEncoding(StandardCharsets.UTF_8.name());
             format.setIndentSize(4);
             format.setTrimText(false);
+
+            // 防止mapperXmlFile需要新建时，new FileWriter(mapperXmlFile)因为文件不存在而抛出异常
+            FileUtils.write(mapperXmlFile, "", StandardCharsets.UTF_8);
+
             XMLWriter outPut = new XMLWriter(new FileWriter(mapperXmlFile), format);
             outPut.write(node.getDocument());
             outPut.close();
