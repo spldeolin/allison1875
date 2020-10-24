@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
+import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -156,6 +157,9 @@ public class DocAnalyzer implements Allison1875MainProcessor {
         String controllerCat = findCat(controller);
         if (controllerCat == null) {
             controllerCat = JavadocDescriptions.getFirstLine(controller);
+        }
+        if (StringUtils.isEmpty(controllerCat)) {
+            controllerCat = controller.getNameAsString();
         }
         return controllerCat;
     }
