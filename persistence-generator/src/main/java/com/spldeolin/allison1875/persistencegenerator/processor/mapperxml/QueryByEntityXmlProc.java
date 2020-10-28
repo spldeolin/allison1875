@@ -41,8 +41,8 @@ public class QueryByEntityXmlProc extends XmlProc {
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            sourceCodeLines
-                    .add(BaseConstant.SINGLE_INDENT + PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
+            sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "AND " + PersistenceGeneratorConfig.getInstance()
+                    .getNotDeletedSql());
         }
         for (PropertyDto property : persistence.getProperties()) {
             sourceCodeLines.add(BaseConstant.SINGLE_INDENT + String
