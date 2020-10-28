@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByEntityProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsEachIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProc;
@@ -25,6 +26,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByI
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllCloumnSqlXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.DeleteByKeyXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByEntityXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdsXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByKeyXmlProc;
@@ -86,6 +88,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 deleteByKeyProcs.add(new DeleteByKeyProc(persistence, key, mapper).process());
                 queryByKeysProcs.add(new QueryByKeysProc(persistence, key, mapper).process());
             }
+            QueryByEntityProc queryByEntityProc = new QueryByEntityProc(persistence, mapper).process();
 
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
@@ -101,7 +104,8 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                         new QueryByIdsXmlProc(persistence, queryByIdsEachIdProc).process(),
                         new QueryByKeyXmlProc(persistence, queryByKeyProcs).process(),
                         new DeleteByKeyXmlProc(persistence, deleteByKeyProcs).process(),
-                        new QueryByKeysXmlProc(persistence, queryByKeysProcs).process()).process();
+                        new QueryByKeysXmlProc(persistence, queryByKeysProcs).process(),
+                        new QueryByEntityXmlProc(persistence, queryByEntityProc, entityName).process()).process();
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

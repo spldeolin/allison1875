@@ -40,7 +40,6 @@ public class QueryByIdsXmlProc extends XmlProc {
         this.queryByIdsEachIdProc = null;
     }
 
-
     public QueryByIdsXmlProc process() {
         if (persistence.getIdProperties().size() == 1) {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());

@@ -145,6 +145,8 @@ public class PersistenceGeneratorConfig {
 
     private Boolean disableQueryByKeys = false;
 
+    private Boolean disableQueryByEntity = false;
+
     private PersistenceGeneratorConfig() {
     }
 
@@ -268,6 +270,10 @@ public class PersistenceGeneratorConfig {
         return this.disableQueryByKeys;
     }
 
+    public Boolean getDisableQueryByEntity() {
+        return this.disableQueryByEntity;
+    }
+
     public void setJdbcUrl(@NotEmpty String jdbcUrl) {
         this.jdbcUrl = jdbcUrl;
     }
@@ -382,6 +388,10 @@ public class PersistenceGeneratorConfig {
 
     public void setDisableQueryByKeys(Boolean disableQueryByKeys) {
         this.disableQueryByKeys = disableQueryByKeys;
+    }
+
+    public void setDisableQueryByEntity(Boolean disableQueryByEntity) {
+        this.disableQueryByEntity = disableQueryByEntity;
     }
 
     public boolean equals(final Object o) {
