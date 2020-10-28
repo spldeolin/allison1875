@@ -2,6 +2,8 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
 import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -14,6 +16,7 @@ import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -43,8 +46,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     private final static String docCat = "doc-cat";
 
-    private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
-            new DefaultObtainConcernedResponseBodyStrategy();
+    private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy = new DefaultObtainConcernedResponseBodyStrategy();
 
     private AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
             new DefaultAnalyzeCustomValidationStrategy();
@@ -53,6 +55,20 @@ public class DocAnalyzer implements Allison1875MainProcessor {
             new DefaultSpecificFieldDescriptionsStrategy();
 
     private AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
+
+    @Override
+    public void preProcess() {
+        Set<ConstraintViolation<DocAnalyzerConfig>> violations = ValidateUtils
+                .validate(DocAnalyzerConfig.getInstance());
+        if (violations.size() > 0) {
+            log.warn("配置项校验未通过，请检查后重新运行");
+            for (ConstraintViolation<DocAnalyzerConfig> violation : violations) {
+                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
+                        + violation.getMessage());
+            }
+            System.exit(-9);
+        }
+    }
 
     @Override
     public void process(AstForest astForest) {

@@ -56,11 +56,11 @@ public class TreeNode {
         log.info(JsonUtils.toJson(jsonSchema));
     }
 
-    public @NotNull Long getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public @NotBlank String getTitle() {
+    public String getTitle() {
         return this.title;
     }
 

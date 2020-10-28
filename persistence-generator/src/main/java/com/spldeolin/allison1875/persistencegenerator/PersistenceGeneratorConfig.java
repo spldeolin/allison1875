@@ -3,15 +3,12 @@ package com.spldeolin.allison1875.persistencegenerator;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 
 /**
  * @author Deolin 2020-07-11
  */
 public class PersistenceGeneratorConfig {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGeneratorConfig.class);
 
     private static final PersistenceGeneratorConfig instance = new PersistenceGeneratorConfig();
 
@@ -48,6 +45,7 @@ public class PersistenceGeneratorConfig {
     /**
      * 指定table，非必填，未填写时代表schema下所有的table
      */
+    @NotNull
     private Collection<String> tables = Lists.newArrayList();
 
     /**
@@ -83,6 +81,7 @@ public class PersistenceGeneratorConfig {
     /**
      * QueryPredicate类的全限定名（根据目标工程的情况填写）
      */
+    @NotEmpty
     private String queryPredicateQualifier;
 
     /**
@@ -110,11 +109,13 @@ public class PersistenceGeneratorConfig {
     /**
      * 对项目隐藏，仅在数据库中可见的表字段
      */
+    @NotNull
     private Collection<String> hiddenColumns = Lists.newArrayList();
 
     /**
      * 即便符合persistence-generator对外键的定义，也不会被当作外键的表字段（一般用于忽略为创建人ID和更新人ID生成query方法）
      */
+    @NotNull
     private Collection<String> notKeyColumns = Lists.newArrayList();
 
     /**
@@ -125,26 +126,37 @@ public class PersistenceGeneratorConfig {
     /**
      * 已在Entit父类中声明，无需在具体Entity中再次声明的表字段
      */
+    @NotNull
     private Collection<String> alreadyInSuperEntity = Lists.newArrayList();
 
+    @NotNull
     private Boolean disableInsert = false;
 
+    @NotNull
     private Boolean disableQueryById = false;
 
+    @NotNull
     private Boolean disableUpdateById = false;
 
+    @NotNull
     private Boolean disableUpdateByIdEvenNull = false;
 
+    @NotNull
     private Boolean disableQueryByIds = false;
 
+    @NotNull
     private Boolean disableQueryByIdsEachId = false;
 
+    @NotNull
     private Boolean disableQueryByKey = false;
 
+    @NotNull
     private Boolean disableDeleteByKey = false;
 
+    @NotNull
     private Boolean disableQueryByKeys = false;
 
+    @NotNull
     private Boolean disableQueryByEntity = false;
 
     private PersistenceGeneratorConfig() {
@@ -154,23 +166,23 @@ public class PersistenceGeneratorConfig {
         return PersistenceGeneratorConfig.instance;
     }
 
-    public @NotEmpty String getJdbcUrl() {
+    public String getJdbcUrl() {
         return this.jdbcUrl;
     }
 
-    public @NotEmpty String getUserName() {
+    public String getUserName() {
         return this.userName;
     }
 
-    public @NotEmpty String getPassword() {
+    public String getPassword() {
         return this.password;
     }
 
-    public @NotEmpty String getAuthor() {
+    public String getAuthor() {
         return this.author;
     }
 
-    public @NotEmpty String getSchema() {
+    public String getSchema() {
         return this.schema;
     }
 
@@ -178,35 +190,35 @@ public class PersistenceGeneratorConfig {
         return this.tables;
     }
 
-    public @NotEmpty String getMapperXmlDirectoryPath() {
+    public String getMapperXmlDirectoryPath() {
         return this.mapperXmlDirectoryPath;
     }
 
-    public @NotEmpty String getMapperPackage() {
+    public String getMapperPackage() {
         return this.mapperPackage;
     }
 
-    public @NotEmpty String getEntityPackage() {
+    public String getEntityPackage() {
         return this.entityPackage;
     }
 
-    public @NotNull Boolean getEnableGenerateQueryDesign() {
+    public Boolean getEnableGenerateQueryDesign() {
         return this.enableGenerateQueryDesign;
     }
 
-    public @NotEmpty String getQueryDesignPackage() {
+    public String getQueryDesignPackage() {
         return this.queryDesignPackage;
     }
 
-    public @NotEmpty String getQueryPredicateQualifier() {
+    public String getQueryPredicateQualifier() {
         return this.queryPredicateQualifier;
     }
 
-    public @NotNull Boolean getIsEntityUsingAlias() {
+    public Boolean getIsEntityUsingAlias() {
         return this.isEntityUsingAlias;
     }
 
-    public @NotNull Boolean getIsEntityEndWithEntity() {
+    public Boolean getIsEntityEndWithEntity() {
         return this.isEntityEndWithEntity;
     }
 

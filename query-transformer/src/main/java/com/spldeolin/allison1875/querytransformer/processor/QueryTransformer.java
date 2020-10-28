@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.querytransformer.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -16,9 +18,11 @@ import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
@@ -29,6 +33,20 @@ import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 public class QueryTransformer implements Allison1875MainProcessor {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(QueryTransformer.class);
+
+    @Override
+    public void preProcess() {
+        Set<ConstraintViolation<QueryTransformerConfig>> violations = ValidateUtils
+                .validate(QueryTransformerConfig.getInstance());
+        if (violations.size() > 0) {
+            log.warn("配置项校验未通过，请检查后重新运行");
+            for (ConstraintViolation<QueryTransformerConfig> violation : violations) {
+                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
+                        + violation.getMessage());
+            }
+            System.exit(-9);
+        }
+    }
 
     @Override
     public void process(AstForest astForest) {

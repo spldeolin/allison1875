@@ -56,7 +56,7 @@ public final class DocAnalyzerConfig {
         return DocAnalyzerConfig.instance;
     }
 
-    public @NotNull Collection<@NotEmpty String> getDependencyProjectPaths() {
+    public Collection<@NotEmpty String> getDependencyProjectPaths() {
         return this.dependencyProjectPaths;
     }
 
@@ -64,15 +64,15 @@ public final class DocAnalyzerConfig {
         return this.globalUrlPrefix;
     }
 
-    public @NotEmpty String getYapiUrl() {
+    public String getYapiUrl() {
         return this.yapiUrl;
     }
 
-    public @NotEmpty String getYapiToken() {
+    public String getYapiToken() {
         return this.yapiToken;
     }
 
-    public @NotEmpty String getRedisAddress() {
+    public String getRedisAddress() {
         return this.redisAddress;
     }
 

@@ -7,6 +7,8 @@ import com.spldeolin.allison1875.base.ast.AstForest;
  */
 public interface Allison1875MainProcessor {
 
+    void preProcess();
+
     void process(AstForest astForest);
 
 }

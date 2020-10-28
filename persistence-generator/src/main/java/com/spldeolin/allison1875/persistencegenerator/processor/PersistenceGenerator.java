@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -9,6 +11,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.creator.CuCreator;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -41,6 +44,20 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.Update
 public class PersistenceGenerator implements Allison1875MainProcessor {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGenerator.class);
+
+    @Override
+    public void preProcess() {
+        Set<ConstraintViolation<PersistenceGeneratorConfig>> violations = ValidateUtils
+                .validate(PersistenceGeneratorConfig.getInstance());
+        if (violations.size() > 0) {
+            log.warn("配置项校验未通过，请检查后重新运行");
+            for (ConstraintViolation<PersistenceGeneratorConfig> violation : violations) {
+                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
+                        + violation.getMessage());
+            }
+            System.exit(-9);
+        }
+    }
 
     @Override
     public void process(AstForest astForest) {

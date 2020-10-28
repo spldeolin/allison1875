@@ -23,11 +23,11 @@ public class SecondDto {
     public SecondDto() {
     }
 
-    public @NotNull @Min(0) Integer getAge() {
+    public Integer getAge() {
         return this.age;
     }
 
-    public @NotNull BigDecimal[][][][] getSalary() {
+    public BigDecimal[][][][] getSalary() {
         return this.salary;
     }
 

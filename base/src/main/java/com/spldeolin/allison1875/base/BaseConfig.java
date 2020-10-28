@@ -27,7 +27,7 @@ public final class BaseConfig {
         return BaseConfig.instance;
     }
 
-    public @NotEmpty String getJavaDirectoryLayout() {
+    public String getJavaDirectoryLayout() {
         return this.javaDirectoryLayout;
     }
 

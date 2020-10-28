@@ -13,6 +13,7 @@ public class Allison1875 {
     public static void allison1875(Class<?> primaryClass, Allison1875MainProcessor... processors) {
         AstForest astForest = new AstForest(primaryClass);
         for (Allison1875MainProcessor processor : processors) {
+            processor.preProcess();
             processor.process(astForest);
         }
     }

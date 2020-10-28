@@ -41,11 +41,11 @@ public final class InspectorConfig {
         return InspectorConfig.instance;
     }
 
-    public @NotNull String getProjectLocalGitPath() {
+    public String getProjectLocalGitPath() {
         return this.projectLocalGitPath;
     }
 
-    public @NotNull LocalDateTime getTargetFileSince() {
+    public LocalDateTime getTargetFileSince() {
         return this.targetFileSince;
     }
 

@@ -23,15 +23,15 @@ public class RootDto {
     public RootDto() {
     }
 
-    public @NotNull Long getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public @Size(max = 6) String getName() {
+    public String getName() {
         return this.name;
     }
 
-    public @NotNull Collection<SecondDto>[] getDtos() {
+    public Collection<SecondDto>[] getDtos() {
         return this.dtos;
     }
 

@@ -86,47 +86,47 @@ public class HandlerTransformerConfig {
         return HandlerTransformerConfig.instance;
     }
 
-    public @NotEmpty String getReqDtoPackage() {
+    public String getReqDtoPackage() {
         return this.reqDtoPackage;
     }
 
-    public @NotEmpty String getRespDtoPackage() {
+    public String getRespDtoPackage() {
         return this.respDtoPackage;
     }
 
-    public @NotEmpty String getServicePackage() {
+    public String getServicePackage() {
         return this.servicePackage;
     }
 
-    public @NotEmpty String getServiceImplPackage() {
+    public String getServiceImplPackage() {
         return this.serviceImplPackage;
     }
 
-    public @NotEmpty Collection<@NotEmpty String> getHandlerAnnotations() {
+    public Collection<@NotEmpty String> getHandlerAnnotations() {
         return this.handlerAnnotations;
     }
 
-    public @NotEmpty String getResult() {
+    public String getResult() {
         return this.result;
     }
 
-    public @NotEmpty String getResultVoid() {
+    public String getResultVoid() {
         return this.resultVoid;
     }
 
-    public @NotEmpty String getHandlerBodyPattern() {
+    public String getHandlerBodyPattern() {
         return this.handlerBodyPattern;
     }
 
-    public @NotEmpty(message = "不能为空，如果不需要返回值则指定为;") String getHandlerBodyPatternInNoResponseBodySituation() {
+    public String getHandlerBodyPatternInNoResponseBodySituation() {
         return this.handlerBodyPatternInNoResponseBodySituation;
     }
 
-    public @NotEmpty Collection<@NotEmpty String> getControllerImports() {
+    public Collection<@NotEmpty String> getControllerImports() {
         return this.controllerImports;
     }
 
-    public @NotEmpty String getAuthor() {
+    public String getAuthor() {
         return this.author;
     }
 

@@ -15,6 +15,10 @@ public class BakFileCleaner implements Allison1875MainProcessor {
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BakFileCleaner.class);
 
     @Override
+    public void preProcess() {
+    }
+
+    @Override
     public void process(AstForest astForest) {
         FileUtils.iterateFiles(astForest.getHost().toFile(), new String[]{"bak"}, true).forEachRemaining(bakFile -> {
             log.info(bakFile.toString() + " 被删除");
