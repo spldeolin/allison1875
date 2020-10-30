@@ -28,7 +28,7 @@ public class QueryByEntityProc extends MapperProc {
     }
 
     public QueryByEntityProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableQueryById()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByEntity()) {
             return this;
         }
 

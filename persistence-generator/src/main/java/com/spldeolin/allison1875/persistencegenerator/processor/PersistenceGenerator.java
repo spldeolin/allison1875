@@ -16,6 +16,7 @@ import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByEntityProc;
@@ -27,6 +28,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKe
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllCloumnSqlXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchInsertEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.DeleteByKeyXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByEntityXmlProc;
@@ -92,6 +94,8 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
 
             // 在Mapper中生成基础方法
             InsertProc insertProc = new InsertProc(persistence, mapper).process();
+            BatchInsertEvenNullProc batchInsertEvenNullProc = new BatchInsertEvenNullProc(persistence, mapper)
+                    .process();
             QueryByIdProc queryByIdProc = new QueryByIdProc(persistence, mapper).process();
             UpdateByIdProc updateByIdProc = new UpdateByIdProc(persistence, mapper).process();
             UpdateByIdEvenNullProc updateByIdEvenNullProc = new UpdateByIdEvenNullProc(persistence, mapper).process();
@@ -114,6 +118,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                         new ResultMapXmlProc(persistence, entityName).process(),
                         new AllCloumnSqlXmlProc(persistence).process(),
                         new InsertXmlProc(persistence, entityName, insertProc).process(),
+                        new BatchInsertEvenNullXmlProc(persistence, batchInsertEvenNullProc).process(),
                         new QueryByIdXmlProc(persistence, queryByIdProc).process(),
                         new UpdateByIdXmlProc(persistence, entityName, updateByIdProc).process(),
                         new UpdateByIdEvenNullXmlProc(persistence, entityName, updateByIdEvenNullProc).process(),
@@ -122,7 +127,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                         new QueryByKeyXmlProc(persistence, queryByKeyProcs).process(),
                         new DeleteByKeyXmlProc(persistence, deleteByKeyProcs).process(),
                         new QueryByKeysXmlProc(persistence, queryByKeysProcs).process(),
-                        new QueryByEntityXmlProc(persistence, queryByEntityProc, entityName).process()).process();
+                        new QueryByEntityXmlProc(persistence, entityName, queryByEntityProc).process()).process();
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

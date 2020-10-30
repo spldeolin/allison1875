@@ -21,14 +21,14 @@ public class QueryByEntityXmlProc extends XmlProc {
 
     private Collection<String> sourceCodeLines;
 
-    public QueryByEntityXmlProc(PersistenceDto persistence, QueryByEntityProc queryByEntityProc, String entityName) {
+    public QueryByEntityXmlProc(PersistenceDto persistence, String entityName, QueryByEntityProc queryByEntityProc) {
         this.persistence = persistence;
-        this.queryByEntityProc = queryByEntityProc;
         this.entityName = entityName;
+        this.queryByEntityProc = queryByEntityProc;
     }
 
     public QueryByEntityXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableQueryById()) {
+        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByEntity()) {
             return this;
         }
 

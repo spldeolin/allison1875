@@ -133,6 +133,9 @@ public class PersistenceGeneratorConfig {
     private Boolean disableInsert = false;
 
     @NotNull
+    private Boolean disableBatchInsertEvenNull = false;
+
+    @NotNull
     private Boolean disableQueryById = false;
 
     @NotNull
@@ -248,6 +251,10 @@ public class PersistenceGeneratorConfig {
 
     public Boolean getDisableInsert() {
         return this.disableInsert;
+    }
+
+    public Boolean getDisableBatchInsertEvenNull() {
+        return this.disableBatchInsertEvenNull;
     }
 
     public Boolean getDisableQueryById() {
@@ -368,6 +375,10 @@ public class PersistenceGeneratorConfig {
 
     public void setDisableInsert(Boolean disableInsert) {
         this.disableInsert = disableInsert;
+    }
+
+    public void setDisableBatchInsertEvenNull(Boolean disableBatchInsertEvenNull) {
+        this.disableBatchInsertEvenNull = disableBatchInsertEvenNull;
     }
 
     public void setDisableQueryById(Boolean disableQueryById) {

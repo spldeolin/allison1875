@@ -34,8 +34,8 @@ public class UpdateByIdEvenNullProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateByIdEvenNull");
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment(
-                    "根据ID更新数据，即便属性的值为null，也更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            Javadoc javadoc = new JavadocComment("根据ID更新数据，为null的属性会被更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC)
+                    .parse();
             javadoc.addBlockTag("param", "entity", persistence.getDescrption());
             javadoc.addBlockTag("return", "更新条数");
             updateByIdEvenNull.setJavadocComment(javadoc);
