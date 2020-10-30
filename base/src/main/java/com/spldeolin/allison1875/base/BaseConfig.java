@@ -15,10 +15,28 @@ public final class BaseConfig {
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BaseConfig.class);
 
     /**
-     * Maven工程Java源码的布局（一般不需要改动此项）
+     * src/main/java的相对路径（一般不需要改动此项）
      */
     @NotEmpty
     private String javaDirectoryLayout = "src/main/java";
+
+    /**
+     * src/main/resources的相对路径（一般不需要改动此项）
+     */
+    @NotEmpty
+    private String resourcesDirectoryLayout = "src/main/resources";
+
+    /**
+     * src/test/java的相对路径（一般不需要改动此项）
+     */
+    @NotEmpty
+    private String testJavaDirectoryLayout = "src/test/java";
+
+    /**
+     * src/test/resources的相对路径（一般不需要改动此项）
+     */
+    @NotEmpty
+    private String testResourcesDirectoryLayout = "src/test/resources";
 
     private BaseConfig() {
     }
@@ -28,12 +46,35 @@ public final class BaseConfig {
     }
 
     public String getJavaDirectoryLayout() {
-        return this.javaDirectoryLayout;
+        return javaDirectoryLayout;
     }
 
-    public BaseConfig setJavaDirectoryLayout(@NotEmpty String javaDirectoryLayout) {
+    public void setJavaDirectoryLayout(String javaDirectoryLayout) {
         this.javaDirectoryLayout = javaDirectoryLayout;
-        return this;
+    }
+
+    public String getResourcesDirectoryLayout() {
+        return resourcesDirectoryLayout;
+    }
+
+    public void setResourcesDirectoryLayout(String resourcesDirectoryLayout) {
+        this.resourcesDirectoryLayout = resourcesDirectoryLayout;
+    }
+
+    public String getTestJavaDirectoryLayout() {
+        return testJavaDirectoryLayout;
+    }
+
+    public void setTestJavaDirectoryLayout(String testJavaDirectoryLayout) {
+        this.testJavaDirectoryLayout = testJavaDirectoryLayout;
+    }
+
+    public String getTestResourcesDirectoryLayout() {
+        return testResourcesDirectoryLayout;
+    }
+
+    public void setTestResourcesDirectoryLayout(String testResourcesDirectoryLayout) {
+        this.testResourcesDirectoryLayout = testResourcesDirectoryLayout;
     }
 
     public boolean equals(final Object o) {

@@ -6,7 +6,9 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 
 /**
- * 删除宿主中所有bak文件的清理器
+ * Bak文件清理器
+ *
+ * 用于删除使用[handler-transformer]、[persistence-generator]、[query-transformer]过程中产生的大量的分散在各处的bak文件
  *
  * @author Deolin 2020-10-22
  */
