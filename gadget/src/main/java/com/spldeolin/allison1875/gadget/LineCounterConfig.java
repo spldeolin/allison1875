@@ -19,7 +19,7 @@ public class LineCounterConfig {
     private Collection<String> typePostfix = Lists.newArrayList();
 
     /**
-     * 是否将src/test/java目录下的文件也统计在呢
+     * 是否将src/test/java目录下的文件也统计在内
      */
     @NotNull
     private Boolean withTest = false;

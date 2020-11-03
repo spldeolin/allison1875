@@ -79,7 +79,7 @@ public class LineCounter implements Allison1875MainProcessor {
         // 所有java代码
         String rankListTitlePart = LineCounterConfig.getInstance().getRankListSize() > 0 ? "，排行：" : "";
         log.info("");
-        log.info("所有java代码总行数：{}{}", valuesSum(allJavas), rankListTitlePart);
+        log.info("宿主[{}]所有java代码总行数：{}{}", astForest.getHost(), valuesSum(allJavas), rankListTitlePart);
         reportRankList(allJavas);
 
         // xxx结尾的类型
