@@ -10,13 +10,14 @@
     <version>1.0.0</version>
 
     <modules>
+        <module>allison1875-all</module>
         <module>base</module>
         <module>doc-analyzer</module>
+        <module>gadget</module>
         <module>handler-transformer</module>
         <module>inspector</module>
         <module>persistence-generator</module>
         <module>query-transformer</module>
-        <module>gadget</module>
     </modules>
 
     <name>allison1875</name>
