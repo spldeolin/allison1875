@@ -1,13 +1,12 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 
 /**
  * <sql id="all"></sql> 标签
@@ -25,13 +24,12 @@ public class AllCloumnSqlXmlProc extends XmlProc {
     }
 
     public AllCloumnSqlXmlProc process() {
-        Element sqlTag = new DefaultElement("sql");
-        sqlTag.addAttribute("id", "all");
-        newLineWithIndent(sqlTag);
-        sqlTag.addText(
-                persistence.getProperties().stream().map(PropertyDto::getColumnName).collect(Collectors.joining(", ")));
-        sqlTag.addText(BaseConstant.NEW_LINE);
-        sourceCodeLines = Dom4jUtils.toSourceCodeLines(sqlTag);
+        List<String> xmlLines = Lists.newArrayList();
+        xmlLines.add("<sql id=\"all\">");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + persistence.getProperties().stream().map(PropertyDto::getColumnName)
+                .collect(Collectors.joining(", ")));
+        xmlLines.add("</sql>");
+        sourceCodeLines = xmlLines;
         return this;
     }
 
