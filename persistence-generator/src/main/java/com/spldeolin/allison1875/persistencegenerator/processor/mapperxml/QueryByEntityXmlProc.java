@@ -36,19 +36,21 @@ public class QueryByEntityXmlProc extends XmlProc {
         sourceCodeLines.add(String
                 .format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", queryByEntityProc.getMethodName(),
                         entityName));
+        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:off -->");
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "<include refid=\"all\"/>");
+        sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "AND " + PersistenceGeneratorConfig.getInstance()
+            sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + "AND " + PersistenceGeneratorConfig.getInstance()
                     .getNotDeletedSql());
         }
         for (PropertyDto property : persistence.getProperties()) {
-            sourceCodeLines.add(BaseConstant.SINGLE_INDENT + String
+            sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + String
                     .format("<if test=\"%s!=null\"> AND %s = #{%s} </if>", property.getPropertyName(),
                             property.getColumnName(), property.getPropertyName()));
         }
+        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:on -->");
         sourceCodeLines.add("</select>");
 
         return this;
