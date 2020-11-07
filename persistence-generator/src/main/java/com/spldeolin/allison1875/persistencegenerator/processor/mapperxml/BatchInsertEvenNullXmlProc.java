@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
+import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
+
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Iterables;
@@ -33,23 +35,25 @@ public class BatchInsertEvenNullXmlProc extends XmlProc {
         if (PersistenceGeneratorConfig.getInstance().getDisableBatchInsertEvenNull()) {
             return this;
         }
-        List<String> sourceCodeLines = Lists.newArrayList();
-        sourceCodeLines.add(String.format("<insert id=\"%s\">", batchInsertEvenNullProc.getMethodName()));
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "(<include refid=\"all\"/>)");
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
-        sourceCodeLines
+        List<String> xmlLines = Lists.newArrayList();
+        xmlLines.add(String.format("<insert id=\"%s\">", batchInsertEvenNullProc.getMethodName()));
+        xmlLines.add(SINGLE_INDENT + "<!-- @formatter:off -->");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "(<include refid=\"all\"/>)");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
+        xmlLines
                 .add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\",\">");
-        sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + "(");
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + "(");
         for (PropertyDto property : persistence.getProperties()) {
-            sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + "#{one." + property.getPropertyName() + "},");
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "#{one." + property.getPropertyName() + "},");
         }
-        sourceCodeLines
-                .set(sourceCodeLines.size() - 1, StringUtils.removeLast(Iterables.getLast(sourceCodeLines), ","));
-        sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + ")");
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
-        sourceCodeLines.add("</insert>");
-        this.sourceCodeLines = sourceCodeLines;
+        xmlLines
+                .set(xmlLines.size() - 1, StringUtils.removeLast(Iterables.getLast(xmlLines), ","));
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + ")");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
+        xmlLines.add(SINGLE_INDENT + "<!-- @formatter:on -->");
+        xmlLines.add("</insert>");
+        this.sourceCodeLines = xmlLines;
         return this;
     }
 
