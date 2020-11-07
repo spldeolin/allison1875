@@ -71,18 +71,25 @@ class GenerateMapperXmlQueryMethodProc {
                             DOUBLE_INDENT + "AND " + cond.getColumnName() + " != " + cond.getDollarParameterName());
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
-                if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+                if (operator == OperatorEnum.IN) {
                     String argumentName = English.plural(cond.getParameterName());
                     xmlLines.add(SINGLE_INDENT + "<if test=\"" + argumentName + " != null\">");
-                    xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() != 0\">");
+                    xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() > 0\">");
                     xmlLines.add(
-                            TREBLE_INDENT + "AND " + cond.getColumnName() + (operator == OperatorEnum.NOT_IN ? " NOT"
-                                    : "") + " IN (<foreach collection='" + argumentName
+                            TREBLE_INDENT + "AND " + cond.getColumnName() + " IN (<foreach collection='" + argumentName
                                     + "' item='one' separator=','>#{one}</foreach>)");
                     xmlLines.add(DOUBLE_INDENT + "</if>");
                     xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() == 0\">");
                     xmlLines.add(TREBLE_INDENT + "AND FALSE");
                     xmlLines.add(DOUBLE_INDENT + "</if>");
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                }
+                if (operator == OperatorEnum.NOT_IN) {
+                    String argumentName = English.plural(cond.getParameterName());
+                    xmlLines.add(SINGLE_INDENT + String
+                            .format("<if test=\"%s != null and %s.size() > 0\">", argumentName, argumentName));
+                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " NOT IN (<foreach collection='"
+                            + argumentName + "' item='one' separator=','>#{one}</foreach>)");
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
                 if (operator == OperatorEnum.GREATER_THEN) {
