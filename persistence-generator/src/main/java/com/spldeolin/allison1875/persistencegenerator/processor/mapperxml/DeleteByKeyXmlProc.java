@@ -1,14 +1,13 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
+import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
+
 import java.util.Collection;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
+import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 
 /**
  * 根据外键删除
@@ -34,26 +33,18 @@ public class DeleteByKeyXmlProc extends XmlProc {
         if (persistence.getIsDeleteFlagExist()) {
             sourceCodeLines = Lists.newArrayList();
             for (DeleteByKeyProc deleteByKeyProc : deleteByKeyProcs) {
-                Element stmt = new DefaultElement("update");
-                stmt.addAttribute("id", deleteByKeyProc.getMethodName());
-                addParameterType(stmt, deleteByKeyProc.getKey());
-                newLineWithIndent(stmt);
-                stmt.addText("UPDATE ").addText(persistence.getTableName());
-                newLineWithIndent(stmt);
-                stmt.addText("SET ").addText(PersistenceGeneratorConfig.getInstance().getDeletedSql());
-                newLineWithIndent(stmt);
-                stmt.addText("WHERE");
-                newLineWithIndent(stmt);
-                if (persistence.getIsDeleteFlagExist()) {
-                    stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
-                    newLineWithIndent(stmt);
-                    stmt.addText("AND ");
-                }
-                stmt.addText(
+                List<String> xmlLines = Lists.newArrayList();
+                xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", deleteByKeyProc.getMethodName(),
+                        deleteByKeyProc.getKey().getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
+                xmlLines.add(SINGLE_INDENT + "<!-- @formatter:off -->");
+                xmlLines.add(SINGLE_INDENT + "UPDATE " + persistence.getTableName());
+                xmlLines.add(SINGLE_INDENT + "SET " + PersistenceGeneratorConfig.getInstance().getDeletedSql());
+                xmlLines.add(SINGLE_INDENT + "WHERE " +
                         deleteByKeyProc.getKey().getColumnName() + " = #{" + deleteByKeyProc.getKey().getPropertyName()
-                                + "}");
-                stmt.addText(BaseConstant.NEW_LINE);
-                sourceCodeLines.addAll(Dom4jUtils.toSourceCodeLines(stmt));
+                        + "}");
+                xmlLines.add(SINGLE_INDENT + "<!-- @formatter:on -->");
+                xmlLines.add("</update>");
+                sourceCodeLines = xmlLines;
             }
         }
         return this;
