@@ -1,15 +1,15 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.Collection;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
+import java.util.List;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsEachIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProc;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 
 /**
  * 这个Proc生成2中方法：
@@ -43,41 +43,29 @@ public class QueryByIdsXmlProc extends XmlProc {
     public QueryByIdsXmlProc process() {
         if (persistence.getIdProperties().size() == 1) {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
-            Element stmt = new DefaultElement("select");
+            List<String> xmlLines = Lists.newArrayList();
             String methodName = null;
             if (queryByIdsProc != null) {
-                if (PersistenceGeneratorConfig.getInstance().getDisableQueryByIds()) {
-                    return this;
-                }
                 methodName = queryByIdsProc.getMethodName();
             }
             if (queryByIdsEachIdProc != null) {
-                if (PersistenceGeneratorConfig.getInstance().getDisableQueryByIdsEachId()) {
-                    return this;
-                }
                 methodName = queryByIdsEachIdProc.getMethodName();
             }
-            stmt.addAttribute("id", methodName);
-            addParameterType(stmt, onlyPk);
-            stmt.addAttribute("resultMap", "all");
-            newLineWithIndent(stmt);
-            stmt.addText("SELECT");
-            stmt.addElement("include").addAttribute("refid", "all");
-            newLineWithIndent(stmt);
-            stmt.addText("FROM ").addText(persistence.getTableName());
-            newLineWithIndent(stmt);
-            stmt.addText("WHERE");
-            newLineWithIndent(stmt);
+            xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName,
+                    onlyPk.getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:off -->");
+            xmlLines.add(BaseConstant.SINGLE_INDENT +"SELECT");
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
-                newLineWithIndent(stmt);
-                stmt.addText("AND ");
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + PersistenceGeneratorConfig.getInstance()
+                        .getNotDeletedSql());
             }
-            stmt.addText(onlyPk.getColumnName()).addText(" IN (");
-            stmt.addElement("foreach").addAttribute("collection", "ids").addAttribute("item", "one")
-                    .addAttribute("separator", ",").addText("#{one}");
-            stmt.addText(")");
-            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + onlyPk.getColumnName() + " IN (<foreach collection=\"ids\" item=\"one\" separator=\",\">#{one}</foreach>)");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:on -->");
+            xmlLines.add("</select>");
+            sourceCodeLines = xmlLines;
         }
         return this;
     }
