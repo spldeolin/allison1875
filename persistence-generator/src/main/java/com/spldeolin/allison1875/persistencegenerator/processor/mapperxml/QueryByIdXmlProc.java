@@ -1,14 +1,14 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
+import java.util.List;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProc;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 
 /**
  * 根据主键查询
@@ -33,29 +33,28 @@ public class QueryByIdXmlProc extends XmlProc {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {
-            Element stmt = new DefaultElement("select");
-            stmt.addAttribute("id", queryByIdProc.getMethodName());
+            List<String> xmlLines = Lists.newArrayList();
+            String firstLine = "<select id=\"" + queryByIdProc.getMethodName() + "\" ";
             if (persistence.getIdProperties().size() == 1) {
-                addParameterType(stmt, Iterables.getOnlyElement(persistence.getIdProperties()));
+                firstLine += "parameterType=\"" + Iterables.getOnlyElement(persistence.getIdProperties()).getJavaType()
+                        .getName().replaceFirst("java\\.lang\\.", "") + "\" ";
             }
-            stmt.addAttribute("resultMap", "all");
-            newLineWithIndent(stmt);
-            stmt.addText("SELECT");
-            stmt.addElement("include").addAttribute("refid", "all");
-            newLineWithIndent(stmt);
-            stmt.addText("FROM ").addText(persistence.getTableName());
-            newLineWithIndent(stmt);
-            stmt.addText("WHERE");
-            newLineWithIndent(stmt);
+            firstLine += "resultMap=\"all\">";
+            xmlLines.add(firstLine);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:off -->");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
-                newLineWithIndent(stmt);
-                stmt.addText("AND ");
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
             }
-            stmt.addText(persistence.getIdProperties().stream()
-                    .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
-                    .collect(Collectors.joining(", ")));
-            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
+            for (PropertyDto idProperty : persistence.getIdProperties()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty.getPropertyName() + "}");
+            }
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:on -->");
+            xmlLines.add("</select>");
+            sourceCodeLines = xmlLines;
         }
         return this;
     }
