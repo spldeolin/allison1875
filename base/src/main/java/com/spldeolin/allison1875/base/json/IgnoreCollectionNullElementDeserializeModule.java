@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.base.json;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -15,6 +14,7 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import com.spldeolin.allison1875.base.util.CollectionUtils;
 
 
 public class IgnoreCollectionNullElementDeserializeModule extends SimpleModule {

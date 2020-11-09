@@ -1,10 +1,10 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.nio.file.Path;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.ImmutableList;
+import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 
 /**

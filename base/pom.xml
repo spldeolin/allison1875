@@ -79,12 +79,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!-- commons collections4 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-        </dependency>
-
         <!-- commons io -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -109,12 +103,6 @@
         <dependency>
             <groupId>org.atteo</groupId>
             <artifactId>evo-inflector</artifactId>
-        </dependency>
-
-        <!-- easy random -->
-        <dependency>
-            <groupId>org.jeasy</groupId>
-            <artifactId>easy-random-core</artifactId>
         </dependency>
     </dependencies>
 
