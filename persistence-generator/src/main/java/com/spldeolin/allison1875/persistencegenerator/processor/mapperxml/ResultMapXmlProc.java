@@ -1,11 +1,11 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.Collection;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
+import java.util.List;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 
 /**
  * ResultMap
@@ -26,20 +26,19 @@ public class ResultMapXmlProc extends XmlProc {
     }
 
     public ResultMapXmlProc process() {
-        Element resultMapTag = new DefaultElement("resultMap");
-        resultMapTag.addAttribute("id", "all");
-        resultMapTag.addAttribute("type", entityName);
-        for (PropertyDto pk : persistence.getIdProperties()) {
-            Element resultTag = resultMapTag.addElement("id");
-            resultTag.addAttribute("column", pk.getColumnName());
-            resultTag.addAttribute("property", pk.getPropertyName());
+        List<String> xmlLines = Lists.newArrayList();
+        xmlLines.add(String.format("<resultMap id=\"all\" type=\"%s\">", entityName));
+        for (PropertyDto id : persistence.getIdProperties()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + String
+                    .format("<id column=\"%s\" property=\"%s\"/>", id.getColumnName(), id.getPropertyName()));
         }
-        for (PropertyDto nonPk : persistence.getNonIdProperties()) {
-            Element resultTag = resultMapTag.addElement("result");
-            resultTag.addAttribute("column", nonPk.getColumnName());
-            resultTag.addAttribute("property", nonPk.getPropertyName());
+        for (PropertyDto nonId : persistence.getNonIdProperties()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + String
+                    .format(" <result column=\"%s\" property=\"%s\"/>", nonId.getColumnName(),
+                            nonId.getPropertyName()));
         }
-        sourceCodeLines = Dom4jUtils.toSourceCodeLines(resultMapTag);
+        xmlLines.add("</resultMap>");
+        sourceCodeLines = xmlLines;
         sourceCodeLines.add("");
         return this;
     }
