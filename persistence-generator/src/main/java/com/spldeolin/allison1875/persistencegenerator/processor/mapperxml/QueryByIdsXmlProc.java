@@ -59,10 +59,10 @@ public class QueryByIdsXmlProc extends XmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + PersistenceGeneratorConfig.getInstance()
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
                         .getNotDeletedSql());
             }
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + onlyPk.getColumnName() + " IN (<foreach collection=\"ids\" item=\"one\" separator=\",\">#{one}</foreach>)");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + onlyPk.getColumnName() + " IN (<foreach collection=\"ids\" item=\"one\" separator=\",\">#{one}</foreach>)");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:on -->");
             xmlLines.add("</select>");
             sourceCodeLines = xmlLines;

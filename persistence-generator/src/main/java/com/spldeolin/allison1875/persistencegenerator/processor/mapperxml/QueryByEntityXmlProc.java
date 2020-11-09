@@ -42,12 +42,12 @@ public class QueryByEntityXmlProc extends XmlProc {
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + "AND " + PersistenceGeneratorConfig.getInstance()
+            sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
                     .getNotDeletedSql());
         }
         for (PropertyDto property : persistence.getProperties()) {
-            sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + String
-                    .format("<if test=\"%s!=null\"> AND %s = #{%s} </if>", property.getPropertyName(),
+            sourceCodeLines.add(BaseConstant.SINGLE_INDENT + String
+                    .format("  <if test=\"%s!=null\"> AND %s = #{%s} </if>", property.getPropertyName(),
                             property.getColumnName(), property.getPropertyName()));
         }
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:on -->");
