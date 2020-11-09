@@ -34,8 +34,7 @@ public class ResultMapXmlProc extends XmlProc {
         }
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
             xmlLines.add(BaseConstant.SINGLE_INDENT + String
-                    .format(" <result column=\"%s\" property=\"%s\"/>", nonId.getColumnName(),
-                            nonId.getPropertyName()));
+                    .format("<result column=\"%s\" property=\"%s\"/>", nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add("</resultMap>");
         sourceCodeLines = xmlLines;
