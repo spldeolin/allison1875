@@ -1,15 +1,14 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
-import com.google.common.base.Strings;
+import java.util.List;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
-import com.spldeolin.allison1875.persistencegenerator.util.Dom4jUtils;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
@@ -38,30 +37,29 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {
-            Element stmt = new DefaultElement("update");
-            stmt.addAttribute("id", updateByIdEvenNullProc.getMethodName());
-            stmt.addAttribute("parameterType", entityName);
-            newLineWithIndent(stmt);
-            stmt.addText("UPDATE ").addText(persistence.getTableName());
-            newLineWithIndent(stmt);
-            stmt.addText("SET ");
-            newLineWithIndent(stmt);
-            stmt.addText(BaseConstant.SINGLE_INDENT);
-            stmt.addText(persistence.getNonIdProperties().stream()
-                    .map(npk -> npk.getColumnName() + " = #{" + npk.getPropertyName() + "}").collect(Collectors
-                            .joining(", " + BaseConstant.NEW_LINE + Strings.repeat(BaseConstant.SINGLE_INDENT, 2))));
-            newLineWithIndent(stmt);
-            stmt.addText("WHERE");
-            newLineWithIndent(stmt);
-            if (persistence.getIsDeleteFlagExist()) {
-                stmt.addText(PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
-                newLineWithIndent(stmt);
-                stmt.addText("AND ");
+            List<String> xmlLines = Lists.newArrayList();
+            xmlLines.add(
+                    String.format("<update id=\"%s\" parameterType=\"%s\">", updateByIdEvenNullProc.getMethodName(),
+                            entityName));
+            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
+            for (PropertyDto nonId : persistence.getNonIdProperties()) {
+                xmlLines.add(
+                        BaseConstant.DOUBLE_INDENT + nonId.getColumnName() + " = #{" + nonId.getPropertyName() + "},");
             }
-            stmt.addText(persistence.getIdProperties().stream()
-                    .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
-                    .collect(Collectors.joining(" AND ")));
-            sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            if (persistence.getIsDeleteFlagExist()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
+                        .getNotDeletedSql());
+            }
+            for (PropertyDto idProperty : persistence.getIdProperties()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty
+                        .getPropertyName() + "}");
+            }
+            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
+            xmlLines.add("</update>");
+            sourceCodeLines = xmlLines;
             sourceCodeLines.add("");
         }
         return this;
