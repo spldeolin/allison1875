@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>com.spldeolin.allison1875</groupId>
         <artifactId>allison1875</artifactId>
+        <groupId>com.spldeolin.allison1875</groupId>
         <version>1.0.0</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>base</artifactId>
-    <version>1.0.0</version>
 
     <dependencies>
         <!-- javaparser -->
@@ -118,19 +116,6 @@
             <groupId>org.jeasy</groupId>
             <artifactId>easy-random-core</artifactId>
         </dependency>
-
-        <!-- reflections -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>uk.co.jemos.podam</groupId>
-            <artifactId>podam</artifactId>
-            <version>7.2.5.RELEASE</version>
-        </dependency>
-
     </dependencies>
 
 </project>
