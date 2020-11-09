@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.querytransformer.constant.Constant;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
@@ -47,7 +48,7 @@ class GenerateMapperXmlQueryMethodProc {
 
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<select id='%s' resultMap='all'>", queryMethodName));
-        xmlLines.add(SINGLE_INDENT + "<!-- @formatter:off -->");
+        xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
         xmlLines.add(SINGLE_INDENT + "SELECT");
         xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
         xmlLines.add(SINGLE_INDENT + "FROM");
@@ -130,7 +131,7 @@ class GenerateMapperXmlQueryMethodProc {
                 }
             }
         }
-        xmlLines.add(SINGLE_INDENT + "<!-- @formatter:on -->");
+        xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
         xmlLines.add("</select>");
 
         List<String> newLines = Lists.newArrayList();

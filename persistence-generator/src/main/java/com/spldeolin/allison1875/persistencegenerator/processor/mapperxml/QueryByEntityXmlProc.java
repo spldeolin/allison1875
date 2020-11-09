@@ -4,6 +4,7 @@ import java.util.Collection;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByEntityProc;
@@ -36,7 +37,7 @@ public class QueryByEntityXmlProc extends XmlProc {
         sourceCodeLines.add(String
                 .format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", queryByEntityProc.getMethodName(),
                         entityName));
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:off -->");
+        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
         sourceCodeLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
         sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
@@ -50,7 +51,7 @@ public class QueryByEntityXmlProc extends XmlProc {
                     .format("  <if test=\"%s!=null\"> AND %s = #{%s} </if>", property.getPropertyName(),
                             property.getColumnName(), property.getPropertyName()));
         }
-        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + "<!-- @formatter:on -->");
+        sourceCodeLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
         sourceCodeLines.add("</select>");
 
         return this;

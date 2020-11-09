@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 
@@ -36,13 +37,13 @@ public class DeleteByKeyXmlProc extends XmlProc {
                 List<String> xmlLines = Lists.newArrayList();
                 xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", deleteByKeyProc.getMethodName(),
                         deleteByKeyProc.getKey().getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
-                xmlLines.add(SINGLE_INDENT + "<!-- @formatter:off -->");
+                xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "UPDATE " + persistence.getTableName());
                 xmlLines.add(SINGLE_INDENT + "SET " + PersistenceGeneratorConfig.getInstance().getDeletedSql());
-                xmlLines.add(SINGLE_INDENT + "WHERE " +
-                        deleteByKeyProc.getKey().getColumnName() + " = #{" + deleteByKeyProc.getKey().getPropertyName()
-                        + "}");
-                xmlLines.add(SINGLE_INDENT + "<!-- @formatter:on -->");
+                xmlLines.add(
+                        SINGLE_INDENT + "WHERE " + deleteByKeyProc.getKey().getColumnName() + " = #{" + deleteByKeyProc
+                                .getKey().getPropertyName() + "}");
+                xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
                 xmlLines.add("</update>");
                 sourceCodeLines.addAll(xmlLines);
             }
