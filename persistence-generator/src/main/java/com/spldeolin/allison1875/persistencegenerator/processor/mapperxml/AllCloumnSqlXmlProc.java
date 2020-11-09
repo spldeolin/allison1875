@@ -30,6 +30,7 @@ public class AllCloumnSqlXmlProc extends XmlProc {
                 .collect(Collectors.joining(", ")));
         xmlLines.add("</sql>");
         sourceCodeLines = xmlLines;
+        sourceCodeLines.add("");
         return this;
     }
 

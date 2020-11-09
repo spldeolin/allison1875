@@ -45,6 +45,7 @@ public class BatchInsertEvenNullXmlProc extends XmlProc {
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</foreach>");
         xmlLines.add("</insert>");
         this.sourceCodeLines = xmlLines;
+        sourceCodeLines.add("");
         return this;
     }
 

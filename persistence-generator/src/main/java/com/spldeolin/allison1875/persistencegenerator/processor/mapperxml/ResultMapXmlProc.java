@@ -40,6 +40,7 @@ public class ResultMapXmlProc extends XmlProc {
             resultTag.addAttribute("property", nonPk.getPropertyName());
         }
         sourceCodeLines = Dom4jUtils.toSourceCodeLines(resultMapTag);
+        sourceCodeLines.add("");
         return this;
     }
 

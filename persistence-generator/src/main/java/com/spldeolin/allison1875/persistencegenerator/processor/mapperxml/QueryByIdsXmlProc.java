@@ -68,6 +68,7 @@ public class QueryByIdsXmlProc extends XmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
             sourceCodeLines = xmlLines;
+            sourceCodeLines.add("");
         }
         return this;
     }

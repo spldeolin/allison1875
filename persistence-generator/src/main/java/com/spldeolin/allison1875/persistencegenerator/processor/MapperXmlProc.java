@@ -37,8 +37,6 @@ public class MapperXmlProc {
 
     private File mapperXmlFile;
 
-    private Element root;
-
     public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
             XmlProc... procs) {
         this.persistence = persistence;
@@ -57,7 +55,7 @@ public class MapperXmlProc {
             Document document = DocumentHelper.createDocument();
             document.addDocType("mapper",
                     "-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd", null);
-            root = document.addElement("mapper").addText(BaseConstant.NEW_LINE);
+            Element root = document.addElement("mapper").addText(BaseConstant.NEW_LINE);
             root.addAttribute("namespace", mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
             Dom4jUtils.write(mapperXmlFile, document);
         }
@@ -113,22 +111,23 @@ public class MapperXmlProc {
                 for (String line : proc.getSourceCodeLines()) {
                     if (StringUtils.isNotBlank(line)) {
                         auto.add(BaseConstant.SINGLE_INDENT + line);
+                    } else {
+                        auto.add("");
                     }
                 }
             }
-
+        }
+        if (auto.get(auto.size() - 1).equals("")) {
+            auto.remove(auto.size() - 1);
         }
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
+        auto.add("");
         return auto;
     }
 
     public File getMapperXmlFile() {
         return this.mapperXmlFile;
-    }
-
-    public Element getRoot() {
-        return this.root;
     }
 
 }

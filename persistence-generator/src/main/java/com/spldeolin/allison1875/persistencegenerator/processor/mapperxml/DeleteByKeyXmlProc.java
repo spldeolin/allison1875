@@ -46,6 +46,7 @@ public class DeleteByKeyXmlProc extends XmlProc {
                 xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
                 xmlLines.add("</update>");
                 sourceCodeLines.addAll(xmlLines);
+                sourceCodeLines.add("");
             }
         }
         return this;

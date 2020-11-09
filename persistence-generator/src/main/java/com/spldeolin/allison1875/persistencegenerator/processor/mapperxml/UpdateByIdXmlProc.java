@@ -59,6 +59,7 @@ public class UpdateByIdXmlProc extends XmlProc {
                     .map(pk -> pk.getColumnName() + " = #{" + pk.getPropertyName() + "}")
                     .collect(Collectors.joining(" AND ")));
             sourceCodeLines = Dom4jUtils.toSourceCodeLines(stmt);
+            sourceCodeLines.add("");
         }
         return this;
     }

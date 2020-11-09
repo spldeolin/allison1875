@@ -56,6 +56,7 @@ public class InsertXmlProc extends XmlProc {
         xmlLines.add("</insert>");
 
         sourceCodeLines = xmlLines;
+        sourceCodeLines.add("");
         return this;
     }
 
