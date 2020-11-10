@@ -26,7 +26,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <javaparser.version>3.16.2</javaparser.version>
+        <javaparser.version>3.16.3</javaparser.version>
         <log4j2.version>2.13.3</log4j2.version>
         <jackson.version>2.11.2</jackson.version>
     </properties>
@@ -150,7 +150,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.2.9.RELEASE</version>
+                <version>5.3.0</version>
             </dependency>
 
             <!-- okhttp -->
