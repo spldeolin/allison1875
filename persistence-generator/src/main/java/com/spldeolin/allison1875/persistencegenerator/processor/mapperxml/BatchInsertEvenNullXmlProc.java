@@ -39,7 +39,7 @@ public class BatchInsertEvenNullXmlProc extends XmlProc {
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <include refid=\"all\"/> )");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\",\">");
-        xmlLines.add(BaseConstant.TREBLE_INDENT + Constant.FORMATTER_ON_MARKER);
+        xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
         xmlLines.add(BaseConstant.TREBLE_INDENT + "( " + persistence.getProperties().stream()
                 .map(p -> "#{one." + p.getPropertyName() + "}").collect(Collectors.joining(", ")) + " )");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</foreach>");

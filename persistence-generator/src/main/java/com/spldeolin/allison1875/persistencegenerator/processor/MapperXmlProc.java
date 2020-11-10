@@ -104,6 +104,7 @@ public class MapperXmlProc {
         List<String> auto = Lists.newArrayList();
         String leftAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
+        auto.add("");
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
         for (XmlProc proc : procs) {
@@ -122,7 +123,6 @@ public class MapperXmlProc {
         }
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
-        auto.add("");
         return auto;
     }
 
