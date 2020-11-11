@@ -55,6 +55,7 @@ public class MapperXmlProc {
                     + ".org/dtd/mybatis-3-mapper.dtd\">");
             sourceCodeLines.add(String.format("<mapper namespace=\"%s\">",
                     mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
+            sourceCodeLines.add("</mapper>");
             FileUtils.writeLines(mapperXmlFile, sourceCodeLines);
         }
 
