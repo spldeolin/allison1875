@@ -125,8 +125,8 @@ class GenerateMapperXmlQueryMethodProc {
                 }
                 if (operator == OperatorEnum.LIKE) {
                     xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " LIKE CONCAT('%', '" + cond
-                            .getDollarParameterName() + "', '%')");
+                    xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " LIKE CONCAT('%', " + cond
+                            .getDollarParameterName() + ", '%')");
                     xmlLines.add(SINGLE_INDENT + "</if>");
                 }
             }
