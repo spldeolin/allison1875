@@ -33,12 +33,6 @@
             <artifactId>commons-dbutils</artifactId>
         </dependency>
 
-        <!-- jaxen -->
-        <dependency>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-        </dependency>
-
         <!-- hikari cp -->
         <dependency>
             <groupId>com.zaxxer</groupId>
