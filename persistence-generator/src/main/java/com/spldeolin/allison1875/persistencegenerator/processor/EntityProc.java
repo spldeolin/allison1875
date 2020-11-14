@@ -5,10 +5,12 @@ import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -17,6 +19,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
@@ -88,6 +91,8 @@ public class EntityProc {
             imports.add(superEntityQualifier);
             imports.add("lombok.EqualsAndHashCode");
         }
+        Collection<Pair<PropertyDto, FieldDeclaration>> fields = Lists.newArrayList();
+
         entityCuCreator = new CuCreator(pathProc.getSourceRoot(), conf.getEntityPackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc classJavadoc = new JavadocComment(
@@ -114,10 +119,15 @@ public class EntityProc {
                 FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
                 Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
                 field.setJavadocComment(fieldJavadoc);
-                generateFieldCallbackStrategy.handle(property, field);
+                fields.add(Pair.of(property, field));
             }
             return coid;
         });
+
+        entityCuCreator.create(false);
+        for (Pair<PropertyDto, FieldDeclaration> pair : fields) {
+            generateFieldCallbackStrategy.handle(pair.getLeft(), pair.getRight());
+        }
 
         this.reportDiff(originalVariables);
 
@@ -181,12 +191,12 @@ public class EntityProc {
     }
 
     private void getAuthorTags(List<JavadocBlockTag> authorTags, CompilationUnit cu) {
-        cu.getPrimaryType()
-                .ifPresent(pt -> pt.getJavadoc().ifPresent(javadoc -> javadoc.getBlockTags().forEach(javadocTag -> {
+        cu.getPrimaryType().flatMap(NodeWithJavadoc::getJavadoc)
+                .ifPresent(javadoc -> javadoc.getBlockTags().forEach(javadocTag -> {
                     if (javadocTag.getType() == Type.AUTHOR) {
                         authorTags.add(javadocTag);
                     }
-                })));
+                }));
     }
 
     public Path getEntityPath() {
