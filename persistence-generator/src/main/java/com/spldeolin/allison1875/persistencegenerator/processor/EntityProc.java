@@ -31,6 +31,7 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateFieldCallbackStrategy;
 
 /**
  * @author Deolin 2020-07-18
@@ -38,6 +39,8 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 public class EntityProc {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(EntityProc.class);
+
+    private final GenerateFieldCallbackStrategy generateFieldCallbackStrategy;
 
     private final PersistenceDto persistence;
 
@@ -47,7 +50,9 @@ public class EntityProc {
 
     private CuCreator entityCuCreator;
 
-    public EntityProc(PersistenceDto persistence, PathProc pathProc) {
+    public EntityProc(GenerateFieldCallbackStrategy generateFieldCallbackStrategy, PersistenceDto persistence,
+            PathProc pathProc) {
+        this.generateFieldCallbackStrategy = generateFieldCallbackStrategy;
         this.persistence = persistence;
         this.pathProc = pathProc;
     }
@@ -109,6 +114,7 @@ public class EntityProc {
                 FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
                 Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
                 field.setJavadocComment(fieldJavadoc);
+                generateFieldCallbackStrategy.handle(property, field);
             }
             return coid;
         });

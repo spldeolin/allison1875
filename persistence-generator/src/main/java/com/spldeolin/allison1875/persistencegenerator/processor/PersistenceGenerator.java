@@ -39,6 +39,8 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateFieldCallbackStrategy;
+import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateFieldCallbackStrategy;
 
 /**
  * @author Deolin 2020-07-11
@@ -46,6 +48,8 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.Update
 public class PersistenceGenerator implements Allison1875MainProcessor {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGenerator.class);
+
+    private GenerateFieldCallbackStrategy generateFieldCallbackStrategy = new DefaultGenerateFieldCallbackStrategy();
 
     @Override
     public void preProcess() {
@@ -72,7 +76,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         for (PersistenceDto persistence : new BuildPersistenceDtoProc().process().getPersistences()) {
 
             // 重新生成Entity
-            EntityProc entityProc = new EntityProc(persistence, pathProc).process();
+            EntityProc entityProc = new EntityProc(generateFieldCallbackStrategy, persistence, pathProc).process();
             CuCreator entityCuCreator = entityProc.getEntityCuCreator();
             toSave.add(entityCuCreator.create(false));
             // 寻找或创建Mapper
@@ -142,6 +146,10 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         } else {
             return entityCuCreator.getPrimaryTypeQualifier();
         }
+    }
+
+    public void setGenerateFieldCallbackStrategy(GenerateFieldCallbackStrategy generateFieldCallbackStrategy) {
+        this.generateFieldCallbackStrategy = generateFieldCallbackStrategy;
     }
 
 }
