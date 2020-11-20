@@ -39,8 +39,10 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProc;
-import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateFieldCallbackStrategy;
-import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateFieldCallbackStrategy;
+import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateEntityFieldCallback;
+import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateQueryDesignFieldCallback;
+import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateEntityFieldCallback;
+import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesignFieldCallback;
 
 /**
  * @author Deolin 2020-07-11
@@ -49,7 +51,10 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGenerator.class);
 
-    private GenerateFieldCallbackStrategy generateFieldCallbackStrategy = new DefaultGenerateFieldCallbackStrategy();
+    private GenerateEntityFieldCallback generateEntityFieldCallback = new DefaultGenerateEntityFieldCallback();
+
+    private GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback =
+            new DefaultGenerateQueryDesignFieldCallback();
 
     @Override
     public void preProcess() {
@@ -76,9 +81,11 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         for (PersistenceDto persistence : new BuildPersistenceDtoProc().process().getPersistences()) {
 
             // 重新生成Entity
-            EntityProc entityProc = new EntityProc(generateFieldCallbackStrategy, persistence, pathProc).process();
+            GenerateEntityProc entityProc = new GenerateEntityProc(generateEntityFieldCallback, persistence, pathProc)
+                    .process();
             CuCreator entityCuCreator = entityProc.getEntityCuCreator();
-            toSave.add(entityCuCreator.create(false));
+            toSave.addAll(entityProc.getToCreate());
+
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
@@ -91,7 +98,9 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
 
             // 重新生成QueryDesign
-            new GenerateQueryDesignProc(persistence, entityCuCreator, mapper).process();
+            toSave.addAll(
+                    new GenerateQueryDesignProc(persistence, entityCuCreator, mapper, generateQueryDesignFieldCallback)
+                            .process().getToCreate());
 
             // 删除Mapper中所有Allison 1875生成的方法
             new DeleteAllison1875MethodProc(mapper).process();
@@ -148,8 +157,12 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         }
     }
 
-    public void setGenerateFieldCallbackStrategy(GenerateFieldCallbackStrategy generateFieldCallbackStrategy) {
-        this.generateFieldCallbackStrategy = generateFieldCallbackStrategy;
+    public void setGenerateEntityFieldCallback(GenerateEntityFieldCallback generateEntityFieldCallback) {
+        this.generateEntityFieldCallback = generateEntityFieldCallback;
+    }
+
+    public void setGenerateQueryDesignFieldCallback(GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback) {
+        this.generateQueryDesignFieldCallback = generateQueryDesignFieldCallback;
     }
 
 }

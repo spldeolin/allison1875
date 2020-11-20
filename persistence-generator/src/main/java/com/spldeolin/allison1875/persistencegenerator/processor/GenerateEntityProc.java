@@ -34,16 +34,16 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateFieldCallbackStrategy;
+import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateEntityFieldCallback;
 
 /**
  * @author Deolin 2020-07-18
  */
-public class EntityProc {
+public class GenerateEntityProc {
 
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(EntityProc.class);
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(GenerateEntityProc.class);
 
-    private final GenerateFieldCallbackStrategy generateFieldCallbackStrategy;
+    private final GenerateEntityFieldCallback generateFieldCallbackStrategy;
 
     private final PersistenceDto persistence;
 
@@ -53,17 +53,20 @@ public class EntityProc {
 
     private CuCreator entityCuCreator;
 
-    public EntityProc(GenerateFieldCallbackStrategy generateFieldCallbackStrategy, PersistenceDto persistence,
+    private final Collection<CompilationUnit> toCreate = Lists.newArrayList();
+
+    public GenerateEntityProc(GenerateEntityFieldCallback generateFieldCallbackStrategy, PersistenceDto persistence,
             PathProc pathProc) {
         this.generateFieldCallbackStrategy = generateFieldCallbackStrategy;
         this.persistence = persistence;
         this.pathProc = pathProc;
     }
 
-    public EntityProc process() {
+    public GenerateEntityProc process() {
         PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
-        entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(pathProc.getSourceRoot(), conf.getEntityPackage(),
-                persistence.getEntityName() + ".java");
+        Path sourceRoot = pathProc.getSourceRoot();
+        entityPath = CodeGenerationUtils
+                .fileInPackageAbsolutePath(sourceRoot, conf.getEntityPackage(), persistence.getEntityName() + ".java");
 
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
         TreeSet<String> originalVariables = Sets.newTreeSet();
@@ -72,7 +75,7 @@ public class EntityProc {
                 CompilationUnit cu = StaticJavaParser.parse(entityPath);
                 for (FieldDeclaration field : cu.findAll(FieldDeclaration.class)) {
                     for (VariableDeclarator variable : field.getVariables()) {
-                        originalVariables.add(variable.getTypeAsString() + " " + variable.getNameAsString());
+                        originalVariables.add(variable.getNameAsString());
                     }
                 }
                 this.getAuthorTags(authorTags, cu);
@@ -91,9 +94,10 @@ public class EntityProc {
             imports.add(superEntityQualifier);
             imports.add("lombok.EqualsAndHashCode");
         }
-        Collection<Pair<PropertyDto, FieldDeclaration>> fields = Lists.newArrayList();
 
-        entityCuCreator = new CuCreator(pathProc.getSourceRoot(), conf.getEntityPackage(), imports, () -> {
+        Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
+
+        entityCuCreator = new CuCreator(sourceRoot, conf.getEntityPackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc classJavadoc = new JavadocComment(
                     persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
@@ -119,17 +123,18 @@ public class EntityProc {
                 FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
                 Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
                 field.setJavadocComment(fieldJavadoc);
-                fields.add(Pair.of(property, field));
+                propAndField.add(Pair.of(property, field));
             }
             return coid;
         });
-
-        entityCuCreator.create(false);
-        for (Pair<PropertyDto, FieldDeclaration> pair : fields) {
-            generateFieldCallbackStrategy.handle(pair.getLeft(), pair.getRight());
-        }
+        toCreate.add(entityCuCreator.create(false));
 
         this.reportDiff(originalVariables);
+
+        for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
+            toCreate.addAll(
+                    generateFieldCallbackStrategy.handleEntityField(pair.getLeft(), pair.getRight(), sourceRoot));
+        }
 
         return this;
     }
@@ -140,7 +145,7 @@ public class EntityProc {
             if (PersistenceGeneratorConfig.getInstance().getAlreadyInSuperEntity().contains(property.getColumnName())) {
                 continue;
             }
-            destinedVariables.add(property.getJavaType().getSimpleName() + " " + property.getPropertyName());
+            destinedVariables.add(property.getPropertyName());
         }
 
         if (!originalVariables.isEmpty()) {
@@ -204,7 +209,11 @@ public class EntityProc {
     }
 
     public CuCreator getEntityCuCreator() {
-        return this.entityCuCreator;
+        return entityCuCreator;
+    }
+
+    public Collection<CompilationUnit> getToCreate() {
+        return toCreate;
     }
 
 }

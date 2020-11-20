@@ -3,8 +3,10 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -31,13 +33,14 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryMeta;
+import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesignFieldCallback;
 
 /**
  * @author Deolin 2020-10-06
  */
 public class GenerateQueryDesignProc {
 
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(EntityProc.class);
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(GenerateEntityProc.class);
 
     private final PersistenceDto persistence;
 
@@ -45,11 +48,16 @@ public class GenerateQueryDesignProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
+    private final GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback;
+
+    private final Collection<CompilationUnit> toCreate = Lists.newArrayList();
+
     public GenerateQueryDesignProc(PersistenceDto persistence, CuCreator entityCuCreator,
-            ClassOrInterfaceDeclaration mapper) {
+            ClassOrInterfaceDeclaration mapper, GenerateQueryDesignFieldCallback generateFieldCallbackStrategy) {
         this.persistence = persistence;
         this.entityCuCreator = entityCuCreator;
         this.mapper = mapper;
+        this.generateQueryDesignFieldCallback = generateFieldCallbackStrategy;
     }
 
     public GenerateQueryDesignProc process() {
@@ -58,9 +66,9 @@ public class GenerateQueryDesignProc {
             return this;
         }
 
+        Path sourceRoot = entityCuCreator.getSourceRoot();
         Path queryPath = CodeGenerationUtils
-                .fileInPackageAbsolutePath(entityCuCreator.getSourceRoot(), conf.getEntityPackage(),
-                        persistence.getEntityName() + ".java");
+                .fileInPackageAbsolutePath(sourceRoot, conf.getEntityPackage(), persistence.getEntityName() + ".java");
 
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
         if (queryPath.toFile().exists()) {
@@ -77,40 +85,46 @@ public class GenerateQueryDesignProc {
 
         List<String> imports = this.getImports(persistence, conf);
 
-        CuCreator cuCreator = new CuCreator(entityCuCreator.getSourceRoot(), conf.getQueryDesignPackage(), imports,
-                () -> {
-                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                    Javadoc classJavadoc = new JavadocComment(
-                            persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
-                                    + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
-                                    + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
-                    classJavadoc.getBlockTags().addAll(authorTags);
-                    coid.setJavadocComment(classJavadoc);
-                    coid.setPublic(true);
-                    coid.setName(calcQueryDesignName(conf));
-                    setDefaultConstructorPrivate(coid);
-                    addStaticFactory(coid);
-                    for (PropertyDto property : persistence.getProperties()) {
-                        addIntermediateField(coid, property);
-                    }
-                    addTerminalMethod(coid, persistence);
+        Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
+        CuCreator cuCreator = new CuCreator(sourceRoot, conf.getQueryDesignPackage(), imports, () -> {
+            ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+            Javadoc classJavadoc = new JavadocComment(
+                    persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
+                            .repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型" + BaseConstant.BY_ALLISON_1875
+                            + "</strong>").parse();
+            classJavadoc.getBlockTags().addAll(authorTags);
+            coid.setJavadocComment(classJavadoc);
+            coid.setPublic(true);
+            coid.setName(calcQueryDesignName(conf));
+            setDefaultConstructorPrivate(coid);
+            addStaticFactory(coid);
+            for (PropertyDto property : persistence.getProperties()) {
+                FieldDeclaration field = addIntermediateField(coid, property);
+                propAndField.add(Pair.of(property, field));
+            }
+            addTerminalMethod(coid, persistence);
 
-                    QueryMeta queryMeta = new QueryMeta();
-                    queryMeta.setEntityQualifier(entityCuCreator.getPrimaryTypeQualifier());
-                    queryMeta.setEntityName(entityCuCreator.getPrimaryTypeName());
-                    queryMeta.setMapperQualifier(
-                            mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-                    queryMeta.setMapperName(mapper.getNameAsString());
-                    queryMeta.setMapperRelativePath(
-                            PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath() + File.separator
-                                    + persistence.getMapperName() + ".xml");
-                    queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
-                            .collect(Collectors.toList()));
-                    queryMeta.setTableName(persistence.getTableName());
-                    coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
-                    return coid;
-                });
-        cuCreator.create(true);
+            QueryMeta queryMeta = new QueryMeta();
+            queryMeta.setEntityQualifier(entityCuCreator.getPrimaryTypeQualifier());
+            queryMeta.setEntityName(entityCuCreator.getPrimaryTypeName());
+            queryMeta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            queryMeta.setMapperName(mapper.getNameAsString());
+            queryMeta.setMapperRelativePath(
+                    PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath() + File.separator + persistence
+                            .getMapperName() + ".xml");
+            queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
+                    .collect(Collectors.toList()));
+            queryMeta.setTableName(persistence.getTableName());
+            coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
+            return coid;
+        });
+        toCreate.add(cuCreator.create(false));
+
+        for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
+            FieldDeclaration field = pair.getRight();
+            toCreate.addAll(
+                    generateQueryDesignFieldCallback.handlerQueryDesignField(pair.getLeft(), field, sourceRoot));
+        }
 
         return this;
     }
@@ -124,7 +138,7 @@ public class GenerateQueryDesignProc {
         coid.addMember(method);
     }
 
-    private void addIntermediateField(ClassOrInterfaceDeclaration coid, PropertyDto property) {
+    private FieldDeclaration addIntermediateField(ClassOrInterfaceDeclaration coid, PropertyDto property) {
         FieldDeclaration field = new FieldDeclaration();
         field.setPublic(true);
         com.github.javaparser.ast.type.Type type = StaticJavaParser.parseType(
@@ -134,6 +148,7 @@ public class GenerateQueryDesignProc {
         Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
         field.setJavadocComment(fieldJavadoc);
         coid.addMember(field);
+        return field;
     }
 
     private String buildCommentDescription(PropertyDto property) {
@@ -201,6 +216,10 @@ public class GenerateQueryDesignProc {
                         authorTags.add(javadocTag);
                     }
                 })));
+    }
+
+    public Collection<CompilationUnit> getToCreate() {
+        return toCreate;
     }
 
 }

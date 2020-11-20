@@ -48,10 +48,12 @@ public class QueryByIdXmlProc extends XmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance().getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
+                        .getNotDeletedSql());
             }
             for (PropertyDto idProperty : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty.getPropertyName() + "}");
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty
+                        .getPropertyName() + "}");
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");

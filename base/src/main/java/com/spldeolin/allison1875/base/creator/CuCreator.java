@@ -52,24 +52,26 @@ public class CuCreator {
     }
 
     public CompilationUnit create(boolean saveNow) {
-        Path storage = CodeGenerationUtils.packageAbsolutePath(sourceRoot, packageName);
-        TypeDeclaration<?> primaryType = primaryTypeCreator.createType();
-        pt = primaryType;
-        primaryTypeName = primaryType.getNameAsString();
-        primaryTypeQualifier = packageName + "." + primaryTypeName;
-        primaryTypeInstanceName = StringUtils.lowerFirstLetter(primaryTypeName);
+        if (this.cu == null) {
+            Path storage = CodeGenerationUtils.packageAbsolutePath(sourceRoot, packageName);
+            TypeDeclaration<?> primaryType = primaryTypeCreator.createType();
+            pt = primaryType;
+            primaryTypeName = primaryType.getNameAsString();
+            primaryTypeQualifier = packageName + "." + primaryTypeName;
+            primaryTypeInstanceName = StringUtils.lowerFirstLetter(primaryTypeName);
 
-        CompilationUnit cu = new CompilationUnit();
-        cu.setStorage(storage.resolve(primaryTypeName + ".java"), StandardCharsets.UTF_8);
-        cu.setPackageDeclaration(packageName);
-        imports.forEach(cu::addImport);
-        cu.addType(primaryType);
+            CompilationUnit cu = new CompilationUnit();
+            cu.setStorage(storage.resolve(primaryTypeName + ".java"), StandardCharsets.UTF_8);
+            cu.setPackageDeclaration(packageName);
+            imports.forEach(cu::addImport);
+            cu.addType(primaryType);
+            this.cu = cu;
+        }
 
         if (saveNow) {
             Saves.save(cu);
         }
 
-        this.cu = cu;
         return cu;
     }
 
