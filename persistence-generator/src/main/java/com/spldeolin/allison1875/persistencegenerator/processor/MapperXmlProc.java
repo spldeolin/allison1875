@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -64,6 +65,7 @@ public class MapperXmlProc {
         String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
         List<String> lines = StringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines();
+
         if (content.contains(BaseConstant.BY_ALLISON_1875)) {
             boolean inAnchorRange = false;
             for (String line : lines) {
@@ -94,8 +96,22 @@ public class MapperXmlProc {
             Collections.reverse(newLines);
         }
 
-        FileUtils.writeLines(mapperXmlFile, newLines);
+        String top = generatedLines.get(0);
+        String bottom = Iterables.getLast(generatedLines);
+        int topIndex = newLines.indexOf(top);
+        if (topIndex > 1) {
+            if (StringUtils.isNotBlank(newLines.get(topIndex - 1))) {
+                newLines.add(topIndex, "");
+            }
+        }
+        int bottomIndex = newLines.indexOf(bottom);
+        if (bottomIndex < newLines.size() + 1) {
+            if (StringUtils.isNotBlank(newLines.get(bottomIndex + 1))) {
+                newLines.add(bottomIndex + 1, "");
+            }
+        }
 
+        FileUtils.writeLines(mapperXmlFile, newLines);
         return this;
     }
 
@@ -103,7 +119,6 @@ public class MapperXmlProc {
         List<String> auto = Lists.newArrayList();
         String leftAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
-        auto.add("");
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
         for (XmlProc proc : procs) {
