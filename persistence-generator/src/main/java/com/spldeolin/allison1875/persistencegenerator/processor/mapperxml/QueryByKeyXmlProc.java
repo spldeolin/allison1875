@@ -42,8 +42,10 @@ public class QueryByKeyXmlProc extends XmlProc {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
-                    .getNotDeletedSql());
+            if (persistence.getIsDeleteFlagExist()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
+                        .getNotDeletedSql());
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + key.getColumnName() + " = #{" + key.getPropertyName()
                     + "}");
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
