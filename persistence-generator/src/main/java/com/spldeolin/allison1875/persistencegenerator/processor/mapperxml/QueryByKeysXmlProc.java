@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKeysProc;
 
 /**
@@ -28,7 +28,7 @@ public class QueryByKeysXmlProc extends XmlProc {
     }
 
     public QueryByKeysXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByKeys()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableQueryByKeys()) {
             return this;
         }
         for (QueryByKeysProc queryByKeyProc : queryByKeysProcs) {
@@ -42,8 +42,8 @@ public class QueryByKeysXmlProc extends XmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
-                        .getNotDeletedSql());
+                xmlLines.add(
+                        BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGenerator.CONFIG.get().getNotDeletedSql());
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + queryByKeyProc.getKey().getColumnName() + String
                     .format(" IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",

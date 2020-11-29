@@ -32,6 +32,7 @@ class GenerateHandlerProc {
     }
 
     GenerateHandlerProc process() throws HandlerNameConflictException {
+        HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
         if (!metaInfo.isReqAbsent()) {
             Imports.ensureImported(controller, metaInfo.getReqBody().getTypeQualifier());
@@ -40,7 +41,7 @@ class GenerateHandlerProc {
             Imports.ensureImported(controller, metaInfo.getRespBody().getTypeQualifier());
         }
         Imports.ensureImported(controller, serviceQualifier);
-        for (String controllerImport : HandlerTransformerConfig.getInstance().getControllerImports()) {
+        for (String controllerImport : config.getControllerImports()) {
             Imports.ensureImported(controller, controllerImport);
         }
         if (controller.getMethodsByName(metaInfo.getHandlerName()).size() > 0) {
@@ -57,15 +58,14 @@ class GenerateHandlerProc {
         handler.setJavadocComment(javadoc);
         String handlerName = metaInfo.getHandlerName();
         handler.addAnnotation(StaticJavaParser.parseAnnotation("@PostMapping(\"/" + handlerName + "\")"));
-        for (String handlerAnnotation : HandlerTransformerConfig.getInstance().getHandlerAnnotations()) {
+        for (String handlerAnnotation : config.getHandlerAnnotations()) {
             handler.addAnnotation(StaticJavaParser.parseAnnotation(handlerAnnotation));
         }
         handler.setPublic(true);
         if (metaInfo.isRespAbsent()) {
-            handler.setType(HandlerTransformerConfig.getInstance().getResultVoid());
+            handler.setType(config.getResultVoid());
         } else {
-            handler.setType(String.format(HandlerTransformerConfig.getInstance().getResult(),
-                    metaInfo.getRespBody().getTypeName()));
+            handler.setType(String.format(config.getResult(), metaInfo.getRespBody().getTypeName()));
         }
         handler.setName(handlerName);
         if (!metaInfo.isReqAbsent()) {
@@ -77,9 +77,9 @@ class GenerateHandlerProc {
 
         String handlerPattern;
         if (metaInfo.isRespAbsent()) {
-            handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPatternInNoResponseBodySituation();
+            handlerPattern = config.getHandlerBodyPatternInNoResponseBodySituation();
         } else {
-            handlerPattern = HandlerTransformerConfig.getInstance().getHandlerBodyPattern();
+            handlerPattern = config.getHandlerBodyPattern();
         }
         String serviceCallExpr = metaInfo.getHandlerName() + "Service." + metaInfo.getHandlerName();
         if (metaInfo.isReqAbsent()) {

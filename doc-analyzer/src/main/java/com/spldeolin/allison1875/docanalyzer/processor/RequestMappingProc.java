@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 
 /**
  * 内聚了 对请求URL和请求动词解析的功能
@@ -48,7 +47,7 @@ class RequestMappingProc {
         combinedVerbs = combineVerb(cVerbs, mVerbs);
 
         // 添加全局前缀
-        String globalUrlPrefix = DocAnalyzerConfig.getInstance().getGlobalUrlPrefix();
+        String globalUrlPrefix = DocAnalyzer.CONFIG.get().getGlobalUrlPrefix();
         if (StringUtils.isNotBlank(globalUrlPrefix)) {
             ListIterator<String> itr = combinedUrls.listIterator();
             while (itr.hasNext()) {

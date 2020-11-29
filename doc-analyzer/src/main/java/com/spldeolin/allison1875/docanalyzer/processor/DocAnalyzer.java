@@ -38,7 +38,7 @@ import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsS
  *
  * @author Deolin 2020-06-10
  */
-public class DocAnalyzer implements Allison1875MainProcessor {
+public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(DocAnalyzer.class);
 
@@ -46,7 +46,8 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     private final static String docCat = "doc-cat";
 
-    private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy = new DefaultObtainConcernedResponseBodyStrategy();
+    private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
+            new DefaultObtainConcernedResponseBodyStrategy();
 
     private AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
             new DefaultAnalyzeCustomValidationStrategy();
@@ -56,10 +57,11 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     private AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
 
+    public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
+
     @Override
-    public void preProcess() {
-        Set<ConstraintViolation<DocAnalyzerConfig>> violations = ValidateUtils
-                .validate(DocAnalyzerConfig.getInstance());
+    public DocAnalyzer config(DocAnalyzerConfig config) {
+        Set<ConstraintViolation<DocAnalyzerConfig>> violations = ValidateUtils.validate(config);
         if (violations.size() > 0) {
             log.warn("配置项校验未通过，请检查后重新运行");
             for (ConstraintViolation<DocAnalyzerConfig> violation : violations) {
@@ -68,12 +70,14 @@ public class DocAnalyzer implements Allison1875MainProcessor {
             }
             System.exit(-9);
         }
+        CONFIG.set(config);
+        return this;
     }
 
     @Override
     public void process(AstForest astForest) {
-        astForest = new AstForest(astForest.getAnyClassFromHost(),
-                DocAnalyzerConfig.getInstance().getDependencyProjectPaths());
+        // re parser
+        astForest = new AstForest(astForest.getAnyClassFromHost(), CONFIG.get().getDependencyProjectPaths());
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需

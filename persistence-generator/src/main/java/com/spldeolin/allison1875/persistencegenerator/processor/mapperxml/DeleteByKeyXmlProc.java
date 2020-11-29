@@ -5,9 +5,9 @@ import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 
 /**
@@ -39,7 +39,7 @@ public class DeleteByKeyXmlProc extends XmlProc {
                         deleteByKeyProc.getKey().getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
                 xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "UPDATE " + persistence.getTableName());
-                xmlLines.add(SINGLE_INDENT + "SET " + PersistenceGeneratorConfig.getInstance().getDeletedSql());
+                xmlLines.add(SINGLE_INDENT + "SET " + PersistenceGenerator.CONFIG.get().getDeletedSql());
                 xmlLines.add(
                         SINGLE_INDENT + "WHERE " + deleteByKeyProc.getKey().getColumnName() + " = #{" + deleteByKeyProc
                                 .getKey().getPropertyName() + "}");

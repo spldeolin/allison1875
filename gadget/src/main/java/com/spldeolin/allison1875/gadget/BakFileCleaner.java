@@ -12,12 +12,13 @@ import com.spldeolin.allison1875.base.ast.AstForest;
  *
  * @author Deolin 2020-10-22
  */
-public class BakFileCleaner implements Allison1875MainProcessor {
+public class BakFileCleaner implements Allison1875MainProcessor<Void, BakFileCleaner> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BakFileCleaner.class);
 
     @Override
-    public void preProcess() {
+    public BakFileCleaner config(Void config) {
+        return this;
     }
 
     @Override

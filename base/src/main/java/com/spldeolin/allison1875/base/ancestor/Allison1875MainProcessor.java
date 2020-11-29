@@ -5,9 +5,9 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 /**
  * @author Deolin 2020-08-29
  */
-public interface Allison1875MainProcessor {
+public interface Allison1875MainProcessor<C, T extends Allison1875MainProcessor<C, T>> {
 
-    void preProcess();
+    T config(C config);
 
     void process(AstForest astForest);
 

@@ -30,7 +30,7 @@ public class QueryInformationSchemaProc {
     private Collection<InformationSchemaDto> infoSchemas;
 
     public QueryInformationSchemaProc process() {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
+        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(conf.getJdbcUrl());
         dataSource.setUsername(conf.getUserName());

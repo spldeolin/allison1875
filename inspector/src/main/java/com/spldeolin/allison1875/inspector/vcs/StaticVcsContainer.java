@@ -12,10 +12,10 @@ import com.spldeolin.allison1875.inspector.InspectorConfig;
  */
 public class StaticVcsContainer {
 
-    private static final VcsContainer fromConfigPath = new VcsContainer(
-            Paths.get(InspectorConfig.getInstance().getProjectLocalGitPath()));
+    private static VcsContainer fromConfigPath;
 
-    public StaticVcsContainer() {
+    public StaticVcsContainer(InspectorConfig inspectorConfig) {
+        fromConfigPath = new VcsContainer(Paths.get(inspectorConfig.getProjectLocalGitPath()));
     }
 
     public static Path getProjectPath() {

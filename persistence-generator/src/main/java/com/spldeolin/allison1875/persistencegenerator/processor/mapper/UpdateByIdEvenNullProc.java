@@ -5,9 +5,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.javadoc.Javadoc;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
@@ -28,7 +28,7 @@ public class UpdateByIdEvenNullProc extends MapperProc {
     }
 
     public UpdateByIdEvenNullProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableUpdateByIdEvenNull()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableUpdateByIdEvenNull()) {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {

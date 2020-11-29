@@ -90,7 +90,7 @@ class BlueprintAnalyzeProc {
             DtoMetaInfo.DtoMetaInfoBuilder dtoBuilder = DtoMetaInfo.builder();
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
 
-            HandlerTransformerConfig conf = HandlerTransformerConfig.getInstance();
+            HandlerTransformerConfig conf = HandlerTransformer.CONFIG.get();
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody != null) {
                 String typeName = StringUtils.upperFirstLetter(handlerName) + "RespDto";
                 String respPackageName = conf.getRespDtoPackage();

@@ -21,14 +21,16 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 /**
  * @author Deolin 2020-06-22
  */
-public class HandlerTransformer implements Allison1875MainProcessor {
+public class HandlerTransformer implements Allison1875MainProcessor<HandlerTransformerConfig, HandlerTransformer> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(HandlerTransformer.class);
 
+    public static final ThreadLocal<HandlerTransformerConfig> CONFIG = ThreadLocal
+            .withInitial(HandlerTransformerConfig::new);
+
     @Override
-    public void preProcess() {
-        Set<ConstraintViolation<HandlerTransformerConfig>> violations = ValidateUtils
-                .validate(HandlerTransformerConfig.getInstance());
+    public HandlerTransformer config(HandlerTransformerConfig config) {
+        Set<ConstraintViolation<HandlerTransformerConfig>> violations = ValidateUtils.validate(config);
         if (violations.size() > 0) {
             log.warn("配置项校验未通过，请检查后重新运行");
             for (ConstraintViolation<HandlerTransformerConfig> violation : violations) {
@@ -37,6 +39,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             }
             System.exit(-9);
         }
+        CONFIG.set(config);
+        return this;
     }
 
     @Override

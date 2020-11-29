@@ -33,14 +33,15 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
  *
  * @author Deolin 2020-10-28
  */
-public class LineCounter implements Allison1875MainProcessor {
+public class LineCounter implements Allison1875MainProcessor<LineCounterConfig, LineCounter> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(LineCounter.class);
 
+    private LineCounterConfig lineCounterConfig;
+
     @Override
-    public void preProcess() {
-        Set<ConstraintViolation<LineCounterConfig>> violations = ValidateUtils
-                .validate(LineCounterConfig.getInstance());
+    public LineCounter config(LineCounterConfig config) {
+        Set<ConstraintViolation<LineCounterConfig>> violations = ValidateUtils.validate(config);
         if (violations.size() > 0) {
             log.warn("配置项校验未通过，请检查后重新运行");
             for (ConstraintViolation<LineCounterConfig> violation : violations) {
@@ -49,12 +50,15 @@ public class LineCounter implements Allison1875MainProcessor {
             }
             System.exit(-9);
         }
+
+        lineCounterConfig = config;
+        return this;
     }
 
     @Override
     public void process(AstForest astForest) {
         // with src/test/java
-        if (LineCounterConfig.getInstance().getWithTest()) {
+        if (lineCounterConfig.getWithTest()) {
             astForest = new AstForest(astForest.getAnyClassFromHost(), Lists.newArrayList(
                     astForest.getHost().resolve(BaseConfig.getInstance().getTestJavaDirectoryLayout()).toString()));
         }
@@ -77,13 +81,13 @@ public class LineCounter implements Allison1875MainProcessor {
         }
 
         // 所有java代码
-        String rankListTitlePart = LineCounterConfig.getInstance().getRankListSize() > 0 ? "，排行：" : "";
+        String rankListTitlePart = lineCounterConfig.getRankListSize() > 0 ? "，排行：" : "";
         log.info("");
         log.info("所有java代码总行数：{}{}", valuesSum(allJavas), rankListTitlePart);
         reportRankList(allJavas);
 
         // xxx结尾的类型
-        for (String postfix : LineCounterConfig.getInstance().getTypePostfix()) {
+        for (String postfix : lineCounterConfig.getTypePostfix()) {
             Map<String, Integer> postfixTypes = Maps.newHashMap();
             allTypes.forEach((typeQualifier, count) -> {
                 if (typeQualifier.endsWith(postfix)) {
@@ -100,7 +104,7 @@ public class LineCounter implements Allison1875MainProcessor {
 
         // 所有xml代码
         Map<String, Integer> allXmls = Maps.newHashMap();
-        for (File xml : detectXmls(astForest, LineCounterConfig.getInstance().getWithTest())) {
+        for (File xml : detectXmls(astForest, lineCounterConfig.getWithTest())) {
             try {
                 String xmlPath = AstForestContext.getCurrent().getCommonPathPart().relativize(xml.toPath()).normalize()
                         .toString();
@@ -134,10 +138,10 @@ public class LineCounter implements Allison1875MainProcessor {
 
     private void reportRankList(Map<String, Integer> lineCounts) {
         // 显示阈值
-        lineCounts.values().removeIf(count -> count < LineCounterConfig.getInstance().getDisplayThreshold());
+        lineCounts.values().removeIf(count -> count < lineCounterConfig.getDisplayThreshold());
 
         // 用户不需要打印排行榜
-        int rankListSize = LineCounterConfig.getInstance().getRankListSize();
+        int rankListSize = lineCounterConfig.getRankListSize();
         if (rankListSize == 0) {
             log.info("");
             return;
@@ -161,7 +165,7 @@ public class LineCounter implements Allison1875MainProcessor {
         Collections.reverse(list);
         // report
         for (Entry<String, Integer> entry : list) {
-            boolean danger = entry.getValue() >= LineCounterConfig.getInstance().getDangerThreshold();
+            boolean danger = entry.getValue() >= lineCounterConfig.getDangerThreshold();
             log.info(BaseConstant.SINGLE_INDENT + (danger ? "[危] " : "") + entry.getKey() + "：" + entry.getValue());
         }
         // more...

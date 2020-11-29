@@ -18,7 +18,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
@@ -43,9 +42,9 @@ class YApiSyncProc {
 
     private static final String DELETE_TAG = "已删除";
 
-    private static final String url = DocAnalyzerConfig.getInstance().getYapiUrl();
+    private static final String url = DocAnalyzer.CONFIG.get().getYapiUrl();
 
-    private static final String token = DocAnalyzerConfig.getInstance().getYapiToken();
+    private static final String token = DocAnalyzer.CONFIG.get().getYapiToken();
 
     private static final Long projectId = getProjectIdFromYApi();
 

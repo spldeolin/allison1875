@@ -35,6 +35,7 @@ class GenerateServicesProc {
     }
 
     GenerateServicesProc process() {
+        HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
         if (metaInfo.isRespAbsent()) {
@@ -55,11 +56,10 @@ class GenerateServicesProc {
         if (!metaInfo.isRespAbsent()) {
             imports.add(metaInfo.getRespBody().getTypeQualifier());
         }
-        CuCreator serviceCreator = new CuCreator(metaInfo.getSourceRoot(),
-                HandlerTransformerConfig.getInstance().getServicePackage(), imports, () -> {
+        CuCreator serviceCreator = new CuCreator(metaInfo.getSourceRoot(), config.getServicePackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc javadoc = new JavadocComment("").parse()
-                    .addBlockTag("author", HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
+                    .addBlockTag("author", config.getAuthor() + " " + LocalDate.now());
             coid.setJavadocComment(javadoc);
             coid.setPublic(true).setInterface(true).setName(serviceName);
             MethodDeclaration decl = absMethod.setBody(null);
@@ -73,11 +73,11 @@ class GenerateServicesProc {
         imports4Impl.add(serviceCreator.getPrimaryTypeQualifier());
         imports4Impl.add("org.springframework.stereotype.Service");
         imports4Impl.add("lombok.extern.slf4j.Slf4j");
-        CuCreator serviceImplCreator = new CuCreator(metaInfo.getSourceRoot(),
-                HandlerTransformerConfig.getInstance().getServiceImplPackage(), imports4Impl, () -> {
+        CuCreator serviceImplCreator = new CuCreator(metaInfo.getSourceRoot(), config.getServiceImplPackage(),
+                imports4Impl, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc javadoc = new JavadocComment("").parse()
-                    .addBlockTag("author", HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
+                    .addBlockTag("author", config.getAuthor() + " " + LocalDate.now());
             coid.setJavadocComment(javadoc);
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Service"));
             coid.addAnnotation(StaticJavaParser.parseAnnotation("@Slf4j"));

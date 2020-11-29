@@ -12,7 +12,7 @@ import com.github.javaparser.ast.Node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.ast.Locations;
-import com.spldeolin.allison1875.inspector.InspectorConfig;
+import com.spldeolin.allison1875.inspector.processor.Inspector;
 
 /**
  * @author Deolin 2020-02-26
@@ -31,8 +31,7 @@ public class VcsContainer {
         this.projectPath = projectPath;
         try {
             GitLoader loader = new GitLoader().projectPath(projectPath).openAndLoad();
-            addedFiles = new AddedFileCollector()
-                    .collectSinceTime(loader, InspectorConfig.getInstance().getTargetFileSince());
+            addedFiles = new AddedFileCollector().collectSinceTime(loader, Inspector.CONFIG.get().getTargetFileSince());
             loader.close();
         } catch (IOException | GitAPIException e) {
             log.error(e);

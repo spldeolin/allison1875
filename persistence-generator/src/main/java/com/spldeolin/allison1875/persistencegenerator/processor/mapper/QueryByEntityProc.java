@@ -7,9 +7,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * @author Deolin 2020-10-27
@@ -28,7 +28,7 @@ public class QueryByEntityProc extends MapperProc {
     }
 
     public QueryByEntityProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByEntity()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableQueryByEntity()) {
             return this;
         }
 

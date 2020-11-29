@@ -38,14 +38,17 @@ class GenerateMapperQueryMethodProc {
 
     private final Collection<CriterionDto> criterions;
 
+    private final QueryTransformerConfig queryTransformerConfig;
+
     private ClassOrInterfaceDeclaration mapper;
 
     GenerateMapperQueryMethodProc(CompilationUnit cu, QueryMeta queryMeta, String queryMethodName,
-            Collection<CriterionDto> criterions) {
+            Collection<CriterionDto> criterions, QueryTransformerConfig queryTransformerConfig) {
         this.cu = cu;
         this.queryMeta = queryMeta;
         this.queryMethodName = queryMethodName;
         this.criterions = criterions;
+        this.queryTransformerConfig = queryTransformerConfig;
     }
 
     GenerateMapperQueryMethodProc process() {
@@ -72,7 +75,7 @@ class GenerateMapperQueryMethodProc {
             if (field.isPresent()) {
                 propertyType = field.orElseThrow(FieldAbsentException::new).getCommonType().toString();
             } else {
-                propertyType = QueryTransformerConfig.getInstance().getEntityCommonPropertyTypes().get(propertyName);
+                propertyType = queryTransformerConfig.getEntityCommonPropertyTypes().get(propertyName);
             }
             if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
                 propertyType = "Collection<" + propertyType + ">";

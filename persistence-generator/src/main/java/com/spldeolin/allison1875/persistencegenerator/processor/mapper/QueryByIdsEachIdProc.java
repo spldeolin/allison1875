@@ -12,10 +12,10 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据主键列表查询，并把结果集以主键为key，映射到Map中
@@ -38,7 +38,7 @@ public class QueryByIdsEachIdProc extends MapperProc {
     }
 
     public QueryByIdsEachIdProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByIdsEachId()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableQueryByIdsEachId()) {
             return this;
         }
         if (persistence.getIdProperties().size() == 1) {

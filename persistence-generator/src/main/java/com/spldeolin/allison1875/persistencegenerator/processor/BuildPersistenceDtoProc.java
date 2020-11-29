@@ -22,7 +22,7 @@ public class BuildPersistenceDtoProc {
     private Collection<PersistenceDto> persistences;
 
     public BuildPersistenceDtoProc process() {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
+        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         // 查询information_schema.COLUMNS、information_schema.TABLES表
         Collection<InformationSchemaDto> infoSchemas = new QueryInformationSchemaProc().process().getInfoSchemas();
         String deleteFlag = getDeleteFlagName();
@@ -82,8 +82,8 @@ public class BuildPersistenceDtoProc {
     }
 
     private String getDeleteFlagName() {
-        String sql = PersistenceGeneratorConfig.getInstance().getNotDeletedSql();
-        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(PersistenceGeneratorConfig.getInstance().getDeletedSql())) {
+        String sql = PersistenceGenerator.CONFIG.get().getNotDeletedSql();
+        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(PersistenceGenerator.CONFIG.get().getDeletedSql())) {
             return null;
         }
         if (!sql.contains("=")) {
@@ -94,7 +94,7 @@ public class BuildPersistenceDtoProc {
     }
 
     private String endWith() {
-        return PersistenceGeneratorConfig.getInstance().getIsEntityEndWithEntity() ? "Entity" : "";
+        return PersistenceGenerator.CONFIG.get().getIsEntityEndWithEntity() ? "Entity" : "";
     }
 
     private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {

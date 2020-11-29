@@ -61,7 +61,7 @@ public class GenerateQueryDesignProc {
     }
 
     public GenerateQueryDesignProc process() {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
+        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         if (!conf.getEnableGenerateQueryDesign()) {
             return this;
         }
@@ -110,7 +110,7 @@ public class GenerateQueryDesignProc {
             queryMeta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
             queryMeta.setMapperName(mapper.getNameAsString());
             queryMeta.setMapperRelativePath(
-                    PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath() + File.separator + persistence
+                    PersistenceGenerator.CONFIG.get().getMapperXmlDirectoryPath() + File.separator + persistence
                             .getMapperName() + ".xml");
             queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
                     .collect(Collectors.toList()));

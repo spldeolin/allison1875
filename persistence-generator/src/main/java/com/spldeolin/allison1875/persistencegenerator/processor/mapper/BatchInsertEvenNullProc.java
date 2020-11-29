@@ -6,9 +6,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.javadoc.Javadoc;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 插入
@@ -29,7 +29,7 @@ public class BatchInsertEvenNullProc extends MapperProc {
     }
 
     public BatchInsertEvenNullProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableBatchInsertEvenNull()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableBatchInsertEvenNull()) {
             return this;
         }
         methodName = super.calcMethodName(mapper, "batchInsertEvenNull");

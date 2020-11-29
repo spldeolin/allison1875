@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
 
 /**
@@ -22,7 +21,7 @@ public class DetectPardonProc {
     private final Collection<PardonDto> pardons = Lists.newArrayList();
 
     public DetectPardonProc process() {
-        String pardonDirectoryPath = InspectorConfig.getInstance().getPardonDirectoryPath();
+        String pardonDirectoryPath = Inspector.CONFIG.get().getPardonDirectoryPath();
         if (!StringUtils.isEmpty(pardonDirectoryPath)) {
             Iterator<File> fileIterator = FileUtils
                     .iterateFiles(new File(pardonDirectoryPath), new String[]{"json"}, true);

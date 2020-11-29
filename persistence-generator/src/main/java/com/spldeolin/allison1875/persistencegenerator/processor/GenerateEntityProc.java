@@ -63,7 +63,7 @@ public class GenerateEntityProc {
     }
 
     public GenerateEntityProc process() {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
+        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         Path sourceRoot = pathProc.getSourceRoot();
         entityPath = CodeGenerationUtils
                 .fileInPackageAbsolutePath(sourceRoot, conf.getEntityPackage(), persistence.getEntityName() + ".java");
@@ -89,7 +89,7 @@ public class GenerateEntityProc {
 
         // 生成Entity（可能是覆盖）
         List<String> imports = this.getImports(persistence);
-        String superEntityQualifier = PersistenceGeneratorConfig.getInstance().getSuperEntityQualifier();
+        String superEntityQualifier = PersistenceGenerator.CONFIG.get().getSuperEntityQualifier();
         if (StringUtils.isNotEmpty(superEntityQualifier)) {
             imports.add(superEntityQualifier);
             imports.add("lombok.EqualsAndHashCode");
@@ -114,8 +114,7 @@ public class GenerateEntityProc {
                 coid.addExtendedType(superEntityName);
             }
             for (PropertyDto property : persistence.getProperties()) {
-                if (PersistenceGeneratorConfig.getInstance().getAlreadyInSuperEntity()
-                        .contains(property.getColumnName())) {
+                if (PersistenceGenerator.CONFIG.get().getAlreadyInSuperEntity().contains(property.getColumnName())) {
                     continue;
                 }
                 String type = property.getJavaType().getSimpleName();
@@ -142,7 +141,7 @@ public class GenerateEntityProc {
     private void reportDiff(TreeSet<String> originalVariables) {
         TreeSet<String> destinedVariables = Sets.newTreeSet();
         for (PropertyDto property : persistence.getProperties()) {
-            if (PersistenceGeneratorConfig.getInstance().getAlreadyInSuperEntity().contains(property.getColumnName())) {
+            if (PersistenceGenerator.CONFIG.get().getAlreadyInSuperEntity().contains(property.getColumnName())) {
                 continue;
             }
             destinedVariables.add(property.getPropertyName());

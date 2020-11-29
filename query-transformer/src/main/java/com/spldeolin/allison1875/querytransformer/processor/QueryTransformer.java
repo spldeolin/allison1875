@@ -30,14 +30,15 @@ import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 /**
  * @author Deolin 2020-10-06
  */
-public class QueryTransformer implements Allison1875MainProcessor {
+public class QueryTransformer implements Allison1875MainProcessor<QueryTransformerConfig, QueryTransformer> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(QueryTransformer.class);
 
+    private QueryTransformerConfig config;
+
     @Override
-    public void preProcess() {
-        Set<ConstraintViolation<QueryTransformerConfig>> violations = ValidateUtils
-                .validate(QueryTransformerConfig.getInstance());
+    public QueryTransformer config(QueryTransformerConfig config) {
+        Set<ConstraintViolation<QueryTransformerConfig>> violations = ValidateUtils.validate(config);
         if (violations.size() > 0) {
             log.warn("配置项校验未通过，请检查后重新运行");
             for (ConstraintViolation<QueryTransformerConfig> violation : violations) {
@@ -46,6 +47,8 @@ public class QueryTransformer implements Allison1875MainProcessor {
             }
             System.exit(-9);
         }
+        this.config = config;
+        return this;
     }
 
     @Override
@@ -71,7 +74,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
             // create queryMethod in mapper
             GenerateMapperQueryMethodProc createMapperQueryMethodProc = new GenerateMapperQueryMethodProc(cu, queryMeta,
-                    queryMethodName, criterions).process();
+                    queryMethodName, criterions, config).process();
             ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc.getMapper();
 
             // create queryMethod in mapper.xml

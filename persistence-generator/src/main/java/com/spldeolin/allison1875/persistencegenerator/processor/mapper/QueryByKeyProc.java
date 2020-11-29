@@ -10,10 +10,10 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据外键查询，表中每有几个外键，这个Proc就生成几个方法
@@ -39,7 +39,7 @@ public class QueryByKeyProc extends MapperProc {
     }
 
     public QueryByKeyProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableQueryByKey()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableQueryByKey()) {
             return this;
         }
         methodName = calcMethodName(mapper, "queryBy" + StringUtils.upperFirstLetter(key.getPropertyName()));

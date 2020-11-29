@@ -42,7 +42,7 @@ public class FindOrCreateMapperProc {
     }
 
     public FindOrCreateMapperProc process() throws IOException {
-        PersistenceGeneratorConfig conf = PersistenceGeneratorConfig.getInstance();
+        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
 
         // find
         Path mapperPath = CodeGenerationUtils

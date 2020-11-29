@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
-import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 
 /**
@@ -24,7 +23,7 @@ public class ReportLawlessProc {
     private Collection<LawlessDto> lawlesses;
 
     public void process() {
-        String lawlessDirectoryPath = InspectorConfig.getInstance().getLawlessDirectoryPath();
+        String lawlessDirectoryPath = Inspector.CONFIG.get().getLawlessDirectoryPath();
         lawlesses.forEach(log::info);
 
         if (!StringUtils.isEmpty(lawlessDirectoryPath)) {

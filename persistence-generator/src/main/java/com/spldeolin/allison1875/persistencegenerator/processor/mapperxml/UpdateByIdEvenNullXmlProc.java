@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
 
 /**
@@ -33,7 +33,7 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
     }
 
     public UpdateByIdEvenNullXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableUpdateByIdEvenNull()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableUpdateByIdEvenNull()) {
             return this;
         }
         if (persistence.getIdProperties().size() > 0) {
@@ -50,8 +50,8 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGeneratorConfig.getInstance()
-                        .getNotDeletedSql());
+                xmlLines.add(
+                        BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGenerator.CONFIG.get().getNotDeletedSql());
             }
             for (PropertyDto idProperty : persistence.getIdProperties()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty

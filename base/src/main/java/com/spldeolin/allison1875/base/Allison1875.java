@@ -10,10 +10,9 @@ import com.spldeolin.allison1875.base.ast.AstForest;
  */
 public class Allison1875 {
 
-    public static void allison1875(Class<?> primaryClass, Allison1875MainProcessor... processors) {
+    public static void allison1875(Class<?> primaryClass, Allison1875MainProcessor<?, ?>... processors) {
         AstForest astForest = new AstForest(primaryClass);
-        for (Allison1875MainProcessor processor : processors) {
-            processor.preProcess();
+        for (Allison1875MainProcessor<?, ?> processor : processors) {
             processor.process(astForest);
         }
     }

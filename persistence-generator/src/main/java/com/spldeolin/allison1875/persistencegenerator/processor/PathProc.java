@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.nio.file.Path;
 import org.apache.logging.log4j.Logger;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 
 /**
  * @author Deolin 2020-08-21
@@ -29,7 +28,7 @@ public class PathProc {
         log.info("hostPath={}", hostPath);
         sourceRoot = astForest.getHostSourceRoot();
         log.info("sourceRoot={}", sourceRoot);
-        mapperXmlPath = hostPath.resolve(PersistenceGeneratorConfig.getInstance().getMapperXmlDirectoryPath());
+        mapperXmlPath = hostPath.resolve(PersistenceGenerator.CONFIG.get().getMapperXmlDirectoryPath());
         log.info("mapperXmlPath={}", mapperXmlPath);
         return this;
     }

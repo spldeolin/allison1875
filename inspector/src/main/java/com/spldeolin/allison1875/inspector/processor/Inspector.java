@@ -17,15 +17,17 @@ import com.spldeolin.allison1875.inspector.statute.Statute;
 /**
  * @author Deolin 2020-08-31
  */
-public class Inspector implements Allison1875MainProcessor {
+public class Inspector implements Allison1875MainProcessor<InspectorConfig, Inspector> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(Inspector.class);
 
     private Collection<Statute> statutes = Lists.newArrayList();
 
+    public static final ThreadLocal<InspectorConfig> CONFIG = ThreadLocal.withInitial(InspectorConfig::new);
+
     @Override
-    public void preProcess() {
-        Set<ConstraintViolation<InspectorConfig>> violations = ValidateUtils.validate(InspectorConfig.getInstance());
+    public Inspector config(InspectorConfig config) {
+        Set<ConstraintViolation<InspectorConfig>> violations = ValidateUtils.validate(config);
         if (violations.size() > 0) {
             log.warn("配置项校验未通过，请检查后重新运行");
             for (ConstraintViolation<InspectorConfig> violation : violations) {
@@ -34,6 +36,8 @@ public class Inspector implements Allison1875MainProcessor {
             }
             System.exit(-9);
         }
+        CONFIG.set(config);
+        return this;
     }
 
     @Override

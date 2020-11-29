@@ -47,7 +47,8 @@ import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesi
 /**
  * @author Deolin 2020-07-11
  */
-public class PersistenceGenerator implements Allison1875MainProcessor {
+public class PersistenceGenerator implements
+        Allison1875MainProcessor<PersistenceGeneratorConfig, PersistenceGenerator> {
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGenerator.class);
 
@@ -56,10 +57,12 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback =
             new DefaultGenerateQueryDesignFieldCallback();
 
+    public static final ThreadLocal<PersistenceGeneratorConfig> CONFIG = ThreadLocal
+            .withInitial(PersistenceGeneratorConfig::new);
+
     @Override
-    public void preProcess() {
-        Set<ConstraintViolation<PersistenceGeneratorConfig>> violations = ValidateUtils
-                .validate(PersistenceGeneratorConfig.getInstance());
+    public PersistenceGenerator config(PersistenceGeneratorConfig config) {
+        Set<ConstraintViolation<PersistenceGeneratorConfig>> violations = ValidateUtils.validate(config);
         if (violations.size() > 0) {
             log.warn("配置项校验未通过，请检查后重新运行");
             for (ConstraintViolation<PersistenceGeneratorConfig> violation : violations) {
@@ -68,6 +71,8 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
             System.exit(-9);
         }
+        CONFIG.set(config);
+        return this;
     }
 
     @Override
@@ -150,7 +155,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     }
 
     private static String getEntityNameInXml(CuCreator entityCuCreator) {
-        if (PersistenceGeneratorConfig.getInstance().getIsEntityUsingAlias()) {
+        if (PersistenceGenerator.CONFIG.get().getIsEntityUsingAlias()) {
             return entityCuCreator.getPrimaryTypeName();
         } else {
             return entityCuCreator.getPrimaryTypeQualifier();

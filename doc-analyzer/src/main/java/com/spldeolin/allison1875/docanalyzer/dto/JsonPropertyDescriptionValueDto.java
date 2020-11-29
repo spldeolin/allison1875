@@ -10,7 +10,7 @@ import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.processor.DocAnalyzer;
 
 /**
  * @author Deolin 2020-04-27
@@ -107,7 +107,7 @@ public class JsonPropertyDescriptionValueDto {
 
                 // TODO 抽取到strategy
                 StringBuilder sb = new StringBuilder("枚举名\n");
-                String appName = DocAnalyzerConfig.getInstance().getGlobalUrlPrefix().replace("/", "");
+                String appName = DocAnalyzer.CONFIG.get().getGlobalUrlPrefix().replace("/", "");
                 sb.append("\t").append(appName).append(":").append(extraInfo);
                 extra = sb.toString();
             }

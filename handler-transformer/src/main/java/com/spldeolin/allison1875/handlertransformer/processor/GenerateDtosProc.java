@@ -13,7 +13,6 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
 
 /**
@@ -42,8 +41,8 @@ class GenerateDtosProc {
 
             CuCreator cuCreator = new CuCreator(sourceRoot, dtoMetaInfo.getPackageName(), imports, () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                Javadoc javadoc = new JavadocComment("").parse().addBlockTag("author",
-                        HandlerTransformerConfig.getInstance().getAuthor() + " " + LocalDate.now());
+                Javadoc javadoc = new JavadocComment("").parse()
+                        .addBlockTag("author", HandlerTransformer.CONFIG.get().getAuthor() + " " + LocalDate.now());
                 coid.setJavadocComment(javadoc);
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Data"));
                 coid.addAnnotation(StaticJavaParser.parseAnnotation("@Accessors(chain = true)"));

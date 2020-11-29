@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
 
 /**
@@ -29,7 +29,7 @@ public class BatchInsertEvenNullXmlProc extends XmlProc {
     }
 
     public BatchInsertEvenNullXmlProc process() {
-        if (PersistenceGeneratorConfig.getInstance().getDisableBatchInsertEvenNull()) {
+        if (PersistenceGenerator.CONFIG.get().getDisableBatchInsertEvenNull()) {
             return this;
         }
         List<String> xmlLines = Lists.newArrayList();
