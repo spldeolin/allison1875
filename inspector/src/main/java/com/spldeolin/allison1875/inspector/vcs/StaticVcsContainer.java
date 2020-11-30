@@ -5,18 +5,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import com.github.javaparser.ast.Node;
-import com.spldeolin.allison1875.inspector.InspectorConfig;
+import com.spldeolin.allison1875.inspector.processor.Inspector;
 
 /**
  * @author Deolin 2020-02-26
  */
 public class StaticVcsContainer {
 
-    private static VcsContainer fromConfigPath;
-
-    public StaticVcsContainer(InspectorConfig inspectorConfig) {
-        fromConfigPath = new VcsContainer(Paths.get(inspectorConfig.getProjectLocalGitPath()));
-    }
+    private static final VcsContainer fromConfigPath = new VcsContainer(
+            Paths.get(Inspector.CONFIG.get().getProjectLocalGitPath()));
 
     public static Path getProjectPath() {
         return fromConfigPath.getProjectPath();

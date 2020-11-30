@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.handlertransformer;
 
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
-import com.google.common.collect.Lists;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -42,8 +42,8 @@ public class HandlerTransformerConfig {
     /**
      * handler 方法上的需要生成的注解
      */
-    @NotEmpty
-    protected Collection<@NotEmpty String> handlerAnnotations = Lists.newArrayList();
+    @NotNull
+    protected Collection<@NotEmpty String> handlerAnnotations;
 
     /**
      * handler 方法签名的返回类型（使用%s占位符代替业务数据部分的泛型）
@@ -73,7 +73,7 @@ public class HandlerTransformerConfig {
      * controller需要确保存在的import
      */
     @NotEmpty
-    protected Collection<@NotEmpty String> controllerImports = Lists.newArrayList();
+    protected Collection<@NotEmpty String> controllerImports;
 
     /**
      * 为生成的代码指定作者

@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
  */
 @Accessors(chain = true)
 @Data
-public final class InspectorConfig {
+public class InspectorConfig {
 
     /**
      * 工程所在的Git本地仓库的路径

@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.querytransformer;
 import java.util.Map;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -24,6 +23,6 @@ public class QueryTransformerConfig {
      * Entity通用属性的类型
      */
     @NotNull
-    protected Map<String, String> entityCommonPropertyTypes = Maps.newHashMap();
+    protected Map<String, String> entityCommonPropertyTypes;
 
 }

@@ -4,7 +4,6 @@ package com.spldeolin.allison1875.docanalyzer;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -15,17 +14,18 @@ import lombok.experimental.Accessors;
  */
 @Accessors(chain = true)
 @Data
-public final class DocAnalyzerConfig {
+public class DocAnalyzerConfig {
 
     /**
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
      */
     @NotNull
-    protected Collection<@NotEmpty String> dependencyProjectPaths = Lists.newArrayList();
+    protected Collection<@NotEmpty String> dependencyProjectPaths;
 
     /**
      * 全局URL前缀
      */
+    @NotNull
     protected String globalUrlPrefix;
 
     /**

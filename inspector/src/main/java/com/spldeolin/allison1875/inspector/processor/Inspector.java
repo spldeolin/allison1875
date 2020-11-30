@@ -21,7 +21,7 @@ public class Inspector implements Allison1875MainProcessor<InspectorConfig, Insp
 
     private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(Inspector.class);
 
-    private Collection<Statute> statutes = Lists.newArrayList();
+    protected Collection<Statute> statutes = Lists.newArrayList();
 
     public static final ThreadLocal<InspectorConfig> CONFIG = ThreadLocal.withInitial(InspectorConfig::new);
 

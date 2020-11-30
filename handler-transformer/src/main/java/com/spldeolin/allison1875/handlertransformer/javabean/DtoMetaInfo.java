@@ -166,38 +166,37 @@ public class DtoMetaInfo {
         DtoMetaInfoBuilder() {
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder packageName(String packageName) {
+        public DtoMetaInfoBuilder packageName(String packageName) {
             this.packageName = packageName;
             return this;
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder typeQualifier(String typeQualifier) {
+        public DtoMetaInfoBuilder typeQualifier(String typeQualifier) {
             this.typeQualifier = typeQualifier;
             return this;
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder typeName(String typeName) {
+        public DtoMetaInfoBuilder typeName(String typeName) {
             this.typeName = typeName;
             return this;
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder dtoName(String dtoName) {
+        public DtoMetaInfoBuilder dtoName(String dtoName) {
             this.dtoName = dtoName;
             return this;
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder asVariableDeclarator(Pair<String, String> asVariableDeclarator) {
+        public DtoMetaInfoBuilder asVariableDeclarator(Pair<String, String> asVariableDeclarator) {
             this.asVariableDeclarator = asVariableDeclarator;
             return this;
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder imports(ImmutableList<ImportDeclaration> imports) {
+        public DtoMetaInfoBuilder imports(ImmutableList<ImportDeclaration> imports) {
             this.imports = imports;
             return this;
         }
 
-        public DtoMetaInfo.DtoMetaInfoBuilder variableDeclarators(
-                ImmutableList<Pair<String, String>> variableDeclarators) {
+        public DtoMetaInfoBuilder variableDeclarators(ImmutableList<Pair<String, String>> variableDeclarators) {
             this.variableDeclarators = variableDeclarators;
             return this;
         }

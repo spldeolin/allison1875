@@ -204,42 +204,42 @@ public class MetaInfo {
         MetaInfoBuilder() {
         }
 
-        public MetaInfo.MetaInfoBuilder location(String location) {
+        public MetaInfoBuilder location(String location) {
             this.location = location;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder sourceRoot(Path sourceRoot) {
+        public MetaInfoBuilder sourceRoot(Path sourceRoot) {
             this.sourceRoot = sourceRoot;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder controller(ClassOrInterfaceDeclaration controller) {
+        public MetaInfoBuilder controller(ClassOrInterfaceDeclaration controller) {
             this.controller = controller;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder handlerName(String handlerName) {
+        public MetaInfoBuilder handlerName(String handlerName) {
             this.handlerName = handlerName;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder handlerDescription(String handlerDescription) {
+        public MetaInfoBuilder handlerDescription(String handlerDescription) {
             this.handlerDescription = handlerDescription;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder reqBody(DtoMetaInfo reqBody) {
+        public MetaInfoBuilder reqBody(DtoMetaInfo reqBody) {
             this.reqBody = reqBody;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder respBody(DtoMetaInfo respBody) {
+        public MetaInfoBuilder respBody(DtoMetaInfo respBody) {
             this.respBody = respBody;
             return this;
         }
 
-        public MetaInfo.MetaInfoBuilder dtos(ImmutableList<DtoMetaInfo> dtos) {
+        public MetaInfoBuilder dtos(ImmutableList<DtoMetaInfo> dtos) {
             this.dtos = dtos;
             return this;
         }

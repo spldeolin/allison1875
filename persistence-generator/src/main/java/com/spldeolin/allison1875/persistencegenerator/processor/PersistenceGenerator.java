@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.util.Collection;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
@@ -43,18 +42,18 @@ import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateEn
 import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateQueryDesignFieldCallback;
 import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateEntityFieldCallback;
 import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesignFieldCallback;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-11
  */
+@Log4j2
 public class PersistenceGenerator implements
         Allison1875MainProcessor<PersistenceGeneratorConfig, PersistenceGenerator> {
 
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(PersistenceGenerator.class);
+    protected GenerateEntityFieldCallback generateEntityFieldCallback = new DefaultGenerateEntityFieldCallback();
 
-    private GenerateEntityFieldCallback generateEntityFieldCallback = new DefaultGenerateEntityFieldCallback();
-
-    private GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback =
+    protected GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback =
             new DefaultGenerateQueryDesignFieldCallback();
 
     public static final ThreadLocal<PersistenceGeneratorConfig> CONFIG = ThreadLocal

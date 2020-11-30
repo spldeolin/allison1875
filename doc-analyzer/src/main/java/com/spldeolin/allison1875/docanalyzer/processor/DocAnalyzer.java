@@ -46,16 +46,16 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     private final static String docCat = "doc-cat";
 
-    private ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
+    protected ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
             new DefaultObtainConcernedResponseBodyStrategy();
 
-    private AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
+    protected AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
             new DefaultAnalyzeCustomValidationStrategy();
 
-    private SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
+    protected SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
             new DefaultSpecificFieldDescriptionsStrategy();
 
-    private AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
+    protected AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
