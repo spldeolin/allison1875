@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -34,13 +33,13 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryMeta;
 import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesignFieldCallback;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-10-06
  */
+@Log4j2
 public class GenerateQueryDesignProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(GenerateEntityProc.class);
 
     private final PersistenceDto persistence;
 

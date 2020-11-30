@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Logger;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -28,15 +27,15 @@ import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.ProjectGetRespDto;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 将endpoints同步到YApi
  *
  * @author Deolin 2020-07-26
  */
+@Log4j2
 class YApiSyncProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(YApiSyncProc.class);
 
     private static final String ALLISON_1875_TAG = "Allison 1875";
 

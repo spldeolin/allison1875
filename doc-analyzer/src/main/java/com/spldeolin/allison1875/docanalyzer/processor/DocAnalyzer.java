@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
-import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -32,15 +31,15 @@ import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResp
 import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * doc-analyzer的主流程
  *
  * @author Deolin 2020-06-10
  */
+@Log4j2
 public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(DocAnalyzer.class);
 
     private final static String docIgnore = "doc-ignore";
 

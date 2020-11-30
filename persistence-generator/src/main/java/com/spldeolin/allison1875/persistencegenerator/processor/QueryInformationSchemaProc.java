@@ -12,20 +12,19 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.Logger;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-12
  */
+@Log4j2
 public class QueryInformationSchemaProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(QueryInformationSchemaProc.class);
 
     private Collection<InformationSchemaDto> infoSchemas;
 

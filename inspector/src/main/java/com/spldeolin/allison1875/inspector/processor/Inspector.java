@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.inspector.processor;
 import java.util.Collection;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
-import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -13,13 +12,13 @@ import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.Statute;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-31
  */
+@Log4j2
 public class Inspector implements Allison1875MainProcessor<InspectorConfig, Inspector> {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(Inspector.class);
 
     protected Collection<Statute> statutes = Lists.newArrayList();
 

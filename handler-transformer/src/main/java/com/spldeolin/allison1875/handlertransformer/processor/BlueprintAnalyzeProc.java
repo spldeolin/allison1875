@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -30,13 +29,13 @@ import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo.DtoMetaInfoBuilder;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import com.spldeolin.allison1875.handlertransformer.util.BlockStmts;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-27
  */
+@Log4j2
 class BlueprintAnalyzeProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BlueprintAnalyzeProc.class);
 
     private final ClassOrInterfaceDeclaration controller;
 

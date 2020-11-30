@@ -5,15 +5,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import com.spldeolin.allison1875.base.util.exception.FileBackupException;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-14
  */
+@Log4j2
 public class FileBackupUtils {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(FileBackupUtils.class);
 
     public static void backup(File src) throws FileBackupException {
         String srcPath = src.getPath();

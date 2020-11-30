@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.gadget;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Bak文件清理器
@@ -12,9 +12,8 @@ import com.spldeolin.allison1875.base.ast.AstForest;
  *
  * @author Deolin 2020-10-22
  */
+@Log4j2
 public class BakFileCleaner implements Allison1875MainProcessor<Void, BakFileCleaner> {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BakFileCleaner.class);
 
     @Override
     public BakFileCleaner config(Void config) {

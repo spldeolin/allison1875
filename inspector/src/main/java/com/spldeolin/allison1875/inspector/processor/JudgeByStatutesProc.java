@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.inspector.processor;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -11,13 +10,13 @@ import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import com.spldeolin.allison1875.inspector.vcs.StaticVcsContainer;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-02-22
  */
+@Log4j2
 public class JudgeByStatutesProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(JudgeByStatutesProc.class);
 
     private Collection<PardonDto> pardons;
 

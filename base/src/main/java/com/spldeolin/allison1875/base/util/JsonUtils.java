@@ -2,13 +2,13 @@ package com.spldeolin.allison1875.base.util;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.exception.JsonException;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * JSON工具类
@@ -19,9 +19,8 @@ import com.spldeolin.allison1875.base.util.exception.JsonException;
  *
  * @author Deolin 2018-04-02
  */
+@Log4j2
 public class JsonUtils {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(JsonUtils.class);
 
     private static final ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
 

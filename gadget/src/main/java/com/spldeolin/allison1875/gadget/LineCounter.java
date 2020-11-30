@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -27,15 +26,15 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 源码行数计数器
  *
  * @author Deolin 2020-10-28
  */
+@Log4j2
 public class LineCounter implements Allison1875MainProcessor<LineCounterConfig, LineCounter> {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(LineCounter.class);
 
     private LineCounterConfig lineCounterConfig;
 

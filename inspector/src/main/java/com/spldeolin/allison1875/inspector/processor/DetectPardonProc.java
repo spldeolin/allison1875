@@ -5,18 +5,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-02-24
  */
+@Log4j2
 public class DetectPardonProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(DetectPardonProc.class);
 
     private final Collection<PardonDto> pardons = Lists.newArrayList();
 

@@ -1,18 +1,17 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.nio.file.Path;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.ImmutableList;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-06-26
  */
+@Log4j2
 public class MetaInfo {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(MetaInfo.class);
 
     private final String location;
 

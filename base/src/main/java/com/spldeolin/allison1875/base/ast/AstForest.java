@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
@@ -13,15 +12,15 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.BaseConfig;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 可遍历的抽象语法树森林
  *
  * @author Deolin 2020-04-24
  */
+@Log4j2
 public class AstForest implements Iterable<CompilationUnit> {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AstForest.class);
 
     private final Class<?> anyClassFromHost;
 

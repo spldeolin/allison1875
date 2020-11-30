@@ -6,20 +6,19 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import com.github.javaparser.ast.Node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.inspector.processor.Inspector;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-02-26
  */
+@Log4j2
 public class VcsContainer {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(VcsContainer.class);
 
     private final Path projectPath;
 

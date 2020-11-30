@@ -7,18 +7,17 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-02-22
  */
+@Log4j2
 public class ReportLawlessProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(ReportLawlessProc.class);
 
     private Collection<LawlessDto> lawlesses;
 

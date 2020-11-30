@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -11,15 +10,15 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 内聚了 遍历AstForest中每一个controller的功能
  *
  * @author Deolin 2020-06-27
  */
+@Log4j2
 class BlueprintCollectProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(BlueprintCollectProc.class);
 
     private final CompilationUnit cu;
 

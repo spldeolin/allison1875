@@ -1,18 +1,17 @@
 package com.spldeolin.allison1875.docanalyzer.util;
 
-import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.spldeolin.allison1875.base.exception.DotAbsentInStringException;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-03-01
  */
+@Log4j2
 public class JsonSchemaGenerateUtils {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(JsonSchemaGenerateUtils.class);
 
     private JsonSchemaGenerateUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");

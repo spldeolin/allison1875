@@ -3,18 +3,17 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 内聚了 遍历Class controllerClass下handler的功能
  *
  * @author Deolin 2020-06-10
  */
+@Log4j2
 class HandlerIterateProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(HandlerIterateProc.class);
 
     private final Class<?> controllerClass;
 

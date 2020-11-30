@@ -1,17 +1,16 @@
 package com.spldeolin.allison1875.docanalyzer.util;
 
 import java.util.Map;
-import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-08-02
  */
+@Log4j2
 public class JsonSchemaTraverseUtils {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(JsonSchemaTraverseUtils.class);
 
     private JsonSchemaTraverseUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");

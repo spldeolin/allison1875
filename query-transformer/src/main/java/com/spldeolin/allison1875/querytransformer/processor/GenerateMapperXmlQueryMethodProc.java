@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -19,13 +18,13 @@ import com.spldeolin.allison1875.querytransformer.constant.Constant;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-10-11
  */
+@Log4j2
 class GenerateMapperXmlQueryMethodProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeCriterionProc.class);
 
     private final AstForest astForest;
 

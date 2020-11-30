@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.apache.logging.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.Problem;
@@ -17,15 +16,15 @@ import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.spldeolin.allison1875.base.classloader.ModuleJavaSymbolSolverFactory;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * CompilationUnit对象的收集器
  *
  * @author Deolin 2020-02-03
  */
+@Log4j2
 class CompilationUnitCollector {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(CompilationUnitCollector.class);
 
     private final Path commonPathPart;
 

@@ -4,7 +4,6 @@ import java.util.Collection;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,13 +15,13 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-25
  */
+@Log4j2
 public class TreeNode {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(TreeNode.class);
 
     @NotNull
     private Long id;

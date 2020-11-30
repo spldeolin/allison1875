@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -20,13 +19,13 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-18
  */
+@Log4j2
 public class FindOrCreateMapperProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(FindOrCreateMapperProc.class);
 
     private final PersistenceDto persistence;
 

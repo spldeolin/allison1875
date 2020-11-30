@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier.Keyword;
@@ -35,13 +34,13 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateEntityFieldCallback;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-07-18
  */
+@Log4j2
 public class GenerateEntityProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(GenerateEntityProc.class);
 
     private final GenerateEntityFieldCallback generateFieldCallbackStrategy;
 

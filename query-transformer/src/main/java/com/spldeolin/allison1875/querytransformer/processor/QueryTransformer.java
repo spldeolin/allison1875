@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -26,13 +25,13 @@ import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-10-06
  */
+@Log4j2
 public class QueryTransformer implements Allison1875MainProcessor<QueryTransformerConfig, QueryTransformer> {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(QueryTransformer.class);
 
     private QueryTransformerConfig config;
 

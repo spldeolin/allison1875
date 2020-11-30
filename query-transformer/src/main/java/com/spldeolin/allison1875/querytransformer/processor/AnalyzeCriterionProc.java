@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import org.apache.logging.log4j.Logger;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
@@ -17,13 +16,13 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-10-10
  */
+@Log4j2
 class AnalyzeCriterionProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeCriterionProc.class);
 
     private final MethodCallExpr mce;
 

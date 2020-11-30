@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
-import org.apache.logging.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,13 +21,13 @@ import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-10-10
  */
+@Log4j2
 class GenerateMapperQueryMethodProc {
-
-    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(AnalyzeCriterionProc.class);
 
     private final CompilationUnit cu;
 
