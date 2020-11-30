@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
+import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
 import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeEnumConstantStrategy;
@@ -40,10 +41,6 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
-
-    private final static String docIgnore = "doc-ignore";
-
-    private final static String docCat = "doc-cat";
 
     protected ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
             new DefaultObtainConcernedResponseBodyStrategy();
@@ -185,8 +182,9 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     private String findCat(NodeWithJavadoc<?> node) {
         for (String line : JavadocDescriptions.getAsLines(node)) {
-            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docCat)) {
-                String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line, docCat).trim();
+            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_CAT)) {
+                String catContent = org.apache.commons.lang3.StringUtils
+                        .removeStartIgnoreCase(line, ControllerMarkerConstant.DOC_CAT).trim();
                 if (catContent.length() > 0) {
                     return catContent;
                 }
@@ -197,7 +195,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     private boolean findIgnoreFlag(NodeWithJavadoc<?> node) {
         for (String line : JavadocDescriptions.getAsLines(node)) {
-            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, docIgnore)) {
+            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_IGNORE)) {
                 return true;
             }
         }

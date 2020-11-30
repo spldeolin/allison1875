@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
@@ -37,11 +38,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class YApiSyncProc {
 
-    private static final String ALLISON_1875_TAG = "Allison 1875";
-
-    private static final String DELETE_TAG = "已删除";
-
-    private static final String url = DocAnalyzer.CONFIG.get().getYapiUrl();
+    private static final String baseUrl = DocAnalyzer.CONFIG.get().getYapiUrl();
 
     private static final String token = DocAnalyzer.CONFIG.get().getYapiToken();
 
@@ -50,7 +47,7 @@ class YApiSyncProc {
     private final Collection<EndpointDto> endpoints;
 
     private static Long getProjectIdFromYApi() {
-        String json = HttpUtils.get(url + "/api/project/get?token=" + token);
+        String json = HttpUtils.get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + token);
         CommonRespDto<ProjectGetRespDto> resp = JsonUtils
                 .toParameterizedObject(json, new TypeReference<CommonRespDto<ProjectGetRespDto>>() {
                 });
@@ -64,7 +61,7 @@ class YApiSyncProc {
 
     void process() {
         RedissonClient redisson = RedissonUtils.getSingleServer();
-        RLock lock = redisson.getLock("allison1875_docanalyzer_" + url + "_" + projectId);
+        RLock lock = redisson.getLock("allison1875_docanalyzer_" + baseUrl + "_" + projectId);
         try {
             // 尝试加锁，最多等待100秒，上锁以后30秒自动解锁
             if (lock.tryLock(100, 20, TimeUnit.SECONDS)) {
@@ -127,7 +124,8 @@ class YApiSyncProc {
     }
 
     Map<String, Long> getYapiCatIdsEachName() {
-        String json = HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId);
+        String json = HttpUtils
+                .get(baseUrl + YApiConstant.LIST_CATS_URL + "?token=" + token + "&project_id" + projectId);
         CommonRespDto<List<InterfaceListMenuRespDto>> resp = JsonUtils
                 .toParameterizedObject(json, new TypeReference<CommonRespDto<List<InterfaceListMenuRespDto>>>() {
                 });
@@ -147,20 +145,20 @@ class YApiSyncProc {
             form.put("name", catName);
             form.put("project_id", projectId.toString());
             form.put("token", token);
-            HttpUtils.postForm(url + "/api/interface/add_cat", form);
+            HttpUtils.postForm(baseUrl + YApiConstant.CREATE_CAT_URL, form);
         }
 
     }
 
     private Map<String, JsonNode> listAutoInterfaces() {
         JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(
-                HttpUtils.get(url + "/api/interface/list_menu?token=" + token + "&project_id" + projectId));
+                HttpUtils.get(baseUrl + YApiConstant.LIST_CATS_URL + "?token=" + token + "&project_id" + projectId));
 
         Map<String, JsonNode> result = Maps.newHashMap();
         for (JsonNode jsonNode : interfaceListMenuDto) {
             for (JsonNode interf : jsonNode.get("list")) {
                 List<String> tags = JsonUtils.toListOfObject(interf.get("tag").toString(), String.class);
-                if (tags.contains(ALLISON_1875_TAG)) {
+                if (tags.contains(YApiConstant.ALLISON_1875_TAG)) {
                     result.put(interf.get("path").asText(), interf);
                 }
             }
@@ -176,13 +174,13 @@ class YApiSyncProc {
         Long id = jsonNode.get("_id").asLong();
 
         JsonNode detail = ensureSusscessAndToGetData(
-                HttpUtils.get(url + "/api/interface/get?id=" + id + "&token=" + token));
+                HttpUtils.get(baseUrl + YApiConstant.GET_ENDPOINT_URL + "?id=" + id + "&token=" + token));
 
         Map<String, Object> form = Maps.newHashMap();
         form.put("id", id);
         form.put("catid", recycleBinCatId);
         List<String> tags = JsonUtils.toListOfObject(jsonNode.get("tag").toString(), String.class);
-        tags.add(DELETE_TAG);
+        tags.add(YApiConstant.DELETE_TAG);
         form.put("tag", tags);
 
         String desc = "";
@@ -197,7 +195,7 @@ class YApiSyncProc {
 
         form.put("desc", deleteMessage + desc);
         form.put("token", token);
-        String resp = HttpUtils.postJson(url + "/api/interface/up", JsonUtils.toJson(form));
+        String resp = HttpUtils.postJson(baseUrl + YApiConstant.UPDATE_ENDPOINT_URL, JsonUtils.toJson(form));
         log.info(resp);
     }
 
@@ -215,12 +213,13 @@ class YApiSyncProc {
         form.put("res_body", responseBodyJsonSchema);
         form.put("switch_notice", true);
         form.put("message", "1");
-        form.put("tag", Lists.newArrayList(ALLISON_1875_TAG));
+        form.put("tag", Lists.newArrayList(YApiConstant.ALLISON_1875_TAG));
         form.put("desc", MarkdownUtils.convertToHtml(description));
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", token);
-        String resp = HttpUtils.postJson(YApiSyncProc.url + "/api/interface/save", JsonUtils.toJson(form));
+        String resp = HttpUtils
+                .postJson(YApiSyncProc.baseUrl + YApiConstant.CREATE_OR_UPDATE_ENDPOINT_URL, JsonUtils.toJson(form));
         log.info(resp);
     }
 
