@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.inspector.processor;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -9,7 +11,6 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.inspector.dto.LawlessDto;
 import com.spldeolin.allison1875.inspector.dto.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.Statute;
-import com.spldeolin.allison1875.inspector.vcs.StaticVcsContainer;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -25,11 +26,13 @@ public class JudgeByStatutesProc {
     private final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 
     public JudgeByStatutesProc process() {
+        VcsProc vcsProc = new VcsProc(Paths.get(Inspector.CONFIG.get().getProjectLocalGitPath())).process();
+
         final Collection<LawlessDto> lawlesses = Lists.newArrayList();
         AstForestContext.getCurrent().forEach(cu -> {
-            if (StaticVcsContainer.contain(cu)) {
+            Path cuPath = Locations.getAbsolutePath(cu);
+            if (vcsProc.getIsAllTarget() || vcsProc.getAddedFiles().contains(cuPath)) {
                 long start = System.currentTimeMillis();
-
                 if (statutes != null) {
                     for (Statute statute : statutes) {
                         Collection<LawlessDto> dtos = statute.inspect(cu);

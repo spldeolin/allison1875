@@ -21,7 +21,7 @@ public class InspectorConfig {
     protected String projectLocalGitPath;
 
     /**
-     * 此时间之后新增的文件为靶文件，不填则代表全项目的文件均为靶文件
+     * 此时间之后新增的文件为靶文件
      */
     @NotNull
     protected LocalDateTime targetFileSince;
