@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.strategy;
+package com.spldeolin.allison1875.docanalyzer.handle;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
@@ -8,7 +8,7 @@ import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 /**
  * @author Deolin 2020-06-18
  */
-public class DefaultAnalyzeCustomValidationStrategy implements AnalyzeCustomValidationStrategy {
+public class DefaultAnalyzeCustomValidationHandle implements AnalyzeCustomValidationHandle {
 
     @Override
     public Collection<ValidatorDto> analyzeCustomValidation(AnnotatedElement annotatedElement) {

@@ -10,7 +10,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
+import com.spldeolin.allison1875.docanalyzer.handle.ObtainConcernedResponseBodyHandle;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -24,11 +24,11 @@ class ResponseBodyProc {
 
     private final JsonSchemaGenerator jsg;
 
-    private final ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy;
+    private final ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle;
 
-    ResponseBodyProc(JsonSchemaGenerator jsg, ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy) {
+    ResponseBodyProc(JsonSchemaGenerator jsg, ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle) {
         this.jsg = jsg;
-        this.obtainConcernedResponseBodyStrategy = obtainConcernedResponseBodyStrategy;
+        this.obtainConcernedResponseBodyHandle = obtainConcernedResponseBodyHandle;
     }
 
     JsonSchema analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
@@ -62,7 +62,7 @@ class ResponseBodyProc {
                     .isAnnotationAbsent(handler, ResponseBody.class)) {
                 return null;
             }
-            return obtainConcernedResponseBodyStrategy.findConcernedResponseBodyType(handler);
+            return obtainConcernedResponseBodyHandle.findConcernedResponseBodyType(handler);
         } catch (Exception e) {
             log.error(e);
             return null;

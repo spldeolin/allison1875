@@ -24,14 +24,14 @@ import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeEnumConstantStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeCustomValidationStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.DefaultAnalyzeEnumConstantStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.DefaultObtainConcernedResponseBodyStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.DefaultSpecificFieldDescriptionsStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.ObtainConcernedResponseBodyStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.SpecificFieldDescriptionsStrategy;
+import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.DefaultAnalyzeCustomValidationHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.DefaultAnalyzeEnumConstantHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.DefaultObtainConcernedResponseBodyHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.DefaultSpecificFieldDescriptionsHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.ObtainConcernedResponseBodyHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -42,16 +42,16 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
 
-    protected ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy =
-            new DefaultObtainConcernedResponseBodyStrategy();
+    protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle =
+            new DefaultObtainConcernedResponseBodyHandle();
 
-    protected AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy =
-            new DefaultAnalyzeCustomValidationStrategy();
+    protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle =
+            new DefaultAnalyzeCustomValidationHandle();
 
-    protected SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy =
-            new DefaultSpecificFieldDescriptionsStrategy();
+    protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle =
+            new DefaultSpecificFieldDescriptionsHandle();
 
-    protected AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy = new DefaultAnalyzeEnumConstantStrategy();
+    protected AnalyzeEnumConstantHandle analyzeEnumConstantHandle = new DefaultAnalyzeEnumConstantHandle();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
@@ -77,8 +77,8 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationStrategy,
-                specificFieldDescriptionsStrategy.provideSpecificFieldDescriptions(), analyzeEnumConstantStrategy);
+        JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationHandle,
+                specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // 收集endpoint
@@ -154,7 +154,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
                 // 分析Response Body
                 ResponseBodyProc responseBodyAnalyzeProcessor = new ResponseBodyProc(jsg,
-                        obtainConcernedResponseBodyStrategy);
+                        obtainConcernedResponseBodyHandle);
                 builder.responseBodyJsonSchema(responseBodyAnalyzeProcessor.analyze(controller, handler));
 
                 // 构建EndpointDto
@@ -217,26 +217,25 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         }
     }
 
-    public DocAnalyzer obtainConcernedResponseBodyStrategy(
-            ObtainConcernedResponseBodyStrategy obtainConcernedResponseBodyStrategy) {
-        this.obtainConcernedResponseBodyStrategy = obtainConcernedResponseBodyStrategy;
+    public DocAnalyzer obtainConcernedResponseBodyHandle(
+            ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle) {
+        this.obtainConcernedResponseBodyHandle = obtainConcernedResponseBodyHandle;
         return this;
     }
 
-    public DocAnalyzer analyzeCustomValidationStrategy(
-            AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy) {
-        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
+    public DocAnalyzer analyzeCustomValidationHandle(AnalyzeCustomValidationHandle analyzeCustomValidationHandle) {
+        this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
         return this;
     }
 
-    public DocAnalyzer specificFieldDescriptionsStrategy(
-            SpecificFieldDescriptionsStrategy specificFieldDescriptionsStrategy) {
-        this.specificFieldDescriptionsStrategy = specificFieldDescriptionsStrategy;
+    public DocAnalyzer specificFieldDescriptionsHandle(
+            SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle) {
+        this.specificFieldDescriptionsHandle = specificFieldDescriptionsHandle;
         return this;
     }
 
-    public DocAnalyzer analyzeEnumConstantStrategy(AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy) {
-        this.analyzeEnumConstantStrategy = analyzeEnumConstantStrategy;
+    public DocAnalyzer analyzeEnumConstantHandle(AnalyzeEnumConstantHandle analyzeEnumConstantHandle) {
+        this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
         return this;
     }
 

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.strategy;
+package com.spldeolin.allison1875.docanalyzer.handle;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
@@ -8,7 +8,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
  *
  * @author Deolin 2020-06-18
  */
-public interface ObtainConcernedResponseBodyStrategy {
+public interface ObtainConcernedResponseBodyHandle {
 
     ResolvedType findConcernedResponseBodyType(MethodDeclaration handler);
 

@@ -105,7 +105,7 @@ public class JsonPropertyDescriptionValueDto {
             String extra = null;
             if (extraInfo != null) {
 
-                // TODO 抽取到strategy
+                // TODO 抽取到handle
                 StringBuilder sb = new StringBuilder("枚举名\n");
                 String appName = DocAnalyzer.CONFIG.get().getGlobalUrlPrefix().replace("/", "");
                 sb.append("\t").append(appName).append(":").append(extraInfo);

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.strategy;
+package com.spldeolin.allison1875.docanalyzer.handle;
 
 import com.google.common.collect.Table;
 
@@ -7,7 +7,7 @@ import com.google.common.collect.Table;
  *
  * @author Deolin 2020-07-08
  */
-public interface SpecificFieldDescriptionsStrategy {
+public interface SpecificFieldDescriptionsHandle {
 
     /**
      * @return 类的全限定名，字段名，描述

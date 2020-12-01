@@ -13,6 +13,10 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEntityFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
@@ -38,10 +42,6 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProc;
-import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateEntityFieldCallback;
-import com.spldeolin.allison1875.persistencegenerator.strategy.DefaultGenerateQueryDesignFieldCallback;
-import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateEntityFieldCallback;
-import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesignFieldCallback;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -51,10 +51,10 @@ import lombok.extern.log4j.Log4j2;
 public class PersistenceGenerator implements
         Allison1875MainProcessor<PersistenceGeneratorConfig, PersistenceGenerator> {
 
-    protected GenerateEntityFieldCallback generateEntityFieldCallback = new DefaultGenerateEntityFieldCallback();
+    protected GenerateEntityFieldHandle generateEntityFieldHandle = new DefaultGenerateEntityFieldHandle();
 
-    protected GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback =
-            new DefaultGenerateQueryDesignFieldCallback();
+    protected GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle =
+            new DefaultGenerateQueryDesignFieldHandle();
 
     public static final ThreadLocal<PersistenceGeneratorConfig> CONFIG = ThreadLocal
             .withInitial(PersistenceGeneratorConfig::new);
@@ -85,7 +85,7 @@ public class PersistenceGenerator implements
         for (PersistenceDto persistence : new BuildPersistenceDtoProc().process().getPersistences()) {
 
             // 重新生成Entity
-            GenerateEntityProc entityProc = new GenerateEntityProc(generateEntityFieldCallback, persistence, pathProc)
+            GenerateEntityProc entityProc = new GenerateEntityProc(generateEntityFieldHandle, persistence, pathProc)
                     .process();
             CuCreator entityCuCreator = entityProc.getEntityCuCreator();
             toSave.addAll(entityProc.getToCreate());
@@ -103,7 +103,7 @@ public class PersistenceGenerator implements
 
             // 重新生成QueryDesign
             toSave.addAll(
-                    new GenerateQueryDesignProc(persistence, entityCuCreator, mapper, generateQueryDesignFieldCallback)
+                    new GenerateQueryDesignProc(persistence, entityCuCreator, mapper, generateQueryDesignFieldHandle)
                             .process().getToCreate());
 
             // 删除Mapper中所有Allison 1875生成的方法
@@ -161,12 +161,12 @@ public class PersistenceGenerator implements
         }
     }
 
-    public void setGenerateEntityFieldCallback(GenerateEntityFieldCallback generateEntityFieldCallback) {
-        this.generateEntityFieldCallback = generateEntityFieldCallback;
+    public void setGenerateEntityFieldHandle(GenerateEntityFieldHandle generateEntityFieldHandle) {
+        this.generateEntityFieldHandle = generateEntityFieldHandle;
     }
 
-    public void setGenerateQueryDesignFieldCallback(GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback) {
-        this.generateQueryDesignFieldCallback = generateQueryDesignFieldCallback;
+    public void setGenerateQueryDesignFieldHandle(GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle) {
+        this.generateQueryDesignFieldHandle = generateQueryDesignFieldHandle;
     }
 
 }

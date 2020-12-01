@@ -22,7 +22,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
-import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
+import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 
 /**
  * 校验项
@@ -31,14 +31,14 @@ import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStr
  */
 class ValidProc {
 
-    private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
+    private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
     private final AnnotatedElement annotatedElement;
 
     private Collection<ValidatorDto> valids;
 
-    ValidProc(AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy, AnnotatedElement annotatedElement) {
-        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
+    ValidProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle, AnnotatedElement annotatedElement) {
+        this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
         this.annotatedElement = annotatedElement;
     }
 
@@ -143,7 +143,7 @@ class ValidProc {
                     new ValidatorDto().setValidatorType(ValidatorTypeEnum.REGEX.getValue()).setNote(pattern.regexp()));
         }
 
-        valids.addAll(analyzeCustomValidationStrategy.analyzeCustomValidation(annotatedElement));
+        valids.addAll(analyzeCustomValidationHandle.analyzeCustomValidation(annotatedElement));
         nullToEmpty(valids);
         return this;
     }

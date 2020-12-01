@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.strategy;
+package com.spldeolin.allison1875.persistencegenerator.handle;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -8,12 +8,12 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
- * @author Deolin 2020-11-14
+ * @author Deolin 2020-11-20
  */
-public class DefaultGenerateEntityFieldCallback implements GenerateEntityFieldCallback {
+public class DefaultGenerateQueryDesignFieldHandle implements GenerateQueryDesignFieldHandle {
 
     @Override
-    public Collection<CompilationUnit> handleEntityField(PropertyDto propertyDto, FieldDeclaration field,
+    public Collection<CompilationUnit> handlerQueryDesignField(PropertyDto propertyDto, FieldDeclaration field,
             Path sourceRoot) {
         return Lists.newArrayList();
     }

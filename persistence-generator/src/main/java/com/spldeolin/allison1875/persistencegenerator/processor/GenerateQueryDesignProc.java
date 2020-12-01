@@ -32,7 +32,7 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryMeta;
-import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateQueryDesignFieldCallback;
+import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -47,16 +47,16 @@ public class GenerateQueryDesignProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    private final GenerateQueryDesignFieldCallback generateQueryDesignFieldCallback;
+    private final GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle;
 
     private final Collection<CompilationUnit> toCreate = Lists.newArrayList();
 
     public GenerateQueryDesignProc(PersistenceDto persistence, CuCreator entityCuCreator,
-            ClassOrInterfaceDeclaration mapper, GenerateQueryDesignFieldCallback generateFieldCallbackStrategy) {
+            ClassOrInterfaceDeclaration mapper, GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle) {
         this.persistence = persistence;
         this.entityCuCreator = entityCuCreator;
         this.mapper = mapper;
-        this.generateQueryDesignFieldCallback = generateFieldCallbackStrategy;
+        this.generateQueryDesignFieldHandle = generateQueryDesignFieldHandle;
     }
 
     public GenerateQueryDesignProc process() {
@@ -122,7 +122,7 @@ public class GenerateQueryDesignProc {
         for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
             FieldDeclaration field = pair.getRight();
             toCreate.addAll(
-                    generateQueryDesignFieldCallback.handlerQueryDesignField(pair.getLeft(), field, sourceRoot));
+                    generateQueryDesignFieldHandle.handlerQueryDesignField(pair.getLeft(), field, sourceRoot));
         }
 
         return this;

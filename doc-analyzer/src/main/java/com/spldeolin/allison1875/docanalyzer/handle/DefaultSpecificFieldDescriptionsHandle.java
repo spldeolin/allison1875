@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.strategy;
+package com.spldeolin.allison1875.docanalyzer.handle;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -6,7 +6,7 @@ import com.google.common.collect.Table;
 /**
  * @author Deolin 2020-07-08
  */
-public class DefaultSpecificFieldDescriptionsStrategy implements SpecificFieldDescriptionsStrategy {
+public class DefaultSpecificFieldDescriptionsHandle implements SpecificFieldDescriptionsHandle {
 
     @Override
     public Table<String, String, String> provideSpecificFieldDescriptions() {

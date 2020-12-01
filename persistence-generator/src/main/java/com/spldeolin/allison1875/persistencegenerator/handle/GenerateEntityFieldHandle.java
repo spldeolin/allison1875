@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.strategy;
+package com.spldeolin.allison1875.persistencegenerator.handle;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 /**
  * @author Deolin 2020-11-14
  */
-public interface GenerateEntityFieldCallback {
+public interface GenerateEntityFieldHandle {
 
     Collection<CompilationUnit> handleEntityField(PropertyDto propertyDto, FieldDeclaration field, Path sourceRoot);
 

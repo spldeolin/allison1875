@@ -33,7 +33,7 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.strategy.GenerateEntityFieldCallback;
+import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -42,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateEntityProc {
 
-    private final GenerateEntityFieldCallback generateFieldCallbackStrategy;
+    private final GenerateEntityFieldHandle generateEntityFieldHandle;
 
     private final PersistenceDto persistence;
 
@@ -54,9 +54,9 @@ public class GenerateEntityProc {
 
     private final Collection<CompilationUnit> toCreate = Lists.newArrayList();
 
-    public GenerateEntityProc(GenerateEntityFieldCallback generateFieldCallbackStrategy, PersistenceDto persistence,
+    public GenerateEntityProc(GenerateEntityFieldHandle generateEntityFieldHandle, PersistenceDto persistence,
             PathProc pathProc) {
-        this.generateFieldCallbackStrategy = generateFieldCallbackStrategy;
+        this.generateEntityFieldHandle = generateEntityFieldHandle;
         this.persistence = persistence;
         this.pathProc = pathProc;
     }
@@ -131,7 +131,7 @@ public class GenerateEntityProc {
 
         for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
             toCreate.addAll(
-                    generateFieldCallbackStrategy.handleEntityField(pair.getLeft(), pair.getRight(), sourceRoot));
+                    generateEntityFieldHandle.handleEntityField(pair.getLeft(), pair.getRight(), sourceRoot));
         }
 
         return this;

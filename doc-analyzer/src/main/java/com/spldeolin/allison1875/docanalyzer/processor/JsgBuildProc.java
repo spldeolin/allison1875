@@ -35,8 +35,8 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
-import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeCustomValidationStrategy;
-import com.spldeolin.allison1875.docanalyzer.strategy.AnalyzeEnumConstantStrategy;
+import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
@@ -47,21 +47,21 @@ class JsgBuildProc {
 
     private final AstForest astForest;
 
-    private final AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy;
+    private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
     private final Table<String, String, String> specificFieldDescriptions;
 
-    private final AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy;
+    private final AnalyzeEnumConstantHandle analyzeEnumConstantHandle;
 
     private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
-    JsgBuildProc(AstForest astForest, AnalyzeCustomValidationStrategy analyzeCustomValidationStrategy,
+    JsgBuildProc(AstForest astForest, AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
             Table<String, String, String> specificFieldDescriptions,
-            AnalyzeEnumConstantStrategy analyzeEnumConstantStrategy) {
+            AnalyzeEnumConstantHandle analyzeEnumConstantHandle) {
         this.astForest = astForest;
-        this.analyzeCustomValidationStrategy = analyzeCustomValidationStrategy;
+        this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
         this.specificFieldDescriptions = specificFieldDescriptions;
-        this.analyzeEnumConstantStrategy = analyzeEnumConstantStrategy;
+        this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
     }
 
     JsonSchemaGenerator analyzeAstAndBuildJsg() {
@@ -131,7 +131,7 @@ class JsgBuildProc {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
-                ValidProc validProc = new ValidProc(analyzeCustomValidationStrategy, annotated.getAnnotated())
+                ValidProc validProc = new ValidProc(analyzeCustomValidationHandle, annotated.getAnnotated())
                         .process();
 
                 if (field == null) {
@@ -171,8 +171,7 @@ class JsgBuildProc {
                                 .getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            Collection<ValidatorDto> theOnlyElementValids = new ValidProc(
-                                    analyzeCustomValidationStrategy, theOnlyTypeArgument).process().getValids();
+                            Collection<ValidatorDto> theOnlyElementValids = new ValidProc(analyzeCustomValidationHandle, theOnlyTypeArgument).process().getValids();
                             theOnlyElementValids.forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);
                         }
@@ -184,7 +183,7 @@ class JsgBuildProc {
                     jpdv.setJsonFormatPattern(jsonFormat.pattern());
                 }
 
-                // TODO 抽取到strategy
+                // TODO 抽取到handle
                 {
                     if (field.getType().isEnum()) {
                         String enumName = field.getType().getSimpleName();
@@ -223,7 +222,7 @@ class JsgBuildProc {
                 if (annoClass == JsonValue.class) {
                     if (annotated instanceof AnnotatedMember) {
                         Class<?> enumTypeMight = ((AnnotatedMember) annotated).getDeclaringClass();
-                        if (enumTypeMight.isEnum() && analyzeEnumConstantStrategy.supportEnumType(enumTypeMight)) {
+                        if (enumTypeMight.isEnum() && analyzeEnumConstantHandle.supportEnumType(enumTypeMight)) {
                             return null;
                         }
                     }
@@ -233,11 +232,11 @@ class JsgBuildProc {
 
             @Override
             public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-                if (analyzeEnumConstantStrategy.supportEnumType(enumType)) {
+                if (analyzeEnumConstantHandle.supportEnumType(enumType)) {
                     Object[] enumConstants = enumType.getEnumConstants();
                     Collection<String> ecat = Lists.newArrayList();
                     for (Object enumConstant : enumConstants) {
-                        ecat.add(JsonUtils.toJson(analyzeEnumConstantStrategy.analyzeEnumConstant(enumConstant)));
+                        ecat.add(JsonUtils.toJson(analyzeEnumConstantHandle.analyzeEnumConstant(enumConstant)));
                     }
                     return ecat.toArray(new String[0]);
                 }
