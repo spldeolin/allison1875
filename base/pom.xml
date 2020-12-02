@@ -21,6 +21,12 @@
             <artifactId>javaparser-symbol-solver-core</artifactId>
         </dependency>
 
+        <!-- guice -->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+
         <!-- jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
