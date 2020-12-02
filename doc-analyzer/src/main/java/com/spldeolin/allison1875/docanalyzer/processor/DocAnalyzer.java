@@ -44,8 +44,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
 
-    protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle =
-            new DefaultObtainConcernedResponseBodyHandle();
+    protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle = new DefaultObtainConcernedResponseBodyHandle();
 
     protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle = new DefaultAnalyzeCustomValidationHandle();
 
@@ -55,6 +54,8 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
     protected AnalyzeEnumConstantHandle analyzeEnumConstantHandle = new DefaultAnalyzeEnumConstantHandle();
 
     protected MoreJpdvAnalysisHandle moreJpdvAnalysisHandle = new DefaultMoreJpdvAnalysisHandle();
+
+    ListControllersProc listControllersProc = new ListControllersProc();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
@@ -84,17 +85,18 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle,
                 moreJpdvAnalysisHandle);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
+        astForest = astForest.reset();
 
         // 收集endpoint
         Collection<EndpointDto> endpoints = Lists.newArrayList();
 
         // 再次遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
-        ControllerIterateProc controllerIterateProcessor = new ControllerIterateProc(astForest.reset());
-        controllerIterateProcessor.iterate(controller -> {
+        Collection<ClassOrInterfaceDeclaration> controllers = listControllersProc.process(astForest);
+        for (ClassOrInterfaceDeclaration controller : controllers) {
 
             // doc-ignore标志
             if (findIgnoreFlag(controller)) {
-                return;
+                continue;
             }
 
             // 反射controller，如果失败那么这个controller就没有处理该controller的必要了
@@ -102,7 +104,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
             try {
                 controllerClass = tryReflectController(controller);
             } catch (ClassNotFoundException e) {
-                return;
+                continue;
             }
 
             // 收集controller内的所有方法
@@ -165,7 +167,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 endpoints.addAll(builder.build());
 
             });
-        });
+        }
 
         // 同步到YApi
         new YApiSyncProc(moreJpdvAnalysisHandle, endpoints).process();

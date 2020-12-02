@@ -1,9 +1,11 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
-import java.util.function.Consumer;
+import java.util.Collection;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import lombok.extern.log4j.Log4j2;
@@ -14,23 +16,14 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class ControllerIterateProc {
+class ListControllersProc {
 
-    private final AstForest astForest;
-
-    ControllerIterateProc(AstForest astForest) {
-        this.astForest = astForest;
-    }
-
-    void iterate(Consumer<ClassOrInterfaceDeclaration> eachCoid) {
-        astForest
-                .forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class, this::isController).forEach(controller -> {
-                    try {
-                        eachCoid.accept(controller);
-                    } catch (Throwable t) {
-                        log.error("controller fail [{}]", controller.getFullyQualifiedName(), t);
-                    }
-                }));
+    Collection<ClassOrInterfaceDeclaration> process(AstForest astForest) {
+        Collection<ClassOrInterfaceDeclaration> result = Lists.newArrayList();
+        for (CompilationUnit cu : astForest) {
+            result.addAll(cu.findAll(ClassOrInterfaceDeclaration.class, this::isController));
+        }
+        return result;
     }
 
     private boolean isController(ClassOrInterfaceDeclaration coid) {
