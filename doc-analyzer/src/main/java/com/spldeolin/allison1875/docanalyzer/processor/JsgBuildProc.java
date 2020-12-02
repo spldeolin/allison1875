@@ -23,7 +23,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -37,6 +36,7 @@ import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
@@ -53,15 +53,18 @@ class JsgBuildProc {
 
     private final AnalyzeEnumConstantHandle analyzeEnumConstantHandle;
 
+    private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
+
     private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
 
     JsgBuildProc(AstForest astForest, AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
             Table<String, String, String> specificFieldDescriptions,
-            AnalyzeEnumConstantHandle analyzeEnumConstantHandle) {
+            AnalyzeEnumConstantHandle analyzeEnumConstantHandle, MoreJpdvAnalysisHandle moreJpdvAnalysisHandle) {
         this.astForest = astForest;
         this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
         this.specificFieldDescriptions = specificFieldDescriptions;
         this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
+        this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
     }
 
     JsonSchemaGenerator analyzeAstAndBuildJsg() {
@@ -131,8 +134,7 @@ class JsgBuildProc {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
-                ValidProc validProc = new ValidProc(analyzeCustomValidationHandle, annotated.getAnnotated())
-                        .process();
+                ValidProc validProc = new ValidProc(analyzeCustomValidationHandle, annotated.getAnnotated()).process();
 
                 if (field == null) {
                     JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
@@ -171,7 +173,8 @@ class JsgBuildProc {
                                 .getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            Collection<ValidatorDto> theOnlyElementValids = new ValidProc(analyzeCustomValidationHandle, theOnlyTypeArgument).process().getValids();
+                            Collection<ValidatorDto> theOnlyElementValids = new ValidProc(analyzeCustomValidationHandle,
+                                    theOnlyTypeArgument).process().getValids();
                             theOnlyElementValids.forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);
                         }
@@ -183,17 +186,7 @@ class JsgBuildProc {
                     jpdv.setJsonFormatPattern(jsonFormat.pattern());
                 }
 
-                // TODO 抽取到handle
-                {
-                    if (field.getType().isEnum()) {
-                        String enumName = field.getType().getSimpleName();
-                        if (enumName.endsWith("Enum")) {
-                            enumName = enumName.substring(0, enumName.length() - 4);
-                        }
-                        enumName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, enumName);
-                        jpdv.setExtraInfo(enumName);
-                    }
-                }
+                jpdv.setMore(moreJpdvAnalysisHandle.moreAnalysisFromField(field));
 
                 return JsonUtils.toJson(jpdv);
             }

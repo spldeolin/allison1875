@@ -26,12 +26,14 @@ import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.DefaultAnalyzeCustomValidationHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.DefaultAnalyzeEnumConstantHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.DefaultObtainConcernedResponseBodyHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.DefaultSpecificFieldDescriptionsHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.ObtainConcernedResponseBodyHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultAnalyzeCustomValidationHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultAnalyzeEnumConstantHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultMoreJpdvAnalysisHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultObtainConcernedResponseBodyHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultSpecificFieldDescriptionsHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -45,13 +47,14 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
     protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle =
             new DefaultObtainConcernedResponseBodyHandle();
 
-    protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle =
-            new DefaultAnalyzeCustomValidationHandle();
+    protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle = new DefaultAnalyzeCustomValidationHandle();
 
     protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle =
             new DefaultSpecificFieldDescriptionsHandle();
 
     protected AnalyzeEnumConstantHandle analyzeEnumConstantHandle = new DefaultAnalyzeEnumConstantHandle();
+
+    protected MoreJpdvAnalysisHandle moreJpdvAnalysisHandle = new DefaultMoreJpdvAnalysisHandle();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
@@ -78,7 +81,8 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
         JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationHandle,
-                specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle);
+                specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle,
+                moreJpdvAnalysisHandle);
         JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
 
         // 收集endpoint
@@ -164,7 +168,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         });
 
         // 同步到YApi
-        new YApiSyncProc(endpoints).process();
+        new YApiSyncProc(moreJpdvAnalysisHandle, endpoints).process();
 
         log.info(endpoints.size());
     }

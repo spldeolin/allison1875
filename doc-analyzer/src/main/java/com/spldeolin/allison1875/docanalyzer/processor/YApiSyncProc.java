@@ -20,6 +20,7 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
@@ -44,6 +45,8 @@ class YApiSyncProc {
 
     private static final Long projectId = getProjectIdFromYApi();
 
+    private final JpdvToStringProc jpdvToStringProc;
+
     private final Collection<EndpointDto> endpoints;
 
     private static Long getProjectIdFromYApi() {
@@ -55,8 +58,9 @@ class YApiSyncProc {
         return resp.getData().getId();
     }
 
-    YApiSyncProc(Collection<EndpointDto> endpoints) {
+    YApiSyncProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle, Collection<EndpointDto> endpoints) {
         this.endpoints = endpoints;
+        this.jpdvToStringProc = new JpdvToStringProc(moreJpdvAnalysisHandle);
     }
 
     void process() {
@@ -114,7 +118,7 @@ class YApiSyncProc {
             JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
                 JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
                 if (jpdv != null) {
-                    jsonSchema.setDescription(jpdv.toStringPrettily());
+                    jsonSchema.setDescription(jpdvToStringProc.process(jpdv));
                 }
             });
 
