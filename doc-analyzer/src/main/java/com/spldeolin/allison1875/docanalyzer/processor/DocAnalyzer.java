@@ -16,10 +16,10 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
-import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.dto.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.HandlerFullDto;
+import com.spldeolin.allison1875.docanalyzer.dto.RequestMappingFullDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
@@ -45,8 +45,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle = new DefaultAnalyzeCustomValidationHandle();
 
-    protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle =
-            new DefaultSpecificFieldDescriptionsHandle();
+    protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle = new DefaultSpecificFieldDescriptionsHandle();
 
     protected AnalyzeEnumConstantHandle analyzeEnumConstantHandle = new DefaultAnalyzeEnumConstantHandle();
 
@@ -55,6 +54,10 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
     ListControllersProc listControllersProc = new ListControllersProc();
 
     ListHandlersProc listHandlersProc = new ListHandlersProc();
+
+    RequestMappingProc requestMappingProcessor = new RequestMappingProc();
+
+    CopyEndpointProc copyEndpointProc = new CopyEndpointProc();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
@@ -92,37 +95,36 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         Collection<ControllerFullDto> controllers = listControllersProc.process(astForest);
         for (ControllerFullDto controller : controllers) {
 
-            // 处理@RequestMapping（controller的RequestMapping）
-            RequestMappingProc requestMappingProcessor = new RequestMappingProc(controller.getReflection());
-
             // 遍历handler
             Collection<HandlerFullDto> handlers = listHandlersProc.process(controller);
             for (HandlerFullDto handler : handlers) {
 
-                // 收集handler的描述、是否过时、作者、源码位置 等基本信息
-                EndpointDtoBuilder builder = new EndpointDtoBuilder();
-                builder.cat(handler.getCat());
-                builder.handlerSimpleName(controller.getCoid().getName() + "_" + handler.getMd().getName());
-                builder.descriptionLines(JavadocDescriptions.getAsLines(handler.getMd()));
-                builder.isDeprecated(isDeprecated(controller.getCoid(), handler.getMd()));
-                builder.author(Authors.getAuthor(handler.getMd()));
-                builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler.getMd()));
-
-                // 处理@RequestMapping（handler的RequestMapping）
-                requestMappingProcessor.analyze(handler.getReflection());
-                builder.combinedUrls(requestMappingProcessor.getCombinedUrls());
-                builder.combinedVerbs(requestMappingProcessor.getCombinedVerbs());
+                // 收集handler的分类、代码简称、描述、是否过时、作者、源码位置 等基本信息
+                EndpointDto endpoint = new EndpointDto();
+                endpoint.setCat(handler.getCat());
+                endpoint.setHandlerSimpleName(controller.getCoid().getName() + "_" + handler.getMd().getName());
+                endpoint.setDescriptionLines(JavadocDescriptions.getAsLines(handler.getMd()));
+                endpoint.setIsDeprecated(isDeprecated(controller.getCoid(), handler.getMd()));
+                endpoint.setAuthor(Authors.getAuthor(handler.getMd()));
+                endpoint.setSourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler.getMd()));
 
                 // 分析Request Body
                 RequestBodyProc requestBodyProc = new RequestBodyProc();
-                builder.requestBodyJsonSchema(requestBodyProc.analyze(jsg, handler.getMd()));
+                endpoint.setRequestBodyJsonSchema(requestBodyProc.analyze(jsg, handler.getMd()));
 
                 // 分析Response Body
                 ResponseBodyProc responseBodyProc = new ResponseBodyProc(obtainConcernedResponseBodyHandle);
-                builder.responseBodyJsonSchema(responseBodyProc.analyze(jsg, controller.getCoid(), handler.getMd()));
+                endpoint.setResponseBodyJsonSchema(
+                        responseBodyProc.analyze(jsg, controller.getCoid(), handler.getMd()));
 
-                // 构建EndpointDto
-                endpoints.addAll(builder.build());
+                // 处理controller级与handler级的@RequestMapping
+                RequestMappingFullDto requestMappingFullDto = requestMappingProcessor
+                        .analyze(controller.getReflection(), handler.getReflection());
+
+                // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
+                Collection<EndpointDto> copies = copyEndpointProc.process(endpoint, requestMappingFullDto);
+
+                endpoints.addAll(copies);
             }
         }
 

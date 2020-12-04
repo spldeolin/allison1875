@@ -30,4 +30,19 @@ public class EndpointDto {
 
     private String sourceCode;
 
+    public EndpointDto copy() {
+        EndpointDto result = new EndpointDto();
+        result.setCat(cat);
+        result.setHandlerSimpleName(handlerSimpleName);
+        result.setDescriptionLines(descriptionLines);
+        result.setUrl(url);
+        result.setHttpMethod(httpMethod);
+        result.setIsDeprecated(isDeprecated);
+        result.setRequestBodyJsonSchema(requestBodyJsonSchema);
+        result.setResponseBodyJsonSchema(responseBodyJsonSchema);
+        result.setAuthor(author);
+        result.setSourceCode(sourceCode);
+        return result;
+    }
+
 }

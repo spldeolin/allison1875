@@ -51,6 +51,9 @@ class YApiSyncProc {
 
     EndpointToStringProc endpointToStringProc = new EndpointToStringProc();
 
+    private static final ThreadLocal<Set<String>> formattedBodyJsonSchemaIds = ThreadLocal
+            .withInitial(Sets::newHashSet);
+
     private static Long getProjectIdFromYApi() {
         String json = HttpUtils.get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + token);
         CommonRespDto<ProjectGetRespDto> resp = JsonUtils
@@ -114,19 +117,22 @@ class YApiSyncProc {
     }
 
     private String toJson(JsonSchema bodyJsonSchema) {
-        String json = "";
-        if (bodyJsonSchema != null) {
-            // jpdv -> Pretty String
-            JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
-                JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
-                if (jpdv != null) {
-                    jsonSchema.setDescription(jpdvToStringProc.toString(jpdv));
-                }
-            });
-
-            json = JsonUtils.toJson(bodyJsonSchema);
+        if (bodyJsonSchema == null) {
+            return "";
         }
-        return json;
+        if (formattedBodyJsonSchemaIds.get().contains(bodyJsonSchema.getId())) {
+            return JsonUtils.toJson(bodyJsonSchema);
+        }
+
+        // jpdv -> Pretty String
+        JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
+            JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
+            if (jpdv != null) {
+                jsonSchema.setDescription(jpdvToStringProc.toString(jpdv));
+                formattedBodyJsonSchemaIds.get().add(bodyJsonSchema.getId());
+            }
+        });
+        return JsonUtils.toJson(bodyJsonSchema);
     }
 
     Map<String, Long> getYapiCatIdsEachName() {

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.docanalyzer.dto.RequestMappingFullDto;
 
 /**
  * 内聚了 对请求URL和请求动词解析的功能
@@ -22,30 +23,18 @@ import com.spldeolin.allison1875.base.util.StringUtils;
  */
 class RequestMappingProc {
 
-    private static final PathMatcher pathMatcher = new AntPathMatcher();
+    PathMatcher pathMatcher = new AntPathMatcher();
 
-    private final String[] cPaths;
-
-    private final RequestMethod[] cVerbs;
-
-    private Collection<String> combinedUrls;
-
-    private Collection<RequestMethod> combinedVerbs;
-
-    RequestMappingProc(Class<?> controllerClass) {
+    RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
-        cPaths = findValueFromAnno(controllerRequestMapping);
-        cVerbs = findVerbFromAnno(controllerRequestMapping);
-    }
+        String[] controllerPaths = findValueFromAnno(controllerRequestMapping);
+        RequestMethod[] controllerVerbs = findVerbFromAnno(controllerRequestMapping);
 
-    void analyze(Method reflectionMethod) {
         RequestMapping methodRequestMapping = findRequestMappingAnnoOrElseNull(reflectionMethod);
-        String[] mPaths = methodRequestMapping.value();
-        RequestMethod[] mVerbs = methodRequestMapping.method();
-        List<String> combinedUrls = combineUrl(cPaths, mPaths);
-        this.combinedUrls = combinedUrls;
-        combinedVerbs = combineVerb(cVerbs, mVerbs);
+        String[] methodPaths = methodRequestMapping.value();
+        RequestMethod[] methodVerbs = methodRequestMapping.method();
 
+        List<String> combinedUrls = combineUrl(controllerPaths, methodPaths);
         // 添加全局前缀
         String globalUrlPrefix = DocAnalyzer.CONFIG.get().getGlobalUrlPrefix();
         if (StringUtils.isNotBlank(globalUrlPrefix)) {
@@ -54,6 +43,8 @@ class RequestMappingProc {
                 itr.set(globalUrlPrefix + itr.next());
             }
         }
+        Collection<RequestMethod> combinedVerbs = combineVerb(controllerVerbs, methodVerbs);
+        return new RequestMappingFullDto(combinedUrls, combinedVerbs);
     }
 
     private RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {
@@ -110,14 +101,6 @@ class RequestMappingProc {
             result.add(url);
         }
         return result;
-    }
-
-    public Collection<String> getCombinedUrls() {
-        return this.combinedUrls;
-    }
-
-    public Collection<RequestMethod> getCombinedVerbs() {
-        return this.combinedVerbs;
     }
 
 }
