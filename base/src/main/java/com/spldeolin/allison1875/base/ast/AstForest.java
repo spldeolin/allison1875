@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.Strings;
@@ -71,10 +72,13 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     private List<Path> collectDependencySourceRoots(Collection<String> dependencyProjectPaths) {
         List<Path> result = Lists.newArrayList();
-        Collection<SourceRoot> sourceRoots = new SourceRootCollector().collect(dependencyProjectPaths);
-        for (SourceRoot sourceRoot : sourceRoots) {
-            log.info("dependencySourceRootPath={}", sourceRoot.getRoot());
-            result.add(sourceRoot.getRoot());
+        for (String projectPath : dependencyProjectPaths) {
+            List<SourceRoot> onePathSourceRoots = new SymbolSolverCollectionStrategy().collect(Paths.get(projectPath))
+                    .getSourceRoots();
+            for (SourceRoot sourceRoot : onePathSourceRoots) {
+                log.info("dependencySourceRootPath={}", sourceRoot.getRoot());
+                result.add(sourceRoot.getRoot());
+            }
         }
         return result;
     }
