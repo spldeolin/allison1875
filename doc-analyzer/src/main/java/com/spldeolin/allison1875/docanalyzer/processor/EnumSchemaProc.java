@@ -14,13 +14,7 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
  */
 public class EnumSchemaProc {
 
-    private final JsonSchema rootJsonSchema;
-
-    EnumSchemaProc(JsonSchema rootJsonSchema) {
-        this.rootJsonSchema = rootJsonSchema;
-    }
-
-    void process() {
+    void process(JsonSchema rootJsonSchema) {
         JsonSchemaTraverseUtils.traverse("", rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
             if (jsonSchema.isValueTypeSchema()) {
                 Set<String> enums = jsonSchema.asValueTypeSchema().getEnums();

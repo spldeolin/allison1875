@@ -22,6 +22,8 @@ class RequestBodyProc {
 
     private final JsonSchemaGenerator jsg;
 
+    EnumSchemaProc enumSchemaProc = new EnumSchemaProc();
+
     RequestBodyProc(JsonSchemaGenerator jsg) {
         this.jsg = jsg;
     }
@@ -34,7 +36,7 @@ class RequestBodyProc {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
                 new ReferenceSchemaProc(jsonSchema).process();
-                new EnumSchemaProc(jsonSchema).process();
+                enumSchemaProc.process(jsonSchema);
                 return jsonSchema;
             }
         } catch (JsonSchemaException ignore) {

@@ -1,10 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.function.Consumer;
+import java.util.Collection;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.google.common.collect.Lists;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -15,20 +15,14 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class HandlerIterateProc {
 
-    private final Class<?> controllerClass;
-
-    HandlerIterateProc(Class<?> controllerClass) {
-        this.controllerClass = controllerClass;
-    }
-
-    void iterate(Consumer<Method> eachMethod) {
-        Arrays.stream(controllerClass.getDeclaredMethods()).filter(this::isHandler).forEach(relectionMethod -> {
-            try {
-                eachMethod.accept(relectionMethod);
-            } catch (Throwable t) {
-                log.error("controller fail [{}]", relectionMethod.getName(), t);
+    Collection<Method> listHandlers(Class<?> controllerClass) {
+        Collection<Method> result = Lists.newArrayList();
+        for (Method declaredMethod : controllerClass.getDeclaredMethods()) {
+            if (this.isHandler(declaredMethod)) {
+                result.add(declaredMethod);
             }
-        });
+        }
+        return result;
     }
 
     private boolean isHandler(Method method) {

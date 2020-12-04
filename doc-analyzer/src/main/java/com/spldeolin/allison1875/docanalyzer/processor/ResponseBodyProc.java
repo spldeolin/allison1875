@@ -26,6 +26,8 @@ class ResponseBodyProc {
 
     private final ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle;
 
+    EnumSchemaProc enumSchemaProc = new EnumSchemaProc();
+
     ResponseBodyProc(JsonSchemaGenerator jsg, ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle) {
         this.jsg = jsg;
         this.obtainConcernedResponseBodyHandle = obtainConcernedResponseBodyHandle;
@@ -39,7 +41,7 @@ class ResponseBodyProc {
                 responseBodyDescribe = responseBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
                 new ReferenceSchemaProc(jsonSchema).process();
-                new EnumSchemaProc(jsonSchema).process();
+                enumSchemaProc.process(jsonSchema);
                 return jsonSchema;
             }
         } catch (JsonSchemaException ignore) {

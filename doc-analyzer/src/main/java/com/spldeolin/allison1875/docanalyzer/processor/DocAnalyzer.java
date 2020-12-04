@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +45,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
 
-    protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle = new DefaultObtainConcernedResponseBodyHandle();
+    protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle =
+            new DefaultObtainConcernedResponseBodyHandle();
 
     protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle = new DefaultAnalyzeCustomValidationHandle();
 
@@ -56,6 +58,8 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
     protected MoreJpdvAnalysisHandle moreJpdvAnalysisHandle = new DefaultMoreJpdvAnalysisHandle();
 
     ListControllersProc listControllersProc = new ListControllersProc();
+
+    HandlerIterateProc handlerIterateProc = new HandlerIterateProc();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
@@ -118,20 +122,20 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
             RequestMappingProc requestMappingProcessor = new RequestMappingProc(controllerClass);
 
             // 遍历handler
-            HandlerIterateProc handlerIterateProcessor = new HandlerIterateProc(controllerClass);
-            handlerIterateProcessor.iterate(reflectionMethod -> {
+            Collection<Method> handlers = handlerIterateProc.listHandlers(controllerClass);
+            for (Method reflectionHandler : handlers) {
 
                 MethodDeclaration handler = methodsByShortestQualifier
-                        .get(MethodQualifiers.getShortestQualifiedSignature(reflectionMethod));
+                        .get(MethodQualifiers.getShortestQualifiedSignature(reflectionHandler));
                 if (handler == null) {
                     // 可能是源码删除了某个handler但未编译，所以reflectionMethod存在，但MethodDeclaration已经不存在了
                     // 这种情况没有继续处理该handler的必要了
-                    return;
+                    continue;
                 }
 
                 // doc-ignore标志
                 if (findIgnoreFlag(handler)) {
-                    return;
+                    continue;
                 }
 
                 // doc-cat标志
@@ -150,7 +154,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
 
                 // 处理@RequestMapping（handler的RequestMapping）
-                requestMappingProcessor.analyze(reflectionMethod);
+                requestMappingProcessor.analyze(reflectionHandler);
                 builder.combinedUrls(requestMappingProcessor.getCombinedUrls());
                 builder.combinedVerbs(requestMappingProcessor.getCombinedVerbs());
 
@@ -166,7 +170,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 // 构建EndpointDto
                 endpoints.addAll(builder.build());
 
-            });
+            }
         }
 
         // 同步到YApi
