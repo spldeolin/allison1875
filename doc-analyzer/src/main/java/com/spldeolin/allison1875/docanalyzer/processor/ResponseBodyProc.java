@@ -22,18 +22,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class ResponseBodyProc {
 
-    private final JsonSchemaGenerator jsg;
-
     private final ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle;
 
     EnumSchemaProc enumSchemaProc = new EnumSchemaProc();
 
-    ResponseBodyProc(JsonSchemaGenerator jsg, ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle) {
-        this.jsg = jsg;
+    ResponseBodyProc(ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle) {
         this.obtainConcernedResponseBodyHandle = obtainConcernedResponseBodyHandle;
     }
 
-    JsonSchema analyze(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+    JsonSchema analyze(JsonSchemaGenerator jsg, ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         String responseBodyDescribe = null;
         try {
             ResolvedType responseBody = findResponseBody(controller, handler);

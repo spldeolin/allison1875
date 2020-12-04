@@ -114,14 +114,12 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 builder.combinedVerbs(requestMappingProcessor.getCombinedVerbs());
 
                 // 分析Request Body
-                RequestBodyProc requestBodyAnalyzeProcessor = new RequestBodyProc(jsg);
-                builder.requestBodyJsonSchema(requestBodyAnalyzeProcessor.analyze(handler.getMd()));
+                RequestBodyProc requestBodyProc = new RequestBodyProc();
+                builder.requestBodyJsonSchema(requestBodyProc.analyze(jsg, handler.getMd()));
 
                 // 分析Response Body
-                ResponseBodyProc responseBodyAnalyzeProcessor = new ResponseBodyProc(jsg,
-                        obtainConcernedResponseBodyHandle);
-                builder.responseBodyJsonSchema(
-                        responseBodyAnalyzeProcessor.analyze(controller.getCoid(), handler.getMd()));
+                ResponseBodyProc responseBodyProc = new ResponseBodyProc(obtainConcernedResponseBodyHandle);
+                builder.responseBodyJsonSchema(responseBodyProc.analyze(jsg, controller.getCoid(), handler.getMd()));
 
                 // 构建EndpointDto
                 endpoints.addAll(builder.build());
