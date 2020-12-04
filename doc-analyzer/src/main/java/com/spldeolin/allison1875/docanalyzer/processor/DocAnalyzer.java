@@ -4,17 +4,12 @@ import java.util.Collection;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import com.spldeolin.allison1875.base.util.ast.Annotations;
-import com.spldeolin.allison1875.base.util.ast.Authors;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
@@ -45,19 +40,20 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle = new DefaultAnalyzeCustomValidationHandle();
 
-    protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle = new DefaultSpecificFieldDescriptionsHandle();
+    protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle =
+            new DefaultSpecificFieldDescriptionsHandle();
 
     protected AnalyzeEnumConstantHandle analyzeEnumConstantHandle = new DefaultAnalyzeEnumConstantHandle();
 
     protected MoreJpdvAnalysisHandle moreJpdvAnalysisHandle = new DefaultMoreJpdvAnalysisHandle();
-
-    ListControllersProc listControllersProc = new ListControllersProc();
 
     ListHandlersProc listHandlersProc = new ListHandlersProc();
 
     RequestMappingProc requestMappingProcessor = new RequestMappingProc();
 
     CopyEndpointProc copyEndpointProc = new CopyEndpointProc();
+
+    SimplyAnalyzeProc simplyAnalyzeProc = new SimplyAnalyzeProc();
 
     public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
 
@@ -91,23 +87,16 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         // 收集endpoint
         Collection<EndpointDto> endpoints = Lists.newArrayList();
 
-        // 遍历controller
-        Collection<ControllerFullDto> controllers = listControllersProc.process(astForest);
-        for (ControllerFullDto controller : controllers) {
+        // 遍历controller、遍历handler
+        Collection<HandlerFullDto> handlers = listHandlersProc.process(astForest);
+        for (HandlerFullDto handler : handlers) {
+            ControllerFullDto controller = handler.getController();
+            EndpointDto endpoint = new EndpointDto();
 
-            // 遍历handler
-            Collection<HandlerFullDto> handlers = listHandlersProc.process(controller);
-            for (HandlerFullDto handler : handlers) {
+            // 分析并保存handler的分类、代码简称、描述、是否过时、作者、源码位置 等基本信息
+            simplyAnalyzeProc.process(controller.getCoid(), handler, endpoint);
 
-                // 收集handler的分类、代码简称、描述、是否过时、作者、源码位置 等基本信息
-                EndpointDto endpoint = new EndpointDto();
-                endpoint.setCat(handler.getCat());
-                endpoint.setHandlerSimpleName(controller.getCoid().getName() + "_" + handler.getMd().getName());
-                endpoint.setDescriptionLines(JavadocDescriptions.getAsLines(handler.getMd()));
-                endpoint.setIsDeprecated(isDeprecated(controller.getCoid(), handler.getMd()));
-                endpoint.setAuthor(Authors.getAuthor(handler.getMd()));
-                endpoint.setSourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler.getMd()));
-
+            try {
                 // 分析Request Body
                 RequestBodyProc requestBodyProc = new RequestBodyProc();
                 endpoint.setRequestBodyJsonSchema(requestBodyProc.analyze(jsg, handler.getMd()));
@@ -125,40 +114,15 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 Collection<EndpointDto> copies = copyEndpointProc.process(endpoint, requestMappingFullDto);
 
                 endpoints.addAll(copies);
+            } catch (Exception e) {
+                log.info("description={} author={} sourceCode={}", Joiner.on(" ").join(endpoint.getDescriptionLines()),
+                        endpoint.getSourceCode(), endpoint.getAuthor(), e);
             }
         }
 
         // 同步到YApi
         new YApiSyncProc(moreJpdvAnalysisHandle, endpoints).process();
-
         log.info(endpoints.size());
-    }
-
-    private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        return Annotations.isAnnotationPresent(handler, Deprecated.class) || Annotations
-                .isAnnotationPresent(controller, Deprecated.class);
-    }
-
-    public DocAnalyzer obtainConcernedResponseBodyHandle(
-            ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle) {
-        this.obtainConcernedResponseBodyHandle = obtainConcernedResponseBodyHandle;
-        return this;
-    }
-
-    public DocAnalyzer analyzeCustomValidationHandle(AnalyzeCustomValidationHandle analyzeCustomValidationHandle) {
-        this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
-        return this;
-    }
-
-    public DocAnalyzer specificFieldDescriptionsHandle(
-            SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle) {
-        this.specificFieldDescriptionsHandle = specificFieldDescriptionsHandle;
-        return this;
-    }
-
-    public DocAnalyzer analyzeEnumConstantHandle(AnalyzeEnumConstantHandle analyzeEnumConstantHandle) {
-        this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
-        return this;
     }
 
 }

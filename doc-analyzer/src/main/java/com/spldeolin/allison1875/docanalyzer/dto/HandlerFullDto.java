@@ -18,4 +18,6 @@ public class HandlerFullDto {
 
     private Method reflection;
 
+    private ControllerFullDto controller;
+
 }
