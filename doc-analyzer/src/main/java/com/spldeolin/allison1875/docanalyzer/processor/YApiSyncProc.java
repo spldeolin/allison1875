@@ -49,6 +49,8 @@ class YApiSyncProc {
 
     private final Collection<EndpointDto> endpoints;
 
+    EndpointToStringProc endpointToStringProc = new EndpointToStringProc();
+
     private static Long getProjectIdFromYApi() {
         String json = HttpUtils.get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + token);
         CommonRespDto<ProjectGetRespDto> resp = JsonUtils
@@ -94,7 +96,7 @@ class YApiSyncProc {
                         if (title == null || title.length() == 0) {
                             title = endpoint.getHandlerSimpleName();
                         }
-                        String yapiDesc = endpoint.toStringPrettily();
+                        String yapiDesc = endpointToStringProc.toString(endpoint);
 
                         String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
                         String respJs = toJson(endpoint.getResponseBodyJsonSchema());
@@ -118,7 +120,7 @@ class YApiSyncProc {
             JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
                 JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
                 if (jpdv != null) {
-                    jsonSchema.setDescription(jpdvToStringProc.process(jpdv));
+                    jsonSchema.setDescription(jpdvToStringProc.toString(jpdv));
                 }
             });
 

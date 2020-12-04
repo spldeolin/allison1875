@@ -22,7 +22,7 @@ public class JpdvToStringProc {
         this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
     }
 
-    public String process(JsonPropertyDescriptionValueDto jpdv) {
+    public String toString(JsonPropertyDescriptionValueDto jpdv) {
         if (jpdv == null) {
             return null;
         }
