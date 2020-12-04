@@ -15,7 +15,6 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
@@ -24,6 +23,7 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.builder.EndpointDtoBuilder;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
+import com.spldeolin.allison1875.docanalyzer.dto.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
@@ -80,49 +80,32 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     @Override
     public void process(AstForest astForest) {
-        // re parser
+        // 重新生成astForest（将解析范围扩大到所有用户配置的项目路径）
         astForest = new AstForest(astForest.getAnyClassFromHost(), CONFIG.get().getDependencyProjectPaths());
         AstForestContext.setCurrent(astForest);
 
-        // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需
-        JsgBuildProc jsgProcessor = new JsgBuildProc(astForest, analyzeCustomValidationHandle,
+        // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
+        JsgBuildProc jsgBuildProc = new JsgBuildProc(astForest, analyzeCustomValidationHandle,
                 specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle,
                 moreJpdvAnalysisHandle);
-        JsonSchemaGenerator jsg = jsgProcessor.analyzeAstAndBuildJsg();
-        astForest = astForest.reset();
+        JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg();
 
         // 收集endpoint
         Collection<EndpointDto> endpoints = Lists.newArrayList();
 
-        // 再次遍历astForest，并遍历每个cu下的每个controller（是否是controller由Processor判断）
-        Collection<ClassOrInterfaceDeclaration> controllers = listControllersProc.process(astForest);
-        for (ClassOrInterfaceDeclaration controller : controllers) {
-
-            // doc-ignore标志
-            if (findIgnoreFlag(controller)) {
-                continue;
-            }
-
-            // 反射controller，如果失败那么这个controller就没有处理该controller的必要了
-            Class<?> controllerClass;
-            try {
-                controllerClass = tryReflectController(controller);
-            } catch (ClassNotFoundException e) {
-                continue;
-            }
+        // 遍历controller
+        Collection<ControllerFullDto> controllers = listControllersProc.process(astForest.reset());
+        for (ControllerFullDto controller : controllers) {
 
             // 收集controller内的所有方法
             Map<String, MethodDeclaration> methodsByShortestQualifier = new MethodCollectProc()
-                    .collectMethods(controller);
-
-            // doc-cat标志
-            String controllerCat = findControllerCat(controller);
+                    .collectMethods(controller.getCoid());
 
             // 处理@RequestMapping（controller的RequestMapping）
-            RequestMappingProc requestMappingProcessor = new RequestMappingProc(controllerClass);
+            RequestMappingProc requestMappingProcessor = new RequestMappingProc(controller.getReflection());
 
             // 遍历handler
-            Collection<Method> handlers = handlerIterateProc.listHandlers(controllerClass);
+            Collection<Method> handlers = handlerIterateProc.listHandlers(controller.getReflection());
             for (Method reflectionHandler : handlers) {
 
                 MethodDeclaration handler = methodsByShortestQualifier
@@ -141,15 +124,15 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 // doc-cat标志
                 String handlerCat = findCat(handler);
                 if (handlerCat == null) {
-                    handlerCat = controllerCat;
+                    handlerCat = controller.getCat();
                 }
 
                 // 收集handler的描述、是否过时、作者、源码位置 等基本信息
                 EndpointDtoBuilder builder = new EndpointDtoBuilder();
                 builder.cat(handlerCat);
-                builder.handlerSimpleName(controller.getName() + "_" + handler.getName());
+                builder.handlerSimpleName(controller.getCoid().getName() + "_" + handler.getName());
                 builder.descriptionLines(JavadocDescriptions.getAsLines(handler));
-                builder.isDeprecated(isDeprecated(controller, handler));
+                builder.isDeprecated(isDeprecated(controller.getCoid(), handler));
                 builder.author(Authors.getAuthor(handler));
                 builder.sourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler));
 
@@ -165,7 +148,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
                 // 分析Response Body
                 ResponseBodyProc responseBodyAnalyzeProcessor = new ResponseBodyProc(jsg,
                         obtainConcernedResponseBodyHandle);
-                builder.responseBodyJsonSchema(responseBodyAnalyzeProcessor.analyze(controller, handler));
+                builder.responseBodyJsonSchema(responseBodyAnalyzeProcessor.analyze(controller.getCoid(), handler));
 
                 // 构建EndpointDto
                 endpoints.addAll(builder.build());
@@ -177,17 +160,6 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         new YApiSyncProc(moreJpdvAnalysisHandle, endpoints).process();
 
         log.info(endpoints.size());
-    }
-
-    private String findControllerCat(ClassOrInterfaceDeclaration controller) {
-        String controllerCat = findCat(controller);
-        if (controllerCat == null) {
-            controllerCat = JavadocDescriptions.getFirstLine(controller);
-        }
-        if (StringUtils.isEmpty(controllerCat)) {
-            controllerCat = controller.getNameAsString();
-        }
-        return controllerCat;
     }
 
     private String findCat(NodeWithJavadoc<?> node) {
