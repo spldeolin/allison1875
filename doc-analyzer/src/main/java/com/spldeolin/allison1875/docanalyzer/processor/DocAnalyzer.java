@@ -85,16 +85,16 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
-        JsgBuildProc jsgBuildProc = new JsgBuildProc(astForest, analyzeCustomValidationHandle,
+        JsgBuildProc jsgBuildProc = new JsgBuildProc(analyzeCustomValidationHandle,
                 specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle,
                 moreJpdvAnalysisHandle);
-        JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg();
+        JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg(astForest);
 
         // 收集endpoint
         Collection<EndpointDto> endpoints = Lists.newArrayList();
 
         // 遍历controller
-        Collection<ControllerFullDto> controllers = listControllersProc.process(astForest.reset());
+        Collection<ControllerFullDto> controllers = listControllersProc.process(astForest);
         for (ControllerFullDto controller : controllers) {
 
             // 收集controller内的所有方法

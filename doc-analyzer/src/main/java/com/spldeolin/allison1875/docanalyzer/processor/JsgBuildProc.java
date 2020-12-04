@@ -45,8 +45,6 @@ import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
  */
 class JsgBuildProc {
 
-    private final AstForest astForest;
-
     private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
     private final Table<String, String, String> specificFieldDescriptions;
@@ -55,57 +53,19 @@ class JsgBuildProc {
 
     private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
 
-    private final Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
-
-    JsgBuildProc(AstForest astForest, AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
+    JsgBuildProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
             Table<String, String, String> specificFieldDescriptions,
             AnalyzeEnumConstantHandle analyzeEnumConstantHandle, MoreJpdvAnalysisHandle moreJpdvAnalysisHandle) {
-        this.astForest = astForest;
         this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
         this.specificFieldDescriptions = specificFieldDescriptions;
         this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
         this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
     }
 
-    JsonSchemaGenerator analyzeAstAndBuildJsg() {
-        analyze(astForest);
-        return buildJsg();
-    }
+    JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
+        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = analyze(astForest);
+        astForest.reset();
 
-    private void analyze(AstForest astForest) {
-        for (CompilationUnit cu : astForest) {
-            for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
-                td.ifClassOrInterfaceDeclaration(coid -> collectPropertyDescriptions(coid, jpdvs));
-            }
-        }
-    }
-
-    private void collectPropertyDescriptions(ClassOrInterfaceDeclaration coid,
-            Table<String, String, JsonPropertyDescriptionValueDto> table) {
-        String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        String javabeanQualifier = qualifier;
-        for (FieldDeclaration field : coid.getFields()) {
-            Collection<String> javadocDescLines = JavadocDescriptions.getAsLines(field);
-            for (VariableDeclarator var : field.getVariables()) {
-                JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
-                String varName = var.getNameAsString();
-                jpdv.setDescriptionLines(javadocDescLines);
-                jpdv.setDocIgnore(findIgnoreFlag(javadocDescLines));
-                table.put(javabeanQualifier, varName, jpdv);
-            }
-        }
-    }
-
-    private boolean findIgnoreFlag(Collection<String> javadocDescLines) {
-        for (String line : javadocDescLines) {
-            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, "doc-ignore")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    JsonSchemaGenerator buildJsg() {
         // 缺省配置
         ObjectMapper customOm = ObjectMapperUtils.initDefault(new ObjectMapper());
 
@@ -240,6 +200,41 @@ class JsgBuildProc {
         JsonSchemaGenerator jsg = new JsonSchemaGenerator(customOm);
 
         return jsg;
+    }
+
+    private Table<String, String, JsonPropertyDescriptionValueDto> analyze(AstForest astForest) {
+        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
+        for (CompilationUnit cu : astForest) {
+            for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
+                td.ifClassOrInterfaceDeclaration(coid -> collectPropertyDescriptions(coid, jpdvs));
+            }
+        }
+        return jpdvs;
+    }
+
+    private void collectPropertyDescriptions(ClassOrInterfaceDeclaration coid,
+            Table<String, String, JsonPropertyDescriptionValueDto> table) {
+        String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+        String javabeanQualifier = qualifier;
+        for (FieldDeclaration field : coid.getFields()) {
+            Collection<String> javadocDescLines = JavadocDescriptions.getAsLines(field);
+            for (VariableDeclarator var : field.getVariables()) {
+                JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
+                String varName = var.getNameAsString();
+                jpdv.setDescriptionLines(javadocDescLines);
+                jpdv.setDocIgnore(findIgnoreFlag(javadocDescLines));
+                table.put(javabeanQualifier, varName, jpdv);
+            }
+        }
+    }
+
+    private boolean findIgnoreFlag(Collection<String> javadocDescLines) {
+        for (String line : javadocDescLines) {
+            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, "doc-ignore")) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
