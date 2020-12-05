@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.handle.impl;
 
 import java.lang.reflect.Field;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 
 /**
@@ -14,7 +15,7 @@ public class DefaultMoreJpdvAnalysisHandle implements MoreJpdvAnalysisHandle {
     }
 
     @Override
-    public String moreJpdvToString(Object dto) {
+    public String moreJpdvToString(Object dto, DocAnalyzerConfig docAnalyzerConfig) {
         return null;
     }
 

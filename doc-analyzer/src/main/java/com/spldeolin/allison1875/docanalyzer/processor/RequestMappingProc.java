@@ -25,7 +25,7 @@ class RequestMappingProc {
 
     PathMatcher pathMatcher = new AntPathMatcher();
 
-    RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod) {
+    RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         String[] controllerPaths = findValueFromAnno(controllerRequestMapping);
         RequestMethod[] controllerVerbs = findVerbFromAnno(controllerRequestMapping);
@@ -36,7 +36,6 @@ class RequestMappingProc {
 
         List<String> combinedUrls = combineUrl(controllerPaths, methodPaths);
         // 添加全局前缀
-        String globalUrlPrefix = DocAnalyzer.CONFIG.get().getGlobalUrlPrefix();
         if (StringUtils.isNotBlank(globalUrlPrefix)) {
             ListIterator<String> itr = combinedUrls.listIterator();
             while (itr.hasNext()) {

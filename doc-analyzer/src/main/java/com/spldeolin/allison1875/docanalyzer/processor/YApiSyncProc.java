@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
@@ -39,37 +40,36 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class YApiSyncProc {
 
-    private static final String baseUrl = DocAnalyzer.CONFIG.get().getYapiUrl();
-
-    private static final String token = DocAnalyzer.CONFIG.get().getYapiToken();
-
-    private static final Long projectId = getProjectIdFromYApi();
-
     private final JpdvToStringProc jpdvToStringProc;
 
     private final Collection<EndpointDto> endpoints;
 
     EndpointToStringProc endpointToStringProc = new EndpointToStringProc();
 
+    private final DocAnalyzerConfig docAnalyzerConfig;
+
     private static final ThreadLocal<Set<String>> formattedBodyJsonSchemaIds = ThreadLocal
             .withInitial(Sets::newHashSet);
 
-    private static Long getProjectIdFromYApi() {
-        String json = HttpUtils.get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + token);
+    YApiSyncProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle, Collection<EndpointDto> endpoints,
+            DocAnalyzerConfig docAnalyzerConfig) {
+        this.endpoints = endpoints;
+        this.jpdvToStringProc = new JpdvToStringProc(moreJpdvAnalysisHandle, docAnalyzerConfig);
+        this.docAnalyzerConfig = docAnalyzerConfig;
+    }
+
+    void process() {
+        String baseUrl = docAnalyzerConfig.getYapiUrl();
+        String json = HttpUtils
+                .get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + docAnalyzerConfig.getYapiToken());
         CommonRespDto<ProjectGetRespDto> resp = JsonUtils
                 .toParameterizedObject(json, new TypeReference<CommonRespDto<ProjectGetRespDto>>() {
                 });
         ensureSuccess(resp);
-        return resp.getData().getId();
-    }
+        Long projectId = resp.getData().getId();
 
-    YApiSyncProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle, Collection<EndpointDto> endpoints) {
-        this.endpoints = endpoints;
-        this.jpdvToStringProc = new JpdvToStringProc(moreJpdvAnalysisHandle);
-    }
-
-    void process() {
-        RedissonClient redisson = RedissonUtils.getSingleServer();
+        RedissonClient redisson = RedissonUtils
+                .getSingleServer(docAnalyzerConfig.getRedisAddress(), docAnalyzerConfig.getRedisPassword());
         RLock lock = redisson.getLock("allison1875_docanalyzer_" + baseUrl + "_" + projectId);
         try {
             // 尝试加锁，最多等待100秒，上锁以后30秒自动解锁
@@ -77,12 +77,12 @@ class YApiSyncProc {
                 try {
                     Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
                     catNames.add("回收站");
-                    Set<String> yapiCatNames = this.getYapiCatIdsEachName().keySet();
-                    this.createYApiCat(Sets.difference(catNames, yapiCatNames));
+                    Set<String> yapiCatNames = this.getYapiCatIdsEachName(projectId).keySet();
+                    this.createYApiCat(Sets.difference(catNames, yapiCatNames), projectId);
 
-                    Map<String, Long> catName2catId = this.getYapiCatIdsEachName();
+                    Map<String, Long> catName2catId = this.getYapiCatIdsEachName(projectId);
 
-                    Map<String, JsonNode> yapiUrls = this.listAutoInterfaces();
+                    Map<String, JsonNode> yapiUrls = this.listAutoInterfaces(projectId);
                     Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
 
                     // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
@@ -135,9 +135,10 @@ class YApiSyncProc {
         return JsonUtils.toJson(bodyJsonSchema);
     }
 
-    Map<String, Long> getYapiCatIdsEachName() {
+    Map<String, Long> getYapiCatIdsEachName(Long projectId) {
         String json = HttpUtils
-                .get(baseUrl + YApiConstant.LIST_CATS_URL + "?token=" + token + "&project_id" + projectId);
+                .get(docAnalyzerConfig.getYapiUrl() + YApiConstant.LIST_CATS_URL + "?token=" + docAnalyzerConfig
+                        .getYapiToken() + "&project_id" + projectId);
         CommonRespDto<List<InterfaceListMenuRespDto>> resp = JsonUtils
                 .toParameterizedObject(json, new TypeReference<CommonRespDto<List<InterfaceListMenuRespDto>>>() {
                 });
@@ -150,21 +151,22 @@ class YApiSyncProc {
         return result;
     }
 
-    private void createYApiCat(Collection<String> catNames) {
+    private void createYApiCat(Collection<String> catNames, Long projectId) {
         for (String catName : catNames) {
             Map<String, String> form = Maps.newHashMap();
             form.put("desc", "");
             form.put("name", catName);
             form.put("project_id", projectId.toString());
-            form.put("token", token);
-            HttpUtils.postForm(baseUrl + YApiConstant.CREATE_CAT_URL, form);
+            form.put("token", docAnalyzerConfig.getYapiToken());
+            HttpUtils.postForm(docAnalyzerConfig.getYapiUrl() + YApiConstant.CREATE_CAT_URL, form);
         }
 
     }
 
-    private Map<String, JsonNode> listAutoInterfaces() {
-        JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(
-                HttpUtils.get(baseUrl + YApiConstant.LIST_CATS_URL + "?token=" + token + "&project_id" + projectId));
+    private Map<String, JsonNode> listAutoInterfaces(Long projectId) {
+        JsonNode interfaceListMenuDto = ensureSusscessAndToGetData(HttpUtils
+                .get(docAnalyzerConfig.getYapiUrl() + YApiConstant.LIST_CATS_URL + "?token=" + docAnalyzerConfig
+                        .getYapiToken() + "&project_id" + projectId));
 
         Map<String, JsonNode> result = Maps.newHashMap();
         for (JsonNode jsonNode : interfaceListMenuDto) {
@@ -185,8 +187,9 @@ class YApiSyncProc {
         }
         Long id = jsonNode.get("_id").asLong();
 
-        JsonNode detail = ensureSusscessAndToGetData(
-                HttpUtils.get(baseUrl + YApiConstant.GET_ENDPOINT_URL + "?id=" + id + "&token=" + token));
+        JsonNode detail = ensureSusscessAndToGetData(HttpUtils
+                .get(docAnalyzerConfig.getYapiUrl() + YApiConstant.GET_ENDPOINT_URL + "?id=" + id + "&token="
+                        + docAnalyzerConfig.getYapiToken()));
 
         Map<String, Object> form = Maps.newHashMap();
         form.put("id", id);
@@ -206,8 +209,9 @@ class YApiSyncProc {
         deleteMessage = StringUtils.replaceLast(deleteMessage, "</strong>", "</span>");
 
         form.put("desc", deleteMessage + desc);
-        form.put("token", token);
-        String resp = HttpUtils.postJson(baseUrl + YApiConstant.UPDATE_ENDPOINT_URL, JsonUtils.toJson(form));
+        form.put("token", docAnalyzerConfig.getYapiToken());
+        String resp = HttpUtils
+                .postJson(docAnalyzerConfig.getYapiUrl() + YApiConstant.UPDATE_ENDPOINT_URL, JsonUtils.toJson(form));
         log.info(resp);
     }
 
@@ -229,9 +233,9 @@ class YApiSyncProc {
         form.put("desc", MarkdownUtils.convertToHtml(description));
         form.put("method", httpMethod);
         form.put("catid", catId);
-        form.put("token", token);
-        String resp = HttpUtils
-                .postJson(YApiSyncProc.baseUrl + YApiConstant.CREATE_OR_UPDATE_ENDPOINT_URL, JsonUtils.toJson(form));
+        form.put("token", docAnalyzerConfig.getYapiToken());
+        String resp = HttpUtils.postJson(docAnalyzerConfig.getYapiUrl() + YApiConstant.CREATE_OR_UPDATE_ENDPOINT_URL,
+                JsonUtils.toJson(form));
         log.info(resp);
     }
 

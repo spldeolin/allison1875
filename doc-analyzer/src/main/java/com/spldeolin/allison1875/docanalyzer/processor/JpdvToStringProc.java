@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.EnumCodeAndTitleDto;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
@@ -18,8 +19,11 @@ public class JpdvToStringProc {
 
     private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
 
-    public JpdvToStringProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle) {
+    private final DocAnalyzerConfig docAnalyzerConfig;
+
+    public JpdvToStringProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle, DocAnalyzerConfig docAnalyzerConfig) {
         this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
+        this.docAnalyzerConfig = docAnalyzerConfig;
     }
 
     public String toString(JsonPropertyDescriptionValueDto jpdv) {
@@ -81,7 +85,7 @@ public class JpdvToStringProc {
                 }
                 enumInfo = sb.deleteCharAt(sb.length() - 1).toString();
             }
-            String extra = moreJpdvAnalysisHandle.moreJpdvToString(jpdv.getMore());
+            String extra = moreJpdvAnalysisHandle.moreJpdvToString(jpdv.getMore(), docAnalyzerConfig);
 
             return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format, enumInfo, extra);
         }

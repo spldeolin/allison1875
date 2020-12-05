@@ -55,7 +55,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     SimplyAnalyzeProc simplyAnalyzeProc = new SimplyAnalyzeProc();
 
-    public static final ThreadLocal<DocAnalyzerConfig> CONFIG = ThreadLocal.withInitial(DocAnalyzerConfig::new);
+    DocAnalyzerConfig config = new DocAnalyzerConfig();
 
     @Override
     public DocAnalyzer config(DocAnalyzerConfig config) {
@@ -68,14 +68,14 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
             }
             System.exit(-9);
         }
-        CONFIG.set(config);
+        this.config = config;
         return this;
     }
 
     @Override
     public void process(AstForest astForest) {
         // 重新生成astForest（将解析范围扩大到所有用户配置的项目路径）
-        astForest = new AstForest(astForest.getAnyClassFromHost(), CONFIG.get().getDependencyProjectPaths());
+        astForest = new AstForest(astForest.getAnyClassFromHost(), config.getDependencyProjectPaths());
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
@@ -108,7 +108,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
                 // 处理controller级与handler级的@RequestMapping
                 RequestMappingFullDto requestMappingFullDto = requestMappingProcessor
-                        .analyze(controller.getReflection(), handler.getReflection());
+                        .analyze(controller.getReflection(), handler.getReflection(), config.getGlobalUrlPrefix());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
                 Collection<EndpointDto> copies = copyEndpointProc.process(endpoint, requestMappingFullDto);
@@ -121,7 +121,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         }
 
         // 同步到YApi
-        new YApiSyncProc(moreJpdvAnalysisHandle, endpoints).process();
+        new YApiSyncProc(moreJpdvAnalysisHandle, endpoints, config).process();
         log.info(endpoints.size());
     }
 
