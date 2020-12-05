@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import com.google.common.base.Joiner;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 
 /**
  * @author Deolin 2020-12-04

@@ -11,10 +11,6 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
-import com.spldeolin.allison1875.docanalyzer.dto.ControllerFullDto;
-import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.dto.HandlerFullDto;
-import com.spldeolin.allison1875.docanalyzer.dto.RequestMappingFullDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
@@ -25,6 +21,10 @@ import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultAnalyzeEnumConst
 import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultMoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultObtainConcernedResponseBodyHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultSpecificFieldDescriptionsHandle;
+import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

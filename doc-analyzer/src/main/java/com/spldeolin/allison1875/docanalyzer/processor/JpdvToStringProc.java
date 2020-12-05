@@ -7,10 +7,10 @@ import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
-import com.spldeolin.allison1875.docanalyzer.dto.EnumCodeAndTitleDto;
-import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
+import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 
 /**
  * @author Deolin 2020-12-02

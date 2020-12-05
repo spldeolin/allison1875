@@ -32,11 +32,11 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
+import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能

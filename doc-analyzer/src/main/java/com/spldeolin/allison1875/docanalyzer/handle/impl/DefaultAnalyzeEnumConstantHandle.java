@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.handle.impl;
 
-import com.spldeolin.allison1875.docanalyzer.dto.EnumCodeAndTitleDto;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
+import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
 
 /**
  * @author Deolin 2020-09-12

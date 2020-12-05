@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.dto;
+package com.spldeolin.allison1875.inspector.javabean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.dto;
+package com.spldeolin.allison1875.inspector.javabean;
 
 import java.time.LocalDateTime;
 import org.apache.commons.lang3.builder.ToStringBuilder;

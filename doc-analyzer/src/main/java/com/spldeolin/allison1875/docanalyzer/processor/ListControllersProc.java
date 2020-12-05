@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
-import com.spldeolin.allison1875.docanalyzer.dto.ControllerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

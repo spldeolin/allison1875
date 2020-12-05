@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.dto;
+package com.spldeolin.allison1875.docanalyzer.javabean;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;

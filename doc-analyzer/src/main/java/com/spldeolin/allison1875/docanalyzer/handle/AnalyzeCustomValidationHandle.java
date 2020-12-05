@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.docanalyzer.handle;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
-import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 
 /**
  * 解析自定义校验注解策略

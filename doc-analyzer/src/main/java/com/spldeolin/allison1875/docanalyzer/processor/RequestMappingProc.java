@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.docanalyzer.dto.RequestMappingFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 
 /**
  * 内聚了 对请求URL和请求动词解析的功能

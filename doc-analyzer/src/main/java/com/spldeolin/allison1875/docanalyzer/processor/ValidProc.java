@@ -20,9 +20,9 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.docanalyzer.dto.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
+import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 
 /**
  * 校验项

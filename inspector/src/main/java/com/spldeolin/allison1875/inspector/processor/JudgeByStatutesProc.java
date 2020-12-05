@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
-import com.spldeolin.allison1875.inspector.dto.LawlessDto;
-import com.spldeolin.allison1875.inspector.dto.PardonDto;
+import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
+import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.extern.log4j.Log4j2;
 

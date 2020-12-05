@@ -10,7 +10,7 @@ import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
-import com.spldeolin.allison1875.inspector.dto.LawlessDto;
+import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.inspector.dto.PardonDto;
+import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

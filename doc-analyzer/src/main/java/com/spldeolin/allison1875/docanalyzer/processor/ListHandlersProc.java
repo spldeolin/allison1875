@@ -12,8 +12,8 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
-import com.spldeolin.allison1875.docanalyzer.dto.ControllerFullDto;
-import com.spldeolin.allison1875.docanalyzer.dto.HandlerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

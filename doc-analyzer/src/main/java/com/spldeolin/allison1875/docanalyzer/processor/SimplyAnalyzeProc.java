@@ -6,8 +6,8 @@ import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
-import com.spldeolin.allison1875.docanalyzer.dto.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.dto.HandlerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 
 /**
  * @author Deolin 2020-12-04

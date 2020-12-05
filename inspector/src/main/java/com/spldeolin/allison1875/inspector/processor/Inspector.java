@@ -9,8 +9,8 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
-import com.spldeolin.allison1875.inspector.dto.LawlessDto;
-import com.spldeolin.allison1875.inspector.dto.PardonDto;
+import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
+import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.extern.log4j.Log4j2;
 

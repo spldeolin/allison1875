@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.inspector.statute;
 
 import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
-import com.spldeolin.allison1875.inspector.dto.LawlessDto;
+import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 
 /**
  * 该接口用于抽象一条规约
