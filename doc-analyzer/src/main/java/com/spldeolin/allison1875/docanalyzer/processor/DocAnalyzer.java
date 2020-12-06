@@ -79,9 +79,8 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
-        JsgBuildProc jsgBuildProc = new JsgBuildProc(analyzeCustomValidationHandle,
-                specificFieldDescriptionsHandle.provideSpecificFieldDescriptions(), analyzeEnumConstantHandle,
-                moreJpdvAnalysisHandle);
+        JsgBuildProc jsgBuildProc = new JsgBuildProc(analyzeCustomValidationHandle, specificFieldDescriptionsHandle,
+                analyzeEnumConstantHandle, moreJpdvAnalysisHandle);
         JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg(astForest);
 
         // 收集endpoint

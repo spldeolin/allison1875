@@ -13,13 +13,7 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
  */
 public class ReferenceSchemaProc {
 
-    private final JsonSchema rootJsonSchema;
-
-    ReferenceSchemaProc(JsonSchema rootJsonSchema) {
-        this.rootJsonSchema = rootJsonSchema;
-    }
-
-    public void process() {
+    public void process(JsonSchema rootJsonSchema) {
         Map<String, String> pathsEachId = Maps.newHashMap();
         Map<JsonSchema, String> paths = Maps.newLinkedHashMap();
         if (rootJsonSchema.isObjectSchema()) {
@@ -54,7 +48,7 @@ public class ReferenceSchemaProc {
 
             if (jsonSchema instanceof ReferenceSchema) {
                 String referencePath = pathsEachId.get(jsonSchema.get$ref());
-                if (this.rootJsonSchema.isArraySchema()) {
+                if (rootJsonSchema.isArraySchema()) {
                     referencePath = "根节点[]" + referencePath;
                 }
                 if (jpdv != null) {

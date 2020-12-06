@@ -35,6 +35,7 @@ import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 
@@ -47,17 +48,17 @@ public class JsgBuildProc {
 
     private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
-    private final Table<String, String, String> specificFieldDescriptions;
+    private final SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle;
 
     private final AnalyzeEnumConstantHandle analyzeEnumConstantHandle;
 
     private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
 
     JsgBuildProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
-            Table<String, String, String> specificFieldDescriptions,
+            SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle,
             AnalyzeEnumConstantHandle analyzeEnumConstantHandle, MoreJpdvAnalysisHandle moreJpdvAnalysisHandle) {
         this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
-        this.specificFieldDescriptions = specificFieldDescriptions;
+        this.specificFieldDescriptionsHandle = specificFieldDescriptionsHandle;
         this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
         this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
     }
@@ -113,7 +114,8 @@ public class JsgBuildProc {
                 JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
                 if (jpdv == null) {
                     jpdv = new JsonPropertyDescriptionValueDto();
-                    String specificDesc = specificFieldDescriptions.get(className, fieldNameMight);
+                    String specificDesc = specificFieldDescriptionsHandle.provideSpecificFieldDescriptions()
+                            .get(className, fieldNameMight);
                     if (specificDesc != null) {
                         jpdv.setDescriptionLines(Lists.newArrayList(specificDesc));
                     }

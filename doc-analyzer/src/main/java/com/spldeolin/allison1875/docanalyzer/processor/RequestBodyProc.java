@@ -22,6 +22,8 @@ public class RequestBodyProc {
 
     EnumSchemaProc enumSchemaProc = new EnumSchemaProc();
 
+    ReferenceSchemaProc referenceSchemaProc = new ReferenceSchemaProc();
+
     public JsonSchema analyze(JsonSchemaGenerator jsg, MethodDeclaration handler) {
         String requestBodyDescribe = null;
         try {
@@ -29,7 +31,7 @@ public class RequestBodyProc {
             if (requestBody != null) {
                 requestBodyDescribe = requestBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
-                new ReferenceSchemaProc(jsonSchema).process();
+                referenceSchemaProc.process(jsonSchema);
                 enumSchemaProc.process(jsonSchema);
                 return jsonSchema;
             }
