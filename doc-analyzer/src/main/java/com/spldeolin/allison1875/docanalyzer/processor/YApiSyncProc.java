@@ -15,11 +15,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
-import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
@@ -37,28 +38,23 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Deolin 2020-07-26
  */
+@Singleton
 @Log4j2
 public class YApiSyncProc {
-
-    private final JpdvToStringProc jpdvToStringProc;
-
-    private final Collection<EndpointDto> endpoints;
-
-    EndpointToStringProc endpointToStringProc = new EndpointToStringProc();
-
-    private final DocAnalyzerConfig docAnalyzerConfig;
 
     private static final ThreadLocal<Set<String>> formattedBodyJsonSchemaIds = ThreadLocal
             .withInitial(Sets::newHashSet);
 
-    YApiSyncProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle, Collection<EndpointDto> endpoints,
-            DocAnalyzerConfig docAnalyzerConfig) {
-        this.endpoints = endpoints;
-        this.jpdvToStringProc = new JpdvToStringProc(moreJpdvAnalysisHandle, docAnalyzerConfig);
-        this.docAnalyzerConfig = docAnalyzerConfig;
-    }
+    @Inject
+    private JpdvToStringProc jpdvToStringProc;
 
-    public void process() {
+    @Inject
+    private EndpointToStringProc endpointToStringProc;
+
+    @Inject
+    private DocAnalyzerConfig docAnalyzerConfig;
+
+    public void process(Collection<EndpointDto> endpoints) {
         String baseUrl = docAnalyzerConfig.getYapiUrl();
         String json = HttpUtils
                 .get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + docAnalyzerConfig.getYapiToken());

@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import java.util.Map;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
@@ -15,16 +17,14 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 /**
  * @author Deolin 2020-12-02
  */
+@Singleton
 public class JpdvToStringProc {
 
-    private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
+    @Inject
+    private MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
 
-    private final DocAnalyzerConfig docAnalyzerConfig;
-
-    public JpdvToStringProc(MoreJpdvAnalysisHandle moreJpdvAnalysisHandle, DocAnalyzerConfig docAnalyzerConfig) {
-        this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
-        this.docAnalyzerConfig = docAnalyzerConfig;
-    }
+    @Inject
+    private DocAnalyzerConfig docAnalyzerConfig;
 
     public String toString(JsonPropertyDescriptionValueDto jpdv) {
         if (jpdv == null) {

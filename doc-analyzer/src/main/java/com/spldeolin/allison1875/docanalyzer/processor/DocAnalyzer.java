@@ -1,26 +1,15 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
-import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
-import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.ObtainConcernedResponseBodyHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultAnalyzeCustomValidationHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultAnalyzeEnumConstantHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultMoreJpdvAnalysisHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultObtainConcernedResponseBodyHandle;
-import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultSpecificFieldDescriptionsHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
@@ -32,43 +21,39 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 @Log4j2
 public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
 
-    protected ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle =
-            new DefaultObtainConcernedResponseBodyHandle();
+    @Inject
+    private ListHandlersProc listHandlersProc;
 
-    protected AnalyzeCustomValidationHandle analyzeCustomValidationHandle = new DefaultAnalyzeCustomValidationHandle();
+    @Inject
+    private RequestMappingProc requestMappingProcessor;
 
-    protected SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle =
-            new DefaultSpecificFieldDescriptionsHandle();
+    @Inject
+    private CopyEndpointProc copyEndpointProc;
 
-    protected AnalyzeEnumConstantHandle analyzeEnumConstantHandle = new DefaultAnalyzeEnumConstantHandle();
+    @Inject
+    private SimplyAnalyzeProc simplyAnalyzeProc;
 
-    protected MoreJpdvAnalysisHandle moreJpdvAnalysisHandle = new DefaultMoreJpdvAnalysisHandle();
+    @Inject
+    private YApiSyncProc yapiSyncProc;
 
-    ListHandlersProc listHandlersProc = new ListHandlersProc();
+    @Inject
+    private JsgBuildProc jsgBuildProc;
 
-    RequestMappingProc requestMappingProcessor = new RequestMappingProc();
+    @Inject
+    private RequestBodyProc requestBodyProc;
 
-    CopyEndpointProc copyEndpointProc = new CopyEndpointProc();
+    @Inject
+    private ResponseBodyProc responseBodyProc;
 
-    SimplyAnalyzeProc simplyAnalyzeProc = new SimplyAnalyzeProc();
-
-    DocAnalyzerConfig config = new DocAnalyzerConfig();
+    @Inject
+    private DocAnalyzerConfig config;
 
     @Override
     public DocAnalyzer config(DocAnalyzerConfig config) {
-        Set<ConstraintViolation<DocAnalyzerConfig>> violations = ValidateUtils.validate(config);
-        if (violations.size() > 0) {
-            log.warn("配置项校验未通过，请检查后重新运行");
-            for (ConstraintViolation<DocAnalyzerConfig> violation : violations) {
-                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
-                        + violation.getMessage());
-            }
-            System.exit(-9);
-        }
-        this.config = config;
         return this;
     }
 
@@ -79,8 +64,6 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
-        JsgBuildProc jsgBuildProc = new JsgBuildProc(analyzeCustomValidationHandle, specificFieldDescriptionsHandle,
-                analyzeEnumConstantHandle, moreJpdvAnalysisHandle);
         JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg(astForest);
 
         // 收集endpoint
@@ -97,11 +80,9 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
             try {
                 // 分析Request Body
-                RequestBodyProc requestBodyProc = new RequestBodyProc();
                 endpoint.setRequestBodyJsonSchema(requestBodyProc.analyze(jsg, handler.getMd()));
 
                 // 分析Response Body
-                ResponseBodyProc responseBodyProc = new ResponseBodyProc(obtainConcernedResponseBodyHandle);
                 endpoint.setResponseBodyJsonSchema(
                         responseBodyProc.analyze(jsg, controller.getCoid(), handler.getMd()));
 
@@ -120,7 +101,7 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
         }
 
         // 同步到YApi
-        new YApiSyncProc(moreJpdvAnalysisHandle, endpoints, config).process();
+        yapiSyncProc.process(endpoints);
         log.info(endpoints.size());
     }
 

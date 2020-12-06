@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
@@ -15,6 +16,7 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 /**
  * @author Deolin 2020-09-12
  */
+@Singleton
 public class EnumSchemaProc {
 
     private static final ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());

@@ -26,13 +26,14 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
@@ -44,24 +45,20 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 public class JsgBuildProc {
 
-    private final SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle;
+    @Inject
+    private SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle;
 
-    private final AnalyzeEnumConstantHandle analyzeEnumConstantHandle;
+    @Inject
+    private AnalyzeEnumConstantHandle analyzeEnumConstantHandle;
 
-    private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
+    @Inject
+    private MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
 
-    private final ValidProc validProc;
-
-    JsgBuildProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
-            SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle,
-            AnalyzeEnumConstantHandle analyzeEnumConstantHandle, MoreJpdvAnalysisHandle moreJpdvAnalysisHandle) {
-        this.specificFieldDescriptionsHandle = specificFieldDescriptionsHandle;
-        this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
-        this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
-        this.validProc = new ValidProc(analyzeCustomValidationHandle);
-    }
+    @Inject
+    private ValidProc validProc;
 
     public JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = analyze(astForest);

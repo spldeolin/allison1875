@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
@@ -21,12 +23,15 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 @Log4j2
 public class ListHandlersProc {
 
-    MethodCollectProc methodCollectProc = new MethodCollectProc();
+    @Inject
+    private MethodCollectProc methodCollectProc;
 
-    ListControllersProc listControllersProc = new ListControllersProc();
+    @Inject
+    private ListControllersProc listControllersProc;
 
     public Collection<HandlerFullDto> process(AstForest astForest) {
         Collection<ControllerFullDto> controllers = listControllersProc.process(astForest);

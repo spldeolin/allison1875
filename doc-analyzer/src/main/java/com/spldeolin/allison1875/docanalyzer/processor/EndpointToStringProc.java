@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import com.google.common.base.Joiner;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
@@ -8,6 +9,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 /**
  * @author Deolin 2020-12-04
  */
+@Singleton
 public class EndpointToStringProc {
 
     public String toString(EndpointDto dto) {

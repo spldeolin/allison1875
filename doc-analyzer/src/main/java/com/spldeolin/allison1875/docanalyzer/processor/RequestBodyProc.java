@@ -6,6 +6,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
@@ -17,12 +19,15 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 @Log4j2
 public class RequestBodyProc {
 
-    EnumSchemaProc enumSchemaProc = new EnumSchemaProc();
+    @Inject
+    private EnumSchemaProc enumSchemaProc;
 
-    ReferenceSchemaProc referenceSchemaProc = new ReferenceSchemaProc();
+    @Inject
+    private ReferenceSchemaProc referenceSchemaProc;
 
     public JsonSchema analyze(JsonSchemaGenerator jsg, MethodDeclaration handler) {
         String requestBodyDescribe = null;

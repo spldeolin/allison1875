@@ -7,6 +7,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -22,6 +23,7 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 @Log4j2
 public class ListControllersProc {
 

@@ -9,10 +9,11 @@ import java.util.ListIterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 
@@ -21,9 +22,11 @@ import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 public class RequestMappingProc {
 
-    PathMatcher pathMatcher = new AntPathMatcher();
+    @Inject
+    AntPathMatcher pathMatcher;
 
     public RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);

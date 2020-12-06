@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import java.util.Collection;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
@@ -10,6 +11,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 /**
  * @author Deolin 2020-12-04
  */
+@Singleton
 public class CopyEndpointProc {
 
     public Collection<EndpointDto> process(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto) {

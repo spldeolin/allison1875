@@ -20,6 +20,8 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
@@ -29,13 +31,11 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
  *
  * @author Deolin 2019-12-09
  */
+@Singleton
 public class ValidProc {
 
-    private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
-
-    ValidProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle) {
-        this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
-    }
+    @Inject
+    private AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
     public Collection<ValidatorDto> process(AnnotatedElement annotatedElement) {
         Collection<ValidatorDto> valids = Lists.newArrayList();

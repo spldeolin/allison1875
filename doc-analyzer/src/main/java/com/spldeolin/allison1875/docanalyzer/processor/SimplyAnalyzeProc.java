@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -12,6 +13,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 /**
  * @author Deolin 2020-12-04
  */
+@Singleton
 public class SimplyAnalyzeProc {
 
     public void process(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint) {

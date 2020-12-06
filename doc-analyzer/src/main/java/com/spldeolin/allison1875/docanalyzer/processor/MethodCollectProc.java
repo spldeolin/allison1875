@@ -4,6 +4,7 @@ import java.util.Map;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Maps;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 
 /**
@@ -11,6 +12,7 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
  *
  * @author Deolin 2020-06-10
  */
+@Singleton
 public class MethodCollectProc {
 
     public Map<String, MethodDeclaration> collectMethods(ClassOrInterfaceDeclaration coid) {
