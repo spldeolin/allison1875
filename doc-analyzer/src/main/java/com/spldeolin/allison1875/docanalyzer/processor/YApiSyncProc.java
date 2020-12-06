@@ -38,7 +38,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-26
  */
 @Log4j2
-class YApiSyncProc {
+public class YApiSyncProc {
 
     private final JpdvToStringProc jpdvToStringProc;
 
@@ -58,7 +58,7 @@ class YApiSyncProc {
         this.docAnalyzerConfig = docAnalyzerConfig;
     }
 
-    void process() {
+    public void process() {
         String baseUrl = docAnalyzerConfig.getYapiUrl();
         String json = HttpUtils
                 .get(baseUrl + YApiConstant.GET_PROJECT_URL + "?token=" + docAnalyzerConfig.getYapiToken());
@@ -135,7 +135,7 @@ class YApiSyncProc {
         return JsonUtils.toJson(bodyJsonSchema);
     }
 
-    Map<String, Long> getYapiCatIdsEachName(Long projectId) {
+    public Map<String, Long> getYapiCatIdsEachName(Long projectId) {
         String json = HttpUtils
                 .get(docAnalyzerConfig.getYapiUrl() + YApiConstant.LIST_CATS_URL + "?token=" + docAnalyzerConfig
                         .getYapiToken() + "&project_id" + projectId);

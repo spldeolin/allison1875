@@ -22,13 +22,13 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class ListHandlersProc {
+public class ListHandlersProc {
 
     MethodCollectProc methodCollectProc = new MethodCollectProc();
 
     ListControllersProc listControllersProc = new ListControllersProc();
 
-    Collection<HandlerFullDto> process(AstForest astForest) {
+    public Collection<HandlerFullDto> process(AstForest astForest) {
         Collection<ControllerFullDto> controllers = listControllersProc.process(astForest);
 
         Collection<HandlerFullDto> result = Lists.newArrayList();

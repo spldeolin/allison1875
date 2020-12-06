@@ -21,11 +21,11 @@ import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
  *
  * @author Deolin 2020-06-10
  */
-class RequestMappingProc {
+public class RequestMappingProc {
 
     PathMatcher pathMatcher = new AntPathMatcher();
 
-    RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix) {
+    public RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         String[] controllerPaths = findValueFromAnno(controllerRequestMapping);
         RequestMethod[] controllerVerbs = findVerbFromAnno(controllerRequestMapping);

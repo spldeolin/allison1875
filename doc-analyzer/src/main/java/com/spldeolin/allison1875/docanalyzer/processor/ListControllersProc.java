@@ -23,9 +23,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class ListControllersProc {
+public class ListControllersProc {
 
-    Collection<ControllerFullDto> process(AstForest astForest) {
+    public Collection<ControllerFullDto> process(AstForest astForest) {
         Collection<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
             for (ClassOrInterfaceDeclaration controller : cu

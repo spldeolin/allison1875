@@ -11,9 +11,9 @@ import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
  *
  * @author Deolin 2020-06-10
  */
-class MethodCollectProc {
+public class MethodCollectProc {
 
-    Map<String, MethodDeclaration> collectMethods(ClassOrInterfaceDeclaration coid) {
+    public Map<String, MethodDeclaration> collectMethods(ClassOrInterfaceDeclaration coid) {
         Map<String, MethodDeclaration> methods = Maps.newHashMap();
         for (MethodDeclaration method : coid.findAll(MethodDeclaration.class)) {
             methods.put(MethodQualifiers.getShortestQualifiedSignature(method), method);

@@ -18,11 +18,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-class RequestBodyProc {
+public class RequestBodyProc {
 
     EnumSchemaProc enumSchemaProc = new EnumSchemaProc();
 
-    JsonSchema analyze(JsonSchemaGenerator jsg, MethodDeclaration handler) {
+    public JsonSchema analyze(JsonSchemaGenerator jsg, MethodDeclaration handler) {
         String requestBodyDescribe = null;
         try {
             ResolvedType requestBody = findRequestBody(handler);

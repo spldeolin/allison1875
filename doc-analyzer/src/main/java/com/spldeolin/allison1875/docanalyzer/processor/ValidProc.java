@@ -29,7 +29,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
  *
  * @author Deolin 2019-12-09
  */
-class ValidProc {
+public class ValidProc {
 
     private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
@@ -42,7 +42,7 @@ class ValidProc {
         this.annotatedElement = annotatedElement;
     }
 
-    ValidProc process() {
+    public ValidProc process() {
         valids = Lists.newArrayList();
         NotNull notNull = find(annotatedElement, NotNull.class);
         if (notNull != null) {

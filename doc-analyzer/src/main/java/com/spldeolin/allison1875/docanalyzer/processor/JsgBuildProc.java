@@ -43,7 +43,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
  *
  * @author Deolin 2020-06-10
  */
-class JsgBuildProc {
+public class JsgBuildProc {
 
     private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
@@ -62,7 +62,7 @@ class JsgBuildProc {
         this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
     }
 
-    JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
+    public JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = analyze(astForest);
         astForest.reset();
 
