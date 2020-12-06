@@ -33,17 +33,12 @@ public class ValidProc {
 
     private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
-    private final AnnotatedElement annotatedElement;
-
-    private Collection<ValidatorDto> valids;
-
-    ValidProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle, AnnotatedElement annotatedElement) {
+    ValidProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle) {
         this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
-        this.annotatedElement = annotatedElement;
     }
 
-    public ValidProc process() {
-        valids = Lists.newArrayList();
+    public Collection<ValidatorDto> process(AnnotatedElement annotatedElement) {
+        Collection<ValidatorDto> valids = Lists.newArrayList();
         NotNull notNull = find(annotatedElement, NotNull.class);
         if (notNull != null) {
             valids.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));
@@ -145,7 +140,7 @@ public class ValidProc {
 
         valids.addAll(analyzeCustomValidationHandle.analyzeCustomValidation(annotatedElement));
         nullToEmpty(valids);
-        return this;
+        return valids;
     }
 
     private <A extends Annotation> A find(AnnotatedElement field, Class<A> annotationType) {
@@ -158,10 +153,6 @@ public class ValidProc {
                 one.setNote("");
             }
         });
-    }
-
-    public Collection<ValidatorDto> getValids() {
-        return this.valids;
     }
 
 }

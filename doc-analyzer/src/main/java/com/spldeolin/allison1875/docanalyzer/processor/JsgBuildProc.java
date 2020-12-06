@@ -46,21 +46,21 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
  */
 public class JsgBuildProc {
 
-    private final AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
-
     private final SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle;
 
     private final AnalyzeEnumConstantHandle analyzeEnumConstantHandle;
 
     private final MoreJpdvAnalysisHandle moreJpdvAnalysisHandle;
 
+    private final ValidProc validProc;
+
     JsgBuildProc(AnalyzeCustomValidationHandle analyzeCustomValidationHandle,
             SpecificFieldDescriptionsHandle specificFieldDescriptionsHandle,
             AnalyzeEnumConstantHandle analyzeEnumConstantHandle, MoreJpdvAnalysisHandle moreJpdvAnalysisHandle) {
-        this.analyzeCustomValidationHandle = analyzeCustomValidationHandle;
         this.specificFieldDescriptionsHandle = specificFieldDescriptionsHandle;
         this.analyzeEnumConstantHandle = analyzeEnumConstantHandle;
         this.moreJpdvAnalysisHandle = moreJpdvAnalysisHandle;
+        this.validProc = new ValidProc(analyzeCustomValidationHandle);
     }
 
     public JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
@@ -95,14 +95,14 @@ public class JsgBuildProc {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
-                ValidProc validProc = new ValidProc(analyzeCustomValidationHandle, annotated.getAnnotated()).process();
+                Collection<ValidatorDto> valids = validProc.process(annotated.getAnnotated());
 
                 if (field == null) {
                     JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
                     if (annotated.getAnnotated() instanceof Method
                             && annotated.getAnnotation(AssertTrue.class) != null) {
                         jpdv.setIsFieldCrossingValids(true);
-                        jpdv.setValids(validProc.getValids());
+                        jpdv.setValids(valids);
                     }
                     return JsonUtils.toJson(jpdv);
                 }
@@ -121,7 +121,7 @@ public class JsgBuildProc {
                     }
                 }
 
-                jpdv.setValids(validProc.getValids());
+                jpdv.setValids(valids);
 
                 /*
                     解析自Field类型的唯一一个泛型上的校验注解（如果有唯一泛型的话）
@@ -135,8 +135,7 @@ public class JsgBuildProc {
                                 .getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            Collection<ValidatorDto> theOnlyElementValids = new ValidProc(analyzeCustomValidationHandle,
-                                    theOnlyTypeArgument).process().getValids();
+                            Collection<ValidatorDto> theOnlyElementValids = validProc.process(theOnlyTypeArgument);
                             theOnlyElementValids.forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);
                         }
