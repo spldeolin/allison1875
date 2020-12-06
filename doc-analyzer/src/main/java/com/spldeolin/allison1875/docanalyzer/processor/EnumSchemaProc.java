@@ -2,9 +2,12 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
 import java.util.Set;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
@@ -14,6 +17,8 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
  */
 public class EnumSchemaProc {
 
+    private static final ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
+
     public void process(JsonSchema rootJsonSchema) {
         JsonSchemaTraverseUtils.traverse("", rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
             if (jsonSchema.isValueTypeSchema()) {
@@ -21,7 +26,11 @@ public class EnumSchemaProc {
                 if (enums != null) {
                     Collection<EnumCodeAndTitleDto> ecats = Lists.newArrayList();
                     for (String anEnum : enums) {
-                        ecats.add(JsonUtils.toObject(anEnum, EnumCodeAndTitleDto.class));
+                        try {
+                            ecats.add(om.readValue(anEnum, EnumCodeAndTitleDto.class));
+                        } catch (JsonProcessingException e) {
+                            // 这种情况说明anEnum没有被AnalyzeEnumConstantHandle#analyzeEnumConstant转化为JSON
+                        }
                     }
 
                     String jpd = jsonSchema.getDescription();
