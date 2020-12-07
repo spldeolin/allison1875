@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-27
  */
 @Log4j2
-class BlueprintCollectProc {
+public class BlueprintCollectProc {
 
     private final CompilationUnit cu;
 
@@ -29,7 +29,7 @@ class BlueprintCollectProc {
         this.cu = cu;
     }
 
-    BlueprintCollectProc process() {
+    public BlueprintCollectProc process() {
         cu.findAll(ClassOrInterfaceDeclaration.class, this::isController).forEach(controller -> {
             for (BodyDeclaration<?> member : controller.getMembers()) {
                 if (!member.isInitializerDeclaration()) {

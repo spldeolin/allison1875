@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
 /**
  * @author Deolin 2020-08-28
  */
-class GenerateDtosProc {
+public class GenerateDtosProc {
 
     private final Path sourceRoot;
 
@@ -31,7 +31,7 @@ class GenerateDtosProc {
         this.dtoMetaInfos = dtoMetaInfos;
     }
 
-    GenerateDtosProc process() {
+    public GenerateDtosProc process() {
         dtoCus = Lists.newArrayList();
         for (DtoMetaInfo dtoMetaInfo : dtoMetaInfos) {
             Collection<ImportDeclaration> imports = Lists.newArrayList(dtoMetaInfo.getImports());

@@ -20,7 +20,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 /**
  * @author Deolin 2020-08-26
  */
-class GenerateServicesProc {
+public class GenerateServicesProc {
 
     private final MetaInfo metaInfo;
 
@@ -34,7 +34,7 @@ class GenerateServicesProc {
         this.metaInfo = metaInfo;
     }
 
-    GenerateServicesProc process() {
+    public GenerateServicesProc process() {
         HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();

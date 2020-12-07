@@ -35,7 +35,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-27
  */
 @Log4j2
-class BlueprintAnalyzeProc {
+public class BlueprintAnalyzeProc {
 
     private final ClassOrInterfaceDeclaration controller;
 
@@ -48,7 +48,7 @@ class BlueprintAnalyzeProc {
         this.blueprint = blueprint;
     }
 
-    BlueprintAnalyzeProc process() {
+    public BlueprintAnalyzeProc process() {
         MetaInfo.MetaInfoBuilder builder = MetaInfo.builder();
         builder.location(Locations.getRelativePathWithLineNo(blueprint));
         builder.controller(controller);

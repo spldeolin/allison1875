@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 /**
  * @author Deolin 2020-08-28
  */
-class GenerateHandlerProc {
+public class GenerateHandlerProc {
 
     private final MetaInfo metaInfo;
 
@@ -31,7 +31,7 @@ class GenerateHandlerProc {
         this.serviceQualifier = serviceQualifier;
     }
 
-    GenerateHandlerProc process() throws HandlerNameConflictException {
+    public GenerateHandlerProc process() throws HandlerNameConflictException {
         HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
         if (!metaInfo.isReqAbsent()) {
