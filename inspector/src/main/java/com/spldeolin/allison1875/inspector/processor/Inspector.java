@@ -20,9 +20,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Inspector implements Allison1875MainProcessor<InspectorConfig, Inspector> {
 
+    DetectPardonProc pardonDetectProc;
+
+    ReportLawlessProc reportLawlessProc;
+
     protected Collection<Statute> statutes = Lists.newArrayList();
 
-    public static final ThreadLocal<InspectorConfig> CONFIG = ThreadLocal.withInitial(InspectorConfig::new);
+    InspectorConfig config;
 
     @Override
     public Inspector config(InspectorConfig config) {
@@ -35,7 +39,9 @@ public class Inspector implements Allison1875MainProcessor<InspectorConfig, Insp
             }
             System.exit(-9);
         }
-        CONFIG.set(config);
+        this.config = config;
+        this.pardonDetectProc = new DetectPardonProc(config);
+        this.reportLawlessProc = new ReportLawlessProc(config);
         return this;
     }
 
@@ -43,14 +49,11 @@ public class Inspector implements Allison1875MainProcessor<InspectorConfig, Insp
     public void process(AstForest astForest) {
         AstForestContext.setCurrent(astForest);
 
-        DetectPardonProc pardonDetectProc = new DetectPardonProc().process();
-        Collection<PardonDto> pardons = pardonDetectProc.pardons();
+        Collection<PardonDto> pardons = pardonDetectProc.process();
 
-        JudgeByStatutesProc judgeByStatutesProc = new JudgeByStatutesProc().statutes(statutes).pardons(pardons)
-                .process();
-        Collection<LawlessDto> lawlesses = judgeByStatutesProc.lawlesses();
+        Collection<LawlessDto> lawlesses = new JudgeByStatutesProc(statutes, config).process(pardons);
 
-        new ReportLawlessProc().lawlesses(lawlesses).process();
+        reportLawlessProc.process(lawlesses);
     }
 
     public Inspector statutes(Collection<Statute> statutes) {

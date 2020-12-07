@@ -18,38 +18,32 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.TimeUtils;
-import lombok.Getter;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
+import com.spldeolin.allison1875.inspector.javabean.VcsResultDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-11-30
  */
 @Log4j2
-class VcsProc {
+public class VcsProc {
 
-    private final Path projectPath;
+    private final InspectorConfig config;
 
-    @Getter
-    private Boolean isAllTarget;
-
-    @Getter
-    private Set<Path> addedFiles;
-
-    VcsProc(Path projectPath) {
-        this.projectPath = projectPath;
+    VcsProc(InspectorConfig config) {
+        this.config = config;
     }
 
-    VcsProc process() {
+    public VcsResultDto process(Path projectPath) {
         try {
             Git git = Git.open(projectPath.toFile());
             List<RevCommit> commits = Lists.newArrayList(git.log().call());
 
-            Date sinceDate = TimeUtils.toDate(Inspector.CONFIG.get().getTargetFileSince());
+            Date sinceDate = TimeUtils.toDate(config.getTargetFileSince());
 
             if (commits.size() < 2) {
                 log.warn("commits.size()={}", commits.size());
-                isAllTarget = true;
-                return this;
+                return new VcsResultDto().setIsAllTarget(true);
             }
 
             // 最早的commit
@@ -58,8 +52,7 @@ class VcsProc {
                 // 最早的commit都晚于指定时间，所有commit都晚于指定时间，所有代码都是新代码
                 log.warn("farthest commit [{}] is after since date [{}].", farthestCommit.getAuthorIdent().getWhen(),
                         sinceDate);
-                isAllTarget = true;
-                return this;
+                return new VcsResultDto().setIsAllTarget(true);
             }
 
             // 最近的commit
@@ -68,9 +61,7 @@ class VcsProc {
                 // 最近的commit都早于指定时间，所有commit都早于指定时间，所有代码都是老代码
                 log.warn("recent commit [{}] is before since date [{}].", recentCommit.getAuthorIdent().getWhen(),
                         sinceDate);
-                isAllTarget = false;
-                addedFiles = Sets.newHashSet();
-                return this;
+                return new VcsResultDto().setIsAllTarget(false).setAddedFiles(Sets.newHashSet());
             }
 
             // 找到第一个早于指定时间的commit
@@ -81,13 +72,12 @@ class VcsProc {
                     break;
                 }
             }
-            isAllTarget = false;
-            addedFiles = listAddTypePath(git, recentCommit, recentCommitInRange);
+            Set<Path> addedFiles = listAddTypePath(git, recentCommit, recentCommitInRange);
+            return new VcsResultDto().setIsAllTarget(false).setAddedFiles(addedFiles);
 
         } catch (Exception e) {
-            log.error(e);
+            throw new RuntimeException(e);
         }
-        return this;
     }
 
 

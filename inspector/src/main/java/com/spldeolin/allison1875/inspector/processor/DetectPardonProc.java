@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -17,10 +18,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DetectPardonProc {
 
-    private final Collection<PardonDto> pardons = Lists.newArrayList();
+    InspectorConfig config;
 
-    public DetectPardonProc process() {
-        String pardonDirectoryPath = Inspector.CONFIG.get().getPardonDirectoryPath();
+    public DetectPardonProc(InspectorConfig config) {
+        this.config = config;
+    }
+
+    public Collection<PardonDto> process() {
+        Collection<PardonDto> pardons = Lists.newArrayList();
+        String pardonDirectoryPath = config.getPardonDirectoryPath();
         if (!StringUtils.isEmpty(pardonDirectoryPath)) {
             Iterator<File> fileIterator = FileUtils
                     .iterateFiles(new File(pardonDirectoryPath), new String[]{"json"}, true);
@@ -38,11 +44,7 @@ public class DetectPardonProc {
                 }
             }
         }
-        return this;
-    }
-
-    public Collection<PardonDto> pardons() {
-        return this.pardons;
+        return pardons;
     }
 
 }

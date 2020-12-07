@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -19,10 +20,14 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ReportLawlessProc {
 
-    private Collection<LawlessDto> lawlesses;
+    InspectorConfig config;
 
-    public void process() {
-        String lawlessDirectoryPath = Inspector.CONFIG.get().getLawlessDirectoryPath();
+    public ReportLawlessProc(InspectorConfig config) {
+        this.config = config;
+    }
+
+    public void process(Collection<LawlessDto> lawlesses) {
+        String lawlessDirectoryPath = config.getLawlessDirectoryPath();
         lawlesses.forEach(log::info);
 
         if (!StringUtils.isEmpty(lawlessDirectoryPath)) {
@@ -40,11 +45,6 @@ public class ReportLawlessProc {
                 log.error(e);
             }
         }
-    }
-
-    public ReportLawlessProc lawlesses(Collection<LawlessDto> lawlesses) {
-        this.lawlesses = lawlesses;
-        return this;
     }
 
 }

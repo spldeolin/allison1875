@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
+import com.spldeolin.allison1875.inspector.javabean.VcsResultDto;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.extern.log4j.Log4j2;
 
@@ -19,26 +21,33 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JudgeByStatutesProc {
 
-    private Collection<PardonDto> pardons;
+    private final Collection<Statute> statutes;
 
-    private Collection<Statute> statutes;
+    private final InspectorConfig config;
 
-    private final Collection<LawlessDto> lawlesses = Lists.newArrayList();
+    VcsProc vcsProc;
 
-    public JudgeByStatutesProc process() {
-        VcsProc vcsProc = new VcsProc(Paths.get(Inspector.CONFIG.get().getProjectLocalGitPath())).process();
+    public JudgeByStatutesProc(Collection<Statute> statutes, InspectorConfig config) {
+        this.statutes = statutes;
+        this.config = config;
+        vcsProc = new VcsProc(config);
+    }
 
+    public Collection<LawlessDto> process(Collection<PardonDto> pardons) {
         final Collection<LawlessDto> lawlesses = Lists.newArrayList();
+
+        VcsResultDto vcsResultDto = vcsProc.process(Paths.get(config.getProjectLocalGitPath()));
+
         AstForestContext.getCurrent().forEach(cu -> {
             Path cuPath = Locations.getAbsolutePath(cu);
-            if (vcsProc.getIsAllTarget() || vcsProc.getAddedFiles().contains(cuPath)) {
+            if (vcsResultDto.getIsAllTarget() || vcsResultDto.getAddedFiles().contains(cuPath)) {
                 long start = System.currentTimeMillis();
                 if (statutes != null) {
                     for (Statute statute : statutes) {
                         Collection<LawlessDto> dtos = statute.inspect(cu);
                         dtos.forEach(dto -> {
                             String statuteNo = statute.declareStatuteNo();
-                            if (isNotInPublicAcks(dto, statuteNo)) {
+                            if (isNotInPublicAcks(dto, statuteNo, pardons)) {
                                 dto.setStatuteNo(statuteNo);
                                 lawlesses.add(dto);
                             }
@@ -51,14 +60,14 @@ public class JudgeByStatutesProc {
             }
         });
 
-        this.lawlesses.addAll(lawlesses.stream().sorted(Comparator.comparing(LawlessDto::getStatuteNo))
+        lawlesses.addAll(lawlesses.stream().sorted(Comparator.comparing(LawlessDto::getStatuteNo))
                 .collect(Collectors.toList()));
 
         log.info("All inspections completed");
-        return this;
+        return lawlesses;
     }
 
-    private boolean isNotInPublicAcks(LawlessDto vo, String statuteNo) {
+    private boolean isNotInPublicAcks(LawlessDto vo, String statuteNo, Collection<PardonDto> pardons) {
         String qualifier = vo.getQualifier();
         String sourceCode = vo.getSourceCode();
 
@@ -73,20 +82,6 @@ public class JudgeByStatutesProc {
             }
         }
         return true;
-    }
-
-    public Collection<LawlessDto> lawlesses() {
-        return this.lawlesses;
-    }
-
-    public JudgeByStatutesProc pardons(Collection<PardonDto> pardons) {
-        this.pardons = pardons;
-        return this;
-    }
-
-    public JudgeByStatutesProc statutes(Collection<Statute> statutes) {
-        this.statutes = statutes;
-        return this;
     }
 
 }
