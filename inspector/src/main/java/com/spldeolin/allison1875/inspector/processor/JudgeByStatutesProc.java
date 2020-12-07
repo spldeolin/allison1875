@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
@@ -18,20 +20,18 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-02-22
  */
+@Singleton
 @Log4j2
 public class JudgeByStatutesProc {
 
-    private final Collection<Statute> statutes;
+    @Inject
+    private Collection<Statute> statutes;
 
-    private final InspectorConfig config;
+    @Inject
+    private InspectorConfig config;
 
-    VcsProc vcsProc;
-
-    public JudgeByStatutesProc(Collection<Statute> statutes, InspectorConfig config) {
-        this.statutes = statutes;
-        this.config = config;
-        vcsProc = new VcsProc(config);
-    }
+    @Inject
+    private VcsProc vcsProc;
 
     public Collection<LawlessDto> process(Collection<PardonDto> pardons) {
         final Collection<LawlessDto> lawlesses = Lists.newArrayList();

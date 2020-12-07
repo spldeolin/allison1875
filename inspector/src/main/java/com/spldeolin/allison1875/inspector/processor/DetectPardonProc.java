@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
@@ -15,14 +17,12 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-02-24
  */
+@Singleton
 @Log4j2
 public class DetectPardonProc {
 
-    InspectorConfig config;
-
-    public DetectPardonProc(InspectorConfig config) {
-        this.config = config;
-    }
+    @Inject
+    private InspectorConfig config;
 
     public Collection<PardonDto> process() {
         Collection<PardonDto> pardons = Lists.newArrayList();

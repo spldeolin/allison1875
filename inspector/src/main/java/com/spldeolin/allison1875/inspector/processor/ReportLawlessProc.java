@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
@@ -17,14 +19,12 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-02-22
  */
+@Singleton
 @Log4j2
 public class ReportLawlessProc {
 
-    InspectorConfig config;
-
-    public ReportLawlessProc(InspectorConfig config) {
-        this.config = config;
-    }
+    @Inject
+    private InspectorConfig config;
 
     public void process(Collection<LawlessDto> lawlesses) {
         String lawlessDirectoryPath = config.getLawlessDirectoryPath();

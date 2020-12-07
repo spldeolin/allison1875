@@ -17,6 +17,8 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.VcsResultDto;
@@ -25,14 +27,12 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-11-30
  */
+@Singleton
 @Log4j2
 public class VcsProc {
 
-    private final InspectorConfig config;
-
-    VcsProc(InspectorConfig config) {
-        this.config = config;
-    }
+    @Inject
+    private InspectorConfig config;
 
     public VcsResultDto process(Path projectPath) {
         try {

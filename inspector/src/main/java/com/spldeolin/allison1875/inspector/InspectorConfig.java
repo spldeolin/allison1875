@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.inspector;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
+import com.google.inject.Singleton;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -10,6 +11,7 @@ import lombok.experimental.Accessors;
  *
  * @author Deolin 2020-02-18
  */
+@Singleton
 @Accessors(chain = true)
 @Data
 public class InspectorConfig {
