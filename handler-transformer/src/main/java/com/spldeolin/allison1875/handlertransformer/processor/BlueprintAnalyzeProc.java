@@ -20,6 +20,8 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -34,14 +36,12 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-06-27
  */
+@Singleton
 @Log4j2
 public class BlueprintAnalyzeProc {
 
-    private final HandlerTransformerConfig config;
-
-    public BlueprintAnalyzeProc(HandlerTransformerConfig config) {
-        this.config = config;
-    }
+    @Inject
+    private HandlerTransformerConfig config;
 
     public MetaInfo process(ClassOrInterfaceDeclaration controller, InitializerDeclaration blueprint) {
         MetaInfo.MetaInfoBuilder builder = MetaInfo.builder();

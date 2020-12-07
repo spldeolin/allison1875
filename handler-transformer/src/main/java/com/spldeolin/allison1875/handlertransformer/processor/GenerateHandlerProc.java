@@ -8,6 +8,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -18,13 +20,11 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 /**
  * @author Deolin 2020-08-28
  */
+@Singleton
 public class GenerateHandlerProc {
 
-    private final HandlerTransformerConfig config;
-
-    public GenerateHandlerProc(HandlerTransformerConfig config) {
-        this.config = config;
-    }
+    @Inject
+    private HandlerTransformerConfig config;
 
     public CompilationUnit process(MetaInfo metaInfo, String serviceQualifier) throws HandlerNameConflictException {
         ClassOrInterfaceDeclaration controller = metaInfo.getController();

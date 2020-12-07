@@ -8,6 +8,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
@@ -22,18 +24,24 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-06-22
  */
+@Singleton
 @Log4j2
 public class HandlerTransformer implements Allison1875MainProcessor<HandlerTransformerConfig, HandlerTransformer> {
 
-    BlueprintAnalyzeProc blueprintAnalyzeProc;
+    @Inject
+    private BlueprintAnalyzeProc blueprintAnalyzeProc;
 
-    BlueprintCollectProc blueprintCollectProc;
+    @Inject
+    private BlueprintCollectProc blueprintCollectProc;
 
-    GenerateDtosProc generateDtosProc;
+    @Inject
+    private GenerateDtosProc generateDtosProc;
 
-    GenerateHandlerProc generateHandlerProc;
+    @Inject
+    private GenerateHandlerProc generateHandlerProc;
 
-    GenerateServicesProc generateServicesProc;
+    @Inject
+    private GenerateServicesProc generateServicesProc;
 
     @Override
     public HandlerTransformer config(HandlerTransformerConfig config) {
@@ -46,11 +54,6 @@ public class HandlerTransformer implements Allison1875MainProcessor<HandlerTrans
             }
             System.exit(-9);
         }
-        blueprintAnalyzeProc = new BlueprintAnalyzeProc(config);
-        blueprintCollectProc = new BlueprintCollectProc();
-        generateDtosProc = new GenerateDtosProc(config);
-        generateHandlerProc = new GenerateHandlerProc(config);
-        generateServicesProc = new GenerateServicesProc(config);
         return this;
     }
 

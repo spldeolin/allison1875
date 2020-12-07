@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.handlertransformer;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.google.inject.Singleton;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,6 +12,7 @@ import lombok.experimental.Accessors;
  *
  * @author Deolin 2020-08-25
  */
+@Singleton
 @Accessors(chain = true)
 @Data
 public class HandlerTransformerConfig {
