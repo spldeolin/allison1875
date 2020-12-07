@@ -20,19 +20,8 @@ import com.spldeolin.allison1875.handlertransformer.javabean.DtoMetaInfo;
  */
 public class GenerateDtosProc {
 
-    private final Path sourceRoot;
-
-    private final Collection<DtoMetaInfo> dtoMetaInfos;
-
-    private Collection<CompilationUnit> dtoCus;
-
-    GenerateDtosProc(Path sourceRoot, Collection<DtoMetaInfo> dtoMetaInfos) {
-        this.sourceRoot = sourceRoot;
-        this.dtoMetaInfos = dtoMetaInfos;
-    }
-
-    public GenerateDtosProc process() {
-        dtoCus = Lists.newArrayList();
+    public Collection<CompilationUnit> process(Path sourceRoot, Collection<DtoMetaInfo> dtoMetaInfos) {
+        Collection<CompilationUnit> dtoCus = Lists.newArrayList();
         for (DtoMetaInfo dtoMetaInfo : dtoMetaInfos) {
             Collection<ImportDeclaration> imports = Lists.newArrayList(dtoMetaInfo.getImports());
             imports.add(new ImportDeclaration("lombok.Data", false, false));
@@ -60,10 +49,6 @@ public class GenerateDtosProc {
             });
             dtoCus.add(cuCreator.create(false));
         }
-        return this;
-    }
-
-    public Collection<CompilationUnit> getDtoCus() {
         return dtoCus;
     }
 

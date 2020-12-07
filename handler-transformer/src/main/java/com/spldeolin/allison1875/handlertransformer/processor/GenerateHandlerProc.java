@@ -20,18 +20,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
  */
 public class GenerateHandlerProc {
 
-    private final MetaInfo metaInfo;
-
-    private final String serviceQualifier;
-
-    private CompilationUnit controllerCu;
-
-    GenerateHandlerProc(MetaInfo metaInfo, String serviceQualifier) {
-        this.metaInfo = metaInfo;
-        this.serviceQualifier = serviceQualifier;
-    }
-
-    public GenerateHandlerProc process() throws HandlerNameConflictException {
+    public CompilationUnit process(MetaInfo metaInfo, String serviceQualifier) throws HandlerNameConflictException {
         HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
         if (!metaInfo.isReqAbsent()) {
@@ -90,12 +79,7 @@ public class GenerateHandlerProc {
         handler.setBody(StaticJavaParser.parseBlock("{" + String.format(handlerPattern, serviceCallExpr) + "}"));
         controller.addMember(handler);
 
-        controllerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        return this;
-    }
-
-    public CompilationUnit getControllerCu() {
-        return this.controllerCu;
+        return controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
     }
 
 }

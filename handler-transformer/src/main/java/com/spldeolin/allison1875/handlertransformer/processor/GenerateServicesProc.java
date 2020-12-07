@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 import java.time.LocalDate;
 import java.util.List;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -15,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicesResultDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 
 /**
@@ -22,19 +22,8 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
  */
 public class GenerateServicesProc {
 
-    private final MetaInfo metaInfo;
-
-    private CompilationUnit serviceCu;
-
-    private CompilationUnit serviceImplCu;
-
-    private String serviceQualifier;
-
-    GenerateServicesProc(MetaInfo metaInfo) {
-        this.metaInfo = metaInfo;
-    }
-
-    public GenerateServicesProc process() {
+    public GenerateServicesResultDto process(MetaInfo metaInfo) {
+        GenerateServicesResultDto result = new GenerateServicesResultDto();
         HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
@@ -66,8 +55,8 @@ public class GenerateServicesProc {
             coid.addMember(decl);
             return coid;
         });
-        serviceCu = serviceCreator.create(false);
-        serviceQualifier = serviceCreator.getPrimaryTypeQualifier();
+        result.setServiceCu(serviceCreator.create(false));
+        result.setServiceQualifier(serviceCreator.getPrimaryTypeQualifier());
 
         List<String> imports4Impl = Lists.newArrayList(imports);
         imports4Impl.add(serviceCreator.getPrimaryTypeQualifier());
@@ -100,21 +89,9 @@ public class GenerateServicesProc {
             coid.addMember(method);
             return coid;
         });
-        serviceImplCu = serviceImplCreator.create(false);
+        result.setServiceImplCu(serviceImplCreator.create(false));
 
-        return this;
-    }
-
-    public CompilationUnit getServiceCu() {
-        return this.serviceCu;
-    }
-
-    public CompilationUnit getServiceImplCu() {
-        return this.serviceImplCu;
-    }
-
-    public String getServiceQualifier() {
-        return this.serviceQualifier;
+        return result;
     }
 
 }

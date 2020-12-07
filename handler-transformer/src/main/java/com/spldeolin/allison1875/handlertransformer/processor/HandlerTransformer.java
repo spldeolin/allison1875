@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
+import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicesResultDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,6 +24,16 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class HandlerTransformer implements Allison1875MainProcessor<HandlerTransformerConfig, HandlerTransformer> {
+
+    BlueprintAnalyzeProc blueprintAnalyzeProc = new BlueprintAnalyzeProc();
+
+    BlueprintCollectProc blueprintCollectProc = new BlueprintCollectProc();
+
+    GenerateDtosProc generateDtosProc = new GenerateDtosProc();
+
+    GenerateHandlerProc generateHandlerProc = new GenerateHandlerProc();
+
+    GenerateServicesProc generateServicesProc = new GenerateServicesProc();
 
     public static final ThreadLocal<HandlerTransformerConfig> CONFIG = ThreadLocal
             .withInitial(HandlerTransformerConfig::new);
@@ -48,31 +59,27 @@ public class HandlerTransformer implements Allison1875MainProcessor<HandlerTrans
         Collection<CompilationUnit> cus = Sets.newHashSet();
 
         for (CompilationUnit cu : AstForestContext.getCurrent()) {
-            for (Pair<ClassOrInterfaceDeclaration, InitializerDeclaration> pair : new BlueprintCollectProc(cu).process()
-                    .getControllerAndBlueprints()) {
+            for (Pair<ClassOrInterfaceDeclaration, InitializerDeclaration> pair : blueprintCollectProc.process(cu)) {
 
                 ClassOrInterfaceDeclaration controller = pair.getLeft();
                 InitializerDeclaration blueprint = pair.getRight();
 
-                BlueprintAnalyzeProc blueprintAnalyzeProc = new BlueprintAnalyzeProc(controller, blueprint).process();
-                MetaInfo metaInfo = blueprintAnalyzeProc.getMetaInfo();
+                MetaInfo metaInfo = blueprintAnalyzeProc.process(controller, blueprint);
 
                 if (metaInfo.isLack()) {
                     continue;
                 }
 
-                GenerateDtosProc generateDtosProc = new GenerateDtosProc(metaInfo.getSourceRoot(), metaInfo.getDtos())
-                        .process();
-                Collection<CompilationUnit> dtoCus = generateDtosProc.getDtoCus();
 
-                GenerateServicesProc generateServicesProc = new GenerateServicesProc(metaInfo).process();
-                CompilationUnit serviceCu = generateServicesProc.getServiceCu();
-                CompilationUnit serviceImplCu = generateServicesProc.getServiceImplCu();
+                Collection<CompilationUnit> dtoCus = generateDtosProc
+                        .process(metaInfo.getSourceRoot(), metaInfo.getDtos());
+
+                GenerateServicesResultDto generateServicesResult = generateServicesProc.process(metaInfo);
+                CompilationUnit serviceCu = generateServicesResult.getServiceCu();
+                CompilationUnit serviceImplCu = generateServicesResult.getServiceImplCu();
 
                 try {
-                    GenerateHandlerProc generateHandlerProc = new GenerateHandlerProc(metaInfo,
-                            generateServicesProc.getServiceQualifier()).process();
-                    cus.add(generateHandlerProc.getControllerCu());
+                    cus.add(generateHandlerProc.process(metaInfo, generateServicesResult.getServiceQualifier()));
                 } catch (HandlerNameConflictException e) {
                     log.warn("handler[{}]在controller[{}]已存在了同名方法，不再生成", metaInfo.getHandlerName(),
                             metaInfo.getController().getName());

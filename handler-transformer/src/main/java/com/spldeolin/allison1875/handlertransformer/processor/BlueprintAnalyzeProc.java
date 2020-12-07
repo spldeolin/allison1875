@@ -37,18 +37,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BlueprintAnalyzeProc {
 
-    private final ClassOrInterfaceDeclaration controller;
-
-    private final InitializerDeclaration blueprint;
-
-    private MetaInfo metaInfo;
-
-    BlueprintAnalyzeProc(ClassOrInterfaceDeclaration controller, InitializerDeclaration blueprint) {
-        this.controller = controller;
-        this.blueprint = blueprint;
-    }
-
-    public BlueprintAnalyzeProc process() {
+    public MetaInfo process(ClassOrInterfaceDeclaration controller, InitializerDeclaration blueprint) {
         MetaInfo.MetaInfoBuilder builder = MetaInfo.builder();
         builder.location(Locations.getRelativePathWithLineNo(blueprint));
         builder.controller(controller);
@@ -74,8 +63,7 @@ public class BlueprintAnalyzeProc {
 
         String handlerName = builder.build().getHandlerName();
         if (handlerName == null) {
-            metaInfo = builder.build();
-            return this;
+            return builder.build();
         }
 
         // dto meta
@@ -201,8 +189,7 @@ public class BlueprintAnalyzeProc {
             throw new RuntimeException("Blueprint不能缺少代表resp的block");
         }
 
-        metaInfo = builder.build();
-        return this;
+        return builder.build();
     }
 
     private String getLineComment(VariableDeclarationExpr vde) {
@@ -236,10 +223,6 @@ public class BlueprintAnalyzeProc {
     private void arrayToCollectionMight(VariableDeclarator vd) {
         vd.getType().ifArrayType(arrayType -> vd
                 .setType(StaticJavaParser.parseType("Collection<" + arrayType.getComponentType() + ">")));
-    }
-
-    public MetaInfo getMetaInfo() {
-        return this.metaInfo;
     }
 
 }

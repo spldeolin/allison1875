@@ -20,26 +20,18 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BlueprintCollectProc {
 
-    private final CompilationUnit cu;
-
-    private final Collection<Pair<ClassOrInterfaceDeclaration, InitializerDeclaration>> controllerAndBlueprints = Lists
-            .newArrayList();
-
-    BlueprintCollectProc(CompilationUnit cu) {
-        this.cu = cu;
-    }
-
-    public BlueprintCollectProc process() {
+    public Collection<Pair<ClassOrInterfaceDeclaration, InitializerDeclaration>> process(CompilationUnit cu) {
+        Collection<Pair<ClassOrInterfaceDeclaration, InitializerDeclaration>> result = Lists.newArrayList();
         cu.findAll(ClassOrInterfaceDeclaration.class, this::isController).forEach(controller -> {
             for (BodyDeclaration<?> member : controller.getMembers()) {
                 if (!member.isInitializerDeclaration()) {
                     continue;
                 }
                 InitializerDeclaration init = member.asInitializerDeclaration();
-                controllerAndBlueprints.add(Pair.of(controller, init));
+                result.add(Pair.of(controller, init));
             }
         });
-        return this;
+        return result;
     }
 
     private boolean isController(ClassOrInterfaceDeclaration coid) {
@@ -56,10 +48,6 @@ public class BlueprintCollectProc {
             }
         }
         return false;
-    }
-
-    public Collection<Pair<ClassOrInterfaceDeclaration, InitializerDeclaration>> getControllerAndBlueprints() {
-        return this.controllerAndBlueprints;
     }
 
 }
