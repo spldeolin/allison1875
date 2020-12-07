@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.gadget;
+package com.spldeolin.allison1875.gadget.processor;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
 import org.apache.commons.io.FileUtils;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
@@ -18,14 +16,16 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.gadget.LineCounterConfig;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -33,24 +33,15 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Deolin 2020-10-28
  */
+@Singleton
 @Log4j2
 public class LineCounter implements Allison1875MainProcessor<LineCounterConfig, LineCounter> {
 
+    @Inject
     private LineCounterConfig lineCounterConfig;
 
     @Override
     public LineCounter config(LineCounterConfig config) {
-        Set<ConstraintViolation<LineCounterConfig>> violations = ValidateUtils.validate(config);
-        if (violations.size() > 0) {
-            log.warn("配置项校验未通过，请检查后重新运行");
-            for (ConstraintViolation<LineCounterConfig> violation : violations) {
-                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
-                        + violation.getMessage());
-            }
-            System.exit(-9);
-        }
-
-        lineCounterConfig = config;
         return this;
     }
 

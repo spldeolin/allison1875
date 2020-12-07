@@ -3,12 +3,14 @@ package com.spldeolin.allison1875.gadget;
 import java.util.Collection;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import com.google.inject.Singleton;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-10-28
  */
+@Singleton
 @Accessors(chain = true)
 @Data
 public class LineCounterConfig {
