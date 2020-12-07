@@ -22,9 +22,14 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
  */
 public class GenerateServicesProc {
 
+    private final HandlerTransformerConfig config;
+
+    public GenerateServicesProc(HandlerTransformerConfig config) {
+        this.config = config;
+    }
+
     public GenerateServicesResultDto process(MetaInfo metaInfo) {
         GenerateServicesResultDto result = new GenerateServicesResultDto();
-        HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
         if (metaInfo.isRespAbsent()) {

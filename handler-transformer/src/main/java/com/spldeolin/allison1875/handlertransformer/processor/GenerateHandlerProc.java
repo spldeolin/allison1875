@@ -20,8 +20,13 @@ import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
  */
 public class GenerateHandlerProc {
 
+    private final HandlerTransformerConfig config;
+
+    public GenerateHandlerProc(HandlerTransformerConfig config) {
+        this.config = config;
+    }
+
     public CompilationUnit process(MetaInfo metaInfo, String serviceQualifier) throws HandlerNameConflictException {
-        HandlerTransformerConfig config = HandlerTransformer.CONFIG.get();
         ClassOrInterfaceDeclaration controller = metaInfo.getController();
         if (!metaInfo.isReqAbsent()) {
             Imports.ensureImported(controller, metaInfo.getReqBody().getTypeQualifier());

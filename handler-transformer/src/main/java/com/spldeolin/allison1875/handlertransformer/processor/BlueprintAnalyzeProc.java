@@ -37,6 +37,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BlueprintAnalyzeProc {
 
+    private final HandlerTransformerConfig config;
+
+    public BlueprintAnalyzeProc(HandlerTransformerConfig config) {
+        this.config = config;
+    }
+
     public MetaInfo process(ClassOrInterfaceDeclaration controller, InitializerDeclaration blueprint) {
         MetaInfo.MetaInfoBuilder builder = MetaInfo.builder();
         builder.location(Locations.getRelativePathWithLineNo(blueprint));
@@ -77,10 +83,9 @@ public class BlueprintAnalyzeProc {
             DtoMetaInfoBuilder dtoBuilder = DtoMetaInfo.builder();
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
 
-            HandlerTransformerConfig conf = HandlerTransformer.CONFIG.get();
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody != null) {
                 String typeName = StringUtils.upperFirstLetter(handlerName) + "RespDto";
-                String respPackageName = conf.getRespDtoPackage();
+                String respPackageName = config.getRespDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(respPackageName);
                 dtoBuilder.typeQualifier(respPackageName + "." + typeName);
@@ -89,7 +94,7 @@ public class BlueprintAnalyzeProc {
             }
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody == null) {
                 String typeName = StringUtils.upperFirstLetter(handlerName) + "ReqDto";
-                String packageName = conf.getReqDtoPackage();
+                String packageName = config.getReqDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(packageName);
                 dtoBuilder.typeQualifier(packageName + "." + typeName);
@@ -108,7 +113,8 @@ public class BlueprintAnalyzeProc {
                         String rawDtoName = ir.asStringLiteralExpr().getValue();
                         String typeName =
                                 StringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp") + "Dto";
-                        String packageName = (inReqScope ? conf.getReqDtoPackage() : conf.getRespDtoPackage()) + ".dto";
+                        String packageName =
+                                (inReqScope ? config.getReqDtoPackage() : config.getRespDtoPackage()) + ".dto";
                         dtoBuilder.typeName(typeName);
                         dtoBuilder.packageName(packageName);
                         dtoBuilder.typeQualifier(packageName + "." + typeName);

@@ -25,18 +25,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerTransformer implements Allison1875MainProcessor<HandlerTransformerConfig, HandlerTransformer> {
 
-    BlueprintAnalyzeProc blueprintAnalyzeProc = new BlueprintAnalyzeProc();
+    BlueprintAnalyzeProc blueprintAnalyzeProc;
 
-    BlueprintCollectProc blueprintCollectProc = new BlueprintCollectProc();
+    BlueprintCollectProc blueprintCollectProc;
 
-    GenerateDtosProc generateDtosProc = new GenerateDtosProc();
+    GenerateDtosProc generateDtosProc;
 
-    GenerateHandlerProc generateHandlerProc = new GenerateHandlerProc();
+    GenerateHandlerProc generateHandlerProc;
 
-    GenerateServicesProc generateServicesProc = new GenerateServicesProc();
-
-    public static final ThreadLocal<HandlerTransformerConfig> CONFIG = ThreadLocal
-            .withInitial(HandlerTransformerConfig::new);
+    GenerateServicesProc generateServicesProc;
 
     @Override
     public HandlerTransformer config(HandlerTransformerConfig config) {
@@ -49,7 +46,11 @@ public class HandlerTransformer implements Allison1875MainProcessor<HandlerTrans
             }
             System.exit(-9);
         }
-        CONFIG.set(config);
+        blueprintAnalyzeProc = new BlueprintAnalyzeProc(config);
+        blueprintCollectProc = new BlueprintCollectProc();
+        generateDtosProc = new GenerateDtosProc(config);
+        generateHandlerProc = new GenerateHandlerProc(config);
+        generateServicesProc = new GenerateServicesProc(config);
         return this;
     }
 
