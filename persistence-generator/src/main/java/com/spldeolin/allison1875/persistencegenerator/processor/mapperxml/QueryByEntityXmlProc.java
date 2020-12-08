@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
+import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
@@ -13,7 +14,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class QueryByEntityXmlProc {
 
-    public List<String> process(PersistenceDto persistence, String entityName, String methodName) {
+    public Collection<String> process(PersistenceDto persistence, String entityName, String methodName) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryByEntity()) {
             return null;
         }

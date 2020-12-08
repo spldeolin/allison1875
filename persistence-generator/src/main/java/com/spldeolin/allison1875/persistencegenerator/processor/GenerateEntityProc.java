@@ -31,9 +31,12 @@ import com.google.common.collect.Sets.SetView;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEntityFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateEntityResultDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PathDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -42,29 +45,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateEntityProc {
 
-    private final GenerateEntityFieldHandle generateEntityFieldHandle;
+    private final GenerateEntityFieldHandle generateEntityFieldHandle = new DefaultGenerateEntityFieldHandle();
 
-    private final PersistenceDto persistence;
-
-    private final PathProc pathProc;
-
-    private Path entityPath;
-
-    private CuCreator entityCuCreator;
-
-    private final Collection<CompilationUnit> toCreate = Lists.newArrayList();
-
-    public GenerateEntityProc(GenerateEntityFieldHandle generateEntityFieldHandle, PersistenceDto persistence,
-            PathProc pathProc) {
-        this.generateEntityFieldHandle = generateEntityFieldHandle;
-        this.persistence = persistence;
-        this.pathProc = pathProc;
-    }
-
-    public GenerateEntityProc process() {
+    public GenerateEntityResultDto process(PersistenceDto persistence, PathDto pathDto) {
         PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
-        Path sourceRoot = pathProc.getSourceRoot();
-        entityPath = CodeGenerationUtils
+        Path sourceRoot = pathDto.getSourceRoot();
+        Path entityPath = CodeGenerationUtils
                 .fileInPackageAbsolutePath(sourceRoot, conf.getEntityPackage(), persistence.getEntityName() + ".java");
 
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
@@ -96,7 +82,8 @@ public class GenerateEntityProc {
 
         Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
 
-        entityCuCreator = new CuCreator(sourceRoot, conf.getEntityPackage(), imports, () -> {
+        Collection<CompilationUnit> toCreate = Lists.newArrayList();
+        CuCreator entityCuCreator = new CuCreator(sourceRoot, conf.getEntityPackage(), imports, () -> {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             Javadoc classJavadoc = new JavadocComment(
                     persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
@@ -127,17 +114,20 @@ public class GenerateEntityProc {
         });
         toCreate.add(entityCuCreator.create(false));
 
-        this.reportDiff(originalVariables);
+        this.reportDiff(originalVariables, persistence);
 
         for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
-            toCreate.addAll(
-                    generateEntityFieldHandle.handleEntityField(pair.getLeft(), pair.getRight(), sourceRoot));
+            toCreate.addAll(generateEntityFieldHandle.handleEntityField(pair.getLeft(), pair.getRight(), sourceRoot));
         }
 
-        return this;
+        GenerateEntityResultDto result = new GenerateEntityResultDto();
+        result.setEntityPath(entityPath);
+        result.setEntityCuCreator(entityCuCreator);
+        result.setToCreate(toCreate);
+        return result;
     }
 
-    private void reportDiff(TreeSet<String> originalVariables) {
+    private void reportDiff(TreeSet<String> originalVariables, PersistenceDto persistence) {
         TreeSet<String> destinedVariables = Sets.newTreeSet();
         for (PropertyDto property : persistence.getProperties()) {
             if (PersistenceGenerator.CONFIG.get().getAlreadyInSuperEntity().contains(property.getColumnName())) {
@@ -200,18 +190,6 @@ public class GenerateEntityProc {
                         authorTags.add(javadocTag);
                     }
                 }));
-    }
-
-    public Path getEntityPath() {
-        return this.entityPath;
-    }
-
-    public CuCreator getEntityCuCreator() {
-        return entityCuCreator;
-    }
-
-    public Collection<CompilationUnit> getToCreate() {
-        return toCreate;
     }
 
 }

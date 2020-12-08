@@ -29,10 +29,11 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryMeta;
-import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -41,29 +42,16 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateQueryDesignProc {
 
-    private final PersistenceDto persistence;
+    private final GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle =
+            new DefaultGenerateQueryDesignFieldHandle();
 
-    private final CuCreator entityCuCreator;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private final GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle;
-
-    private final Collection<CompilationUnit> toCreate = Lists.newArrayList();
-
-    public GenerateQueryDesignProc(PersistenceDto persistence, CuCreator entityCuCreator,
-            ClassOrInterfaceDeclaration mapper, GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle) {
-        this.persistence = persistence;
-        this.entityCuCreator = entityCuCreator;
-        this.mapper = mapper;
-        this.generateQueryDesignFieldHandle = generateQueryDesignFieldHandle;
-    }
-
-    public GenerateQueryDesignProc process() {
+    public Collection<CompilationUnit> process(PersistenceDto persistence, CuCreator entityCuCreator,
+            ClassOrInterfaceDeclaration mapper) {
         PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         if (!conf.getEnableGenerateQueryDesign()) {
-            return this;
+            return Lists.newArrayList();
         }
+        Collection<CompilationUnit> toCreate = Lists.newArrayList();
 
         Path sourceRoot = entityCuCreator.getSourceRoot();
         Path queryPath = CodeGenerationUtils
@@ -82,7 +70,7 @@ public class GenerateQueryDesignProc {
             authorTags.add(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
         }
 
-        List<String> imports = this.getImports(persistence, conf);
+        List<String> imports = this.getImports(persistence, conf, entityCuCreator);
 
         Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
         CuCreator cuCreator = new CuCreator(sourceRoot, conf.getQueryDesignPackage(), imports, () -> {
@@ -94,7 +82,7 @@ public class GenerateQueryDesignProc {
             classJavadoc.getBlockTags().addAll(authorTags);
             coid.setJavadocComment(classJavadoc);
             coid.setPublic(true);
-            coid.setName(calcQueryDesignName(conf));
+            coid.setName(calcQueryDesignName(conf, persistence));
             setDefaultConstructorPrivate(coid);
             addStaticFactory(coid);
             for (PropertyDto property : persistence.getProperties()) {
@@ -121,11 +109,10 @@ public class GenerateQueryDesignProc {
 
         for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
             FieldDeclaration field = pair.getRight();
-            toCreate.addAll(
-                    generateQueryDesignFieldHandle.handlerQueryDesignField(pair.getLeft(), field, sourceRoot));
+            toCreate.addAll(generateQueryDesignFieldHandle.handlerQueryDesignField(pair.getLeft(), field, sourceRoot));
         }
 
-        return this;
+        return toCreate;
     }
 
     private void addTerminalMethod(ClassOrInterfaceDeclaration coid, PersistenceDto persistence) {
@@ -188,12 +175,13 @@ public class GenerateQueryDesignProc {
         coid.addMember(constructor);
     }
 
-    private String calcQueryDesignName(PersistenceGeneratorConfig conf) {
+    private String calcQueryDesignName(PersistenceGeneratorConfig conf, PersistenceDto persistence) {
         return conf.getIsEntityEndWithEntity() ? StringUtils.replaceLast(persistence.getEntityName(), "Entity", "Query")
                 : persistence.getEntityName() + "QueryDesign";
     }
 
-    private List<String> getImports(PersistenceDto persistence, PersistenceGeneratorConfig conf) {
+    private List<String> getImports(PersistenceDto persistence, PersistenceGeneratorConfig conf,
+            CuCreator entityCuCreator) {
         List<String> result = Lists.newArrayList();
         for (PropertyDto property : persistence.getProperties()) {
             String qualifier = property.getJavaType().getName();
@@ -215,10 +203,6 @@ public class GenerateQueryDesignProc {
                         authorTags.add(javadocTag);
                     }
                 })));
-    }
-
-    public Collection<CompilationUnit> getToCreate() {
-        return toCreate;
     }
 
 }

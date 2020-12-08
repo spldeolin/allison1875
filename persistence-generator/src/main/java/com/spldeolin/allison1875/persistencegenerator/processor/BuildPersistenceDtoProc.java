@@ -18,12 +18,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BuildPersistenceDtoProc {
 
-    private Collection<PersistenceDto> persistences;
+    QueryInformationSchemaProc queryInformationSchemaProc = new QueryInformationSchemaProc();
 
-    public BuildPersistenceDtoProc process() {
+    public Collection<PersistenceDto> process() {
         PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         // 查询information_schema.COLUMNS、information_schema.TABLES表
-        Collection<InformationSchemaDto> infoSchemas = new QueryInformationSchemaProc().process().getInfoSchemas();
+        Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaProc.process();
         String deleteFlag = getDeleteFlagName();
 
         Map<String, PersistenceDto> persistences = Maps.newHashMap();
@@ -74,10 +74,9 @@ public class BuildPersistenceDtoProc {
                 persistence.setIsDeleteFlagExist(true);
             }
         }
-        this.persistences = persistences.values();
-        this.persistences.stream().filter(dto -> !dto.getIsDeleteFlagExist())
+        persistences.values().stream().filter(dto -> !dto.getIsDeleteFlagExist())
                 .forEach(dto -> log.info("数据表[{}]没有逻辑删除标识符[{}]", dto.getTableName(), deleteFlag));
-        return this;
+        return persistences.values();
     }
 
     private String getDeleteFlagName() {
@@ -107,10 +106,6 @@ public class BuildPersistenceDtoProc {
             return null;
         }
         return jdbcTypeEnum;
-    }
-
-    public Collection<PersistenceDto> getPersistences() {
-        return this.persistences;
     }
 
 }

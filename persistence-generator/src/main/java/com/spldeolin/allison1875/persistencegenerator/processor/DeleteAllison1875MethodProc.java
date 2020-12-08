@@ -8,16 +8,9 @@ import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 /**
  * @author Deolin 2020-09-02
  */
-class DeleteAllison1875MethodProc {
+public class DeleteAllison1875MethodProc {
 
-    private final ClassOrInterfaceDeclaration mapper;
-
-
-    public DeleteAllison1875MethodProc(ClassOrInterfaceDeclaration mapper) {
-        this.mapper = mapper;
-    }
-
-    void process() {
+    public void process(ClassOrInterfaceDeclaration mapper) {
         for (MethodDeclaration method : mapper.getMethods()) {
             boolean byAllison1875 = JavadocDescriptions.getRaw(method).contains(BaseConstant.BY_ALLISON_1875);
             if (byAllison1875) {

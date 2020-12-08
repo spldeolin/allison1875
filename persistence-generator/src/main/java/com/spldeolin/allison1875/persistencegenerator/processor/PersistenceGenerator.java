@@ -13,11 +13,10 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEntityFieldHandle;
-import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
-import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
-import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.javabean.FindOrCreateMapperResultDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateEntityResultDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PathDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
@@ -52,11 +51,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class PersistenceGenerator implements
         Allison1875MainProcessor<PersistenceGeneratorConfig, PersistenceGenerator> {
-
-    protected GenerateEntityFieldHandle generateEntityFieldHandle = new DefaultGenerateEntityFieldHandle();
-
-    protected GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle =
-            new DefaultGenerateQueryDesignFieldHandle();
 
     BatchInsertEvenNullProc batchInsertEvenNullProc = new BatchInsertEvenNullProc();
 
@@ -104,6 +98,20 @@ public class PersistenceGenerator implements
 
     QueryByEntityXmlProc queryByEntityXmlProc = new QueryByEntityXmlProc();
 
+    BuildPersistenceDtoProc buildPersistenceDtoProc = new BuildPersistenceDtoProc();
+
+    DeleteAllison1875MethodProc deleteAllison1875MethodProc = new DeleteAllison1875MethodProc();
+
+    FindOrCreateMapperProc findOrCreateMapperProc = new FindOrCreateMapperProc();
+
+    GenerateEntityProc entityProc = new GenerateEntityProc();
+
+    PathProc pathProc = new PathProc();
+
+    MapperXmlProc mapperXmlProc = new MapperXmlProc();
+
+    GenerateQueryDesignProc generateQueryDesignProc = new GenerateQueryDesignProc();
+
     public static final ThreadLocal<PersistenceGeneratorConfig> CONFIG = ThreadLocal
             .withInitial(PersistenceGeneratorConfig::new);
 
@@ -125,37 +133,35 @@ public class PersistenceGenerator implements
     @Override
     public void process(AstForest astForest) {
         AstForestContext.setCurrent(astForest);
-        PathProc pathProc = new PathProc(astForest).process();
+        PathDto pathDto = pathProc.process(astForest);
 
         Collection<CompilationUnit> toSave = Lists.newArrayList();
 
         // 构建并遍历 PersistenceDto对象
-        for (PersistenceDto persistence : new BuildPersistenceDtoProc().process().getPersistences()) {
+        for (PersistenceDto persistence : buildPersistenceDtoProc.process()) {
 
             // 重新生成Entity
-            GenerateEntityProc entityProc = new GenerateEntityProc(generateEntityFieldHandle, persistence, pathProc)
-                    .process();
-            CuCreator entityCuCreator = entityProc.getEntityCuCreator();
-            toSave.addAll(entityProc.getToCreate());
+            GenerateEntityResultDto generateEntityResult = entityProc.process(persistence, pathDto);
+            CuCreator entityCuCreator = generateEntityResult.getEntityCuCreator();
+            toSave.addAll(generateEntityResult.getToCreate());
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
-                FindOrCreateMapperProc proc = new FindOrCreateMapperProc(persistence, entityCuCreator).process();
-                mapper = proc.getMapper();
-                toSave.add(proc.getCu());
+                FindOrCreateMapperResultDto findOrCreateMapperResult = findOrCreateMapperProc
+                        .process(persistence, entityCuCreator);
+                mapper = findOrCreateMapperResult.getMapper();
+                toSave.add(findOrCreateMapperResult.getCu());
             } catch (Exception e) {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
 
             // 重新生成QueryDesign
-            toSave.addAll(
-                    new GenerateQueryDesignProc(persistence, entityCuCreator, mapper, generateQueryDesignFieldHandle)
-                            .process().getToCreate());
+            toSave.addAll(generateQueryDesignProc.process(persistence, entityCuCreator, mapper));
 
             // 删除Mapper中所有Allison 1875生成的方法
-            new DeleteAllison1875MethodProc(mapper).process();
+            deleteAllison1875MethodProc.process(mapper);
 
             // 在Mapper中生成基础方法
             String insertMethodName = insertProc.process(persistence, mapper);
@@ -180,20 +186,21 @@ public class PersistenceGenerator implements
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
             try {
-                new MapperXmlProc(persistence, mapper, pathProc.getMapperXmlPath(),
-                        resultMapXmlProc.process(persistence, entityName), allCloumnSqlXmlProc.process(persistence),
-                        insertXmlProc.process(persistence, entityName, insertMethodName),
-                        batchInsertEvenNullXmlProc.process(persistence, batchInsertEvenNullMethodName),
-                        queryByIdXmlProc.process(persistence, queryByIdMethodName),
-                        updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
-                        updateByIdEvenNullXmlProc.process(persistence, entityName, updateByIdEvenNullMethodName),
-                        queryByIdsXmlProc.process(persistence, queryByIdsProcMethodName),
-                        queryByIdsXmlProc.process(persistence, queryByIdsEachIdMethodName),
-                        queryByKeyXmlProc.process(persistence, queryByKeyDtos),
-                        deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
-                        queryByKeysXmlProc.process(persistence, queryByKeysDtos),
-                        queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName)).
-                        process();
+                mapperXmlProc.process(persistence, mapper, pathDto.getMapperXmlPath(),
+                        Lists.newArrayList(resultMapXmlProc.process(persistence, entityName),
+                                allCloumnSqlXmlProc.process(persistence),
+                                insertXmlProc.process(persistence, entityName, insertMethodName),
+                                batchInsertEvenNullXmlProc.process(persistence, batchInsertEvenNullMethodName),
+                                queryByIdXmlProc.process(persistence, queryByIdMethodName),
+                                updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
+                                updateByIdEvenNullXmlProc
+                                        .process(persistence, entityName, updateByIdEvenNullMethodName),
+                                queryByIdsXmlProc.process(persistence, queryByIdsProcMethodName),
+                                queryByIdsXmlProc.process(persistence, queryByIdsEachIdMethodName),
+                                queryByKeyXmlProc.process(persistence, queryByKeyDtos),
+                                deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
+                                queryByKeysXmlProc.process(persistence, queryByKeysDtos),
+                                queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName)));
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

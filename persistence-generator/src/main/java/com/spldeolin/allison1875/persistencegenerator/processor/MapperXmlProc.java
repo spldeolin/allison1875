@@ -24,28 +24,10 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
  */
 public class MapperXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private final List<Collection<String>> procs;
-
-    private final Path mapperXmlDirectory;
-
-    private File mapperXmlFile;
-
-    public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
-            Collection<String>... sourceCodes) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-        this.mapperXmlDirectory = mapperXmlDirectory;
-        this.procs = Lists.newArrayList(sourceCodes);
-    }
-
-
-    public MapperXmlProc process() throws IOException {
+    public MapperXmlProc process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
+            Path mapperXmlDirectory, Collection<Collection<String>> sourceCodes) throws IOException {
         // find
-        mapperXmlFile = mapperXmlDirectory.resolve(persistence.getMapperName() + ".xml").toFile();
+        File mapperXmlFile = mapperXmlDirectory.resolve(persistence.getMapperName() + ".xml").toFile();
 
         if (!mapperXmlFile.exists()) {
             // create new File
@@ -63,7 +45,7 @@ public class MapperXmlProc {
 
         String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
         List<String> lines = StringUtils.splitLineByLine(content);
-        List<String> generatedLines = getGeneratedLines();
+        List<String> generatedLines = getGeneratedLines(sourceCodes);
 
         if (content.contains(BaseConstant.BY_ALLISON_1875)) {
             boolean inAnchorRange = false;
@@ -114,15 +96,15 @@ public class MapperXmlProc {
         return this;
     }
 
-    private List<String> getGeneratedLines() {
+    private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes) {
         List<String> auto = Lists.newArrayList();
         String leftAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
-        for (Collection<String> proc : procs) {
-            if (CollectionUtils.isNotEmpty(proc)) {
-                for (String line : proc) {
+        for (Collection<String> sourceCode : sourceCodes) {
+            if (CollectionUtils.isNotEmpty(sourceCode)) {
+                for (String line : sourceCode) {
                     if (StringUtils.isNotBlank(line)) {
                         auto.add(BaseConstant.SINGLE_INDENT + line);
                     } else {

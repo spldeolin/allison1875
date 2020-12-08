@@ -26,9 +26,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class QueryInformationSchemaProc {
 
-    private Collection<InformationSchemaDto> infoSchemas;
-
-    public QueryInformationSchemaProc process() {
+    public Collection<InformationSchemaDto> process() {
         PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(conf.getJdbcUrl());
@@ -40,6 +38,7 @@ public class QueryInformationSchemaProc {
 
         QueryRunner runner = new QueryRunner(dataSource);
 
+        Collection<InformationSchemaDto> infoSchemas;
         try {
             InputStream is = Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("information_schema.sql"),
                     "impossible unless bug.");
@@ -53,18 +52,14 @@ public class QueryInformationSchemaProc {
             }
             sql = sql.replaceFirst("\\{}", part);
 
-            this.infoSchemas = runner.query(sql, rsh, conf.getSchema());
+            infoSchemas = runner.query(sql, rsh, conf.getSchema());
         } catch (Throwable e) {
             log.error("ColumnMetaProc.process", e);
             infoSchemas = Lists.newArrayList();
         } finally {
             dataSource.close();
         }
-        return this;
-    }
-
-    public Collection<InformationSchemaDto> getInfoSchemas() {
-        return this.infoSchemas;
+        return infoSchemas;
     }
 
 }

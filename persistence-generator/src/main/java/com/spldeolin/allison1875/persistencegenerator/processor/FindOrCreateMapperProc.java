@@ -18,6 +18,7 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.javabean.FindOrCreateMapperResultDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -27,26 +28,16 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class FindOrCreateMapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final CuCreator entityCuCreator;
-
-    private ClassOrInterfaceDeclaration mapper;
-
-    private CompilationUnit cu;
-
-    public FindOrCreateMapperProc(PersistenceDto persistence, CuCreator entityCuCreator) {
-        this.persistence = persistence;
-        this.entityCuCreator = entityCuCreator;
-    }
-
-    public FindOrCreateMapperProc process() throws IOException {
+    public FindOrCreateMapperResultDto process(PersistenceDto persistence, CuCreator entityCuCreator)
+            throws IOException {
         PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
 
         // find
         Path mapperPath = CodeGenerationUtils
                 .fileInPackageAbsolutePath(entityCuCreator.getSourceRoot(), conf.getMapperPackage(),
                         persistence.getMapperName() + ".java");
+        CompilationUnit cu;
+        ClassOrInterfaceDeclaration mapper;
         if (mapperPath.toFile().exists()) {
             cu = parse(mapperPath);
             Optional<TypeDeclaration<?>> primaryType = cu.getPrimaryType();
@@ -79,15 +70,7 @@ public class FindOrCreateMapperProc {
 
             mapper = mapperCuCreator.getPt().asClassOrInterfaceDeclaration();
         }
-        return this;
-    }
-
-    public ClassOrInterfaceDeclaration getMapper() {
-        return this.mapper;
-    }
-
-    public CompilationUnit getCu() {
-        return this.cu;
+        return new FindOrCreateMapperResultDto().setCu(cu).setMapper(mapper);
     }
 
 }
