@@ -9,8 +9,6 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsEachIdProc;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProc;
 
 /**
  * 这个Proc生成2中方法：
@@ -19,39 +17,12 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryById
  *
  * @author Deolin 2020-07-19
  */
-public class QueryByIdsXmlProc extends XmlProc {
+public class QueryByIdsXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final QueryByIdsProc queryByIdsProc;
-
-    private final QueryByIdsEachIdProc queryByIdsEachIdProc;
-
-    private Collection<String> sourceCodeLines;
-
-    public QueryByIdsXmlProc(PersistenceDto persistence, QueryByIdsEachIdProc queryByIdsEachPkProc) {
-        this.persistence = persistence;
-        this.queryByIdsProc = null;
-        this.queryByIdsEachIdProc = queryByIdsEachPkProc;
-    }
-
-    public QueryByIdsXmlProc(PersistenceDto persistence, QueryByIdsProc queryByPksProc) {
-        this.persistence = persistence;
-        this.queryByIdsProc = queryByPksProc;
-        this.queryByIdsEachIdProc = null;
-    }
-
-    public QueryByIdsXmlProc process() {
+    public Collection<String> process(PersistenceDto persistence, String methodName) {
+        List<String> xmlLines = Lists.newArrayList();
         if (persistence.getIdProperties().size() == 1) {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
-            List<String> xmlLines = Lists.newArrayList();
-            String methodName = null;
-            if (queryByIdsProc != null) {
-                methodName = queryByIdsProc.getMethodName();
-            }
-            if (queryByIdsEachIdProc != null) {
-                methodName = queryByIdsEachIdProc.getMethodName();
-            }
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName,
                     onlyPk.getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
@@ -67,14 +38,9 @@ public class QueryByIdsXmlProc extends XmlProc {
                     + " IN (<foreach collection=\"ids\" item=\"one\" separator=\",\">#{one}</foreach>)");
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
-            sourceCodeLines = xmlLines;
-            sourceCodeLines.add("");
+            xmlLines.add("");
         }
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        return xmlLines;
     }
 
 }

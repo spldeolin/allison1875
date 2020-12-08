@@ -13,29 +13,16 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
  *
  * @author Deolin 2020-07-19
  */
-public class AllCloumnSqlXmlProc extends XmlProc {
+public class AllCloumnSqlXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private Collection<String> sourceCodeLines;
-
-    public AllCloumnSqlXmlProc(PersistenceDto persistence) {
-        this.persistence = persistence;
-    }
-
-    public AllCloumnSqlXmlProc process() {
+    public Collection<String> process(PersistenceDto persistence) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add("<sql id=\"all\">");
         xmlLines.add(BaseConstant.SINGLE_INDENT + persistence.getProperties().stream().map(PropertyDto::getColumnName)
                 .collect(Collectors.joining(", ")));
         xmlLines.add("</sql>");
-        sourceCodeLines = xmlLines;
-        sourceCodeLines.add("");
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        xmlLines.add("");
+        return xmlLines;
     }
 
 }

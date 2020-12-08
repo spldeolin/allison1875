@@ -8,39 +8,21 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
  *
  * @author Deolin 2020-07-19
  */
-public class UpdateByIdEvenNullXmlProc extends XmlProc {
+public class UpdateByIdEvenNullXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final String entityName;
-
-    private final UpdateByIdEvenNullProc updateByIdEvenNullProc;
-
-    private Collection<String> sourceCodeLines;
-
-    public UpdateByIdEvenNullXmlProc(PersistenceDto persistence, String entityName,
-            UpdateByIdEvenNullProc updateByPkEvenNullProc) {
-        this.persistence = persistence;
-        this.entityName = entityName;
-        this.updateByIdEvenNullProc = updateByPkEvenNullProc;
-    }
-
-    public UpdateByIdEvenNullXmlProc process() {
+    public Collection<String> process(PersistenceDto persistence, String entityName, String methodName) {
         if (PersistenceGenerator.CONFIG.get().getDisableUpdateByIdEvenNull()) {
-            return this;
+            return null;
         }
+        List<String> xmlLines = Lists.newArrayList();
         if (persistence.getIdProperties().size() > 0) {
-            List<String> xmlLines = Lists.newArrayList();
-            xmlLines.add(
-                    String.format("<update id=\"%s\" parameterType=\"%s\">", updateByIdEvenNullProc.getMethodName(),
-                            entityName));
+            xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
@@ -59,14 +41,9 @@ public class UpdateByIdEvenNullXmlProc extends XmlProc {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
-            sourceCodeLines = xmlLines;
-            sourceCodeLines.add("");
+            xmlLines.add("");
         }
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        return xmlLines;
     }
 
 }

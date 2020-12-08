@@ -16,21 +16,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class UpdateByIdProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public UpdateByIdProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-    }
-
-    public UpdateByIdProc process() {
+    public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableUpdateById()) {
-            return this;
+            return null;
         }
+        String methodName = null;
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateById");
             MethodDeclaration updateById = new MethodDeclaration();
@@ -45,11 +35,7 @@ public class UpdateByIdProc extends MapperProc {
             updateById.setBody(null);
             mapper.getMembers().addLast(updateById);
         }
-        return this;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

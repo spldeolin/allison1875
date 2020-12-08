@@ -18,7 +18,6 @@ import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.XmlProc;
 
 /**
  * @author Deolin 2020-07-18
@@ -29,18 +28,18 @@ public class MapperXmlProc {
 
     private final ClassOrInterfaceDeclaration mapper;
 
-    private final List<XmlProc> procs;
+    private final List<Collection<String>> procs;
 
     private final Path mapperXmlDirectory;
 
     private File mapperXmlFile;
 
     public MapperXmlProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
-            XmlProc... procs) {
+            Collection<String>... sourceCodes) {
         this.persistence = persistence;
         this.mapper = mapper;
         this.mapperXmlDirectory = mapperXmlDirectory;
-        this.procs = Lists.newArrayList(procs);
+        this.procs = Lists.newArrayList(sourceCodes);
     }
 
 
@@ -121,9 +120,9 @@ public class MapperXmlProc {
         String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
-        for (XmlProc proc : procs) {
-            if (CollectionUtils.isNotEmpty(proc.getSourceCodeLines())) {
-                for (String line : proc.getSourceCodeLines()) {
+        for (Collection<String> proc : procs) {
+            if (CollectionUtils.isNotEmpty(proc)) {
+                for (String line : proc) {
                     if (StringUtils.isNotBlank(line)) {
                         auto.add(BaseConstant.SINGLE_INDENT + line);
                     } else {
@@ -138,10 +137,6 @@ public class MapperXmlProc {
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
         return auto;
-    }
-
-    public File getMapperXmlFile() {
-        return this.mapperXmlFile;
     }
 
 }

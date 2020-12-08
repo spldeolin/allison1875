@@ -22,21 +22,8 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
  */
 public class DeleteByKeyProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final PropertyDto key;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public DeleteByKeyProc(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.key = key;
-        this.mapper = mapper;
-    }
-
-    public DeleteByKeyProc process() {
+    public String process(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
+        String methodName = null;
         if (persistence.getIsDeleteFlagExist()) {
             methodName = calcMethodName(mapper, "deleteBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
             MethodDeclaration method = new MethodDeclaration();
@@ -54,15 +41,7 @@ public class DeleteByKeyProc extends MapperProc {
             method.setBody(null);
             mapper.getMembers().addLast(method);
         }
-        return this;
-    }
-
-    public PropertyDto getKey() {
-        return this.key;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

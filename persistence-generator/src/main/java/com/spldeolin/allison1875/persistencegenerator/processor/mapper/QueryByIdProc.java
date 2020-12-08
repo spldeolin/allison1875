@@ -23,21 +23,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class QueryByIdProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public QueryByIdProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-    }
-
-    public QueryByIdProc process() {
+    public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryById()) {
-            return this;
+            return null;
         }
+        String methodName = null;
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
@@ -66,11 +56,7 @@ public class QueryByIdProc extends MapperProc {
             queryById.setBody(null);
             mapper.getMembers().addLast(queryById);
         }
-        return this;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

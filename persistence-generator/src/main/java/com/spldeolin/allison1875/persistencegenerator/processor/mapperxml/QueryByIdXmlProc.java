@@ -9,33 +9,21 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProc;
 
 /**
  * 根据主键查询
  *
  * @author Deolin 2020-07-19
  */
-public class QueryByIdXmlProc extends XmlProc {
+public class QueryByIdXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final QueryByIdProc queryByIdProc;
-
-    private Collection<String> sourceCodeLines;
-
-    public QueryByIdXmlProc(PersistenceDto persistence, QueryByIdProc queryByIdProc) {
-        this.persistence = persistence;
-        this.queryByIdProc = queryByIdProc;
-    }
-
-    public QueryByIdXmlProc process() {
+    public Collection<String> process(PersistenceDto persistence, String methodName) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryById()) {
-            return this;
+            return null;
         }
+        List<String> xmlLines = Lists.newArrayList();
         if (persistence.getIdProperties().size() > 0) {
-            List<String> xmlLines = Lists.newArrayList();
-            String firstLine = "<select id=\"" + queryByIdProc.getMethodName() + "\" ";
+            String firstLine = "<select id=\"" + methodName + "\" ";
             if (persistence.getIdProperties().size() == 1) {
                 firstLine += "parameterType=\"" + Iterables.getOnlyElement(persistence.getIdProperties()).getJavaType()
                         .getName().replaceFirst("java\\.lang\\.", "") + "\" ";
@@ -57,14 +45,9 @@ public class QueryByIdXmlProc extends XmlProc {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
-            sourceCodeLines = xmlLines;
-            sourceCodeLines.add("");
+            xmlLines.add("");
         }
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        return xmlLines;
     }
 
 }

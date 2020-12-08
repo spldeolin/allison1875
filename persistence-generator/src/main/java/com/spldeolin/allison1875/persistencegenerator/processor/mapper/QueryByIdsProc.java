@@ -26,21 +26,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class QueryByIdsProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public QueryByIdsProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-    }
-
-    public QueryByIdsProc process() {
+    public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryByIds()) {
-            return this;
+            return null;
         }
+        String methodName = null;
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
@@ -62,11 +52,7 @@ public class QueryByIdsProc extends MapperProc {
             queryByIds.setJavadocComment(javadoc);
             mapper.getMembers().addLast(queryByIds);
         }
-        return this;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

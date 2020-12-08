@@ -24,25 +24,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class QueryByKeyProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final PropertyDto key;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public QueryByKeyProc(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.key = key;
-        this.mapper = mapper;
-    }
-
-    public QueryByKeyProc process() {
+    public String process(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryByKey()) {
-            return this;
+            return null;
         }
-        methodName = calcMethodName(mapper, "queryBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
+        String methodName = calcMethodName(mapper, "queryBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
                 "根据" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
@@ -58,15 +44,7 @@ public class QueryByKeyProc extends MapperProc {
         javadoc.addBlockTag("return", persistence.getDescrption());
         method.setJavadocComment(javadoc);
         mapper.getMembers().addLast(method);
-        return this;
-    }
-
-    public PropertyDto getKey() {
-        return this.key;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

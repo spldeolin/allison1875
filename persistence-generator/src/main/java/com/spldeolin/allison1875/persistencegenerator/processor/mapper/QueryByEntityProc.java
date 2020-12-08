@@ -16,23 +16,12 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class QueryByEntityProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public QueryByEntityProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-    }
-
-    public QueryByEntityProc process() {
+    public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryByEntity()) {
-            return this;
+            return null;
         }
 
-        methodName = super.calcMethodName(mapper, "queryByEntity");
+        String methodName = super.calcMethodName(mapper, "queryByEntity");
         MethodDeclaration queryByEntity = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
         Imports.ensureImported(mapper, "java.util.List");
@@ -44,11 +33,7 @@ public class QueryByEntityProc extends MapperProc {
         javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
         queryByEntity.setJavadocComment(javadoc);
         mapper.getMembers().addLast(queryByEntity);
-        return this;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

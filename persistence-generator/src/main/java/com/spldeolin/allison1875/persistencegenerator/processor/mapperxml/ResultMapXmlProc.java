@@ -12,20 +12,9 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
  *
  * @author Deolin 2020-07-19
  */
-public class ResultMapXmlProc extends XmlProc {
+public class ResultMapXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final String entityName;
-
-    private Collection<String> sourceCodeLines;
-
-    public ResultMapXmlProc(PersistenceDto persistence, String entityName) {
-        this.persistence = persistence;
-        this.entityName = entityName;
-    }
-
-    public ResultMapXmlProc process() {
+    public Collection<String> process(PersistenceDto persistence, String entityName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<resultMap id=\"all\" type=\"%s\">", entityName));
         for (PropertyDto id : persistence.getIdProperties()) {
@@ -37,13 +26,8 @@ public class ResultMapXmlProc extends XmlProc {
                     .format("<result column=\"%s\" property=\"%s\"/>", nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add("</resultMap>");
-        sourceCodeLines = xmlLines;
-        sourceCodeLines.add("");
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        xmlLines.add("");
+        return xmlLines;
     }
 
 }

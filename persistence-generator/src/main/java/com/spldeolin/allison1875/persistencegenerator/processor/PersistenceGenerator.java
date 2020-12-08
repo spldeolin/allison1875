@@ -17,8 +17,10 @@ import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEnti
 import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
@@ -55,6 +57,52 @@ public class PersistenceGenerator implements
 
     protected GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle =
             new DefaultGenerateQueryDesignFieldHandle();
+
+    BatchInsertEvenNullProc batchInsertEvenNullProc = new BatchInsertEvenNullProc();
+
+    BatchInsertEvenNullXmlProc batchInsertEvenNullXmlProc = new BatchInsertEvenNullXmlProc();
+
+    InsertProc insertProc = new InsertProc();
+
+    InsertXmlProc insertXmlProc = new InsertXmlProc();
+
+    QueryByIdProc queryByIdProc = new QueryByIdProc();
+
+    QueryByIdXmlProc queryByIdXmlProc = new QueryByIdXmlProc();
+
+    UpdateByIdProc updateByIdProc = new UpdateByIdProc();
+
+    UpdateByIdXmlProc updateByIdXmlProc = new UpdateByIdXmlProc();
+
+    ResultMapXmlProc resultMapXmlProc = new ResultMapXmlProc();
+
+    AllCloumnSqlXmlProc allCloumnSqlXmlProc = new AllCloumnSqlXmlProc();
+
+    UpdateByIdEvenNullProc updateByIdEvenNullProc = new UpdateByIdEvenNullProc();
+
+    UpdateByIdEvenNullXmlProc updateByIdEvenNullXmlProc = new UpdateByIdEvenNullXmlProc();
+
+    QueryByIdsProc queryByIdsProc = new QueryByIdsProc();
+
+    QueryByIdsEachIdProc queryByIdsEachIdProc = new QueryByIdsEachIdProc();
+
+    QueryByIdsXmlProc queryByIdsXmlProc = new QueryByIdsXmlProc();
+
+    QueryByKeyProc queryByKeyProc = new QueryByKeyProc();
+
+    DeleteByKeyProc deleteByKeyProc = new DeleteByKeyProc();
+
+    QueryByKeysProc queryByKeysProc = new QueryByKeysProc();
+
+    QueryByKeyXmlProc queryByKeyXmlProc = new QueryByKeyXmlProc();
+
+    DeleteByKeyXmlProc deleteByKeyXmlProc = new DeleteByKeyXmlProc();
+
+    QueryByKeysXmlProc queryByKeysXmlProc = new QueryByKeysXmlProc();
+
+    QueryByEntityProc queryByEntityProc = new QueryByEntityProc();
+
+    QueryByEntityXmlProc queryByEntityXmlProc = new QueryByEntityXmlProc();
 
     public static final ThreadLocal<PersistenceGeneratorConfig> CONFIG = ThreadLocal
             .withInitial(PersistenceGeneratorConfig::new);
@@ -110,41 +158,42 @@ public class PersistenceGenerator implements
             new DeleteAllison1875MethodProc(mapper).process();
 
             // 在Mapper中生成基础方法
-            InsertProc insertProc = new InsertProc(persistence, mapper).process();
-            BatchInsertEvenNullProc batchInsertEvenNullProc = new BatchInsertEvenNullProc(persistence, mapper)
-                    .process();
-            QueryByIdProc queryByIdProc = new QueryByIdProc(persistence, mapper).process();
-            UpdateByIdProc updateByIdProc = new UpdateByIdProc(persistence, mapper).process();
-            UpdateByIdEvenNullProc updateByIdEvenNullProc = new UpdateByIdEvenNullProc(persistence, mapper).process();
-            QueryByIdsProc queryByIdsProc = new QueryByIdsProc(persistence, mapper).process();
-            QueryByIdsEachIdProc queryByIdsEachIdProc = new QueryByIdsEachIdProc(persistence, mapper).process();
-            Collection<QueryByKeyProc> queryByKeyProcs = Lists.newArrayList();
-            Collection<DeleteByKeyProc> deleteByKeyProcs = Lists.newArrayList();
-            Collection<QueryByKeysProc> queryByKeysProcs = Lists.newArrayList();
+            String insertMethodName = insertProc.process(persistence, mapper);
+            String batchInsertEvenNullMethodName = batchInsertEvenNullProc.process(persistence, mapper);
+            String queryByIdMethodName = queryByIdProc.process(persistence, mapper);
+            String updateByIdMethodName = updateByIdProc.process(persistence, mapper);
+            String updateByIdEvenNullMethodName = updateByIdEvenNullProc.process(persistence, mapper);
+            String queryByIdsProcMethodName = queryByIdsProc.process(persistence, mapper);
+            String queryByIdsEachIdMethodName = queryByIdsEachIdProc.process(persistence, mapper);
+            Collection<KeyMethodNameDto> queryByKeyDtos = Lists.newArrayList();
+            Collection<KeyMethodNameDto> deleteByKeyDtos = Lists.newArrayList();
+            Collection<QueryByKeysDto> queryByKeysDtos = Lists.newArrayList();
             for (PropertyDto key : persistence.getKeyProperties()) {
-                queryByKeyProcs.add(new QueryByKeyProc(persistence, key, mapper).process());
-                deleteByKeyProcs.add(new DeleteByKeyProc(persistence, key, mapper).process());
-                queryByKeysProcs.add(new QueryByKeysProc(persistence, key, mapper).process());
+                queryByKeyDtos.add(new KeyMethodNameDto().setKey(key)
+                        .setMethodName(queryByKeyProc.process(persistence, key, mapper)));
+                deleteByKeyDtos.add(new KeyMethodNameDto().setKey(key)
+                        .setMethodName(deleteByKeyProc.process(persistence, key, mapper)));
+                queryByKeysDtos.add(queryByKeysProc.process(persistence, key, mapper));
             }
-            QueryByEntityProc queryByEntityProc = new QueryByEntityProc(persistence, mapper).process();
+            String queryByEntityMethodName = queryByEntityProc.process(persistence, mapper);
 
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
             try {
                 new MapperXmlProc(persistence, mapper, pathProc.getMapperXmlPath(),
-                        new ResultMapXmlProc(persistence, entityName).process(),
-                        new AllCloumnSqlXmlProc(persistence).process(),
-                        new InsertXmlProc(persistence, entityName, insertProc).process(),
-                        new BatchInsertEvenNullXmlProc(persistence, batchInsertEvenNullProc).process(),
-                        new QueryByIdXmlProc(persistence, queryByIdProc).process(),
-                        new UpdateByIdXmlProc(persistence, entityName, updateByIdProc).process(),
-                        new UpdateByIdEvenNullXmlProc(persistence, entityName, updateByIdEvenNullProc).process(),
-                        new QueryByIdsXmlProc(persistence, queryByIdsProc).process(),
-                        new QueryByIdsXmlProc(persistence, queryByIdsEachIdProc).process(),
-                        new QueryByKeyXmlProc(persistence, queryByKeyProcs).process(),
-                        new DeleteByKeyXmlProc(persistence, deleteByKeyProcs).process(),
-                        new QueryByKeysXmlProc(persistence, queryByKeysProcs).process(),
-                        new QueryByEntityXmlProc(persistence, entityName, queryByEntityProc).process()).process();
+                        resultMapXmlProc.process(persistence, entityName), allCloumnSqlXmlProc.process(persistence),
+                        insertXmlProc.process(persistence, entityName, insertMethodName),
+                        batchInsertEvenNullXmlProc.process(persistence, batchInsertEvenNullMethodName),
+                        queryByIdXmlProc.process(persistence, queryByIdMethodName),
+                        updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
+                        updateByIdEvenNullXmlProc.process(persistence, entityName, updateByIdEvenNullMethodName),
+                        queryByIdsXmlProc.process(persistence, queryByIdsProcMethodName),
+                        queryByIdsXmlProc.process(persistence, queryByIdsEachIdMethodName),
+                        queryByKeyXmlProc.process(persistence, queryByKeyDtos),
+                        deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
+                        queryByKeysXmlProc.process(persistence, queryByKeysDtos),
+                        queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName)).
+                        process();
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }
@@ -159,14 +208,6 @@ public class PersistenceGenerator implements
         } else {
             return entityCuCreator.getPrimaryTypeQualifier();
         }
-    }
-
-    public void setGenerateEntityFieldHandle(GenerateEntityFieldHandle generateEntityFieldHandle) {
-        this.generateEntityFieldHandle = generateEntityFieldHandle;
-    }
-
-    public void setGenerateQueryDesignFieldHandle(GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle) {
-        this.generateQueryDesignFieldHandle = generateQueryDesignFieldHandle;
     }
 
 }

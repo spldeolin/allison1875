@@ -16,22 +16,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class InsertProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public InsertProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-    }
-
-    public InsertProc process() {
+    public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableInsert()) {
-            return this;
+            return null;
         }
-        methodName = super.calcMethodName(mapper, "insert");
+        String methodName = super.calcMethodName(mapper, "insert");
         MethodDeclaration insert = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment("插入" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
         javadoc.addBlockTag("param", "entity", persistence.getDescrption());
@@ -42,11 +31,7 @@ public class InsertProc extends MapperProc {
         insert.addParameter(persistence.getEntityName(), "entity");
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
-        return this;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

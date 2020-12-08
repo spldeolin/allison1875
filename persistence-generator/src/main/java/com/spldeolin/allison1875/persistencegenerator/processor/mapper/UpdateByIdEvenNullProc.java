@@ -16,21 +16,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class UpdateByIdEvenNullProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    public UpdateByIdEvenNullProc(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.mapper = mapper;
-    }
-
-    public UpdateByIdEvenNullProc process() {
+    public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableUpdateByIdEvenNull()) {
-            return this;
+            return null;
         }
+        String methodName = null;
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateByIdEvenNull");
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
@@ -45,11 +35,7 @@ public class UpdateByIdEvenNullProc extends MapperProc {
             updateByIdEvenNull.setBody(null);
             mapper.getMembers().addLast(updateByIdEvenNull);
         }
-        return this;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
 }

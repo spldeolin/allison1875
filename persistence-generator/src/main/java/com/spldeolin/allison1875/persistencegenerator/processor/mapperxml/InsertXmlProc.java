@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 
-import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
@@ -8,35 +7,20 @@ import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
 
 /**
  * 插入
  *
  * @author Deolin 2020-07-19
  */
-public class InsertXmlProc extends XmlProc {
+public class InsertXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final String entityName;
-
-    private final InsertProc insertProc;
-
-    private Collection<String> sourceCodeLines;
-
-    public InsertXmlProc(PersistenceDto persistence, String entityName, InsertProc insertProc) {
-        this.persistence = persistence;
-        this.entityName = entityName;
-        this.insertProc = insertProc;
-    }
-
-    public InsertXmlProc process() {
+    public List<String> process(PersistenceDto persistence, String entityName, String methodName) {
         if (PersistenceGenerator.CONFIG.get().getDisableInsert()) {
-            return this;
+            return null;
         }
         List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", insertProc.getMethodName(), entityName));
+        xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
         xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO " + persistence.getTableName());
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
@@ -55,13 +39,8 @@ public class InsertXmlProc extends XmlProc {
         xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
         xmlLines.add("</insert>");
 
-        sourceCodeLines = xmlLines;
-        sourceCodeLines.add("");
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        xmlLines.add("");
+        return xmlLines;
     }
 
 }

@@ -8,32 +8,20 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
 
 /**
  * 插入
  *
  * @author Deolin 2020-07-19
  */
-public class BatchInsertEvenNullXmlProc extends XmlProc {
+public class BatchInsertEvenNullXmlProc {
 
-    private final PersistenceDto persistence;
-
-    private final BatchInsertEvenNullProc batchInsertEvenNullProc;
-
-    private Collection<String> sourceCodeLines;
-
-    public BatchInsertEvenNullXmlProc(PersistenceDto persistence, BatchInsertEvenNullProc batchInsertEvenNullProc) {
-        this.persistence = persistence;
-        this.batchInsertEvenNullProc = batchInsertEvenNullProc;
-    }
-
-    public BatchInsertEvenNullXmlProc process() {
+    public Collection<String> process(PersistenceDto persistence, String methodName) {
         if (PersistenceGenerator.CONFIG.get().getDisableBatchInsertEvenNull()) {
-            return this;
+            return null;
         }
         List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(String.format("<insert id=\"%s\">", batchInsertEvenNullProc.getMethodName()));
+        xmlLines.add(String.format("<insert id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
         xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <include refid=\"all\"/> )");
@@ -44,13 +32,8 @@ public class BatchInsertEvenNullXmlProc extends XmlProc {
                 .map(p -> "#{one." + p.getPropertyName() + "}").collect(Collectors.joining(", ")) + " )");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</foreach>");
         xmlLines.add("</insert>");
-        this.sourceCodeLines = xmlLines;
-        sourceCodeLines.add("");
-        return this;
-    }
-
-    public Collection<String> getSourceCodeLines() {
-        return this.sourceCodeLines;
+        xmlLines.add("");
+        return xmlLines;
     }
 
 }

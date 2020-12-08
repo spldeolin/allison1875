@@ -14,6 +14,7 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
@@ -25,27 +26,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class QueryByKeysProc extends MapperProc {
 
-    private final PersistenceDto persistence;
-
-    private final PropertyDto key;
-
-    private final ClassOrInterfaceDeclaration mapper;
-
-    private String methodName;
-
-    private String varsName;
-
-    public QueryByKeysProc(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
-        this.persistence = persistence;
-        this.key = key;
-        this.mapper = mapper;
-    }
-
-    public QueryByKeysProc process() {
+    public QueryByKeysDto process(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
         if (PersistenceGenerator.CONFIG.get().getDisableQueryByKeys()) {
-            return this;
+            return null;
         }
-        methodName = calcMethodName(mapper,
+        String methodName = calcMethodName(mapper,
                 "queryBy" + English.plural(StringUtils.upperFirstLetter(key.getPropertyName())));
         MethodDeclaration method = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
@@ -54,7 +39,7 @@ public class QueryByKeysProc extends MapperProc {
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));
         method.setName(methodName);
         String typeName = "Collection<" + key.getJavaType().getSimpleName() + ">";
-        varsName = English.plural(StringUtils.lowerFirstLetter(key.getPropertyName()));
+        String varsName = English.plural(StringUtils.lowerFirstLetter(key.getPropertyName()));
         String paramAnno = "@Param(\"" + varsName + "\")";
         Parameter parameter = parseParameter(paramAnno + " " + typeName + " " + varsName);
         method.addParameter(parameter);
@@ -63,19 +48,7 @@ public class QueryByKeysProc extends MapperProc {
         javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
         method.setJavadocComment(javadoc);
         mapper.getMembers().addLast(method);
-        return this;
-    }
-
-    public PropertyDto getKey() {
-        return this.key;
-    }
-
-    public String getMethodName() {
-        return this.methodName;
-    }
-
-    public String getVarsName() {
-        return this.varsName;
+        return new QueryByKeysDto().setKey(key).setMethodName(methodName).setVarsName(varsName);
     }
 
 }
