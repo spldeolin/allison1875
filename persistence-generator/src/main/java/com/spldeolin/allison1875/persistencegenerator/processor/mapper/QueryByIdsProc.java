@@ -10,12 +10,14 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据主键列表查询
@@ -24,10 +26,14 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  *
  * @author Deolin 2020-07-18
  */
+@Singleton
 public class QueryByIdsProc extends MapperProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        if (PersistenceGenerator.CONFIG.get().getDisableQueryByIds()) {
+        if (persistenceGeneratorConfig.getDisableQueryByIds()) {
             return null;
         }
         String methodName = null;

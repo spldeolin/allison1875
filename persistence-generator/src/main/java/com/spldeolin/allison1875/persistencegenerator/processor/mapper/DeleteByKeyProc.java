@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.javadoc.Javadoc;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -20,6 +21,7 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
  *
  * @author Deolin 2020-08-08
  */
+@Singleton
 public class DeleteByKeyProc extends MapperProc {
 
     public String process(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {

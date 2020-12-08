@@ -5,11 +5,13 @@ import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
  * @author Deolin 2020-11-14
  */
+@Singleton
 public class DefaultGenerateEntityFieldHandle implements GenerateEntityFieldHandle {
 
     @Override

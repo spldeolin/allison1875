@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.enums.JdbcTypeEnum;
@@ -15,13 +17,17 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-07-12
  */
+@Singleton
 @Log4j2
 public class BuildPersistenceDtoProc {
 
-    QueryInformationSchemaProc queryInformationSchemaProc = new QueryInformationSchemaProc();
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
+    @Inject
+    private QueryInformationSchemaProc queryInformationSchemaProc;
 
     public Collection<PersistenceDto> process() {
-        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         // 查询information_schema.COLUMNS、information_schema.TABLES表
         Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaProc.process();
         String deleteFlag = getDeleteFlagName();
@@ -42,7 +48,7 @@ public class BuildPersistenceDtoProc {
         }
         for (InformationSchemaDto columnMeta : infoSchemas) {
             String columnName = columnMeta.getColumnName();
-            if (conf.getHiddenColumns().contains(columnName)) {
+            if (persistenceGeneratorConfig.getHiddenColumns().contains(columnName)) {
                 continue;
             }
             PropertyDto property = new PropertyDto();
@@ -65,7 +71,7 @@ public class BuildPersistenceDtoProc {
                 persistence.getIdProperties().add(property);
             } else {
                 persistence.getNonIdProperties().add(property);
-                if (columnName.endsWith("_id") && !conf.getNotKeyColumns().contains(columnName)) {
+                if (columnName.endsWith("_id") && !persistenceGeneratorConfig.getNotKeyColumns().contains(columnName)) {
                     persistence.getKeyProperties().add(property);
                 }
             }
@@ -80,8 +86,8 @@ public class BuildPersistenceDtoProc {
     }
 
     private String getDeleteFlagName() {
-        String sql = PersistenceGenerator.CONFIG.get().getNotDeletedSql();
-        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(PersistenceGenerator.CONFIG.get().getDeletedSql())) {
+        String sql = persistenceGeneratorConfig.getNotDeletedSql();
+        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(persistenceGeneratorConfig.getDeletedSql())) {
             return null;
         }
         if (!sql.contains("=")) {
@@ -92,7 +98,7 @@ public class BuildPersistenceDtoProc {
     }
 
     private String endWith() {
-        return PersistenceGenerator.CONFIG.get().getIsEntityEndWithEntity() ? "Entity" : "";
+        return persistenceGeneratorConfig.getIsEntityEndWithEntity() ? "Entity" : "";
     }
 
     private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {

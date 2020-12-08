@@ -9,13 +9,15 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据外键列表查询，表中每有几个外键，这个Proc就生成几个方法
@@ -24,10 +26,14 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  *
  * @author Deolin 2020-08-08
  */
+@Singleton
 public class QueryByKeysProc extends MapperProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public QueryByKeysDto process(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
-        if (PersistenceGenerator.CONFIG.get().getDisableQueryByKeys()) {
+        if (persistenceGeneratorConfig.getDisableQueryByKeys()) {
             return null;
         }
         String methodName = calcMethodName(mapper,

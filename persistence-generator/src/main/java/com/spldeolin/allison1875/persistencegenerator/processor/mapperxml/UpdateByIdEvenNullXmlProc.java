@@ -3,21 +3,27 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
  *
  * @author Deolin 2020-07-19
  */
+@Singleton
 public class UpdateByIdEvenNullXmlProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public Collection<String> process(PersistenceDto persistence, String entityName, String methodName) {
-        if (PersistenceGenerator.CONFIG.get().getDisableUpdateByIdEvenNull()) {
+        if (persistenceGeneratorConfig.getDisableUpdateByIdEvenNull()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -32,8 +38,7 @@ public class UpdateByIdEvenNullXmlProc {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(
-                        BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGenerator.CONFIG.get().getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
             }
             for (PropertyDto idProperty : persistence.getIdProperties()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty

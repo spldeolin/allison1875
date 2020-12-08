@@ -23,13 +23,14 @@ import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -39,23 +40,27 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-10-06
  */
+@Singleton
 @Log4j2
 public class GenerateQueryDesignProc {
 
-    private final GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle =
-            new DefaultGenerateQueryDesignFieldHandle();
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
+    @Inject
+    private GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle;
 
     public Collection<CompilationUnit> process(PersistenceDto persistence, CuCreator entityCuCreator,
             ClassOrInterfaceDeclaration mapper) {
-        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
-        if (!conf.getEnableGenerateQueryDesign()) {
+        if (!persistenceGeneratorConfig.getEnableGenerateQueryDesign()) {
             return Lists.newArrayList();
         }
         Collection<CompilationUnit> toCreate = Lists.newArrayList();
 
         Path sourceRoot = entityCuCreator.getSourceRoot();
         Path queryPath = CodeGenerationUtils
-                .fileInPackageAbsolutePath(sourceRoot, conf.getEntityPackage(), persistence.getEntityName() + ".java");
+                .fileInPackageAbsolutePath(sourceRoot, persistenceGeneratorConfig.getEntityPackage(),
+                        persistence.getEntityName() + ".java");
 
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
         if (queryPath.toFile().exists()) {
@@ -67,44 +72,47 @@ public class GenerateQueryDesignProc {
             }
             log.info("Query文件已存在，覆盖它。 [{}]", queryPath);
         } else {
-            authorTags.add(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
+            authorTags.add(new JavadocBlockTag(Type.AUTHOR,
+                    persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
         }
 
-        List<String> imports = this.getImports(persistence, conf, entityCuCreator);
+        List<String> imports = this.getImports(persistence, persistenceGeneratorConfig, entityCuCreator);
 
         Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
-        CuCreator cuCreator = new CuCreator(sourceRoot, conf.getQueryDesignPackage(), imports, () -> {
-            ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            Javadoc classJavadoc = new JavadocComment(
-                    persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
-                            .repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型" + BaseConstant.BY_ALLISON_1875
-                            + "</strong>").parse();
-            classJavadoc.getBlockTags().addAll(authorTags);
-            coid.setJavadocComment(classJavadoc);
-            coid.setPublic(true);
-            coid.setName(calcQueryDesignName(conf, persistence));
-            setDefaultConstructorPrivate(coid);
-            addStaticFactory(coid);
-            for (PropertyDto property : persistence.getProperties()) {
-                FieldDeclaration field = addIntermediateField(coid, property);
-                propAndField.add(Pair.of(property, field));
-            }
-            addTerminalMethod(coid, persistence);
+        CuCreator cuCreator = new CuCreator(sourceRoot, persistenceGeneratorConfig.getQueryDesignPackage(), imports,
+                () -> {
+                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+                    Javadoc classJavadoc = new JavadocComment(
+                            persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
+                                    + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
+                                    + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
+                    classJavadoc.getBlockTags().addAll(authorTags);
+                    coid.setJavadocComment(classJavadoc);
+                    coid.setPublic(true);
+                    coid.setName(calcQueryDesignName(persistenceGeneratorConfig, persistence));
+                    setDefaultConstructorPrivate(coid);
+                    addStaticFactory(coid);
+                    for (PropertyDto property : persistence.getProperties()) {
+                        FieldDeclaration field = addIntermediateField(coid, property);
+                        propAndField.add(Pair.of(property, field));
+                    }
+                    addTerminalMethod(coid, persistence);
 
-            QueryMeta queryMeta = new QueryMeta();
-            queryMeta.setEntityQualifier(entityCuCreator.getPrimaryTypeQualifier());
-            queryMeta.setEntityName(entityCuCreator.getPrimaryTypeName());
-            queryMeta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-            queryMeta.setMapperName(mapper.getNameAsString());
-            queryMeta.setMapperRelativePath(
-                    PersistenceGenerator.CONFIG.get().getMapperXmlDirectoryPath() + File.separator + persistence
-                            .getMapperName() + ".xml");
-            queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
-                    .collect(Collectors.toList()));
-            queryMeta.setTableName(persistence.getTableName());
-            coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
-            return coid;
-        });
+                    QueryMeta queryMeta = new QueryMeta();
+                    queryMeta.setEntityQualifier(entityCuCreator.getPrimaryTypeQualifier());
+                    queryMeta.setEntityName(entityCuCreator.getPrimaryTypeName());
+                    queryMeta.setMapperQualifier(
+                            mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+                    queryMeta.setMapperName(mapper.getNameAsString());
+                    queryMeta.setMapperRelativePath(
+                            persistenceGeneratorConfig.getMapperXmlDirectoryPath() + File.separator + persistence
+                                    .getMapperName() + ".xml");
+                    queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
+                            .collect(Collectors.toList()));
+                    queryMeta.setTableName(persistence.getTableName());
+                    coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
+                    return coid;
+                });
         toCreate.add(cuCreator.create(false));
 
         for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {

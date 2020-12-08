@@ -16,6 +16,8 @@ import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.FindOrCreateMapperResultDto;
@@ -25,17 +27,19 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-07-18
  */
+@Singleton
 @Log4j2
 public class FindOrCreateMapperProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public FindOrCreateMapperResultDto process(PersistenceDto persistence, CuCreator entityCuCreator)
             throws IOException {
-        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
 
         // find
-        Path mapperPath = CodeGenerationUtils
-                .fileInPackageAbsolutePath(entityCuCreator.getSourceRoot(), conf.getMapperPackage(),
-                        persistence.getMapperName() + ".java");
+        Path mapperPath = CodeGenerationUtils.fileInPackageAbsolutePath(entityCuCreator.getSourceRoot(),
+                persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java");
         CompilationUnit cu;
         ClassOrInterfaceDeclaration mapper;
         if (mapperPath.toFile().exists()) {
@@ -52,14 +56,16 @@ public class FindOrCreateMapperProc {
 
             // create
             log.info("Mapper文件不存在，创建它。 [{}]", mapperPath);
-            CuCreator mapperCuCreator = new CuCreator(entityCuCreator.getSourceRoot(), conf.getMapperPackage(),
+            CuCreator mapperCuCreator = new CuCreator(entityCuCreator.getSourceRoot(),
+                    persistenceGeneratorConfig.getMapperPackage(),
                     Lists.newArrayList(new ImportDeclaration("java.util", false, true),
                             new ImportDeclaration(entityCuCreator.getPrimaryTypeQualifier(), false, false),
                             new ImportDeclaration("org.apache.ibatis.annotations", false, true)), () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
                 javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityCuCreator.getPrimaryTypeName()));
-                javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, conf.getAuthor() + " " + LocalDate.now()));
+                javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR,
+                        persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
                 coid.setJavadocComment(javadoc);
                 coid.setPublic(true);
                 coid.setInterface(true);

@@ -3,19 +3,25 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * @author Deolin 2020-10-27
  */
+@Singleton
 public class QueryByEntityXmlProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public Collection<String> process(PersistenceDto persistence, String entityName, String methodName) {
-        if (PersistenceGenerator.CONFIG.get().getDisableQueryByEntity()) {
+        if (persistenceGeneratorConfig.getDisableQueryByEntity()) {
             return null;
         }
 
@@ -29,7 +35,7 @@ public class QueryByEntityXmlProc {
         xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
         xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGenerator.CONFIG.get().getNotDeletedSql());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
         }
         for (PropertyDto property : persistence.getProperties()) {
             xmlLines.add(BaseConstant.SINGLE_INDENT + String

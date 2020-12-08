@@ -4,11 +4,13 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 这个Proc生成2中方法：
@@ -17,7 +19,11 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  *
  * @author Deolin 2020-07-19
  */
+@Singleton
 public class QueryByIdsXmlProc {
+
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     public Collection<String> process(PersistenceDto persistence, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
@@ -31,8 +37,7 @@ public class QueryByIdsXmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(
-                        BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGenerator.CONFIG.get().getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + onlyPk.getColumnName()
                     + " IN (<foreach collection=\"ids\" item=\"one\" separator=\",\">#{one}</foreach>)");

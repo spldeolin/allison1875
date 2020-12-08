@@ -3,22 +3,28 @@ package com.spldeolin.allison1875.persistencegenerator.processor.mapperxml;
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 根据外键查询，表中每有几个外键，这个Proc就生成几个方法
  *
  * @author Deolin 2020-07-19
  */
+@Singleton
 public class QueryByKeyXmlProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public Collection<String> process(PersistenceDto persistence, Collection<KeyMethodNameDto> keyAndMethodNames) {
-        if (PersistenceGenerator.CONFIG.get().getDisableQueryByKey()) {
+        if (persistenceGeneratorConfig.getDisableQueryByKey()) {
             return null;
         }
         Collection<String> result = Lists.newArrayList();
@@ -33,8 +39,7 @@ public class QueryByKeyXmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(
-                        BaseConstant.SINGLE_INDENT + "  AND " + PersistenceGenerator.CONFIG.get().getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + key.getColumnName() + " = #{" + key.getPropertyName()
                     + "}");

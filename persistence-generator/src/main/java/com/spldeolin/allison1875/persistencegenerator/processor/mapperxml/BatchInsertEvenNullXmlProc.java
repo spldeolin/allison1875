@@ -4,20 +4,26 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * 插入
  *
  * @author Deolin 2020-07-19
  */
+@Singleton
 public class BatchInsertEvenNullXmlProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public Collection<String> process(PersistenceDto persistence, String methodName) {
-        if (PersistenceGenerator.CONFIG.get().getDisableBatchInsertEvenNull()) {
+        if (persistenceGeneratorConfig.getDisableBatchInsertEvenNull()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();

@@ -6,18 +6,24 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.Imports;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
  * @author Deolin 2020-10-27
  */
+@Singleton
 public class QueryByEntityProc extends MapperProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public String process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
-        if (PersistenceGenerator.CONFIG.get().getDisableQueryByEntity()) {
+        if (persistenceGeneratorConfig.getDisableQueryByEntity()) {
             return null;
         }
 

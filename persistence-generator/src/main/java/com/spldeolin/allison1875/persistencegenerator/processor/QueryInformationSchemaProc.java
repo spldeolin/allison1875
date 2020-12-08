@@ -14,6 +14,8 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.io.IOUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
@@ -23,15 +25,18 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-07-12
  */
+@Singleton
 @Log4j2
 public class QueryInformationSchemaProc {
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     public Collection<InformationSchemaDto> process() {
-        PersistenceGeneratorConfig conf = PersistenceGenerator.CONFIG.get();
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl(conf.getJdbcUrl());
-        dataSource.setUsername(conf.getUserName());
-        dataSource.setPassword(conf.getPassword());
+        dataSource.setJdbcUrl(persistenceGeneratorConfig.getJdbcUrl());
+        dataSource.setUsername(persistenceGeneratorConfig.getUserName());
+        dataSource.setPassword(persistenceGeneratorConfig.getPassword());
 
         ResultSetHandler<List<InformationSchemaDto>> rsh = new BeanListHandler<>(InformationSchemaDto.class,
                 new BasicRowProcessor(new GenerousBeanProcessor()));
@@ -45,14 +50,14 @@ public class QueryInformationSchemaProc {
             String sql = IOUtils.toString(is, StandardCharsets.UTF_8);
 
             String part = "IS NOT NULL";
-            Collection<String> tables = conf.getTables();
+            Collection<String> tables = persistenceGeneratorConfig.getTables();
             if (CollectionUtils.isNotEmpty(tables)) {
                 tables = tables.stream().map(one -> "'" + one + "'").collect(Collectors.toList());
                 part = Joiner.on(',').appendTo(new StringBuilder("IN ("), tables).append(")").toString();
             }
             sql = sql.replaceFirst("\\{}", part);
 
-            infoSchemas = runner.query(sql, rsh, conf.getSchema());
+            infoSchemas = runner.query(sql, rsh, persistenceGeneratorConfig.getSchema());
         } catch (Throwable e) {
             log.error("ColumnMetaProc.process", e);
             infoSchemas = Lists.newArrayList();

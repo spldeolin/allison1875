@@ -12,6 +12,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
@@ -22,6 +23,7 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 /**
  * @author Deolin 2020-07-18
  */
+@Singleton
 public class MapperXmlProc {
 
     public MapperXmlProc process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,

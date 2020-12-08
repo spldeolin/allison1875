@@ -1,16 +1,15 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.creator.CuCreator;
-import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.FindOrCreateMapperResultDto;
@@ -48,85 +47,106 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-07-11
  */
+@Singleton
 @Log4j2
 public class PersistenceGenerator implements
         Allison1875MainProcessor<PersistenceGeneratorConfig, PersistenceGenerator> {
 
-    BatchInsertEvenNullProc batchInsertEvenNullProc = new BatchInsertEvenNullProc();
+    @Inject
+    private BatchInsertEvenNullProc batchInsertEvenNullProc;
 
-    BatchInsertEvenNullXmlProc batchInsertEvenNullXmlProc = new BatchInsertEvenNullXmlProc();
+    @Inject
+    private BatchInsertEvenNullXmlProc batchInsertEvenNullXmlProc;
 
-    InsertProc insertProc = new InsertProc();
+    @Inject
+    private InsertProc insertProc;
 
-    InsertXmlProc insertXmlProc = new InsertXmlProc();
+    @Inject
+    private InsertXmlProc insertXmlProc;
 
-    QueryByIdProc queryByIdProc = new QueryByIdProc();
+    @Inject
+    private QueryByIdProc queryByIdProc;
 
-    QueryByIdXmlProc queryByIdXmlProc = new QueryByIdXmlProc();
+    @Inject
+    private QueryByIdXmlProc queryByIdXmlProc;
 
-    UpdateByIdProc updateByIdProc = new UpdateByIdProc();
+    @Inject
+    private UpdateByIdProc updateByIdProc;
 
-    UpdateByIdXmlProc updateByIdXmlProc = new UpdateByIdXmlProc();
+    @Inject
+    private UpdateByIdXmlProc updateByIdXmlProc;
 
-    ResultMapXmlProc resultMapXmlProc = new ResultMapXmlProc();
+    @Inject
+    private ResultMapXmlProc resultMapXmlProc;
 
-    AllCloumnSqlXmlProc allCloumnSqlXmlProc = new AllCloumnSqlXmlProc();
+    @Inject
+    private AllCloumnSqlXmlProc allCloumnSqlXmlProc;
 
-    UpdateByIdEvenNullProc updateByIdEvenNullProc = new UpdateByIdEvenNullProc();
+    @Inject
+    private UpdateByIdEvenNullProc updateByIdEvenNullProc;
 
-    UpdateByIdEvenNullXmlProc updateByIdEvenNullXmlProc = new UpdateByIdEvenNullXmlProc();
+    @Inject
+    private UpdateByIdEvenNullXmlProc updateByIdEvenNullXmlProc;
 
-    QueryByIdsProc queryByIdsProc = new QueryByIdsProc();
+    @Inject
+    private QueryByIdsProc queryByIdsProc;
 
-    QueryByIdsEachIdProc queryByIdsEachIdProc = new QueryByIdsEachIdProc();
+    @Inject
+    private QueryByIdsEachIdProc queryByIdsEachIdProc;
 
-    QueryByIdsXmlProc queryByIdsXmlProc = new QueryByIdsXmlProc();
+    @Inject
+    private QueryByIdsXmlProc queryByIdsXmlProc;
 
-    QueryByKeyProc queryByKeyProc = new QueryByKeyProc();
+    @Inject
+    private QueryByKeyProc queryByKeyProc;
 
-    DeleteByKeyProc deleteByKeyProc = new DeleteByKeyProc();
+    @Inject
+    private DeleteByKeyProc deleteByKeyProc;
 
-    QueryByKeysProc queryByKeysProc = new QueryByKeysProc();
+    @Inject
+    private QueryByKeysProc queryByKeysProc;
 
-    QueryByKeyXmlProc queryByKeyXmlProc = new QueryByKeyXmlProc();
+    @Inject
+    private QueryByKeyXmlProc queryByKeyXmlProc;
 
-    DeleteByKeyXmlProc deleteByKeyXmlProc = new DeleteByKeyXmlProc();
+    @Inject
+    private DeleteByKeyXmlProc deleteByKeyXmlProc;
 
-    QueryByKeysXmlProc queryByKeysXmlProc = new QueryByKeysXmlProc();
+    @Inject
+    private QueryByKeysXmlProc queryByKeysXmlProc;
 
-    QueryByEntityProc queryByEntityProc = new QueryByEntityProc();
+    @Inject
+    private QueryByEntityProc queryByEntityProc;
 
-    QueryByEntityXmlProc queryByEntityXmlProc = new QueryByEntityXmlProc();
+    @Inject
+    private QueryByEntityXmlProc queryByEntityXmlProc;
 
-    BuildPersistenceDtoProc buildPersistenceDtoProc = new BuildPersistenceDtoProc();
+    @Inject
+    private BuildPersistenceDtoProc buildPersistenceDtoProc;
 
-    DeleteAllison1875MethodProc deleteAllison1875MethodProc = new DeleteAllison1875MethodProc();
+    @Inject
+    private DeleteAllison1875MethodProc deleteAllison1875MethodProc;
 
-    FindOrCreateMapperProc findOrCreateMapperProc = new FindOrCreateMapperProc();
+    @Inject
+    private FindOrCreateMapperProc findOrCreateMapperProc;
 
-    GenerateEntityProc entityProc = new GenerateEntityProc();
+    @Inject
+    private GenerateEntityProc entityProc;
 
-    PathProc pathProc = new PathProc();
+    @Inject
+    private PathProc pathProc;
 
-    MapperXmlProc mapperXmlProc = new MapperXmlProc();
+    @Inject
+    private MapperXmlProc mapperXmlProc;
 
-    GenerateQueryDesignProc generateQueryDesignProc = new GenerateQueryDesignProc();
+    @Inject
+    private GenerateQueryDesignProc generateQueryDesignProc;
 
-    public static final ThreadLocal<PersistenceGeneratorConfig> CONFIG = ThreadLocal
-            .withInitial(PersistenceGeneratorConfig::new);
+    @Inject
+    private PersistenceGeneratorConfig config;
 
     @Override
     public PersistenceGenerator config(PersistenceGeneratorConfig config) {
-        Set<ConstraintViolation<PersistenceGeneratorConfig>> violations = ValidateUtils.validate(config);
-        if (violations.size() > 0) {
-            log.warn("配置项校验未通过，请检查后重新运行");
-            for (ConstraintViolation<PersistenceGeneratorConfig> violation : violations) {
-                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
-                        + violation.getMessage());
-            }
-            System.exit(-9);
-        }
-        CONFIG.set(config);
         return this;
     }
 
@@ -209,8 +229,8 @@ public class PersistenceGenerator implements
         toSave.forEach(Saves::save);
     }
 
-    private static String getEntityNameInXml(CuCreator entityCuCreator) {
-        if (PersistenceGenerator.CONFIG.get().getIsEntityUsingAlias()) {
+    private String getEntityNameInXml(CuCreator entityCuCreator) {
+        if (config.getIsEntityUsingAlias()) {
             return entityCuCreator.getPrimaryTypeName();
         } else {
             return entityCuCreator.getPrimaryTypeQualifier();

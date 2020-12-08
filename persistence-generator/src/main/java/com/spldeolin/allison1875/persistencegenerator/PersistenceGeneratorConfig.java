@@ -3,12 +3,14 @@ package com.spldeolin.allison1875.persistencegenerator;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.google.inject.Singleton;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-07-11
  */
+@Singleton
 @Accessors(chain = true)
 @Data
 public class PersistenceGeneratorConfig {
