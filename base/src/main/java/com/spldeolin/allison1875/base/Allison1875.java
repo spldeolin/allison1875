@@ -23,6 +23,7 @@ public class Allison1875 {
         BaseConfig baseConfig = injector.getInstance(BaseConfig.class);
         AstForest astForest = new AstForest(primaryClass, baseConfig);
 
+        injector.getInstance(Greeting.class).version();
         for (Module guiceModule : guiceModules) {
             guiceModule.getMainProcessor(injector).process(astForest);
         }
