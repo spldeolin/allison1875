@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public class QueryTransformerConfig {
+public final class QueryTransformerConfig {
 
     /**
      * mapper.xml所在目录的相对路径（根据目标工程的情况填写）

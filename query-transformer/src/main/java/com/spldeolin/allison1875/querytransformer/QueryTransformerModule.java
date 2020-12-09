@@ -10,7 +10,7 @@ import com.spldeolin.allison1875.querytransformer.processor.QueryTransformer;
  */
 public class QueryTransformerModule extends Allison1875.Module {
 
-    private final QueryTransformerConfig queryTransformerConfig;
+    protected final QueryTransformerConfig queryTransformerConfig;
 
     public QueryTransformerModule(QueryTransformerConfig queryTransformerConfig) {
         this.queryTransformerConfig = queryTransformerConfig;
@@ -19,7 +19,6 @@ public class QueryTransformerModule extends Allison1875.Module {
     @Override
     protected void configure() {
         bind(QueryTransformerConfig.class).toInstance(queryTransformerConfig);
-        super.configure();
     }
 
     @Override

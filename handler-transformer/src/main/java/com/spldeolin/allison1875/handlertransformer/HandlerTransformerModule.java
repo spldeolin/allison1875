@@ -10,16 +10,15 @@ import com.spldeolin.allison1875.handlertransformer.processor.HandlerTransformer
  */
 public class HandlerTransformerModule extends Allison1875.Module {
 
-    private final HandlerTransformerConfig handlerTransformerConfig;
+    protected final HandlerTransformerConfig handlerTransformerConfig;
 
     public HandlerTransformerModule(HandlerTransformerConfig handlerTransformerConfig) {
-        this.handlerTransformerConfig = super.ensureValid(handlerTransformerConfig);
+        this.handlerTransformerConfig = handlerTransformerConfig;
     }
 
     @Override
     protected void configure() {
         bind(HandlerTransformerConfig.class).toInstance(handlerTransformerConfig);
-        super.configure();
     }
 
     @Override

@@ -5,15 +5,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import com.google.inject.Singleton;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-10-28
  */
 @Singleton
-@Accessors(chain = true)
 @Data
-public class LineCounterConfig {
+public final class LineCounterConfig {
 
     /**
      * 对这些指定后缀的Java类型的进行专门的统计

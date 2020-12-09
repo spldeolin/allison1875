@@ -5,15 +5,13 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.inject.Singleton;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-07-11
  */
 @Singleton
-@Accessors(chain = true)
 @Data
-public class PersistenceGeneratorConfig {
+public final class PersistenceGeneratorConfig {
 
     /**
      * 数据库连接

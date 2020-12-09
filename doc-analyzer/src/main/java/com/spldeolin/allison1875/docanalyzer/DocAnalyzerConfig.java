@@ -6,7 +6,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.inject.Singleton;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * Allison1875[doc-analyzer]的配置
@@ -14,9 +13,8 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-18
  */
 @Singleton
-@Accessors(chain = true)
 @Data
-public class DocAnalyzerConfig {
+public final class DocAnalyzerConfig {
 
     /**
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可

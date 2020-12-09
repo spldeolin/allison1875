@@ -14,15 +14,14 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class PersistenceGeneratorModule extends Allison1875.Module {
 
-    private final PersistenceGeneratorConfig persistenceGeneratorConfig;
+    protected final PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     public PersistenceGeneratorModule(PersistenceGeneratorConfig persistenceGeneratorConfig) {
-        this.persistenceGeneratorConfig = super.ensureValid(persistenceGeneratorConfig);
+        this.persistenceGeneratorConfig = persistenceGeneratorConfig;
     }
 
     @Override
     protected void configure() {
-        super.configure();
         bind(GenerateEntityFieldHandle.class).to(DefaultGenerateEntityFieldHandle.class);
         bind(GenerateQueryDesignFieldHandle.class).to(DefaultGenerateQueryDesignFieldHandle.class);
         bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);

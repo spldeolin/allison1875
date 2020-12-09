@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import com.google.inject.Singleton;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * Allison1875[inspector]的配置
@@ -12,9 +11,8 @@ import lombok.experimental.Accessors;
  * @author Deolin 2020-02-18
  */
 @Singleton
-@Accessors(chain = true)
 @Data
-public class InspectorConfig {
+public final class InspectorConfig {
 
     /**
      * 工程所在的Git本地仓库的路径

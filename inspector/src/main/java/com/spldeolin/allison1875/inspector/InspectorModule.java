@@ -10,16 +10,15 @@ import com.spldeolin.allison1875.inspector.processor.Inspector;
  */
 public class InspectorModule extends Allison1875.Module {
 
-    private final InspectorConfig inspectorConfig;
+    protected final InspectorConfig inspectorConfig;
 
     public InspectorModule(InspectorConfig inspectorConfig) {
-        this.inspectorConfig = super.ensureValid(inspectorConfig);
+        this.inspectorConfig = inspectorConfig;
     }
 
     @Override
     protected void configure() {
         bind(InspectorConfig.class).toInstance(inspectorConfig);
-        super.configure();
     }
 
     @Override

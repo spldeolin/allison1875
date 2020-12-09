@@ -22,10 +22,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DocAnalyzerModule extends Allison1875.Module {
 
-    private final DocAnalyzerConfig docAnalyzerConfig;
+    protected final DocAnalyzerConfig docAnalyzerConfig;
 
     public DocAnalyzerModule(DocAnalyzerConfig docAnalyzerConfig) {
-        this.docAnalyzerConfig = super.ensureValid(docAnalyzerConfig);
+        this.docAnalyzerConfig = docAnalyzerConfig;
     }
 
     @Override
@@ -36,7 +36,6 @@ public class DocAnalyzerModule extends Allison1875.Module {
         bind(ObtainConcernedResponseBodyHandle.class).to(DefaultObtainConcernedResponseBodyHandle.class);
         bind(SpecificFieldDescriptionsHandle.class).to(DefaultSpecificFieldDescriptionsHandle.class);
         bind(DocAnalyzerConfig.class).toInstance(docAnalyzerConfig);
-        super.configure();
     }
 
     @Override

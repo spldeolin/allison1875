@@ -10,16 +10,15 @@ import com.spldeolin.allison1875.gadget.processor.LineCounter;
  */
 public class LineCounterModule extends Allison1875.Module {
 
-    private final LineCounterConfig lineCounterConfig;
+    protected final LineCounterConfig lineCounterConfig;
 
     public LineCounterModule(LineCounterConfig lineCounterConfig) {
-        this.lineCounterConfig = super.ensureValid(lineCounterConfig);
+        this.lineCounterConfig = lineCounterConfig;
     }
 
     @Override
     protected void configure() {
         bind(LineCounterConfig.class).toInstance(lineCounterConfig);
-        super.configure();
     }
 
     @Override
