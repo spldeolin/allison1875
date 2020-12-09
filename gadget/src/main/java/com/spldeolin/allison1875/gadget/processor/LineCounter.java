@@ -40,12 +40,16 @@ public class LineCounter implements Allison1875MainProcessor {
     @Inject
     private LineCounterConfig lineCounterConfig;
 
+    @Inject
+    private BaseConfig baseConfig;
+
     @Override
     public void process(AstForest astForest) {
         // with src/test/java
         if (lineCounterConfig.getWithTest()) {
-            astForest = new AstForest(astForest.getAnyClassFromHost(), Lists.newArrayList(
-                    astForest.getHost().resolve(BaseConfig.getInstance().getTestJavaDirectoryLayout()).toString()));
+            astForest = new AstForest(astForest.getAnyClassFromHost(),
+                    Lists.newArrayList(astForest.getHost().resolve(baseConfig.getTestJavaDirectoryLayout()).toString()),
+                    baseConfig);
         }
         AstForestContext.setCurrent(astForest);
 
@@ -104,12 +108,11 @@ public class LineCounter implements Allison1875MainProcessor {
     }
 
     private Collection<File> detectXmls(AstForest astForest, boolean withTest) {
-        BaseConfig baseConf = BaseConfig.getInstance();
         Collection<File> result = Lists.newArrayList();
-        FileUtils.iterateFiles(astForest.getHost().resolve(baseConf.getResourcesDirectoryLayout()).toFile(),
+        FileUtils.iterateFiles(astForest.getHost().resolve(baseConfig.getResourcesDirectoryLayout()).toFile(),
                 new String[]{"xml"}, true).forEachRemaining(result::add);
         if (withTest) {
-            File directory = astForest.getHost().resolve(baseConf.getTestResourcesDirectoryLayout()).toFile();
+            File directory = astForest.getHost().resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
             if (directory.exists()) {
                 FileUtils.iterateFiles(directory, new String[]{"xml"}, true).forEachRemaining(result::add);
             }

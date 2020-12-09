@@ -19,9 +19,9 @@ import lombok.extern.log4j.Log4j2;
 public class Allison1875 {
 
     public static void launch(Class<?> primaryClass, Module guiceModule) {
-        AstForest astForest = new AstForest(primaryClass);
-
         Injector injector = Guice.createInjector(guiceModule);
+        BaseConfig baseConfig = injector.getInstance(BaseConfig.class);
+        AstForest astForest = new AstForest(primaryClass, baseConfig);
         guiceModule.getMainProcessor(injector).process(astForest);
     }
 
