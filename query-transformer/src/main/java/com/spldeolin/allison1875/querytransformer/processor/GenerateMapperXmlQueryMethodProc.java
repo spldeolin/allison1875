@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.atteo.evo.inflector.English;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.querytransformer.constant.Constant;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
@@ -23,6 +24,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-10-11
  */
+@Singleton
 @Log4j2
 public class GenerateMapperXmlQueryMethodProc {
 

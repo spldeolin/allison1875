@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.AnalyzeCriterionResultDto;
@@ -22,6 +23,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-10-10
  */
+@Singleton
 @Log4j2
 public class AnalyzeCriterionProc {
 

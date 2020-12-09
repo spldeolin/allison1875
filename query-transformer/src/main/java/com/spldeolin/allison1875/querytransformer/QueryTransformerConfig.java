@@ -3,13 +3,13 @@ package com.spldeolin.allison1875.querytransformer;
 import java.util.Map;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.google.inject.Singleton;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2020-08-09
  */
-@Accessors(chain = true)
+@Singleton
 @Data
 public class QueryTransformerConfig {
 

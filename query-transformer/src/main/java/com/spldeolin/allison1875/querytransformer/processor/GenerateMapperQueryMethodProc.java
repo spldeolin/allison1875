@@ -12,6 +12,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -26,14 +28,12 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-10-10
  */
+@Singleton
 @Log4j2
 public class GenerateMapperQueryMethodProc {
 
-    private final QueryTransformerConfig queryTransformerConfig;
-
-    GenerateMapperQueryMethodProc(QueryTransformerConfig queryTransformerConfig) {
-        this.queryTransformerConfig = queryTransformerConfig;
-    }
+    @Inject
+    private QueryTransformerConfig queryTransformerConfig;
 
     public ClassOrInterfaceDeclaration process(CompilationUnit cu, QueryMeta queryMeta, String queryMethodName,
             Collection<CriterionDto> criterions) {

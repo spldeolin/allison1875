@@ -3,21 +3,20 @@ package com.spldeolin.allison1875.querytransformer.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
-import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
@@ -31,29 +30,24 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2020-10-06
  */
+@Singleton
 @Log4j2
 public class QueryTransformer implements Allison1875MainProcessor<QueryTransformerConfig, QueryTransformer> {
 
-    private QueryTransformerConfig config;
+    @Inject
+    private DetectQueryDesignProc detectQueryDesignProc;
 
-    DetectQueryDesignProc detectQueryDesignProc = new DetectQueryDesignProc();
+    @Inject
+    private AnalyzeCriterionProc analyzeSqlTokenProc;
 
-    AnalyzeCriterionProc analyzeSqlTokenProc = new AnalyzeCriterionProc();
+    @Inject
+    private GenerateMapperXmlQueryMethodProc generateMapperXmlQueryMethodProc;
 
-    GenerateMapperXmlQueryMethodProc generateMapperXmlQueryMethodProc = new GenerateMapperXmlQueryMethodProc();
+    @Inject
+    private GenerateMapperQueryMethodProc createMapperQueryMethodProc;
 
     @Override
     public QueryTransformer config(QueryTransformerConfig config) {
-        Set<ConstraintViolation<QueryTransformerConfig>> violations = ValidateUtils.validate(config);
-        if (violations.size() > 0) {
-            log.warn("配置项校验未通过，请检查后重新运行");
-            for (ConstraintViolation<QueryTransformerConfig> violation : violations) {
-                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
-                        + violation.getMessage());
-            }
-            System.exit(-9);
-        }
-        this.config = config;
         return this;
     }
 
@@ -79,7 +73,6 @@ public class QueryTransformer implements Allison1875MainProcessor<QueryTransform
 
 
             // create queryMethod in mapper
-            GenerateMapperQueryMethodProc createMapperQueryMethodProc = new GenerateMapperQueryMethodProc(config);
             ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc
                     .process(cu, queryMeta, queryMethodName, criterions);
 
