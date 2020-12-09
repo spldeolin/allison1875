@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 /**
  * @author Deolin 2020-10-10
  */
-class DetectQueryDesignProc {
+public class DetectQueryDesignProc {
 
     private final AstForest astForest;
 
@@ -22,7 +22,7 @@ class DetectQueryDesignProc {
         this.terminalMethodName = terminalMethodName;
     }
 
-    DetectQueryDesignProc process() {
+    public DetectQueryDesignProc process() {
         mces = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
             for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {

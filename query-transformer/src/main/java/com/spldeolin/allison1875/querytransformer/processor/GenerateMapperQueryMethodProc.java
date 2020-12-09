@@ -27,7 +27,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-10-10
  */
 @Log4j2
-class GenerateMapperQueryMethodProc {
+public class GenerateMapperQueryMethodProc {
 
     private final CompilationUnit cu;
 
@@ -50,7 +50,7 @@ class GenerateMapperQueryMethodProc {
         this.queryTransformerConfig = queryTransformerConfig;
     }
 
-    GenerateMapperQueryMethodProc process() {
+    public GenerateMapperQueryMethodProc process() {
         mapper = findMapper(cu, queryMeta);
         if (mapper == null) {
             return this;

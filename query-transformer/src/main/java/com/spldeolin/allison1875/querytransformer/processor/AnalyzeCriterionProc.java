@@ -22,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-10-10
  */
 @Log4j2
-class AnalyzeCriterionProc {
+public class AnalyzeCriterionProc {
 
     private final MethodCallExpr mce;
 
@@ -37,7 +37,7 @@ class AnalyzeCriterionProc {
         this.queryMeta = queryMeta;
     }
 
-    AnalyzeCriterionProc process() {
+    public AnalyzeCriterionProc process() {
         List<MethodCallExpr> tokenMces = mce
                 .findAll(MethodCallExpr.class, mce -> mce.getScope().filter(Expression::isFieldAccessExpr).isPresent());
         Collections.reverse(tokenMces);
