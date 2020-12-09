@@ -18,11 +18,14 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Allison1875 {
 
-    public static void launch(Class<?> primaryClass, Module guiceModule) {
-        Injector injector = Guice.createInjector(guiceModule);
+    public static void allison1875(Class<?> primaryClass, Module... guiceModules) {
+        Injector injector = Guice.createInjector(guiceModules);
         BaseConfig baseConfig = injector.getInstance(BaseConfig.class);
         AstForest astForest = new AstForest(primaryClass, baseConfig);
-        guiceModule.getMainProcessor(injector).process(astForest);
+
+        for (Module guiceModule : guiceModules) {
+            guiceModule.getMainProcessor(injector).process(astForest);
+        }
     }
 
     public static abstract class Module extends AbstractModule {
