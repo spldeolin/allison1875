@@ -17,14 +17,14 @@ public class InspectorModule extends Allison1875.Module {
     protected final InspectorConfig inspectorConfig;
 
     public InspectorModule(InspectorConfig inspectorConfig) {
-        // multi bind
-        bind(new TypeLiteral<Collection<Statute>>() {
-        }).toInstance(Lists.newArrayList());
         this.inspectorConfig = super.ensureValid(inspectorConfig);
     }
 
     @Override
     protected void configure() {
+        // multi bind
+        bind(new TypeLiteral<Collection<Statute>>() {
+        }).toInstance(Lists.newArrayList());
         bind(InspectorConfig.class).toInstance(inspectorConfig);
     }
 
