@@ -25,7 +25,7 @@ public class DocAnalyzerModule extends Allison1875.Module {
     protected final DocAnalyzerConfig docAnalyzerConfig;
 
     public DocAnalyzerModule(DocAnalyzerConfig docAnalyzerConfig) {
-        this.docAnalyzerConfig = docAnalyzerConfig;
+        this.docAnalyzerConfig = super.ensureValid(docAnalyzerConfig);
     }
 
     @Override

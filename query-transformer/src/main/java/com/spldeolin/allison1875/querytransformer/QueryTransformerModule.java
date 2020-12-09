@@ -13,7 +13,7 @@ public class QueryTransformerModule extends Allison1875.Module {
     protected final QueryTransformerConfig queryTransformerConfig;
 
     public QueryTransformerModule(QueryTransformerConfig queryTransformerConfig) {
-        this.queryTransformerConfig = queryTransformerConfig;
+        this.queryTransformerConfig = super.ensureValid(queryTransformerConfig);
     }
 
     @Override

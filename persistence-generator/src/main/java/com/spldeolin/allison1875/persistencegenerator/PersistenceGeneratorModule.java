@@ -17,7 +17,7 @@ public class PersistenceGeneratorModule extends Allison1875.Module {
     protected final PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     public PersistenceGeneratorModule(PersistenceGeneratorConfig persistenceGeneratorConfig) {
-        this.persistenceGeneratorConfig = persistenceGeneratorConfig;
+        this.persistenceGeneratorConfig = super.ensureValid(persistenceGeneratorConfig);
     }
 
     @Override

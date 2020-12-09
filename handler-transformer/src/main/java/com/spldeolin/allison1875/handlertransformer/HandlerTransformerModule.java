@@ -13,7 +13,7 @@ public class HandlerTransformerModule extends Allison1875.Module {
     protected final HandlerTransformerConfig handlerTransformerConfig;
 
     public HandlerTransformerModule(HandlerTransformerConfig handlerTransformerConfig) {
-        this.handlerTransformerConfig = handlerTransformerConfig;
+        this.handlerTransformerConfig = super.ensureValid(handlerTransformerConfig);
     }
 
     @Override

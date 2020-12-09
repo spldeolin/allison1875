@@ -13,7 +13,7 @@ public class InspectorModule extends Allison1875.Module {
     protected final InspectorConfig inspectorConfig;
 
     public InspectorModule(InspectorConfig inspectorConfig) {
-        this.inspectorConfig = inspectorConfig;
+        this.inspectorConfig = super.ensureValid(inspectorConfig);
     }
 
     @Override

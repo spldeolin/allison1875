@@ -13,7 +13,7 @@ public class LineCounterModule extends Allison1875.Module {
     protected final LineCounterConfig lineCounterConfig;
 
     public LineCounterModule(LineCounterConfig lineCounterConfig) {
-        this.lineCounterConfig = lineCounterConfig;
+        this.lineCounterConfig = super.ensureValid(lineCounterConfig);
     }
 
     @Override
