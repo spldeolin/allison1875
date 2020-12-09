@@ -11,19 +11,8 @@ import com.spldeolin.allison1875.base.ast.AstForest;
  */
 public class DetectQueryDesignProc {
 
-    private final AstForest astForest;
-
-    private final String terminalMethodName;
-
-    private Collection<MethodCallExpr> mces;
-
-    DetectQueryDesignProc(AstForest astForest, String terminalMethodName) {
-        this.astForest = astForest;
-        this.terminalMethodName = terminalMethodName;
-    }
-
-    public DetectQueryDesignProc process() {
-        mces = Lists.newArrayList();
+    public Collection<MethodCallExpr> process(AstForest astForest, String terminalMethodName) {
+        Collection<MethodCallExpr> mces = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
             for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {
                 if (mce.getNameAsString().equals(terminalMethodName) && mce.getParentNode().isPresent()) {
@@ -31,10 +20,6 @@ public class DetectQueryDesignProc {
                 }
             }
         }
-        return this;
-    }
-
-    public Collection<MethodCallExpr> getMces() {
         return mces;
     }
 

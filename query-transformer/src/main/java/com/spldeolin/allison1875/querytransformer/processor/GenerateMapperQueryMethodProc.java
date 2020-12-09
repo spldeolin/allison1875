@@ -29,35 +29,21 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateMapperQueryMethodProc {
 
-    private final CompilationUnit cu;
-
-    private final QueryMeta queryMeta;
-
-    private final String queryMethodName;
-
-    private final Collection<CriterionDto> criterions;
-
     private final QueryTransformerConfig queryTransformerConfig;
 
-    private ClassOrInterfaceDeclaration mapper;
-
-    GenerateMapperQueryMethodProc(CompilationUnit cu, QueryMeta queryMeta, String queryMethodName,
-            Collection<CriterionDto> criterions, QueryTransformerConfig queryTransformerConfig) {
-        this.cu = cu;
-        this.queryMeta = queryMeta;
-        this.queryMethodName = queryMethodName;
-        this.criterions = criterions;
+    GenerateMapperQueryMethodProc(QueryTransformerConfig queryTransformerConfig) {
         this.queryTransformerConfig = queryTransformerConfig;
     }
 
-    public GenerateMapperQueryMethodProc process() {
-        mapper = findMapper(cu, queryMeta);
+    public ClassOrInterfaceDeclaration process(CompilationUnit cu, QueryMeta queryMeta, String queryMethodName,
+            Collection<CriterionDto> criterions) {
+        ClassOrInterfaceDeclaration mapper = findMapper(cu, queryMeta);
         if (mapper == null) {
-            return this;
+            return null;
         }
         ClassOrInterfaceDeclaration entity = findEntity(cu, queryMeta);
         if (entity == null) {
-            return this;
+            return mapper;
         }
 
         MethodDeclaration queryMethod = new MethodDeclaration();
@@ -98,7 +84,7 @@ public class GenerateMapperQueryMethodProc {
         mapper.getMembers().add(0, queryMethod);
         Saves.save(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
 
-        return this;
+        return mapper;
     }
 
     private ClassOrInterfaceDeclaration findMapper(CompilationUnit cu, QueryMeta queryMeta) {
@@ -123,10 +109,6 @@ public class GenerateMapperQueryMethodProc {
             log.warn("寻找Entity失败", e);
             return null;
         }
-    }
-
-    public ClassOrInterfaceDeclaration getMapper() {
-        return mapper;
     }
 
 }

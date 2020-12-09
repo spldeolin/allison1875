@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
+import com.spldeolin.allison1875.querytransformer.javabean.AnalyzeCriterionResultDto;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 import lombok.extern.log4j.Log4j2;
@@ -24,22 +25,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AnalyzeCriterionProc {
 
-    private final MethodCallExpr mce;
-
-    private final QueryMeta queryMeta;
-
-    private Collection<CriterionDto> criterions;
-
-    private String queryMethodName;
-
-    AnalyzeCriterionProc(MethodCallExpr mce, QueryMeta queryMeta) {
-        this.mce = mce;
-        this.queryMeta = queryMeta;
-    }
-
-    public AnalyzeCriterionProc process() {
+    public AnalyzeCriterionResultDto process(MethodCallExpr mce, QueryMeta queryMeta) {
         List<MethodCallExpr> tokenMces = mce
-                .findAll(MethodCallExpr.class, mce -> mce.getScope().filter(Expression::isFieldAccessExpr).isPresent());
+                .findAll(MethodCallExpr.class, m -> m.getScope().filter(Expression::isFieldAccessExpr).isPresent());
         Collections.reverse(tokenMces);
 
         for (MethodCallExpr tokenMce : tokenMces) {
@@ -54,24 +42,24 @@ public class AnalyzeCriterionProc {
         collectCondition(parts, mce);
         if (parts.size() < 3) {
             log.warn("QueryDesign编写方式不正确");
-            return this;
+            return new AnalyzeCriterionResultDto();
         }
         if (!Objects.equals(parts.pollFirst(), "over")) {
             log.warn("QueryDesign编写方式不正确");
-            return this;
+            return new AnalyzeCriterionResultDto();
         }
-        queryMethodName = parts.pollLast();
+        String queryMethodName = parts.pollLast();
         if (queryMethodName == null || !queryMethodName.startsWith("\"") || !queryMethodName.endsWith("\"")) {
             log.warn("QueryDesign的design方法必须使用String字面量作为实际参数");
-            return this;
+            return new AnalyzeCriterionResultDto();
         }
         queryMethodName = queryMethodName.substring(1, queryMethodName.length() - 1);
         if (!Objects.equals(parts.pollLast(), "design")) {
             log.warn("QueryDesign编写方式不正确");
-            return this;
+            return new AnalyzeCriterionResultDto();
         }
 
-        criterions = Lists.newArrayList();
+        Collection<CriterionDto> criterions = Lists.newArrayList();
         parts.descendingIterator().forEachRemaining(part -> {
             CriterionDto criterion;
             if (queryMeta.getPropertyNames().contains(part)) {
@@ -89,7 +77,7 @@ public class AnalyzeCriterionProc {
                 }
             }
         });
-        return this;
+        return new AnalyzeCriterionResultDto().setCriterions(criterions).setQueryMethodName(queryMethodName);
     }
 
     private void collectCondition(Deque<String> parts, Expression scope) {
@@ -108,14 +96,6 @@ public class AnalyzeCriterionProc {
             parts.add(propertyName);
             this.collectCondition(parts, fae.getScope());
         });
-    }
-
-    public Collection<CriterionDto> getCriterions() {
-        return criterions;
-    }
-
-    public String getQueryMethodName() {
-        return queryMethodName;
     }
 
 }

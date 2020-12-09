@@ -23,6 +23,7 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
+import com.spldeolin.allison1875.querytransformer.javabean.AnalyzeCriterionResultDto;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 import lombok.extern.log4j.Log4j2;
@@ -34,6 +35,12 @@ import lombok.extern.log4j.Log4j2;
 public class QueryTransformer implements Allison1875MainProcessor<QueryTransformerConfig, QueryTransformer> {
 
     private QueryTransformerConfig config;
+
+    DetectQueryDesignProc detectQueryDesignProc = new DetectQueryDesignProc();
+
+    AnalyzeCriterionProc analyzeSqlTokenProc = new AnalyzeCriterionProc();
+
+    GenerateMapperXmlQueryMethodProc generateMapperXmlQueryMethodProc = new GenerateMapperXmlQueryMethodProc();
 
     @Override
     public QueryTransformer config(QueryTransformerConfig config) {
@@ -52,8 +59,8 @@ public class QueryTransformer implements Allison1875MainProcessor<QueryTransform
 
     @Override
     public void process(AstForest astForest) {
-        DetectQueryDesignProc detectQueryDesignProc = new DetectQueryDesignProc(astForest, "over").process();
-        for (MethodCallExpr mce : detectQueryDesignProc.getMces()) {
+        Collection<MethodCallExpr> mces = detectQueryDesignProc.process(astForest, "over");
+        for (MethodCallExpr mce : mces) {
             CompilationUnit cu = mce.findCompilationUnit().orElseThrow(CuAbsentException::new);
             Node parent = mce.getParentNode().orElseThrow(ParentAbsentException::new);
 
@@ -66,18 +73,18 @@ public class QueryTransformer implements Allison1875MainProcessor<QueryTransform
                     queryDesign.getOrphanComments().get(0).getContent().replaceAll("\\r?\\n", "").replaceAll(" ", ""),
                     QueryMeta.class);
 
-            AnalyzeCriterionProc analyzeSqlTokenProc = new AnalyzeCriterionProc(mce, queryMeta).process();
-            String queryMethodName = analyzeSqlTokenProc.getQueryMethodName();
-            Collection<CriterionDto> criterions = analyzeSqlTokenProc.getCriterions();
+            AnalyzeCriterionResultDto analyzeCriterionResult = analyzeSqlTokenProc.process(mce, queryMeta);
+            String queryMethodName = analyzeCriterionResult.getQueryMethodName();
+            Collection<CriterionDto> criterions = analyzeCriterionResult.getCriterions();
 
 
             // create queryMethod in mapper
-            GenerateMapperQueryMethodProc createMapperQueryMethodProc = new GenerateMapperQueryMethodProc(cu, queryMeta,
-                    queryMethodName, criterions, config).process();
-            ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc.getMapper();
+            GenerateMapperQueryMethodProc createMapperQueryMethodProc = new GenerateMapperQueryMethodProc(config);
+            ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc
+                    .process(cu, queryMeta, queryMethodName, criterions);
 
             // create queryMethod in mapper.xml
-            new GenerateMapperXmlQueryMethodProc(astForest, queryMeta, queryMethodName, criterions).process();
+            generateMapperXmlQueryMethodProc.process(astForest, queryMeta, queryMethodName, criterions);
 
             // overwirte service
             MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(

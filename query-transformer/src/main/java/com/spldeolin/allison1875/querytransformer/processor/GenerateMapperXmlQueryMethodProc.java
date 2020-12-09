@@ -26,23 +26,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateMapperXmlQueryMethodProc {
 
-    private final AstForest astForest;
-
-    private final QueryMeta queryMeta;
-
-    private final String queryMethodName;
-
-    private final Collection<CriterionDto> criterions;
-
-    GenerateMapperXmlQueryMethodProc(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
+    public void process(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
             Collection<CriterionDto> criterions) {
-        this.astForest = astForest;
-        this.queryMeta = queryMeta;
-        this.queryMethodName = queryMethodName;
-        this.criterions = criterions;
-    }
-
-    public void process() {
         File mapperXml = astForest.getHost().resolve(queryMeta.getMapperRelativePath()).toFile();
 
         List<String> xmlLines = Lists.newArrayList();
