@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import com.google.inject.Injector;
-import com.spldeolin.allison1875.base.Allison1875Guice;
+import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEntityFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
@@ -12,12 +12,12 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
 /**
  * @author Deolin 2020-12-08
  */
-public class PersistenceGeneratorModule extends Allison1875Guice.Module {
+public class PersistenceGeneratorModule extends Allison1875.Module {
 
     private final PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     public PersistenceGeneratorModule(PersistenceGeneratorConfig persistenceGeneratorConfig) {
-        this.persistenceGeneratorConfig = persistenceGeneratorConfig;
+        this.persistenceGeneratorConfig = super.ensureValid(persistenceGeneratorConfig);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class PersistenceGeneratorModule extends Allison1875Guice.Module {
     }
 
     @Override
-    public Allison1875MainProcessor<?, ?> getMainProcessor(Injector injector) {
+    public Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(PersistenceGenerator.class);
     }
 

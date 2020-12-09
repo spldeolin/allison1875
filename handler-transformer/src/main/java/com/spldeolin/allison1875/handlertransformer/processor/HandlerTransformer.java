@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.Collection;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
 import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -13,9 +11,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.AstForestContext;
-import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicesResultDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
@@ -26,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class HandlerTransformer implements Allison1875MainProcessor<HandlerTransformerConfig, HandlerTransformer> {
+public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Inject
     private BlueprintAnalyzeProc blueprintAnalyzeProc;
@@ -42,20 +38,6 @@ public class HandlerTransformer implements Allison1875MainProcessor<HandlerTrans
 
     @Inject
     private GenerateServicesProc generateServicesProc;
-
-    @Override
-    public HandlerTransformer config(HandlerTransformerConfig config) {
-        Set<ConstraintViolation<HandlerTransformerConfig>> violations = ValidateUtils.validate(config);
-        if (violations.size() > 0) {
-            log.warn("配置项校验未通过，请检查后重新运行");
-            for (ConstraintViolation<HandlerTransformerConfig> violation : violations) {
-                log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
-                        + violation.getMessage());
-            }
-            System.exit(-9);
-        }
-        return this;
-    }
 
     @Override
     public void process(AstForest astForest) {

@@ -49,8 +49,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class PersistenceGenerator implements
-        Allison1875MainProcessor<PersistenceGeneratorConfig, PersistenceGenerator> {
+public class PersistenceGenerator implements Allison1875MainProcessor {
 
     @Inject
     private BatchInsertEvenNullProc batchInsertEvenNullProc;
@@ -144,11 +143,6 @@ public class PersistenceGenerator implements
 
     @Inject
     private PersistenceGeneratorConfig config;
-
-    @Override
-    public PersistenceGenerator config(PersistenceGeneratorConfig config) {
-        return this;
-    }
 
     @Override
     public void process(AstForest astForest) {

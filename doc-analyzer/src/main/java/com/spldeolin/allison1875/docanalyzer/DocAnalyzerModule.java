@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer;
 
 import com.google.inject.Injector;
-import com.spldeolin.allison1875.base.Allison1875Guice;
+import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-12-06
  */
 @Log4j2
-public class DocAnalyzerModule extends Allison1875Guice.Module {
+public class DocAnalyzerModule extends Allison1875.Module {
 
     private final DocAnalyzerConfig docAnalyzerConfig;
 
@@ -40,7 +40,7 @@ public class DocAnalyzerModule extends Allison1875Guice.Module {
     }
 
     @Override
-    public Allison1875MainProcessor<?, ?> getMainProcessor(Injector injector) {
+    public Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(DocAnalyzer.class);
     }
 

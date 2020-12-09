@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, DocAnalyzer> {
+public class DocAnalyzer implements Allison1875MainProcessor {
 
     @Inject
     private ListHandlersProc listHandlersProc;
@@ -51,11 +51,6 @@ public class DocAnalyzer implements Allison1875MainProcessor<DocAnalyzerConfig, 
 
     @Inject
     private DocAnalyzerConfig config;
-
-    @Override
-    public DocAnalyzer config(DocAnalyzerConfig config) {
-        return this;
-    }
 
     @Override
     public void process(AstForest astForest) {

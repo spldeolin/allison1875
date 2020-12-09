@@ -20,7 +20,6 @@ import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
-import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.AnalyzeCriterionResultDto;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
@@ -32,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class QueryTransformer implements Allison1875MainProcessor<QueryTransformerConfig, QueryTransformer> {
+public class QueryTransformer implements Allison1875MainProcessor {
 
     @Inject
     private DetectQueryDesignProc detectQueryDesignProc;
@@ -45,11 +44,6 @@ public class QueryTransformer implements Allison1875MainProcessor<QueryTransform
 
     @Inject
     private GenerateMapperQueryMethodProc createMapperQueryMethodProc;
-
-    @Override
-    public QueryTransformer config(QueryTransformerConfig config) {
-        return this;
-    }
 
     @Override
     public void process(AstForest astForest) {

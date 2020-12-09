@@ -15,12 +15,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class BakFileCleaner implements Allison1875MainProcessor<Void, BakFileCleaner> {
-
-    @Override
-    public BakFileCleaner config(Void config) {
-        return this;
-    }
+public class BakFileCleaner implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {

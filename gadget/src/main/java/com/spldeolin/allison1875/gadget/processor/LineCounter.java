@@ -35,15 +35,10 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class LineCounter implements Allison1875MainProcessor<LineCounterConfig, LineCounter> {
+public class LineCounter implements Allison1875MainProcessor {
 
     @Inject
     private LineCounterConfig lineCounterConfig;
-
-    @Override
-    public LineCounter config(LineCounterConfig config) {
-        return this;
-    }
 
     @Override
     public void process(AstForest astForest) {
