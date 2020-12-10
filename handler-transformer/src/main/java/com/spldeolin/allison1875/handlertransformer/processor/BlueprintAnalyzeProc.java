@@ -45,7 +45,7 @@ public class BlueprintAnalyzeProc {
 
     public MetaInfo process(ClassOrInterfaceDeclaration controller, InitializerDeclaration blueprint) {
         MetaInfo.MetaInfoBuilder builder = MetaInfo.builder();
-        builder.location(Locations.getRelativePathWithLineNo(blueprint));
+        builder.location(Locations.getFileNameWithLineNo(blueprint));
         builder.controller(controller);
         builder.sourceRoot(Locations.getStorage(controller).getSourceRoot());
 
@@ -139,12 +139,12 @@ public class BlueprintAnalyzeProc {
 
             // 大括号内没有指定任何dto和dtos时
             if (dtoBuilder.build().getTypeName() == null) {
-                log.warn("存在未指定dto或者dtos属性的区域，忽略这个dto[{}]", Locations.getRelativePathWithLineNo(blueprint));
+                log.warn("存在未指定dto或者dtos属性的区域，忽略这个dto[{}]", Locations.getFileNameWithLineNo(blueprint));
                 continue;
             }
             // 大括号内没有除dto或dtos以外的vde
             if (dtoBuilder.build().getVariableDeclarators().size() == 0) {
-                log.warn("存在没有指定除dto或dtos以外属性的区域，忽略这个dto[{}]", Locations.getRelativePathWithLineNo(blueprint));
+                log.warn("存在没有指定除dto或dtos以外属性的区域，忽略这个dto[{}]", Locations.getFileNameWithLineNo(blueprint));
                 continue;
             }
 

@@ -4,8 +4,6 @@ import java.nio.file.Path;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.ast.Node;
-import com.google.common.base.Joiner;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
@@ -22,25 +20,26 @@ public class Locations {
     }
 
     /**
-     * @return e.g.: project-name/module-name/src/main/java/com/spldeolin/allison1875/base/util/Locations.java
-     */
-    public static Path getRelativePath(Node node) {
-        return AstForestContext.getCurrent().getCommonPathPart().relativize(getAbsolutePath(node)).normalize();
-    }
-
-    /**
-     * @return e.g.: project-name/module-name/src/main/java/com/spldeolin/allison1875/base/util/Locations.java:23
-     */
-    public static String getRelativePathWithLineNo(Node node) {
-        return Joiner.on(":").join(Locations.getRelativePath(node), Locations.getBeginLine(node));
-    }
-
-    /**
      * @return e.g.: /Users/deolin/Documents/allison1875/base/src/main/java/com/spldeolin/allison1875/base/util
      *         /Locations.java
      */
     public static Path getAbsolutePath(Node node) {
         return getStorage(node).getPath();
+    }
+
+    /**
+     * @return e.g.: /Users/deolin/Documents/allison1875/base/src/main/java/com/spldeolin/allison1875/base/util
+     *         /Locations.java:23
+     */
+    public static String getAbsolutePathWithLineNo(Node node) {
+        return getAbsolutePath(node) + ":" + getBeginLine(node);
+    }
+
+    /**
+     * @return e.g.: Locations.java:23
+     */
+    public static String getFileNameWithLineNo(Node node) {
+        return getStorage(node).getFileName() + ":" + getBeginLine(node);
     }
 
     public static Storage getStorage(Node node) {

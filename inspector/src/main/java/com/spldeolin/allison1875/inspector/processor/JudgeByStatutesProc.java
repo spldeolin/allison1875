@@ -55,7 +55,7 @@ public class JudgeByStatutesProc {
                     }
                 }
 
-                log.info("CompilationUnit [{}] inspection completed with [{}]ms.", Locations.getRelativePath(cu),
+                log.info("CompilationUnit [{}] inspection completed with [{}]ms.", Locations.getAbsolutePath(cu),
                         System.currentTimeMillis() - start);
             }
         });

@@ -56,7 +56,7 @@ public class LineCounter implements Allison1875MainProcessor {
         Map<String, Integer> allTypes = Maps.newHashMap();
         Map<String, Integer> allMethods = Maps.newHashMap();
         for (CompilationUnit cu : astForest) {
-            allJavas.put(Locations.getRelativePath(cu).toString(), getLineCount(cu));
+            allJavas.put(Locations.getAbsolutePath(cu).toString(), getLineCount(cu));
             for (TypeDeclaration<?> type : cu.findAll(TypeDeclaration.class)) {
                 type.getFullyQualifiedName()
                         .ifPresent(typeQualifier -> allTypes.put(typeQualifier, getLineCount(type)));

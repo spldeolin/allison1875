@@ -40,7 +40,7 @@ public class LawlessDto {
     private LocalDateTime fixedAt;
 
     public LawlessDto(Node node, String qualifier, String message) {
-        this.sourceCode = Locations.getRelativePathWithLineNo(node);
+        this.sourceCode = Locations.getAbsolutePathWithLineNo(node);
         this.qualifier = qualifier;
         this.message = message;
         this.author = Authors.getAuthor(node);
