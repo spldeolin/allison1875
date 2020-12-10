@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicesResultDto;
@@ -41,10 +40,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        AstForestContext.setCurrent(astForest);
         Collection<CompilationUnit> cus = Sets.newHashSet();
 
-        for (CompilationUnit cu : AstForestContext.getCurrent()) {
+        for (CompilationUnit cu : astForest) {
             for (Pair<ClassOrInterfaceDeclaration, InitializerDeclaration> pair : blueprintCollectProc.process(cu)) {
 
                 ClassOrInterfaceDeclaration controller = pair.getLeft();

@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -146,7 +145,6 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        AstForestContext.setCurrent(astForest);
         PathDto pathDto = pathProc.process(astForest);
 
         Collection<CompilationUnit> toSave = Lists.newArrayList();

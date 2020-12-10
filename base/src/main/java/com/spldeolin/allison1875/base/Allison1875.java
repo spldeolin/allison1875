@@ -33,9 +33,9 @@ public class Allison1875 {
         public <T> T ensureValid(T config) {
             Set<ConstraintViolation<Object>> violations = ValidateUtils.validate(config);
             if (violations.size() > 0) {
-                log.warn("配置项校验未通过，请检查后重新运行");
+                log.error("配置项校验未通过，请检查后重新运行");
                 for (ConstraintViolation<Object> violation : violations) {
-                    log.warn(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
+                    log.error(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
                             + violation.getMessage());
                 }
                 System.exit(-9);

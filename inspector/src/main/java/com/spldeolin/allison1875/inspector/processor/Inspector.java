@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import lombok.extern.log4j.Log4j2;
@@ -28,9 +27,8 @@ public class Inspector implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        AstForestContext.setCurrent(astForest);
         Collection<PardonDto> pardons = pardonDetectProc.process();
-        Collection<LawlessDto> lawlesses = judgeByStatutesProc.process(pardons);
+        Collection<LawlessDto> lawlesses = judgeByStatutesProc.process(pardons, astForest);
         reportLawlessProc.process(lawlesses);
     }
 

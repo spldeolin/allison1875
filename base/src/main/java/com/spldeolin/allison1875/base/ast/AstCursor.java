@@ -40,7 +40,7 @@ class AstCursor implements Iterator<CompilationUnit> {
             }
 
             SourceRoot sourceRoot = sourceRootItr.next();
-            Collection<CompilationUnit> cus = new CompilationUnitCollector(commonPathPart).collect(sourceRoot);
+            Collection<CompilationUnit> cus = new CuCollector(commonPathPart).collect(sourceRoot);
             cuItr = cus.iterator();
             // 递归的目的是这个sourceRoot可能没源码
             return hasNext();

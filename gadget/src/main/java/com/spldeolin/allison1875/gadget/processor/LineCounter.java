@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
@@ -50,7 +49,6 @@ public class LineCounter implements Allison1875MainProcessor {
             astForest = new AstForest(astForest.getAnyClassFromHost(), Lists.newArrayList(
                     astForest.getHost().resolve(baseConfig.getTestJavaDirectoryLayout()).toString()));
         }
-        AstForestContext.setCurrent(astForest);
 
         Map<String, Integer> allJavas = Maps.newHashMap();
         Map<String, Integer> allTypes = Maps.newHashMap();
@@ -94,8 +92,7 @@ public class LineCounter implements Allison1875MainProcessor {
         Map<String, Integer> allXmls = Maps.newHashMap();
         for (File xml : detectXmls(astForest, lineCounterConfig.getWithTest())) {
             try {
-                String xmlPath = AstForestContext.getCurrent().getCommonPathPart().relativize(xml.toPath()).normalize()
-                        .toString();
+                String xmlPath = astForest.getCommonPathPart().relativize(xml.toPath()).normalize().toString();
                 allXmls.put(xmlPath, (int) Files.lines(xml.toPath()).count());
             } catch (IOException e) {
                 log.error("xml={}", xml, e);

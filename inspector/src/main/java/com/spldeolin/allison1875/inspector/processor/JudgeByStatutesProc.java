@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.ast.AstForestContext;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
@@ -33,12 +33,12 @@ public class JudgeByStatutesProc {
     @Inject
     private VcsProc vcsProc;
 
-    public Collection<LawlessDto> process(Collection<PardonDto> pardons) {
+    public Collection<LawlessDto> process(Collection<PardonDto> pardons, AstForest astForest) {
         final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 
         VcsResultDto vcsResultDto = vcsProc.process(Paths.get(config.getProjectLocalGitPath()));
 
-        AstForestContext.getCurrent().forEach(cu -> {
+        astForest.forEach(cu -> {
             Path cuPath = Locations.getAbsolutePath(cu);
             if (vcsResultDto.getIsAllTarget() || vcsResultDto.getAddedFiles().contains(cuPath)) {
                 long start = System.currentTimeMillis();

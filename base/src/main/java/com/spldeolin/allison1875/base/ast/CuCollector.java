@@ -24,11 +24,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-02-03
  */
 @Log4j2
-class CompilationUnitCollector {
+class CuCollector {
 
     private final Path commonPathPart;
 
-    CompilationUnitCollector(Path commonPathPart) {
+    CuCollector(Path commonPathPart) {
         this.commonPathPart = commonPathPart;
     }
 
