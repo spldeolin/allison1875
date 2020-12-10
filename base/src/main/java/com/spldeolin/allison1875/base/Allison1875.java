@@ -10,6 +10,7 @@ import com.google.inject.Module;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.factory.RedissonFactory;
+import com.spldeolin.allison1875.base.process.UserInfoCollectProc;
 import com.spldeolin.allison1875.base.util.GuiceUtils;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import lombok.extern.log4j.Log4j2;
@@ -23,14 +24,16 @@ import lombok.extern.log4j.Log4j2;
 public class Allison1875 {
 
     public static void allison1875(Class<?> primaryClass, Module... guiceModules) {
-        // Greeting
-        Greeting.version();
+        // Version
+        Version.greeting();
 
         // 启动IOC
         Injector injector = GuiceUtils.createInjector(guiceModules);
 
-        // 参数校验、参数报告
+        // 参数校验
         validate(injector, guiceModules);
+
+        GuiceUtils.getComponent(UserInfoCollectProc.class).process(primaryClass, guiceModules);
 
         // 运行主流程
         launch(primaryClass, injector, guiceModules);
