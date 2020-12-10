@@ -47,9 +47,8 @@ public class LineCounter implements Allison1875MainProcessor {
     public void process(AstForest astForest) {
         // with src/test/java
         if (lineCounterConfig.getWithTest()) {
-            astForest = new AstForest(astForest.getAnyClassFromHost(),
-                    Lists.newArrayList(astForest.getHost().resolve(baseConfig.getTestJavaDirectoryLayout()).toString()),
-                    baseConfig);
+            astForest = new AstForest(astForest.getAnyClassFromHost(), Lists.newArrayList(
+                    astForest.getHost().resolve(baseConfig.getTestJavaDirectoryLayout()).toString()));
         }
         AstForestContext.setCurrent(astForest);
 

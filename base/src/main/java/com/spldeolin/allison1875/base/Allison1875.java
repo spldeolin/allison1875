@@ -3,10 +3,10 @@ package com.spldeolin.allison1875.base;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.util.GuiceUtils;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -19,11 +19,10 @@ import lombok.extern.log4j.Log4j2;
 public class Allison1875 {
 
     public static void allison1875(Class<?> primaryClass, Module... guiceModules) {
-        Injector injector = Guice.createInjector(guiceModules);
-        BaseConfig baseConfig = injector.getInstance(BaseConfig.class);
-        AstForest astForest = new AstForest(primaryClass, baseConfig);
+        Greeting.version();
+        Injector injector = GuiceUtils.createInjector(guiceModules);
 
-        injector.getInstance(Greeting.class).version();
+        AstForest astForest = new AstForest(primaryClass);
         for (Module guiceModule : guiceModules) {
             guiceModule.getMainProcessor(injector).process(astForest);
         }

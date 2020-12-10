@@ -13,6 +13,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.base.util.GuiceUtils;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
@@ -41,23 +42,23 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     private AstCursor cursor;
 
-    public AstForest(Class<?> anyClassFromHost, BaseConfig baseConfig) {
+    public AstForest(Class<?> anyClassFromHost) {
         this.anyClassFromHost = anyClassFromHost;
         this.dependencyProjectPaths = null;
 
         this.host = detectHost(anyClassFromHost);
-        this.hostSourceRoot = detectHostSourceRoot(host, baseConfig);
+        this.hostSourceRoot = detectHostSourceRoot(host);
         this.hostAndDependencySourceRoots = ImmutableList.of(hostSourceRoot);
         this.commonPathPart = calcCommonPath(hostAndDependencySourceRoots);
         this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
     }
 
-    public AstForest(Class<?> anyClassFromHost, Collection<String> dependencyProjectPaths, BaseConfig baseConfig) {
+    public AstForest(Class<?> anyClassFromHost, Collection<String> dependencyProjectPaths) {
         this.anyClassFromHost = anyClassFromHost;
         this.dependencyProjectPaths = ImmutableList.copyOf(dependencyProjectPaths);
 
         this.host = detectHost(anyClassFromHost);
-        this.hostSourceRoot = detectHostSourceRoot(host, baseConfig);
+        this.hostSourceRoot = detectHostSourceRoot(host);
         List<Path> sourceRoots = collectDependencySourceRoots(dependencyProjectPaths);
         sourceRoots.add(0, hostSourceRoot);
         this.hostAndDependencySourceRoots = ImmutableList.copyOf(sourceRoots);
@@ -69,7 +70,8 @@ public class AstForest implements Iterable<CompilationUnit> {
         return CodeGenerationUtils.mavenModuleRoot(anyClassFromHost);
     }
 
-    private Path detectHostSourceRoot(Path host, BaseConfig baseConfig) {
+    private Path detectHostSourceRoot(Path host) {
+        BaseConfig baseConfig = GuiceUtils.getComponent(BaseConfig.class);
         Path hostSourceRootPath = host.resolve(baseConfig.getJavaDirectoryLayout());
         return hostSourceRootPath;
     }

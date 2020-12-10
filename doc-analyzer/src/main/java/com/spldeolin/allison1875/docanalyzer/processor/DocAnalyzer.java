@@ -59,7 +59,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     @Override
     public void process(AstForest astForest) {
         // 重新生成astForest（将解析范围扩大到所有用户配置的项目路径）
-        astForest = new AstForest(astForest.getAnyClassFromHost(), config.getDependencyProjectPaths(), baseConfig);
+        astForest = new AstForest(astForest.getAnyClassFromHost(), config.getDependencyProjectPaths());
         AstForestContext.setCurrent(astForest);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
