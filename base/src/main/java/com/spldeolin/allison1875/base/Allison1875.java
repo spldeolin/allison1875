@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.factory.RedissonFactory;
 import com.spldeolin.allison1875.base.util.GuiceUtils;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +34,9 @@ public class Allison1875 {
 
         // 运行主流程
         launch(primaryClass, injector, guiceModules);
+
+        // 回收资源
+        destroy(injector);
     }
 
     private static void validate(Injector injector, Module[] guiceModules) {
@@ -69,6 +73,10 @@ public class Allison1875 {
                 allison1875Module.getMainProcessor(injector).process(astForest);
             }
         }
+    }
+
+    private static void destroy(Injector injector) {
+        injector.getInstance(RedissonFactory.class).getRedissonClient().shutdown();
     }
 
 }

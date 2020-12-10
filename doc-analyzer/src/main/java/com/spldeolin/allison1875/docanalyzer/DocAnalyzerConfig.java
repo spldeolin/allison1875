@@ -41,17 +41,6 @@ public final class DocAnalyzerConfig extends AbstractModule {
     @NotEmpty
     protected String yapiToken;
 
-    /**
-     * Redis服务，用于作为分布式锁防止多个doc-analyzer并发同步YApi
-     */
-    @NotEmpty
-    protected String redisAddress;
-
-    /**
-     * Redis服务的密码
-     */
-    protected String redisPassword;
-
     @Override
     protected void configure() {
         bind(DocAnalyzerConfig.class).toInstance(this);

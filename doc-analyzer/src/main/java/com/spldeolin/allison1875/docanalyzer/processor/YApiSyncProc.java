@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.factory.RedissonFactory;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -26,7 +27,6 @@ import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionVal
 import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
-import com.spldeolin.allison1875.docanalyzer.util.RedissonUtils;
 import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
@@ -54,6 +54,9 @@ public class YApiSyncProc {
     @Inject
     private DocAnalyzerConfig docAnalyzerConfig;
 
+    @Inject
+    private RedissonFactory redissonFactory;
+
     public void process(Collection<EndpointDto> endpoints) {
         String baseUrl = docAnalyzerConfig.getYapiUrl();
         String json = HttpUtils
@@ -64,8 +67,7 @@ public class YApiSyncProc {
         ensureSuccess(resp);
         Long projectId = resp.getData().getId();
 
-        RedissonClient redisson = RedissonUtils
-                .getSingleServer(docAnalyzerConfig.getRedisAddress(), docAnalyzerConfig.getRedisPassword());
+        RedissonClient redisson = redissonFactory.getRedissonClient();
         RLock lock = redisson.getLock("allison1875_docanalyzer_" + baseUrl + "_" + projectId);
         try {
             // 尝试加锁，最多等待100秒，上锁以后30秒自动解锁
@@ -105,7 +107,6 @@ public class YApiSyncProc {
                     }
                 } finally {
                     lock.unlock();
-                    RedissonUtils.close(redisson);
                 }
             }
         } catch (InterruptedException ignored) {
