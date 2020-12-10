@@ -10,6 +10,10 @@ import com.spldeolin.allison1875.gadget.processor.LineCounter;
  */
 public class LineCounterModule extends Allison1875Module {
 
+    {
+        addSupportValidationType(LineCounterConfig.class);
+    }
+
     @Override
     public Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(LineCounter.class);

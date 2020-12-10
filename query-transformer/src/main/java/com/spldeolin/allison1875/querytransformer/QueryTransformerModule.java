@@ -10,6 +10,10 @@ import com.spldeolin.allison1875.querytransformer.processor.QueryTransformer;
  */
 public class QueryTransformerModule extends Allison1875Module {
 
+    {
+        addSupportValidationType(QueryTransformerConfig.class);
+    }
+
     @Override
     public Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(QueryTransformer.class);

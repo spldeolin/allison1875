@@ -14,6 +14,10 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class PersistenceGeneratorModule extends Allison1875Module {
 
+    {
+        addSupportValidationType(PersistenceGeneratorConfig.class);
+    }
+
     @Override
     protected void configure() {
         bind(GenerateEntityFieldHandle.class).to(DefaultGenerateEntityFieldHandle.class);

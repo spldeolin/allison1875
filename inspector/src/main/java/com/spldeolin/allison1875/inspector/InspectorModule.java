@@ -14,6 +14,10 @@ import com.spldeolin.allison1875.inspector.statute.Statute;
  */
 public class InspectorModule extends Allison1875Module {
 
+    {
+        addSupportValidationType(InspectorConfig.class);
+    }
+
     @Override
     protected void configure() {
         // multi bind

@@ -10,6 +10,10 @@ import com.spldeolin.allison1875.handlertransformer.processor.HandlerTransformer
  */
 public class HandlerTransformerModule extends Allison1875Module {
 
+    {
+        addSupportValidationType(HandlerTransformerConfig.class);
+    }
+
     @Override
     public Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(HandlerTransformer.class);

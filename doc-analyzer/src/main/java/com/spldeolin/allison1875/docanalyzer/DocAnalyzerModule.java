@@ -22,6 +22,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DocAnalyzerModule extends Allison1875Module {
 
+    {
+        addSupportValidationType(DocAnalyzerConfig.class);
+    }
+
     @Override
     protected void configure() {
         bind(AnalyzeCustomValidationHandle.class).to(DefaultAnalyzeCustomValidationHandle.class);
@@ -32,7 +36,7 @@ public class DocAnalyzerModule extends Allison1875Module {
     }
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
+    public final Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(DocAnalyzer.class);
     }
 
