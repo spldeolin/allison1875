@@ -26,4 +26,9 @@ public final class QueryTransformerConfig extends AbstractModule {
     @NotNull
     protected Map<String, String> entityCommonPropertyTypes;
 
+    @Override
+    protected void configure() {
+        bind(QueryTransformerConfig.class).toInstance(this);
+    }
+
 }
