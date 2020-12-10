@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.base;
 
 import javax.validation.constraints.NotEmpty;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public final class BaseConfig {
+public final class BaseConfig extends AbstractModule {
 
     /**
      * src/main/java的相对路径（一般不需要改动此项）
@@ -36,5 +37,10 @@ public final class BaseConfig {
      */
     @NotEmpty
     private String testResourcesDirectoryLayout = "src/test/resources";
+
+    @Override
+    protected void configure() {
+        bind(BaseConfig.class).toInstance(this);
+    }
 
 }

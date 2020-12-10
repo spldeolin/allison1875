@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.inspector;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public final class InspectorConfig {
+public final class InspectorConfig extends AbstractModule {
 
     /**
      * 工程所在的Git本地仓库的路径
@@ -35,5 +36,10 @@ public final class InspectorConfig {
      * 检查结果CSV文件输出目录的路径
      */
     protected String lawlessDirectoryPath;
+
+    @Override
+    protected void configure() {
+        bind(InspectorConfig.class).toInstance(this);
+    }
 
 }

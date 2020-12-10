@@ -14,18 +14,11 @@ import com.spldeolin.allison1875.inspector.statute.Statute;
  */
 public class InspectorModule extends Allison1875Module {
 
-    protected final InspectorConfig inspectorConfig;
-
-    public InspectorModule(InspectorConfig inspectorConfig) {
-        this.inspectorConfig = super.ensureValid(inspectorConfig);
-    }
-
     @Override
     protected void configure() {
         // multi bind
         bind(new TypeLiteral<Collection<Statute>>() {
         }).toInstance(Lists.newArrayList());
-        bind(InspectorConfig.class).toInstance(inspectorConfig);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.handlertransformer;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public final class HandlerTransformerConfig {
+public final class HandlerTransformerConfig extends AbstractModule {
 
     /**
      * 控制层 @RequestBody类型所在包的包名
@@ -80,5 +81,10 @@ public final class HandlerTransformerConfig {
      */
     @NotEmpty
     protected String author;
+
+    @Override
+    protected void configure() {
+        bind(HandlerTransformerConfig.class).toInstance(this);
+    }
 
 }

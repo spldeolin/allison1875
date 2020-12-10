@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.gadget;
 import java.util.Collection;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public final class LineCounterConfig {
+public final class LineCounterConfig extends AbstractModule {
 
     /**
      * 对这些指定后缀的Java类型的进行专门的统计
@@ -45,5 +46,10 @@ public final class LineCounterConfig {
     @NotNull
     @PositiveOrZero
     protected Integer rankListSize;
+
+    @Override
+    protected void configure() {
+        bind(LineCounterConfig.class).toInstance(this);
+    }
 
 }

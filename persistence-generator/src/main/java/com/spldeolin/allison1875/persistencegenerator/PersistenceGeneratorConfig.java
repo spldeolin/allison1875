@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator;
 import java.util.Collection;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public final class PersistenceGeneratorConfig {
+public final class PersistenceGeneratorConfig extends AbstractModule {
 
     /**
      * 数据库连接
@@ -162,5 +163,10 @@ public final class PersistenceGeneratorConfig {
 
     @NotNull
     protected Boolean disableQueryByEntity;
+
+    @Override
+    protected void configure() {
+        bind(PersistenceGeneratorConfig.class).toInstance(this);
+    }
 
 }

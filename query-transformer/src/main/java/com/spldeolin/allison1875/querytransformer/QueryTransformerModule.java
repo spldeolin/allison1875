@@ -10,17 +10,6 @@ import com.spldeolin.allison1875.querytransformer.processor.QueryTransformer;
  */
 public class QueryTransformerModule extends Allison1875Module {
 
-    protected final QueryTransformerConfig queryTransformerConfig;
-
-    public QueryTransformerModule(QueryTransformerConfig queryTransformerConfig) {
-        this.queryTransformerConfig = super.ensureValid(queryTransformerConfig);
-    }
-
-    @Override
-    protected void configure() {
-        bind(QueryTransformerConfig.class).toInstance(queryTransformerConfig);
-    }
-
     @Override
     public Allison1875MainProcessor getMainProcessor(Injector injector) {
         return injector.getInstance(QueryTransformer.class);

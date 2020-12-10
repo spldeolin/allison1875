@@ -14,17 +14,10 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class PersistenceGeneratorModule extends Allison1875Module {
 
-    protected final PersistenceGeneratorConfig persistenceGeneratorConfig;
-
-    public PersistenceGeneratorModule(PersistenceGeneratorConfig persistenceGeneratorConfig) {
-        this.persistenceGeneratorConfig = super.ensureValid(persistenceGeneratorConfig);
-    }
-
     @Override
     protected void configure() {
         bind(GenerateEntityFieldHandle.class).to(DefaultGenerateEntityFieldHandle.class);
         bind(GenerateQueryDesignFieldHandle.class).to(DefaultGenerateQueryDesignFieldHandle.class);
-        bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
     }
 
     @Override

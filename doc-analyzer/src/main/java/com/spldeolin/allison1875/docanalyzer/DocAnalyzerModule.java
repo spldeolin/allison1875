@@ -22,12 +22,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DocAnalyzerModule extends Allison1875Module {
 
-    protected final DocAnalyzerConfig docAnalyzerConfig;
-
-    public DocAnalyzerModule(DocAnalyzerConfig docAnalyzerConfig) {
-        this.docAnalyzerConfig = super.ensureValid(docAnalyzerConfig);
-    }
-
     @Override
     protected void configure() {
         bind(AnalyzeCustomValidationHandle.class).to(DefaultAnalyzeCustomValidationHandle.class);
@@ -35,7 +29,6 @@ public class DocAnalyzerModule extends Allison1875Module {
         bind(MoreJpdvAnalysisHandle.class).to(DefaultMoreJpdvAnalysisHandle.class);
         bind(ObtainConcernedResponseBodyHandle.class).to(DefaultObtainConcernedResponseBodyHandle.class);
         bind(SpecificFieldDescriptionsHandle.class).to(DefaultSpecificFieldDescriptionsHandle.class);
-        bind(DocAnalyzerConfig.class).toInstance(docAnalyzerConfig);
     }
 
     @Override
