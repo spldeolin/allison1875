@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
 public class PersistenceGeneratorModule extends Allison1875Module {
 
     {
-        addSupportValidationType(PersistenceGeneratorConfig.class);
+        addConfigType(PersistenceGeneratorConfig.class);
     }
 
     @Override

@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
 public class DocAnalyzerModule extends Allison1875Module {
 
     {
-        addSupportValidationType(DocAnalyzerConfig.class);
+        addConfigType(DocAnalyzerConfig.class);
     }
 
     @Override

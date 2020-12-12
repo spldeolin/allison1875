@@ -47,7 +47,7 @@ public class UserInfoCollectProc {
                 if (module instanceof Allison1875Module) {
                     Allison1875Module allison1875Module = (Allison1875Module) module;
                     moduleNames.add(allison1875Module.getClass().getSimpleName());
-                    for (Class<?> supportValidationType : allison1875Module.getSupportValidationTypes()) {
+                    for (Class<?> supportValidationType : allison1875Module.getConfigTypes()) {
                         Object config = GuiceUtils.getComponent(supportValidationType);
                         configs.put(config.getClass().getSimpleName(), config);
                     }

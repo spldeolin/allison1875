@@ -11,7 +11,7 @@ import com.spldeolin.allison1875.querytransformer.processor.QueryTransformer;
 public class QueryTransformerModule extends Allison1875Module {
 
     {
-        addSupportValidationType(QueryTransformerConfig.class);
+        addConfigType(QueryTransformerConfig.class);
     }
 
     @Override

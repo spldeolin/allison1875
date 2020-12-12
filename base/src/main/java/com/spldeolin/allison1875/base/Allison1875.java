@@ -47,7 +47,7 @@ public class Allison1875 {
         Set<ConstraintViolation<?>> violations = Sets.newHashSet();
         for (Module guiceModule : guiceModules) {
             if (guiceModule instanceof Allison1875Module) {
-                for (Class<?> supportValidationType : ((Allison1875Module) guiceModule).getSupportValidationTypes()) {
+                for (Class<?> supportValidationType : ((Allison1875Module) guiceModule).getConfigTypes()) {
                     Object component = injector.getInstance(supportValidationType);
                     components.add(component);
                     Set<ConstraintViolation<Object>> validate = ValidateUtils.validate(component);

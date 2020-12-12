@@ -17,10 +17,10 @@ public abstract class Allison1875Module extends AbstractModule {
     public abstract Allison1875MainProcessor getMainProcessor(Injector injector);
 
     @Getter
-    private final Set<Class<?>> supportValidationTypes = Sets.newHashSet(BaseConfig.class);
+    private final Set<Class<?>> configTypes = Sets.newHashSet(BaseConfig.class);
 
-    protected void addSupportValidationType(Class<?> type) {
-        supportValidationTypes.add(type);
+    protected void addConfigType(Class<?> type) {
+        configTypes.add(type);
     }
 
 }
