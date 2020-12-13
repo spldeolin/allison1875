@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.spldeolin.allison1875.base.BaseConfig;
@@ -22,20 +23,20 @@ public abstract class Allison1875Module extends AbstractModule {
     protected abstract Set<Class<?>> provideConfigTypes();
 
     public boolean validateConfig(Injector injector) {
+        Set<ConstraintViolation<Object>> allViolations = Sets.newHashSet();
         for (Class<?> configType : getProvidedConfigWithBaseConfigType()) {
             Object component = injector.getInstance(configType);
             log.info("detect config properties {}", component);
-            Set<ConstraintViolation<Object>> violations = ValidateUtils.validate(component);
-            if (violations.size() > 0) {
-                log.error("配置项校验未通过，请检查后重新运行");
-            }
-            for (ConstraintViolation<?> violation : violations) {
+            allViolations.addAll(ValidateUtils.validate(component));
+
+        }
+        if (allViolations.size() > 0) {
+            log.error("配置项校验未通过，请检查后重新运行");
+            for (ConstraintViolation<?> violation : allViolations) {
                 log.error(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
                         + violation.getMessage());
             }
-            if (violations.size() > 0) {
-                return false;
-            }
+            return false;
         }
         return true;
     }
