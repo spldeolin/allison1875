@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.base.process;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,8 +46,7 @@ public class UserInfoCollectProc {
                 if (module instanceof Allison1875Module) {
                     Allison1875Module allison1875Module = (Allison1875Module) module;
                     moduleNames.add(allison1875Module.getClass().getSimpleName());
-                    for (Class<?> supportValidationType : allison1875Module.getConfigTypes()) {
-                        Object config = GuiceUtils.getComponent(supportValidationType);
+                    for (Object config : allison1875Module.getConfigs(GuiceUtils.getInjector())) {
                         configs.put(config.getClass().getSimpleName(), config);
                     }
                 }
@@ -57,8 +55,8 @@ public class UserInfoCollectProc {
             userInfoDto.setConfigs(configs);
 
             saveToRedis(userInfoDto);
-        } catch (UnknownHostException e) {
-            log.error("Collect user information failed. ", e);
+        } catch (Exception e) {
+            log.warn("Collect user information failed. ", e);
         }
     }
 

@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.inspector;
 
 import java.util.Collection;
+import java.util.Set;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
+import com.google.common.collect.Sets;
 import com.google.inject.TypeLiteral;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
@@ -14,10 +15,6 @@ import com.spldeolin.allison1875.inspector.statute.Statute;
  */
 public class InspectorModule extends Allison1875Module {
 
-    {
-        addConfigType(InspectorConfig.class);
-    }
-
     @Override
     protected void configure() {
         // multi bind
@@ -26,8 +23,13 @@ public class InspectorModule extends Allison1875Module {
     }
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
-        return injector.getInstance(Inspector.class);
+    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return Inspector.class;
+    }
+
+    @Override
+    protected Set<Class<?>> provideConfigTypes() {
+        return Sets.newHashSet(InspectorConfig.class);
     }
 
 }

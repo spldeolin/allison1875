@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.gadget;
 
-import com.google.inject.Injector;
+import java.util.Set;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.gadget.processor.LineCounter;
@@ -10,13 +11,14 @@ import com.spldeolin.allison1875.gadget.processor.LineCounter;
  */
 public class LineCounterModule extends Allison1875Module {
 
-    {
-        addConfigType(LineCounterConfig.class);
+    @Override
+    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return LineCounter.class;
     }
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
-        return injector.getInstance(LineCounter.class);
+    protected Set<Class<?>> provideConfigTypes() {
+        return Sets.newHashSet(LineCounter.class);
     }
 
 }

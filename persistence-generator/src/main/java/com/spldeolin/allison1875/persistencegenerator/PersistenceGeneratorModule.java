@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
-import com.google.inject.Injector;
+import java.util.Set;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEntityFieldHandle;
@@ -14,10 +15,6 @@ import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGener
  */
 public class PersistenceGeneratorModule extends Allison1875Module {
 
-    {
-        addConfigType(PersistenceGeneratorConfig.class);
-    }
-
     @Override
     protected void configure() {
         bind(GenerateEntityFieldHandle.class).to(DefaultGenerateEntityFieldHandle.class);
@@ -25,8 +22,13 @@ public class PersistenceGeneratorModule extends Allison1875Module {
     }
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
-        return injector.getInstance(PersistenceGenerator.class);
+    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return PersistenceGenerator.class;
+    }
+
+    @Override
+    protected Set<Class<?>> provideConfigTypes() {
+        return Sets.newHashSet(PersistenceGeneratorConfig.class);
     }
 
 }

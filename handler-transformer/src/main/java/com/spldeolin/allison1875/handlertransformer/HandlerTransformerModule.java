@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer;
 
-import com.google.inject.Injector;
+import java.util.Set;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.handlertransformer.processor.HandlerTransformer;
@@ -10,13 +11,14 @@ import com.spldeolin.allison1875.handlertransformer.processor.HandlerTransformer
  */
 public class HandlerTransformerModule extends Allison1875Module {
 
-    {
-        addConfigType(HandlerTransformerConfig.class);
+    @Override
+    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return HandlerTransformer.class;
     }
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
-        return injector.getInstance(HandlerTransformer.class);
+    protected Set<Class<?>> provideConfigTypes() {
+        return Sets.newHashSet(HandlerTransformerConfig.class);
     }
 
 }

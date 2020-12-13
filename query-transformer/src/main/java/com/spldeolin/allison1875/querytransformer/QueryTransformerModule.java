@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.querytransformer;
 
-import com.google.inject.Injector;
+import java.util.Set;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.querytransformer.processor.QueryTransformer;
@@ -10,13 +11,14 @@ import com.spldeolin.allison1875.querytransformer.processor.QueryTransformer;
  */
 public class QueryTransformerModule extends Allison1875Module {
 
-    {
-        addConfigType(QueryTransformerConfig.class);
+    @Override
+    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return QueryTransformer.class;
     }
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
-        return injector.getInstance(QueryTransformer.class);
+    protected Set<Class<?>> provideConfigTypes() {
+        return Sets.newHashSet(QueryTransformerConfig.class);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.gadget;
 
-import com.google.inject.Injector;
+import java.util.Set;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.gadget.processor.BakFileCleaner;
@@ -11,8 +12,13 @@ import com.spldeolin.allison1875.gadget.processor.BakFileCleaner;
 public class BakFileCleanerModule extends Allison1875Module {
 
     @Override
-    public Allison1875MainProcessor getMainProcessor(Injector injector) {
-        return injector.getInstance(BakFileCleaner.class);
+    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return BakFileCleaner.class;
+    }
+
+    @Override
+    protected Set<Class<?>> provideConfigTypes() {
+        return Sets.newHashSet();
     }
 
 }
