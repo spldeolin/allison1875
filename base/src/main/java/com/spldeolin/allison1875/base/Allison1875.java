@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base;
 
+import org.redisson.api.RedissonClient;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
@@ -50,7 +51,10 @@ public class Allison1875 {
     }
 
     private static void destroy(Injector injector) {
-        injector.getInstance(RedissonFactory.class).getRedissonClient().shutdown();
+        RedissonClient redissonClient = injector.getInstance(RedissonFactory.class).getRedissonClient();
+        if (redissonClient != null) {
+            redissonClient.shutdown();
+        }
     }
 
 }
