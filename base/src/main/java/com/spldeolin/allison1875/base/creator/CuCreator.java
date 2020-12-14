@@ -9,7 +9,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 
 /**
@@ -58,7 +58,7 @@ public class CuCreator {
             pt = primaryType;
             primaryTypeName = primaryType.getNameAsString();
             primaryTypeQualifier = packageName + "." + primaryTypeName;
-            primaryTypeInstanceName = StringUtils.lowerFirstLetter(primaryTypeName);
+            primaryTypeInstanceName = MoreStringUtils.lowerFirstLetter(primaryTypeName);
 
             CompilationUnit cu = new CompilationUnit();
             cu.setStorage(storage.resolve(primaryTypeName + ".java"), StandardCharsets.UTF_8);

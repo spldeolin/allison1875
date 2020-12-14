@@ -6,7 +6,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.google.common.collect.ImmutableList;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 
 /**
  * @author Deolin 2020-07-12
@@ -15,7 +15,7 @@ public class Imports {
 
     public static void ensureImported(Node node, String importName) {
         if (importName.endsWith(".*")) {
-            ensureImported(node, StringUtils.replaceLast(importName, ".*", ""), false, true);
+            ensureImported(node, MoreStringUtils.replaceLast(importName, ".*", ""), false, true);
         } else {
             ensureImported(node, importName, false, false);
         }

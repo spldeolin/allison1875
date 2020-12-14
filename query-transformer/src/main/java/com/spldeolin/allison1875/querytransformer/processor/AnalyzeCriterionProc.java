@@ -13,7 +13,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.AnalyzeCriterionResultDto;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
@@ -68,7 +68,7 @@ public class AnalyzeCriterionProc {
                 criterion = new CriterionDto();
                 criterions.add(criterion);
                 criterion.setParameterName(part);
-                criterion.setColumnName(StringUtils.lowerCamelToUnderscore(part));
+                criterion.setColumnName(MoreStringUtils.lowerCamelToUnderscore(part));
                 criterion.setDollarParameterName("#{" + part + "}");
             } else {
                 criterion = Iterables.getLast(criterions);

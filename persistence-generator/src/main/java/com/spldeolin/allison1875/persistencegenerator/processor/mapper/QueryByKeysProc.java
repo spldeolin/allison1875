@@ -11,7 +11,7 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
@@ -37,7 +37,7 @@ public class QueryByKeysProc extends MapperProc {
             return null;
         }
         String methodName = calcMethodName(mapper,
-                "queryBy" + English.plural(StringUtils.upperFirstLetter(key.getPropertyName())));
+                "queryBy" + English.plural(MoreStringUtils.upperFirstLetter(key.getPropertyName())));
         MethodDeclaration method = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
                 "根据多个" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
@@ -45,7 +45,7 @@ public class QueryByKeysProc extends MapperProc {
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));
         method.setName(methodName);
         String typeName = "Collection<" + key.getJavaType().getSimpleName() + ">";
-        String varsName = English.plural(StringUtils.lowerFirstLetter(key.getPropertyName()));
+        String varsName = English.plural(MoreStringUtils.lowerFirstLetter(key.getPropertyName()));
         String paramAnno = "@Param(\"" + varsName + "\")";
         Parameter parameter = parseParameter(paramAnno + " " + typeName + " " + varsName);
         method.addParameter(parameter);

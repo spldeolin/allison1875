@@ -12,7 +12,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
@@ -47,7 +47,7 @@ public class QueryByIdsEachIdProc extends MapperProc {
             Imports.ensureImported(mapper, "java.util.Collection");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
-            String varName = StringUtils.lowerFirstLetter(onlyPk.getPropertyName());
+            String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
             String pkTypeName = onlyPk.getJavaType().getSimpleName();
             queryByIdsEachId.addAnnotation(parseAnnotation("@MapKey(\"" + varName + "\")"));
             queryByIdsEachId.setType(parseType("Map<" + pkTypeName + ", " + persistence.getEntityName() + ">"));

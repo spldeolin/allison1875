@@ -31,8 +31,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
@@ -155,7 +155,7 @@ public class JsgBuildProc {
                 }
                 if (annotated instanceof Method) {
                     Method method = (Method) annotated;
-                    String fieldName = StringUtils.lowerFirstLetter(method.getName().substring(2));
+                    String fieldName = MoreStringUtils.lowerFirstLetter(method.getName().substring(2));
                     try {
                         return method.getDeclaringClass().getDeclaredField(fieldName);
                     } catch (NoSuchFieldException e) {

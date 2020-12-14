@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
@@ -23,7 +24,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -56,7 +57,7 @@ public class BlueprintAnalyzeProc {
                         String value = i.asStringLiteralExpr().getValue();
                         switch (vd.getNameAsString()) {
                             case "handler":
-                                builder.handlerName(StringUtils.lowerFirstLetter(value));
+                                builder.handlerName(MoreStringUtils.lowerFirstLetter(value));
                                 break;
                             case "desc":
                                 builder.handlerDescription(value);
@@ -84,7 +85,7 @@ public class BlueprintAnalyzeProc {
             boolean inReqScope = isInReqScope(blockStmt, reqBlockStmt);
 
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody != null) {
-                String typeName = StringUtils.upperFirstLetter(handlerName) + "RespDto";
+                String typeName = MoreStringUtils.upperFirstLetter(handlerName) + "RespDto";
                 String respPackageName = config.getRespDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(respPackageName);
@@ -93,7 +94,7 @@ public class BlueprintAnalyzeProc {
                 respBody = dtoBuilder.build();
             }
             if (isReqOrRespLevel(blockStmt, blueprint) && reqBody == null) {
-                String typeName = StringUtils.upperFirstLetter(handlerName) + "ReqDto";
+                String typeName = MoreStringUtils.upperFirstLetter(handlerName) + "ReqDto";
                 String packageName = config.getReqDtoPackage();
                 dtoBuilder.typeName(typeName);
                 dtoBuilder.packageName(packageName);
@@ -112,7 +113,7 @@ public class BlueprintAnalyzeProc {
                     vd.getInitializer().ifPresent(ir -> {
                         String rawDtoName = ir.asStringLiteralExpr().getValue();
                         String typeName =
-                                StringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp") + "Dto";
+                                MoreStringUtils.upperFirstLetter(rawDtoName) + (inReqScope ? "Req" : "Resp") + "Dto";
                         String packageName =
                                 (inReqScope ? config.getReqDtoPackage() : config.getRespDtoPackage()) + ".dto";
                         dtoBuilder.typeName(typeName);

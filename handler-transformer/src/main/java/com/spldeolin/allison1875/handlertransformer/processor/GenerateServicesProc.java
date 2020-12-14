@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.creator.CuCreator;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicesResultDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
@@ -30,7 +30,7 @@ public class GenerateServicesProc {
 
     public GenerateServicesResultDto process(MetaInfo metaInfo) {
         GenerateServicesResultDto result = new GenerateServicesResultDto();
-        String serviceName = StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
+        String serviceName = MoreStringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service";
         MethodDeclaration absMethod = new MethodDeclaration();
         if (metaInfo.isRespAbsent()) {
             absMethod.setType("void");

@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 
 /**

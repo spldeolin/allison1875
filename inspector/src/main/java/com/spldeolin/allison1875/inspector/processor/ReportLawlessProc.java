@@ -7,10 +7,10 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CsvUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
@@ -30,7 +30,7 @@ public class ReportLawlessProc {
         String lawlessDirectoryPath = config.getLawlessDirectoryPath();
         lawlesses.forEach(log::info);
 
-        if (!StringUtils.isEmpty(lawlessDirectoryPath)) {
+        if (StringUtils.isNotEmpty(lawlessDirectoryPath)) {
             String csvContent = CsvUtils.writeCsv(lawlesses, LawlessDto.class);
             String fileName = "lawless-" + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd");
             Path outputDirectory = Paths.get(lawlessDirectoryPath);

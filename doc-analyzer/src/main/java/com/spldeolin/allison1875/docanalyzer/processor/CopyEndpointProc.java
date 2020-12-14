@@ -1,10 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Collection;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 

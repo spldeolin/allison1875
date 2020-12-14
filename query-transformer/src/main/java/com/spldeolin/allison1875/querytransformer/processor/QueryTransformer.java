@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
@@ -75,7 +75,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
             // overwirte service
             MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
-                    StringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
+                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
                     .asMethodCallExpr();
             for (CriterionDto criterion : criterions) {
                 OperatorEnum operator = OperatorEnum.of(criterion.getOperator());
@@ -88,10 +88,10 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
             // ensure service import & autowired
             parent.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
-                if (!service.getFieldByName(StringUtils.lowerFirstLetter(mapper.getNameAsString())).isPresent()) {
+                if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(mapper.getNameAsString())).isPresent()) {
                     service.getMembers().add(0, StaticJavaParser.parseBodyDeclaration(
                             String.format("@Autowired private %s %s;", mapper.getNameAsString(),
-                                    StringUtils.lowerFirstLetter(mapper.getNameAsString()))));
+                                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()))));
                     Imports.ensureImported(service, queryMeta.getMapperQualifier());
                     Imports.ensureImported(service, "org.springframework.beans.factory.annotation.Autowired");
                 }

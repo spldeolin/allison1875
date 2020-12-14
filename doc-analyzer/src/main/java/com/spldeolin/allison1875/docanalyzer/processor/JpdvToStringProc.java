@@ -1,13 +1,14 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
@@ -80,7 +81,7 @@ public class JpdvToStringProc {
                 for (EnumCodeAndTitleDto ecat : jpdv.getEcats()) {
                     catsMap.put(ecat.getCode(), ecat.getTitle());
                 }
-                for (String line : StringUtils.splitLineByLine(JsonUtils.toJsonPrettily(catsMap))) {
+                for (String line : MoreStringUtils.splitLineByLine(JsonUtils.toJsonPrettily(catsMap))) {
                     sb.append("\t").append(line).append("\n");
                 }
                 enumInfo = sb.deleteCharAt(sb.length() - 1).toString();

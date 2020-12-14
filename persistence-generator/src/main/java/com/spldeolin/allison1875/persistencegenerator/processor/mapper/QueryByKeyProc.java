@@ -10,7 +10,7 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
@@ -34,7 +34,7 @@ public class QueryByKeyProc extends MapperProc {
         if (persistenceGeneratorConfig.getDisableQueryByKey()) {
             return null;
         }
-        String methodName = calcMethodName(mapper, "queryBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
+        String methodName = calcMethodName(mapper, "queryBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
                 "根据" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
@@ -42,7 +42,7 @@ public class QueryByKeyProc extends MapperProc {
         Imports.ensureImported(mapper, "java.util.List");
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));
         method.setName(methodName);
-        String varName = StringUtils.lowerFirstLetter(key.getPropertyName());
+        String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
         Parameter parameter = parseParameter(key.getJavaType().getSimpleName() + " " + varName);
         method.addParameter(parameter);
         method.setBody(null);

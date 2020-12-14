@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.factory.RedissonFactory;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
@@ -201,9 +201,9 @@ public class YApiSyncProc {
             desc = descNode.asText();
         }
         String deleteMessage = MarkdownUtils.convertToHtml("> 该接口已被删除，或是它的URL已被更改，**禁止调用**\n");
-        deleteMessage = StringUtils
+        deleteMessage = MoreStringUtils
                 .replaceLast(deleteMessage, "<strong>", "<span style='background:black;color:#FFD9E6'>");
-        deleteMessage = StringUtils.replaceLast(deleteMessage, "</strong>", "</span>");
+        deleteMessage = MoreStringUtils.replaceLast(deleteMessage, "</strong>", "</span>");
 
         form.put("desc", deleteMessage + desc);
         form.put("token", docAnalyzerConfig.getYapiToken());

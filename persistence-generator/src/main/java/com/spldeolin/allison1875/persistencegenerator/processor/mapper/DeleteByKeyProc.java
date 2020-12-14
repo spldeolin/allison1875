@@ -9,7 +9,7 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -27,9 +27,9 @@ public class DeleteByKeyProc extends MapperProc {
     public String process(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
         String methodName = null;
         if (persistence.getIsDeleteFlagExist()) {
-            methodName = calcMethodName(mapper, "deleteBy" + StringUtils.upperFirstLetter(key.getPropertyName()));
+            methodName = calcMethodName(mapper, "deleteBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
             MethodDeclaration method = new MethodDeclaration();
-            String varName = StringUtils.lowerFirstLetter(key.getPropertyName());
+            String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
             Javadoc javadoc = new JavadocComment(
                     "根据" + key.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
             javadoc.addBlockTag("param", varName, key.getDescription());

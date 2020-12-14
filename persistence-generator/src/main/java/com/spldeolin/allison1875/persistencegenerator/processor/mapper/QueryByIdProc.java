@@ -11,7 +11,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
@@ -43,14 +43,14 @@ public class QueryByIdProc extends MapperProc {
 
             if (persistence.getIdProperties().size() == 1) {
                 PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
-                String varName = StringUtils.lowerFirstLetter(onlyPk.getPropertyName());
+                String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
                 Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
                 javadoc.addBlockTag("param", varName, onlyPk.getDescription());
             } else {
                 Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
                 for (PropertyDto pk : persistence.getIdProperties()) {
-                    String varName = StringUtils.lowerFirstLetter(pk.getPropertyName());
+                    String varName = MoreStringUtils.lowerFirstLetter(pk.getPropertyName());
                     Parameter parameter = parseParameter(
                             "@Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName() + " " + varName);
                     queryById.addParameter(parameter);

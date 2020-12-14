@@ -2,11 +2,12 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.enums.JdbcTypeEnum;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
@@ -35,7 +36,7 @@ public class BuildPersistenceDtoProc {
         Map<String, PersistenceDto> persistences = Maps.newHashMap();
         for (InformationSchemaDto infoSchema : infoSchemas) {
             PersistenceDto dto = new PersistenceDto();
-            String domainName = StringUtils.underscoreToUpperCamel(infoSchema.getTableName());
+            String domainName = MoreStringUtils.underscoreToUpperCamel(infoSchema.getTableName());
             dto.setTableName(infoSchema.getTableName());
             dto.setEntityName(domainName + endWith());
             dto.setMapperName(domainName + "Mapper");
@@ -53,7 +54,7 @@ public class BuildPersistenceDtoProc {
             }
             PropertyDto property = new PropertyDto();
             property.setColumnName(columnName);
-            property.setPropertyName(StringUtils.underscoreToLowerCamel(columnName));
+            property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
             JdbcTypeEnum jdbcTypeEnum = calcJavaType(columnMeta);
             if (jdbcTypeEnum == null) {
                 continue;

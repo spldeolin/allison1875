@@ -29,7 +29,7 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -184,7 +184,8 @@ public class GenerateQueryDesignProc {
     }
 
     private String calcQueryDesignName(PersistenceGeneratorConfig conf, PersistenceDto persistence) {
-        return conf.getIsEntityEndWithEntity() ? StringUtils.replaceLast(persistence.getEntityName(), "Entity", "Query")
+        return conf.getIsEntityEndWithEntity() ? MoreStringUtils
+                .replaceLast(persistence.getEntityName(), "Entity", "Query")
                 : persistence.getEntityName() + "QueryDesign";
     }
 

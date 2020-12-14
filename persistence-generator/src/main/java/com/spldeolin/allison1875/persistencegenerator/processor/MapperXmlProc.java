@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -16,7 +17,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
@@ -46,7 +47,7 @@ public class MapperXmlProc {
         List<String> newLines = Lists.newArrayList();
 
         String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
-        List<String> lines = StringUtils.splitLineByLine(content);
+        List<String> lines = MoreStringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines(sourceCodes);
 
         if (content.contains(BaseConstant.BY_ALLISON_1875)) {
@@ -100,8 +101,8 @@ public class MapperXmlProc {
 
     private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes) {
         List<String> auto = Lists.newArrayList();
-        String leftAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
-        String rightAnchor = StringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
+        String leftAnchor = MoreStringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
+        String rightAnchor = MoreStringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
         auto.add(BaseConstant.SINGLE_INDENT + String
                 .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
         for (Collection<String> sourceCode : sourceCodes) {

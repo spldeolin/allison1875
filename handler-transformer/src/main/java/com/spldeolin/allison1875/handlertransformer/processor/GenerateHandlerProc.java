@@ -11,7 +11,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.StringUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
@@ -43,7 +43,7 @@ public class GenerateHandlerProc {
         }
 
         FieldDeclaration field = controller
-                .addField(StringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service",
+                .addField(MoreStringUtils.upperFirstLetter(metaInfo.getHandlerName()) + "Service",
                         metaInfo.getHandlerName() + "Service");
         field.addAnnotation(StaticJavaParser.parseAnnotation("@Autowired"));
         field.setPrivate(true);
