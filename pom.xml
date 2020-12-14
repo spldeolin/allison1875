@@ -110,6 +110,13 @@
                 <version>30.0-jre</version>
             </dependency>
 
+            <!-- mug -->
+            <dependency>
+                <groupId>com.google.mug</groupId>
+                <artifactId>mug</artifactId>
+                <version>5.1</version>
+            </dependency>
+
             <!-- commons lang3 -->
             <dependency>
                 <groupId>org.apache.commons</groupId>

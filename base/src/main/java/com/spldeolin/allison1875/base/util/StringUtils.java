@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.base.util;
 import java.util.List;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
+import com.google.mu.util.Substring;
 
 /**
  * @author Deolin 2019-12-03
@@ -69,19 +70,12 @@ public class StringUtils {
         return Lists.newArrayList(string.split("\\r?\\n"));
     }
 
-    public static String replaceLast(CharSequence cs, String target, String replacement) {
-        String string = cs.toString();
-        StringBuilder sb = new StringBuilder(string);
-        sb.replace(string.lastIndexOf(target), string.lastIndexOf(target) + target.length(), replacement);
-        return sb.toString();
-    }
-
-    public static String removeLast(CharSequence cs, String target) {
-        return replaceLast(cs, target, "");
-    }
-
-    public static String capture(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    /**
+     * 将<code>from</code>中最后一次出现的<code>target</code>替换成<code>replacement</code>，如果<code>from</code>不包含<code>target
+     * </code>，则无事发生
+     */
+    public static String replaceLast(String target, String from, String replacement) {
+        return Substring.last(target).replaceFrom(from, replacement);
     }
 
     public static String upperFirstLetter(String s) {
