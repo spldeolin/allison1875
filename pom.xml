@@ -26,7 +26,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <javaparser.version>3.17.0</javaparser.version>
+        <javaparser.version>3.18.0</javaparser.version>
         <log4j2.version>2.14.0</log4j2.version>
         <jackson.version>2.12.0</jackson.version>
     </properties>
@@ -56,7 +56,7 @@
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
                 <artifactId>org.eclipse.jgit</artifactId>
-                <version>5.9.0.202009080501-r</version>
+                <version>5.10.0.202012080955-r</version>
             </dependency>
 
             <!-- log4j2 -->
@@ -159,7 +159,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.3.1</version>
+                <version>5.3.2</version>
             </dependency>
 
             <!-- okhttp -->

@@ -25,7 +25,7 @@ public class MoreStringUtils {
      * 将<code>from</code>中最后一次出现的<code>target</code>替换成<code>replacement</code>，如果<code>from</code>不包含<code>target
      * </code>，则无事发生
      */
-    public static String replaceLast(String target, String from, String replacement) {
+    public static String replaceLast(String from, String target, String replacement) {
         return Substring.last(target).replaceFrom(from, replacement);
     }
 
