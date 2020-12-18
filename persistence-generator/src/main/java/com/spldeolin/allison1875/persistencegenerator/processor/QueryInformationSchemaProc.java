@@ -1,19 +1,17 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.GenerousBeanProcessor;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.io.IOUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
@@ -45,9 +43,7 @@ public class QueryInformationSchemaProc {
 
         Collection<InformationSchemaDto> infoSchemas;
         try {
-            InputStream is = Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("information_schema.sql"),
-                    "impossible unless bug.");
-            String sql = IOUtils.toString(is, StandardCharsets.UTF_8);
+            String sql = Resources.toString(Resources.getResource("information_schema.sql"), StandardCharsets.UTF_8);
 
             String part = "IS NOT NULL";
             Collection<String> tables = persistenceGeneratorConfig.getTables();
