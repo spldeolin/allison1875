@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchUpdateEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByEntityProc;
@@ -31,6 +32,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByI
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllCloumnSqlXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchInsertEvenNullXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchUpdateEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.DeleteByKeyXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByEntityXmlProc;
@@ -55,6 +57,12 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
 
     @Inject
     private BatchInsertEvenNullXmlProc batchInsertEvenNullXmlProc;
+
+    @Inject
+    private BatchUpdateEvenNullProc batchUpdateEvenNullProc;
+
+    @Inject
+    private BatchUpdateEvenNullXmlProc batchUpdateEvenNullXmlProc;
 
     @Inject
     private InsertProc insertProc;
@@ -178,6 +186,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             // 在Mapper中生成基础方法
             String insertMethodName = insertProc.process(persistence, mapper);
             String batchInsertEvenNullMethodName = batchInsertEvenNullProc.process(persistence, mapper);
+            String batchUpdateEvenNullMethodName = batchUpdateEvenNullProc.process(persistence, mapper);
             String queryByIdMethodName = queryByIdProc.process(persistence, mapper);
             String updateByIdMethodName = updateByIdProc.process(persistence, mapper);
             String updateByIdEvenNullMethodName = updateByIdEvenNullProc.process(persistence, mapper);
@@ -203,6 +212,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                                 allCloumnSqlXmlProc.process(persistence),
                                 insertXmlProc.process(persistence, entityName, insertMethodName),
                                 batchInsertEvenNullXmlProc.process(persistence, batchInsertEvenNullMethodName),
+                                batchUpdateEvenNullXmlProc.process(persistence, batchUpdateEvenNullMethodName),
                                 queryByIdXmlProc.process(persistence, queryByIdMethodName),
                                 updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
                                 updateByIdEvenNullXmlProc

@@ -138,6 +138,9 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
     protected Boolean disableBatchInsertEvenNull;
 
     @NotNull
+    protected Boolean disableBatchUpdateEvenNull;
+
+    @NotNull
     protected Boolean disableQueryById;
 
     @NotNull
