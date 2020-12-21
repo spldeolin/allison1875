@@ -1,12 +1,15 @@
-package com.spldeolin.allison1875.base.factory;
+package com.spldeolin.allison1875.base.redis;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.BaseConfig;
+import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,6 +33,7 @@ public class RedissonFactory {
             }
             singleServerConfig.setAddress(baseConfig.getRedisAddress());
             singleServerConfig.setPassword(baseConfig.getRedisPassword());
+            redissonConfig.setCodec(new JsonJacksonCodec(ObjectMapperUtils.initDefault(new ObjectMapper())));
             try {
                 redissonClient = Redisson.create(redissonConfig);
             } catch (Exception e) {

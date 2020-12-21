@@ -5,8 +5,8 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.factory.RedissonFactory;
 import com.spldeolin.allison1875.base.process.UserInfoCollectProc;
+import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.GuiceUtils;
 import lombok.extern.log4j.Log4j2;
 

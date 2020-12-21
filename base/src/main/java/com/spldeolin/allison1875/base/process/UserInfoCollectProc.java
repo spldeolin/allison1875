@@ -14,9 +14,8 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.Version;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.base.factory.RedissonFactory;
+import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.GuiceUtils;
-import com.spldeolin.allison1875.base.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -65,7 +64,7 @@ public class UserInfoCollectProc {
         long l = atomicLong.incrementAndGet();
         String bucketKey = todayKey + "-" + l;
         RBucket<Object> bucket = redissonFactory.getRedissonClient().getBucket(bucketKey);
-        bucket.set(JsonUtils.toJson(userInfoDto));
+        bucket.set(userInfoDto);
     }
 
 }

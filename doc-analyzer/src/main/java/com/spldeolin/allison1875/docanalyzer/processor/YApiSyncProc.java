@@ -17,7 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.factory.RedissonFactory;
+import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
