@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
@@ -116,7 +115,7 @@ public class YApiSyncProc {
         if (bodyJsonSchema == null) {
             return "";
         }
-        ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
+        ObjectMapper om = JsonUtils.createObjectMapper();
         try {
             om.writeValueAsString(bodyJsonSchema.getDescription());
         } catch (Exception e) {

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
@@ -19,7 +18,7 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 @Singleton
 public class EnumSchemaProc {
 
-    private static final ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
+    private static final ObjectMapper om = JsonUtils.createObjectMapper();
 
     public void process(JsonSchema rootJsonSchema) {
         JsonSchemaTraverseUtils.traverse("", rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {

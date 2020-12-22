@@ -32,7 +32,6 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
@@ -65,7 +64,7 @@ public class JsgBuildProc {
         astForest.reset();
 
         // 缺省配置
-        ObjectMapper customOm = ObjectMapperUtils.initDefault(new ObjectMapper());
+        ObjectMapper customOm = JsonUtils.createObjectMapper();
 
         // 只有类属性可见，类的getter、setter、构造方法里的字段不会被当作JSON的字段
         customOm.setVisibility(customOm.getSerializationConfig().getDefaultVisibilityChecker()
