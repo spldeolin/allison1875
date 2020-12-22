@@ -10,6 +10,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -20,6 +21,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
@@ -41,9 +43,6 @@ import lombok.extern.log4j.Log4j2;
 @Singleton
 @Log4j2
 public class YApiSyncProc {
-
-    private static final ThreadLocal<Set<String>> formattedBodyJsonSchemaIds = ThreadLocal
-            .withInitial(Sets::newHashSet);
 
     @Inject
     private JpdvToStringProc jpdvToStringProc;
@@ -117,7 +116,11 @@ public class YApiSyncProc {
         if (bodyJsonSchema == null) {
             return "";
         }
-        if (formattedBodyJsonSchemaIds.get().contains(bodyJsonSchema.getId())) {
+        ObjectMapper om = ObjectMapperUtils.initDefault(new ObjectMapper());
+        try {
+            om.writeValueAsString(bodyJsonSchema.getDescription());
+        } catch (Exception e) {
+            log.info("不在重复toPrettyString [{}]", bodyJsonSchema.getId());
             return JsonUtils.toJson(bodyJsonSchema);
         }
 
@@ -126,7 +129,6 @@ public class YApiSyncProc {
             JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
             if (jpdv != null) {
                 jsonSchema.setDescription(jpdvToStringProc.toString(jpdv));
-                formattedBodyJsonSchemaIds.get().add(bodyJsonSchema.getId());
             }
         });
         return JsonUtils.toJson(bodyJsonSchema);
