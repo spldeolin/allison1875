@@ -119,7 +119,7 @@ public class YApiSyncProc {
         try {
             om.writeValueAsString(bodyJsonSchema.getDescription());
         } catch (Exception e) {
-            log.info("不在重复toPrettyString [{}]", bodyJsonSchema.getId());
+            log.info("不再重复toPrettyString [{}]", bodyJsonSchema.getId());
             return JsonUtils.toJson(bodyJsonSchema);
         }
 
