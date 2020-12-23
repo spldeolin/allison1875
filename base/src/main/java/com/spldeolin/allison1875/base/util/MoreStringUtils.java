@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.base.util;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.google.mu.util.Substring;
@@ -47,6 +48,14 @@ public class MoreStringUtils {
 
     public static String lowerCamelToUnderscore(String string) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, string);
+    }
+
+    public static String slashToLowerCamel(String string) {
+        StringBuilder sb = new StringBuilder(64);
+        for (String part : string.split("/")) {
+            sb.append(StringUtils.capitalize(part));
+        }
+        return lowerFirstLetter(sb.toString());
     }
 
 }
