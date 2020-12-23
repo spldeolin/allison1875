@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserInfoCollectProc {
 
-    private static final String todayKey = "allison-1875-userInfo-" + LocalDate.now();
+    private static final String todayKey = "allison1875-userInfo-" + LocalDate.now();
 
     @Inject
     private RedissonFactory redissonFactory;
