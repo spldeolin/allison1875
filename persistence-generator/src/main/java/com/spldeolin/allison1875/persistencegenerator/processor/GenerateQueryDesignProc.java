@@ -14,7 +14,6 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.javadoc.Javadoc;
@@ -110,7 +109,8 @@ public class GenerateQueryDesignProc {
                     queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
                             .collect(Collectors.toList()));
                     queryMeta.setTableName(persistence.getTableName());
-                    coid.addOrphanComment(new BlockComment(JsonUtils.toJson(queryMeta)));
+                    String queryMetaJson = JsonUtils.toJson(queryMeta);
+                    coid.addField("String", "queryMeta").setJavadocComment(queryMetaJson);
                     return coid;
                 });
         toCreate.add(cuCreator.create(false));
@@ -128,7 +128,7 @@ public class GenerateQueryDesignProc {
         method.setPublic(true);
         method.setType(StaticJavaParser.parseType(String.format("List<%s>", persistence.getEntityName())));
         method.setName("over");
-        method.setBody(new BlockStmt().addStatement("throw new UnsupportedOperationException();"));
+        method.setBody(new BlockStmt().addStatement("throw new UnsupportedOperationException(queryMeta);"));
         coid.addMember(method);
     }
 

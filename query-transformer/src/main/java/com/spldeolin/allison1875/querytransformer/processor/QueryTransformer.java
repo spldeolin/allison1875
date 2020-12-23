@@ -7,6 +7,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.google.inject.Inject;
@@ -18,6 +19,7 @@ import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
+import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
@@ -57,14 +59,14 @@ public class QueryTransformer implements Allison1875MainProcessor {
                 continue;
             }
 
-            QueryMeta queryMeta = JsonUtils.toObject(
-                    queryDesign.getOrphanComments().get(0).getContent().replaceAll("\\r?\\n", "").replaceAll(" ", ""),
-                    QueryMeta.class);
+            QueryMeta queryMeta = tryParseQueryMeta(queryDesign);
+            if (queryMeta == null) {
+                continue;
+            }
 
             AnalyzeCriterionResultDto analyzeCriterionResult = analyzeSqlTokenProc.process(mce, queryMeta);
             String queryMethodName = analyzeCriterionResult.getQueryMethodName();
             Collection<CriterionDto> criterions = analyzeCriterionResult.getCriterions();
-
 
             // create queryMethod in mapper
             ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc
@@ -99,6 +101,17 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
             Saves.save(cu);
         }
+    }
+
+    private QueryMeta tryParseQueryMeta(ClassOrInterfaceDeclaration queryDesign) {
+        if (!queryDesign.getFieldByName("queryMeta").isPresent()) {
+            log.warn("[{}] 缺少元数据 [String queryMeta]", queryDesign.getNameAsString());
+            return null;
+        }
+        FieldDeclaration queryMetaField = queryDesign.getFieldByName("queryMeta").get();
+        String queryMetaJson = JavadocDescriptions.getRaw(queryMetaField).replaceAll("\\r?\\n", "");
+        QueryMeta queryMeta = JsonUtils.toObject(queryMetaJson, QueryMeta.class);
+        return queryMeta;
     }
 
     private ClassOrInterfaceDeclaration findQueryDesign(CompilationUnit cu, MethodCallExpr mce) {
