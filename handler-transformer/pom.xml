@@ -14,7 +14,7 @@
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>base</artifactId>
-            <version>1.0</version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
