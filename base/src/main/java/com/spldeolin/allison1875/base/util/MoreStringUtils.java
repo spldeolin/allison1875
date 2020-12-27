@@ -50,6 +50,10 @@ public class MoreStringUtils {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, string);
     }
 
+    public static String upperCamelToLowerCamel(String string) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, string);
+    }
+
     public static String slashToLowerCamel(String string) {
         StringBuilder sb = new StringBuilder(64);
         for (String part : string.split("/")) {
