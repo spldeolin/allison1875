@@ -2,13 +2,12 @@ package json_schema_traverse_test;
 
 import java.util.Collection;
 import java.util.Map;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.util.ObjectMapperUtils;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
@@ -20,7 +19,7 @@ public class JsonSchemaTraverseUtilsTest {
 
     public static void main(String[] args) throws JsonSchemaException {
         JsonSchema root = JsonSchemaGenerateUtils.generateSchema("json_schema_traverse_test.RootDto",
-                new JsonSchemaGenerator(ObjectMapperUtils.initDefault(new ObjectMapper())));
+                new JsonSchemaGenerator(JsonUtils.createObjectMapper()));
 
         Collection<String> names = Lists.newArrayList();
         Map<JsonSchema, String> pathMap = Maps.newLinkedHashMap();
