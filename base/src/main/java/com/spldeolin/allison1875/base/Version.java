@@ -8,9 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Version {
 
-    public static final double number = 1.0d;
-
-    public static final String numberCode = "v" + number;
+    public static final String numberCode = "1.0";
 
     public static final String title = "Allison 1875 " + numberCode;
 
