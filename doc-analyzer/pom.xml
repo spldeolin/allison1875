@@ -39,10 +39,22 @@
             <artifactId>flexmark-all</artifactId>
         </dependency>
 
-        <!-- okhttp -->
+        <!-- retrofit -->
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+        </dependency>
+
+        <!-- retrofit converter-jackson -->
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-jackson</artifactId>
+        </dependency>
+
+        <!-- retrofit adapter-rxjava2 -->
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>adapter-rxjava2</artifactId>
         </dependency>
     </dependencies>
 

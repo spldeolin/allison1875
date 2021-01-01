@@ -29,6 +29,7 @@
         <javaparser.version>3.18.0</javaparser.version>
         <log4j2.version>2.14.0</log4j2.version>
         <jackson.version>2.12.0</jackson.version>
+        <retrofit.version>2.3.0</retrofit.version>
     </properties>
 
     <dependencyManagement>
@@ -162,11 +163,25 @@
                 <version>5.3.2</version>
             </dependency>
 
-            <!-- okhttp -->
+            <!-- retrofit -->
             <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>3.14.9</version>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>${retrofit.version}</version>
+            </dependency>
+
+            <!-- retrofit converter-jackson -->
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>converter-jackson</artifactId>
+                <version>${retrofit.version}</version>
+            </dependency>
+
+            <!-- retrofit adapter-rxjava2 -->
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>adapter-rxjava2</artifactId>
+                <version>${retrofit.version}</version>
             </dependency>
 
             <!-- commons dbutils -->
