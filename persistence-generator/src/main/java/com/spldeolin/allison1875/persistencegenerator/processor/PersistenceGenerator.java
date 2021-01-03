@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInse
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchUpdateEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.ListAllProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByEntityProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsEachIdProc;
@@ -35,6 +36,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchI
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchUpdateEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.DeleteByKeyXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ListAllXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByEntityXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByIdsXmlProc;
@@ -128,6 +130,12 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private QueryByEntityXmlProc queryByEntityXmlProc;
 
     @Inject
+    private ListAllProc listAllProc;
+
+    @Inject
+    private ListAllXmlProc listAllXmlProc;
+
+    @Inject
     private BuildPersistenceDtoProc buildPersistenceDtoProc;
 
     @Inject
@@ -203,6 +211,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 queryByKeysDtos.add(queryByKeysProc.process(persistence, key, mapper));
             }
             String queryByEntityMethodName = queryByEntityProc.process(persistence, mapper);
+            String listAllMethodName = listAllProc.process(persistence, mapper);
 
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
@@ -222,7 +231,8 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                                 queryByKeyXmlProc.process(persistence, queryByKeyDtos),
                                 deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
                                 queryByKeysXmlProc.process(persistence, queryByKeysDtos),
-                                queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName)));
+                                queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName),
+                                listAllXmlProc.process(persistence, listAllMethodName)));
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }
