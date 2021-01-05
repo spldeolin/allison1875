@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
-                <version>3.14.0</version>
+                <version>3.14.1</version>
             </dependency>
 
             <!-- lombok -->
