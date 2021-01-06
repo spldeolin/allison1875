@@ -98,7 +98,11 @@ public class DocAnalyzer implements Allison1875MainProcessor {
         }
 
         // 同步到YApi
-        yapiSyncProc.process(endpoints);
+        try {
+            yapiSyncProc.process(endpoints);
+        } catch (Exception e) {
+            log.info("YApi sync failed.", e);
+        }
         log.info(endpoints.size());
     }
 
