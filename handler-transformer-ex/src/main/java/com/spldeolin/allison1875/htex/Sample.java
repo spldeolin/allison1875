@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.htex;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import com.sun.istack.internal.NotNull;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Deolin 2020-12-22
