@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.htex;
+package com.spldeolin.allison1875.htex.processor;
 
 import java.io.File;
 import java.util.Collection;
@@ -19,6 +19,8 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
@@ -33,7 +35,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-12-22
  */
 @Log4j2
-public class Ht2 {
+public class HandlerTransformer implements Allison1875MainProcessor {
 
     public static void main(String[] args) throws Exception {
         CompilationUnit cu = StaticJavaParser.parse(new File(
@@ -42,7 +44,7 @@ public class Ht2 {
 
         Collection<CompilationUnit> toCreate = Lists.newArrayList();
         for (ClassOrInterfaceDeclaration controller : cu
-                .findAll(ClassOrInterfaceDeclaration.class/*, Ht2::isController*/)) {
+                .findAll(ClassOrInterfaceDeclaration.class/*, HandlerTransformer::isController*/)) {
             for (BodyDeclaration<?> member : controller.getMembers()) {
                 if (member.isInitializerDeclaration()) {
                     InitializerDeclaration init = member.asInitializerDeclaration();
@@ -185,6 +187,11 @@ public class Ht2 {
 
     private static boolean isClass(ClassOrInterfaceDeclaration coid) {
         return !coid.isInterface();
+    }
+
+    @Override
+    public void process(AstForest astForest) {
+
     }
 
 }

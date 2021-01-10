@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Singleton
 @Data
-public final class Ht2Config extends AbstractModule {
+public final class HandlerTransformerConfig extends AbstractModule {
 
     /**
      * 控制层 @RequestBody类型所在包的包名
@@ -46,7 +46,7 @@ public final class Ht2Config extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(Ht2Config.class).toInstance(this);
+        bind(HandlerTransformerConfig.class).toInstance(this);
     }
 
 }
