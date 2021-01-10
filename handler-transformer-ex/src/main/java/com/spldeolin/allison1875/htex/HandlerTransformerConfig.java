@@ -36,13 +36,18 @@ public final class HandlerTransformerConfig extends AbstractModule {
      * 业务 ServiceImpl类所在包的包名
      */
     @NotEmpty
-    protected String serviceImplPackage;
+    private String serviceImplPackage;
 
     /**
      * 为生成的代码指定作者
      */
     @NotEmpty
-    protected String author;
+    private String author;
+
+    /**
+     * 分页对象的全限定名
+     */
+    private String pageTypeQualifier;
 
     @Override
     protected void configure() {

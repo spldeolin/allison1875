@@ -56,7 +56,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                             continue;
                         }
                         BlockStmt initBody = init.getBody();
-                        String firstLine = tryGetFirstLine(initBody);
+                        String firstLine = tryGetFirstLine(initBody.getStatements());
                         FirstLineDto firstLineDto = parseFirstLine(firstLine);
                         if (firstLineDto == null) {
                             continue;
@@ -89,7 +89,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                                     ancestor -> ancestor.getNameAsString().equals("Req")).isPresent();
                             boolean isInResp = dto.findAncestor(ClassOrInterfaceDeclaration.class,
                                     ancestor -> ancestor.getNameAsString().equals("Resp")).isPresent();
-
 
                             // 校验init下的Req和Resp类
                             if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
@@ -138,9 +137,13 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                             }
                             builder.packageDeclaration(pkg);
                             builder.importDeclarations(cu.getImports());
-                            builder.importDeclaration("javax.validation.Valid");
+                            builder.importDeclarationsString(
+                                    Lists.newArrayList("javax.validation.Valid", "java.util.Collection",
+                                            handlerTransformerConfig.getPageTypeQualifier()));
                             ClassOrInterfaceDeclaration clone = dto.clone();
                             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
+                            clone.getAnnotations().removeIf(annotationExpr -> StringUtils
+                                    .equalsAny(annotationExpr.getNameAsString(), "L", "P"));
                             if (isReq || isResp) {
                                 clone.setName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + dto
                                         .getNameAsString());
@@ -163,7 +166,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                                 FieldDeclarationBuilder fieldBuilder = new FieldDeclarationBuilder();
                                 dto.getJavadoc().ifPresent(fieldBuilder::javadoc);
                                 fieldBuilder.annotationExpr("@Valid");
-                                fieldBuilder.type(dto.getNameAsString());
+                                fieldBuilder.type(calcType(dto));
                                 fieldBuilder.fieldName(MoreStringUtils.upperCamelToLowerCamel(dto.getNameAsString()));
                                 parentCoid.replace(dto, fieldBuilder.build());
                             }
@@ -186,6 +189,17 @@ public class HandlerTransformer implements Allison1875MainProcessor {
         toCreate.forEach(Saves::save);
     }
 
+    private String calcType(ClassOrInterfaceDeclaration dto) {
+        if (dto.getAnnotationByName("L").isPresent()) {
+            return "Collection<" + dto.getNameAsString() + ">";
+        }
+        if (dto.getAnnotationByName("P").isPresent()) {
+            String[] split = handlerTransformerConfig.getPageTypeQualifier().split("\\.");
+            return split[split.length - 1] + "<" + dto.getNameAsString() + ">";
+        }
+        return dto.getNameAsString();
+    }
+
     private boolean isFirstLineCommentPresent(InitializerDeclaration init) {
         NodeList<Statement> statements = init.getBody().getStatements();
         if (CollectionUtils.isEmpty(statements)) {
@@ -194,8 +208,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
         return statements.get(0).getComment().filter(Comment::isLineComment).isPresent();
     }
 
-    private String tryGetFirstLine(BlockStmt initBody) {
-        NodeList<Statement> statements = initBody.getStatements();
+    private String tryGetFirstLine(NodeList<Statement> statements) {
         if (CollectionUtils.isEmpty(statements)) {
             return null;
         }
