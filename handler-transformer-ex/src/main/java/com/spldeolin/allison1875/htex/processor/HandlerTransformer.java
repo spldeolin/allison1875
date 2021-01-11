@@ -124,7 +124,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         Collections.reverse(dtos);
 
                         String reqDtoQualifier = null;
-                        String respDtoQualfier = null;
+                        String respDtoQualifier = null;
                         String paramType = null;
                         String resultType = null;
                         Collection<JavabeanCuBuilder> builders = Lists.newArrayList();
@@ -174,7 +174,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                             }
                             if (isResp) {
                                 resultType = calcType(dto);
-                                respDtoQualfier = pkg + "." + clone.getNameAsString();
+                                respDtoQualifier = pkg + "." + clone.getNameAsString();
                             }
                             builders.add(builder);
                             dtoQualifiers.add(pkg + "." + clone.getNameAsString());
@@ -204,7 +204,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         serviceBuilder.implPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
                         serviceBuilder.importDeclarations(cu.getImports());
                         serviceBuilder.importDeclarationsString(Lists.newArrayList("java.util.Collection",
-                                handlerTransformerConfig.getPageTypeQualifier(), reqDtoQualifier, respDtoQualfier));
+                                handlerTransformerConfig.getPageTypeQualifier(), reqDtoQualifier, respDtoQualifier));
                         serviceBuilder.serviceName(
                                 MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
                         serviceBuilder.method(createServiceMethodHandle
@@ -226,6 +226,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         }
                         controllerClone.addMember(handler);
                         transformed = true;
+                        Imports.ensureImported(cu, reqDtoQualifier);
+                        Imports.ensureImported(cu, respDtoQualifier);
                         Imports.ensureImported(cu, serviceBuilder.getJavabeanQualifier());
                     }
                 }
