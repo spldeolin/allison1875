@@ -63,7 +63,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
         for (CompilationUnit cu : astForest) {
             for (ClassOrInterfaceDeclaration controller : cu
                     .findAll(ClassOrInterfaceDeclaration.class, this::isController)) {
-                List<BodyDeclaration> toAddMembers = Lists.newArrayList();
+                ClassOrInterfaceDeclaration controllerClone = controller.clone();
+                boolean transformed = false;
                 for (BodyDeclaration<?> member : controller.getMembers()) {
                     if (member.isInitializerDeclaration()) {
                         InitializerDeclaration init = member.asInitializerDeclaration();
@@ -214,22 +215,28 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         // Controller中的InitBlock转化为handler方法
                         MethodDeclaration handler = createHandlerHandle
                                 .createHandler(firstLineDto, paramType, resultType, serviceBuilder);
-                        Imports.ensureImported(controller, AnnotationConstant.REQUEST_BODY_QUALIFIER);
-                        Imports.ensureImported(controller, AnnotationConstant.VALID_QUALIFIER);
-                        Imports.ensureImported(controller, AnnotationConstant.POST_MAPPING_QUALIFIER);
+
+                        // 确保存在 @Autowired private Service service;
                         if (!controller.getFieldByName(serviceBuilder.getServiceVarName()).isPresent()) {
-                            Imports.ensureImported(controller, AnnotationConstant.AUTOWIRED_QUALIFIER);
-                            FieldDeclarationBuilder field = new FieldDeclarationBuilder();
-                            field.annotationExpr("@Autowired");
-                            field.type(serviceBuilder.getService().getNameAsString());
-                            field.fieldName(serviceBuilder.getServiceVarName());
-                            toAddMembers.add(field.build());
+                            FieldDeclarationBuilder serviceField = new FieldDeclarationBuilder();
+                            serviceField.annotationExpr("@Autowired");
+                            serviceField.type(serviceBuilder.getService().getNameAsString());
+                            serviceField.fieldName(serviceBuilder.getServiceVarName());
+                            controllerClone.addMember(serviceField.build());
                         }
-                        toAddMembers.add(handler);
+                        controllerClone.addMember(handler);
+                        transformed = true;
+                        Imports.ensureImported(cu, serviceBuilder.getJavabeanQualifier());
                     }
                 }
-                toAddMembers.forEach(controller::addMember);
-                toCreate.add(cu);
+                if (transformed) {
+                    Imports.ensureImported(cu, AnnotationConstant.REQUEST_BODY_QUALIFIER);
+                    Imports.ensureImported(cu, AnnotationConstant.VALID_QUALIFIER);
+                    Imports.ensureImported(cu, AnnotationConstant.POST_MAPPING_QUALIFIER);
+                    Imports.ensureImported(cu, AnnotationConstant.AUTOWIRED_QUALIFIER);
+                    controller.replace(controllerClone);
+                    toCreate.add(cu);
+                }
             }
         }
         toCreate.forEach(Saves::save);
@@ -299,10 +306,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             }
         }
         return false;
-    }
-
-    private boolean isClass(ClassOrInterfaceDeclaration coid) {
-        return !coid.isInterface();
     }
 
 }
