@@ -252,7 +252,7 @@ public class SingleMethodServiceCuBuilder {
         return result;
     }
 
-    public ClassOrInterfaceDeclaration getJavabean() {
+    public ClassOrInterfaceDeclaration getService() {
         if (service == null) {
             throw new IllegalStateException("buildService() not yet.");
         }

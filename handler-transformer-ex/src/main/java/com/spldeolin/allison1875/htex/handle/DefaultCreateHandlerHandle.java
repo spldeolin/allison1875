@@ -18,6 +18,8 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
     public MethodDeclaration createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
             SingleMethodServiceCuBuilder serviceCuBuilder) {
         MethodDeclaration handler = new MethodDeclaration();
+        handler.addAnnotation(
+                StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", firstLineDto.getHandlerUrl())));
         handler.setPublic(true);
         if (serviceResultType != null) {
             handler.setType(serviceResultType);
@@ -28,6 +30,7 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
         if (serviceParamType != null) {
             Parameter parameter = new Parameter();
             parameter.addAnnotation(AnnotationConstant.REQUEST_BODY);
+            parameter.addAnnotation(AnnotationConstant.VALID);
             parameter.setType(serviceParamType);
             parameter.setName("req");
             handler.addParameter(parameter);

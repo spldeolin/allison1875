@@ -23,8 +23,19 @@ public interface AnnotationConstant {
 
     AnnotationExpr OVERRIDE = StaticJavaParser.parseAnnotation("@Override");
 
+    String POST_MAPPING_QUALIFIER = "org.springframework.web.bind.annotation.PostMapping";
+
     AnnotationExpr REQUEST_BODY = StaticJavaParser.parseAnnotation("@RequestBody");
 
     String REQUEST_BODY_QUALIFIER = "org.springframework.web.bind.annotation.RequestBody";
+
+    AnnotationExpr VALID = StaticJavaParser.parseAnnotation("@Valid");
+
+    String VALID_QUALIFIER = "javax.validation.Valid";
+
+
+    AnnotationExpr AUTOWIRED = StaticJavaParser.parseAnnotation("@Autowired");
+
+    String AUTOWIRED_QUALIFIER = "org.springframework.beans.factory.annotation.Autowired";
 
 }

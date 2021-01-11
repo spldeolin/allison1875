@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.htex.processor;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
@@ -19,6 +20,7 @@ import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -26,9 +28,11 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.htex.HandlerTransformerConfig;
@@ -55,10 +59,11 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        Collection<CompilationUnit> toCreate = Lists.newArrayList();
+        Set<CompilationUnit> toCreate = Sets.newHashSet();
         for (CompilationUnit cu : astForest) {
             for (ClassOrInterfaceDeclaration controller : cu
                     .findAll(ClassOrInterfaceDeclaration.class, this::isController)) {
+                List<BodyDeclaration> toAddMembers = Lists.newArrayList();
                 for (BodyDeclaration<?> member : controller.getMembers()) {
                     if (member.isInitializerDeclaration()) {
                         InitializerDeclaration init = member.asInitializerDeclaration();
@@ -206,13 +211,25 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         toCreate.add(serviceBuilder.buildService());
                         toCreate.add(serviceBuilder.buildServiceImpl());
 
-                        // TODO Controller中的InitBlock转化为handler方法
+                        // Controller中的InitBlock转化为handler方法
                         MethodDeclaration handler = createHandlerHandle
                                 .createHandler(firstLineDto, paramType, resultType, serviceBuilder);
-
+                        Imports.ensureImported(controller, AnnotationConstant.REQUEST_BODY_QUALIFIER);
+                        Imports.ensureImported(controller, AnnotationConstant.VALID_QUALIFIER);
+                        Imports.ensureImported(controller, AnnotationConstant.POST_MAPPING_QUALIFIER);
+                        if (!controller.getFieldByName(serviceBuilder.getServiceVarName()).isPresent()) {
+                            Imports.ensureImported(controller, AnnotationConstant.AUTOWIRED_QUALIFIER);
+                            FieldDeclarationBuilder field = new FieldDeclarationBuilder();
+                            field.annotationExpr("@Autowired");
+                            field.type(serviceBuilder.getService().getNameAsString());
+                            field.fieldName(serviceBuilder.getServiceVarName());
+                            toAddMembers.add(field.build());
+                        }
+                        toAddMembers.add(handler);
                     }
                 }
-
+                toAddMembers.forEach(controller::addMember);
+                toCreate.add(cu);
             }
         }
         toCreate.forEach(Saves::save);
