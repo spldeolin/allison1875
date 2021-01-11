@@ -18,6 +18,7 @@
         <module>persistence-generator</module>
         <module>query-transformer</module>
         <module>handler-transformer-ex</module>
+        <module>allison1875-support</module>
     </modules>
 
     <name>Allison 1875</name>
