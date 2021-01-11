@@ -227,4 +227,8 @@ public class JavabeanCuBuilder {
         return javabeanQualifier;
     }
 
+    public Set<ImportDeclaration> getImportDeclarations() {
+        return importDeclarations;
+    }
+
 }

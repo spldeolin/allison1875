@@ -11,6 +11,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -24,12 +25,15 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
+import com.spldeolin.allison1875.base.builder.ServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.htex.HandlerTransformerConfig;
+import com.spldeolin.allison1875.htex.handle.CreateHandlerHandle;
+import com.spldeolin.allison1875.htex.handle.CreateServiceMethodHandle;
 import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -42,6 +46,12 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Inject
     private HandlerTransformerConfig handlerTransformerConfig;
+
+    @Inject
+    private CreateServiceMethodHandle createServiceMethodHandle;
+
+    @Inject
+    private CreateHandlerHandle createHandlerHandle;
 
     @Override
     public void process(AstForest astForest) {
@@ -63,6 +73,38 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         }
                         log.info(firstLineDto);
 
+                        // 校验init下的Req和Resp类
+                        if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
+                            throw new IllegalArgumentException(
+                                    "构造代码块下最多只能有2个类声明，分别用于代表Req和Resp。[" + firstLineDto.getHandlerUrl() + "] 当前："
+                                            + initBody.findAll(LocalClassDeclarationStmt.class).stream()
+                                            .map(one -> one.getClassDeclaration().getNameAsString())
+                                            .collect(Collectors.joining("、")));
+                        }
+                        if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {
+                            for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
+                                if (!StringUtils
+                                        .equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req",
+                                                "Resp")) {
+                                    throw new IllegalArgumentException(
+                                            "构造代码块下类的命名只能是Req或者Resp。[" + firstLineDto.getHandlerUrl() + "] 当前："
+                                                    + initBody.findAll(LocalClassDeclarationStmt.class).stream()
+                                                    .map(one -> one.getClassDeclaration().getNameAsString())
+                                                    .collect(Collectors.joining("、")));
+                                }
+                            }
+                        }
+                        if (initBody.findAll(ClassOrInterfaceDeclaration.class,
+                                coid -> coid.getNameAsString().equals("Req")).size() > 1) {
+                            throw new IllegalArgumentException(
+                                    "构造代码块下不能重复声明Req类。[" + firstLineDto.getHandlerUrl() + "]");
+                        }
+                        if (initBody.findAll(ClassOrInterfaceDeclaration.class,
+                                coid -> coid.getNameAsString().equals("Resp")).size() > 1) {
+                            throw new IllegalArgumentException(
+                                    "构造代码块下不能重复声明Resp类。[" + firstLineDto.getHandlerUrl() + "]");
+                        }
+
                         // 广度优先遍历收集 + 反转
                         List<ClassOrInterfaceDeclaration> dtos = Lists.newArrayList();
                         init.walk(TreeTraversal.BREADTHFIRST, node -> {
@@ -75,8 +117,10 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         });
                         Collections.reverse(dtos);
 
-                        JavabeanCuBuilder reqDtoBuilder = null;
-                        JavabeanCuBuilder respDtoBuilder = null;
+                        String reqDtoQualifier = null;
+                        String respDtoQualfier = null;
+                        String paramType = null;
+                        String resultType = null;
                         Collection<JavabeanCuBuilder> builders = Lists.newArrayList();
                         Collection<String> dtoQualifiers = Lists.newArrayList();
                         // 生成ReqDto、RespDto、NestDto
@@ -90,38 +134,11 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                             boolean isInResp = dto.findAncestor(ClassOrInterfaceDeclaration.class,
                                     ancestor -> ancestor.getNameAsString().equals("Resp")).isPresent();
 
-                            // 校验init下的Req和Resp类
-                            if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
-                                throw new IllegalArgumentException(
-                                        "构造代码块下最多只能有2个类声明，分别用于代表Req和Resp。[" + firstLineDto.getHandlerUrl() + "] 当前："
-                                                + initBody.findAll(LocalClassDeclarationStmt.class).stream()
-                                                .map(one -> one.getClassDeclaration().getNameAsString())
-                                                .collect(Collectors.joining("、")));
+                            if (isReq || isResp) {
+                                dto.setName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + dto
+                                        .getNameAsString());
                             }
-                            if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {
-                                for (LocalClassDeclarationStmt lcds : initBody
-                                        .findAll(LocalClassDeclarationStmt.class)) {
-                                    if (!StringUtils
-                                            .equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req",
-                                                    "Resp")) {
-                                        throw new IllegalArgumentException(
-                                                "构造代码块下类的命名只能是Req或者Resp。[" + firstLineDto.getHandlerUrl() + "] 当前："
-                                                        + initBody.findAll(LocalClassDeclarationStmt.class).stream()
-                                                        .map(one -> one.getClassDeclaration().getNameAsString())
-                                                        .collect(Collectors.joining("、")));
-                                    }
-                                }
-                            }
-                            if (init.findAll(ClassOrInterfaceDeclaration.class,
-                                    coid -> coid.getNameAsString().equals("Req")).size() > 1) {
-                                throw new IllegalArgumentException(
-                                        "构造代码块下不能重复声明Req类。[" + firstLineDto.getHandlerUrl() + "]");
-                            }
-                            if (init.findAll(ClassOrInterfaceDeclaration.class,
-                                    coid -> coid.getNameAsString().equals("Resp")).size() > 1) {
-                                throw new IllegalArgumentException(
-                                        "构造代码块下不能重复声明Resp类。[" + firstLineDto.getHandlerUrl() + "]");
-                            }
+
                             // 计算每一个dto的package
                             String pkg;
                             if (isReq) {
@@ -143,17 +160,15 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                             ClassOrInterfaceDeclaration clone = dto.clone();
                             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
                             clone.getAnnotations().removeIf(annotationExpr -> StringUtils
-                                    .equalsAny(annotationExpr.getNameAsString(), "L", "P"));
-                            if (isReq || isResp) {
-                                clone.setName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + dto
-                                        .getNameAsString());
-                            }
+                                    .equalsAnyIgnoreCase(annotationExpr.getNameAsString(), "l", "p"));
                             builder.coid(clone.setPublic(true));
                             if (isReq) {
-                                reqDtoBuilder = builder;
+                                paramType = calcType(dto);
+                                reqDtoQualifier = pkg + "." + clone.getNameAsString();
                             }
                             if (isResp) {
-                                respDtoBuilder = builder;
+                                resultType = calcType(dto);
+                                respDtoQualfier = pkg + "." + clone.getNameAsString();
                             }
                             builders.add(builder);
                             dtoQualifiers.add(pkg + "." + clone.getNameAsString());
@@ -176,10 +191,22 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                             toCreate.add(builder.build());
                         }
 
-                        // TODO 生成Service
-
+                        // 生成Service
+                        ServiceCuBuilder serviceBuilder = new ServiceCuBuilder();
+                        serviceBuilder.sourceRoot(Locations.getStorage(cu).getSourceRoot());
+                        serviceBuilder.packageDeclaration(handlerTransformerConfig.getServicePackage());
+                        serviceBuilder.importDeclarations(cu.getImports());
+                        serviceBuilder.importDeclarationsString(Lists.newArrayList("java.util.Collection",
+                                handlerTransformerConfig.getPageTypeQualifier(), reqDtoQualifier, respDtoQualfier));
+                        serviceBuilder.serviceName(
+                                MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
+                        serviceBuilder.method(createServiceMethodHandle
+                                .createMethodImpl(firstLineDto, paramType, resultType));
+                        toCreate.add(serviceBuilder.build());
 
                         // TODO Controller中的InitBlock转化为handler方法
+                        MethodDeclaration handler = createHandlerHandle
+                                .createHandler(firstLineDto, paramType, resultType, serviceBuilder);
 
                     }
                 }

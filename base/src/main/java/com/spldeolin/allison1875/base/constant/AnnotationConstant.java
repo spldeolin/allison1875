@@ -6,8 +6,25 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 /**
  * @author Deolin 2020-12-26
  */
+
 public interface AnnotationConstant {
 
     AnnotationExpr DATA = StaticJavaParser.parseAnnotation("@Data");
+
+    String DATA_QUALIFIER = "lombok.Data";
+
+    AnnotationExpr SERVICE = StaticJavaParser.parseAnnotation("@Service");
+
+    String SERVICE_QUALIFIER = "org.springframework.stereotype.Service";
+
+    AnnotationExpr SLF4J = StaticJavaParser.parseAnnotation("@Slf4j");
+
+    String SLF4J_QUALIFIER = "lombok.extern.slf4j.Slf4j";
+
+    AnnotationExpr OVERRIDE = StaticJavaParser.parseAnnotation("@Override");
+
+    AnnotationExpr REQUEST_BODY = StaticJavaParser.parseAnnotation("@RequestBody");
+
+    String REQUEST_BODY_QUALIFIER = "org.springframework.web.bind.annotation.RequestBody";
 
 }
