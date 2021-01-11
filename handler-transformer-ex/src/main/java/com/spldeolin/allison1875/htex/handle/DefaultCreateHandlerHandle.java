@@ -47,6 +47,16 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
                         String.format("return %s.%s();", serviceCuBuilder.getServiceVarName(),
                                 serviceCuBuilder.getMethodName())));
             }
+        } else {
+            if (serviceParamType != null) {
+                body.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%s.%s(req);", serviceCuBuilder.getServiceVarName(),
+                                serviceCuBuilder.getMethodName())));
+            } else {
+                body.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%s.%s();", serviceCuBuilder.getServiceVarName(),
+                                serviceCuBuilder.getMethodName())));
+            }
         }
         handler.setBody(body);
         return handler;
