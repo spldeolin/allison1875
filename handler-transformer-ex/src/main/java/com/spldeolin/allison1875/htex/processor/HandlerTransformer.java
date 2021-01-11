@@ -25,7 +25,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
-import com.spldeolin.allison1875.base.builder.ServiceCuBuilder;
+import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
@@ -192,9 +192,10 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         }
 
                         // 生成Service
-                        ServiceCuBuilder serviceBuilder = new ServiceCuBuilder();
+                        SingleMethodServiceCuBuilder serviceBuilder = new SingleMethodServiceCuBuilder();
                         serviceBuilder.sourceRoot(Locations.getStorage(cu).getSourceRoot());
-                        serviceBuilder.packageDeclaration(handlerTransformerConfig.getServicePackage());
+                        serviceBuilder.servicePackageDeclaration(handlerTransformerConfig.getServicePackage());
+                        serviceBuilder.implPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
                         serviceBuilder.importDeclarations(cu.getImports());
                         serviceBuilder.importDeclarationsString(Lists.newArrayList("java.util.Collection",
                                 handlerTransformerConfig.getPageTypeQualifier(), reqDtoQualifier, respDtoQualfier));
@@ -202,7 +203,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                                 MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
                         serviceBuilder.method(createServiceMethodHandle
                                 .createMethodImpl(firstLineDto, paramType, resultType));
-                        toCreate.add(serviceBuilder.build());
+                        toCreate.add(serviceBuilder.buildService());
+                        toCreate.add(serviceBuilder.buildServiceImpl());
 
                         // TODO Controller中的InitBlock转化为handler方法
                         MethodDeclaration handler = createHandlerHandle

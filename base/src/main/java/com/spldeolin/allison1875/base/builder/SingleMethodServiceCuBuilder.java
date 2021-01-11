@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-import javax.validation.ConstraintViolation;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,18 +21,20 @@ import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import com.google.mu.util.Substring;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ValidateUtils;
 
 /**
  * @author Deolin 2021-01-10
  */
-public class ServiceCuBuilder {
+public class SingleMethodServiceCuBuilder {
 
     private SourceRoot sourceRoot;
 
-    private PackageDeclaration packageDeclaration;
+    private PackageDeclaration servicePackageDeclaration;
+
+    private PackageDeclaration implPackageDeclaration;
 
     private final Set<ImportDeclaration> importDeclarations = Sets.newLinkedHashSet();
 
@@ -53,30 +54,41 @@ public class ServiceCuBuilder {
 
     private String methodName;
 
-    public ServiceCuBuilder sourceRoot(SourceRoot sourceRoot) {
+    public SingleMethodServiceCuBuilder sourceRoot(SourceRoot sourceRoot) {
         Objects.requireNonNull(sourceRoot, "sourceRoot cannot be null.");
         this.sourceRoot = sourceRoot;
         return this;
     }
 
-    public ServiceCuBuilder sourceRoot(Path sourceRootPath) {
+    public SingleMethodServiceCuBuilder sourceRoot(Path sourceRootPath) {
         Objects.requireNonNull(sourceRootPath, "sourceRootPath cannot be null.");
         this.sourceRoot = new SourceRoot(sourceRootPath);
         return this;
     }
 
-    public ServiceCuBuilder packageDeclaration(String packageName) {
+    public SingleMethodServiceCuBuilder servicePackageDeclaration(String packageName) {
         Objects.requireNonNull(packageName, "packageName cannot be null.");
-        this.packageDeclaration = new PackageDeclaration().setName(packageName);
+        this.servicePackageDeclaration = new PackageDeclaration().setName(packageName);
         return this;
     }
 
-    public ServiceCuBuilder packageDeclaration(PackageDeclaration packageDeclaration) {
-        this.packageDeclaration = packageDeclaration;
+    public SingleMethodServiceCuBuilder servicePackageDeclaration(PackageDeclaration packageDeclaration) {
+        this.servicePackageDeclaration = packageDeclaration;
         return this;
     }
 
-    public ServiceCuBuilder importDeclaration(String importName, Boolean isAsterisk) {
+    public SingleMethodServiceCuBuilder implPackageDeclaration(String packageName) {
+        Objects.requireNonNull(packageName, "packageName cannot be null.");
+        this.implPackageDeclaration = new PackageDeclaration().setName(packageName);
+        return this;
+    }
+
+    public SingleMethodServiceCuBuilder implPackageDeclaration(PackageDeclaration packageDeclaration) {
+        this.implPackageDeclaration = packageDeclaration;
+        return this;
+    }
+
+    public SingleMethodServiceCuBuilder importDeclaration(String importName, Boolean isAsterisk) {
         boolean endsWith = importName.endsWith(".*");
         if (isAsterisk && !endsWith) {
             importName = importName + ".*";
@@ -88,13 +100,13 @@ public class ServiceCuBuilder {
         return this;
     }
 
-    public ServiceCuBuilder importDeclaration(ImportDeclaration importDeclaration) {
+    public SingleMethodServiceCuBuilder importDeclaration(ImportDeclaration importDeclaration) {
         Objects.requireNonNull(importDeclaration, "importDeclaration cannot be null.");
         importDeclarations.add(importDeclaration);
         return this;
     }
 
-    public ServiceCuBuilder importDeclaration(String importName) {
+    public SingleMethodServiceCuBuilder importDeclaration(String importName) {
         if (importName.endsWith(".*")) {
             importDeclarations.add(new ImportDeclaration(Substring.last(".*").removeFrom(importName), false, true));
         } else {
@@ -103,17 +115,17 @@ public class ServiceCuBuilder {
         return this;
     }
 
-    public ServiceCuBuilder importDeclarationsString(Collection<String> importNames) {
+    public SingleMethodServiceCuBuilder importDeclarationsString(Collection<String> importNames) {
         importNames.forEach(this::importDeclaration);
         return this;
     }
 
-    public ServiceCuBuilder importDeclarations(Collection<ImportDeclaration> importDeclarations) {
+    public SingleMethodServiceCuBuilder importDeclarations(Collection<ImportDeclaration> importDeclarations) {
         importDeclarations.forEach(this::importDeclaration);
         return this;
     }
 
-    public ServiceCuBuilder javadoc(String javadocDescription, String author) {
+    public SingleMethodServiceCuBuilder javadoc(String javadocDescription, String author) {
         if (StringUtils.isBlank(author)) {
             throw new IllegalArgumentException("author cannot be blank.");
         }
@@ -124,43 +136,38 @@ public class ServiceCuBuilder {
         return this;
     }
 
-    public ServiceCuBuilder javadoc(Javadoc javadoc) {
+    public SingleMethodServiceCuBuilder javadoc(Javadoc javadoc) {
         this.javadoc = javadoc;
         return this;
     }
 
-    public ServiceCuBuilder annotationExpr(AnnotationExpr annotationExpr) {
+    public SingleMethodServiceCuBuilder annotationExpr(AnnotationExpr annotationExpr) {
         annotationExprs.add(annotationExpr);
         return this;
     }
 
-    public ServiceCuBuilder annotationExpr(String annotation, String... var) {
+    public SingleMethodServiceCuBuilder annotationExpr(String annotation, String... var) {
         annotationExprs.add(StaticJavaParser.parseAnnotation(String.format(annotation, (Object) var)));
         return this;
     }
 
-    public ServiceCuBuilder serviceName(String serviceName) {
+    public SingleMethodServiceCuBuilder serviceName(String serviceName) {
         Objects.requireNonNull(serviceName, "serviceName cannot be null.");
         this.serviceName = serviceName;
         return this;
     }
 
-    public ServiceCuBuilder method(MethodDeclaration method) {
+    public SingleMethodServiceCuBuilder method(MethodDeclaration method) {
         Objects.requireNonNull(serviceName, "method cannot be null.");
         this.method = method;
         return this;
     }
 
-    public CompilationUnit build() {
-        Set<ConstraintViolation<ServiceCuBuilder>> violations = ValidateUtils.validate(this);
-        if (violations.size() > 0) {
-            throw new IllegalArgumentException(violations.toString());
-        }
-
+    public CompilationUnit buildService() {
         CompilationUnit result = new CompilationUnit();
 
         // package声明
-        result.setPackageDeclaration(packageDeclaration);
+        result.setPackageDeclaration(servicePackageDeclaration);
 
         // import声明
         result.setImports(new NodeList<>(importDeclarations));
@@ -188,8 +195,8 @@ public class ServiceCuBuilder {
 
         // CU的路径
         Path storage = sourceRoot.getRoot();
-        if (packageDeclaration != null) {
-            storage = storage.resolve(CodeGenerationUtils.packageToPath(packageDeclaration.getNameAsString()));
+        if (servicePackageDeclaration != null) {
+            storage = storage.resolve(CodeGenerationUtils.packageToPath(servicePackageDeclaration.getNameAsString()));
         }
         storage = storage.resolve(coid.getNameAsString() + ".java");
         result.setStorage(storage);
@@ -202,30 +209,73 @@ public class ServiceCuBuilder {
         return result;
     }
 
+    public CompilationUnit buildServiceImpl() {
+        CompilationUnit result = new CompilationUnit();
+
+        // package声明
+        result.setPackageDeclaration(implPackageDeclaration);
+
+        // import声明
+        result.setImports(new NodeList<>(importDeclarations));
+        result.addImport(AnnotationConstant.SLF4J_QUALIFIER);
+        result.addImport(AnnotationConstant.SERVICE_QUALIFIER);
+        result.addImport(serviceQualifier);
+
+        ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+
+        // 类级Javadoc
+        if (javadoc != null) {
+            coid.setJavadocComment(javadoc);
+        }
+
+        // 类级注解
+        annotationExprs.forEach(coid::addAnnotation);
+        coid.addAnnotation(AnnotationConstant.SLF4J);
+        coid.addAnnotation(AnnotationConstant.SERVICE);
+
+        // 类签名
+        coid.setPublic(true).setStatic(false).setInterface(false).setName(serviceName + "Impl").addImplementedType(serviceName);
+
+        // 方法签名
+        coid.addMember(this.method);
+
+        result.setTypes(new NodeList<>(coid));
+
+        // CU的路径
+        Path storage = sourceRoot.getRoot();
+        if (implPackageDeclaration != null) {
+            storage = storage.resolve(CodeGenerationUtils.packageToPath(implPackageDeclaration.getNameAsString()));
+        }
+        storage = storage.resolve(coid.getNameAsString() + ".java");
+        result.setStorage(storage);
+
+        return result;
+    }
+
     public ClassOrInterfaceDeclaration getJavabean() {
         if (service == null) {
-            throw new IllegalStateException("build() not yet.");
+            throw new IllegalStateException("buildService() not yet.");
         }
         return service;
     }
 
     public String getJavabeanQualifier() {
         if (service == null) {
-            throw new IllegalStateException("build() not yet.");
+            throw new IllegalStateException("buildService() not yet.");
         }
         return serviceQualifier;
     }
 
     public String getServiceVarName() {
         if (service == null) {
-            throw new IllegalArgumentException("build() not yet.");
+            throw new IllegalArgumentException("buildService() not yet.");
         }
         return serviceVarName;
     }
 
     public String getMethodName() {
         if (service == null) {
-            throw new IllegalArgumentException("build() not yet.");
+            throw new IllegalArgumentException("buildService() not yet.");
         }
         return methodName;
     }

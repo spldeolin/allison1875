@@ -5,7 +5,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
-import com.spldeolin.allison1875.base.builder.ServiceCuBuilder;
+import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
 
@@ -16,7 +16,7 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
 
     @Override
     public MethodDeclaration createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
-            ServiceCuBuilder serviceCuBuilder) {
+            SingleMethodServiceCuBuilder serviceCuBuilder) {
         MethodDeclaration handler = new MethodDeclaration();
         handler.setPublic(true);
         if (serviceResultType != null) {

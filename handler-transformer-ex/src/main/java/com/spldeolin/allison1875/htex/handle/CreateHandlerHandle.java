@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.htex.handle;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.spldeolin.allison1875.base.builder.ServiceCuBuilder;
+import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
 
 /**
@@ -10,6 +10,6 @@ import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
 public interface CreateHandlerHandle {
 
     MethodDeclaration createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
-            ServiceCuBuilder serviceCuBuilder);
+            SingleMethodServiceCuBuilder serviceCuBuilder);
 
 }
