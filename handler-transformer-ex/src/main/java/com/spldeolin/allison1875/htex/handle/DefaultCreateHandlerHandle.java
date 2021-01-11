@@ -37,10 +37,16 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
         }
 
         BlockStmt body = new BlockStmt();
-        if (serviceParamType != null) {
-            body.addStatement(StaticJavaParser.parseStatement(
-                    String.format("return %s.%s(req);", serviceCuBuilder.getServiceVarName(),
-                            serviceCuBuilder.getMethodName())));
+        if (serviceResultType != null) {
+            if (serviceParamType != null) {
+                body.addStatement(StaticJavaParser.parseStatement(
+                        String.format("return %s.%s(req);", serviceCuBuilder.getServiceVarName(),
+                                serviceCuBuilder.getMethodName())));
+            } else {
+                body.addStatement(StaticJavaParser.parseStatement(
+                        String.format("return %s.%s();", serviceCuBuilder.getServiceVarName(),
+                                serviceCuBuilder.getMethodName())));
+            }
         }
         handler.setBody(body);
         return handler;

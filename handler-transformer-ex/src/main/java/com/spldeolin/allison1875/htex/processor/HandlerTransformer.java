@@ -203,8 +203,15 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         serviceBuilder.servicePackageDeclaration(handlerTransformerConfig.getServicePackage());
                         serviceBuilder.implPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
                         serviceBuilder.importDeclarations(cu.getImports());
-                        serviceBuilder.importDeclarationsString(Lists.newArrayList("java.util.Collection",
-                                handlerTransformerConfig.getPageTypeQualifier(), reqDtoQualifier, respDtoQualifier));
+                        List<String> imports = Lists
+                                .newArrayList("java.util.Collection", handlerTransformerConfig.getPageTypeQualifier());
+                        if (reqDtoQualifier != null) {
+                            imports.add(reqDtoQualifier);
+                        }
+                        if (respDtoQualifier != null) {
+                            imports.add(respDtoQualifier);
+                        }
+                        serviceBuilder.importDeclarationsString(imports);
                         serviceBuilder.serviceName(
                                 MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
                         serviceBuilder.method(createServiceMethodHandle
@@ -226,8 +233,12 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         }
                         controllerClone.addMember(handler);
                         transformed = true;
-                        Imports.ensureImported(cu, reqDtoQualifier);
-                        Imports.ensureImported(cu, respDtoQualifier);
+                        if (reqDtoQualifier != null) {
+                            Imports.ensureImported(cu, reqDtoQualifier);
+                        }
+                        if (respDtoQualifier != null) {
+                            Imports.ensureImported(cu, respDtoQualifier);
+                        }
                         Imports.ensureImported(cu, serviceBuilder.getJavabeanQualifier());
                     }
                 }
