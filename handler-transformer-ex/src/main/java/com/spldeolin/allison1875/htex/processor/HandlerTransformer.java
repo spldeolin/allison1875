@@ -79,6 +79,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         }
                         log.info(firstLineDto);
 
+                        ensureNoRepeation(controller, firstLineDto);
+
                         // 校验init下的Req和Resp类
                         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
                             throw new IllegalArgumentException(
@@ -253,6 +255,18 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             }
         }
         toCreate.forEach(Saves::save);
+    }
+
+    private void ensureNoRepeation(ClassOrInterfaceDeclaration controller, FirstLineDto firstLineDto) {
+        String handlerName = firstLineDto.getHandlerName();
+        if (controller.getMethodsByName(handlerName).size() > 0) {
+            String newHandlerName = handlerName + "Ex";
+            firstLineDto.setHandlerName(newHandlerName);
+            firstLineDto.setHandlerUrl(firstLineDto.getHandlerUrl() + "Ex");
+            log.warn(String.format("方法[%s] 在Controller[%s] 中已存在，重名名为[%s]", handlerName,
+                    controller.getNameAsString(), newHandlerName));
+            ensureNoRepeation(controller,firstLineDto);
+        }
     }
 
     private String calcType(ClassOrInterfaceDeclaration dto) {
