@@ -7,9 +7,13 @@ import lombok.Data;
  */
 @Data
 public class ReqDtoRespDtoInfo {
+
     String reqDtoQualifier = null;
+
     String respDtoQualifier = null;
+
     String paramType = null;
+
     String resultType = null;
 
 }
