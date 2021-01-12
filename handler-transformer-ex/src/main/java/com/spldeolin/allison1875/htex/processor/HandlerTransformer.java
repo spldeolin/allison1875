@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.htex.processor;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -10,20 +9,16 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
-import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.htex.HandlerTransformerConfig;
 import com.spldeolin.allison1875.htex.handle.CreateServiceMethodHandle;
@@ -88,76 +83,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     // 自底向上收集（广度优先遍历收集 + 反转）
                     List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
-                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = new ReqDtoRespDtoInfo();
-                    Collection<JavabeanCuBuilder> builders = Lists.newArrayList();
-                    Collection<String> dtoQualifiers = Lists.newArrayList();
-                    // 生成ReqDto、RespDto、NestDto
-                    for (ClassOrInterfaceDeclaration dto : dtos) {
-                        JavabeanCuBuilder builder = new JavabeanCuBuilder();
-                        builder.sourceRoot(Locations.getStorage(cu).getSourceRoot());
-                        boolean isReq = dto.getNameAsString().equals("Req");
-                        boolean isResp = dto.getNameAsString().equals("Resp");
-                        boolean isInReq = dto.findAncestor(ClassOrInterfaceDeclaration.class,
-                                ancestor -> ancestor.getNameAsString().equals("Req")).isPresent();
-                        boolean isInResp = dto.findAncestor(ClassOrInterfaceDeclaration.class,
-                                ancestor -> ancestor.getNameAsString().equals("Resp")).isPresent();
-
-                        if (isReq || isResp) {
-                            dto.setName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + dto
-                                    .getNameAsString());
-                        }
-
-                        // 计算每一个dto的package
-                        String pkg;
-                        if (isReq) {
-                            pkg = handlerTransformerConfig.getReqDtoPackage();
-                        } else if (isResp) {
-                            pkg = handlerTransformerConfig.getRespDtoPackage();
-                        } else if (isInReq) {
-                            pkg = handlerTransformerConfig.getReqDtoPackage() + ".dto";
-                        } else if (isInResp) {
-                            pkg = handlerTransformerConfig.getRespDtoPackage() + ".dto";
-                        } else {
-                            throw new RuntimeException("impossible unless bug.");
-                        }
-                        builder.packageDeclaration(pkg);
-                        builder.importDeclarations(cu.getImports());
-                        builder.importDeclarationsString(
-                                Lists.newArrayList("javax.validation.Valid", "java.util.Collection",
-                                        handlerTransformerConfig.getPageTypeQualifier()));
-                        ClassOrInterfaceDeclaration clone = dto.clone();
-                        clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
-                        clone.getAnnotations().removeIf(annotationExpr -> StringUtils
-                                .equalsAnyIgnoreCase(annotationExpr.getNameAsString(), "l", "p"));
-                        builder.coid(clone.setPublic(true));
-                        if (isReq) {
-                            reqDtoRespDtoInfo.setParamType(calcType(dto));
-                            reqDtoRespDtoInfo.setReqDtoQualifier(pkg + "." + clone.getNameAsString());
-                        }
-                        if (isResp) {
-                            reqDtoRespDtoInfo.setResultType(calcType(dto));
-                            reqDtoRespDtoInfo.setRespDtoQualifier(pkg + "." + clone.getNameAsString());
-                        }
-                        builders.add(builder);
-                        dtoQualifiers.add(pkg + "." + clone.getNameAsString());
-
-                        // 遍历到NestDto时，将父节点中的自身替换为Field
-                        if (dto.getParentNode().filter(parent -> parent instanceof ClassOrInterfaceDeclaration)
-                                .isPresent()) {
-                            ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode()
-                                    .get();
-                            FieldDeclarationBuilder fieldBuilder = new FieldDeclarationBuilder();
-                            dto.getJavadoc().ifPresent(fieldBuilder::javadoc);
-                            fieldBuilder.annotationExpr("@Valid");
-                            fieldBuilder.type(calcType(dto));
-                            fieldBuilder.fieldName(MoreStringUtils.upperCamelToLowerCamel(dto.getNameAsString()));
-                            parentCoid.replace(dto, fieldBuilder.build());
-                        }
-                    }
-                    for (JavabeanCuBuilder builder : builders) {
-                        builder.importDeclarationsString(dtoQualifiers);
-                        toCreate.add(builder.build());
-                    }
+                    // 生成所有所需的Dto
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.generateDtos(toCreate, cu, firstLineDto, dtos);
 
                     // 生成Service
                     SingleMethodServiceCuBuilder serviceBuilder = serviceProc
@@ -183,17 +110,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             }
         }
         toCreate.forEach(Saves::save);
-    }
-
-    private String calcType(ClassOrInterfaceDeclaration dto) {
-        if (dto.getAnnotationByName("L").isPresent()) {
-            return "Collection<" + dto.getNameAsString() + ">";
-        }
-        if (dto.getAnnotationByName("P").isPresent()) {
-            String[] split = handlerTransformerConfig.getPageTypeQualifier().split("\\.");
-            return split[split.length - 1] + "<" + dto.getNameAsString() + ">";
-        }
-        return dto.getNameAsString();
     }
 
     private String tryGetFirstLine(NodeList<Statement> statements) {
