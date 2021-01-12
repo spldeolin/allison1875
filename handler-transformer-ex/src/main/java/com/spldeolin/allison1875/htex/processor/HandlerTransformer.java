@@ -14,11 +14,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -29,7 +27,6 @@ import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -57,13 +54,17 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private CreateHandlerHandle createHandlerHandle;
 
+    @Inject
+    private ControllerCollectProc controllerCollectProc;
+
     @Override
     public void process(AstForest astForest) {
         Set<CompilationUnit> toCreate = Sets.newHashSet();
+
         for (CompilationUnit cu : astForest) {
-            for (ClassOrInterfaceDeclaration controller : cu
-                    .findAll(ClassOrInterfaceDeclaration.class, this::isController)) {
+            for (ClassOrInterfaceDeclaration controller : controllerCollectProc.collect(cu)) {
                 ClassOrInterfaceDeclaration controllerClone = controller.clone();
+
                 boolean transformed = false;
                 for (BodyDeclaration<?> member : controller.getMembers()) {
                     if (member.isInitializerDeclaration()) {
@@ -115,7 +116,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
                         // 广度优先遍历收集 + 反转
                         List<ClassOrInterfaceDeclaration> dtos = Lists.newArrayList();
-                        init.walk(TreeTraversal.BREADTHFIRST, node -> {
+                        initBody.walk(TreeTraversal.BREADTHFIRST, node -> {
                             if (node instanceof ClassOrInterfaceDeclaration) {
                                 ClassOrInterfaceDeclaration coid = (ClassOrInterfaceDeclaration) node;
                                 if (!coid.isInterface()) {
@@ -245,6 +246,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     }
                 }
                 if (transformed) {
+                    Imports.ensureImported(cu, handlerTransformerConfig.getPageTypeQualifier());
                     Imports.ensureImported(cu, AnnotationConstant.REQUEST_BODY_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.VALID_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.POST_MAPPING_QUALIFIER);
@@ -263,9 +265,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             String newHandlerName = handlerName + "Ex";
             firstLineDto.setHandlerName(newHandlerName);
             firstLineDto.setHandlerUrl(firstLineDto.getHandlerUrl() + "Ex");
-            log.warn(String.format("方法[%s] 在Controller[%s] 中已存在，重名名为[%s]", handlerName,
-                    controller.getNameAsString(), newHandlerName));
-            ensureNoRepeation(controller,firstLineDto);
+            log.warn(String.format("方法[%s] 在Controller[%s] 中已存在，重名名为[%s]", handlerName, controller.getNameAsString(),
+                    newHandlerName));
+            ensureNoRepeation(controller, firstLineDto);
         }
     }
 
@@ -317,22 +319,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
         firstLineDto.setHandlerDescription(parts[1]);
         firstLineDto.setMore(null); // privode handle
         return firstLineDto;
-    }
-
-    private boolean isController(ClassOrInterfaceDeclaration coid) {
-        for (AnnotationExpr annotation : coid.getAnnotations()) {
-            try {
-                ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(QualifierConstants.CONTROLLER) || QualifierConstants.CONTROLLER
-                        .equals(resolve.getQualifiedName())) {
-                    return true;
-                }
-            } catch (Exception e) {
-                log.error("annotation [{}] of class [{}] cannot resolve", annotation.getNameAsString(),
-                        coid.getNameAsString(), e);
-            }
-        }
-        return false;
     }
 
 }
