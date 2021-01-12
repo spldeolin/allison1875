@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -27,9 +26,9 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.htex.HandlerTransformerConfig;
-import com.spldeolin.allison1875.htex.handle.CreateHandlerHandle;
 import com.spldeolin.allison1875.htex.handle.CreateServiceMethodHandle;
 import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
+import com.spldeolin.allison1875.htex.javabean.ReqDtoRespDtoInfo;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -44,9 +43,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Inject
     private CreateServiceMethodHandle createServiceMethodHandle;
-
-    @Inject
-    private CreateHandlerHandle createHandlerHandle;
 
     @Inject
     private ControllerProc controllerProc;
@@ -92,10 +88,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     // 自底向上收集（广度优先遍历收集 + 反转）
                     List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
-                    String reqDtoQualifier = null;
-                    String respDtoQualifier = null;
-                    String paramType = null;
-                    String resultType = null;
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = new ReqDtoRespDtoInfo();
                     Collection<JavabeanCuBuilder> builders = Lists.newArrayList();
                     Collection<String> dtoQualifiers = Lists.newArrayList();
                     // 生成ReqDto、RespDto、NestDto
@@ -138,12 +131,12 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                                 .equalsAnyIgnoreCase(annotationExpr.getNameAsString(), "l", "p"));
                         builder.coid(clone.setPublic(true));
                         if (isReq) {
-                            paramType = calcType(dto);
-                            reqDtoQualifier = pkg + "." + clone.getNameAsString();
+                            reqDtoRespDtoInfo.setParamType(calcType(dto));
+                            reqDtoRespDtoInfo.setReqDtoQualifier(pkg + "." + clone.getNameAsString());
                         }
                         if (isResp) {
-                            resultType = calcType(dto);
-                            respDtoQualifier = pkg + "." + clone.getNameAsString();
+                            reqDtoRespDtoInfo.setResultType(calcType(dto));
+                            reqDtoRespDtoInfo.setRespDtoQualifier(pkg + "." + clone.getNameAsString());
                         }
                         builders.add(builder);
                         dtoQualifiers.add(pkg + "." + clone.getNameAsString());
@@ -168,19 +161,13 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
                     // 生成Service
                     SingleMethodServiceCuBuilder serviceBuilder = serviceProc
-                            .generateServiceWithImpl(cu, firstLineDto, reqDtoQualifier, respDtoQualifier, paramType,
-                                    resultType);
+                            .generateServiceWithImpl(cu, firstLineDto, reqDtoRespDtoInfo);
                     toCreate.add(serviceBuilder.buildService());
                     toCreate.add(serviceBuilder.buildServiceImpl());
 
-                    // 创建Handler方法
-                    MethodDeclaration handler = createHandlerHandle
-                            .createHandler(firstLineDto, paramType, resultType, serviceBuilder);
-
-                    // 将handler插入controller中
-                    controllerProc
-                            .addHandlerToController(controller, controllerClone, reqDtoQualifier, respDtoQualifier,
-                                    serviceBuilder, handler);
+                    // 在controller中创建handler
+                    controllerProc.createHandlerToController(firstLineDto, controller, controllerClone, serviceBuilder,
+                            reqDtoRespDtoInfo);
 
                     transformed = true;
                 }

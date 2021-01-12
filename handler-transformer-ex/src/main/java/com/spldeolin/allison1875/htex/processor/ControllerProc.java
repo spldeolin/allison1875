@@ -3,14 +3,17 @@ package com.spldeolin.allison1875.htex.processor;
 import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.Imports;
+import com.spldeolin.allison1875.htex.handle.CreateHandlerHandle;
+import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
+import com.spldeolin.allison1875.htex.javabean.ReqDtoRespDtoInfo;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -19,6 +22,9 @@ import lombok.extern.log4j.Log4j2;
 @Singleton
 @Log4j2
 public class ControllerProc {
+
+    @Inject
+    private CreateHandlerHandle createHandlerHandle;
 
     public Collection<ClassOrInterfaceDeclaration> collect(CompilationUnit cu) {
         return cu.findAll(ClassOrInterfaceDeclaration.class, this::isController);
@@ -40,9 +46,9 @@ public class ControllerProc {
         return false;
     }
 
-    public void addHandlerToController(ClassOrInterfaceDeclaration controller,
-            ClassOrInterfaceDeclaration controllerClone, String reqDtoQualifier, String respDtoQualifier,
-            SingleMethodServiceCuBuilder serviceBuilder, MethodDeclaration handler) {
+    public void createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
+            ClassOrInterfaceDeclaration controllerClone, SingleMethodServiceCuBuilder serviceBuilder,
+            ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
         if (!controller.getFieldByName(serviceBuilder.getServiceVarName()).isPresent()) {
             FieldDeclarationBuilder serviceField = new FieldDeclarationBuilder();
             serviceField.annotationExpr("@Autowired");
@@ -50,12 +56,15 @@ public class ControllerProc {
             serviceField.fieldName(serviceBuilder.getServiceVarName());
             controllerClone.addMember(serviceField.build());
         }
-        controllerClone.addMember(handler);
-        if (reqDtoQualifier != null) {
-            Imports.ensureImported(controller, reqDtoQualifier);
+        // 使用handle创建Handler方法
+        controllerClone.addMember(createHandlerHandle
+                .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
+                        serviceBuilder));
+        if (reqDtoRespDtoInfo.getReqDtoQualifier() != null) {
+            Imports.ensureImported(controller, reqDtoRespDtoInfo.getReqDtoQualifier());
         }
-        if (respDtoQualifier != null) {
-            Imports.ensureImported(controller, respDtoQualifier);
+        if (reqDtoRespDtoInfo.getRespDtoQualifier() != null) {
+            Imports.ensureImported(controller, reqDtoRespDtoInfo.getRespDtoQualifier());
         }
         Imports.ensureImported(controller, serviceBuilder.getJavabeanQualifier());
     }
