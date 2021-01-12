@@ -49,7 +49,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     private CreateHandlerHandle createHandlerHandle;
 
     @Inject
-    private ControllerCollectProc controllerCollectProc;
+    private ControllerProc controllerProc;
 
     @Inject
     private InitBodyCollectProc initBodyCollectProc;
@@ -63,12 +63,15 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private DtoProc dtoProc;
 
+    @Inject
+    private ServiceProc serviceProc;
+
     @Override
     public void process(AstForest astForest) {
         Set<CompilationUnit> toCreate = Sets.newHashSet();
 
         for (CompilationUnit cu : astForest) {
-            for (ClassOrInterfaceDeclaration controller : controllerCollectProc.collect(cu)) {
+            for (ClassOrInterfaceDeclaration controller : controllerProc.collect(cu)) {
                 ClassOrInterfaceDeclaration controllerClone = controller.clone();
 
                 boolean transformed = false;
@@ -148,8 +151,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         // 遍历到NestDto时，将父节点中的自身替换为Field
                         if (dto.getParentNode().filter(parent -> parent instanceof ClassOrInterfaceDeclaration)
                                 .isPresent()) {
-                            ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto
-                                    .getParentNode().get();
+                            ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode()
+                                    .get();
                             FieldDeclarationBuilder fieldBuilder = new FieldDeclarationBuilder();
                             dto.getJavadoc().ifPresent(fieldBuilder::javadoc);
                             fieldBuilder.annotationExpr("@Valid");
@@ -164,48 +167,22 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     }
 
                     // 生成Service
-                    SingleMethodServiceCuBuilder serviceBuilder = new SingleMethodServiceCuBuilder();
-                    serviceBuilder.sourceRoot(Locations.getStorage(cu).getSourceRoot());
-                    serviceBuilder.servicePackageDeclaration(handlerTransformerConfig.getServicePackage());
-                    serviceBuilder.implPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
-                    serviceBuilder.importDeclarations(cu.getImports());
-                    List<String> imports = Lists
-                            .newArrayList("java.util.Collection", handlerTransformerConfig.getPageTypeQualifier());
-                    if (reqDtoQualifier != null) {
-                        imports.add(reqDtoQualifier);
-                    }
-                    if (respDtoQualifier != null) {
-                        imports.add(respDtoQualifier);
-                    }
-                    serviceBuilder.importDeclarationsString(imports);
-                    serviceBuilder.serviceName(
-                            MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
-                    serviceBuilder.method(createServiceMethodHandle
-                            .createMethodImpl(firstLineDto, paramType, resultType));
+                    SingleMethodServiceCuBuilder serviceBuilder = serviceProc
+                            .generateServiceWithImpl(cu, firstLineDto, reqDtoQualifier, respDtoQualifier, paramType,
+                                    resultType);
                     toCreate.add(serviceBuilder.buildService());
                     toCreate.add(serviceBuilder.buildServiceImpl());
 
-                    // Controller中的InitBlock转化为handler方法
+                    // 创建Handler方法
                     MethodDeclaration handler = createHandlerHandle
                             .createHandler(firstLineDto, paramType, resultType, serviceBuilder);
 
-                    // 确保存在 @Autowired private Service service;
-                    if (!controller.getFieldByName(serviceBuilder.getServiceVarName()).isPresent()) {
-                        FieldDeclarationBuilder serviceField = new FieldDeclarationBuilder();
-                        serviceField.annotationExpr("@Autowired");
-                        serviceField.type(serviceBuilder.getService().getNameAsString());
-                        serviceField.fieldName(serviceBuilder.getServiceVarName());
-                        controllerClone.addMember(serviceField.build());
-                    }
-                    controllerClone.addMember(handler);
+                    // 将handler插入controller中
+                    controllerProc
+                            .addHandlerToController(controller, controllerClone, reqDtoQualifier, respDtoQualifier,
+                                    serviceBuilder, handler);
+
                     transformed = true;
-                    if (reqDtoQualifier != null) {
-                        Imports.ensureImported(cu, reqDtoQualifier);
-                    }
-                    if (respDtoQualifier != null) {
-                        Imports.ensureImported(cu, respDtoQualifier);
-                    }
-                    Imports.ensureImported(cu, serviceBuilder.getJavabeanQualifier());
                 }
                 if (transformed) {
                     Imports.ensureImported(cu, handlerTransformerConfig.getPageTypeQualifier());
