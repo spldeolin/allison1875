@@ -1,20 +1,15 @@
 package com.spldeolin.allison1875.htex.processor;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -62,6 +57,12 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private EnsureNoRepeationProc ensureNoRepeationProc;
 
+    @Inject
+    private ReqRespProc reqRespProc;
+
+    @Inject
+    private DtoProc dtoProc;
+
     @Override
     public void process(AstForest astForest) {
         Set<CompilationUnit> toCreate = Sets.newHashSet();
@@ -83,48 +84,10 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     ensureNoRepeationProc.ensureNoRepeation(controller, firstLineDto);
 
                     // 校验init下的Req和Resp类
-                    if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
-                        throw new IllegalArgumentException(
-                                "构造代码块下最多只能有2个类声明，分别用于代表Req和Resp。[" + firstLineDto.getHandlerUrl() + "] 当前："
-                                        + initBody.findAll(LocalClassDeclarationStmt.class).stream()
-                                        .map(one -> one.getClassDeclaration().getNameAsString())
-                                        .collect(Collectors.joining("、")));
-                    }
-                    if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {
-                        for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
-                            if (!StringUtils
-                                    .equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req",
-                                            "Resp")) {
-                                throw new IllegalArgumentException(
-                                        "构造代码块下类的命名只能是Req或者Resp。[" + firstLineDto.getHandlerUrl() + "] 当前："
-                                                + initBody.findAll(LocalClassDeclarationStmt.class).stream()
-                                                .map(one -> one.getClassDeclaration().getNameAsString())
-                                                .collect(Collectors.joining("、")));
-                            }
-                        }
-                    }
-                    if (initBody.findAll(ClassOrInterfaceDeclaration.class,
-                            coid -> coid.getNameAsString().equals("Req")).size() > 1) {
-                        throw new IllegalArgumentException(
-                                "构造代码块下不能重复声明Req类。[" + firstLineDto.getHandlerUrl() + "]");
-                    }
-                    if (initBody.findAll(ClassOrInterfaceDeclaration.class,
-                            coid -> coid.getNameAsString().equals("Resp")).size() > 1) {
-                        throw new IllegalArgumentException(
-                                "构造代码块下不能重复声明Resp类。[" + firstLineDto.getHandlerUrl() + "]");
-                    }
+                    reqRespProc.checkInitBody(initBody, firstLineDto);
 
-                    // 广度优先遍历收集 + 反转
-                    List<ClassOrInterfaceDeclaration> dtos = Lists.newArrayList();
-                    initBody.walk(TreeTraversal.BREADTHFIRST, node -> {
-                        if (node instanceof ClassOrInterfaceDeclaration) {
-                            ClassOrInterfaceDeclaration coid = (ClassOrInterfaceDeclaration) node;
-                            if (!coid.isInterface()) {
-                                dtos.add(coid);
-                            }
-                        }
-                    });
-                    Collections.reverse(dtos);
+                    // 自底向上收集（广度优先遍历收集 + 反转）
+                    List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
                     String reqDtoQualifier = null;
                     String respDtoQualifier = null;
@@ -267,14 +230,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             return split[split.length - 1] + "<" + dto.getNameAsString() + ">";
         }
         return dto.getNameAsString();
-    }
-
-    private boolean isFirstLineCommentPresent(InitializerDeclaration init) {
-        NodeList<Statement> statements = init.getBody().getStatements();
-        if (CollectionUtils.isEmpty(statements)) {
-            return false;
-        }
-        return statements.get(0).getComment().filter(Comment::isLineComment).isPresent();
     }
 
     private String tryGetFirstLine(NodeList<Statement> statements) {
