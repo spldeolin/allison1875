@@ -59,6 +59,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private InitBodyCollectProc initBodyCollectProc;
 
+    @Inject
+    private EnsureNoRepeationProc ensureNoRepeationProc;
+
     @Override
     public void process(AstForest astForest) {
         Set<CompilationUnit> toCreate = Sets.newHashSet();
@@ -76,7 +79,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     }
                     log.info(firstLineDto);
 
-                    ensureNoRepeation(controller, firstLineDto);
+                    // 当指定的handlerName在controller中已经存在同名handler时，handlerName后拼接Ex（递归，确保不会重名）
+                    ensureNoRepeationProc.ensureNoRepeation(controller, firstLineDto);
 
                     // 校验init下的Req和Resp类
                     if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
@@ -252,18 +256,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             }
         }
         toCreate.forEach(Saves::save);
-    }
-
-    private void ensureNoRepeation(ClassOrInterfaceDeclaration controller, FirstLineDto firstLineDto) {
-        String handlerName = firstLineDto.getHandlerName();
-        if (controller.getMethodsByName(handlerName).size() > 0) {
-            String newHandlerName = handlerName + "Ex";
-            firstLineDto.setHandlerName(newHandlerName);
-            firstLineDto.setHandlerUrl(firstLineDto.getHandlerUrl() + "Ex");
-            log.warn(String.format("方法[%s] 在Controller[%s] 中已存在，重名名为[%s]", handlerName, controller.getNameAsString(),
-                    newHandlerName));
-            ensureNoRepeation(controller, firstLineDto);
-        }
     }
 
     private String calcType(ClassOrInterfaceDeclaration dto) {

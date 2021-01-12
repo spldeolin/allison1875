@@ -7,13 +7,13 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-01-12
  */
 @Singleton
-@Slf4j
+@Log4j2
 public class ControllerCollectProc {
 
     public Collection<ClassOrInterfaceDeclaration> collect(CompilationUnit cu) {
