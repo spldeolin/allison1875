@@ -8,11 +8,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -26,6 +27,9 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
  */
 @Singleton
 public class MapperXmlProc {
+
+    @Inject
+    private AnchorProc anchorProc;
 
     public MapperXmlProc process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
             Path mapperXmlDirectory, Collection<Collection<String>> sourceCodes) throws IOException {
@@ -95,16 +99,19 @@ public class MapperXmlProc {
             }
         }
 
-        FileUtils.writeLines(mapperXmlFile, newLines);
+        String leftAnchor = anchorProc.createLeftAnchor(mapperXmlFile, newLines);
+        String rightAnchor = anchorProc.createRightAnchor(mapperXmlFile, newLines);
+
+        String finalContent = Joiner.on(System.lineSeparator()).join(newLines).replace("${leftAnchor}", leftAnchor)
+                .replace("${rightAnchor}", rightAnchor);
+
+        FileUtils.writeStringToFile(mapperXmlFile, finalContent, StandardCharsets.UTF_8);
         return this;
     }
 
     private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes) {
         List<String> auto = Lists.newArrayList();
-        String leftAnchor = MoreStringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
-        String rightAnchor = MoreStringUtils.upperFirstLetter(RandomStringUtils.randomAlphanumeric(6));
-        auto.add(BaseConstant.SINGLE_INDENT + String
-                .format(Constant.PROHIBIT_MODIFICATION_XML_BEGIN, leftAnchor, rightAnchor));
+        auto.add(BaseConstant.SINGLE_INDENT + Constant.PROHIBIT_MODIFICATION_XML_BEGIN);
         for (Collection<String> sourceCode : sourceCodes) {
             if (CollectionUtils.isNotEmpty(sourceCode)) {
                 for (String line : sourceCode) {
@@ -119,8 +126,7 @@ public class MapperXmlProc {
         if (auto.get(auto.size() - 1).equals("")) {
             auto.remove(auto.size() - 1);
         }
-        auto.add(BaseConstant.SINGLE_INDENT + String
-                .format(Constant.PROHIBIT_MODIFICATION_XML_END, leftAnchor, rightAnchor));
+        auto.add(BaseConstant.SINGLE_INDENT + Constant.PROHIBIT_MODIFICATION_XML_END);
         return auto;
     }
 
