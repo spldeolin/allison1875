@@ -131,6 +131,12 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
     @NotNull
     protected Collection<String> alreadyInSuperEntity;
 
+    /**
+     * listAll方法返回值的最多条数，disableListAll=true时，此项失效
+     */
+    @NotNull
+    private Long listAllLimit = 500L;
+
     @NotNull
     protected Boolean disableInsert;
 
@@ -166,6 +172,9 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
 
     @NotNull
     protected Boolean disableQueryByEntity;
+
+    @NotNull
+    protected Boolean disableListAll;
 
     @Override
     protected void configure() {
