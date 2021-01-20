@@ -29,7 +29,7 @@
         <javaparser.version>3.18.0</javaparser.version>
         <log4j2.version>2.14.0</log4j2.version>
         <jackson.version>2.12.0</jackson.version>
-        <retrofit.version>2.3.0</retrofit.version>
+        <retrofit.version>2.9.0</retrofit.version>
     </properties>
 
     <dependencyManagement>
