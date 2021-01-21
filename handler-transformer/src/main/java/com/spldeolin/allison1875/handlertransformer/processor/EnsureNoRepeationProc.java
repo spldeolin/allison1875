@@ -1,8 +1,8 @@
-package com.spldeolin.allison1875.htex.processor;
+package com.spldeolin.allison1875.handlertransformer.processor;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.htex.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

@@ -1,82 +1,146 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
-import java.util.Collection;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.InitializerDeclaration;
+import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.util.CollectionUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
-import com.spldeolin.allison1875.handlertransformer.exception.HandlerNameConflictException;
-import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicesResultDto;
-import com.spldeolin.allison1875.handlertransformer.javabean.MetaInfo;
+import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
+import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * @author Deolin 2020-06-22
+ * @author Deolin 2020-12-22
  */
 @Singleton
 @Log4j2
 public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Inject
-    private BlueprintAnalyzeProc blueprintAnalyzeProc;
+    private HandlerTransformerConfig handlerTransformerConfig;
 
     @Inject
-    private BlueprintCollectProc blueprintCollectProc;
+    private CreateServiceMethodHandle createServiceMethodHandle;
 
     @Inject
-    private GenerateDtosProc generateDtosProc;
+    private ControllerProc controllerProc;
 
     @Inject
-    private GenerateHandlerProc generateHandlerProc;
+    private InitBodyCollectProc initBodyCollectProc;
 
     @Inject
-    private GenerateServicesProc generateServicesProc;
+    private EnsureNoRepeationProc ensureNoRepeationProc;
+
+    @Inject
+    private ReqRespProc reqRespProc;
+
+    @Inject
+    private DtoProc dtoProc;
+
+    @Inject
+    private ServiceProc serviceProc;
 
     @Override
     public void process(AstForest astForest) {
-        Collection<CompilationUnit> cus = Sets.newHashSet();
+        Set<CompilationUnit> toCreate = Sets.newHashSet();
 
         for (CompilationUnit cu : astForest) {
-            for (Pair<ClassOrInterfaceDeclaration, InitializerDeclaration> pair : blueprintCollectProc.process(cu)) {
+            for (ClassOrInterfaceDeclaration controller : controllerProc.collect(cu)) {
+                ClassOrInterfaceDeclaration controllerClone = controller.clone();
 
-                ClassOrInterfaceDeclaration controller = pair.getLeft();
-                InitializerDeclaration blueprint = pair.getRight();
+                boolean transformed = false;
+                for (BlockStmt initBody : initBodyCollectProc.collect(controller)) {
+                    String firstLine = tryGetFirstLine(initBody.getStatements());
+                    FirstLineDto firstLineDto = parseFirstLine(firstLine);
+                    if (firstLineDto == null) {
+                        continue;
+                    }
+                    log.info(firstLineDto);
 
-                MetaInfo metaInfo = blueprintAnalyzeProc.process(controller, blueprint);
+                    // 当指定的handlerName在controller中已经存在同名handler时，handlerName后拼接Ex（递归，确保不会重名）
+                    ensureNoRepeationProc.ensureNoRepeation(controller, firstLineDto);
 
-                if (metaInfo.isLack()) {
-                    continue;
+                    // 校验init下的Req和Resp类
+                    reqRespProc.checkInitBody(initBody, firstLineDto);
+
+                    // 自底向上收集（广度优先遍历收集 + 反转）
+                    List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
+
+                    // 生成所有所需的Dto
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.generateDtos(toCreate, cu, firstLineDto, dtos);
+
+                    // 生成Service
+                    SingleMethodServiceCuBuilder serviceBuilder = serviceProc
+                            .generateServiceWithImpl(cu, firstLineDto, reqDtoRespDtoInfo);
+                    toCreate.add(serviceBuilder.buildService());
+                    toCreate.add(serviceBuilder.buildServiceImpl());
+
+                    // 在controller中创建handler
+                    controllerProc.createHandlerToController(firstLineDto, controller, controllerClone, serviceBuilder,
+                            reqDtoRespDtoInfo);
+
+                    transformed = true;
                 }
-
-
-                Collection<CompilationUnit> dtoCus = generateDtosProc
-                        .process(metaInfo.getSourceRoot(), metaInfo.getDtos());
-
-                GenerateServicesResultDto generateServicesResult = generateServicesProc.process(metaInfo);
-                CompilationUnit serviceCu = generateServicesResult.getServiceCu();
-                CompilationUnit serviceImplCu = generateServicesResult.getServiceImplCu();
-
-                try {
-                    cus.add(generateHandlerProc.process(metaInfo, generateServicesResult.getServiceQualifier()));
-                } catch (HandlerNameConflictException e) {
-                    log.warn("handler[{}]在controller[{}]已存在了同名方法，不再生成", metaInfo.getHandlerName(),
-                            metaInfo.getController().getName());
-                    continue;
+                if (transformed) {
+                    Imports.ensureImported(cu, handlerTransformerConfig.getPageTypeQualifier());
+                    Imports.ensureImported(cu, AnnotationConstant.REQUEST_BODY_QUALIFIER);
+                    Imports.ensureImported(cu, AnnotationConstant.VALID_QUALIFIER);
+                    Imports.ensureImported(cu, AnnotationConstant.POST_MAPPING_QUALIFIER);
+                    Imports.ensureImported(cu, AnnotationConstant.AUTOWIRED_QUALIFIER);
+                    controller.replace(controllerClone);
+                    toCreate.add(cu);
                 }
-
-                cus.addAll(dtoCus);
-                cus.add(serviceCu);
-                cus.add(serviceImplCu);
             }
         }
+        toCreate.forEach(Saves::save);
+    }
 
-        Saves.save(cus);
+    private String tryGetFirstLine(NodeList<Statement> statements) {
+        if (CollectionUtils.isEmpty(statements)) {
+            return null;
+        }
+        Statement first = statements.get(0);
+        if (!first.getComment().filter(Comment::isLineComment).isPresent()) {
+            return null;
+        }
+        String firstLineContent = first.getComment().get().asLineComment().getContent();
+        return firstLineContent;
+    }
+
+    private FirstLineDto parseFirstLine(String firstLineContent) {
+        if (StringUtils.isBlank(firstLineContent)) {
+            return null;
+        }
+        firstLineContent = firstLineContent.trim();
+        // extract to processor
+        String[] parts = firstLineContent.split(" ");
+        if (parts.length != 2) {
+            return null;
+        }
+
+        FirstLineDto firstLineDto = new FirstLineDto();
+        firstLineDto.setHandlerUrl(parts[0]);
+        firstLineDto.setHandlerName(MoreStringUtils.slashToLowerCamel(parts[0]));
+        firstLineDto.setHandlerDescription(parts[1]);
+        firstLineDto.setMore(null); // privode handle
+        return firstLineDto;
     }
 
 }

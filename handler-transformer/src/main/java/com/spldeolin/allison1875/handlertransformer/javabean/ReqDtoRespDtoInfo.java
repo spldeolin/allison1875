@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.htex.javabean;
+package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import lombok.Data;
 
