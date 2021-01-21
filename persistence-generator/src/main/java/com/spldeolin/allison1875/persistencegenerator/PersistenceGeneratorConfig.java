@@ -181,4 +181,27 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
         bind(PersistenceGeneratorConfig.class).toInstance(this);
     }
 
+    /**
+     * 使用通配符的方式设置所有包名，通配符是-
+     *
+     * <pre>
+     * e.g.:
+     * input:
+     *  com.company.orginization.project.-.module.sub
+     *
+     * output:
+     *  com.company.orginization.project.mapper.module.sub
+     *  com.company.orginization.project.entity.module.sub
+     *  com.company.orginization.project.querydesign.module.sub
+     *
+     * </pre>
+     */
+    public void batchAllPackagesByWildcard(String packageNameWithWildcard) {
+        if (packageNameWithWildcard != null && packageNameWithWildcard.contains("$")) {
+            this.mapperPackage = packageNameWithWildcard.replace(".-.", ".mapper.");
+            this.entityPackage = packageNameWithWildcard.replace(".-.", ".entity.");
+            this.queryDesignPackage = packageNameWithWildcard.replace(".-.", ".querydesign.");
+        }
+    }
+
 }
