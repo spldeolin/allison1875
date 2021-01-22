@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
@@ -57,9 +58,10 @@ public class ControllerProc {
             controllerClone.addMember(serviceField.build());
         }
         // 使用handle创建Handler方法
+        CompilationUnit handlerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         controllerClone.addMember(createHandlerHandle
-                .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
-                        serviceBuilder));
+                .createHandler(handlerCu, firstLineDto, reqDtoRespDtoInfo.getParamType(),
+                        reqDtoRespDtoInfo.getResultType(), serviceBuilder));
         if (reqDtoRespDtoInfo.getReqDtoQualifier() != null) {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getReqDtoQualifier());
         }
