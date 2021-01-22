@@ -55,4 +55,29 @@ public final class HandlerTransformerConfig extends AbstractModule {
         bind(HandlerTransformerConfig.class).toInstance(this);
     }
 
+    /**
+     * 使用通配符的方式设置所有包名，通配符是-
+     *
+     * <pre>
+     * e.g.:
+     * input:
+     *  com.company.orginization.project.-.module.sub
+     *
+     * output:
+     *  com.company.orginization.project.javabean.req.module.sub
+     *  com.company.orginization.project.javabean.resp.module.sub
+     *  com.company.orginization.project.service.module.sub
+     *  com.company.orginization.project.serviceimpl.module.sub
+     *
+     * </pre>
+     */
+    public void batchAllPackagesByWildcard(String packageNameWithWildcard) {
+        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-.")) {
+            this.reqDtoPackage = packageNameWithWildcard.replace(".-.", ".javabean.req.");
+            this.respDtoPackage = packageNameWithWildcard.replace(".-.", ".javabean.resp.");
+            this.servicePackage = packageNameWithWildcard.replace(".-.", ".service.");
+            this.serviceImplPackage = packageNameWithWildcard.replace(".-.", ".serviceimpl.");
+        }
+    }
+
 }

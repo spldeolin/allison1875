@@ -197,7 +197,7 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
      * </pre>
      */
     public void batchAllPackagesByWildcard(String packageNameWithWildcard) {
-        if (packageNameWithWildcard != null && packageNameWithWildcard.contains("$")) {
+        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-.")) {
             this.mapperPackage = packageNameWithWildcard.replace(".-.", ".mapper.");
             this.entityPackage = packageNameWithWildcard.replace(".-.", ".entity.");
             this.queryDesignPackage = packageNameWithWildcard.replace(".-.", ".querydesign.");
