@@ -47,6 +47,7 @@ public final class HandlerTransformerConfig extends AbstractModule {
     /**
      * 分页对象的全限定名
      */
+    @NotEmpty
     private String pageTypeQualifier;
 
     @Override
