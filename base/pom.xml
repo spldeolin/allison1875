@@ -38,14 +38,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-        </dependency>
 
         <!-- jackson (jsr310, yaml, csv, jsonSchema) -->
         <dependency>
@@ -123,6 +115,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- allison1875-support -->
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>allison1875-support</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
