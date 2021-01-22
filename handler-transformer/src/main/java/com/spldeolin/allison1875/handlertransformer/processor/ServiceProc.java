@@ -10,6 +10,7 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 
@@ -42,8 +43,13 @@ public class ServiceProc {
         }
         serviceBuilder.importDeclarationsString(imports);
         serviceBuilder.serviceName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
-        serviceBuilder.method(createServiceMethodHandle
-                .createMethodImpl(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType()));
+
+        // 使用handle创建service实现方法
+        CreateServiceMethodHandleResult creation = createServiceMethodHandle
+                .createMethodImpl(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType());
+        serviceBuilder.method(creation.getServiceMethod());
+        serviceBuilder.importDeclarationsString(creation.getAppendImports());
+
         return serviceBuilder;
     }
 

@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.handle;
 
-import com.github.javaparser.ast.body.MethodDeclaration;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 
 /**
@@ -8,6 +8,6 @@ import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
  */
 public interface CreateServiceMethodHandle {
 
-    MethodDeclaration createMethodImpl(FirstLineDto firstLineDto, String paramType, String resultType);
+    CreateServiceMethodHandleResult createMethodImpl(FirstLineDto firstLineDto, String paramType, String resultType);
 
 }

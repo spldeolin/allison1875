@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.handle;
 
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -9,6 +8,7 @@ import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateHandlerHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 
 /**
@@ -18,8 +18,8 @@ import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
 
     @Override
-    public MethodDeclaration createHandler(CompilationUnit handlerCu, FirstLineDto firstLineDto,
-            String serviceParamType, String serviceResultType, SingleMethodServiceCuBuilder serviceCuBuilder) {
+    public CreateHandlerHandleResult createHandler(FirstLineDto firstLineDto, String serviceParamType,
+            String serviceResultType, SingleMethodServiceCuBuilder serviceCuBuilder) {
         MethodDeclaration handler = new MethodDeclaration();
         handler.addAnnotation(
                 StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", firstLineDto.getHandlerUrl())));
@@ -62,7 +62,8 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
             }
         }
         handler.setBody(body);
-        return handler;
+
+        return new CreateHandlerHandleResult().setHandler(handler);
     }
 
 }

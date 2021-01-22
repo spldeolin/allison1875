@@ -10,9 +10,9 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
-import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateHandlerHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import lombok.extern.log4j.Log4j2;
@@ -57,11 +57,16 @@ public class ControllerProc {
             serviceField.fieldName(serviceBuilder.getServiceVarName());
             controllerClone.addMember(serviceField.build());
         }
+
         // 使用handle创建Handler方法
-        CompilationUnit handlerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
-        controllerClone.addMember(createHandlerHandle
-                .createHandler(handlerCu, firstLineDto, reqDtoRespDtoInfo.getParamType(),
-                        reqDtoRespDtoInfo.getResultType(), serviceBuilder));
+        CreateHandlerHandleResult handlerCreation = createHandlerHandle
+                .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
+                        serviceBuilder);
+        controllerClone.addMember(handlerCreation.getHandler());
+        for (String appendImport : handlerCreation.getAppendImports()) {
+            Imports.ensureImported(controller, appendImport);
+        }
+
         if (reqDtoRespDtoInfo.getReqDtoQualifier() != null) {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getReqDtoQualifier());
         }

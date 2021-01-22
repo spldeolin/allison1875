@@ -6,6 +6,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 
 /**
@@ -15,7 +16,8 @@ import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 public class DefaultCreateServiceMethodHandle implements CreateServiceMethodHandle {
 
     @Override
-    public MethodDeclaration createMethodImpl(FirstLineDto firstLineDto, String paramType, String resultType) {
+    public CreateServiceMethodHandleResult createMethodImpl(FirstLineDto firstLineDto, String paramType,
+            String resultType) {
         MethodDeclaration method = new MethodDeclaration();
         method.addAnnotation(AnnotationConstant.OVERRIDE);
         method.setPublic(true);
@@ -34,7 +36,8 @@ public class DefaultCreateServiceMethodHandle implements CreateServiceMethodHand
             body.addStatement(StaticJavaParser.parseStatement("return null;"));
         }
         method.setBody(body);
-        return method;
+
+        return new CreateServiceMethodHandleResult().setServiceMethod(method);
     }
 
 }
