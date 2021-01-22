@@ -48,21 +48,27 @@ public class ControllerProc {
     }
 
     public void createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
-            ClassOrInterfaceDeclaration controllerClone, SingleMethodServiceCuBuilder serviceBuilder,
-            ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
+            SingleMethodServiceCuBuilder serviceBuilder, ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
+
+        // 确保controller有autowired 新生成的service
         if (!controller.getFieldByName(serviceBuilder.getServiceVarName()).isPresent()) {
             FieldDeclarationBuilder serviceField = new FieldDeclarationBuilder();
             serviceField.annotationExpr("@Autowired");
             serviceField.type(serviceBuilder.getService().getNameAsString());
             serviceField.fieldName(serviceBuilder.getServiceVarName());
-            controllerClone.addMember(serviceField.build());
+            controller.addMember(serviceField.build());
         }
+        log.info("append @Autowired Field [{}] into Controller [{}]", serviceBuilder.getServiceVarName(),
+                controller.getNameAsString());
 
-        // 使用handle创建Handler方法
+        // 使用handle创建Handler方法，并追加到controller中
         CreateHandlerHandleResult handlerCreation = createHandlerHandle
                 .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
                         serviceBuilder);
-        controllerClone.addMember(handlerCreation.getHandler());
+        controller.addMember(handlerCreation.getHandler());
+        log.info("append Handler [{}] into Controller [{}]", handlerCreation.getHandler().getNameAsString(),
+                controller.getNameAsString());
+
         for (String appendImport : handlerCreation.getAppendImports()) {
             Imports.ensureImported(controller, appendImport);
         }

@@ -48,6 +48,8 @@ public class SingleMethodServiceCuBuilder {
 
     private ClassOrInterfaceDeclaration service;
 
+    private ClassOrInterfaceDeclaration serviceImpl;
+
     private String serviceQualifier;
 
     private String serviceVarName;
@@ -221,32 +223,33 @@ public class SingleMethodServiceCuBuilder {
         result.addImport(AnnotationConstant.SERVICE_QUALIFIER);
         result.addImport(serviceQualifier);
 
-        ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+        serviceImpl = new ClassOrInterfaceDeclaration();
 
         // 类级Javadoc
         if (javadoc != null) {
-            coid.setJavadocComment(javadoc);
+            serviceImpl.setJavadocComment(javadoc);
         }
 
         // 类级注解
-        annotationExprs.forEach(coid::addAnnotation);
-        coid.addAnnotation(AnnotationConstant.SLF4J);
-        coid.addAnnotation(AnnotationConstant.SERVICE);
+        annotationExprs.forEach(serviceImpl::addAnnotation);
+        serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
+        serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
 
         // 类签名
-        coid.setPublic(true).setStatic(false).setInterface(false).setName(serviceName + "Impl").addImplementedType(serviceName);
+        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceName + "Impl")
+                .addImplementedType(serviceName);
 
         // 方法签名
-        coid.addMember(this.method);
+        serviceImpl.addMember(this.method);
 
-        result.setTypes(new NodeList<>(coid));
+        result.setTypes(new NodeList<>(serviceImpl));
 
         // CU的路径
         Path storage = sourceRoot.getRoot();
         if (implPackageDeclaration != null) {
             storage = storage.resolve(CodeGenerationUtils.packageToPath(implPackageDeclaration.getNameAsString()));
         }
-        storage = storage.resolve(coid.getNameAsString() + ".java");
+        storage = storage.resolve(serviceImpl.getNameAsString() + ".java");
         result.setStorage(storage);
 
         return result;
@@ -257,6 +260,13 @@ public class SingleMethodServiceCuBuilder {
             throw new IllegalStateException("buildService() not yet.");
         }
         return service;
+    }
+
+    public ClassOrInterfaceDeclaration getServiceImpl() {
+        if (serviceImpl == null) {
+            throw new IllegalArgumentException("buildServiceImpl() net yet.");
+        }
+        return serviceImpl;
     }
 
     public String getJavabeanQualifier() {

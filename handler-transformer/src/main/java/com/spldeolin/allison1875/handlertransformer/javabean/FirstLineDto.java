@@ -17,4 +17,9 @@ public class FirstLineDto {
 
     private Map<String, Object> more;
 
+    @Override
+    public String toString() {
+        return handlerUrl + " " + handlerName;
+    }
+
 }

@@ -33,34 +33,31 @@ public class ReqRespProc {
 
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
-            throw new IllegalArgumentException(
-                    "构造代码块下最多只能有2个类声明，分别用于代表Req和Resp。[" + firstLineDto.getHandlerUrl() + "] 当前：" + initBody
-                            .findAll(LocalClassDeclarationStmt.class).stream()
-                            .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
+            throw new IllegalArgumentException("构造代码块下最多只能有2个类声明，分别用于代表Req和Resp。[" + firstLineDto + "] 当前：" + initBody
+                    .findAll(LocalClassDeclarationStmt.class).stream()
+                    .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
         }
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {
             for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
                 if (!StringUtils.equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req", "Resp")) {
-                    throw new IllegalArgumentException(
-                            "构造代码块下类的命名只能是Req或者Resp。[" + firstLineDto.getHandlerUrl() + "] 当前：" + initBody
-                                    .findAll(LocalClassDeclarationStmt.class).stream()
-                                    .map(one -> one.getClassDeclaration().getNameAsString())
-                                    .collect(Collectors.joining("、")));
+                    throw new IllegalArgumentException("构造代码块下类的命名只能是Req或者Resp。[" + firstLineDto + "] 当前：" + initBody
+                            .findAll(LocalClassDeclarationStmt.class).stream()
+                            .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
                 }
             }
         }
         if (initBody.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getNameAsString().equals("Req")).size()
                 > 1) {
-            throw new IllegalArgumentException("构造代码块下不能重复声明Req类。[" + firstLineDto.getHandlerUrl() + "]");
+            throw new IllegalArgumentException("构造代码块下不能重复声明Req类。[" + firstLineDto + "]");
         }
         if (initBody.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getNameAsString().equals("Resp")).size()
                 > 1) {
-            throw new IllegalArgumentException("构造代码块下不能重复声明Resp类。[" + firstLineDto.getHandlerUrl() + "]");
+            throw new IllegalArgumentException("构造代码块下不能重复声明Resp类。[" + firstLineDto + "]");
         }
     }
 
-    public ReqDtoRespDtoInfo generateDtos(Set<CompilationUnit> toCreate, CompilationUnit cu, FirstLineDto firstLineDto,
-            List<ClassOrInterfaceDeclaration> dtos) {
+    public ReqDtoRespDtoInfo createJavabeans(Set<CompilationUnit> toCreate, CompilationUnit cu,
+            FirstLineDto firstLineDto, List<ClassOrInterfaceDeclaration> dtos) {
         ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
         Collection<JavabeanCuBuilder> builders = Lists.newArrayList();
         Collection<String> dtoQualifiers = Lists.newArrayList();
@@ -126,6 +123,7 @@ public class ReqRespProc {
         for (JavabeanCuBuilder builder : builders) {
             builder.importDeclarationsString(dtoQualifiers);
             toCreate.add(builder.build());
+            log.info("create Javabean [{}]", builder.getJavabean().getNameAsString());
         }
         return result;
     }

@@ -18,8 +18,8 @@ public class EnsureNoRepeationProc {
             String newHandlerName = handlerName + "Ex";
             firstLineDto.setHandlerName(newHandlerName);
             firstLineDto.setHandlerUrl(firstLineDto.getHandlerUrl() + "Ex");
-            log.warn(String.format("方法[%s] 在Controller[%s] 中已存在，重名名为[%s]", handlerName, controller.getNameAsString(),
-                    newHandlerName));
+            log.warn("Handler name [{}] is conflicted in Controller [{}], rename to [{}].", handlerName,
+                    controller.getNameAsString(), newHandlerName);
             ensureNoRepeation(controller, firstLineDto);
         }
     }

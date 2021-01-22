@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -43,7 +44,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     private ControllerProc controllerProc;
 
     @Inject
-    private InitBodyCollectProc initBodyCollectProc;
+    private InitializerCollectProc initializerCollectProc;
 
     @Inject
     private EnsureNoRepeationProc ensureNoRepeationProc;
@@ -63,16 +64,16 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
         for (CompilationUnit cu : astForest) {
             for (ClassOrInterfaceDeclaration controller : controllerProc.collect(cu)) {
-                ClassOrInterfaceDeclaration controllerClone = controller.clone();
-
-                boolean transformed = false;
-                for (BlockStmt initBody : initBodyCollectProc.collect(controller)) {
+                boolean anyTransformed = false;
+                for (InitializerDeclaration init : initializerCollectProc.collectInitializer(controller)) {
+                    BlockStmt initBody = init.getBody().clone();
                     String firstLine = tryGetFirstLine(initBody.getStatements());
                     FirstLineDto firstLineDto = parseFirstLine(firstLine);
                     if (firstLineDto == null) {
                         continue;
                     }
-                    log.info(firstLineDto);
+                    log.info("detect able to transform Initializer [{}] from Controller [{}].", firstLineDto,
+                            controller.getNameAsString());
 
                     // 当指定的handlerName在controller中已经存在同名handler时，handlerName后拼接Ex（递归，确保不会重名）
                     ensureNoRepeationProc.ensureNoRepeation(controller, firstLineDto);
@@ -83,28 +84,33 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     // 自底向上收集（广度优先遍历收集 + 反转）
                     List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
-                    // 生成所有所需的Dto
-                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.generateDtos(toCreate, cu, firstLineDto, dtos);
+                    // 创建所有所需的Javabean
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.createJavabeans(toCreate, cu, firstLineDto, dtos);
 
-                    // 生成Service
+                    // 创建Service
                     SingleMethodServiceCuBuilder serviceBuilder = serviceProc
                             .generateServiceWithImpl(cu, firstLineDto, reqDtoRespDtoInfo);
                     toCreate.add(serviceBuilder.buildService());
+                    log.info("create Service [{}].", serviceBuilder.getService().getNameAsString());
                     toCreate.add(serviceBuilder.buildServiceImpl());
+                    log.info("create ServiceImpl [{}].", serviceBuilder.getServiceImpl().getNameAsString());
 
                     // 在controller中创建handler
-                    controllerProc.createHandlerToController(firstLineDto, controller, controllerClone, serviceBuilder,
-                            reqDtoRespDtoInfo);
+                    controllerProc
+                            .createHandlerToController(firstLineDto, controller, serviceBuilder, reqDtoRespDtoInfo);
 
-                    transformed = true;
+                    // 从controller中删除init
+                    anyTransformed |= init.remove();
+                    log.info("delete Initializer [{}] from Controller [{}]", firstLine, controller.getNameAsString());
                 }
-                if (transformed) {
+
+                // controller中存在被转化成handler的构造代码块
+                if (anyTransformed) {
                     Imports.ensureImported(cu, handlerTransformerConfig.getPageTypeQualifier());
                     Imports.ensureImported(cu, AnnotationConstant.REQUEST_BODY_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.VALID_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.POST_MAPPING_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.AUTOWIRED_QUALIFIER);
-                    controller.replace(controllerClone);
                     toCreate.add(cu);
                 }
             }
