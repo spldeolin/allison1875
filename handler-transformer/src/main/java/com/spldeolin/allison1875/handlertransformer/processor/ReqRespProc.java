@@ -123,7 +123,7 @@ public class ReqRespProc {
         for (JavabeanCuBuilder builder : builders) {
             builder.importDeclarationsString(dtoQualifiers);
             toCreate.add(builder.build());
-            log.info("create Javabean [{}]", builder.getJavabean().getNameAsString());
+            log.info("create Javabean [{}].", builder.getJavabean().getNameAsString());
         }
         return result;
     }

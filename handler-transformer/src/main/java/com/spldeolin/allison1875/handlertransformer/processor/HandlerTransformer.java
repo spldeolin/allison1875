@@ -101,7 +101,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
                     // 从controller中删除init
                     anyTransformed |= init.remove();
-                    log.info("delete Initializer [{}] from Controller [{}]", firstLine, controller.getNameAsString());
+                    log.info("delete Initializer [{}] from Controller [{}].", firstLine, controller.getNameAsString());
                 }
 
                 // controller中存在被转化成handler的构造代码块

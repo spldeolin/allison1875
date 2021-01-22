@@ -58,7 +58,7 @@ public class ControllerProc {
             serviceField.fieldName(serviceBuilder.getServiceVarName());
             controller.addMember(serviceField.build());
         }
-        log.info("append @Autowired Field [{}] into Controller [{}]", serviceBuilder.getServiceVarName(),
+        log.info("append @Autowired Field [{}] into Controller [{}].", serviceBuilder.getServiceVarName(),
                 controller.getNameAsString());
 
         // 使用handle创建Handler方法，并追加到controller中
@@ -66,7 +66,7 @@ public class ControllerProc {
                 .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
                         serviceBuilder);
         controller.addMember(handlerCreation.getHandler());
-        log.info("append Handler [{}] into Controller [{}]", handlerCreation.getHandler().getNameAsString(),
+        log.info("append Handler [{}] into Controller [{}].", handlerCreation.getHandler().getNameAsString(),
                 controller.getNameAsString());
 
         for (String appendImport : handlerCreation.getAppendImports()) {
