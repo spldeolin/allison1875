@@ -2,14 +2,10 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
-import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -17,8 +13,6 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.base.util.CollectionUtils;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -58,6 +52,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private ServiceProc serviceProc;
 
+    @Inject
+    private ParseFirstLineProc parseFirstLineProc;
+
     @Override
     public void process(AstForest astForest) {
         Set<CompilationUnit> toCreate = Sets.newHashSet();
@@ -67,8 +64,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                 boolean anyTransformed = false;
                 for (InitializerDeclaration init : initializerCollectProc.collectInitializer(controller)) {
                     BlockStmt initBody = init.getBody().clone();
-                    String firstLine = tryGetFirstLine(initBody.getStatements());
-                    FirstLineDto firstLineDto = parseFirstLine(firstLine);
+                    FirstLineDto firstLineDto = parseFirstLineProc.parse(initBody.getStatements());
                     if (firstLineDto == null) {
                         continue;
                     }
@@ -101,7 +97,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
                     // 从controller中删除init
                     anyTransformed |= init.remove();
-                    log.info("delete Initializer [{}] from Controller [{}].", firstLine, controller.getNameAsString());
+                    log.info("delete Initializer [{}] from Controller [{}].", firstLineDto,
+                            controller.getNameAsString());
                 }
 
                 // controller中存在被转化成handler的构造代码块
@@ -116,37 +113,6 @@ public class HandlerTransformer implements Allison1875MainProcessor {
             }
         }
         toCreate.forEach(Saves::save);
-    }
-
-    private String tryGetFirstLine(NodeList<Statement> statements) {
-        if (CollectionUtils.isEmpty(statements)) {
-            return null;
-        }
-        Statement first = statements.get(0);
-        if (!first.getComment().filter(Comment::isLineComment).isPresent()) {
-            return null;
-        }
-        String firstLineContent = first.getComment().get().asLineComment().getContent();
-        return firstLineContent;
-    }
-
-    private FirstLineDto parseFirstLine(String firstLineContent) {
-        if (StringUtils.isBlank(firstLineContent)) {
-            return null;
-        }
-        firstLineContent = firstLineContent.trim();
-        // extract to processor
-        String[] parts = firstLineContent.split(" ");
-        if (parts.length != 2) {
-            return null;
-        }
-
-        FirstLineDto firstLineDto = new FirstLineDto();
-        firstLineDto.setHandlerUrl(parts[0]);
-        firstLineDto.setHandlerName(MoreStringUtils.slashToLowerCamel(parts[0]));
-        firstLineDto.setHandlerDescription(parts[1]);
-        firstLineDto.setMore(null); // privode handle
-        return firstLineDto;
     }
 
 }
