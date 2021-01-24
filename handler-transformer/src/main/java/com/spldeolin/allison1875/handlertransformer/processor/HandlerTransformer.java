@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -108,6 +109,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     Imports.ensureImported(cu, AnnotationConstant.VALID_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.POST_MAPPING_QUALIFIER);
                     Imports.ensureImported(cu, AnnotationConstant.AUTOWIRED_QUALIFIER);
+                    Imports.ensureImported(cu, ImportConstants.COLLECTION);
                     toCreate.add(cu);
                 }
             }
