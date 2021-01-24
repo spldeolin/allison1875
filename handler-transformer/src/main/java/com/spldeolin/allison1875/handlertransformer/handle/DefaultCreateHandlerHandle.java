@@ -21,6 +21,9 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
     public CreateHandlerHandleResult createHandler(FirstLineDto firstLineDto, String serviceParamType,
             String serviceResultType, SingleMethodServiceCuBuilder serviceCuBuilder) {
         MethodDeclaration handler = new MethodDeclaration();
+
+        handler.setJavadocComment(firstLineDto.getHandlerDescription());
+
         handler.addAnnotation(
                 StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", firstLineDto.getHandlerUrl())));
         handler.setPublic(true);

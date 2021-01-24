@@ -19,7 +19,7 @@ public class FirstLineDto {
 
     @Override
     public String toString() {
-        return handlerUrl + " " + handlerName;
+        return handlerUrl + " " + handlerDescription;
     }
 
 }
