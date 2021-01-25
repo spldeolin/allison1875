@@ -105,12 +105,15 @@ public class LineCounter implements Allison1875MainProcessor {
 
     private Collection<File> detectXmls(AstForest astForest, boolean withTest) {
         Collection<File> result = Lists.newArrayList();
-        FileUtils.iterateFiles(astForest.getHost().resolve(baseConfig.getResourcesDirectoryLayout()).toFile(),
-                new String[]{"xml"}, true).forEachRemaining(result::add);
+
+        File mainResources = astForest.getHost().resolve(baseConfig.getResourcesDirectoryLayout()).toFile();
+        if (mainResources.exists()) {
+            FileUtils.iterateFiles(mainResources, new String[]{"xml"}, true).forEachRemaining(result::add);
+        }
         if (withTest) {
-            File directory = astForest.getHost().resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
-            if (directory.exists()) {
-                FileUtils.iterateFiles(directory, new String[]{"xml"}, true).forEachRemaining(result::add);
+            File testResources = astForest.getHost().resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
+            if (testResources.exists()) {
+                FileUtils.iterateFiles(testResources, new String[]{"xml"}, true).forEachRemaining(result::add);
             }
         }
         return result;
