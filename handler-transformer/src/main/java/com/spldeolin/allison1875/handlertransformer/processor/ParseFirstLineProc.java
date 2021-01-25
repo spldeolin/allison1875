@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
@@ -49,7 +50,7 @@ public class ParseFirstLineProc {
                 }
             }));
         }
-        if (result.getHandlerUrl() == null) {
+        if (StringUtils.isBlank(result.getHandlerUrl())) {
             return null;
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
