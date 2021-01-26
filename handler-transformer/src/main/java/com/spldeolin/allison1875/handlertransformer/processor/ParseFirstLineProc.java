@@ -22,7 +22,7 @@ public class ParseFirstLineProc {
         for (Statement stmt : statements) {
             stmt.ifExpressionStmt(exprStmt -> exprStmt.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
-                    if (vd.getType().toString().equals("String") && vd.getInitializer().isPresent()) {
+                    if (vd.getInitializer().isPresent()) {
                         Expression i = vd.getInitializer().get();
                         if (vd.getNameAsString().equals("handler")) {
                             if (i.isStringLiteralExpr()) {
