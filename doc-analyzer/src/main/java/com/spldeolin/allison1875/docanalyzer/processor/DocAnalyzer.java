@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.base.Joiner;
@@ -55,10 +56,14 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     @Inject
     private BaseConfig baseConfig;
 
+    @Inject
+    private GetProjectRootPathProc getProjectRootPathProc;
+
     @Override
     public void process(AstForest astForest) {
-        // 重新生成astForest（将解析范围扩大到所有用户配置的项目路径）
-        astForest = new AstForest(astForest.getAnyClassFromHost(), config.getDependencyProjectPaths());
+        // 重新生成astForest（将解析范围扩大到 项目根目录 + 所有用户配置的项目路径）
+        Path projectRootPath = getProjectRootPathProc.getTopAncestor(astForest.getAnyClassFromHost());
+        astForest = new AstForest(astForest.getAnyClassFromHost(), projectRootPath, config.getDependencyProjectPaths());
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
         JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg(astForest);

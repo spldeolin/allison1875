@@ -66,6 +66,19 @@ public class AstForest implements Iterable<CompilationUnit> {
         this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
     }
 
+    public AstForest(Class<?> primaryClass, Path projectRootPath, Collection<String> dependencyProjectPaths) {
+        this.anyClassFromHost = primaryClass;
+        this.dependencyProjectPaths = ImmutableList.copyOf(dependencyProjectPaths);
+
+        this.host = detectHost(anyClassFromHost);
+        this.hostSourceRoot = detectHostSourceRoot(host);
+        List<Path> sourceRoots = collectDependencySourceRoots(dependencyProjectPaths);
+        sourceRoots.add(0, projectRootPath);
+        this.hostAndDependencySourceRoots = ImmutableList.copyOf(sourceRoots);
+        this.commonPathPart = calcCommonPath(hostAndDependencySourceRoots);
+        this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
+    }
+
     private Path detectHost(Class<?> anyClassFromHost) {
         return CodeGenerationUtils.mavenModuleRoot(anyClassFromHost);
     }
