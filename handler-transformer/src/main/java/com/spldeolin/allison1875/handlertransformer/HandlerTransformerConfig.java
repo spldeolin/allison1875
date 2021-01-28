@@ -56,10 +56,21 @@ public final class HandlerTransformerConfig extends AbstractModule {
     }
 
     /**
-     * 使用通配符的方式设置所有包名，通配符是-
+     * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
      *
      * <pre>
-     * e.g.:
+     * e.g.1:
+     * input:
+     *  com.company.orginization.project.-
+     *
+     * output:
+     *  com.company.orginization.project.javabean.req
+     *  com.company.orginization.project.javabean.resp
+     *  com.company.orginization.project.service
+     *  com.company.orginization.project.serviceimpl
+     *
+     *
+     * e.g.2:
      * input:
      *  com.company.orginization.project.-.module.sub
      *
@@ -71,12 +82,12 @@ public final class HandlerTransformerConfig extends AbstractModule {
      *
      * </pre>
      */
-    public void batchAllPackagesByWildcard(String packageNameWithWildcard) {
-        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-.")) {
-            this.reqDtoPackage = packageNameWithWildcard.replace(".-.", ".javabean.req.");
-            this.respDtoPackage = packageNameWithWildcard.replace(".-.", ".javabean.resp.");
-            this.servicePackage = packageNameWithWildcard.replace(".-.", ".service.");
-            this.serviceImplPackage = packageNameWithWildcard.replace(".-.", ".serviceimpl.");
+    public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
+        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
+            this.reqDtoPackage = packageNameWithWildcard.replace(".-", ".javabean.req");
+            this.respDtoPackage = packageNameWithWildcard.replace(".-", ".javabean.resp");
+            this.servicePackage = packageNameWithWildcard.replace(".-", ".service");
+            this.serviceImplPackage = packageNameWithWildcard.replace(".-", ".serviceimpl");
         }
     }
 

@@ -182,10 +182,20 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
     }
 
     /**
-     * 使用通配符的方式设置所有包名，通配符是-
+     * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
      *
      * <pre>
-     * e.g.:
+     * e.g.1:
+     * input:
+     *  com.company.orginization.project.-
+     *
+     * output:
+     *  com.company.orginization.project.mapper
+     *  com.company.orginization.project.entity
+     *  com.company.orginization.project.querydesign
+     *
+     *
+     * e.g.2:
      * input:
      *  com.company.orginization.project.-.module.sub
      *
@@ -196,11 +206,11 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
      *
      * </pre>
      */
-    public void batchAllPackagesByWildcard(String packageNameWithWildcard) {
-        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-.")) {
-            this.mapperPackage = packageNameWithWildcard.replace(".-.", ".mapper.");
-            this.entityPackage = packageNameWithWildcard.replace(".-.", ".entity.");
-            this.queryDesignPackage = packageNameWithWildcard.replace(".-.", ".querydesign.");
+    public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
+        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
+            this.mapperPackage = packageNameWithWildcard.replace(".-", ".mapper");
+            this.entityPackage = packageNameWithWildcard.replace(".-", ".entity");
+            this.queryDesignPackage = packageNameWithWildcard.replace(".-", ".querydesign");
         }
     }
 
