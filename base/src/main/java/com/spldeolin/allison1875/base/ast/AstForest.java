@@ -59,21 +59,21 @@ public class AstForest implements Iterable<CompilationUnit> {
 
         this.host = detectHost(anyClassFromHost);
         this.hostSourceRoot = detectHostSourceRoot(host);
-        List<Path> sourceRoots = collectDependencySourceRoots(dependencyProjectPaths);
+        List<Path> sourceRoots = collectSourceRoots(dependencyProjectPaths);
         sourceRoots.add(0, hostSourceRoot);
         this.hostAndDependencySourceRoots = ImmutableList.copyOf(sourceRoots);
         this.commonPathPart = calcCommonPath(hostAndDependencySourceRoots);
         this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
     }
 
-    public AstForest(Class<?> primaryClass, Path projectRootPath, Collection<String> dependencyProjectPaths) {
+    public AstForest(Class<?> primaryClass, String projectRootPath, Collection<String> dependencyProjectPaths) {
         this.anyClassFromHost = primaryClass;
         this.dependencyProjectPaths = ImmutableList.copyOf(dependencyProjectPaths);
 
         this.host = detectHost(anyClassFromHost);
         this.hostSourceRoot = detectHostSourceRoot(host);
-        List<Path> sourceRoots = collectDependencySourceRoots(dependencyProjectPaths);
-        sourceRoots.add(0, projectRootPath);
+        List<Path> sourceRoots = collectSourceRoots(dependencyProjectPaths);
+        sourceRoots.addAll(collectSourceRoots(Lists.newArrayList(projectRootPath)));
         this.hostAndDependencySourceRoots = ImmutableList.copyOf(sourceRoots);
         this.commonPathPart = calcCommonPath(hostAndDependencySourceRoots);
         this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
@@ -89,13 +89,13 @@ public class AstForest implements Iterable<CompilationUnit> {
         return hostSourceRootPath;
     }
 
-    private List<Path> collectDependencySourceRoots(Collection<String> dependencyProjectPaths) {
+    private List<Path> collectSourceRoots(Collection<String> dependencyProjectPaths) {
         List<Path> result = Lists.newArrayList();
         for (String projectPath : dependencyProjectPaths) {
             List<SourceRoot> onePathSourceRoots = new SymbolSolverCollectionStrategy().collect(Paths.get(projectPath))
                     .getSourceRoots();
             for (SourceRoot sourceRoot : onePathSourceRoots) {
-                log.info("dependencySourceRootPath={}", sourceRoot.getRoot());
+                log.info("sourceRootPath={}", sourceRoot.getRoot());
                 result.add(sourceRoot.getRoot());
             }
         }

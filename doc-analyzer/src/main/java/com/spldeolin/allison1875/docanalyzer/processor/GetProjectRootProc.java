@@ -17,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class GetProjectRootPathProc {
+public class GetProjectRootProc {
 
     private static final MavenXpp3Reader mavenXpp3Reader = new MavenXpp3Reader();
 
