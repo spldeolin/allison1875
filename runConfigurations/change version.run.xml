@@ -12,7 +12,7 @@
             <list>
               <option value="versions:set" />
               <option value="-DgenerateBackupPoms=false" />
-              <option value="-DnewVersion=2.0" />
+              <option value="-DnewVersion=f_deolin_0128_mavenModel-SNAPSHOT"/>
             </list>
           </option>
           <option name="pomFileName" />
