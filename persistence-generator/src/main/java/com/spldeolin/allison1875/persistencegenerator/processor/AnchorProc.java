@@ -14,13 +14,15 @@ public class AnchorProc {
 
     public String createLeftAnchor(PersistenceDto persistence) {
         String target = persistence.toString();
-        String hashCode = Hashing.goodFastHash(64).hashString(target, StandardCharsets.UTF_8).toString();
+        String hashCode = Hashing.hmacMd5("Allison 1875".getBytes(StandardCharsets.UTF_8))
+                .hashString(target, StandardCharsets.UTF_8).toString();
         return StringUtils.left(hashCode, 6);
     }
 
     public String createRightAnchor(PersistenceDto persistence) {
         String target = persistence.toString();
-        String hashCode = Hashing.goodFastHash(64).hashString(target, StandardCharsets.UTF_8).toString();
+        String hashCode = Hashing.hmacMd5("Allison 1875".getBytes(StandardCharsets.UTF_8))
+                .hashString(target, StandardCharsets.UTF_8).toString();
         return StringUtils.right(hashCode, 6);
     }
 
