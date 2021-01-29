@@ -12,7 +12,7 @@
             <list>
               <option value="versions:set" />
               <option value="-DgenerateBackupPoms=false" />
-              <option value="-DnewVersion=4.0-SNAPSHOT"/>
+              <option value="-DnewVersion=f_deolin_0128_refactorQueryTransformer-SNAPSHOT"/>
             </list>
           </option>
           <option name="pomFileName" />
