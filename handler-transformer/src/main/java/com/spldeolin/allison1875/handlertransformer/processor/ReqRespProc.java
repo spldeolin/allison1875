@@ -80,19 +80,7 @@ public class ReqRespProc {
             JavabeanCuBuilder<JavabeanTypeEnum> builder = new JavabeanCuBuilder<>();
             builder.sourceRoot(Locations.getStorage(cu).getSourceRoot());
             JavabeanTypeEnum javabeanType;
-            if (dto.getNameAsString().equalsIgnoreCase("Req")) {
-                javabeanType = JavabeanTypeEnum.REQ_DTO;
-            } else if (dto.getNameAsString().equalsIgnoreCase("Resp")) {
-                javabeanType = JavabeanTypeEnum.RESP_DTO;
-            } else if (dto.findAncestor(ClassOrInterfaceDeclaration.class,
-                    ancestor -> ancestor.getNameAsString().equalsIgnoreCase("Req")).isPresent()) {
-                javabeanType = JavabeanTypeEnum.NEST_DTO_IN_REQ;
-            } else if (dto.findAncestor(ClassOrInterfaceDeclaration.class,
-                    ancestor -> ancestor.getNameAsString().equalsIgnoreCase("Resp")).isPresent()) {
-                javabeanType = JavabeanTypeEnum.NEST_DTO_IN_RESP;
-            } else {
-                throw new RuntimeException("impossible unless bug.");
-            }
+            javabeanType = estimateJavabeanType(dto);
             builder.context(javabeanType);
 
             String javabeanName = concatJavabeanName(firstLineDto, dto, javabeanType);
@@ -117,7 +105,13 @@ public class ReqRespProc {
             ClassOrInterfaceDeclaration clone = dto.clone();
             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
             clone.getAnnotations().clear();
-            builder.coid(clone.setPublic(true).addAnnotation(AnnotationConstant.DATA));
+            clone.addAnnotation(AnnotationConstant.DATA);
+            // 所有RespDto与其中的嵌套Dto（NestDto），都会有@Accessor(chains = true)，方便像return new Xxx().setA(..).setB(..)这样链式调用
+            if (javabeanType == JavabeanTypeEnum.RESP_DTO || javabeanType == JavabeanTypeEnum.NEST_DTO_IN_RESP) {
+                clone.addAnnotation(AnnotationConstant.ACCESSORS);
+                builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
+            }
+            builder.coid(clone);
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
                 result.setParamType(calcType(dto));
                 result.setReqDtoQualifier(pkg + "." + clone.getNameAsString());
@@ -158,6 +152,24 @@ public class ReqRespProc {
             log.info("create Javabean [{}].", builder.getJavabean().getNameAsString());
         }
         return result;
+    }
+
+    private JavabeanTypeEnum estimateJavabeanType(ClassOrInterfaceDeclaration dto) {
+        JavabeanTypeEnum javabeanType;
+        if (dto.getNameAsString().equalsIgnoreCase("Req")) {
+            javabeanType = JavabeanTypeEnum.REQ_DTO;
+        } else if (dto.getNameAsString().equalsIgnoreCase("Resp")) {
+            javabeanType = JavabeanTypeEnum.RESP_DTO;
+        } else if (dto.findAncestor(ClassOrInterfaceDeclaration.class,
+                ancestor -> ancestor.getNameAsString().equalsIgnoreCase("Req")).isPresent()) {
+            javabeanType = JavabeanTypeEnum.NEST_DTO_IN_REQ;
+        } else if (dto.findAncestor(ClassOrInterfaceDeclaration.class,
+                ancestor -> ancestor.getNameAsString().equalsIgnoreCase("Resp")).isPresent()) {
+            javabeanType = JavabeanTypeEnum.NEST_DTO_IN_RESP;
+        } else {
+            throw new RuntimeException("impossible unless bug.");
+        }
+        return javabeanType;
     }
 
     private void moveAnnotationsFromDtoToField(ClassOrInterfaceDeclaration dto, FieldDeclarationBuilder fieldBuilder) {

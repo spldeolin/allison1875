@@ -6,7 +6,6 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 /**
  * @author Deolin 2020-12-26
  */
-
 public interface AnnotationConstant {
 
     AnnotationExpr DATA = StaticJavaParser.parseAnnotation("@Data");
@@ -36,5 +35,9 @@ public interface AnnotationConstant {
     AnnotationExpr AUTOWIRED = StaticJavaParser.parseAnnotation("@Autowired");
 
     String AUTOWIRED_QUALIFIER = "org.springframework.beans.factory.annotation.Autowired";
+
+    AnnotationExpr ACCESSORS = StaticJavaParser.parseAnnotation("@Accessors(chain = true)");
+
+    String ACCESSORS_QUALIFIER = "lombok.experimental.Accessors";
 
 }
