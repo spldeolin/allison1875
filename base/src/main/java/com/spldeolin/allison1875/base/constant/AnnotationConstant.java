@@ -33,7 +33,6 @@ public interface AnnotationConstant {
 
     String VALID_QUALIFIER = "javax.validation.Valid";
 
-
     AnnotationExpr AUTOWIRED = StaticJavaParser.parseAnnotation("@Autowired");
 
     String AUTOWIRED_QUALIFIER = "org.springframework.beans.factory.annotation.Autowired";

@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -110,12 +111,13 @@ public class ReqRespProc {
             }
             builder.packageDeclaration(pkg);
             builder.importDeclarations(cu.getImports());
-            builder.importDeclarationsString(Lists.newArrayList("javax.validation.Valid", "java.util.Collection",
-                    handlerTransformerConfig.getPageTypeQualifier()));
+            builder.importDeclarationsString(
+                    Lists.newArrayList(AnnotationConstant.VALID_QUALIFIER, "java.util.Collection",
+                            AnnotationConstant.DATA_QUALIFIER, handlerTransformerConfig.getPageTypeQualifier()));
             ClassOrInterfaceDeclaration clone = dto.clone();
             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
             clone.getAnnotations().clear();
-            builder.coid(clone.setPublic(true));
+            builder.coid(clone.setPublic(true).addAnnotation(AnnotationConstant.DATA));
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
                 result.setParamType(calcType(dto));
                 result.setReqDtoQualifier(pkg + "." + clone.getNameAsString());
