@@ -114,8 +114,6 @@ public class ReqRespProc {
                     handlerTransformerConfig.getPageTypeQualifier()));
             ClassOrInterfaceDeclaration clone = dto.clone();
             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
-//            clone.getAnnotations().removeIf(
-//                    annotationExpr -> StringUtils.equalsAnyIgnoreCase(annotationExpr.getNameAsString(), "l", "p"));
             clone.getAnnotations().clear();
             builder.coid(clone.setPublic(true));
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
