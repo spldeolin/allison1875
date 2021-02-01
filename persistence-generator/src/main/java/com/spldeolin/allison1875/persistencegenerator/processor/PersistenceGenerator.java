@@ -166,7 +166,12 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         Collection<CompilationUnit> toSave = Lists.newArrayList();
 
         // 构建并遍历 PersistenceDto对象
-        for (PersistenceDto persistence : buildPersistenceDtoProc.process()) {
+        Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoProc.process();
+        if (persistenceDtos.size() == 0) {
+            log.warn("no tables detect in Connection [{}].", config.getJdbcUrl());
+            return;
+        }
+        for (PersistenceDto persistence : persistenceDtos) {
 
             // 重新生成Entity
             GenerateEntityResultDto generateEntityResult = entityProc.process(persistence, pathDto);

@@ -74,6 +74,10 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
         // 遍历controller、遍历handler
         Collection<HandlerFullDto> handlers = listHandlersProc.process(astForest);
+        if (handlers.size() == 0) {
+            log.warn("no handler detect.");
+            return;
+        }
         for (HandlerFullDto handler : handlers) {
             ControllerFullDto controller = handler.getController();
             EndpointDto endpoint = new EndpointDto();

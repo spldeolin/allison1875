@@ -50,6 +50,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Override
     public void process(AstForest astForest) {
         Collection<MethodCallExpr> mces = detectQueryDesignProc.process(astForest, "over");
+        int detected = 0;
         for (MethodCallExpr mce : mces) {
             CompilationUnit cu = mce.findCompilationUnit().orElseThrow(CuAbsentException::new);
             Node parent = mce.getParentNode().orElseThrow(ParentAbsentException::new);
@@ -69,16 +70,14 @@ public class QueryTransformer implements Allison1875MainProcessor {
             Collection<CriterionDto> criterions = analyzeCriterionResult.getCriterions();
 
             // create queryMethod in mapper
-            ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc
-                    .process(cu, queryMeta, queryMethodName, criterions);
+            ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc.process(cu, queryMeta, queryMethodName, criterions);
 
             // create queryMethod in mapper.xml
             generateMapperXmlQueryMethodProc.process(astForest, queryMeta, queryMethodName, criterions);
 
             // overwirte service
             MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
-                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
-                    .asMethodCallExpr();
+                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()").asMethodCallExpr();
             for (CriterionDto criterion : criterions) {
                 OperatorEnum operator = OperatorEnum.of(criterion.getOperator());
                 if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
@@ -100,6 +99,11 @@ public class QueryTransformer implements Allison1875MainProcessor {
             });
 
             Saves.save(cu);
+            detected++;
+        }
+
+        if (detected == 0) {
+            log.warn("no tables detect.");
         }
     }
 
