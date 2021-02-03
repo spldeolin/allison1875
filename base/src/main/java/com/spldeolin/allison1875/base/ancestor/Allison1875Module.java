@@ -31,7 +31,7 @@ public abstract class Allison1875Module extends AbstractModule {
 
         }
         if (allViolations.size() > 0) {
-            log.error("配置项校验未通过，请检查后重新运行");
+            log.error("config invalid");
             for (ConstraintViolation<?> violation : allViolations) {
                 log.error(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
                         + violation.getMessage());

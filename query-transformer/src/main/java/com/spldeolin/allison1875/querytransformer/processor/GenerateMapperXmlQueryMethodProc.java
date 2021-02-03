@@ -15,6 +15,7 @@ import org.atteo.evo.inflector.English;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.querytransformer.constant.Constant;
 import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
@@ -30,7 +31,8 @@ public class GenerateMapperXmlQueryMethodProc {
 
     public void process(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
             Collection<CriterionDto> criterions) {
-        File mapperXml = astForest.getHost().resolve(queryMeta.getMapperRelativePath()).toFile();
+        File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
+                .resolve(queryMeta.getMapperRelativePath()).toFile();
 
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<select id='%s' resultMap='all'>", queryMethodName));

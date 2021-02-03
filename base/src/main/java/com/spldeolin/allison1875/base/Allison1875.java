@@ -41,7 +41,7 @@ public class Allison1875 {
             if (guiceModule instanceof Allison1875Module) {
                 Allison1875Module allison1875Module = (Allison1875Module) guiceModule;
                 if (allison1875Module.validateConfig(injector) && noneInvalid) {
-                    AstForest astForest = new AstForest(primaryClass);
+                    AstForest astForest = new AstForest(primaryClass, false);
                     allison1875Module.launchMainProcessor(astForest, injector);
                 } else {
                     noneInvalid = false;

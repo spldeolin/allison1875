@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
@@ -44,12 +45,6 @@ public class LineCounter implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        // with src/test/java
-        if (lineCounterConfig.getWithTest()) {
-            astForest = new AstForest(astForest.getAnyClassFromHost(), Lists.newArrayList(
-                    astForest.getHost().resolve(baseConfig.getTestJavaDirectoryLayout()).toString()));
-        }
-
         Map<String, Integer> allJavas = Maps.newHashMap();
         Map<String, Integer> allTypes = Maps.newHashMap();
         Map<String, Integer> allMethods = Maps.newHashMap();
@@ -90,9 +85,9 @@ public class LineCounter implements Allison1875MainProcessor {
 
         // 所有xml代码
         Map<String, Integer> allXmls = Maps.newHashMap();
-        for (File xml : detectXmls(astForest, lineCounterConfig.getWithTest())) {
+        for (File xml : detectXmls(astForest)) {
             try {
-                String xmlPath = astForest.getCommonPathPart().relativize(xml.toPath()).normalize().toString();
+                String xmlPath = astForest.getCommonPath().relativize(xml.toPath()).normalize().toString();
                 allXmls.put(xmlPath, (int) Files.lines(xml.toPath()).count());
             } catch (IOException e) {
                 log.error("xml={}", xml, e);
@@ -103,15 +98,15 @@ public class LineCounter implements Allison1875MainProcessor {
 
     }
 
-    private Collection<File> detectXmls(AstForest astForest, boolean withTest) {
+    private Collection<File> detectXmls(AstForest astForest) {
         Collection<File> result = Lists.newArrayList();
-        FileUtils.iterateFiles(astForest.getHost().resolve(baseConfig.getResourcesDirectoryLayout()).toFile(),
-                new String[]{"xml"}, true).forEachRemaining(result::add);
-        if (withTest) {
-            File directory = astForest.getHost().resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
-            if (directory.exists()) {
-                FileUtils.iterateFiles(directory, new String[]{"xml"}, true).forEachRemaining(result::add);
-            }
+        FileUtils.iterateFiles(MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
+                .resolve(baseConfig.getResourcesDirectoryLayout()).toFile(), new String[]{"xml"}, true)
+                .forEachRemaining(result::add);
+        File directory = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
+                .resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
+        if (directory.exists()) {
+            FileUtils.iterateFiles(directory, new String[]{"xml"}, true).forEachRemaining(result::add);
         }
         return result;
     }

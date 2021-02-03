@@ -21,12 +21,6 @@ public final class LineCounterConfig extends AbstractModule {
     protected Collection<String> typePostfix;
 
     /**
-     * 是否将src/test/java目录下的文件也统计在内
-     */
-    @NotNull
-    protected Boolean withTest;
-
-    /**
      * 显示阈值，行数大于等于这个值时，才在排行榜中显示
      */
     @NotNull
