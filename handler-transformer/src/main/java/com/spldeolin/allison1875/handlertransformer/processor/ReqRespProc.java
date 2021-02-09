@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -111,6 +112,7 @@ public class ReqRespProc {
                 clone.addAnnotation(AnnotationConstant.ACCESSORS);
                 builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
             }
+            Authors.ensureAuthorExist(clone, handlerTransformerConfig.getAuthor());
             builder.coid(clone);
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
                 result.setParamType(calcType(dto));

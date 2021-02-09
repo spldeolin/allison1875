@@ -42,6 +42,7 @@ public class ServiceProc {
             imports.add(reqDtoRespDtoInfo.getRespDtoQualifier());
         }
         serviceBuilder.importDeclarationsString(imports);
+        serviceBuilder.javadoc(null, handlerTransformerConfig.getAuthor());
         serviceBuilder.serviceName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
 
         // 使用handle创建service实现方法
