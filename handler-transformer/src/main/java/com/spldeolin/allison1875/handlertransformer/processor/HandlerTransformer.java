@@ -114,7 +114,12 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                 }
             }
         }
-        toCreate.forEach(Saves::save);
+
+        if (toCreate.size() > 0) {
+            toCreate.forEach(Saves::save);
+        } else {
+            log.warn("no Initializer detect.");
+        }
     }
 
 }
