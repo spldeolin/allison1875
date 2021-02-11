@@ -43,7 +43,7 @@ public class AstForest implements Iterable<CompilationUnit> {
         javaPaths.addAll(collectJavas(root));
         commonPath = calcCommonPath(javaPaths);
         iterator = new AstIterator(primaryClass.getClassLoader(), javaPaths);
-        log.info("AST Forest set up");
+        log.info("AST Forest built");
     }
 
     public AstForest(Class<?> primaryClass, boolean wholeProject, Set<Path> dependencyPaths) {
