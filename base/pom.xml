@@ -127,7 +127,7 @@
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>allison1875-support</artifactId>
-            <version>${project.version}</version>
+            <version>3.0</version>
         </dependency>
     </dependencies>
 
