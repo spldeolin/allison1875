@@ -17,13 +17,13 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.GuiceUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-12-10
  */
 @Singleton
-@Slf4j
+@Log4j2
 public class UserInfoCollectProc {
 
     private static final String todayKey = "allison1875-userInfo-" + LocalDate.now();

@@ -21,6 +21,11 @@ public class Imports {
         }
     }
 
+    public static void ensureImported(Node node, ImportDeclaration importDeclaration) {
+        ensureImported(node, importDeclaration.getNameAsString(), importDeclaration.isStatic(),
+                importDeclaration.isAsterisk());
+    }
+
     public static ImmutableList<ImportDeclaration> listImports(Node node) {
         CompilationUnit cu = node.findCompilationUnit().orElseThrow(CuAbsentException::new);
         return ImmutableList.copyOf(cu.getImports());

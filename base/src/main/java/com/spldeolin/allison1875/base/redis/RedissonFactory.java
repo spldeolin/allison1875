@@ -8,13 +8,13 @@ import org.redisson.config.SingleServerConfig;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.BaseConfig;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-12-10
  */
 @Singleton
-@Slf4j
+@Log4j2
 public class RedissonFactory {
 
     @Inject

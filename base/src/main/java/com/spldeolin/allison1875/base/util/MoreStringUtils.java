@@ -62,4 +62,8 @@ public class MoreStringUtils {
         return lowerFirstLetter(sb.toString());
     }
 
+    public static boolean endsWithIgnoreCase(String string, String suffix) {
+        return string.toUpperCase().endsWith(suffix.toUpperCase());
+    }
+
 }

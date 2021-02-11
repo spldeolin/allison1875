@@ -13,7 +13,17 @@
     <dependencies>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>base</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>doc-analyzer</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>gadget</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -34,11 +44,6 @@
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>query-transformer</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>gadget</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

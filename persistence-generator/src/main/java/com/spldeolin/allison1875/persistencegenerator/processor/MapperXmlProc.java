@@ -99,8 +99,8 @@ public class MapperXmlProc {
             }
         }
 
-        String leftAnchor = anchorProc.createLeftAnchor(mapperXmlFile, newLines);
-        String rightAnchor = anchorProc.createRightAnchor(mapperXmlFile, newLines);
+        String leftAnchor = anchorProc.createLeftAnchor(persistence);
+        String rightAnchor = anchorProc.createRightAnchor(persistence);
 
         String finalContent = Joiner.on(System.lineSeparator()).join(newLines).replace("${leftAnchor}", leftAnchor)
                 .replace("${rightAnchor}", rightAnchor);

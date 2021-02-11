@@ -30,7 +30,7 @@ import com.spldeolin.allison1875.base.util.ValidateUtils;
 /**
  * @author Deolin 2020-12-26
  */
-public class JavabeanCuBuilder {
+public class JavabeanCuBuilder<C> {
 
     private SourceRoot sourceRoot;
 
@@ -54,30 +54,32 @@ public class JavabeanCuBuilder {
 
     private String javabeanQualifier;
 
-    public JavabeanCuBuilder sourceRoot(SourceRoot sourceRoot) {
+    private C context;
+
+    public JavabeanCuBuilder<C> sourceRoot(SourceRoot sourceRoot) {
         Objects.requireNonNull(sourceRoot, "sourceRoot cannot be null.");
         this.sourceRoot = sourceRoot;
         return this;
     }
 
-    public JavabeanCuBuilder sourceRoot(Path sourceRootPath) {
+    public JavabeanCuBuilder<C> sourceRoot(Path sourceRootPath) {
         Objects.requireNonNull(sourceRootPath, "sourceRootPath cannot be null.");
         this.sourceRoot = new SourceRoot(sourceRootPath);
         return this;
     }
 
-    public JavabeanCuBuilder packageDeclaration(String packageName) {
+    public JavabeanCuBuilder<C> packageDeclaration(String packageName) {
         Objects.requireNonNull(packageName, "packageName cannot be null.");
         this.packageDeclaration = new PackageDeclaration().setName(packageName);
         return this;
     }
 
-    public JavabeanCuBuilder packageDeclaration(PackageDeclaration packageDeclaration) {
+    public JavabeanCuBuilder<C> packageDeclaration(PackageDeclaration packageDeclaration) {
         this.packageDeclaration = packageDeclaration;
         return this;
     }
 
-    public JavabeanCuBuilder importDeclaration(String importName, Boolean isAsterisk) {
+    public JavabeanCuBuilder<C> importDeclaration(String importName, Boolean isAsterisk) {
         boolean endsWith = importName.endsWith(".*");
         if (isAsterisk && !endsWith) {
             importName = importName + ".*";
@@ -89,13 +91,13 @@ public class JavabeanCuBuilder {
         return this;
     }
 
-    public JavabeanCuBuilder importDeclaration(ImportDeclaration importDeclaration) {
+    public JavabeanCuBuilder<C> importDeclaration(ImportDeclaration importDeclaration) {
         Objects.requireNonNull(importDeclaration, "importDeclaration cannot be null.");
         importDeclarations.add(importDeclaration);
         return this;
     }
 
-    public JavabeanCuBuilder importDeclaration(String importName) {
+    public JavabeanCuBuilder<C> importDeclaration(String importName) {
         if (importName.endsWith(".*")) {
             importDeclarations.add(new ImportDeclaration(Substring.last(".*").removeFrom(importName), false, true));
         } else {
@@ -104,23 +106,23 @@ public class JavabeanCuBuilder {
         return this;
     }
 
-    public JavabeanCuBuilder importDeclarationsString(Collection<String> importNames) {
+    public JavabeanCuBuilder<C> importDeclarationsString(Collection<String> importNames) {
         importNames.forEach(this::importDeclaration);
         return this;
     }
 
-    public JavabeanCuBuilder importDeclarations(Collection<ImportDeclaration> importDeclarations) {
+    public JavabeanCuBuilder<C> importDeclarations(Collection<ImportDeclaration> importDeclarations) {
         importDeclarations.forEach(this::importDeclaration);
         return this;
     }
 
-    public JavabeanCuBuilder coid(ClassOrInterfaceDeclaration coid) {
+    public JavabeanCuBuilder<C> coid(ClassOrInterfaceDeclaration coid) {
         Objects.requireNonNull(coid, "coid cannot be null.");
         this.coid = coid;
         return this;
     }
 
-    public JavabeanCuBuilder javadoc(String javadocDescription, String author) {
+    public JavabeanCuBuilder<C> javadoc(String javadocDescription, String author) {
         if (StringUtils.isBlank(author)) {
             throw new IllegalArgumentException("author cannot be blank.");
         }
@@ -131,40 +133,49 @@ public class JavabeanCuBuilder {
         return this;
     }
 
-    public JavabeanCuBuilder javadoc(Javadoc javadoc) {
+    public JavabeanCuBuilder<C> javadoc(Javadoc javadoc) {
         this.javadoc = javadoc;
         return this;
     }
 
-    public JavabeanCuBuilder annotationExpr(AnnotationExpr annotationExpr) {
+    public JavabeanCuBuilder<C> annotationExpr(AnnotationExpr annotationExpr) {
         annotationExprs.add(annotationExpr);
         return this;
     }
 
-    public JavabeanCuBuilder annotationExpr(String annotation, String... var) {
+    public JavabeanCuBuilder<C> annotationExpr(String annotation, String... var) {
         annotationExprs.add(StaticJavaParser.parseAnnotation(String.format(annotation, (Object) var)));
         return this;
     }
 
-    public JavabeanCuBuilder isFinal(Boolean isFinal) {
+    public JavabeanCuBuilder<C> isFinal(Boolean isFinal) {
         Objects.requireNonNull(isFinal, "isFinal cannot be null.");
         this.isFinal = isFinal;
         return this;
     }
 
-    public JavabeanCuBuilder javabeanName(String javabeanName) {
+    public JavabeanCuBuilder<C> javabeanName(String javabeanName) {
         Objects.requireNonNull(javabeanName, "javabeanName cannot be null.");
         this.javabeanName = javabeanName;
         return this;
     }
 
-    public JavabeanCuBuilder fieldDeclaration(FieldDeclaration fieldDeclaration) {
+    public JavabeanCuBuilder<C> fieldDeclaration(FieldDeclaration fieldDeclaration) {
         this.fieldDeclarations.add(fieldDeclaration);
         return this;
     }
 
+    public JavabeanCuBuilder<C> context(C context) {
+        this.context = context;
+        return this;
+    }
+
+    public C getContext() {
+        return context;
+    }
+
     public CompilationUnit build() {
-        Set<ConstraintViolation<JavabeanCuBuilder>> violations = ValidateUtils.validate(this);
+        Set<ConstraintViolation<JavabeanCuBuilder<?>>> violations = ValidateUtils.validate(this);
         if (violations.size() > 0) {
             throw new IllegalArgumentException(violations.toString());
         }
@@ -225,6 +236,10 @@ public class JavabeanCuBuilder {
             throw new IllegalStateException("build() not yet.");
         }
         return javabeanQualifier;
+    }
+
+    public Set<ImportDeclaration> getImportDeclarations() {
+        return importDeclarations;
     }
 
 }
