@@ -8,13 +8,13 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-01-23
  */
 @Singleton
-@Slf4j
+@Log4j2
 public class ParseFirstLineProc {
 
     public FirstLineDto parse(NodeList<Statement> statements) {
