@@ -17,7 +17,6 @@
         <module>inspector</module>
         <module>persistence-generator</module>
         <module>query-transformer</module>
-        <module>allison1875-support</module>
     </modules>
 
     <name>Allison 1875</name>

@@ -21,9 +21,9 @@ public class BakFileCleaner implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        File host = MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).toFile();
-        FileUtils.iterateFiles(host, new String[]{"bak"}, true).forEachRemaining(bakFile -> {
-            log.info(bakFile.toString() + " 被删除");
+        File projectRoot = MavenPathResolver.findMavenProject(astForest.getPrimaryClass()).toFile();
+        FileUtils.iterateFiles(projectRoot, new String[]{"bak"}, true).forEachRemaining(bakFile -> {
+            log.info("Backup File delete [{}]", bakFile);
             bakFile.deleteOnExit();
         });
     }
