@@ -22,6 +22,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AstForest implements Iterable<CompilationUnit> {
 
+    /**
+     * Primary Class
+     */
     private final Class<?> primaryClass;
 
     /**
@@ -34,6 +37,9 @@ public class AstForest implements Iterable<CompilationUnit> {
      */
     private final Set<Path> javasInForest = Sets.newHashSet();
 
+    /**
+     * 所有javasInForest的共同路径前缀
+     */
     private final Path commonPath;
 
     private AstIterator iterator;
