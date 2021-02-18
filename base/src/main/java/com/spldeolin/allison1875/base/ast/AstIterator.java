@@ -42,9 +42,9 @@ public class AstIterator implements Iterator<CompilationUnit> {
                     Locations.getStorage(cu).getSourceRoot().relativize(Locations.getAbsolutePath(cu)), cu.hashCode());
             return cu;
         } catch (ParseProblemException e) {
-            log.warn("SourceCode parse causing problems {}", e.getMessage());
+            log.warn("SourceCode parse causing problems [{}] [{}]", javaPath, e.getMessage());
         } catch (Exception e) {
-            log.warn("SourceCode parse unsuccessfully", e);
+            log.warn("SourceCode parse unsuccessfully [{}]", javaPath, e);
         }
         return null;
     }
