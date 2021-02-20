@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base;
 
+import java.util.Locale;
 import org.redisson.api.RedissonClient;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -17,6 +18,10 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class Allison1875 {
+
+    static {
+        Locale.setDefault(Locale.ENGLISH);
+    }
 
     public static void allison1875(Class<?> primaryClass, Module... guiceModules) {
         // Version

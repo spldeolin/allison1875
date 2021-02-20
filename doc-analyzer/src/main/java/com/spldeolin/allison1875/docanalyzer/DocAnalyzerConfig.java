@@ -6,6 +6,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.valid.annotation.IsDirectory;
 import lombok.Data;
 
 /**
@@ -21,7 +22,7 @@ public final class DocAnalyzerConfig extends AbstractModule {
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
      */
     @NotNull
-    protected Collection<@NotEmpty String> dependencyProjectPaths;
+    protected Collection<@NotNull @IsDirectory String> dependencyProjectPaths;
 
     /**
      * 全局URL前缀
