@@ -22,25 +22,25 @@ public final class DocAnalyzerConfig extends AbstractModule {
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
      */
     @NotNull
-    protected Collection<@NotNull @IsDirectory String> dependencyProjectPaths;
+    private Collection<@NotNull @IsDirectory String> dependencyProjectPaths;
 
     /**
      * 全局URL前缀
      */
     @NotNull
-    protected String globalUrlPrefix;
+    private String globalUrlPrefix;
 
     /**
      * YApi请求URL
      */
     @NotEmpty
-    protected String yapiUrl;
+    private String yapiUrl;
 
     /**
      * YApi项目的TOKEN
      */
     @NotEmpty
-    protected String yapiToken;
+    private String yapiToken;
 
     @Override
     protected void configure() {

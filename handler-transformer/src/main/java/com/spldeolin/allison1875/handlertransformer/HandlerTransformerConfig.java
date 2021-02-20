@@ -18,19 +18,19 @@ public final class HandlerTransformerConfig extends AbstractModule {
      * 控制层 @RequestBody类型所在包的包名
      */
     @NotEmpty
-    protected String reqDtoPackage;
+    private String reqDtoPackage;
 
     /**
      * 控制层 @ResponseBody业务数据部分类型所在包的包名
      */
     @NotEmpty
-    protected String respDtoPackage;
+    private String respDtoPackage;
 
     /**
      * 业务层 Service接口所在包的包名
      */
     @NotEmpty
-    protected String servicePackage;
+    private String servicePackage;
 
     /**
      * 业务 ServiceImpl类所在包的包名

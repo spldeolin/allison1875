@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.valid.annotation.IsDirectory;
 import lombok.Data;
 
 /**
@@ -19,23 +20,25 @@ public final class InspectorConfig extends AbstractModule {
      * 工程所在的Git本地仓库的路径
      */
     @NotNull
-    protected String projectLocalGitPath;
+    private String projectLocalGitPath;
 
     /**
      * 此时间之后新增的文件为靶文件
      */
     @NotNull
-    protected LocalDateTime targetFileSince;
+    private LocalDateTime targetFileSince;
 
     /**
      * 周知JSON目录的路径
      */
-    protected String pardonDirectoryPath;
+    @IsDirectory
+    private String pardonDirectoryPath;
 
     /**
      * 检查结果CSV文件输出目录的路径
      */
-    protected String lawlessDirectoryPath;
+    @IsDirectory
+    private String lawlessDirectoryPath;
 
     @Override
     protected void configure() {
