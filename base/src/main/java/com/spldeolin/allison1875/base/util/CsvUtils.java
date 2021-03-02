@@ -26,14 +26,14 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.base.util.exception.CsvException;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * CSV工具类
  *
  * @author Deolin 2019-01-14
  */
-@Slf4j
+@Log4j2
 public class CsvUtils {
 
     private static final CsvMapper cm = createCsvMapper();

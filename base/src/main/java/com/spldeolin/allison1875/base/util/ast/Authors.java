@@ -4,10 +4,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -84,6 +88,24 @@ public class Authors {
 
         // 递归到找不到withJavadoc的父节点时，返回empty
         return Lists.newArrayList();
+    }
+
+    public static void ensureAuthorExist(NodeWithJavadoc<?> node, String authorName) {
+        if (StringUtils.isEmpty(authorName)) {
+            throw new IllegalArgumentException("authorName cannot be empty");
+        }
+        Optional<Javadoc> javadocOpt = node.getJavadoc();
+        if (javadocOpt.isPresent()) {
+            Javadoc javadoc = javadocOpt.get();
+            if (javadoc.getBlockTags().stream()
+                    .noneMatch(javadocBlockTag -> javadocBlockTag.getType() == Type.AUTHOR)) {
+                javadoc.addBlockTag(Type.AUTHOR.name(), authorName);
+            }
+        } else {
+            Javadoc javadoc = new JavadocComment("").parse();
+            javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, authorName));
+            node.setJavadocComment(javadoc);
+        }
     }
 
     private static Optional<Node> getParentWithJavadoc(Node node) {

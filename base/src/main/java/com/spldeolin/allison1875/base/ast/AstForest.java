@@ -5,88 +5,105 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import org.apache.commons.io.FileUtils;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
-import com.github.javaparser.utils.CodeGenerationUtils;
-import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.BaseConfig;
-import com.spldeolin.allison1875.base.util.GuiceUtils;
-import lombok.Getter;
-import lombok.ToString;
+import com.google.common.collect.Sets;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * 可遍历的抽象语法树森林
  *
- * @author Deolin 2020-04-24
+ * @author Deolin 2021-02-02
  */
 @Log4j2
-@Getter
-@ToString
 public class AstForest implements Iterable<CompilationUnit> {
 
-    private final Class<?> anyClassFromHost;
+    /**
+     * Primary Class
+     */
+    private final Class<?> primaryClass;
 
-    private final ImmutableList<String> dependencyProjectPaths;
+    /**
+     * AST森林的根目录
+     */
+    private final Path astForestRoot;
 
-    private final Path host;
+    /**
+     * AST森林内的java文件
+     */
+    private final Set<Path> javasInForest = Sets.newHashSet();
 
-    private final Path hostSourceRoot;
+    /**
+     * 所有javasInForest的共同路径前缀
+     */
+    private final Path commonPath;
 
-    private final ImmutableList<Path> hostAndDependencySourceRoots;
+    private AstIterator iterator;
 
-    private final Path commonPathPart;
-
-    private AstCursor cursor;
-
-    public AstForest(Class<?> anyClassFromHost) {
-        this.anyClassFromHost = anyClassFromHost;
-        this.dependencyProjectPaths = null;
-
-        this.host = detectHost(anyClassFromHost);
-        this.hostSourceRoot = detectHostSourceRoot(host);
-        this.hostAndDependencySourceRoots = ImmutableList.of(hostSourceRoot);
-        this.commonPathPart = calcCommonPath(hostAndDependencySourceRoots);
-        this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
-    }
-
-    public AstForest(Class<?> anyClassFromHost, Collection<String> dependencyProjectPaths) {
-        this.anyClassFromHost = anyClassFromHost;
-        this.dependencyProjectPaths = ImmutableList.copyOf(dependencyProjectPaths);
-
-        this.host = detectHost(anyClassFromHost);
-        this.hostSourceRoot = detectHostSourceRoot(host);
-        List<Path> sourceRoots = collectDependencySourceRoots(dependencyProjectPaths);
-        sourceRoots.add(0, hostSourceRoot);
-        this.hostAndDependencySourceRoots = ImmutableList.copyOf(sourceRoots);
-        this.commonPathPart = calcCommonPath(hostAndDependencySourceRoots);
-        this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
-    }
-
-    private Path detectHost(Class<?> anyClassFromHost) {
-        return CodeGenerationUtils.mavenModuleRoot(anyClassFromHost);
-    }
-
-    private Path detectHostSourceRoot(Path host) {
-        BaseConfig baseConfig = GuiceUtils.getComponent(BaseConfig.class);
-        Path hostSourceRootPath = host.resolve(baseConfig.getJavaDirectoryLayout());
-        return hostSourceRootPath;
-    }
-
-    private List<Path> collectDependencySourceRoots(Collection<String> dependencyProjectPaths) {
-        List<Path> result = Lists.newArrayList();
-        for (String projectPath : dependencyProjectPaths) {
-            List<SourceRoot> onePathSourceRoots = new SymbolSolverCollectionStrategy().collect(Paths.get(projectPath))
-                    .getSourceRoots();
-            for (SourceRoot sourceRoot : onePathSourceRoots) {
-                log.info("dependencySourceRootPath={}", sourceRoot.getRoot());
-                result.add(sourceRoot.getRoot());
-            }
+    public AstForest(Class<?> primaryClass, boolean wholeProject) {
+        this.primaryClass = primaryClass;
+        if (wholeProject) {
+            astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
+        } else {
+            astForestRoot = MavenPathResolver.findMavenModule(primaryClass);
         }
-        return result;
+        javasInForest.addAll(collectJavas(astForestRoot));
+        commonPath = calcCommonPath(javasInForest);
+        iterator = new AstIterator(primaryClass.getClassLoader(), javasInForest);
+        log.info("AST Forest built [{}]", astForestRoot);
+    }
+
+    public AstForest(Class<?> primaryClass, boolean wholeProject, Set<Path> dependencyPaths) {
+        this.primaryClass = primaryClass;
+        if (wholeProject) {
+            astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
+        } else {
+            astForestRoot = MavenPathResolver.findMavenModule(primaryClass);
+        }
+        javasInForest.addAll(collectJavas(astForestRoot));
+        for (Path dependencyPath : dependencyPaths) {
+            javasInForest.addAll(collectJavas(dependencyPath));
+        }
+        commonPath = calcCommonPath(javasInForest);
+        iterator = new AstIterator(primaryClass.getClassLoader(), javasInForest);
+        log.info("AST Forest built [{}]", astForestRoot);
+    }
+
+    @Override
+    public Iterator<CompilationUnit> iterator() {
+        return this.iterator;
+    }
+
+    public AstForest reset() {
+        this.iterator = new AstIterator(primaryClass.getClassLoader(), javasInForest);
+        log.info("AST Forest reset");
+        return this;
+    }
+
+    public Class<?> getPrimaryClass() {
+        return primaryClass;
+    }
+
+    public Path getCommonPath() {
+        return commonPath;
+    }
+
+    public Path getAstForestRoot() {
+        return astForestRoot;
+    }
+
+    private Set<Path> collectJavas(Path directory) {
+        Set<Path> javaPaths = Sets.newLinkedHashSet();
+        FileUtils.iterateFiles(directory.toFile(), new String[]{"java"}, true)
+                .forEachRemaining(javaFile -> javaPaths.add(javaFile.toPath()));
+
+        int javaCount = javaPaths.size();
+        log.info("collect {} of {} from directory [{}]", javaCount, English.plural("java file", javaCount), directory);
+        return javaPaths;
     }
 
     private Path calcCommonPath(Collection<Path> sourceRootPaths) {
@@ -96,17 +113,6 @@ public class AstForest implements Iterable<CompilationUnit> {
             common = Strings.commonPrefix(common, path.toString());
         }
         return Paths.get(common);
-    }
-
-    @Override
-    public Iterator<CompilationUnit> iterator() {
-        return cursor;
-    }
-
-    public AstForest reset() {
-        log.info("Astforest reset.");
-        this.cursor = new AstCursor(commonPathPart, hostAndDependencySourceRoots);
-        return this;
     }
 
 }

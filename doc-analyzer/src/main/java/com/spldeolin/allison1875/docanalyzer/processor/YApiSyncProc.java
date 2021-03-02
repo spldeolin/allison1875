@@ -12,6 +12,7 @@ import org.redisson.api.RedissonClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -244,7 +245,12 @@ public class YApiSyncProc {
         if (nullableJson == null) {
             return null;
         }
-        return JsonUtils.toObject(nullableJson, JsonPropertyDescriptionValueDto.class);
+        try {
+            return JsonUtils.createObjectMapper().readValue(nullableJson, JsonPropertyDescriptionValueDto.class);
+        } catch (Exception e) {
+            log.info("jpdv has been pretty [{}]", StringEscapeUtils.escapeJava(nullableJson));
+        }
+        return null;
     }
 
 }

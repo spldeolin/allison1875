@@ -1,6 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -57,8 +61,10 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        // 重新生成astForest（将解析范围扩大到所有用户配置的项目路径）
-        astForest = new AstForest(astForest.getAnyClassFromHost(), config.getDependencyProjectPaths());
+        // 重新生成astForest（将解析范围扩大到 项目根目录 + 所有用户配置的依赖项目路径）
+        Set<Path> dependencyProjectPaths = config.getDependencyProjectPaths().stream().map(Paths::get)
+                .collect(Collectors.toSet());
+        astForest = new AstForest(astForest.getPrimaryClass(), true, dependencyProjectPaths);
 
         // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
         JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg(astForest);
@@ -68,6 +74,10 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
         // 遍历controller、遍历handler
         Collection<HandlerFullDto> handlers = listHandlersProc.process(astForest);
+        if (handlers.size() == 0) {
+            log.warn("no handler detect.");
+            return;
+        }
         for (HandlerFullDto handler : handlers) {
             ControllerFullDto controller = handler.getController();
             EndpointDto endpoint = new EndpointDto();

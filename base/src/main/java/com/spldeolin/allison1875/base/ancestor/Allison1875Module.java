@@ -31,10 +31,12 @@ public abstract class Allison1875Module extends AbstractModule {
 
         }
         if (allViolations.size() > 0) {
-            log.error("配置项校验未通过，请检查后重新运行");
+            log.error("Allison 1875 cannot work due to invalid config");
             for (ConstraintViolation<?> violation : allViolations) {
-                log.error(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath() + " "
-                        + violation.getMessage());
+                String configName =
+                        violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath().toString()
+                                .replace(".<iterable element>", "");
+                log.error("{} {}, current value: {}", configName, violation.getMessage(), violation.getInvalidValue());
             }
             return false;
         }

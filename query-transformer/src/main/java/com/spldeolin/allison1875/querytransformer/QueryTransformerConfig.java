@@ -18,13 +18,13 @@ public final class QueryTransformerConfig extends AbstractModule {
      * mapper.xml所在目录的相对路径（根据目标工程的情况填写）
      */
     @NotEmpty
-    protected String mapperXmlDirectoryPath;
+    private String mapperXmlDirectoryPath;
 
     /**
      * Entity通用属性的类型
      */
     @NotNull
-    protected Map<String, String> entityCommonPropertyTypes;
+    private Map<String, String> entityCommonPropertyTypes;
 
     @Override
     protected void configure() {
