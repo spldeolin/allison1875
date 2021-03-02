@@ -9,7 +9,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.resolution.SymbolResolver;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
-import com.spldeolin.allison1875.base.util.ast.Locations;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -25,6 +24,7 @@ public class AstIterator implements Iterator<CompilationUnit> {
     public AstIterator(ClassLoader primaryClassLoader, Set<Path> javaPaths) {
         this.primaryClassLoader = primaryClassLoader;
         this.javaPaths = javaPaths.iterator();
+        StaticJavaParser.getConfiguration().setSymbolResolver(createSymbolSolver());
     }
 
     @Override
@@ -35,11 +35,8 @@ public class AstIterator implements Iterator<CompilationUnit> {
     @Override
     public CompilationUnit next() {
         Path javaPath = javaPaths.next();
-        StaticJavaParser.getConfiguration().setSymbolResolver(createSymbolSolver());
         try {
             CompilationUnit cu = StaticJavaParser.parse(javaPath);
-            log.info("SourceCode {} -> CompilationUnit {}",
-                    Locations.getStorage(cu).getSourceRoot().relativize(Locations.getAbsolutePath(cu)), cu.hashCode());
             return cu;
         } catch (ParseProblemException e) {
             log.warn("SourceCode parse causing problems [{}] [{}]", javaPath, e.getMessage());
