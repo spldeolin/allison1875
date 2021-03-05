@@ -41,7 +41,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     private InitializerCollectProc initializerCollectProc;
 
     @Inject
-    private EnsureNoRepeationProc ensureNoRepeationProc;
+    private EnsureNoRepeatProc ensureNoRepeationProc;
 
     @Inject
     private ReqRespProc reqRespProc;
@@ -74,7 +74,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     detectCount++;
 
                     // 当指定的handlerName在controller中已经存在同名handler时，handlerName后拼接Ex（递归，确保不会重名）
-                    ensureNoRepeationProc.ensureNoRepeation(controller, firstLineDto);
+                    ensureNoRepeationProc.inController(controller, firstLineDto);
 
                     // 校验init下的Req和Resp类
                     reqRespProc.checkInitBody(initBody, firstLineDto);

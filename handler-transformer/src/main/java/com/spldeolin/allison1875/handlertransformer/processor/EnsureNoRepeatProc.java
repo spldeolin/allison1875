@@ -10,9 +10,9 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class EnsureNoRepeationProc {
+public class EnsureNoRepeatProc {
 
-    public void ensureNoRepeation(ClassOrInterfaceDeclaration controller, FirstLineDto firstLineDto) {
+    public void inController(ClassOrInterfaceDeclaration controller, FirstLineDto firstLineDto) {
         String handlerName = firstLineDto.getHandlerName();
         if (controller.getMethodsByName(handlerName).size() > 0) {
             String newHandlerName = handlerName + "Ex";
@@ -20,8 +20,18 @@ public class EnsureNoRepeationProc {
             firstLineDto.setHandlerUrl(firstLineDto.getHandlerUrl() + "Ex");
             log.warn("Handler name [{}] is conflicted in Controller [{}], rename to [{}].", handlerName,
                     controller.getNameAsString(), newHandlerName);
-            ensureNoRepeation(controller, firstLineDto);
+            inController(controller, firstLineDto);
         }
+    }
+
+    public String inService(ClassOrInterfaceDeclaration service, String methodName) {
+        if (service.getMethodsByName(methodName).size() > 0) {
+            String newMethodName = methodName + "Ex";
+            log.warn("Method name [{}] is conflicted in Service [{}], rename to [{}].", methodName,
+                    service.getNameAsString(), newMethodName);
+            return inService(service, newMethodName);
+        }
+        return methodName;
     }
 
 }
