@@ -8,13 +8,13 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
-import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateHandlerHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -48,23 +48,23 @@ public class ControllerProc {
     }
 
     public void createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
-            SingleMethodServiceCuBuilder serviceBuilder, ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
+            ServiceGeneration serviceGeneration, ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
 
         // 确保controller有autowired 新生成的service
-        if (!controller.getFieldByName(serviceBuilder.getServiceVarName()).isPresent()) {
+        if (!controller.getFieldByName(serviceGeneration.getServiceVarName()).isPresent()) {
             FieldDeclarationBuilder serviceField = new FieldDeclarationBuilder();
             serviceField.annotationExpr("@Autowired");
-            serviceField.type(serviceBuilder.getService().getNameAsString());
-            serviceField.fieldName(serviceBuilder.getServiceVarName());
+            serviceField.type(serviceGeneration.getService().getNameAsString());
+            serviceField.fieldName(serviceGeneration.getServiceVarName());
             controller.addMember(serviceField.build());
         }
-        log.info("append @Autowired Field [{}] into Controller [{}].", serviceBuilder.getServiceVarName(),
+        log.info("append @Autowired Field [{}] into Controller [{}].", serviceGeneration.getServiceVarName(),
                 controller.getNameAsString());
 
         // 使用handle创建Handler方法，并追加到controller中
         CreateHandlerHandleResult handlerCreation = createHandlerHandle
                 .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
-                        serviceBuilder);
+                        serviceGeneration);
         controller.addMember(handlerCreation.getHandler());
         log.info("append Handler [{}] into Controller [{}].", handlerCreation.getHandler().getNameAsString(),
                 controller.getNameAsString());
@@ -79,7 +79,7 @@ public class ControllerProc {
         if (reqDtoRespDtoInfo.getRespDtoQualifier() != null) {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getRespDtoQualifier());
         }
-        Imports.ensureImported(controller, serviceBuilder.getJavabeanQualifier());
+        Imports.ensureImported(controller, serviceGeneration.getServiceQualifier());
     }
 
 }

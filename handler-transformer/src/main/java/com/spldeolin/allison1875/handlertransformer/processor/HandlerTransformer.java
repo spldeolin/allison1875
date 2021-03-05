@@ -18,6 +18,7 @@ import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -88,13 +89,15 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     SingleMethodServiceCuBuilder serviceBuilder = serviceProc
                             .generateServiceWithImpl(cu, firstLineDto, reqDtoRespDtoInfo);
 
+                    ServiceGeneration serviceGeneration = generateServicePairProc.generateService(null);
+
                     // 创建ServiceImpl
                     Saves.add(serviceBuilder.buildServiceImpl());
                     log.info("generate ServiceImpl [{}].", serviceBuilder.getServiceImpl().getNameAsString());
 
                     // 在controller中创建handler
                     controllerProc
-                            .createHandlerToController(firstLineDto, controller, serviceBuilder, reqDtoRespDtoInfo);
+                            .createHandlerToController(firstLineDto, controller, serviceGeneration, reqDtoRespDtoInfo);
 
                     // 从controller中删除init
                     boolean anyTransformed = init.remove();

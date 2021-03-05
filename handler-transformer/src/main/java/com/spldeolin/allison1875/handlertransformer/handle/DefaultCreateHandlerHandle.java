@@ -6,10 +6,10 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateHandlerHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 
 /**
  * @author Deolin 2021-01-11
@@ -19,7 +19,7 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
 
     @Override
     public CreateHandlerHandleResult createHandler(FirstLineDto firstLineDto, String serviceParamType,
-            String serviceResultType, SingleMethodServiceCuBuilder serviceCuBuilder) {
+            String serviceResultType, ServiceGeneration serviceGeneration) {
         MethodDeclaration handler = new MethodDeclaration();
 
         handler.setJavadocComment(firstLineDto.getHandlerDescription());
@@ -46,22 +46,22 @@ public class DefaultCreateHandlerHandle implements CreateHandlerHandle {
         if (serviceResultType != null) {
             if (serviceParamType != null) {
                 body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("return %s.%s(req);", serviceCuBuilder.getServiceVarName(),
-                                serviceCuBuilder.getMethodName())));
+                        String.format("return %s.%s(req);", serviceGeneration.getServiceVarName(),
+                                serviceGeneration.getMethodName())));
             } else {
                 body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("return %s.%s();", serviceCuBuilder.getServiceVarName(),
-                                serviceCuBuilder.getMethodName())));
+                        String.format("return %s.%s();", serviceGeneration.getServiceVarName(),
+                                serviceGeneration.getMethodName())));
             }
         } else {
             if (serviceParamType != null) {
                 body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s.%s(req);", serviceCuBuilder.getServiceVarName(),
-                                serviceCuBuilder.getMethodName())));
+                        String.format("%s.%s(req);", serviceGeneration.getServiceVarName(),
+                                serviceGeneration.getMethodName())));
             } else {
                 body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s.%s();", serviceCuBuilder.getServiceVarName(),
-                                serviceCuBuilder.getMethodName())));
+                        String.format("%s.%s();", serviceGeneration.getServiceVarName(),
+                                serviceGeneration.getMethodName())));
             }
         }
         handler.setBody(body);

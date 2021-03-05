@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceImplParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
@@ -13,6 +14,8 @@ import com.spldeolin.allison1875.handlertransformer.javabean.ServiceImplGenerati
 public class GenerateServicePairProc {
 
     public ServiceGeneration generateService(GenerateServiceParam param) {
+        FirstLineDto firstLineDto = param.getFirstLineDto();
+
 
         ServiceGeneration result = new ServiceGeneration();
         return result;
