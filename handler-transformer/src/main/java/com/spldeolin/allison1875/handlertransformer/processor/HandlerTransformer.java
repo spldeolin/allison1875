@@ -54,6 +54,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private ParseFirstLineProc parseFirstLineProc;
 
+    @Inject
+    private GenerateServicePairProc generateServicePairProc;
+
     @Override
     public void process(AstForest astForest) {
         int detectCount = 0;
