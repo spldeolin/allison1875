@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
 import com.spldeolin.allison1875.handlertransformer.handle.FieldHandle;
@@ -71,8 +72,8 @@ public class ReqRespProc {
         }
     }
 
-    public ReqDtoRespDtoInfo createJavabeans(Set<CompilationUnit> toCreate, CompilationUnit cu,
-            FirstLineDto firstLineDto, List<ClassOrInterfaceDeclaration> dtos) {
+    public ReqDtoRespDtoInfo createJavabeans(CompilationUnit cu, FirstLineDto firstLineDto,
+            List<ClassOrInterfaceDeclaration> dtos) {
         ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
         Collection<JavabeanCuBuilder<JavabeanTypeEnum>> builders = Lists.newArrayList();
         Collection<String> dtoQualifiers = Lists.newArrayList();
@@ -150,8 +151,8 @@ public class ReqRespProc {
             }
             importNames.forEach(importName -> Imports.ensureImported(javabeanCu, importName));
 
-            toCreate.add(javabeanCu);
-            log.info("create Javabean [{}].", builder.getJavabean().getNameAsString());
+            Saves.add(javabeanCu);
+            log.info("generate Javabean [{}].", builder.getJavabean().getNameAsString());
         }
         return result;
     }

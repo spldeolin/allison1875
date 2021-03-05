@@ -27,7 +27,7 @@ public class ParseFirstLineProc {
                         if (vd.getNameAsString().equals("handler")) {
                             if (i.isStringLiteralExpr()) {
                                 if (result.getHandlerUrl() == null) {
-                                    result.setHandlerUrl(i.asStringLiteralExpr().getValue());
+                                    result.setHandlerUrl(ensureStartsWith(i.asStringLiteralExpr().getValue()));
                                 } else {
                                     log.warn("'handler' [{}] duplicate declaration, ignore.", i.toString());
                                 }
@@ -55,6 +55,13 @@ public class ParseFirstLineProc {
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
         return result;
+    }
+
+    private String ensureStartsWith(String s) {
+        if (!s.startsWith("/")) {
+            return "/" + s;
+        }
+        return s;
     }
 
 }
