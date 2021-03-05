@@ -1,10 +1,12 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.List;
+import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -17,8 +19,10 @@ import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
+import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -60,6 +64,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
+        Map<String, ServicePairDto> qualifier2Pair = Maps.newHashMap();
+
         int detectCount = 0;
         for (CompilationUnit cu : astForest) {
             for (ClassOrInterfaceDeclaration controller : controllerProc.collect(cu)) {
@@ -89,7 +95,16 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     SingleMethodServiceCuBuilder serviceBuilder = serviceProc
                             .generateServiceWithImpl(cu, firstLineDto, reqDtoRespDtoInfo);
 
-                    ServiceGeneration serviceGeneration = generateServicePairProc.generateService(null);
+                    GenerateServiceParam param = new GenerateServiceParam();
+                    param.setCu(cu);
+                    param.setFirstLineDto(firstLineDto);
+                    param.setReqDtoRespDtoInfo(reqDtoRespDtoInfo);
+                    param.setAstForest(astForest);
+                    param.setQualifier2Pair(qualifier2Pair);
+                    ServiceGeneration serviceGeneration = generateServicePairProc.generateService(param);
+                    if (serviceGeneration == null) {
+                        continue;
+                    }
 
                     // 创建ServiceImpl
                     Saves.add(serviceBuilder.buildServiceImpl());

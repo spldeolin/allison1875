@@ -27,7 +27,7 @@ public class ParseFirstLineProc {
                         if (vd.getNameAsString().equals("handler")) {
                             if (i.isStringLiteralExpr()) {
                                 if (result.getHandlerUrl() == null) {
-                                    result.setHandlerUrl(ensureStartsWith(i.asStringLiteralExpr().getValue()));
+                                    result.setHandlerUrl(i.asStringLiteralExpr().getValue());
                                 } else {
                                     log.warn("'handler' [{}] duplicate declaration, ignore.", i.toString());
                                 }
@@ -46,6 +46,17 @@ public class ParseFirstLineProc {
                                 log.warn("'desc' [{}] is not String Literal, ignore.", i.toString());
                             }
                         }
+                        if (vd.getNameAsString().equals("service")) {
+                            if (i.isClassExpr()) {
+                                result.setPresentServiceQualifier(i.asClassExpr().getType().resolve().describe());
+                            } else if (i.isStringLiteralExpr()) {
+                                result.setServiceName(i.asStringLiteralExpr().getValue());
+                            } else {
+                                log.warn("'service' [{}] is not String Literal nor Class Expression, ignore.",
+                                        i.toString());
+                            }
+
+                        }
                     }
                 }
             }));
@@ -55,13 +66,6 @@ public class ParseFirstLineProc {
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
         return result;
-    }
-
-    private String ensureStartsWith(String s) {
-        if (!s.startsWith("/")) {
-            return "/" + s;
-        }
-        return s;
     }
 
 }

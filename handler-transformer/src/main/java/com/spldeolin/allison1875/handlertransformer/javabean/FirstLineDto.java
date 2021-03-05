@@ -15,6 +15,10 @@ public class FirstLineDto {
 
     private String handlerDescription;
 
+    private String presentServiceQualifier;
+
+    private String serviceName;
+
     private Map<String, Object> more;
 
     @Override

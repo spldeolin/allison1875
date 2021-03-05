@@ -6,8 +6,10 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 
 /**
@@ -16,7 +18,10 @@ import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 @Singleton
 public class FindServiceProc {
 
-    public ServicePairDto findServiceWithServiceImpls(AstForest astForest, String presentServiceQualifier,
+    @Inject
+    private HandlerTransformerConfig handlerTransformerConfig;
+
+    public ServicePairDto findPresent(AstForest astForest, String presentServiceQualifier,
             Map<String, ServicePairDto> qualifier2Pair) {
         if (qualifier2Pair.get(presentServiceQualifier) != null) {
             return qualifier2Pair.get(presentServiceQualifier);
@@ -49,6 +54,12 @@ public class FindServiceProc {
         }
 
         return result;
+    }
+
+    public ServicePairDto findGenerated(String serviceName) {
+
+
+        return new ServicePairDto();
     }
 
 }
