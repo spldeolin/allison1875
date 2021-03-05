@@ -27,6 +27,8 @@ public class AstForest implements Iterable<CompilationUnit> {
      */
     private final Class<?> primaryClass;
 
+    private final boolean wholeProject;
+
     /**
      * AST森林的根目录
      */
@@ -46,6 +48,7 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     public AstForest(Class<?> primaryClass, boolean wholeProject) {
         this.primaryClass = primaryClass;
+        this.wholeProject = wholeProject;
         if (wholeProject) {
             astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
         } else {
@@ -59,6 +62,7 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     public AstForest(Class<?> primaryClass, boolean wholeProject, Set<Path> dependencyPaths) {
         this.primaryClass = primaryClass;
+        this.wholeProject = wholeProject;
         if (wholeProject) {
             astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
         } else {
@@ -82,6 +86,12 @@ public class AstForest implements Iterable<CompilationUnit> {
         this.iterator = new AstIterator(primaryClass.getClassLoader(), javasInForest);
         log.info("AST Forest reset");
         return this;
+    }
+
+    public AstForest clone() {
+        AstForest result = new AstForest(primaryClass, wholeProject);
+        log.info("AST Forest cloned");
+        return result;
     }
 
     public Class<?> getPrimaryClass() {

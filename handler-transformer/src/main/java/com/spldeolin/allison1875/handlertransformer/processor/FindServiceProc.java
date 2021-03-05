@@ -25,9 +25,9 @@ public class FindServiceProc {
         ClassOrInterfaceDeclaration service = null;
         Collection<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
         boolean caught = false;
-        for (CompilationUnit cu2 : astForest.clone()) {
-            if (cu2.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
-                ClassOrInterfaceDeclaration coid = cu2.getPrimaryType().get().asClassOrInterfaceDeclaration();
+        for (CompilationUnit cu : astForest.clone()) {
+            if (cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
+                ClassOrInterfaceDeclaration coid = cu.getPrimaryType().get().asClassOrInterfaceDeclaration();
                 if (coid.getFullyQualifiedName().isPresent() && coid.isInterface()) {
                     String qualifier = coid.getFullyQualifiedName().get();
                     if (qualifier.equals(presentServiceQualifier)) {
