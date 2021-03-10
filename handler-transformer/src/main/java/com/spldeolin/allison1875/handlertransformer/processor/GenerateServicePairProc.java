@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -11,6 +12,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
@@ -118,6 +120,15 @@ public class GenerateServicePairProc {
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
         method.setBody(null);
         pair.getService().addMember(method);
+        log.info("Method [{}] append to  Service [{}]", method.getName(), pair.getService().getName());
+        pair.getServiceImpls().forEach(serviceImpl -> serviceImpl.addMember(serviceMethodImpl));
+        log.info("MethodImpl [{}] append to  ServiceImpl [{}]", method.getName(),
+                pair.getServiceImpls().stream().map(ClassOrInterfaceDeclaration::getNameAsString)
+                        .collect(Collectors.joining(", ")));
+        for (String appendImport : methodGeneration.getAppendImports()) {
+            Imports.ensureImported(pair.getService(), appendImport);
+            pair.getServiceImpls().forEach(serviceImpl -> Imports.ensureImported(serviceImpl, appendImport));
+        }
 
         ServiceGeneration result = new ServiceGeneration();
         return result;
