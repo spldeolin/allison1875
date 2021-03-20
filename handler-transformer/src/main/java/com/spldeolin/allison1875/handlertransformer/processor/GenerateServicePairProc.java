@@ -91,11 +91,15 @@ public class GenerateServicePairProc {
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
         serviceMethod.setBody(null);
         pair.getService().addMember(serviceMethod);
+        Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+        Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getRespDtoQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
         Saves.add(pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new));
 
         for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
             serviceImpl.addMember(serviceMethodImpl);
+            Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+            Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getRespDtoQualifier());
             log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
             Saves.add(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new));
         }
