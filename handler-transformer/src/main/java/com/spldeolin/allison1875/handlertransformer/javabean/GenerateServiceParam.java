@@ -21,4 +21,6 @@ public class GenerateServiceParam {
 
     private Map<String, ServicePairDto> qualifier2Pair;
 
+    private Map<String, ServicePairDto> name2Pair;
+
 }

@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.nio.file.Path;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
+import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -20,10 +22,8 @@ import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
-import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceImplParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
-import com.spldeolin.allison1875.handlertransformer.javabean.ServiceImplGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,7 +54,7 @@ public class GenerateServicePairProc {
         ServicePairDto pair;
 
         if (StringUtils.isNotBlank(presentServiceQualifier)) {
-            // 使用既存的Service
+            // 指定了Service全限定名
             pair = findServiceProc
                     .findPresent(param.getAstForest(), presentServiceQualifier, param.getQualifier2Pair());
             if (pair.getService() == null) {
@@ -63,50 +63,21 @@ public class GenerateServicePairProc {
             }
 
         } else if (StringUtils.isNotBlank(serviceName)) {
-            // 使用指定命名的Service
-            pair = findServiceProc.findGenerated(serviceName);
+            String standardizedServiceName = standardizeServiceName(serviceName);
+            // 指定了Service的类名
+            pair = findServiceProc.findGenerated(param.getAstForest(), standardizedServiceName, param.getName2Pair());
             if (pair.getService() == null) {
-                CompilationUnit serviceCu = new CompilationUnit();
-                serviceCu.setPackageDeclaration(conf.getServicePackage());
-                serviceCu.setImports(param.getCu().getImports());
-                ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
-                service.setJavadocComment(Javadocs.createJavadoc("", conf.getAuthor()));
-                service.setPublic(true).setStatic(false).setInterface(true)
-                        .setName(standardizeServiceName(serviceName));
-                serviceCu.setType(0, service);
-                Path storage = Locations.getStorage(param.getCu()).getPath();
-                storage = storage.resolve(CodeGenerationUtils.packageToPath(conf.getServicePackage()));
-                storage = storage.resolve(service.getName() + ".java");
-                serviceCu.setStorage(storage);
-                Saves.add(serviceCu);
-                log.info("generate Service [{}]", service.getName());
-
-                CompilationUnit serviceImplCu = new CompilationUnit();
-                serviceImplCu.setPackageDeclaration(conf.getServiceImplPackage());
-                serviceImplCu.setImports(param.getCu().getImports());
-                serviceImplCu.addImport(AnnotationConstant.SLF4J_QUALIFIER);
-                ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-                serviceImpl.setJavadocComment(Javadocs.createJavadoc("", conf.getAuthor()));
-                serviceImpl.addAnnotation(AnnotationConstant.OVERRIDE);
-                serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
-                serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(service.getName() + "Impl");
-                serviceImplCu.setType(0, serviceImpl);
-                storage = Locations.getStorage(param.getCu()).getPath();
-                storage = storage.resolve(CodeGenerationUtils.packageToPath(conf.getServiceImplPackage()));
-                storage = storage.resolve(serviceImpl.getName() + ".java");
-                serviceImplCu.setStorage(storage);
-                Saves.add(serviceCu);
-                log.info("generate ServiceImpl [{}]", serviceImpl.getName());
-                pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
+                // 生成全新的 Service 与 ServiceImpl （往往时第一次获取到ServiceName时）
+                pair = generateServicePair(param, standardizedServiceName);
             }
 
         } else {
-            // 创建Single Method Service
-
-            pair = new ServicePairDto();
+            // 生成全新的 Service 与 ServiceImpl
+            serviceName = MoreStringUtils.upperFirstLetter(param.getFirstLineDto().getHandlerName()) + "Service";
+            pair = generateServicePair(param, serviceName);
         }
 
-        // TODO 调用handle创建Service Method，添加到ServicePair中
+        // 调用handle创建Service Method，添加到ServicePair中
         CreateServiceMethodHandleResult methodGeneration = createServiceMethodHandle
                 .createMethodImpl(firstLineDto, param.getReqDtoRespDtoInfo().getParamType(),
                         param.getReqDtoRespDtoInfo().getResultType());
@@ -116,28 +87,68 @@ public class GenerateServicePairProc {
         methodGeneration.getServiceMethod().setName(noRepeat);
 
         MethodDeclaration serviceMethodImpl = methodGeneration.getServiceMethod();
-        MethodDeclaration method = new MethodDeclaration().setType(serviceMethodImpl.getType())
+        MethodDeclaration serviceMethod = new MethodDeclaration().setType(serviceMethodImpl.getType())
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
-        method.setBody(null);
-        pair.getService().addMember(method);
-        log.info("Method [{}] append to  Service [{}]", method.getName(), pair.getService().getName());
-        pair.getServiceImpls().forEach(serviceImpl -> serviceImpl.addMember(serviceMethodImpl));
-        log.info("MethodImpl [{}] append to  ServiceImpl [{}]", method.getName(),
-                pair.getServiceImpls().stream().map(ClassOrInterfaceDeclaration::getNameAsString)
-                        .collect(Collectors.joining(", ")));
+        serviceMethod.setBody(null);
+        pair.getService().addMember(serviceMethod);
+        log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
+        Saves.add(pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new));
+
+        for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
+            serviceImpl.addMember(serviceMethodImpl);
+            log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
+            Saves.add(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new));
+        }
+
         for (String appendImport : methodGeneration.getAppendImports()) {
             Imports.ensureImported(pair.getService(), appendImport);
             pair.getServiceImpls().forEach(serviceImpl -> Imports.ensureImported(serviceImpl, appendImport));
         }
 
         ServiceGeneration result = new ServiceGeneration();
+        result.setServiceVarName(MoreStringUtils.lowerFirstLetter(pair.getService().getNameAsString()));
+        result.setService(pair.getService());
+        result.setServiceQualifier(
+                pair.getService().getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+        result.setMethodName(serviceMethod.getNameAsString());
         return result;
     }
 
-    public ServiceImplGeneration generateServiceImpl(GenerateServiceImplParam param) {
+    private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName) {
+        ServicePairDto pair;
+        CompilationUnit serviceCu = new CompilationUnit();
+        serviceCu.setPackageDeclaration(conf.getServicePackage());
+        serviceCu.setImports(param.getCu().getImports());
+        ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
+        service.setJavadocComment(Javadocs.createJavadoc("", conf.getAuthor()));
+        service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
+        serviceCu.setTypes(new NodeList<>(service));
+        Path storage = Locations.getStorage(param.getCu()).getSourceRoot();
+        storage = storage.resolve(CodeGenerationUtils.packageToPath(conf.getServicePackage()));
+        storage = storage.resolve(service.getName() + ".java");
+        serviceCu.setStorage(storage);
+        Saves.add(serviceCu);
+        log.info("generate Service [{}]", service.getName());
 
-        ServiceImplGeneration result = new ServiceImplGeneration();
-        return result;
+        CompilationUnit serviceImplCu = new CompilationUnit();
+        serviceImplCu.setPackageDeclaration(conf.getServiceImplPackage());
+        serviceImplCu.setImports(param.getCu().getImports());
+        serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+        serviceImplCu.addImport(AnnotationConstant.SLF4J_QUALIFIER);
+        ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
+        serviceImpl.setJavadocComment(Javadocs.createJavadoc("", conf.getAuthor()));
+        serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
+        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(service.getName() + "Impl")
+                .addImplementedType(service.getNameAsString());
+        serviceImplCu.setTypes(new NodeList<>(serviceImpl));
+        storage = Locations.getStorage(param.getCu()).getSourceRoot();
+        storage = storage.resolve(CodeGenerationUtils.packageToPath(conf.getServiceImplPackage()));
+        storage = storage.resolve(serviceImpl.getName() + ".java");
+        serviceImplCu.setStorage(storage);
+        Saves.add(serviceImplCu);
+        log.info("generate ServiceImpl [{}]", serviceImpl.getName());
+        pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
+        return pair;
     }
 
     private String standardizeServiceName(String serviceName) {
@@ -150,23 +161,6 @@ public class GenerateServicePairProc {
             log.info("Service name standardize from [{}] to [{}]", serviceName, result);
         }
         return result;
-    }
-
-    private String calcServiceName(FirstLineDto firstLineDto) {
-        String serviceName;
-        if (StringUtils.isNotBlank(firstLineDto.getServiceName())) {
-            serviceName = MoreStringUtils.upperFirstLetter(firstLineDto.getServiceName());
-            if (!serviceName.endsWith("Service")) {
-                serviceName += "Service";
-            }
-            // report standardize
-            if (!serviceName.equals(firstLineDto.getServiceName())) {
-                log.info("Service name standardize from [{}] to [{}]", firstLineDto.getServiceName(), serviceName);
-            }
-        } else {
-            serviceName = MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service";
-        }
-        return serviceName;
     }
 
 }

@@ -11,7 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.util.ast.Imports;
@@ -65,6 +64,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Override
     public void process(AstForest astForest) {
         Map<String, ServicePairDto> qualifier2Pair = Maps.newHashMap();
+        Map<String, ServicePairDto> name2Pair = Maps.newHashMap();
 
         int detectCount = 0;
         for (CompilationUnit cu : astForest) {
@@ -91,24 +91,18 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     // 创建所有所需的Javabean
                     ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.createJavabeans(cu, firstLineDto, dtos);
 
-                    // 创建Service
-                    SingleMethodServiceCuBuilder serviceBuilder = serviceProc
-                            .generateServiceWithImpl(cu, firstLineDto, reqDtoRespDtoInfo);
-
+                    // 创建Service Pair
                     GenerateServiceParam param = new GenerateServiceParam();
                     param.setCu(cu);
                     param.setFirstLineDto(firstLineDto);
                     param.setReqDtoRespDtoInfo(reqDtoRespDtoInfo);
                     param.setAstForest(astForest);
                     param.setQualifier2Pair(qualifier2Pair);
+                    param.setName2Pair(name2Pair);
                     ServiceGeneration serviceGeneration = generateServicePairProc.generateService(param);
                     if (serviceGeneration == null) {
                         continue;
                     }
-
-                    // 创建ServiceImpl
-                    Saves.add(serviceBuilder.buildServiceImpl());
-                    log.info("generate ServiceImpl [{}].", serviceBuilder.getServiceImpl().getNameAsString());
 
                     // 在controller中创建handler
                     controllerProc
