@@ -19,7 +19,7 @@ public class FileBackupUtils {
         String destPath = srcPath + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss") + ".bak";
         try {
             FileUtils.copyFile(src, new File(destPath));
-            log.info("文件[{}]备份到了[{}]", srcPath, destPath);
+            log.info("File [{}] back up to [{}]", srcPath, destPath);
         } catch (IOException e) {
             log.error("src={}", src, e);
             throw new FileBackupException(e);
