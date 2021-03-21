@@ -125,6 +125,7 @@ public class GenerateServicePairProc {
 
     private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName,
             Map<String, ServicePairDto> name2Pair) {
+        Path sourceRoot = Locations.getStorage(param.getCu()).getSourceRoot();
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(conf.getServicePackage());
@@ -133,9 +134,8 @@ public class GenerateServicePairProc {
         Authors.ensureAuthorExist(service, conf.getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
         serviceCu.setTypes(new NodeList<>(service));
-        Path storage = Locations.getStorage(param.getCu()).getSourceRoot();
-        storage = storage.resolve(CodeGenerationUtils.packageToPath(conf.getServicePackage()));
-        storage = storage.resolve(service.getName() + ".java");
+        Path storage = CodeGenerationUtils
+                .fileInPackageAbsolutePath(sourceRoot, conf.getServicePackage(), service.getName() + ".java");
         serviceCu.setStorage(storage);
         Saves.add(serviceCu);
         log.info("generate Service [{}]", service.getName());
@@ -151,9 +151,8 @@ public class GenerateServicePairProc {
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(service.getName() + "Impl")
                 .addImplementedType(service.getNameAsString());
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        storage = Locations.getStorage(param.getCu()).getSourceRoot();
-        storage = storage.resolve(CodeGenerationUtils.packageToPath(conf.getServiceImplPackage()));
-        storage = storage.resolve(serviceImpl.getName() + ".java");
+        storage = CodeGenerationUtils
+                .fileInPackageAbsolutePath(sourceRoot, conf.getServiceImplPackage(), serviceImpl.getName() + ".java");
         serviceImplCu.setStorage(storage);
         Saves.add(serviceImplCu);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
