@@ -15,8 +15,8 @@ import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -130,7 +130,7 @@ public class GenerateServicePairProc {
         serviceCu.setPackageDeclaration(conf.getServicePackage());
         serviceCu.setImports(param.getCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
-        service.setJavadocComment(Javadocs.createJavadoc("", conf.getAuthor()));
+        Authors.ensureAuthorExist(service, conf.getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
         serviceCu.setTypes(new NodeList<>(service));
         Path storage = Locations.getStorage(param.getCu()).getSourceRoot();
@@ -146,7 +146,7 @@ public class GenerateServicePairProc {
         serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         serviceImplCu.addImport(AnnotationConstant.SLF4J_QUALIFIER);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-        serviceImpl.setJavadocComment(Javadocs.createJavadoc("", conf.getAuthor()));
+        Authors.ensureAuthorExist(serviceImpl, conf.getAuthor());
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(service.getName() + "Impl")
                 .addImplementedType(service.getNameAsString());
