@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.nio.file.Path;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -68,13 +69,13 @@ public class GenerateServicePairProc {
             pair = findServiceProc.findGenerated(param.getAstForest(), standardizedServiceName, param.getName2Pair());
             if (pair.getService() == null) {
                 // 生成全新的 Service 与 ServiceImpl （往往时第一次获取到ServiceName时）
-                pair = generateServicePair(param, standardizedServiceName);
+                pair = generateServicePair(param, standardizedServiceName, param.getName2Pair());
             }
 
         } else {
             // 生成全新的 Service 与 ServiceImpl
             serviceName = MoreStringUtils.upperFirstLetter(param.getFirstLineDto().getHandlerName()) + "Service";
-            pair = generateServicePair(param, serviceName);
+            pair = generateServicePair(param, serviceName, param.getName2Pair());
         }
 
         // 调用handle创建Service Method，添加到ServicePair中
@@ -86,6 +87,7 @@ public class GenerateServicePairProc {
                 .inService(pair.getService(), methodGeneration.getServiceMethod().getNameAsString());
         methodGeneration.getServiceMethod().setName(noRepeat);
 
+        // 将方法以及Req、Resp的全名 添加到 Service
         MethodDeclaration serviceMethodImpl = methodGeneration.getServiceMethod();
         MethodDeclaration serviceMethod = new MethodDeclaration().setType(serviceMethodImpl.getType())
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
@@ -96,6 +98,7 @@ public class GenerateServicePairProc {
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
         Saves.add(pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new));
 
+        // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
         for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
             serviceImpl.addMember(serviceMethodImpl);
             Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getReqDtoQualifier());
@@ -104,8 +107,10 @@ public class GenerateServicePairProc {
             Saves.add(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new));
         }
 
+        // 将生成的方法所需的import 均添加到 Service 和 每个 ServiceImpl
         for (String appendImport : methodGeneration.getAppendImports()) {
             Imports.ensureImported(pair.getService(), appendImport);
+            Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getReqDtoQualifier());
             pair.getServiceImpls().forEach(serviceImpl -> Imports.ensureImported(serviceImpl, appendImport));
         }
 
@@ -118,7 +123,8 @@ public class GenerateServicePairProc {
         return result;
     }
 
-    private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName) {
+    private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName,
+            Map<String, ServicePairDto> name2Pair) {
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(conf.getServicePackage());
@@ -152,6 +158,7 @@ public class GenerateServicePairProc {
         Saves.add(serviceImplCu);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
         pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
+        name2Pair.put(serviceName, pair);
         return pair;
     }
 
