@@ -66,7 +66,7 @@ public class GenerateServicePairProc {
         } else if (StringUtils.isNotBlank(serviceName)) {
             String standardizedServiceName = standardizeServiceName(serviceName);
             // 指定了Service的类名
-            pair = findServiceProc.findGenerated(param.getAstForest(), standardizedServiceName, param.getName2Pair());
+            pair = findServiceProc.findGenerated(param.getCu(), standardizedServiceName, param.getName2Pair());
             if (pair.getService() == null) {
                 // 生成全新的 Service 与 ServiceImpl （往往时第一次获取到ServiceName时）
                 pair = generateServicePair(param, standardizedServiceName, param.getName2Pair());
