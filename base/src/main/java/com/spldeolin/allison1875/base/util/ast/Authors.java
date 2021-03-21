@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base.util.ast;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -99,11 +100,11 @@ public class Authors {
             Javadoc javadoc = javadocOpt.get();
             if (javadoc.getBlockTags().stream()
                     .noneMatch(javadocBlockTag -> javadocBlockTag.getType() == Type.AUTHOR)) {
-                javadoc.addBlockTag(Type.AUTHOR.name(), authorName);
+                javadoc.addBlockTag(Type.AUTHOR.name(), authorName + " " + LocalDate.now());
             }
         } else {
             Javadoc javadoc = new JavadocComment("").parse();
-            javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, authorName));
+            javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR, authorName + " " + LocalDate.now()));
             node.setJavadocComment(javadoc);
         }
     }
