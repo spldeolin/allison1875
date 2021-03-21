@@ -108,11 +108,8 @@ public class ReqRespProc {
             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
             clone.getAnnotations().clear();
             clone.addAnnotation(AnnotationConstant.DATA);
-            // 所有RespDto与其中的嵌套Dto（NestDto），都会有@Accessor(chains = true)，方便像return new Xxx().setA(..).setB(..)这样链式调用
-            if (javabeanType == JavabeanTypeEnum.RESP_DTO || javabeanType == JavabeanTypeEnum.NEST_DTO_IN_RESP) {
-                clone.addAnnotation(AnnotationConstant.ACCESSORS);
-                builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
-            }
+            clone.addAnnotation(AnnotationConstant.ACCESSORS);
+            builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
             Authors.ensureAuthorExist(clone, handlerTransformerConfig.getAuthor());
             builder.coid(clone);
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
