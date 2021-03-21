@@ -19,6 +19,8 @@ public class FirstLineDto {
 
     private String serviceName;
 
+    private String apiQualifier;
+
     private Map<String, Object> more;
 
     @Override

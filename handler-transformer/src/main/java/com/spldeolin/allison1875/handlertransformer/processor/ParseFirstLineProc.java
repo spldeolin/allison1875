@@ -24,7 +24,7 @@ public class ParseFirstLineProc {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     if (vd.getInitializer().isPresent()) {
                         Expression i = vd.getInitializer().get();
-                        if (vd.getNameAsString().equals("handler")) {
+                        if (StringUtils.equalsAny(vd.getNameAsString(), "handler", "h")) {
                             if (i.isStringLiteralExpr()) {
                                 if (result.getHandlerUrl() == null) {
                                     result.setHandlerUrl(i.asStringLiteralExpr().getValue());
@@ -35,7 +35,7 @@ public class ParseFirstLineProc {
                                 log.warn("'handler' [{}] is not String Literal, ignore.", i.toString());
                             }
                         }
-                        if (vd.getNameAsString().equals("desc")) {
+                        if (StringUtils.equalsAny(vd.getNameAsString(), "desc", "d")) {
                             if (i.isStringLiteralExpr()) {
                                 if (result.getHandlerDescription() == null) {
                                     result.setHandlerDescription(i.asStringLiteralExpr().getValue());
@@ -46,7 +46,7 @@ public class ParseFirstLineProc {
                                 log.warn("'desc' [{}] is not String Literal, ignore.", i.toString());
                             }
                         }
-                        if (vd.getNameAsString().equals("service")) {
+                        if (StringUtils.equalsAny(vd.getNameAsString(), "service", "s")) {
                             if (i.isClassExpr()) {
                                 result.setPresentServiceQualifier(i.asClassExpr().getType().resolve().describe());
                             } else if (i.isStringLiteralExpr()) {
@@ -56,6 +56,13 @@ public class ParseFirstLineProc {
                                         i.toString());
                             }
 
+                        }
+                        if (StringUtils.equalsAny(vd.getNameAsString(), "api", "a")) {
+                            if (i.isClassExpr()) {
+                                result.setApiQualifier(i.asClassExpr().getType().resolve().describe());
+                            } else {
+                                log.warn("'api' [{}] is not Class Expression, ignore.", i.toString());
+                            }
                         }
                     }
                 }
