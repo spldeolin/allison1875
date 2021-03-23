@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.enums.JdbcTypeEnum;
+import com.spldeolin.allison1875.persistencegenerator.handle.JdbcTypeHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -27,6 +27,9 @@ public class BuildPersistenceDtoProc {
 
     @Inject
     private QueryInformationSchemaProc queryInformationSchemaProc;
+
+    @Inject
+    private JdbcTypeHandle jdbcTypeHandle;
 
     public Collection<PersistenceDto> process() {
         // 查询information_schema.COLUMNS、information_schema.TABLES表
@@ -55,11 +58,12 @@ public class BuildPersistenceDtoProc {
             PropertyDto property = new PropertyDto();
             property.setColumnName(columnName);
             property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
-            JdbcTypeEnum jdbcTypeEnum = calcJavaType(columnMeta);
-            if (jdbcTypeEnum == null) {
+            Class<?> javaType = jdbcTypeHandle.jdbcType2javaType(columnMeta.getColumnType(), columnMeta.getDataType());
+            if (javaType == null) {
+                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", columnMeta.getColumnName(),
+                        columnMeta.getDataType(), columnMeta.getColumnType());
                 continue;
             }
-            Class<?> javaType = jdbcTypeEnum.getJavaType();
             property.setJavaType(javaType);
             property.setDescription(columnMeta.getColumnComment());
             property.setLength(columnMeta.getCharacterMaximumLength());
@@ -100,19 +104,6 @@ public class BuildPersistenceDtoProc {
 
     private String endWith() {
         return persistenceGeneratorConfig.getIsEntityEndWithEntity() ? "Entity" : "";
-    }
-
-    private static JdbcTypeEnum calcJavaType(InformationSchemaDto columnMeta) {
-        JdbcTypeEnum jdbcTypeEnum = JdbcTypeEnum.likeColumnType(columnMeta.getColumnType());
-        if (jdbcTypeEnum == null) {
-            jdbcTypeEnum = JdbcTypeEnum.ofDataType(columnMeta.getDataType());
-        }
-        if (jdbcTypeEnum == null) {
-            log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", columnMeta.getColumnName(),
-                    columnMeta.getDataType(), columnMeta.getColumnType());
-            return null;
-        }
-        return jdbcTypeEnum;
     }
 
 }

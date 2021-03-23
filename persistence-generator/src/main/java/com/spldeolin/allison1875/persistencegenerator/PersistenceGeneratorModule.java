@@ -6,8 +6,10 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateEntityFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.DefaultGenerateQueryDesignFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.DefaultJdbcTypeHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
+import com.spldeolin.allison1875.persistencegenerator.handle.JdbcTypeHandle;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 
 /**
@@ -19,6 +21,7 @@ public class PersistenceGeneratorModule extends Allison1875Module {
     protected void configure() {
         bind(GenerateEntityFieldHandle.class).to(DefaultGenerateEntityFieldHandle.class);
         bind(GenerateQueryDesignFieldHandle.class).to(DefaultGenerateQueryDesignFieldHandle.class);
+        bind(JdbcTypeHandle.class).to(DefaultJdbcTypeHandle.class);
     }
 
     @Override
