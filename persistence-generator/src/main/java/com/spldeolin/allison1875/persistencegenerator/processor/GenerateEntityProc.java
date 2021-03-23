@@ -2,12 +2,11 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -80,7 +79,7 @@ public class GenerateEntityProc {
         }
 
         // 生成Entity（可能是覆盖）
-        List<String> imports = this.getImports(persistence);
+        List<String> imports = Lists.newArrayList(this.getImports(persistence));
         String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
         if (StringUtils.isNotEmpty(superEntityQualifier)) {
             imports.add(superEntityQualifier);
@@ -180,13 +179,13 @@ public class GenerateEntityProc {
         return result;
     }
 
-    private List<String> getImports(PersistenceDto persistence) {
-        List<String> result = Lists.newArrayList();
-        if (persistence.getProperties().stream().anyMatch(prop -> prop.getJavaType() == BigDecimal.class)) {
-            result.add("java.math.BigDecimal");
-        }
-        if (persistence.getProperties().stream().anyMatch(prop -> prop.getJavaType() == Date.class)) {
-            result.add("java.util.Date");
+    private Set<String> getImports(PersistenceDto persistence) {
+        Set<String> result = Sets.newHashSet();
+        for (PropertyDto prop : persistence.getProperties()) {
+            String qualifier = prop.getJavaType().getName();
+            if (!qualifier.startsWith("java.lang")) {
+                result.add(qualifier);
+            }
         }
         result.add("lombok.Data");
         return result;
