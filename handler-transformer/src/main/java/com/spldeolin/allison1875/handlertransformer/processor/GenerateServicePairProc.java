@@ -145,9 +145,11 @@ public class GenerateServicePairProc {
         serviceImplCu.setImports(param.getCu().getImports());
         serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         serviceImplCu.addImport(AnnotationConstant.SLF4J_QUALIFIER);
+        serviceImplCu.addImport(AnnotationConstant.SERVICE_QUALIFIER);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         Authors.ensureAuthorExist(serviceImpl, conf.getAuthor());
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
+        serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(service.getName() + "Impl")
                 .addImplementedType(service.getNameAsString());
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
