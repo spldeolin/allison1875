@@ -8,7 +8,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Version {
 
-    public static final String numberCode = "4.2";
+    public static final String numberCode = "4.3-SNAPSHOT";
 
     public static final String title = "Allison 1875 " + numberCode;
 
