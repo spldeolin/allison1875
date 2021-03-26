@@ -71,6 +71,9 @@ public class ParseFirstLineProc {
         if (StringUtils.isBlank(result.getHandlerUrl())) {
             return null;
         }
+        if (StringUtils.isBlank(result.getHandlerDescription())) {
+            result.setHandlerDescription("未指定描述");
+        }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
         return result;
     }
