@@ -38,7 +38,7 @@ public class AstIterator implements Iterator<CompilationUnit> {
         Path javaPath = javaPaths.next();
         try {
             CompilationUnit cu = StaticJavaParser.parse(javaPath);
-            log.info("CompilationUnit@{} <- SourceCode {}", cu.hashCode(),
+            log.debug("CompilationUnit@{} <- SourceCode {}", cu.hashCode(),
                     Locations.getStorage(cu).getSourceRoot().relativize(Locations.getAbsolutePath(cu)));
             return cu;
         } catch (ParseProblemException e) {
