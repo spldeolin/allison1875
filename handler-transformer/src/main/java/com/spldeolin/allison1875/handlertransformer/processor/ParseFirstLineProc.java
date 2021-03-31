@@ -69,6 +69,7 @@ public class ParseFirstLineProc {
             }));
         }
         if (StringUtils.isBlank(result.getHandlerUrl())) {
+            log.warn("'handler' [{}] is blank, ignore", result.getHandlerUrl());
             return null;
         }
         if (StringUtils.isBlank(result.getHandlerDescription())) {
