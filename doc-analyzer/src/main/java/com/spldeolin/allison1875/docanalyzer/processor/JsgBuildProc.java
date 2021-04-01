@@ -123,7 +123,7 @@ public class JsgBuildProc {
                     解析自Field类型的唯一一个泛型上的校验注解（如果有唯一泛型的话）
                     e.g: private Collection<@NotBlank @Length(max = 10) String> userNames;
                  */
-                boolean isLikeCollection = annotated.getType().getRawClass().isAssignableFrom(Collection.class);
+                boolean isLikeCollection = Collection.class.isAssignableFrom(annotated.getType().getRawClass());
                 if (isLikeCollection) {
                     AnnotatedType at = field.getAnnotatedType();
                     if (at instanceof AnnotatedParameterizedType) {
@@ -132,7 +132,7 @@ public class JsgBuildProc {
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
                             Collection<ValidatorDto> theOnlyElementValids = validProc.process(theOnlyTypeArgument);
-                            theOnlyElementValids.forEach(one -> one.setValidatorType("内部元素" + one.getValidatorType()));
+                            theOnlyElementValids.forEach(one -> one.setValidatorType("列表内元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);
                         }
                     }
