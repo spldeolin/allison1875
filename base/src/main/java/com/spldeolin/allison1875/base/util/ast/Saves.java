@@ -2,9 +2,11 @@ package com.spldeolin.allison1875.base.util.ast;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.FileBackupUtils;
 
@@ -14,6 +16,17 @@ import com.spldeolin.allison1875.base.util.FileBackupUtils;
  * @author Deolin 2020-01-26
  */
 public class Saves {
+
+    private static final ThreadLocal<Set<CompilationUnit>> toSaveCus = ThreadLocal.withInitial(Sets::newHashSet);
+
+    public static void add(CompilationUnit cu) {
+        toSaveCus.get().add(cu);
+    }
+
+    public static void saveAll() {
+        toSaveCus.get().forEach(Saves::save);
+        toSaveCus.get().clear();
+    }
 
     /**
      * 以代码格式化的形式进行保存

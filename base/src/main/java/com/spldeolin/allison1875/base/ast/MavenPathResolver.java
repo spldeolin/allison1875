@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -40,8 +41,7 @@ public class MavenPathResolver {
     private static Path findParentPathRecursively(Model child, Path childPath)
             throws IOException, XmlPullParserException {
         Parent parent = child.getParent();
-        if (parent == null) {
-
+        if (parent == null || StringUtils.isEmpty(parent.getRelativePath())) {
             return childPath;
         }
         Path parentPomPath = childPath.resolve(parent.getRelativePath()).normalize();

@@ -168,7 +168,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         // 构建并遍历 PersistenceDto对象
         Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoProc.process();
         if (persistenceDtos.size() == 0) {
-            log.warn("no tables detect in Connection [{}].", config.getJdbcUrl());
+            log.warn("no tables detect in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
         }
         for (PersistenceDto persistence : persistenceDtos) {

@@ -8,16 +8,19 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.SingleMethodServiceCuBuilder;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-01-12
  */
 @Singleton
+@Slf4j
 public class ServiceProc {
 
     @Inject
@@ -50,6 +53,9 @@ public class ServiceProc {
                 .createMethodImpl(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType());
         serviceBuilder.method(creation.getServiceMethod());
         serviceBuilder.importDeclarationsString(creation.getAppendImports());
+
+        Saves.add(serviceBuilder.buildService());
+        log.info("generate Service [{}].", serviceBuilder.getService().getNameAsString());
 
         return serviceBuilder;
     }

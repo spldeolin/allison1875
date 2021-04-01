@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
 import com.spldeolin.allison1875.handlertransformer.handle.FieldHandle;
@@ -71,8 +72,8 @@ public class ReqRespProc {
         }
     }
 
-    public ReqDtoRespDtoInfo createJavabeans(Set<CompilationUnit> toCreate, CompilationUnit cu,
-            FirstLineDto firstLineDto, List<ClassOrInterfaceDeclaration> dtos) {
+    public ReqDtoRespDtoInfo createJavabeans(CompilationUnit cu, FirstLineDto firstLineDto,
+            List<ClassOrInterfaceDeclaration> dtos) {
         ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
         Collection<JavabeanCuBuilder<JavabeanTypeEnum>> builders = Lists.newArrayList();
         Collection<String> dtoQualifiers = Lists.newArrayList();
@@ -107,11 +108,8 @@ public class ReqRespProc {
             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
             clone.getAnnotations().clear();
             clone.addAnnotation(AnnotationConstant.DATA);
-            // 所有RespDto与其中的嵌套Dto（NestDto），都会有@Accessor(chains = true)，方便像return new Xxx().setA(..).setB(..)这样链式调用
-            if (javabeanType == JavabeanTypeEnum.RESP_DTO || javabeanType == JavabeanTypeEnum.NEST_DTO_IN_RESP) {
-                clone.addAnnotation(AnnotationConstant.ACCESSORS);
-                builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
-            }
+            clone.addAnnotation(AnnotationConstant.ACCESSORS);
+            builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
             Authors.ensureAuthorExist(clone, handlerTransformerConfig.getAuthor());
             builder.coid(clone);
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
@@ -130,7 +128,9 @@ public class ReqRespProc {
                 ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode().get();
                 FieldDeclarationBuilder fieldBuilder = new FieldDeclarationBuilder();
                 dto.getJavadoc().ifPresent(fieldBuilder::javadoc);
-                fieldBuilder.annotationExpr("@Valid");
+                if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_RESP) {
+                    fieldBuilder.annotationExpr(AnnotationConstant.VALID);
+                }
                 this.moveAnnotationsFromDtoToField(dto, fieldBuilder);
                 fieldBuilder.type(calcType(dto));
                 fieldBuilder.fieldName(MoreStringUtils.upperCamelToLowerCamel(dto.getNameAsString()));
@@ -150,8 +150,8 @@ public class ReqRespProc {
             }
             importNames.forEach(importName -> Imports.ensureImported(javabeanCu, importName));
 
-            toCreate.add(javabeanCu);
-            log.info("create Javabean [{}].", builder.getJavabean().getNameAsString());
+            Saves.add(javabeanCu);
+            log.info("generate Javabean [{}].", builder.getJavabean().getNameAsString());
         }
         return result;
     }

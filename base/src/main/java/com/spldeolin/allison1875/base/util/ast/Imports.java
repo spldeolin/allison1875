@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base.util.ast;
 
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
@@ -14,6 +15,9 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 public class Imports {
 
     public static void ensureImported(Node node, String importName) {
+        if (StringUtils.isEmpty(importName)) {
+            return;
+        }
         if (importName.endsWith(".*")) {
             ensureImported(node, MoreStringUtils.replaceLast(importName, ".*", ""), false, true);
         } else {
