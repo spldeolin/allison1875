@@ -4,6 +4,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
+import com.spldeolin.allison1875.docanalyzer.handle.AccessDescriptionHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
@@ -14,6 +15,7 @@ import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultAnalyzeEnumConst
 import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultMoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultObtainConcernedResponseBodyHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.impl.DefaultSpecificFieldDescriptionsHandle;
+import com.spldeolin.allison1875.docanalyzer.handleimpl.DefaultAccessDescriptionHandle;
 import com.spldeolin.allison1875.docanalyzer.processor.DocAnalyzer;
 import lombok.extern.log4j.Log4j2;
 
@@ -30,6 +32,7 @@ public class DocAnalyzerModule extends Allison1875Module {
         bind(MoreJpdvAnalysisHandle.class).to(DefaultMoreJpdvAnalysisHandle.class);
         bind(ObtainConcernedResponseBodyHandle.class).to(DefaultObtainConcernedResponseBodyHandle.class);
         bind(SpecificFieldDescriptionsHandle.class).to(DefaultSpecificFieldDescriptionsHandle.class);
+        bind(AccessDescriptionHandle.class).to(DefaultAccessDescriptionHandle.class);
     }
 
     @Override

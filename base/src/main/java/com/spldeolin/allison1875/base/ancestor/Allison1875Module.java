@@ -22,6 +22,10 @@ public abstract class Allison1875Module extends AbstractModule {
 
     protected abstract Set<Class<?>> provideConfigTypes();
 
+    @Override
+    protected void configure() {
+    }
+
     public boolean validateConfig(Injector injector) {
         Set<ConstraintViolation<Object>> allViolations = Sets.newHashSet();
         for (Class<?> configType : getProvidedConfigWithBaseConfigType()) {
