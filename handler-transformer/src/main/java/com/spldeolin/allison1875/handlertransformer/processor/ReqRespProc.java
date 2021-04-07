@@ -128,7 +128,7 @@ public class ReqRespProc {
                 ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode().get();
                 FieldDeclarationBuilder fieldBuilder = new FieldDeclarationBuilder();
                 dto.getJavadoc().ifPresent(fieldBuilder::javadoc);
-                if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_RESP) {
+                if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
                     fieldBuilder.annotationExpr(AnnotationConstant.VALID);
                 }
                 this.moveAnnotationsFromDtoToField(dto, fieldBuilder);
