@@ -95,7 +95,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
                 // 处理controller级与handler级的@RequestMapping
                 RequestMappingFullDto requestMappingFullDto = requestMappingProcessor
-                        .analyze(controller.getReflection(), handler.getReflection(), config.getGlobalUrlPrefix());
+                        .analyze(controller.getReflection(), handler.getReflection(), config.getGlobalUrlPrefix(), config.getGlobalUrlPrefixIndex());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
                 Collection<EndpointDto> copies = copyEndpointProc.process(endpoint, requestMappingFullDto);

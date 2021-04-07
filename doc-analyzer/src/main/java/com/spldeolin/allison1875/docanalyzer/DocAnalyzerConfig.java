@@ -31,6 +31,12 @@ public final class DocAnalyzerConfig extends AbstractModule {
     private String globalUrlPrefix;
 
     /**
+     * 全局URL前缀 
+     */
+    @NotNull
+    private Integer globalUrlPrefixIndex;
+
+    /**
      * YApi请求URL
      */
     @NotEmpty

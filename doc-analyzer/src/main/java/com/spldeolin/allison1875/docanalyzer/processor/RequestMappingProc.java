@@ -28,7 +28,7 @@ public class RequestMappingProc {
     @Inject
     AntPathMatcher pathMatcher;
 
-    public RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix) {
+    public RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix, Integer globalUrlPrefixIndex) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         String[] controllerPaths = findValueFromAnno(controllerRequestMapping);
         RequestMethod[] controllerVerbs = findVerbFromAnno(controllerRequestMapping);
@@ -42,7 +42,20 @@ public class RequestMappingProc {
         if (StringUtils.isNotBlank(globalUrlPrefix)) {
             ListIterator<String> itr = combinedUrls.listIterator();
             while (itr.hasNext()) {
-                itr.set(globalUrlPrefix + itr.next());
+                if(globalUrlPrefixIndex == null || globalUrlPrefixIndex == 0){
+                    itr.set(globalUrlPrefix + itr.next());
+                }else {
+                    String[] urls = itr.next().split("/");
+                    StringBuilder result = new StringBuilder();
+                    for (int i = 0; i < urls.length; i ++){
+                        if(globalUrlPrefixIndex == i){
+                            result.append(globalUrlPrefix).append("/").append(urls[i]);
+                        }else{
+                            result.append("/").append(urls[i]);
+                        }
+                    }
+                    itr.set(result.toString());
+                }
             }
         }
         Collection<RequestMethod> combinedVerbs = combineVerb(controllerVerbs, methodVerbs);
