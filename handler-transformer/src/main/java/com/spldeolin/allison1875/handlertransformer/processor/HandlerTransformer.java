@@ -89,7 +89,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
                     // 创建所有所需的Javabean
-                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.createJavabeans(cu, firstLineDto, dtos);
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc
+                            .createJavabeans(astForest, cu, firstLineDto, dtos);
 
                     // 创建Service Pair
                     GenerateServiceParam param = new GenerateServiceParam();

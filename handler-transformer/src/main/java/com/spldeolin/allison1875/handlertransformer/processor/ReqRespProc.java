@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
@@ -44,6 +45,9 @@ public class ReqRespProc {
     @Inject
     private FieldHandle fieldHandle;
 
+    @Inject
+    private EnsureNoRepeatProc ensureNoRepeatProc;
+
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
             throw new IllegalArgumentException(
@@ -72,7 +76,7 @@ public class ReqRespProc {
         }
     }
 
-    public ReqDtoRespDtoInfo createJavabeans(CompilationUnit cu, FirstLineDto firstLineDto,
+    public ReqDtoRespDtoInfo createJavabeans(AstForest astForest, CompilationUnit cu, FirstLineDto firstLineDto,
             List<ClassOrInterfaceDeclaration> dtos) {
         ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
         Collection<JavabeanCuBuilder<JavabeanTypeEnum>> builders = Lists.newArrayList();
@@ -85,7 +89,8 @@ public class ReqRespProc {
             javabeanType = estimateJavabeanType(dto);
             builder.context(javabeanType);
 
-            String javabeanName = concatJavabeanName(firstLineDto, dto, javabeanType);
+            String javabeanName = standardizeJavabeanName(firstLineDto, dto, javabeanType);
+            javabeanName = ensureNoRepeatProc.inAstForest(astForest, javabeanName);
             dto.setName(javabeanName);
 
             // 计算每一个dto的package
@@ -182,7 +187,7 @@ public class ReqRespProc {
         }
     }
 
-    private String concatJavabeanName(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration dto,
+    private String standardizeJavabeanName(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration dto,
             JavabeanTypeEnum javabeanType) {
         String javaBeanName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
