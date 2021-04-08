@@ -12,4 +12,5 @@ public interface AccessDescriptionHandle {
     Collection<String> accessMethod(HandlerFullDto handlerFullDto);
 
     Collection<String> accessField(FieldDeclaration field);
+
 }

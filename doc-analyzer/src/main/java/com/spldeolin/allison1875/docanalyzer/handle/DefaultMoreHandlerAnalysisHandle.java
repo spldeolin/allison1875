@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
 import javax.inject.Singleton;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 
 /**

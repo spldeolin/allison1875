@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.Authors;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.handle.AccessDescriptionHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreHandlerAnalysisHandle;
