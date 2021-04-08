@@ -6,7 +6,7 @@
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875</artifactId>
     <packaging>pom</packaging>
-    <version>5.2</version>
+    <version>5.3-SNAPSHOT</version>
 
     <modules>
         <module>allison1875-all</module>
