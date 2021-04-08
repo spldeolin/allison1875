@@ -1,12 +1,17 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.Statement;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.constant.FirstLineMoreKey;
+import com.spldeolin.allison1875.handlertransformer.handle.FirstLineMoreParseHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -16,6 +21,12 @@ import lombok.extern.log4j.Log4j2;
 @Singleton
 @Log4j2
 public class ParseFirstLineProc {
+
+    @Inject
+    private HandlerTransformerConfig handlerTransformerConfig;
+
+    @Inject
+    private FirstLineMoreParseHandle firstLineMoreParseHandle;
 
     public FirstLineDto parse(NodeList<Statement> statements) {
         FirstLineDto result = new FirstLineDto();
@@ -55,15 +66,9 @@ public class ParseFirstLineProc {
                                 log.warn("'service' [{}] is not String Literal nor Class Expression, ignore.",
                                         i.toString());
                             }
-
                         }
-                        if (StringUtils.equalsAny(vd.getNameAsString(), "api", "a")) {
-                            if (i.isClassExpr()) {
-                                result.setApiQualifier(i.asClassExpr().getType().resolve().describe());
-                            } else {
-                                log.warn("'api' [{}] is not Class Expression, ignore.", i.toString());
-                            }
-                        }
+                        Pair<String, Object> pair = firstLineMoreParseHandle.parseMore(vd);
+                        result.getMore().put(pair.getKey(), pair.getValue());
                     }
                 }
             }));

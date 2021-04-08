@@ -17,6 +17,7 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
+import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
@@ -60,6 +61,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
 
     @Inject
     private GenerateServicePairProc generateServicePairProc;
+
+    @Inject
+    private MoreTransformHandle moreTransformHandle;
 
     @Override
     public void process(AstForest astForest) {
@@ -108,6 +112,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     // 在controller中创建handler
                     controllerProc
                             .createHandlerToController(firstLineDto, controller, serviceGeneration, reqDtoRespDtoInfo);
+
+                    moreTransformHandle.transform(astForest.reset(), firstLineDto);
 
                     // 从controller中删除init
                     boolean anyTransformed = init.remove();
