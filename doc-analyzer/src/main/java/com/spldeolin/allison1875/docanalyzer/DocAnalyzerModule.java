@@ -7,6 +7,8 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.docanalyzer.handle.AccessDescriptionHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeCustomValidationHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.DefaultMoreHandlerAnalysisHandle;
+import com.spldeolin.allison1875.docanalyzer.handle.MoreHandlerAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.ObtainConcernedResponseBodyHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
@@ -33,6 +35,7 @@ public class DocAnalyzerModule extends Allison1875Module {
         bind(ObtainConcernedResponseBodyHandle.class).to(DefaultObtainConcernedResponseBodyHandle.class);
         bind(SpecificFieldDescriptionsHandle.class).to(DefaultSpecificFieldDescriptionsHandle.class);
         bind(AccessDescriptionHandle.class).to(DefaultAccessDescriptionHandle.class);
+        bind(MoreHandlerAnalysisHandle.class).to(DefaultMoreHandlerAnalysisHandle.class);
     }
 
     @Override
