@@ -30,6 +30,8 @@ public class EndpointDto {
 
     private String sourceCode;
 
+    private Object more;
+
     public EndpointDto copy() {
         EndpointDto result = new EndpointDto();
         result.setCat(cat);
@@ -42,6 +44,7 @@ public class EndpointDto {
         result.setResponseBodyJsonSchema(responseBodyJsonSchema);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
+        result.setMore(more);
         return result;
     }
 
