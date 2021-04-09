@@ -2,12 +2,16 @@ package com.spldeolin.allison1875.handlertransformer.handle;
 
 import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.google.inject.Singleton;
 
 /**
  * @author Deolin 2020-12-23
  */
-public interface FirstLineMoreParseHandle {
+@Singleton
+public class FirstLineMoreParseHandle {
 
-    Pair<String, Object> parseMore(VariableDeclarator vd);
+    public Pair<String, Object> parseMore(VariableDeclarator vd) {
+        return null;
+    }
 
 }
