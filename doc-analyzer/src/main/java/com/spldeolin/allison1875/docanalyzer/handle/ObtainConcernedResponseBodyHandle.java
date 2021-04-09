@@ -1,15 +1,17 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
+import javax.inject.Singleton;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 
 /**
- * 获取受关注的ResponseBody类型的策略
- *
- * @author Deolin 2020-06-18
+ * @author Deolin 2020-06-02
  */
-public interface ObtainConcernedResponseBodyHandle {
+@Singleton
+public class ObtainConcernedResponseBodyHandle {
 
-    ResolvedType findConcernedResponseBodyType(MethodDeclaration handler);
+    public ResolvedType findConcernedResponseBodyType(MethodDeclaration handler) {
+        return handler.getType().resolve();
+    }
 
 }

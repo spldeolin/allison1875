@@ -1,14 +1,20 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
+import javax.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 
 /**
  * @author Deolin 2021-04-08
  */
-public interface MoreHandlerAnalysisHandle {
+@Singleton
+public class MoreHandlerAnalysisHandle {
 
-    Object moreAnalysisFromMethod(HandlerFullDto handler);
+    public Object moreAnalysisFromMethod(HandlerFullDto handler) {
+        return null;
+    }
 
-    String moreToString(Object dto);
+    public String moreToString(Object dto) {
+        return null;
+    }
 
 }

@@ -1,14 +1,21 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
+import javax.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
 
 /**
  * @author Deolin 2020-09-12
  */
-public interface AnalyzeEnumConstantHandle {
+@Singleton
+public class AnalyzeEnumConstantHandle {
 
-    boolean supportEnumType(Class<?> enumType);
+    public boolean supportEnumType(Class<?> enumType) {
+        return false;
+    }
 
-    EnumCodeAndTitleDto analyzeEnumConstant(Object enumConstant);
+    public EnumCodeAndTitleDto analyzeEnumConstant(Object enumConstant) {
+        // what ever
+        return null;
+    }
 
 }
