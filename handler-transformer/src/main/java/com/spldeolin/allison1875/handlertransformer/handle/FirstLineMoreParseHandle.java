@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.handlertransformer.handle;
 
-import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.body.VariableDeclarator;
 

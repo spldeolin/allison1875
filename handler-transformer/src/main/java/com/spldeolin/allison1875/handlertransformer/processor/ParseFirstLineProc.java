@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.constant.FirstLineMoreKey;
 import com.spldeolin.allison1875.handlertransformer.handle.FirstLineMoreParseHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import lombok.extern.log4j.Log4j2;
