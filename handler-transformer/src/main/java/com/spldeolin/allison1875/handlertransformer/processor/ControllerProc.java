@@ -11,7 +11,7 @@ import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.base.constant.QualifierConstants;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateHandlerHandleResult;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
@@ -47,7 +47,7 @@ public class ControllerProc {
         return false;
     }
 
-    public void createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
+    public HandlerCreation createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
             ServiceGeneration serviceGeneration, ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
 
         // 确保controller有autowired 新生成的service
@@ -62,7 +62,7 @@ public class ControllerProc {
                 controller.getNameAsString());
 
         // 使用handle创建Handler方法，并追加到controller中
-        CreateHandlerHandleResult handlerCreation = createHandlerHandle
+        HandlerCreation handlerCreation = createHandlerHandle
                 .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
                         serviceGeneration);
         controller.addMember(handlerCreation.getHandler());
@@ -80,6 +80,7 @@ public class ControllerProc {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getRespDtoQualifier());
         }
         Imports.ensureImported(controller, serviceGeneration.getServiceQualifier());
+        return handlerCreation;
     }
 
 }

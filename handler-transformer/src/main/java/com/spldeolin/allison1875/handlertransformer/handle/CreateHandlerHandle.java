@@ -7,7 +7,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateHandlerHandleResult;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 
@@ -17,8 +17,8 @@ import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 @Singleton
 public class CreateHandlerHandle {
 
-    public CreateHandlerHandleResult createHandler(FirstLineDto firstLineDto, String serviceParamType,
-            String serviceResultType, ServiceGeneration serviceGeneration) {
+    public HandlerCreation createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
+            ServiceGeneration serviceGeneration) {
         MethodDeclaration handler = new MethodDeclaration();
 
         handler.setJavadocComment(firstLineDto.getHandlerDescription());
@@ -65,7 +65,7 @@ public class CreateHandlerHandle {
         }
         handler.setBody(body);
 
-        return new CreateHandlerHandleResult().setHandler(handler);
+        return new HandlerCreation().setHandler(handler);
     }
 
 }

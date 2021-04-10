@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class CreateHandlerHandleResult {
+public class HandlerCreation {
 
     /**
      * handler方法

@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.handle.FirstLineMoreParseHandle;
+import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -25,7 +25,7 @@ public class ParseFirstLineProc {
     private HandlerTransformerConfig handlerTransformerConfig;
 
     @Inject
-    private FirstLineMoreParseHandle firstLineMoreParseHandle;
+    private MoreTransformHandle moreTransformHandle;
 
     public FirstLineDto parse(NodeList<Statement> statements) {
         FirstLineDto result = new FirstLineDto();
@@ -66,8 +66,10 @@ public class ParseFirstLineProc {
                                         i.toString());
                             }
                         }
-                        Pair<String, Object> pair = firstLineMoreParseHandle.parseMore(vd);
-                        result.getMore().put(pair.getKey(), pair.getValue());
+                        Pair<String, Object> pair = moreTransformHandle.parseMoreFromFirstLine(vd);
+                        if (pair != null && pair.getKey() != null) {
+                            result.getMore().put(pair.getKey(), pair.getValue());
+                        }
                     }
                 }
             }));
