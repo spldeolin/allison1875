@@ -17,15 +17,23 @@ import com.spldeolin.allison1875.base.util.FileBackupUtils;
  */
 public class Saves {
 
-    private static final ThreadLocal<Set<CompilationUnit>> toSaveCus = ThreadLocal.withInitial(Sets::newHashSet);
+    private static final ThreadLocal<Set<CompilationUnit>> buffer = ThreadLocal.withInitial(Sets::newHashSet);
 
     public static void add(CompilationUnit cu) {
-        toSaveCus.get().add(cu);
+        buffer.get().add(cu);
+    }
+
+    public static void add(Collection<CompilationUnit> cus) {
+        buffer.get().addAll(cus);
+    }
+
+    public static Set<CompilationUnit> listBuffers() {
+        return buffer.get();
     }
 
     public static void saveAll() {
-        toSaveCus.get().forEach(Saves::save);
-        toSaveCus.get().clear();
+        buffer.get().forEach(Saves::save);
+        buffer.get().clear();
     }
 
     /**
