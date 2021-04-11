@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -13,6 +14,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
+import com.spldeolin.allison1875.base.util.ShortUUIDUtil;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -130,9 +132,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         Saves.add(cu);
 
                         // 更多的转化操作
-                        Saves.add(moreTransformHandle.transform(astForest.clone(), firstLineDto, handlerCreation));
-
-                        Saves.saveAll();
+                        Saves.saveAllWithBC(ShortUUIDUtil.generateKey());
                     }
                 }
             }
@@ -141,6 +141,11 @@ public class HandlerTransformer implements Allison1875MainProcessor {
         if (detectCount == 0) {
             log.warn("no Initializer detect.");
         }
+    }
+
+    public static void main(String[] args) {
+        UUID uuid = UUID.randomUUID();
+
     }
 
 }
