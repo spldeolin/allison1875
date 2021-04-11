@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
@@ -66,9 +66,9 @@ public class ParseFirstLineProc {
                                         i.toString());
                             }
                         }
-                        Pair<String, Object> pair = moreTransformHandle.parseMoreFromFirstLine(vd);
-                        if (pair != null && pair.getKey() != null) {
-                            result.getMore().put(pair.getKey(), pair.getValue());
+                        Map<String, Object> more = moreTransformHandle.parseMoreFromFirstLine(vd);
+                        if (more != null) {
+                            result.getMore().putAll(more);
                         }
                     }
                 }

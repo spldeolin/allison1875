@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.handle;
 
 import java.util.Collection;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 @Singleton
 public class MoreTransformHandle {
 
-    public Pair<String, Object> parseMoreFromFirstLine(VariableDeclarator vd) {
+    public Map<String, Object> parseMoreFromFirstLine(VariableDeclarator vd) {
         return null;
     }
 
