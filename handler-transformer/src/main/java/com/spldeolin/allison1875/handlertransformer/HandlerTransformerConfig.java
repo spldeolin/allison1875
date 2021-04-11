@@ -50,21 +50,6 @@ public final class HandlerTransformerConfig extends AbstractModule {
     @NotEmpty
     private String pageTypeQualifier;
 
-    /**
-     * API模块相对于宿主的路径
-     */
-    private String apiModuleRelativePath;
-
-    /**
-     * API层 @RequestBody类型所在API模块的包名
-     */
-    private String apiReqDtoPackage;
-
-    /**
-     * API层 @ResponseBody业务数据部分类型所在API模块的包名
-     */
-    private String apiRespDtoPackage;
-
     @Override
     protected void configure() {
         bind(HandlerTransformerConfig.class).toInstance(this);
