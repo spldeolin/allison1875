@@ -32,7 +32,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.docanalyzer.handle.AccessDescriptionHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.AnalyzeEnumConstantHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreJpdvAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.handle.SpecificFieldDescriptionsHandle;
@@ -58,6 +58,9 @@ public class JsgBuildProc {
 
     @Inject
     private ValidProc validProc;
+
+    @Inject
+    private AccessDescriptionHandle accessDescriptionHandle;
 
     public JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = analyze(astForest);
@@ -214,7 +217,7 @@ public class JsgBuildProc {
         String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
         String javabeanQualifier = qualifier;
         for (FieldDeclaration field : coid.getFields()) {
-            Collection<String> javadocDescLines = JavadocDescriptions.getAsLines(field);
+            Collection<String> javadocDescLines = accessDescriptionHandle.accessField(field);
             for (VariableDeclarator var : field.getVariables()) {
                 JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
                 String varName = var.getNameAsString();

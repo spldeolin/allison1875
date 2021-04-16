@@ -27,7 +27,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <javaparser.version>3.19.0</javaparser.version>
         <log4j2.version>2.14.0</log4j2.version>
         <jackson.version>2.12.0</jackson.version>
         <retrofit.version>2.3.0</retrofit.version>
@@ -38,13 +37,8 @@
             <!-- javaparser -->
             <dependency>
                 <groupId>com.github.javaparser</groupId>
-                <artifactId>javaparser-core</artifactId>
-                <version>${javaparser.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.javaparser</groupId>
                 <artifactId>javaparser-symbol-solver-core</artifactId>
-                <version>${javaparser.version}</version>
+                <version>3.20.2</version>
             </dependency>
 
             <!-- guice -->

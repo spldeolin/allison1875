@@ -132,7 +132,8 @@ public class GenerateServicePairProc {
         serviceCu.setImports(param.getCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         Authors.ensureAuthorExist(service, conf.getAuthor());
-        service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
+        service.setPublic(true).setStatic(false).setInterface(true)
+                .setName(ensureNoRepeatProc.inAstForest(param.getAstForest(), serviceName));
         serviceCu.setTypes(new NodeList<>(service));
         Path storage = CodeGenerationUtils
                 .fileInPackageAbsolutePath(sourceRoot, conf.getServicePackage(), service.getName() + ".java");
@@ -150,7 +151,9 @@ public class GenerateServicePairProc {
         Authors.ensureAuthorExist(serviceImpl, conf.getAuthor());
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
-        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(service.getName() + "Impl")
+        String serviceImplName = ensureNoRepeatProc
+                .inAstForest(param.getAstForest(), service.getNameAsString() + "Impl");
+        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName)
                 .addImplementedType(service.getNameAsString());
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
         storage = CodeGenerationUtils

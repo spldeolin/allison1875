@@ -175,7 +175,7 @@ public class JavabeanCuBuilder<C> {
     }
 
     public CompilationUnit build() {
-        Set<ConstraintViolation<JavabeanCuBuilder<?>>> violations = ValidateUtils.validate(this);
+        Set<ConstraintViolation<JavabeanCuBuilder<?>>> violations = ValidateUtils.VALIDATOR.validate(this);
         if (violations.size() > 0) {
             throw new IllegalArgumentException(violations.toString());
         }

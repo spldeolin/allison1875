@@ -2,9 +2,7 @@ package com.spldeolin.allison1875.base.ancestor;
 
 import java.util.Collection;
 import java.util.Set;
-import javax.validation.ConstraintViolation;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.spldeolin.allison1875.base.BaseConfig;
@@ -22,25 +20,18 @@ public abstract class Allison1875Module extends AbstractModule {
 
     protected abstract Set<Class<?>> provideConfigTypes();
 
-    public boolean validateConfig(Injector injector) {
-        Set<ConstraintViolation<Object>> allViolations = Sets.newHashSet();
-        for (Class<?> configType : getProvidedConfigWithBaseConfigType()) {
-            Object component = injector.getInstance(configType);
-            log.info("detect config properties {}", component);
-            allViolations.addAll(ValidateUtils.validate(component));
+    @Override
+    protected void configure() {
+    }
 
+    public void validateConfig(Injector injector) {
+        Collection<Object> configs = Lists.newArrayList();
+        for (Class<?> configType : getProvidedConfigWithBaseConfigType()) {
+            Object config = injector.getInstance(configType);
+            log.info("detect config properties {}", config);
+            configs.add(config);
         }
-        if (allViolations.size() > 0) {
-            log.error("Allison 1875 cannot work due to invalid config");
-            for (ConstraintViolation<?> violation : allViolations) {
-                String configName =
-                        violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath().toString()
-                                .replace(".<iterable element>", "");
-                log.error("{} {}, current value: {}", configName, violation.getMessage(), violation.getInvalidValue());
-            }
-            return false;
-        }
-        return true;
+        ValidateUtils.ensureValid(configs);
     }
 
     public void launchMainProcessor(AstForest astForest, Injector injector) {

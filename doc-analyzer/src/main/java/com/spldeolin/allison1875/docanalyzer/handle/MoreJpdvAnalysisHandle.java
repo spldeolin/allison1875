@@ -1,17 +1,21 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
 import java.lang.reflect.Field;
+import javax.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 
 /**
- * jpdv额外解析
- *
  * @author Deolin 2020-12-02
  */
-public interface MoreJpdvAnalysisHandle {
+@Singleton
+public class MoreJpdvAnalysisHandle {
 
-    Object moreAnalysisFromField(Field field);
+    public Object moreAnalysisFromField(Field field) {
+        return null;
+    }
 
-    String moreJpdvToString(Object dto, DocAnalyzerConfig docAnalyzerConfig);
+    public String moreJpdvToString(Object dto, DocAnalyzerConfig docAnalyzerConfig) {
+        return null;
+    }
 
 }

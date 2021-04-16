@@ -69,7 +69,7 @@ public class FieldDeclarationBuilder {
     }
 
     public FieldDeclaration build() {
-        Set<ConstraintViolation<FieldDeclarationBuilder>> violations = ValidateUtils.validate(this);
+        Set<ConstraintViolation<FieldDeclarationBuilder>> violations = ValidateUtils.VALIDATOR.validate(this);
         if (violations.size() > 0) {
             throw new IllegalArgumentException(violations.toString());
         }

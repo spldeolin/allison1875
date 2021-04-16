@@ -17,6 +17,8 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
+import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
+import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
@@ -61,6 +63,9 @@ public class HandlerTransformer implements Allison1875MainProcessor {
     @Inject
     private GenerateServicePairProc generateServicePairProc;
 
+    @Inject
+    private MoreTransformHandle moreTransformHandle;
+
     @Override
     public void process(AstForest astForest) {
         Map<String, ServicePairDto> qualifier2Pair = Maps.newHashMap();
@@ -89,7 +94,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
                     // 创建所有所需的Javabean
-                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.createJavabeans(cu, firstLineDto, dtos);
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc
+                            .createJavabeans(astForest, cu, firstLineDto, dtos);
 
                     // 创建Service Pair
                     GenerateServiceParam param = new GenerateServiceParam();
@@ -105,7 +111,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     }
 
                     // 在controller中创建handler
-                    controllerProc
+                    HandlerCreation handlerCreation = controllerProc
                             .createHandlerToController(firstLineDto, controller, serviceGeneration, reqDtoRespDtoInfo);
 
                     // 从controller中删除init
@@ -122,6 +128,10 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         Imports.ensureImported(cu, AnnotationConstant.AUTOWIRED_QUALIFIER);
                         Imports.ensureImported(cu, ImportConstants.COLLECTION);
                         Saves.add(cu);
+
+                        // 更多的转化操作
+                        Saves.add(moreTransformHandle.transform(astForest.clone(), firstLineDto, handlerCreation));
+
                         Saves.saveAll();
                     }
                 }

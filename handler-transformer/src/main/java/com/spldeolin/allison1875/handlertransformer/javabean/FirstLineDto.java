@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.util.Map;
+import com.google.common.collect.Maps;
 import lombok.Data;
 
 /**
@@ -19,9 +20,7 @@ public class FirstLineDto {
 
     private String serviceName;
 
-    private String apiQualifier;
-
-    private Map<String, Object> more;
+    private final Map<String, Object> more = Maps.newHashMap();
 
     @Override
     public String toString() {

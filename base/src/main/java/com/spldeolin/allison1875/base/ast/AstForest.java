@@ -125,4 +125,8 @@ public class AstForest implements Iterable<CompilationUnit> {
         return Paths.get(common);
     }
 
+    public Set<Path> getJavasInForest() {
+        return javasInForest;
+    }
+
 }
