@@ -25,7 +25,7 @@ public class SimplyAnalyzeProc {
     private MoreHandlerAnalysisHandle moreHandlerAnalysisHandle;
 
     public void process(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint) {
-        endpoint.setCat(handler.getCat());
+        endpoint.setCat(handler.getCat().trim());
         endpoint.setHandlerSimpleName(controller.getName() + "_" + handler.getMd().getName());
         endpoint.setDescriptionLines(accessDescriptionHandle.accessMethod(handler));
         endpoint.setIsDeprecated(isDeprecated(controller, handler.getMd()));
