@@ -12,7 +12,7 @@
             <list>
               <option value="versions:set" />
               <option value="-DgenerateBackupPoms=false" />
-              <option value="-DnewVersion=6.1"/>
+              <option value="-DnewVersion=6.2"/>
             </list>
           </option>
           <option name="pomFileName" />
