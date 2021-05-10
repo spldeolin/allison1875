@@ -21,7 +21,7 @@ public class MoreTransformHandle {
     }
 
     public Collection<CompilationUnit> transform(AstForest clonedAstForest, FirstLineDto firstLine,
-            HandlerCreation handlerCreation) {
+            HandlerCreation handlerCreation, Collection<String> dtoQualifiers) {
         return Lists.newArrayList();
     }
 

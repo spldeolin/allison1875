@@ -157,6 +157,7 @@ public class ReqRespProc {
 
             Saves.add(javabeanCu);
             log.info("generate Javabean [{}].", builder.getJavabean().getNameAsString());
+            result.getDtoQualifiers().add(builder.getJavabeanQualifier());
         }
         return result;
     }
