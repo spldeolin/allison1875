@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -204,6 +206,10 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             // 删除Mapper中所有Allison 1875生成的方法
             deleteAllison1875MethodProc.process(mapper);
 
+            // 临时删除Mapper中所有开发者自定义方法
+            List<MethodDeclaration> customMethods = mapper.getMethods();
+            customMethods.forEach(MethodDeclaration::remove);
+
             // 在Mapper中生成基础方法
             String insertMethodName = insertProc.process(persistence, mapper);
             String batchInsertMethodName = batchInsertProc.process(persistence, mapper);
@@ -226,6 +232,9 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
             String queryByEntityMethodName = queryByEntityProc.process(persistence, mapper);
             String listAllMethodName = listAllProc.process(persistence, mapper);
+
+            // 将临时删除的开发者自定义方法添加到Mapper的最后
+            customMethods.forEach(one -> mapper.getMembers().addLast(one));
 
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityCuCreator);
