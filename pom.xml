@@ -34,6 +34,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- allison1875-support -->
+            <dependency>
+                <groupId>com.spldeolin.allison1875</groupId>
+                <artifactId>allison1875-support</artifactId>
+                <version>4.0</version>
+            </dependency>
+
             <!-- javaparser -->
             <dependency>
                 <groupId>com.github.javaparser</groupId>
