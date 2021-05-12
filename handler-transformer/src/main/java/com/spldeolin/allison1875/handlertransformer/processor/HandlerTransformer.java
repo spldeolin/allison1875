@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
@@ -130,7 +131,10 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         Saves.add(cu);
 
                         // 更多的转化操作
-                        Saves.add(moreTransformHandle.transform(astForest.clone(), firstLineDto, handlerCreation));
+                        Collection<CompilationUnit> moreCus = moreTransformHandle
+                                .transform(astForest.clone(), firstLineDto, handlerCreation,
+                                        reqDtoRespDtoInfo.getDtoQualifiers());
+                        Saves.add(moreCus);
 
                         Saves.saveAll();
                     }

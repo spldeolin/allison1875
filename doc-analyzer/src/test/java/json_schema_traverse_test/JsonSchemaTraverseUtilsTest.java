@@ -30,16 +30,16 @@ public class JsonSchemaTraverseUtilsTest {
         JsonSchemaTraverseUtils.traverse("root", root, (propertyName, jsonSchema, parentJsonSchema) -> {
             String path = pathMap.get(parentJsonSchema);
             if (path == null) {
-                path = "";
+                path = propertyName;
             } else {
                 if (parentJsonSchema.isArraySchema()) {
                     path += "[]";
                 }
                 if (parentJsonSchema.isObjectSchema()) {
-                    path += ".";
+                    path += "." + propertyName;
                 }
             }
-            path = path + propertyName;
+//            path = path + propertyName;
             pathMap.put(jsonSchema, path);
 
             if (jsonSchema.getId() != null) {
@@ -49,8 +49,10 @@ public class JsonSchemaTraverseUtilsTest {
             names.add(propertyName);
             paths.add(path);
 
+            System.out.println(path);
+
             if (jsonSchema instanceof ReferenceSchema) {
-                System.out.println(path + "的数据结构与" + id2Path.get(jsonSchema.get$ref()) + "一致");
+//                System.out.println(path + "的数据结构与" + id2Path.get(jsonSchema.get$ref()) + "一致");
             }
 
         });

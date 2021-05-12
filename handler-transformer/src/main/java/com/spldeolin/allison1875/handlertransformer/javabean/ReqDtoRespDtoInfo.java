@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
+import java.util.Collection;
+import com.google.common.collect.Lists;
 import lombok.Data;
 
 /**
@@ -8,12 +10,14 @@ import lombok.Data;
 @Data
 public class ReqDtoRespDtoInfo {
 
-    String reqDtoQualifier = null;
+    private String reqDtoQualifier = null;
 
-    String respDtoQualifier = null;
+    private String respDtoQualifier = null;
 
-    String paramType = null;
+    private String paramType = null;
 
-    String resultType = null;
+    private String resultType = null;
+
+    private final Collection<String> dtoQualifiers = Lists.newArrayList();
 
 }

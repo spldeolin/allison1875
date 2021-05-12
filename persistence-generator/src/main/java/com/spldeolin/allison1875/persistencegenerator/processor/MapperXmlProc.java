@@ -11,7 +11,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -84,21 +83,6 @@ public class MapperXmlProc {
             Collections.reverse(newLines);
         }
 
-        String top = generatedLines.get(0);
-        String bottom = Iterables.getLast(generatedLines);
-        int topIndex = newLines.indexOf(top);
-        if (topIndex > 1) {
-            if (StringUtils.isNotBlank(newLines.get(topIndex - 1))) {
-                newLines.add(topIndex, "");
-            }
-        }
-        int bottomIndex = newLines.indexOf(bottom);
-        if (bottomIndex < newLines.size() + 1) {
-            if (StringUtils.isNotBlank(newLines.get(bottomIndex + 1))) {
-                newLines.add(bottomIndex + 1, "");
-            }
-        }
-
         String leftAnchor = anchorProc.createLeftAnchor(persistence);
         String rightAnchor = anchorProc.createRightAnchor(persistence);
 
@@ -112,6 +96,7 @@ public class MapperXmlProc {
     private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes) {
         List<String> auto = Lists.newArrayList();
         auto.add(BaseConstant.SINGLE_INDENT + Constant.PROHIBIT_MODIFICATION_XML_BEGIN);
+        auto.add("");
         for (Collection<String> sourceCode : sourceCodes) {
             if (CollectionUtils.isNotEmpty(sourceCode)) {
                 for (String line : sourceCode) {
@@ -126,6 +111,7 @@ public class MapperXmlProc {
         if (auto.get(auto.size() - 1).equals("")) {
             auto.remove(auto.size() - 1);
         }
+        auto.add("");
         auto.add(BaseConstant.SINGLE_INDENT + Constant.PROHIBIT_MODIFICATION_XML_END);
         return auto;
     }
