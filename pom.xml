@@ -45,7 +45,7 @@
             <dependency>
                 <groupId>com.github.javaparser</groupId>
                 <artifactId>javaparser-symbol-solver-core</artifactId>
-                <version>3.22.0</version>
+                <version>3.22.1</version>
             </dependency>
 
             <!-- guice -->
@@ -59,7 +59,7 @@
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
                 <artifactId>org.eclipse.jgit</artifactId>
-                <version>5.11.0.202103091610-r</version>
+                <version>5.11.1.202105131744-r</version>
             </dependency>
 
             <!-- log4j2 -->
@@ -152,7 +152,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.3.6</version>
+                <version>5.3.7</version>
             </dependency>
 
             <!-- retrofit -->
@@ -209,7 +209,7 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
-                <version>3.15.4</version>
+                <version>3.15.5</version>
             </dependency>
 
             <!-- maven model -->
