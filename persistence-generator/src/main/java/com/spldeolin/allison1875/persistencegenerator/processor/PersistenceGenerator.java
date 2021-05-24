@@ -163,7 +163,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private MapperXmlProc mapperXmlProc;
 
     @Inject
-    private GenerateDesignProc generateQueryDesignProc;
+    private GenerateDesignProc generateDesignProc;
 
     @Inject
     private PersistenceGeneratorConfig config;
@@ -198,7 +198,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
 
             // 重新生成QueryDesign
-            Saves.add(generateQueryDesignProc.process(persistence, entityCuCreator, mapper));
+            generateDesignProc.process(persistence, entityCuCreator, mapper);
 
             // 删除Mapper中所有Allison 1875生成的方法
             deleteAllison1875MethodProc.process(mapper);

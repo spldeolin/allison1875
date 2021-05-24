@@ -3,10 +3,8 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -29,6 +27,7 @@ import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -45,13 +44,10 @@ public class GenerateDesignProc {
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
-    public Collection<CompilationUnit> process(PersistenceDto persistence, CuCreator entityCuCreator,
-            ClassOrInterfaceDeclaration mapper) {
+    public void process(PersistenceDto persistence, CuCreator entityCuCreator, ClassOrInterfaceDeclaration mapper) {
         if (!persistenceGeneratorConfig.getEnableGenerateQueryDesign()) {
-            return Lists.newArrayList();
+            return;
         }
-        Collection<CompilationUnit> toCreate = Lists.newArrayList();
-
         Path sourceRoot = entityCuCreator.getSourceRoot();
         Path queryPath = CodeGenerationUtils
                 .fileInPackageAbsolutePath(sourceRoot, persistenceGeneratorConfig.getEntityPackage(),
@@ -73,7 +69,6 @@ public class GenerateDesignProc {
 
         List<String> imports = this.getImports(persistence, persistenceGeneratorConfig, entityCuCreator);
 
-        Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
         CuCreator cuCreator = new CuCreator(sourceRoot, persistenceGeneratorConfig.getQueryDesignPackage(), imports,
                 () -> {
                     ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
@@ -87,10 +82,6 @@ public class GenerateDesignProc {
                     coid.setName(calcQueryDesignName(persistenceGeneratorConfig, persistence));
                     setDefaultConstructorPrivate(coid);
                     addStaticFactory(coid);
-                    for (PropertyDto property : persistence.getProperties()) {
-                        FieldDeclaration field = addIntermediateField(coid, property);
-                        propAndField.add(Pair.of(property, field));
-                    }
                     addTerminalMethod(coid, persistence);
 
                     QueryMeta queryMeta = new QueryMeta();
@@ -109,9 +100,8 @@ public class GenerateDesignProc {
                     coid.addField("String", "queryMeta").setJavadocComment(queryMetaJson);
                     return coid;
                 });
-        toCreate.add(cuCreator.create(false));
 
-        return toCreate;
+        Saves.add(cuCreator.create(false));
     }
 
     private void addTerminalMethod(ClassOrInterfaceDeclaration coid, PersistenceDto persistence) {
