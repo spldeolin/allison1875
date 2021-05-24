@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.gadget.processor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +16,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -83,11 +86,13 @@ public class LineCounter implements Allison1875MainProcessor {
         log.info("方法总行数：{}{}", valuesSum(allMethods), rankListTitlePart);
         reportRankList(allMethods);
 
+        Path commonPath = calcCommonPath(astForest.getJavasInForest());
+
         // 所有xml代码
         Map<String, Integer> allXmls = Maps.newHashMap();
         for (File xml : detectXmls(astForest)) {
             try {
-                String xmlPath = astForest.getCommonPath().relativize(xml.toPath()).normalize().toString();
+                String xmlPath = commonPath.relativize(xml.toPath()).normalize().toString();
                 allXmls.put(xmlPath, (int) Files.lines(xml.toPath()).count());
             } catch (IOException e) {
                 log.error("xml={}", xml, e);
@@ -156,6 +161,15 @@ public class LineCounter implements Allison1875MainProcessor {
 
     private int getLineCount(Node node) {
         return node.getRange().map(Range::getLineCount).orElse(0);
+    }
+
+    private Path calcCommonPath(Collection<Path> sourceRootPaths) {
+        List<Path> paths = Lists.newArrayList(sourceRootPaths);
+        String common = paths.get(0).toString();
+        for (Path path : paths) {
+            common = Strings.commonPrefix(common, path.toString());
+        }
+        return Paths.get(common);
     }
 
 }

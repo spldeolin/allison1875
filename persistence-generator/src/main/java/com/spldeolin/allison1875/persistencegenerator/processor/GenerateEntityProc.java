@@ -32,7 +32,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.handle.GenerateEntityFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateEntityResultDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PathDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -45,9 +44,6 @@ import lombok.extern.log4j.Log4j2;
 @Singleton
 @Log4j2
 public class GenerateEntityProc {
-
-    @Inject
-    private GenerateEntityFieldHandle generateEntityFieldHandle;
 
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
@@ -124,10 +120,6 @@ public class GenerateEntityProc {
 
         this.reportDiff(originalVariables, persistence);
 
-        for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
-            toCreate.addAll(generateEntityFieldHandle.handleEntityField(pair.getLeft(), pair.getRight(), sourceRoot));
-        }
-
         GenerateEntityResultDto result = new GenerateEntityResultDto();
         result.setEntityPath(entityPath);
         result.setEntityCuCreator(entityCuCreator);
@@ -182,7 +174,7 @@ public class GenerateEntityProc {
     private Set<String> getImports(PersistenceDto persistence) {
         Set<String> result = Sets.newHashSet();
         for (PropertyDto prop : persistence.getProperties()) {
-            String qualifier = prop.getJavaType().getName();
+            String qualifier = prop.getJavaType().getQualifier();
             if (!qualifier.startsWith("java.lang")) {
                 result.add(qualifier);
             }

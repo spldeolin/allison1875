@@ -30,7 +30,7 @@ public class QueryByIdsXmlProc {
         if (persistence.getIdProperties().size() == 1) {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName,
-                    onlyPk.getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
+                    onlyPk.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");

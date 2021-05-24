@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.util.Collection;
 import java.util.List;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
@@ -164,7 +163,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private MapperXmlProc mapperXmlProc;
 
     @Inject
-    private GenerateQueryDesignProc generateQueryDesignProc;
+    private GenerateDesignProc generateQueryDesignProc;
 
     @Inject
     private PersistenceGeneratorConfig config;
@@ -173,10 +172,8 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     public void process(AstForest astForest) {
         PathDto pathDto = pathProc.process(astForest);
 
-        Collection<CompilationUnit> toSave = Lists.newArrayList();
-
         // 构建并遍历 PersistenceDto对象
-        Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoProc.process();
+        Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoProc.process(astForest);
         if (persistenceDtos.size() == 0) {
             log.warn("no tables detect in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
@@ -186,7 +183,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             // 重新生成Entity
             GenerateEntityResultDto generateEntityResult = entityProc.process(persistence, pathDto);
             CuCreator entityCuCreator = generateEntityResult.getEntityCuCreator();
-            toSave.addAll(generateEntityResult.getToCreate());
+            Saves.add(generateEntityResult.getToCreate());
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
@@ -194,14 +191,14 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 FindOrCreateMapperResultDto findOrCreateMapperResult = findOrCreateMapperProc
                         .process(persistence, entityCuCreator);
                 mapper = findOrCreateMapperResult.getMapper();
-                toSave.add(findOrCreateMapperResult.getCu());
+                Saves.add(findOrCreateMapperResult.getCu());
             } catch (Exception e) {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
 
             // 重新生成QueryDesign
-            toSave.addAll(generateQueryDesignProc.process(persistence, entityCuCreator, mapper));
+            Saves.add(generateQueryDesignProc.process(persistence, entityCuCreator, mapper));
 
             // 删除Mapper中所有Allison 1875生成的方法
             deleteAllison1875MethodProc.process(mapper);
@@ -262,7 +259,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
         }
 
-        toSave.forEach(Saves::save);
+        Saves.saveAll();
     }
 
     private String getEntityNameInXml(CuCreator entityCuCreator) {

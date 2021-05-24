@@ -12,7 +12,7 @@ public class PropertyDto {
 
     private String propertyName;
 
-    private Class<?> javaType;
+    private JavaTypeNamingDto javaType;
 
     private String description;
 

@@ -33,7 +33,7 @@ public class DeleteByKeyXmlProc {
                 List<String> xmlLines = Lists.newArrayList();
                 PropertyDto key = KeyAndMethodName.getKey();
                 xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", KeyAndMethodName.getMethodName(),
-                        key.getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
+                        key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
                 xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "UPDATE " + persistence.getTableName());
                 xmlLines.add(SINGLE_INDENT + "SET " + persistenceGeneratorConfig.getDeletedSql());

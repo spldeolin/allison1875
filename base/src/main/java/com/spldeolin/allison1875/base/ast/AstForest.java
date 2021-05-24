@@ -1,16 +1,11 @@
 package com.spldeolin.allison1875.base.ast;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.ast.CompilationUnit;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,27 +30,30 @@ public class AstForest implements Iterable<CompilationUnit> {
     private final Path astForestRoot;
 
     /**
+     * Primary Class所在Maven Module的src/main/java的路径
+     */
+    private final Path primaryJavaRoot;
+
+    /**
      * AST森林内的java文件
      */
     private final Set<Path> javasInForest = Sets.newHashSet();
-
-    /**
-     * 所有javasInForest的共同路径前缀
-     */
-    private final Path commonPath;
 
     private AstIterator iterator;
 
     public AstForest(Class<?> primaryClass, boolean wholeProject) {
         this.primaryClass = primaryClass;
         this.wholeProject = wholeProject;
+
+        Path mavenModule = MavenPathResolver.findMavenModule(primaryClass);
+        this.primaryJavaRoot = mavenModule.resolve("src/main/java").normalize();
+
         if (wholeProject) {
             astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
         } else {
-            astForestRoot = MavenPathResolver.findMavenModule(primaryClass);
+            astForestRoot = mavenModule;
         }
         javasInForest.addAll(collectJavas(astForestRoot));
-        commonPath = calcCommonPath(javasInForest);
         iterator = new AstIterator(primaryClass.getClassLoader(), javasInForest);
         log.info("AST Forest built [{}]", astForestRoot);
     }
@@ -63,6 +61,10 @@ public class AstForest implements Iterable<CompilationUnit> {
     public AstForest(Class<?> primaryClass, boolean wholeProject, Set<Path> dependencyPaths) {
         this.primaryClass = primaryClass;
         this.wholeProject = wholeProject;
+
+        Path mavenModule = MavenPathResolver.findMavenModule(primaryClass);
+        this.primaryJavaRoot = mavenModule.resolve("src/main/java").normalize();
+
         if (wholeProject) {
             astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
         } else {
@@ -72,7 +74,6 @@ public class AstForest implements Iterable<CompilationUnit> {
         for (Path dependencyPath : dependencyPaths) {
             javasInForest.addAll(collectJavas(dependencyPath));
         }
-        commonPath = calcCommonPath(javasInForest);
         iterator = new AstIterator(primaryClass.getClassLoader(), javasInForest);
         log.info("AST Forest built [{}]", astForestRoot);
     }
@@ -98,12 +99,16 @@ public class AstForest implements Iterable<CompilationUnit> {
         return primaryClass;
     }
 
-    public Path getCommonPath() {
-        return commonPath;
-    }
-
     public Path getAstForestRoot() {
         return astForestRoot;
+    }
+
+    public Path getPrimaryJavaRoot() {
+        return primaryJavaRoot;
+    }
+
+    public Set<Path> getJavasInForest() {
+        return javasInForest;
     }
 
     private Set<Path> collectJavas(Path directory) {
@@ -114,19 +119,6 @@ public class AstForest implements Iterable<CompilationUnit> {
         int javaCount = javaPaths.size();
         log.info("collect {} of {} from directory [{}]", javaCount, English.plural("java file", javaCount), directory);
         return javaPaths;
-    }
-
-    private Path calcCommonPath(Collection<Path> sourceRootPaths) {
-        List<Path> paths = Lists.newArrayList(sourceRootPaths);
-        String common = paths.get(0).toString();
-        for (Path path : paths) {
-            common = Strings.commonPrefix(common, path.toString());
-        }
-        return Paths.get(common);
-    }
-
-    public Set<Path> getJavasInForest() {
-        return javasInForest;
     }
 
 }

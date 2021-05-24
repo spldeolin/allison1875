@@ -32,7 +32,8 @@ public class QueryByKeysXmlProc {
             List<String> xmlLines = Lists.newArrayList();
             PropertyDto key = queryByKeysDto.getKey();
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
-                    queryByKeysDto.getMethodName(), key.getJavaType().getName().replaceFirst("java\\.lang\\.", "")));
+                    queryByKeysDto.getMethodName(),
+                    key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
             xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");

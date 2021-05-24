@@ -32,7 +32,7 @@ public class QueryByIdXmlProc {
             String firstLine = "<select id=\"" + methodName + "\" ";
             if (persistence.getIdProperties().size() == 1) {
                 firstLine += "parameterType=\"" + Iterables.getOnlyElement(persistence.getIdProperties()).getJavaType()
-                        .getName().replaceFirst("java\\.lang\\.", "") + "\" ";
+                        .getQualifier().replaceFirst("java\\.lang\\.", "") + "\" ";
             }
             firstLine += "resultMap=\"all\">";
             xmlLines.add(firstLine);

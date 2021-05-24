@@ -7,10 +7,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.handle.CommentHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.JdbcTypeHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import lombok.extern.log4j.Log4j2;
@@ -31,7 +34,10 @@ public class BuildPersistenceDtoProc {
     @Inject
     private JdbcTypeHandle jdbcTypeHandle;
 
-    public Collection<PersistenceDto> process() {
+    @Inject
+    private CommentHandle commentHandle;
+
+    public Collection<PersistenceDto> process(AstForest astForest) {
         // 查询information_schema.COLUMNS、information_schema.TABLES表
         Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaProc.process();
         String deleteFlag = getDeleteFlagName();
@@ -43,36 +49,36 @@ public class BuildPersistenceDtoProc {
             dto.setTableName(infoSchema.getTableName());
             dto.setEntityName(domainName + endWith());
             dto.setMapperName(domainName + "Mapper");
-            dto.setDescrption(infoSchema.getTableComment());
+            dto.setDescrption(commentHandle.resolveTableComment(infoSchema));
             dto.setIdProperties(Lists.newArrayList());
             dto.setNonIdProperties(Lists.newArrayList());
             dto.setKeyProperties(Lists.newArrayList());
             dto.setProperties(Lists.newArrayList());
             persistences.put(infoSchema.getTableName(), dto);
         }
-        for (InformationSchemaDto columnMeta : infoSchemas) {
-            String columnName = columnMeta.getColumnName();
+        for (InformationSchemaDto infoSchema : infoSchemas) {
+            String columnName = infoSchema.getColumnName();
             if (persistenceGeneratorConfig.getHiddenColumns().contains(columnName)) {
                 continue;
             }
             PropertyDto property = new PropertyDto();
             property.setColumnName(columnName);
             property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
-            Class<?> javaType = jdbcTypeHandle.jdbcType2javaType(columnMeta.getColumnType(), columnMeta.getDataType());
+            JavaTypeNamingDto javaType = jdbcTypeHandle.jdbcType2javaType(infoSchema, astForest);
             if (javaType == null) {
-                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", columnMeta.getColumnName(),
-                        columnMeta.getDataType(), columnMeta.getColumnType());
+                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(),
+                        infoSchema.getDataType(), infoSchema.getColumnType());
                 continue;
             }
             property.setJavaType(javaType);
-            property.setDescription(columnMeta.getColumnComment());
-            property.setLength(columnMeta.getCharacterMaximumLength());
-            property.setNotnull("NO".equals(columnMeta.getIsNullable()));
-            property.setDefaultV(columnMeta.getColumnDefault());
-            PersistenceDto persistence = persistences.get(columnMeta.getTableName());
+            property.setDescription(commentHandle.resolveColumnComment(infoSchema));
+            property.setLength(infoSchema.getCharacterMaximumLength());
+            property.setNotnull("NO".equals(infoSchema.getIsNullable()));
+            property.setDefaultV(infoSchema.getColumnDefault());
+            PersistenceDto persistence = persistences.get(infoSchema.getTableName());
 
             persistence.getProperties().add(property);
-            if ("PRI".equalsIgnoreCase(columnMeta.getColumnKey())) {
+            if ("PRI".equalsIgnoreCase(infoSchema.getColumnKey())) {
                 persistence.getIdProperties().add(property);
             } else {
                 persistence.getNonIdProperties().add(property);

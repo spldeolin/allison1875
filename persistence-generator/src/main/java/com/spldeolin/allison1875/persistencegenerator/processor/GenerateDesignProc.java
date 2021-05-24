@@ -30,7 +30,6 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.handle.GenerateQueryDesignFieldHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryMeta;
@@ -41,13 +40,10 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class GenerateQueryDesignProc {
+public class GenerateDesignProc {
 
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
-
-    @Inject
-    private GenerateQueryDesignFieldHandle generateQueryDesignFieldHandle;
 
     public Collection<CompilationUnit> process(PersistenceDto persistence, CuCreator entityCuCreator,
             ClassOrInterfaceDeclaration mapper) {
@@ -114,11 +110,6 @@ public class GenerateQueryDesignProc {
                     return coid;
                 });
         toCreate.add(cuCreator.create(false));
-
-        for (Pair<PropertyDto, FieldDeclaration> pair : propAndField) {
-            FieldDeclaration field = pair.getRight();
-            toCreate.addAll(generateQueryDesignFieldHandle.handlerQueryDesignField(pair.getLeft(), field, sourceRoot));
-        }
 
         return toCreate;
     }
@@ -193,7 +184,7 @@ public class GenerateQueryDesignProc {
             CuCreator entityCuCreator) {
         List<String> result = Lists.newArrayList();
         for (PropertyDto property : persistence.getProperties()) {
-            String qualifier = property.getJavaType().getName();
+            String qualifier = property.getJavaType().getQualifier();
             if (!qualifier.startsWith("java.lang")) {
                 result.add(qualifier);
             }
