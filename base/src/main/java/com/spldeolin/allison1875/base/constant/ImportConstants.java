@@ -11,4 +11,8 @@ public interface ImportConstants {
 
     ImportDeclaration LIST = new ImportDeclaration("java.util.List", false, false);
 
+    ImportDeclaration JAVA_UTIL = new ImportDeclaration("java.util", false, true);
+
+    ImportDeclaration APACHE_IBATIS = new ImportDeclaration("org.apache.ibatis.annotations", false, true);
+
 }

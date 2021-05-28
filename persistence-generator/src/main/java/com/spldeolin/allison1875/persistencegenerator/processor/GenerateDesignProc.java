@@ -2,26 +2,15 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.stream.Collectors;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.javadoc.Javadoc;
-import com.github.javaparser.javadoc.JavadocBlockTag;
-import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
@@ -54,8 +43,8 @@ public class GenerateDesignProc {
         if (!persistenceGeneratorConfig.getEnableGenerateQueryDesign()) {
             return;
         }
-        String designName = calcQueryDesignName(persistenceGeneratorConfig, persistence);
 
+        String designName = concatDesignName(persistence);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                 persistenceGeneratorConfig.getQueryDesignPackage(), designName + ".java");
         JavabeanArg entityArg = entityGeneration.getJavabeanArg();
@@ -182,145 +171,10 @@ public class GenerateDesignProc {
 
         cu.addType(designCoid);
         Saves.add(cu);
-
-//        List<JavadocBlockTag> authorTags = Lists.newArrayList();
-//        if (queryPath.toFile().exists()) {
-//            try {
-//                cu = StaticJavaParser.parse(queryPath);
-//                this.getAuthorTags(authorTags, cu);
-//            } catch (Exception e) {
-//                log.warn("StaticJavaParser.parse failed entityPath={}", queryPath, e);
-//            }
-//            log.info("Query文件已存在，覆盖它。 [{}]", queryPath);
-//        } else {
-//            authorTags.add(new JavadocBlockTag(Type.AUTHOR,
-//                    persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
-//        }
-//
-//        List<String> imports = this.getImports(persistence, persistenceGeneratorConfig);
-//
-//        CuCreator cuCreator = new CuCreator(sourceRoot, persistenceGeneratorConfig.getQueryDesignPackage(), imports,
-//                () -> {
-//                    ClassOrInterfaceDeclaration coid1 = new ClassOrInterfaceDeclaration();
-//                    Javadoc classJavadoc = new JavadocComment(
-//                            persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
-//                                    + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
-//                                    + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
-//                    classJavadoc.getBlockTags().addAll(authorTags);
-//                    coid1.setJavadocComment(classJavadoc);
-//                    coid1.setPublic(true);
-//                    coid1.setName(calcQueryDesignName(persistenceGeneratorConfig, persistence));
-//                    setDefaultConstructorPrivate(coid1);
-//                    addStaticFactory(coid1);
-//                    addTerminalMethod(coid1, persistence);
-//
-//                    DesignMeta queryMeta = new DesignMeta();
-//                    queryMeta.setEntityQualifier(entityGeneration.getEntityQualifier());
-//                    queryMeta.setEntityName(entityGeneration.getEntityName());
-//                    queryMeta.setMapperQualifier(
-//                            mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-//                    queryMeta.setMapperName(mapper.getNameAsString());
-//                    queryMeta.setMapperRelativePath(
-//                            persistenceGeneratorConfig.getMapperXmlDirectoryPath() + File.separator + persistence
-//                                    .getMapperName() + ".xml");
-//                    queryMeta.setPropertyNames(persistence.getProperties().stream().map(PropertyDto::getPropertyName)
-//                            .collect(Collectors.toList()));
-//                    queryMeta.setTableName(persistence.getTableName());
-//                    String queryMetaJson = JsonUtils.toJson(queryMeta);
-//                    coid1.addField("String", "meta").setJavadocComment(queryMetaJson);
-//                    return coid1;
-//                });
-//
-//        Saves.add(cuCreator.create(false));
     }
 
-    private void addTerminalMethod(ClassOrInterfaceDeclaration coid, PersistenceDto persistence) {
-        MethodDeclaration method = new MethodDeclaration();
-        method.setPublic(true);
-        method.setType(StaticJavaParser.parseType(String.format("List<%s>", persistence.getEntityName())));
-        method.setName("over");
-        method.setBody(new BlockStmt().addStatement("throw new UnsupportedOperationException(queryMeta);"));
-        coid.addMember(method);
-    }
-
-    private FieldDeclaration addIntermediateField(ClassOrInterfaceDeclaration coid, PropertyDto property) {
-        FieldDeclaration field = new FieldDeclaration();
-        field.setPublic(true);
-        com.github.javaparser.ast.type.Type type = StaticJavaParser.parseType(
-                String.format("QueryPredicate<%s, %s>", coid.getName(), property.getJavaType().getSimpleName()));
-        VariableDeclarator variable = new VariableDeclarator(type, property.getPropertyName());
-        field.addVariable(variable);
-        Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
-        field.setJavadocComment(fieldJavadoc);
-        coid.addMember(field);
-        return field;
-    }
-
-    private String buildCommentDescription(PropertyDto property) {
-        String result = property.getDescription();
-        result += BaseConstant.NEW_LINE + "<p>" + property.getColumnName();
-        if (property.getLength() != null) {
-            result += BaseConstant.NEW_LINE + "<p>长度：" + property.getLength();
-        }
-        if (property.getNotnull()) {
-            result += BaseConstant.NEW_LINE + "<p>不能为null";
-        }
-        if (property.getDefaultV() != null) {
-            String defaultV = property.getDefaultV();
-            if (!"CURRENT_TIMESTAMP".equals(defaultV)) {
-                defaultV = "'" + defaultV + "'";
-            }
-            result += BaseConstant.NEW_LINE + "<p>默认：" + defaultV;
-        }
-        return result;
-    }
-
-    private void addStaticFactory(ClassOrInterfaceDeclaration coid) {
-        MethodDeclaration method = new MethodDeclaration();
-        method.setPublic(true);
-        method.setStatic(true);
-        method.setType(coid.getNameAsString());
-        method.setName("design");
-        method.addParameter("String", "methodName");
-        method.setBody(new BlockStmt().addStatement("throw new UnsupportedOperationException(methodName);"));
-        coid.addMember(method);
-    }
-
-    private void setDefaultConstructorPrivate(ClassOrInterfaceDeclaration coid) {
-        ConstructorDeclaration constructor = new ConstructorDeclaration();
-        constructor.setPrivate(true);
-        constructor.setName(coid.getName());
-        constructor.setBody(new BlockStmt());
-        coid.addMember(constructor);
-    }
-
-    private String calcQueryDesignName(PersistenceGeneratorConfig conf, PersistenceDto persistence) {
-        return conf.getIsEntityEndWithEntity() ? MoreStringUtils
-                .replaceLast(persistence.getEntityName(), "Entity", "Query")
-                : persistence.getEntityName() + "QueryDesign";
-    }
-
-    private List<String> getImports(PersistenceDto persistence, PersistenceGeneratorConfig conf) {
-        List<String> result = Lists.newArrayList();
-        for (PropertyDto property : persistence.getProperties()) {
-            String qualifier = property.getJavaType().getQualifier();
-            if (!qualifier.startsWith("java.lang")) {
-                result.add(qualifier);
-            }
-        }
-        result.add(conf.getQueryPredicateQualifier());
-        result.add("java.util.List");
-        result.sort(String::compareTo);
-        return result;
-    }
-
-    private void getAuthorTags(List<JavadocBlockTag> authorTags, CompilationUnit cu) {
-        cu.getPrimaryType()
-                .ifPresent(pt -> pt.getJavadoc().ifPresent(javadoc -> javadoc.getBlockTags().forEach(javadocTag -> {
-                    if (javadocTag.getType() == Type.AUTHOR) {
-                        authorTags.add(javadocTag);
-                    }
-                })));
+    private String concatDesignName(PersistenceDto persistence) {
+        return MoreStringUtils.underscoreToUpperCamel(persistence.getTableName()) + "Design";
     }
 
 }

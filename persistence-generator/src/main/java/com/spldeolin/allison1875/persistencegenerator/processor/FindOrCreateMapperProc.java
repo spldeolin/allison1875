@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
@@ -15,11 +14,10 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.creator.CuCreator;
+import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
@@ -58,29 +56,24 @@ public class FindOrCreateMapperProc {
 
             // create
             log.info("Mapper文件不存在，创建它。 [{}]", mapperPath);
-            CuCreator mapperCuCreator = new CuCreator(astForest.getPrimaryJavaRoot(),
-                    persistenceGeneratorConfig.getMapperPackage(),
-                    Lists.newArrayList(new ImportDeclaration("java.util", false, true),
-                            new ImportDeclaration(entityGeneration.getEntityQualifier(), false, false),
-                            new ImportDeclaration("org.apache.ibatis.annotations", false, true)), () -> {
-                ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
-                javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityGeneration.getEntityName()));
-                javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR,
-                        persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
-                coid.setJavadocComment(javadoc);
-                coid.setPublic(true);
-                coid.setInterface(true);
-                coid.setName(persistence.getMapperName());
-                return coid;
-            });
-            cu = mapperCuCreator.create(false);
-
-            mapper = mapperCuCreator.getPt().asClassOrInterfaceDeclaration();
+            cu = new CompilationUnit();
+            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
+                    persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.addImport(ImportConstants.JAVA_UTIL);
+            cu.addImport(entityGeneration.getEntityQualifier());
+            cu.addImport(ImportConstants.APACHE_IBATIS);
+            mapper = new ClassOrInterfaceDeclaration();
+            Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
+            javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityGeneration.getEntityName()));
+            javadoc.addBlockTag(
+                    new JavadocBlockTag(Type.AUTHOR, persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
+            mapper.setJavadocComment(javadoc);
+            mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
+            mapper.setInterface(true);
+            cu.addType(mapper);
         }
 
         Saves.add(cu);
-
         return mapper;
     }
 

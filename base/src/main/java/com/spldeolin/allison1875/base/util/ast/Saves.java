@@ -61,6 +61,12 @@ public class Saves {
         });
     }
 
+    public static Set<CompilationUnit> listAllBuffers() {
+        Set<CompilationUnit> result = apiSaveBuffer.get();
+        result.addAll(rawReplaceBuffer.get().keySet());
+        return result;
+    }
+
     public static void saveAll() {
         apiSaveBuffer.get().forEach(Saves::save);
         apiSaveBuffer.get().clear();

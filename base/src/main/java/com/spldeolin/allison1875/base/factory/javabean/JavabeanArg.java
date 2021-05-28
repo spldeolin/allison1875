@@ -27,6 +27,8 @@ public class JavabeanArg {
     @NotBlank
     private String className;
 
+    private String description;
+
     private String authorName;
 
     @NotNull
