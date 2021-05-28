@@ -134,7 +134,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         Collection<CompilationUnit> moreCus = moreTransformHandle
                                 .transform(astForest.clone(), firstLineDto, handlerCreation,
                                         reqDtoRespDtoInfo.getDtoQualifiers());
-                        Saves.add(moreCus);
+                        moreCus.forEach(Saves::add);
 
                         Saves.saveAll();
                     }
