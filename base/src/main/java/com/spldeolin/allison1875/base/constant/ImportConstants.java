@@ -9,4 +9,6 @@ public interface ImportConstants {
 
     ImportDeclaration COLLECTION = new ImportDeclaration("java.util.Collection", false, false);
 
+    ImportDeclaration LIST = new ImportDeclaration("java.util.List", false, false);
+
 }

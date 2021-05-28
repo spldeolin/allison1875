@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * @author Deolin 2020-10-06
  */
-public class QueryMeta {
+public class DesignMeta {
 
     private String entityQualifier;
 

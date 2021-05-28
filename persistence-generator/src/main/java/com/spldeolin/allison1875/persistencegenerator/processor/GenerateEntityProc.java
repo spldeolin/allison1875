@@ -1,19 +1,12 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
-import static com.github.javaparser.StaticJavaParser.parseAnnotation;
-
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier.Keyword;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.JavadocComment;
@@ -29,11 +22,16 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.creator.CuCreator;
+import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.factory.JavabeanFactory;
+import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
+import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateEntityResultDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PathDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import lombok.extern.log4j.Log4j2;
@@ -48,11 +46,9 @@ public class GenerateEntityProc {
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
-    public GenerateEntityResultDto process(PersistenceDto persistence, PathDto pathDto) {
-        Path sourceRoot = pathDto.getSourceRoot();
-        Path entityPath = CodeGenerationUtils
-                .fileInPackageAbsolutePath(sourceRoot, persistenceGeneratorConfig.getEntityPackage(),
-                        persistence.getEntityName() + ".java");
+    public EntityGeneration process(PersistenceDto persistence, AstForest astForest) {
+        Path entityPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
+                persistenceGeneratorConfig.getEntityPackage(), persistence.getEntityName() + ".java");
 
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
         TreeSet<String> originalVariables = Sets.newTreeSet();
@@ -74,56 +70,58 @@ public class GenerateEntityProc {
                     persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
         }
 
-        // 生成Entity（可能是覆盖）
-        List<String> imports = Lists.newArrayList(this.getImports(persistence));
-        String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
-        if (StringUtils.isNotEmpty(superEntityQualifier)) {
-            imports.add(superEntityQualifier);
-            imports.add("lombok.EqualsAndHashCode");
+        JavabeanArg arg = new JavabeanArg();
+        arg.setAstForest(astForest);
+        arg.setPackageName(persistenceGeneratorConfig.getEntityPackage());
+        arg.setClassName(persistence.getEntityName());
+        arg.setAuthorName(persistenceGeneratorConfig.getAuthor());
+        arg.setMore4Javabean((cu, javabean) -> {
+            // 补全Javadoc
+            javabean.getJavadoc().ifPresent(old -> {
+                Javadoc javadoc = new JavadocComment(
+                        persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
+                                + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
+                                + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
+                javadoc.getBlockTags().clear();
+                javadoc.getBlockTags().addAll(authorTags);
+                javabean.setJavadocComment(javadoc);
+            });
+
+            // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
+            String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
+            if (StringUtils.isNotEmpty(superEntityQualifier)) {
+                cu.addImport(superEntityQualifier);
+                cu.addImport(AnnotationConstant.EQUALS_AND_HASH_CODE_QUALIFIER);
+                cu.getImports().removeIf(ipt -> ipt.getNameAsString().equals(AnnotationConstant.ACCESSORS_QUALIFIER));
+                String superEntityName = superEntityQualifier.substring(superEntityQualifier.lastIndexOf('.') + 1);
+                javabean.addExtendedType(superEntityName);
+                javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
+                javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
+            }
+        });
+        for (PropertyDto property : persistence.getProperties()) {
+            if (persistenceGeneratorConfig.getHiddenColumns().contains(property.getColumnName())
+                    || persistenceGeneratorConfig.getAlreadyInSuperEntity().contains(property.getColumnName())) {
+                continue;
+            }
+            FieldArg fieldArg = new FieldArg();
+            fieldArg.setTypeQualifier(property.getJavaType().getQualifier());
+            fieldArg.setDescription(buildCommentDescription(property));
+            fieldArg.setTypeName(property.getJavaType().getSimpleName());
+            fieldArg.setFieldName(property.getPropertyName());
+            arg.getFieldArgs().add(fieldArg);
         }
-
-        Collection<Pair<PropertyDto, FieldDeclaration>> propAndField = Lists.newArrayList();
-
-        Collection<CompilationUnit> toCreate = Lists.newArrayList();
-        CuCreator entityCuCreator = new CuCreator(sourceRoot, persistenceGeneratorConfig.getEntityPackage(), imports,
-                () -> {
-                    ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                    Javadoc classJavadoc = new JavadocComment(
-                            persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
-                                    + Strings.repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型"
-                                    + BaseConstant.BY_ALLISON_1875 + "</strong>").parse();
-                    classJavadoc.getBlockTags().addAll(authorTags);
-                    coid.setJavadocComment(classJavadoc);
-                    coid.addAnnotation(parseAnnotation("@Data"));
-                    coid.setPublic(true);
-                    coid.setName(persistence.getEntityName());
-                    if (StringUtils.isNotEmpty(superEntityQualifier)) {
-                        coid.addAnnotation(StaticJavaParser.parseAnnotation("@EqualsAndHashCode(callSuper = true)"));
-                        String superEntityName = superEntityQualifier
-                                .substring(superEntityQualifier.lastIndexOf('.') + 1);
-                        coid.addExtendedType(superEntityName);
-                    }
-                    for (PropertyDto property : persistence.getProperties()) {
-                        if (persistenceGeneratorConfig.getAlreadyInSuperEntity().contains(property.getColumnName())) {
-                            continue;
-                        }
-                        String type = property.getJavaType().getSimpleName();
-                        String name = property.getPropertyName();
-                        FieldDeclaration field = coid.addField(type, name, Keyword.PRIVATE);
-                        Javadoc fieldJavadoc = new JavadocComment(buildCommentDescription(property)).parse();
-                        field.setJavadocComment(fieldJavadoc);
-                        propAndField.add(Pair.of(property, field));
-                    }
-                    return coid;
-                });
-        toCreate.add(entityCuCreator.create(false));
+        CompilationUnit cu = JavabeanFactory.buildCu(arg);
+        Saves.add(cu);
 
         this.reportDiff(originalVariables, persistence);
 
-        GenerateEntityResultDto result = new GenerateEntityResultDto();
-        result.setEntityPath(entityPath);
-        result.setEntityCuCreator(entityCuCreator);
-        result.setToCreate(toCreate);
+        EntityGeneration result = new EntityGeneration();
+        result.setJavabeanArg(arg);
+        result.setEntity(cu.getPrimaryType().orElseThrow(RuntimeException::new).asClassOrInterfaceDeclaration());
+        result.setEntityName(arg.getClassName());
+        result.setEntityQualifier(cu.getPrimaryType().orElseThrow(QualifierAbsentException::new).getFullyQualifiedName()
+                .orElseThrow(QualifierAbsentException::new));
         return result;
     }
 
@@ -168,18 +166,6 @@ public class GenerateEntityProc {
             }
             result += BaseConstant.NEW_LINE + "<p>默认：" + defaultV;
         }
-        return result;
-    }
-
-    private Set<String> getImports(PersistenceDto persistence) {
-        Set<String> result = Sets.newHashSet();
-        for (PropertyDto prop : persistence.getProperties()) {
-            String qualifier = prop.getJavaType().getQualifier();
-            if (!qualifier.startsWith("java.lang")) {
-                result.add(qualifier);
-            }
-        }
-        result.add("lombok.Data");
         return result;
     }
 

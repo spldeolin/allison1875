@@ -18,9 +18,11 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.creator.CuCreator;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.javabean.FindOrCreateMapperResultDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -34,11 +36,11 @@ public class FindOrCreateMapperProc {
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
-    public FindOrCreateMapperResultDto process(PersistenceDto persistence, CuCreator entityCuCreator)
-            throws IOException {
+    public ClassOrInterfaceDeclaration process(PersistenceDto persistence, EntityGeneration entityGeneration,
+            AstForest astForest) throws IOException {
 
         // find
-        Path mapperPath = CodeGenerationUtils.fileInPackageAbsolutePath(entityCuCreator.getSourceRoot(),
+        Path mapperPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                 persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java");
         CompilationUnit cu;
         ClassOrInterfaceDeclaration mapper;
@@ -56,14 +58,14 @@ public class FindOrCreateMapperProc {
 
             // create
             log.info("Mapper文件不存在，创建它。 [{}]", mapperPath);
-            CuCreator mapperCuCreator = new CuCreator(entityCuCreator.getSourceRoot(),
+            CuCreator mapperCuCreator = new CuCreator(astForest.getPrimaryJavaRoot(),
                     persistenceGeneratorConfig.getMapperPackage(),
                     Lists.newArrayList(new ImportDeclaration("java.util", false, true),
-                            new ImportDeclaration(entityCuCreator.getPrimaryTypeQualifier(), false, false),
+                            new ImportDeclaration(entityGeneration.getEntityQualifier(), false, false),
                             new ImportDeclaration("org.apache.ibatis.annotations", false, true)), () -> {
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
-                javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityCuCreator.getPrimaryTypeName()));
+                javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityGeneration.getEntityName()));
                 javadoc.addBlockTag(new JavadocBlockTag(Type.AUTHOR,
                         persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
                 coid.setJavadocComment(javadoc);
@@ -76,7 +78,10 @@ public class FindOrCreateMapperProc {
 
             mapper = mapperCuCreator.getPt().asClassOrInterfaceDeclaration();
         }
-        return new FindOrCreateMapperResultDto().setCu(cu).setMapper(mapper);
+
+        Saves.add(cu);
+
+        return mapper;
     }
 
 }

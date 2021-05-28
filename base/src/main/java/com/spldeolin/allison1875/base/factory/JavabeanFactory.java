@@ -17,6 +17,10 @@ import com.spldeolin.allison1875.base.util.ast.Authors;
  */
 public class JavabeanFactory {
 
+    /**
+     * TODO JavabeanFactory#buildCu 如果absulutePath对应的文件已存在，需要在新的primaryType使用原有的Javadoc Author
+     * TODO JavabeanFactory#buildCu 如果absulutePath对应的文件已存在，需要打印field的变动点
+     */
     public static CompilationUnit buildCu(JavabeanArg javabeanArg) {
         CompilationUnit cu = new CompilationUnit();
         Path absulutePath = CodeGenerationUtils
@@ -30,10 +34,12 @@ public class JavabeanFactory {
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.addAnnotation(AnnotationConstant.DATA);
         coid.addAnnotation(AnnotationConstant.ACCESSORS);
-        coid.setName(javabeanArg.getClassName());
+        coid.setPublic(true).setInterface(false).setName(javabeanArg.getClassName());
         if (StringUtils.isNotEmpty(javabeanArg.getAuthorName())) {
             Authors.ensureAuthorExist(coid, javabeanArg.getAuthorName());
         }
+        cu.addType(coid);
+
         for (FieldArg fieldArg : javabeanArg.getFieldArgs()) {
             if (fieldArg.getTypeQualifier() != null) {
                 cu.addImport(fieldArg.getTypeQualifier());
@@ -42,8 +48,16 @@ public class JavabeanFactory {
             if (fieldArg.getDescription() != null) {
                 field.setJavadocComment(fieldArg.getDescription());
             }
+            // more
+            if (fieldArg.getMore4Field() != null) {
+                fieldArg.getMore4Field().accept(coid, field);
+            }
         }
-        cu.addType(coid);
+
+        // more
+        if (javabeanArg.getMore4Javabean() != null) {
+            javabeanArg.getMore4Javabean().accept(cu, coid);
+        }
 
         return cu;
     }

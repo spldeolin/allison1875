@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
-import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -97,8 +97,8 @@ public class ListControllersProc {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(QualifierConstants.CONTROLLER) || QualifierConstants.CONTROLLER
-                        .equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_QUALIFIER)
+                        || AnnotationConstant.CONTROLLER_QUALIFIER.equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {

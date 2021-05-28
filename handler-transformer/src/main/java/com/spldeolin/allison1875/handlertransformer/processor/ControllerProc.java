@@ -8,7 +8,7 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.builder.FieldDeclarationBuilder;
-import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
@@ -35,8 +35,8 @@ public class ControllerProc {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(QualifierConstants.CONTROLLER) || QualifierConstants.CONTROLLER
-                        .equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_QUALIFIER)
+                        || AnnotationConstant.CONTROLLER_QUALIFIER.equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {

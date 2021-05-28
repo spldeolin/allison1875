@@ -9,11 +9,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.creator.CuCreator;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.javabean.FindOrCreateMapperResultDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateEntityResultDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PathDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -181,24 +179,19 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         for (PersistenceDto persistence : persistenceDtos) {
 
             // 重新生成Entity
-            GenerateEntityResultDto generateEntityResult = entityProc.process(persistence, pathDto);
-            CuCreator entityCuCreator = generateEntityResult.getEntityCuCreator();
-            Saves.add(generateEntityResult.getToCreate());
+            EntityGeneration entityGeneration = entityProc.process(persistence, astForest);
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
-                FindOrCreateMapperResultDto findOrCreateMapperResult = findOrCreateMapperProc
-                        .process(persistence, entityCuCreator);
-                mapper = findOrCreateMapperResult.getMapper();
-                Saves.add(findOrCreateMapperResult.getCu());
+                mapper = findOrCreateMapperProc.process(persistence, entityGeneration, astForest);
             } catch (Exception e) {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
 
             // 重新生成QueryDesign
-            generateDesignProc.process(persistence, entityCuCreator, mapper);
+            generateDesignProc.process(persistence, entityGeneration, mapper, astForest);
 
             // 删除Mapper中所有Allison 1875生成的方法
             deleteAllison1875MethodProc.process(mapper);
@@ -234,7 +227,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             customMethods.forEach(one -> mapper.getMembers().addLast(one));
 
             // 在Mapper.xml中覆盖生成基础方法
-            String entityName = getEntityNameInXml(entityCuCreator);
+            String entityName = getEntityNameInXml(entityGeneration);
             try {
                 mapperXmlProc.process(persistence, mapper, pathDto.getMapperXmlPath(),
                         Lists.newArrayList(resultMapXmlProc.process(persistence, entityName),
@@ -262,11 +255,11 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
         Saves.saveAll();
     }
 
-    private String getEntityNameInXml(CuCreator entityCuCreator) {
+    private String getEntityNameInXml(EntityGeneration entityGeneration) {
         if (config.getIsEntityUsingAlias()) {
-            return entityCuCreator.getPrimaryTypeName();
+            return entityGeneration.getEntityName();
         } else {
-            return entityCuCreator.getPrimaryTypeQualifier();
+            return entityGeneration.getEntityQualifier();
         }
     }
 

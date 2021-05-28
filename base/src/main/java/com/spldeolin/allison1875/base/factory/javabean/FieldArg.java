@@ -1,6 +1,9 @@
 package com.spldeolin.allison1875.base.factory.javabean;
 
+import java.util.function.BiConsumer;
 import javax.validation.constraints.NotBlank;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -20,5 +23,7 @@ public class FieldArg {
 
     @NotBlank
     private String fieldName;
+
+    private BiConsumer<ClassOrInterfaceDeclaration, FieldDeclaration> more4Field;
 
 }

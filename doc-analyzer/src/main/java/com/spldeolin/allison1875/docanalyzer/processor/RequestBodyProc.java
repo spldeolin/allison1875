@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.QualifierConstants;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
@@ -61,7 +61,7 @@ public class RequestBodyProc {
             try {
                 boolean isRequestBody = false;
                 for (AnnotationExpr annotation : parameter.getAnnotations()) {
-                    if (QualifierConstants.REQUEST_BODY.equals(annotation.resolve().getQualifiedName())) {
+                    if (AnnotationConstant.REQUEST_BODY_QUALIFIER.equals(annotation.resolve().getQualifiedName())) {
                         if (result == null) {
                             result = parameter.getType().resolve();
                             isRequestBody = true;

@@ -40,4 +40,12 @@ public interface AnnotationConstant {
 
     String ACCESSORS_QUALIFIER = "lombok.experimental.Accessors";
 
+    AnnotationExpr CONTROLLER = StaticJavaParser.parseAnnotation("@Controller");
+
+    String CONTROLLER_QUALIFIER = "org.springframework.stereotype.Controller";
+
+    AnnotationExpr EQUALS_AND_HASH_CODE = StaticJavaParser.parseAnnotation("@EqualsAndHashCode(callSuper = true)");
+
+    String EQUALS_AND_HASH_CODE_QUALIFIER = "lombok.EqualsAndHashCode";
+
 }
