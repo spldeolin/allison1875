@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
@@ -36,7 +35,7 @@ public class QueryByIdXmlProc {
             }
             firstLine += "resultMap=\"all\">";
             xmlLines.add(firstLine);
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
@@ -48,7 +47,7 @@ public class QueryByIdXmlProc {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty
                         .getPropertyName() + "}");
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
             xmlLines.add("");
         }

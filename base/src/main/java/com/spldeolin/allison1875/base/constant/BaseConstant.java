@@ -17,4 +17,8 @@ public interface BaseConstant {
 
     String NEW_LINE = "\r\n";
 
+    String FORMATTER_OFF_MARKER = "<!-- @formatter:off -->";
+
+    String FORMATTER_ON_MARKER = "<!-- @formatter:on -->";
+
 }

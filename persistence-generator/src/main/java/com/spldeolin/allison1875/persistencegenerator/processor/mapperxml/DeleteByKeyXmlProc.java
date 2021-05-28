@@ -7,8 +7,8 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
@@ -34,11 +34,11 @@ public class DeleteByKeyXmlProc {
                 PropertyDto key = KeyAndMethodName.getKey();
                 xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", KeyAndMethodName.getMethodName(),
                         key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-                xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "UPDATE " + persistence.getTableName());
                 xmlLines.add(SINGLE_INDENT + "SET " + persistenceGeneratorConfig.getDeletedSql());
                 xmlLines.add(SINGLE_INDENT + "WHERE " + key.getColumnName() + " = #{" + key.getPropertyName() + "}");
-                xmlLines.add(SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
                 xmlLines.add("</update>");
                 result.addAll(xmlLines);
                 result.add("");

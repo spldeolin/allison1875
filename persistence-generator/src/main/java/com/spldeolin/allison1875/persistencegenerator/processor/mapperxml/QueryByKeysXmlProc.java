@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
@@ -34,7 +33,7 @@ public class QueryByKeysXmlProc {
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
                     queryByKeysDto.getMethodName(),
                     key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
@@ -45,7 +44,7 @@ public class QueryByKeysXmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + key.getColumnName() + String
                     .format(" IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
                             queryByKeysDto.getVarsName()));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
             sourceCodeLines.addAll(xmlLines);
             sourceCodeLines.add("");

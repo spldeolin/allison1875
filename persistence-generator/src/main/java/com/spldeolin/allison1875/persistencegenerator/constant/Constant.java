@@ -15,8 +15,4 @@ public interface Constant {
 
     String PROHIBIT_MODIFICATION_JAVADOC = "\r\n" + "\r\n" + "<strong>该方法" + BaseConstant.BY_ALLISON_1875 + "</strong>";
 
-    String FORMATTER_OFF_MARKER = "<!-- @formatter:off -->";
-
-    String FORMATTER_ON_MARKER = "<!-- @formatter:on -->";
-
 }

@@ -8,7 +8,6 @@ import com.google.inject.Singleton;
 import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
@@ -30,7 +29,7 @@ public class UpdateByIdEvenNullXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         if (persistence.getIdProperties().size() > 0) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
             for (PropertyDto nonId : persistence.getNonIdProperties()) {
@@ -50,7 +49,7 @@ public class UpdateByIdEvenNullXmlProc {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty
                         .getPropertyName() + "}");
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
             xmlLines.add("");
         }

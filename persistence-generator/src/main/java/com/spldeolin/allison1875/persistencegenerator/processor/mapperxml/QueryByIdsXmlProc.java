@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
@@ -31,7 +30,7 @@ public class QueryByIdsXmlProc {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName,
                     onlyPk.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
@@ -41,7 +40,7 @@ public class QueryByIdsXmlProc {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + onlyPk.getColumnName()
                     + " IN (<foreach collection=\"ids\" item=\"one\" separator=\",\">#{one}</foreach>)");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + Constant.FORMATTER_ON_MARKER);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
             xmlLines.add("");
         }

@@ -8,7 +8,6 @@ import com.google.inject.Singleton;
 import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
@@ -30,7 +29,7 @@ public class BatchUpdateEvenNullXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + Constant.FORMATTER_OFF_MARKER);
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE " + persistence.getTableName());
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "SET");
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
@@ -50,7 +49,7 @@ public class BatchUpdateEvenNullXmlProc {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{one." + idProperty
                     .getPropertyName() + "}");
         }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + Constant.FORMATTER_ON_MARKER);
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add("</update>");
         xmlLines.add("");
