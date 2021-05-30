@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * @author Deolin 2020-10-06
  */
-public enum OperatorEnum {
+public enum VerbEnum {
 
     EQUALS("eq"),
 
@@ -33,7 +33,7 @@ public enum OperatorEnum {
 
     private final String value;
 
-    OperatorEnum(String value) {
+    VerbEnum(String value) {
         this.value = value;
     }
 
@@ -42,11 +42,11 @@ public enum OperatorEnum {
     }
 
     public static boolean isValid(String value) {
-        return Arrays.stream(OperatorEnum.values()).anyMatch(one -> one.getValue().equals(value));
+        return Arrays.stream(VerbEnum.values()).anyMatch(one -> one.getValue().equals(value));
     }
 
-    public static OperatorEnum of(String value) {
-        return Arrays.stream(OperatorEnum.values()).filter(one -> one.getValue().equals(value)).findAny().orElse(null);
+    public static VerbEnum of(String value) {
+        return Arrays.stream(VerbEnum.values()).filter(one -> one.getValue().equals(value)).findAny().orElse(null);
     }
 
 }

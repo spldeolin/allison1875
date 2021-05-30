@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Optional;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -14,13 +13,13 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
-import com.spldeolin.allison1875.querytransformer.enums.OperatorEnum;
+import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 import lombok.extern.log4j.Log4j2;
@@ -35,13 +34,13 @@ public class GenerateMapperQueryMethodProc {
     @Inject
     private QueryTransformerConfig queryTransformerConfig;
 
-    public ClassOrInterfaceDeclaration process(CompilationUnit cu, QueryMeta queryMeta, String queryMethodName,
+    public ClassOrInterfaceDeclaration process(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
             Collection<CriterionDto> criterions) {
-        ClassOrInterfaceDeclaration mapper = findMapper(cu, queryMeta);
+        ClassOrInterfaceDeclaration mapper = findMapper(astForest, queryMeta);
         if (mapper == null) {
             return null;
         }
-        ClassOrInterfaceDeclaration entity = findEntity(cu, queryMeta);
+        ClassOrInterfaceDeclaration entity = findEntity(astForest, queryMeta);
         if (entity == null) {
             return mapper;
         }
@@ -50,8 +49,8 @@ public class GenerateMapperQueryMethodProc {
         queryMethod.setType(StaticJavaParser.parseType(String.format("List<%s>", queryMeta.getEntityName())));
         queryMethod.setName(queryMethodName);
         for (CriterionDto criterion : criterions) {
-            OperatorEnum operator = OperatorEnum.of(criterion.getOperator());
-            if (operator == OperatorEnum.NOT_NULL || operator == OperatorEnum.IS_NULL) {
+            VerbEnum operator = VerbEnum.of(criterion.getOperator());
+            if (operator == VerbEnum.NOT_NULL || operator == VerbEnum.IS_NULL) {
                 continue;
             }
             String propertyName = criterion.getParameterName();
@@ -62,13 +61,13 @@ public class GenerateMapperQueryMethodProc {
             } else {
                 propertyType = queryTransformerConfig.getEntityCommonPropertyTypes().get(propertyName);
             }
-            if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+            if (operator == VerbEnum.IN || operator == VerbEnum.NOT_IN) {
                 propertyType = "Collection<" + propertyType + ">";
             }
             criterion.setParameterType(propertyType);
             Parameter parameter = new Parameter();
             String argumentName = propertyName;
-            if (operator == OperatorEnum.IN || operator == OperatorEnum.NOT_IN) {
+            if (operator == VerbEnum.IN || operator == VerbEnum.NOT_IN) {
                 argumentName = English.plural(propertyName);
             }
             parameter.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", argumentName)));
@@ -87,10 +86,10 @@ public class GenerateMapperQueryMethodProc {
         return mapper;
     }
 
-    private ClassOrInterfaceDeclaration findMapper(CompilationUnit cu, QueryMeta queryMeta) {
+    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, QueryMeta queryMeta) {
         try {
             String mapperQualifier = queryMeta.getMapperQualifier();
-            Path mapperPath = Locations.getStorage(cu).getSourceRoot()
+            Path mapperPath = astForest.getPrimaryJavaRoot()
                     .resolve(mapperQualifier.replace('.', File.separatorChar) + ".java");
             return StaticJavaParser.parse(mapperPath).getTypes().get(0).asClassOrInterfaceDeclaration();
         } catch (Exception e) {
@@ -99,10 +98,10 @@ public class GenerateMapperQueryMethodProc {
         }
     }
 
-    private ClassOrInterfaceDeclaration findEntity(CompilationUnit cu, QueryMeta queryMeta) {
+    private ClassOrInterfaceDeclaration findEntity(AstForest astForest, QueryMeta queryMeta) {
         try {
             String mapperQualifier = queryMeta.getEntityQualifier();
-            Path mapperPath = Locations.getStorage(cu).getSourceRoot()
+            Path mapperPath = astForest.getPrimaryJavaRoot()
                     .resolve(mapperQualifier.replace('.', File.separatorChar) + ".java");
             return StaticJavaParser.parse(mapperPath).getTypes().get(0).asClassOrInterfaceDeclaration();
         } catch (Exception e) {
