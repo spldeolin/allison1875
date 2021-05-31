@@ -69,10 +69,10 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
     private String entityPackage;
 
     /**
-     * 是否为[query-transformer]生成Query类
+     * 是否为[query-transformer]生成Design类
      */
     @NotNull
-    private Boolean enableGenerateQueryDesign;
+    private Boolean enableGenerateDesign;
 
     /**
      * QueryDesign类的包名（根据目标工程的情况填写）

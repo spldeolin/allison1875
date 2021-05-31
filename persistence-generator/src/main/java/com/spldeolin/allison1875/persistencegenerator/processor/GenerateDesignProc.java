@@ -40,7 +40,7 @@ public class GenerateDesignProc {
 
     public void process(PersistenceDto persistence, EntityGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
-        if (!persistenceGeneratorConfig.getEnableGenerateQueryDesign()) {
+        if (!persistenceGeneratorConfig.getEnableGenerateDesign()) {
             return;
         }
 
