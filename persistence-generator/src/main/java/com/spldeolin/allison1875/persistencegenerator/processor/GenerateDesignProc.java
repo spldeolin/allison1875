@@ -46,12 +46,12 @@ public class GenerateDesignProc {
 
         String designName = concatDesignName(persistence);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
-                persistenceGeneratorConfig.getQueryDesignPackage(), designName + ".java");
+                persistenceGeneratorConfig.getDesignPackage(), designName + ".java");
         JavabeanArg entityArg = entityGeneration.getJavabeanArg();
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
-        cu.setPackageDeclaration(persistenceGeneratorConfig.getQueryDesignPackage());
+        cu.setPackageDeclaration(persistenceGeneratorConfig.getDesignPackage());
         cu.addImport(ImportConstants.LIST);
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
@@ -76,10 +76,10 @@ public class GenerateDesignProc {
                 .parseBodyDeclaration("public static UpdateChain update(String methodName) {throw e;}"));
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
-        queryChainCoid.setPublic(true).setInterface(true).setName("QueryChain");
+        queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
         for (FieldArg fieldArg : entityArg.getFieldArgs()) {
             queryChainCoid.addMember(StaticJavaParser
-                    .parseBodyDeclaration("public QueryChain " + fieldArg.getFieldName() + " = query(null);"));
+                    .parseBodyDeclaration("public static QueryChain " + fieldArg.getFieldName() + " = query(null);"));
         }
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainReturn> by();"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("OrderChain order();"));

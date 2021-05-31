@@ -78,13 +78,7 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
      * QueryDesign类的包名（根据目标工程的情况填写）
      */
     @NotEmpty
-    private String queryDesignPackage;
-
-    /**
-     * QueryPredicate类的全限定名（根据目标工程的情况填写）
-     */
-    @NotEmpty
-    private String queryPredicateQualifier;
+    private String designPackage;
 
     /**
      * mapper.xml的标签中，是否使用别名来引用Entity类
@@ -213,7 +207,7 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
         if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
             this.mapperPackage = packageNameWithWildcard.replace(".-", ".mapper");
             this.entityPackage = packageNameWithWildcard.replace(".-", ".entity");
-            this.queryDesignPackage = packageNameWithWildcard.replace(".-", ".querydesign");
+            this.designPackage = packageNameWithWildcard.replace(".-", ".design");
         }
     }
 
