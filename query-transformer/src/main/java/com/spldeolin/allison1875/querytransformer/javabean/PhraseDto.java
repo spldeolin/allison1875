@@ -18,4 +18,18 @@ public class PhraseDto {
 
     private Expression objectExpr;
 
+    public String toString() {
+        if (verb == null && objectExpr == null) {
+            return subjectPropertyName;
+        }
+        if (objectExpr == null) {
+            return subjectPropertyName + " " + verb.getValue();
+        }
+        if (verb == null) {
+            return subjectPropertyName + " . " + objectExpr;
+        }
+        return subjectPropertyName + " " + verb.getValue() + " " + objectExpr;
+
+    }
+
 }

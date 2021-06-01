@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Expression;
@@ -43,31 +44,55 @@ public class AnalyzeCriterionProc {
         String betweenCode = Substring.between(Substring.first('.'), Substring.last(".")).from(chainCode)
                 .orElseThrow(IllegalChainException::new);
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        boolean queryOrUpdate = betweenCode.startsWith("query(");
 
-        Set<String> queryPropertyNames = Sets.newLinkedHashSet();
+        boolean queryOrUpdate = betweenCode.startsWith("query(");
+        boolean returnManyOrOne = chainCode.endsWith("many()");
+        log.info("queryOrUpdate={} returnManyOrOne={}", queryOrUpdate, returnManyOrOne);
+
+        Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
-        for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class)) {
+        Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
+        for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
             String describe = fae.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".QueryChain")) {
-                queryPropertyNames.add(fae.getNameAsString());
+                queryPhrases.add(new PhraseDto().setSubjectPropertyName(fae.getNameAsString()));
             }
             if (describe.startsWith(ByChainPredicate.class.getName()) && fae.getParentNode().isPresent()) {
                 Node parent = fae.getParentNode().get();
                 if (!(parent instanceof MethodCallExpr)) {
                     throw new IllegalChainException();
                 }
-                PhraseDto byPhrase = new PhraseDto();
-                byPhrase.setSubjectPropertyName(fae.getNameAsString());
-                byPhrase.setVerb(VerbEnum.of(((MethodCallExpr) parent).getNameAsString()));
-                byPhrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
-                byPhrases.add(byPhrase);
+                PhraseDto phrase = new PhraseDto();
+                phrase.setSubjectPropertyName(fae.getNameAsString());
+                phrase.setVerb(VerbEnum.of(((MethodCallExpr) parent).getNameAsString()));
+                phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
+                byPhrases.add(phrase);
             }
             if (describe.startsWith(OrderChainPredicate.class.getName())) {
-
+                Node parent = fae.getParentNode().get();
+                if (!(parent instanceof MethodCallExpr)) {
+                    throw new IllegalChainException();
+                }
+                PhraseDto phrase = new PhraseDto();
+                phrase.setSubjectPropertyName(fae.getNameAsString());
+                phrase.setVerb(VerbEnum.of(((MethodCallExpr) parent).getNameAsString()));
+                orderPhrases.add(phrase);
             }
         }
+        for (MethodCallExpr mce : chain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
+            String describe = mce.calculateResolvedType().describe();
+            if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
+                PhraseDto phrase = new PhraseDto();
+                phrase.setSubjectPropertyName(mce.getNameAsString());
+                phrase.setObjectExpr(mce.getArgument(0));
+                updatePhrases.add(phrase);
+            }
+        }
+        log.info("queryPhrases={}", queryPhrases);
+        log.info("byPhrases={}", byPhrases);
+        log.info("orderPhrases={}", orderPhrases);
+        log.info("updatePhrases={}", updatePhrases);
 
 
         List<MethodCallExpr> tokenMces = chain

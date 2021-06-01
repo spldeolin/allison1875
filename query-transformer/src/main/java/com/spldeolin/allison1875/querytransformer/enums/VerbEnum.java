@@ -1,10 +1,14 @@
 package com.spldeolin.allison1875.querytransformer.enums;
 
 import java.util.Arrays;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * @author Deolin 2020-10-06
  */
+@AllArgsConstructor
+@Getter
 public enum VerbEnum {
 
     EQUALS("eq"),
@@ -29,17 +33,13 @@ public enum VerbEnum {
 
     LIKE("like"),
 
+    DESC("desc"),
+
+    ASC("asc"),
+
     ;
 
     private final String value;
-
-    VerbEnum(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
 
     public static boolean isValid(String value) {
         return Arrays.stream(VerbEnum.values()).anyMatch(one -> one.getValue().equals(value));
