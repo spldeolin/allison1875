@@ -81,11 +81,15 @@ public class GenerateDesignProc {
             queryChainCoid.addMember(StaticJavaParser
                     .parseBodyDeclaration("public static QueryChain " + fieldArg.getFieldName() + " = query(null);"));
         }
-        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainReturn> by();"));
-        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("OrderChain order();"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public static ByChainReturn<NextableByChainReturn> by() { return new ByChainReturn(); }"));
         queryChainCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration("List<" + entityGeneration.getEntityName() + "> many();"));
-        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(entityGeneration.getEntityName() + " one();"));
+                StaticJavaParser.parseBodyDeclaration("public static OrderChain order() { return new OrderChain(); }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public static List<" + entityGeneration.getEntityName() + "> many() { return new ArrayList<>(); }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public static " + entityGeneration.getEntityName() + " one() { return new " + entityGeneration
+                        .getEntityName() + "(); }"));
         designCoid.addMember(queryChainCoid);
 
         ClassOrInterfaceDeclaration updateChainCoid = new ClassOrInterfaceDeclaration();
