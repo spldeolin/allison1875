@@ -53,6 +53,7 @@ public class GenerateDesignProc {
         cu.setStorage(designPath);
         cu.setPackageDeclaration(persistenceGeneratorConfig.getDesignPackage());
         cu.addImport(ImportConstants.LIST);
+        cu.addImport(ImportConstants.ARRAY_LIST);
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
         cu.addImport(entityGeneration.getEntityQualifier());
@@ -103,8 +104,12 @@ public class GenerateDesignProc {
         designCoid.addMember(updateChainCoid);
 
         ClassOrInterfaceDeclaration nextableUpdateChainCoid = new ClassOrInterfaceDeclaration();
-        nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain")
-                .addExtendedType("UpdateChain");
+        nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain");
+        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+            nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "NextableUpdateChain " + fieldArg.getFieldName() + "(" + fieldArg.getTypeName() + " " + fieldArg
+                            .getFieldName() + ");"));
+        }
         nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("void over();"));
         nextableUpdateChainCoid
                 .addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
@@ -141,7 +146,7 @@ public class GenerateDesignProc {
                     "public ByChainPredicate<NextableByChainVoid, " + fieldArg.getTypeName() + "> " + fieldArg
                             .getFieldName() + ";"));
         }
-        nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration("public void over() { throw e; }"));
+        nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int over() { return 0; }"));
         designCoid.addMember(nextableByChainVoidCoid);
 
         ClassOrInterfaceDeclaration orderChainCoid = new ClassOrInterfaceDeclaration();
@@ -153,8 +158,11 @@ public class GenerateDesignProc {
         designCoid.addMember(orderChainCoid);
 
         ClassOrInterfaceDeclaration nextableOrderChainCoid = new ClassOrInterfaceDeclaration();
-        nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
-                .addExtendedType("OrderChain");
+        nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain");
+        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "public OrderChainPredicate<NextableOrderChain> " + fieldArg.getFieldName() + ";"));
+        }
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser
