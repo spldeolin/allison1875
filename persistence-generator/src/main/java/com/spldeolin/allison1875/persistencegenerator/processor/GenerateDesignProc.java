@@ -77,19 +77,20 @@ public class GenerateDesignProc {
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("private QueryChain () {}"));
         for (FieldArg fieldArg : entityArg.getFieldArgs()) {
             queryChainCoid.addMember(StaticJavaParser
-                    .parseBodyDeclaration("public static QueryChain " + fieldArg.getFieldName() + " = query(null);"));
+                    .parseBodyDeclaration("public QueryChain " + fieldArg.getFieldName() + " = new QueryChain();"));
         }
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public static ByChainReturn<NextableByChainReturn> by() { return new ByChainReturn(); }"));
+                "public ByChainReturn<NextableByChainReturn> by() { return new ByChainReturn(); }"));
         queryChainCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration("public static OrderChain order() { return new OrderChain(); }"));
+                StaticJavaParser.parseBodyDeclaration("public OrderChain order() { return new OrderChain(); }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public static List<" + entityGeneration.getEntityName() + "> many() { return new ArrayList<>(); }"));
+                "public List<" + entityGeneration.getEntityName() + "> many() { return new ArrayList<>(); }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public static " + entityGeneration.getEntityName() + " one() { return new " + entityGeneration
-                        .getEntityName() + "(); }"));
+                "public " + entityGeneration.getEntityName() + " one() { return new " + entityGeneration.getEntityName()
+                        + "(); }"));
         designCoid.addMember(queryChainCoid);
 
         ClassOrInterfaceDeclaration updateChainCoid = new ClassOrInterfaceDeclaration();
@@ -122,8 +123,8 @@ public class GenerateDesignProc {
         nextableByChainReturnCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainReturn");
         for (FieldArg fieldArg : entityArg.getFieldArgs()) {
             nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "ByChainPredicate<NextableByChainReturn, " + fieldArg.getTypeName() + "> " + fieldArg.getFieldName()
-                            + ";"));
+                    "public ByChainPredicate<NextableByChainReturn, " + fieldArg.getTypeName() + "> " + fieldArg
+                            .getFieldName() + ";"));
         }
         nextableByChainReturnCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
