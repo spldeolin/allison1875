@@ -1,20 +1,23 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.stream.Collectors;
+import java.util.Collection;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.utils.CodeGenerationUtils;
+import com.github.javaparser.utils.StringEscapeUtils;
+import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
-import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -47,7 +50,10 @@ public class GenerateDesignProc {
         String designName = concatDesignName(persistence);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                 persistenceGeneratorConfig.getDesignPackage(), designName + ".java");
-        JavabeanArg entityArg = entityGeneration.getJavabeanArg();
+
+        Collection<PropertyDto> properties = persistence.getProperties();
+        properties.removeIf(
+                property -> persistenceGeneratorConfig.getHiddenColumns().contains(property.getPropertyName()));
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
@@ -57,11 +63,12 @@ public class GenerateDesignProc {
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
         cu.addImport(entityGeneration.getEntityQualifier());
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
-            if (fieldArg.getTypeQualifier() != null) {
-                cu.addImport(fieldArg.getTypeQualifier());
+        for (PropertyDto property : properties) {
+            if (!property.getJavaType().getQualifier().startsWith("java.lang")) {
+                cu.addImport(property.getJavaType().getQualifier());
             }
         }
+        cu.addOrphanComment(new LineComment("@formatter:" + "off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
         Javadoc javadoc = entityGeneration.getEntity().getJavadoc()
                 .orElse(Javadocs.createJavadoc(null, persistenceGeneratorConfig.getAuthor()));
@@ -79,9 +86,11 @@ public class GenerateDesignProc {
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("private QueryChain () {}"));
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
-            queryChainCoid.addMember(StaticJavaParser
-                    .parseBodyDeclaration("public QueryChain " + fieldArg.getFieldName() + " = new QueryChain();"));
+        for (PropertyDto property : properties) {
+            FieldDeclaration field = StaticJavaParser
+                    .parseBodyDeclaration("public QueryChain " + property.getPropertyName() + " = new QueryChain();")
+                    .asFieldDeclaration();
+            queryChainCoid.addMember(field);
         }
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public ByChainReturn<NextableByChainReturn> by() { return new ByChainReturn(); }"));
@@ -96,19 +105,19 @@ public class GenerateDesignProc {
 
         ClassOrInterfaceDeclaration updateChainCoid = new ClassOrInterfaceDeclaration();
         updateChainCoid.setPublic(true).setInterface(true).setName("UpdateChain");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             updateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "NextableUpdateChain " + fieldArg.getFieldName() + "(" + fieldArg.getTypeName() + " " + fieldArg
-                            .getFieldName() + ");"));
+                    "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getSimpleName()
+                            + " " + property.getPropertyName() + ");"));
         }
         designCoid.addMember(updateChainCoid);
 
         ClassOrInterfaceDeclaration nextableUpdateChainCoid = new ClassOrInterfaceDeclaration();
         nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "NextableUpdateChain " + fieldArg.getFieldName() + "(" + fieldArg.getTypeName() + " " + fieldArg
-                            .getFieldName() + ");"));
+                    "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getSimpleName()
+                            + " " + property.getPropertyName() + ");"));
         }
         nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("void over();"));
         nextableUpdateChainCoid
@@ -118,18 +127,19 @@ public class GenerateDesignProc {
         ClassOrInterfaceDeclaration byChainReturnCode = new ClassOrInterfaceDeclaration();
         byChainReturnCode.setPublic(true).setStatic(true).setInterface(false).setName("ByChainReturn")
                 .addTypeParameter("NEXT");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             byChainReturnCode.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public ByChainPredicate<NEXT, " + fieldArg.getTypeName() + "> " + fieldArg.getFieldName() + ";"));
+                    "public ByChainPredicate<NEXT, " + property.getJavaType().getSimpleName() + "> " + property
+                            .getPropertyName() + ";"));
         }
         designCoid.addMember(byChainReturnCode);
 
         ClassOrInterfaceDeclaration nextableByChainReturnCoid = new ClassOrInterfaceDeclaration();
         nextableByChainReturnCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainReturn");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public ByChainPredicate<NextableByChainReturn, " + fieldArg.getTypeName() + "> " + fieldArg
-                            .getFieldName() + ";"));
+                    "public ByChainPredicate<NextableByChainReturn, " + property.getJavaType().getSimpleName() + "> "
+                            + property.getPropertyName() + ";"));
         }
         nextableByChainReturnCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
@@ -141,27 +151,27 @@ public class GenerateDesignProc {
 
         ClassOrInterfaceDeclaration nextableByChainVoidCoid = new ClassOrInterfaceDeclaration();
         nextableByChainVoidCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainVoid");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public ByChainPredicate<NextableByChainVoid, " + fieldArg.getTypeName() + "> " + fieldArg
-                            .getFieldName() + ";"));
+                    "public ByChainPredicate<NextableByChainVoid, " + property.getJavaType().getSimpleName() + "> "
+                            + property.getPropertyName() + ";"));
         }
         nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int over() { return 0; }"));
         designCoid.addMember(nextableByChainVoidCoid);
 
         ClassOrInterfaceDeclaration orderChainCoid = new ClassOrInterfaceDeclaration();
         orderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("OrderChain");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             orderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public OrderChainPredicate<NextableOrderChain> " + fieldArg.getFieldName() + ";"));
+                    "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";"));
         }
         designCoid.addMember(orderChainCoid);
 
         ClassOrInterfaceDeclaration nextableOrderChainCoid = new ClassOrInterfaceDeclaration();
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain");
-        for (FieldArg fieldArg : entityArg.getFieldArgs()) {
+        for (PropertyDto property : properties) {
             nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public OrderChainPredicate<NextableOrderChain> " + fieldArg.getFieldName() + ";"));
+                    "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";"));
         }
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
@@ -177,13 +187,21 @@ public class GenerateDesignProc {
         meta.setMapperRelativePath(
                 persistenceGeneratorConfig.getMapperXmlDirectoryPath() + File.separator + persistence.getMapperName()
                         + ".xml");
-        meta.setPropertyNames(
-                persistence.getProperties().stream().map(PropertyDto::getPropertyName).collect(Collectors.toList()));
+        meta.setProperties(properties);
         meta.setTableName(persistence.getTableName());
-        designCoid.addField("String", "meta").setJavadocComment(JsonUtils.toJson(meta));
-
+        String metaJson = JsonUtils.toJson(meta);
+        designCoid.addFieldWithInitializer("String", "meta",
+                StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
+        cu.addOrphanComment(new LineComment(hashing(designCoid)));
+
         Saves.add(cu);
+    }
+
+    private String hashing(ClassOrInterfaceDeclaration designCoid) {
+        return Hashing.hmacMd5("Allison 1875".getBytes(StandardCharsets.UTF_8))
+                .hashString(designCoid.toString(), StandardCharsets.UTF_8).toString();
+
     }
 
     private String concatDesignName(PersistenceDto persistence) {
