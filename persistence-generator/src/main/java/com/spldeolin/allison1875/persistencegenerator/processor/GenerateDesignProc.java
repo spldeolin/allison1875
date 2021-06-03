@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
 import com.github.javaparser.StaticJavaParser;
@@ -12,21 +11,21 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.StringEscapeUtils;
-import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.HashUtil;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.log4j.Log4j2;
@@ -193,15 +192,9 @@ public class GenerateDesignProc {
         designCoid.addFieldWithInitializer("String", "meta",
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
-        cu.addOrphanComment(new LineComment(hashing(designCoid)));
+        cu.addOrphanComment(new LineComment(HashUtil.md5(designCoid.toString())));
 
         Saves.add(cu);
-    }
-
-    private String hashing(ClassOrInterfaceDeclaration designCoid) {
-        return Hashing.hmacMd5("Allison 1875".getBytes(StandardCharsets.UTF_8))
-                .hashString(designCoid.toString(), StandardCharsets.UTF_8).toString();
-
     }
 
     private String concatDesignName(PersistenceDto persistence) {

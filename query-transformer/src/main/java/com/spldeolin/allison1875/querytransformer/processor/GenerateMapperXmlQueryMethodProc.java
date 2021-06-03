@@ -17,9 +17,9 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
-import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateMapperXmlQueryMethodProc {
 
-    public void process(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
+    public void process(AstForest astForest, DesignMeta queryMeta, String queryMethodName,
             Collection<CriterionDto> criterions) {
         File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
                 .resolve(queryMeta.getMapperRelativePath()).toFile();

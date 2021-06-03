@@ -11,8 +11,8 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 
 /**
  * 根据外键删除

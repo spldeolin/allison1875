@@ -16,8 +16,8 @@
         <module>handler-transformer</module>
         <module>inspector</module>
         <module>persistence-generator</module>
+        <module>persistence-generator-facade</module>
         <module>query-transformer</module>
-        <module>query-transformer-ex</module>
     </modules>
 
     <name>Allison 1875</name>

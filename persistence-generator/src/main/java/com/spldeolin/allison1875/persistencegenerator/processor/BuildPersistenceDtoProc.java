@@ -10,12 +10,12 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.handle.CommentHandle;
 import com.spldeolin.allison1875.persistencegenerator.handle.JdbcTypeHandle;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PropertyDto;
 import lombok.extern.log4j.Log4j2;
 
 /**

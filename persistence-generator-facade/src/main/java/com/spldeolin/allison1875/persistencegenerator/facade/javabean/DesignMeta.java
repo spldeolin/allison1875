@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.javabean;
+package com.spldeolin.allison1875.persistencegenerator.facade.javabean;
 
 import java.util.Collection;
 import lombok.Data;

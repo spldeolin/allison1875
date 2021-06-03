@@ -8,6 +8,14 @@ public class IllegalChainException extends RuntimeException {
     public IllegalChainException() {
     }
 
+    public IllegalChainException(String message) {
+        super(message);
+    }
+
+    public IllegalChainException(Throwable cause) {
+        super(cause);
+    }
+
     private static final long serialVersionUID = 3800789440778078756L;
 
 }

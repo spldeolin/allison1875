@@ -5,8 +5,8 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.JavaTypeNamingDto;
 
 /**
  * @author Deolin 2021-03-23

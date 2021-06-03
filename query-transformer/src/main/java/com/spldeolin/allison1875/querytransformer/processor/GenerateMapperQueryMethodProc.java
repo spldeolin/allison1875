@@ -18,10 +18,10 @@ import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.FieldAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
-import com.spldeolin.allison1875.querytransformer.javabean.QueryMeta;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -34,7 +34,7 @@ public class GenerateMapperQueryMethodProc {
     @Inject
     private QueryTransformerConfig queryTransformerConfig;
 
-    public ClassOrInterfaceDeclaration process(AstForest astForest, QueryMeta queryMeta, String queryMethodName,
+    public ClassOrInterfaceDeclaration process(AstForest astForest, DesignMeta queryMeta, String queryMethodName,
             Collection<CriterionDto> criterions) {
         ClassOrInterfaceDeclaration mapper = findMapper(astForest, queryMeta);
         if (mapper == null) {
@@ -86,7 +86,7 @@ public class GenerateMapperQueryMethodProc {
         return mapper;
     }
 
-    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, QueryMeta queryMeta) {
+    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta queryMeta) {
         try {
             String mapperQualifier = queryMeta.getMapperQualifier();
             Path mapperPath = astForest.getPrimaryJavaRoot()
@@ -98,7 +98,7 @@ public class GenerateMapperQueryMethodProc {
         }
     }
 
-    private ClassOrInterfaceDeclaration findEntity(AstForest astForest, QueryMeta queryMeta) {
+    private ClassOrInterfaceDeclaration findEntity(AstForest astForest, DesignMeta queryMeta) {
         try {
             String mapperQualifier = queryMeta.getEntityQualifier();
             Path mapperPath = astForest.getPrimaryJavaRoot()

@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
 import java.util.Collection;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import lombok.Data;
 
 /**
