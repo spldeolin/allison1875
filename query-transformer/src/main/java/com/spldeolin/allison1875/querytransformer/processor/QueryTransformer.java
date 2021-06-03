@@ -25,6 +25,7 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
@@ -143,7 +144,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
         try {
             designCu = StaticJavaParser.parse(designPath);
         } catch (IOException e) {
-            throw new RuntimeException("cannot parse Java code", e);
+            throw new RuntimeException("failed to parse Java code", e);
         }
 
         List<Comment> orphanComments = designCu.getOrphanComments();
@@ -153,13 +154,16 @@ public class QueryTransformer implements Allison1875MainProcessor {
         String hashcode = orphanComments.get(1).asLineComment().getContent().trim();
 
         if (!designCu.getPrimaryType().isPresent()) {
-            throw new IllegalChainException("cannot found Design Type");
+            throw new IllegalChainException(
+                    "cannot found Design Type in file [" + Locations.getStorage(designCu).getFileName()
+                            + "], this Design file need to regenerate");
         }
         TypeDeclaration<?> primaryType = designCu.getPrimaryType().get();
         String hashing = HashUtil.md5(primaryType.toString());
 
         if (!hashing.equals(hashcode)) {
-            throw new IllegalChainException("incorrect Hashcode");
+            throw new IllegalChainException(
+                    "modifications exist in Type [" + designQualifier + "], this Design file need to regenerate");
         }
 
         return designCu.getType(0).asClassOrInterfaceDeclaration();
