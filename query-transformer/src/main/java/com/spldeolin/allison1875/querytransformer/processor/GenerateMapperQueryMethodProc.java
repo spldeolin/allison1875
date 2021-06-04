@@ -1,11 +1,10 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -86,28 +85,20 @@ public class GenerateMapperQueryMethodProc {
         return mapper;
     }
 
-    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta queryMeta) {
-        try {
-            String mapperQualifier = queryMeta.getMapperQualifier();
-            Path mapperPath = astForest.getPrimaryJavaRoot()
-                    .resolve(mapperQualifier.replace('.', File.separatorChar) + ".java");
-            return StaticJavaParser.parse(mapperPath).getTypes().get(0).asClassOrInterfaceDeclaration();
-        } catch (Exception e) {
-            log.warn("寻找Mapper失败", e);
+    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta designMeta) {
+        CompilationUnit cu = astForest.findCu(designMeta.getMapperQualifier());
+        if (cu == null) {
             return null;
         }
+        return cu.getPrimaryType().orElseThrow(RuntimeException::new).asClassOrInterfaceDeclaration();
     }
 
-    private ClassOrInterfaceDeclaration findEntity(AstForest astForest, DesignMeta queryMeta) {
-        try {
-            String mapperQualifier = queryMeta.getEntityQualifier();
-            Path mapperPath = astForest.getPrimaryJavaRoot()
-                    .resolve(mapperQualifier.replace('.', File.separatorChar) + ".java");
-            return StaticJavaParser.parse(mapperPath).getTypes().get(0).asClassOrInterfaceDeclaration();
-        } catch (Exception e) {
-            log.warn("寻找Entity失败", e);
+    private ClassOrInterfaceDeclaration findEntity(AstForest astForest, DesignMeta designMeta) {
+        CompilationUnit cu = astForest.findCu(designMeta.getEntityQualifier());
+        if (cu == null) {
             return null;
         }
+        return cu.getPrimaryType().orElseThrow(RuntimeException::new).asClassOrInterfaceDeclaration();
     }
 
 }

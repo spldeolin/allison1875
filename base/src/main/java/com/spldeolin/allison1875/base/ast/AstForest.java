@@ -1,10 +1,14 @@
 package com.spldeolin.allison1875.base.ast;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.atteo.evo.inflector.English;
+import org.codehaus.plexus.util.StringUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Sets;
 import lombok.extern.log4j.Log4j2;
@@ -119,6 +123,29 @@ public class AstForest implements Iterable<CompilationUnit> {
         int javaCount = javaPaths.size();
         log.info("collect {} of {} from directory [{}]", javaCount, English.plural("java file", javaCount), directory);
         return javaPaths;
+    }
+
+    public CompilationUnit findCu(String primaryTypeQualifier) {
+        Path absPath = getPrimaryJavaRoot().resolve(primaryTypeQualifier.replace('.', File.separatorChar) + ".java");
+        if (!absPath.toFile().exists()) {
+            return null;
+        }
+        CompilationUnit designCu;
+        try {
+            designCu = StaticJavaParser.parse(absPath);
+        } catch (IOException e) {
+            throw new RuntimeException("failed to parse Java code [" + absPath + "]", e);
+        }
+        return designCu;
+    }
+
+    public CompilationUnit findCu(String packageName, String primaryTypeName) {
+        String primaryTypeQualifier = "";
+        if (StringUtils.isNotEmpty(packageName)) {
+            primaryTypeQualifier += packageName + ".";
+        }
+        primaryTypeQualifier += primaryTypeName;
+        return findCu(primaryTypeQualifier);
     }
 
 }

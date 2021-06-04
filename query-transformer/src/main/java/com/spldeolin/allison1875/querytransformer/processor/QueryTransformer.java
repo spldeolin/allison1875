@@ -1,8 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.StaticJavaParser;
@@ -138,14 +135,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
     private ClassOrInterfaceDeclaration findDesign(AstForest astForest, MethodCallExpr chain) {
         String designQualifier = chain.findAll(NameExpr.class).get(0).calculateResolvedType().describe();
-        Path designPath = astForest.getPrimaryJavaRoot()
-                .resolve(designQualifier.replace('.', File.separatorChar) + ".java");
-        CompilationUnit designCu;
-        try {
-            designCu = StaticJavaParser.parse(designPath);
-        } catch (IOException e) {
-            throw new RuntimeException("failed to parse Java code", e);
-        }
+        CompilationUnit designCu = astForest.findCu(designQualifier);
 
         List<Comment> orphanComments = designCu.getOrphanComments();
         if (orphanComments.size() < 2 || !orphanComments.get(1).isLineComment()) {
