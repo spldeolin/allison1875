@@ -1,8 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
-import java.util.List;
 import java.util.Map;
-import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.type.Type;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,11 +10,11 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class ParameterTransformationDto {
+public class ResultTransformationDto {
 
-    private List<String> imports;
+    private String oneImport;
 
-    private List<Parameter> parameters;
+    private Type resultType;
 
     private Map<String, String> propertyName2VarNames;
 

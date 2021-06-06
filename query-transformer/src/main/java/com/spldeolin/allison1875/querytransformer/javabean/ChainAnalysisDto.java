@@ -2,6 +2,8 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.Collection;
 import java.util.Set;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,6 +14,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ChainAnalysisDto {
 
+    @Deprecated
     private Collection<CriterionDto> criterions;
 
     private String methodName;
@@ -20,12 +23,14 @@ public class ChainAnalysisDto {
 
     private boolean returnManyOrOne;
 
-    private Set<PhraseDto> queryPhrases;
+    private Set<PhraseDto> queryPhrases = Sets.newHashSet();
 
-    private Set<PhraseDto> byPhrases;
+    private Set<PhraseDto> byPhrases = Sets.newHashSet();
 
-    private Set<PhraseDto> orderPhrases;
+    private Set<PhraseDto> orderPhrases = Sets.newHashSet();
 
-    private Set<PhraseDto> updatePhrases;
+    private Set<PhraseDto> updatePhrases = Sets.newHashSet();
+
+    private MethodCallExpr chain;
 
 }

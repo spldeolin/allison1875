@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
@@ -11,7 +10,6 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.LoadClassUtils;
@@ -31,10 +29,9 @@ import lombok.extern.log4j.Log4j2;
 public class ListControllersProc {
 
     public Collection<ControllerFullDto> process(AstForest astForest) {
-        Path hostPath = MavenPathResolver.findMavenModule(astForest.getPrimaryClass());
         Collection<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
-            if (!Locations.getAbsolutePath(cu).startsWith(hostPath)) {
+            if (!Locations.getAbsolutePath(cu).startsWith(astForest.getPrimaryJavaRoot())) {
                 // 非宿主controller
                 continue;
             }

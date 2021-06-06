@@ -8,8 +8,10 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -21,7 +23,6 @@ import com.spldeolin.allison1875.base.util.HashUtil;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -29,6 +30,8 @@ import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -50,6 +53,15 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Inject
     private GenerateMapperQueryMethodProc createMapperQueryMethodProc;
 
+    @Inject
+    private FindEntityAndSuperEntityProc findEntityAndSuperEntityProc;
+
+    @Inject
+    private TransformParameterProc transformParameterProc;
+
+    @Inject
+    private TransformResultProc transformResultProc;
+
     @Override
     public void process(AstForest astForest) {
         int detected = 0;
@@ -59,22 +71,17 @@ public class QueryTransformer implements Allison1875MainProcessor {
                 continue;
             }
 
-            DesignMeta designMeta = tryParseQueryMeta(design);
-            if (designMeta == null) {
-                log.warn("incorrect Design Class");
-                continue;
-            }
+            DesignMeta designMeta = parseDesignMeta(design);
 
-            ChainAnalysisDto chainAnalysis;
-            try {
-                chainAnalysis = analyzeChainProc.process(chain, design);
-            } catch (Exception e) {
-                log.warn("incorret chain", e);
-                continue;
-            }
+            ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design);
 
-            // TODO 从AstForest中获取entity和superEntity的coid对象，提供给后续的TransformProc
+            // 转化出参数
+            ParameterTransformationDto parameterTransformation = transformParameterProc
+                    .transform(chainAnalysis, designMeta, astForest);
 
+            // 转化出返回值
+            ResultTransformationDto resultTransformation = transformResultProc
+                    .transform(chainAnalysis, designMeta, astForest);
 
             String queryMethodName = chainAnalysis.getMethodName();
             Collection<CriterionDto> criterions = chainAnalysis.getCriterions();
@@ -122,15 +129,11 @@ public class QueryTransformer implements Allison1875MainProcessor {
         }
     }
 
-    private DesignMeta tryParseQueryMeta(ClassOrInterfaceDeclaration queryDesign) {
-        if (!queryDesign.getFieldByName("meta").isPresent()) {
-            log.warn("[{}] 缺少元数据 [String meta]", queryDesign.getNameAsString());
-            return null;
-        }
-        FieldDeclaration queryMetaField = queryDesign.getFieldByName("meta").get();
-        String queryMetaJson = JavadocDescriptions.getRaw(queryMetaField).replaceAll("\\r?\\n", "");
-        DesignMeta queryMeta = JsonUtils.toObject(queryMetaJson, DesignMeta.class);
-        return queryMeta;
+    private DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration queryDesign) {
+        FieldDeclaration queryMetaField = queryDesign.getFieldByName("meta").orElseThrow(IllegalChainException::new);
+        Expression initializer = queryMetaField.getVariable(0).getInitializer().orElseThrow(IllegalChainException::new);
+        String metaJson = StringEscapeUtils.unescapeJava(initializer.asStringLiteralExpr().getValue());
+        return JsonUtils.toObject(metaJson, DesignMeta.class);
     }
 
     private ClassOrInterfaceDeclaration findDesign(AstForest astForest, MethodCallExpr chain) {
