@@ -11,7 +11,6 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -56,8 +55,6 @@ public class TransformResultProc {
 
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
-        Map<String, String> propertyName2VarNames = Maps.newHashMap();
-
         Set<PhraseDto> phrases = chainAnalysis.getQueryPhrases();
         if (phrases.size() > 1) {
             // 指定了2个及以上属性，生成一个Javabean作为返回值类型
@@ -76,7 +73,6 @@ public class TransformResultProc {
                 fieldArg.setTypeName(javaType.getSimpleName());
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
-                propertyName2VarNames.put(propertyName, varName);
             }
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
             TypeDeclaration<?> resultType = cu.getPrimaryType().orElseThrow(RuntimeException::new);
