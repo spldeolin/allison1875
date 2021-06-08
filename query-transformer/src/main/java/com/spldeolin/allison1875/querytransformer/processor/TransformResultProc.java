@@ -42,8 +42,7 @@ public class TransformResultProc {
     public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
         if (!chainAnalysis.isQueryOrUpdate()) {
-            return new ResultTransformationDto().setResultType(PrimitiveType.intType())
-                    .setPropertyName2VarNames(Maps.newHashMap());
+            return new ResultTransformationDto().setResultType(PrimitiveType.intType());
         }
         if (chainAnalysis.getChain().getParentNode().isPresent()) {
             if (chainAnalysis.getChain().getParentNode().get().getParentNode()
@@ -51,12 +50,11 @@ public class TransformResultProc {
                 VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode().get()
                         .getParentNode().get();
                 Type vdeType = vde.getCommonType();
-                return new ResultTransformationDto().setResultType(vdeType).setPropertyName2VarNames(Maps.newHashMap());
+                return new ResultTransformationDto().setResultType(vdeType).setIsEntityOrRecord(true);
             }
         }
 
-        Map<String, PropertyDto> properties = Maps.newHashMap();
-        designMeta.getProperties().forEach(one -> properties.put(one.getPropertyName(), one));
+        Map<String, PropertyDto> properties = designMeta.getProperties();
 
         Map<String, String> propertyName2VarNames = Maps.newHashMap();
 
@@ -89,7 +87,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
             }
-            result.setPropertyName2VarNames(propertyName2VarNames);
+            result.setIsEntityOrRecord(false);
             return result;
 
         } else if (phrases.size() == 1) {
@@ -103,7 +101,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
             }
-            result.setPropertyName2VarNames(Maps.newHashMap());
+            result.setIsEntityOrRecord(false);
             return result;
 
         } else {
@@ -115,7 +113,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
             }
-            result.setPropertyName2VarNames(Maps.newHashMap());
+            result.setIsEntityOrRecord(true);
             return result;
         }
     }

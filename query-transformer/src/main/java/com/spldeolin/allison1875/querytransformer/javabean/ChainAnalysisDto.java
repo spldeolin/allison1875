@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
-import java.util.Collection;
 import java.util.Set;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Sets;
@@ -13,9 +12,6 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class ChainAnalysisDto {
-
-    @Deprecated
-    private Collection<CriterionDto> criterions;
 
     private String methodName;
 

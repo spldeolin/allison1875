@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.facade.javabean;
 
-import java.util.Collection;
+import java.util.Map;
 import lombok.Data;
 
 /**
@@ -19,7 +19,7 @@ public class DesignMeta {
 
     private String mapperRelativePath;
 
-    private Collection<PropertyDto> properties;
+    private Map<String, PropertyDto> properties;
 
     private String tableName;
 

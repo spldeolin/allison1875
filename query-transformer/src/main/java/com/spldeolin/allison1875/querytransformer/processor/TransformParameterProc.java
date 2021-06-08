@@ -9,7 +9,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -41,10 +40,8 @@ public class TransformParameterProc {
     public ParameterTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
 
-        Map<String, PropertyDto> properties = Maps.newHashMap();
-        designMeta.getProperties().forEach(one -> properties.put(one.getPropertyName(), one));
+        Map<String, PropertyDto> properties = designMeta.getProperties();
 
-        Map<String, String> propertyName2VarNames = Maps.newHashMap();
         List<String> imports = Lists.newArrayList();
         List<Parameter> params = Lists.newArrayList();
 
@@ -66,7 +63,6 @@ public class TransformParameterProc {
                 fieldArg.setTypeName(javaType.getSimpleName());
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
-                propertyName2VarNames.put(propertyName, varName);
             }
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
             TypeDeclaration<?> cond = cu.getPrimaryType().orElseThrow(RuntimeException::new);
@@ -87,14 +83,12 @@ public class TransformParameterProc {
                 param.setName(varName);
                 imports.add(javaType.getQualifier());
                 params.add(param);
-                propertyName2VarNames.put(propertyName, varName);
             }
         } else {
             return null;
         }
 
-        return new ParameterTransformationDto().setImports(imports).setParameters(params)
-                .setPropertyName2VarNames(propertyName2VarNames);
+        return new ParameterTransformationDto().setImports(imports).setParameters(params);
     }
 
     private String sureNotToRepeat(String name, List<String> names, int index) {

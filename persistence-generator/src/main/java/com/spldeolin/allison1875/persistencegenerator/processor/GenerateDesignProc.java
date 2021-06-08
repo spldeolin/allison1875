@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Map;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -11,6 +12,7 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.StringEscapeUtils;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -53,6 +55,7 @@ public class GenerateDesignProc {
         Collection<PropertyDto> properties = persistence.getProperties();
         properties.removeIf(
                 property -> persistenceGeneratorConfig.getHiddenColumns().contains(property.getPropertyName()));
+        Map<String, PropertyDto> propertiesByName = Maps.newHashMap();
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
@@ -66,6 +69,7 @@ public class GenerateDesignProc {
             if (!property.getJavaType().getQualifier().startsWith("java.lang")) {
                 cu.addImport(property.getJavaType().getQualifier());
             }
+            propertiesByName.put(property.getPropertyName(), property);
         }
         cu.addOrphanComment(new LineComment("@formatter:" + "off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
@@ -186,7 +190,7 @@ public class GenerateDesignProc {
         meta.setMapperRelativePath(
                 persistenceGeneratorConfig.getMapperXmlDirectoryPath() + File.separator + persistence.getMapperName()
                         + ".xml");
-        meta.setProperties(properties);
+        meta.setProperties(propertiesByName);
         meta.setTableName(persistence.getTableName());
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", "meta",

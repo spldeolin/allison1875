@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -26,10 +25,8 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
-import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.CriterionDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
 import lombok.extern.log4j.Log4j2;
@@ -83,27 +80,18 @@ public class QueryTransformer implements Allison1875MainProcessor {
             ResultTransformationDto resultTransformation = transformResultProc
                     .transform(chainAnalysis, designMeta, astForest);
 
-            String queryMethodName = chainAnalysis.getMethodName();
-            Collection<CriterionDto> criterions = chainAnalysis.getCriterions();
-
             // create queryMethod in mapper
             ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc
-                    .process(astForest, designMeta, queryMethodName, criterions);
+                    .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
 
             // create queryMethod in mapper.xml
-            generateMapperXmlQueryMethodProc.process(astForest, designMeta, queryMethodName, criterions);
+            generateMapperXmlQueryMethodProc
+                    .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
 
             // overwirte service
             MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
-                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + queryMethodName + "()")
-                    .asMethodCallExpr();
-            for (CriterionDto criterion : criterions) {
-                VerbEnum operator = VerbEnum.of(criterion.getOperator());
-                if (operator == VerbEnum.NOT_NULL || operator == VerbEnum.IS_NULL) {
-                    continue;
-                }
-                callQueryMethod.addArgument(criterion.getArgumentExpr());
-            }
+                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + chainAnalysis.getMethodName()
+                            + "()").asMethodCallExpr();
 
             // ensure service import & autowired
 //            Node parent = mce.getParentNode().orElseThrow(ParentAbsentException::new);

@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
+import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.Node;
@@ -7,6 +8,7 @@ import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.google.mu.util.Substring;
@@ -25,6 +27,15 @@ import lombok.extern.log4j.Log4j2;
 @Singleton
 @Log4j2
 public class AnalyzeChainProc {
+
+    private String sureNotToRepeat(String name, List<String> names, int index) {
+        if (!names.contains(name)) {
+            names.add(name);
+            return name;
+        }
+        index++;
+        return this.sureNotToRepeat(name + index, names, index);
+    }
 
     public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design) {
         String chainCode = chain.toString();
@@ -46,6 +57,7 @@ public class AnalyzeChainProc {
         Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
+        List<String> varNames = Lists.newArrayList();
         for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
             String describe = fae.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".QueryChain")) {
@@ -55,6 +67,7 @@ public class AnalyzeChainProc {
                 Node parent = fae.getParentNode().get();
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
+                phrase.setVarName(sureNotToRepeat(fae.getNameAsString(), varNames, 1));
                 phrase.setVerb(VerbEnum.of(((MethodCallExpr) parent).getNameAsString()));
                 phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
                 byPhrases.add(phrase);
@@ -72,6 +85,7 @@ public class AnalyzeChainProc {
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());
+                phrase.setVarName(sureNotToRepeat(mce.getNameAsString(), varNames, 1));
                 phrase.setObjectExpr(mce.getArgument(0));
                 updatePhrases.add(phrase);
             }

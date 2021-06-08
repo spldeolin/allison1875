@@ -14,6 +14,8 @@ public class PhraseDto {
 
     private String subjectPropertyName;
 
+    private String varName;
+
     private VerbEnum verb;
 
     private Expression objectExpr;
