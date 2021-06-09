@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -61,7 +62,7 @@ public class TransformResultProc {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionQualifier());
-            javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
+            javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
             List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
@@ -75,6 +76,7 @@ public class TransformResultProc {
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
+            Saves.add(cu);
             TypeDeclaration<?> resultType = cu.getPrimaryType().orElseThrow(RuntimeException::new);
             ResultTransformationDto result = new ResultTransformationDto();
             result.setOneImport(resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));

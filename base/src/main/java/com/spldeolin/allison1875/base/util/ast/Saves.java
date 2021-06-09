@@ -3,9 +3,11 @@ package com.spldeolin.allison1875.base.util.ast;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
+import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.google.common.collect.Maps;
@@ -14,6 +16,8 @@ import com.spldeolin.allison1875.base.Version;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.FileBackupUtils;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,18 +51,36 @@ public class Saves {
             oldCodeText = cu.getTokenRange().orElseThrow(RangeAbsentException::new).toString();
         }
         String newCodeText = oldCodeText.replace(target, replacement);
+
         rawReplaceBuffer.get().put(cu, newCodeText);
+    }
 
-        cu.getTokenRange().ifPresent(tokenRange -> {
+    @Data
+    @AllArgsConstructor
+    public static class Replace {
 
-            rawReplaceBuffer.get().put(cu, newCodeText);
-            try {
-                FileUtils
-                        .writeStringToFile(Locations.getAbsolutePath(cu).toFile(), newCodeText, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                log.error("FileUtils#writeStringToFile", e);
-            }
-        });
+        private String target;
+
+        private String replacement;
+
+    }
+
+    public static void add(CompilationUnit cu, List<Replace> replaces) {
+        if (replaces.size() == 0) {
+            return;
+        }
+        String newCodeText;
+        TokenRange javaTokens = cu.getTokenRange().orElseThrow(RangeAbsentException::new);
+        if (rawReplaceBuffer.get().containsKey(cu)) {
+            newCodeText = rawReplaceBuffer.get().get(cu);
+        } else {
+            newCodeText = javaTokens.toString();
+        }
+        for (Replace replace : replaces) {
+            newCodeText = newCodeText.replace(replace.getTarget(), replace.getReplacement());
+        }
+
+        rawReplaceBuffer.get().put(cu, newCodeText);
     }
 
     public static Set<CompilationUnit> listAllBuffers() {

@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.querytransformer.processor;
 
 import static com.spldeolin.allison1875.base.constant.BaseConstant.DOUBLE_INDENT;
 import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
+import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.atteo.evo.inflector.English;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -17,7 +19,6 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
@@ -39,12 +40,7 @@ public class GenerateMapperXmlQueryMethodProc {
         List<String> xmlLines = Lists.newArrayList();
         if (chainAnalysis.isQueryOrUpdate()) {
             // QUERY
-            String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
-            if (resultTransformation.getIsEntityOrRecord()) {
-                startTag += " resultMap='all'>";
-            } else {
-                startTag += " resultType='" + resultTransformation.getOneImport() + "'>";
-            }
+            String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -52,8 +48,9 @@ public class GenerateMapperXmlQueryMethodProc {
                 xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
             } else {
                 for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {
-                    xmlLines.add(MoreStringUtils.lowerCamelToUnderscore(queryPhrase.getSubjectPropertyName()) + " AS "
-                            + queryPhrase.getSubjectPropertyName());
+                    xmlLines.add(
+                            DOUBLE_INDENT + MoreStringUtils.lowerCamelToUnderscore(queryPhrase.getSubjectPropertyName())
+                                    + " AS " + queryPhrase.getSubjectPropertyName());
                 }
             }
             xmlLines.add(SINGLE_INDENT + "FROM");
@@ -70,102 +67,82 @@ public class GenerateMapperXmlQueryMethodProc {
                         ifTag += " AND " + varName + " != ''";
                     }
                     ifTag += "\">";
-                    if (byPhrase.getVerb() == VerbEnum.EQUALS) {
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + " AND " + property.getColumnName() + " = " + dollarVar);
+                    switch (byPhrase.getVerb()) {
+                        case EQUALS:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(DOUBLE_INDENT + " AND " + property.getColumnName() + " = " + dollarVar);
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case NOT_EQUALS:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " != " + dollarVar);
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case IN:
+                            String pluralVarName = English.plural(varName);
+                            xmlLines.add(SINGLE_INDENT + "<if test=\"" + pluralVarName + " != null\">");
+                            xmlLines.add(DOUBLE_INDENT + "<if test=\"" + pluralVarName + ".size() > 0\">");
+                            xmlLines.add(
+                                    TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='"
+                                            + pluralVarName + "' item='one' separator=','>#{one}</foreach>)");
+                            xmlLines.add(DOUBLE_INDENT + "</if>");
+                            xmlLines.add(DOUBLE_INDENT + "<if test=\"" + pluralVarName + ".size() == 0\">");
+                            xmlLines.add(TREBLE_INDENT + "AND FALSE");
+                            xmlLines.add(DOUBLE_INDENT + "</if>");
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case NOT_IN:
+                            pluralVarName = English.plural(varName);
+                            xmlLines.add(SINGLE_INDENT + String
+                                    .format("<if test=\"%s != null and %s.size() > 0\">", pluralVarName,
+                                            pluralVarName));
+                            xmlLines.add(
+                                    DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
+                                            + pluralVarName + "' item='one' separator=','>#{one}</foreach>)");
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case GREATER_THEN:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case GREATER_OR_EQUALS:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case LESS_THEN:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case LESS_OR_EQUALS:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
+                        case NOT_NULL:
+                            xmlLines.add(SINGLE_INDENT + "AND " + property.getColumnName() + " IS NOT NULL");
+                            break;
+                        case IS_NULL:
+                            xmlLines.add(SINGLE_INDENT + "AND " + property.getColumnName() + " IS NULL");
+                            break;
+                        case LIKE:
+                            xmlLines.add(ifTag);
+                            xmlLines.add(
+                                    DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
+                                            + ", '%')");
+                            xmlLines.add(SINGLE_INDENT + "</if>");
+                            break;
                     }
                 }
             }
-
-
-//            if (criterions.size() > 0) {
-//
-//                for (CriterionDto cond : criterions) {
-//                    VerbEnum operator = VerbEnum.of(cond.getOperator());
-//                    String ifTag = SINGLE_INDENT + "<if test=\"" + cond.getParameterName() + " != null";
-//                    if ("String".equals(cond.getParameterType())) {
-//                        ifTag += " and " + cond.getParameterName() + " != ''";
-//                    }
-//                    ifTag += "\">";
-//                    if (operator == VerbEnum.EQUALS) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(
-//                                DOUBLE_INDENT + "AND " + cond.getColumnName() + " = " + cond.getDollarParameterName
-//                                ());
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.NOT_EQUALS) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(
-//                                DOUBLE_INDENT + "AND " + cond.getColumnName() + " != " + cond
-//                                .getDollarParameterName());
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.IN) {
-//                        String argumentName = English.plural(cond.getParameterName());
-//                        xmlLines.add(SINGLE_INDENT + "<if test=\"" + argumentName + " != null\">");
-//                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() > 0\">");
-//                        xmlLines.add(TREBLE_INDENT + "AND " + cond.getColumnName() + " IN (<foreach collection='"
-//                                + argumentName + "' item='one' separator=','>#{one}</foreach>)");
-//                        xmlLines.add(DOUBLE_INDENT + "</if>");
-//                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + argumentName + ".size() == 0\">");
-//                        xmlLines.add(TREBLE_INDENT + "AND FALSE");
-//                        xmlLines.add(DOUBLE_INDENT + "</if>");
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.NOT_IN) {
-//                        String argumentName = English.plural(cond.getParameterName());
-//                        xmlLines.add(SINGLE_INDENT + String
-//                                .format("<if test=\"%s != null and %s.size() > 0\">", argumentName, argumentName));
-//                        xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " NOT IN (<foreach collection='"
-//                                + argumentName + "' item='one' separator=','>#{one}</foreach>)");
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.GREATER_THEN) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(
-//                                DOUBLE_INDENT + "AND " + cond.getColumnName() + " > " + cond.getDollarParameterName
-//                                ());
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.GREATER_OR_EQUALS) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(
-//                                DOUBLE_INDENT + "AND " + cond.getColumnName() + " >= " + cond
-//                                .getDollarParameterName());
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.LESS_THEN) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " &lt; " + cond
-//                                .getDollarParameterName());
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.LESS_OR_EQUALS) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " &lt;= " + cond
-//                                .getDollarParameterName());
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                    if (operator == VerbEnum.NOT_NULL) {
-//                        xmlLines.add(SINGLE_INDENT + "AND " + cond.getColumnName() + " IS NOT NULL");
-//                    }
-//                    if (operator == VerbEnum.IS_NULL) {
-//                        xmlLines.add(SINGLE_INDENT + "AND " + cond.getColumnName() + " IS NULL");
-//                    }
-//                    if (operator == VerbEnum.LIKE) {
-//                        xmlLines.add(ifTag);
-//                        xmlLines.add(DOUBLE_INDENT + "AND " + cond.getColumnName() + " LIKE CONCAT('%', " + cond
-//                                .getDollarParameterName() + ", '%')");
-//                        xmlLines.add(SINGLE_INDENT + "</if>");
-//                    }
-//                }
-//            }
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
         } else {
             // UPDATE
-
+            String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
+            xmlLines.add(startTag);
         }
 
         List<String> newLines = Lists.newArrayList();
@@ -187,6 +164,30 @@ public class GenerateMapperXmlQueryMethodProc {
         } catch (IOException e) {
             log.error(e);
         }
+    }
+
+    private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,
+            ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
+        String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
+        if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
+            startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
+        }
+        if (resultTransformation.getIsEntityOrRecord()) {
+            startTag += " resultMap='all'>";
+        } else {
+            startTag += " resultType='" + resultTransformation.getOneImport() + "'>";
+        }
+        return startTag;
+    }
+
+    private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis,
+            ParameterTransformationDto parameterTransformation) {
+        String startTag = "<update id='" + chainAnalysis.getMethodName() + "'";
+        if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
+            startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
+        }
+        startTag += " resultType='int'";
+        return startTag;
     }
 
 }

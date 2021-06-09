@@ -27,12 +27,11 @@ public class GenerateMapperQueryMethodProc {
     @Inject
     private QueryTransformerConfig queryTransformerConfig;
 
-    public ClassOrInterfaceDeclaration process(AstForest astForest, DesignMeta designMeta,
-            ChainAnalysisDto chainAnalysis, ParameterTransformationDto parameterTransformation,
-            ResultTransformationDto resultTransformation) {
+    public void process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+            ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         ClassOrInterfaceDeclaration mapper = findMapper(astForest, designMeta);
         if (mapper == null) {
-            return null;
+            return;
         }
 
         if (resultTransformation.getOneImport() != null) {
@@ -49,8 +48,6 @@ public class GenerateMapperQueryMethodProc {
         method.setBody(null);
         mapper.getMembers().add(0, method);
         Saves.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
-
-        return mapper;
     }
 
     private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta designMeta) {

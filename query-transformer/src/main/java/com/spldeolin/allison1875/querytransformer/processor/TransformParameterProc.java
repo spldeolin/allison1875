@@ -17,6 +17,7 @@ import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -65,6 +66,7 @@ public class TransformParameterProc {
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
+            Saves.add(cu);
             TypeDeclaration<?> cond = cu.getPrimaryType().orElseThrow(RuntimeException::new);
             Parameter param = new Parameter();
             param.setType(cond.getNameAsString());

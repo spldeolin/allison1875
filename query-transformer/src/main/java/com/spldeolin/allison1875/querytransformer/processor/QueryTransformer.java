@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
 import java.util.List;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -15,13 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.util.HashUtil;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -59,6 +54,9 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Inject
     private TransformResultProc transformResultProc;
 
+    @Inject
+    private ReplaceDesignProc replaceDesignProc;
+
     @Override
     public void process(AstForest astForest) {
         int detected = 0;
@@ -72,42 +70,28 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
             ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design);
 
-            // 转化出参数
+            // transform Parameter
             ParameterTransformationDto parameterTransformation = transformParameterProc
                     .transform(chainAnalysis, designMeta, astForest);
 
-            // 转化出返回值
+            // transform Result Type
             ResultTransformationDto resultTransformation = transformResultProc
                     .transform(chainAnalysis, designMeta, astForest);
 
-            // create queryMethod in mapper
-            ClassOrInterfaceDeclaration mapper = createMapperQueryMethodProc
+            // create Method in Mapper
+            createMapperQueryMethodProc
                     .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
 
-            // create queryMethod in mapper.xml
+            // create Method in mapper.xml
             generateMapperXmlQueryMethodProc
                     .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
 
-            // overwirte service
-            MethodCallExpr callQueryMethod = StaticJavaParser.parseExpression(
-                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()) + "." + chainAnalysis.getMethodName()
-                            + "()").asMethodCallExpr();
+            // transform Method Call and replace Design
+            List<Saves.Replace> replaces = replaceDesignProc
+                    .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
 
-            // ensure service import & autowired
-//            Node parent = mce.getParentNode().orElseThrow(ParentAbsentException::new);
-            chain.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
-                if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(mapper.getNameAsString())).isPresent()) {
-                    service.getMembers().add(0, StaticJavaParser.parseBodyDeclaration(
-                            String.format("@Autowired private %s %s;", mapper.getNameAsString(),
-                                    MoreStringUtils.lowerFirstLetter(mapper.getNameAsString()))));
-                    Imports.ensureImported(service, designMeta.getMapperQualifier());
-                    Imports.ensureImported(service, AnnotationConstant.AUTOWIRED_QUALIFIER);
-                }
-            });
-
-            CompilationUnit cu = chain.findCompilationUnit().orElseThrow(CuAbsentException::new);
-            Saves.add(cu, chain.getTokenRange().orElseThrow(RangeAbsentException::new).toString(),
-                    callQueryMethod.toString());
+            // save
+            Saves.add(chain.findCompilationUnit().orElseThrow(CuAbsentException::new), replaces);
             Saves.saveAll();
             detected++;
         }
