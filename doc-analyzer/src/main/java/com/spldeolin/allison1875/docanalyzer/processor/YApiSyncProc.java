@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +27,8 @@ import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
-import com.spldeolin.allison1875.docanalyzer.util.RetrofitUtils;
-import com.spldeolin.allison1875.docanalyzer.yapi.YapiApi;
 import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
-import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
 import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
-import com.spldeolin.allison1875.docanalyzer.yapi.javabean.ProjectGetRespDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -57,14 +52,13 @@ public class YApiSyncProc {
     @Inject
     private RedissonFactory redissonFactory;
 
+    @Inject
+    private YApiOpenProc yApiOpenProc;
+
     public void process(Collection<EndpointDto> endpoints) throws Exception {
         String baseUrl = docAnalyzerConfig.getYapiUrl();
-        YapiApi yapiApi = RetrofitUtils.createApi(baseUrl, YapiApi.class);
 
-        CommonRespDto<ProjectGetRespDto> resp = yapiApi.getProject(docAnalyzerConfig.getYapiToken()).execute().body();
-
-        ensureSuccess(resp);
-        Long projectId = resp.getData().getId();
+        Long projectId = yApiOpenProc.getProject().getId();
 
         RedissonClient redisson = redissonFactory.getRedissonClient();
         RLock lock = redisson.getLock("allison1875_docanalyzer_" + baseUrl + "_" + projectId);
@@ -73,18 +67,18 @@ public class YApiSyncProc {
             try {
                 Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
                 catNames.add("回收站");
-                Set<String> yapiCatNames = this.getYapiCatIdsEachName(yapiApi, projectId).keySet();
-                this.createYApiCat(yapiApi, Sets.difference(catNames, yapiCatNames), projectId);
+                Set<String> yapiCatNames = this.getYapiCatIdsEachName(projectId).keySet();
+                this.createYApiCat(Sets.difference(catNames, yapiCatNames), projectId);
 
-                Map<String, Long> catName2catId = this.getYapiCatIdsEachName(yapiApi, projectId);
+                Map<String, Long> catName2catId = this.getYapiCatIdsEachName(projectId);
 
-                Map<String, JsonNode> yapiUrls = this.listAutoInterfaces(yapiApi, projectId);
+                Map<String, JsonNode> yapiUrls = this.listAutoInterfaces(projectId);
                 Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
 
                 // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
                 for (String yapiUrl : yapiUrls.keySet()) {
                     if (!analysisUrls.contains(yapiUrl)) {
-                        this.deleteInterface(yapiApi, yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
+                        this.deleteInterface(yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
                     }
                 }
 
@@ -100,7 +94,7 @@ public class YApiSyncProc {
                     String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
                     String respJs = toJson(endpoint.getResponseBodyJsonSchema());
 
-                    this.createYApiInterface(yapiApi, title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
+                    this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
                             endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
                 }
             } finally {
@@ -131,33 +125,27 @@ public class YApiSyncProc {
         return JsonUtils.toJson(bodyJsonSchema);
     }
 
-    public Map<String, Long> getYapiCatIdsEachName(YapiApi yapiApi, Long projectId) throws IOException {
-        CommonRespDto<List<InterfaceListMenuRespDto>> resp = yapiApi
-                .listCats(docAnalyzerConfig.getYapiToken(), projectId).execute().body();
-        ensureSuccess(resp);
-
+    public Map<String, Long> getYapiCatIdsEachName(Long projectId) {
+        List<InterfaceListMenuRespDto> cats = yApiOpenProc.listCats(projectId);
         Map<String, Long> result = Maps.newHashMap();
-        for (InterfaceListMenuRespDto cat : resp.getData()) {
+        for (InterfaceListMenuRespDto cat : cats) {
             result.put(cat.getName(), cat.getId());
         }
         return result;
     }
 
-    private void createYApiCat(YapiApi yapiApi, Collection<String> catNames, Long projectId) throws IOException {
+    private void createYApiCat(Collection<String> catNames, Long projectId) {
         for (String catName : catNames) {
-            Object rawRespBody = yapiApi.createCat("", catName, projectId, docAnalyzerConfig.getYapiToken()).execute()
-                    .body();
-            log.info("create yapi cat. catName={} rawRespBody={}", catName, JsonUtils.toJson(rawRespBody));
+            JsonNode responseBody = yApiOpenProc.createCat("", catName, projectId);
+            log.info("create yapi cat. catName={} rawRespBody={}", catName, JsonUtils.toJson(responseBody));
         }
     }
 
-    private Map<String, JsonNode> listAutoInterfaces(YapiApi yapiApi, Long projectId) throws IOException {
-        JsonNode respNode = yapiApi.listCatsAsJsonNode(docAnalyzerConfig.getYapiToken(), projectId).execute().body();
-        ensureSuccess(respNode);
-
+    private Map<String, JsonNode> listAutoInterfaces(Long projectId) {
+        JsonNode jsonNode = yApiOpenProc.listCatsAsJsonNode(projectId);
         Map<String, JsonNode> result = Maps.newHashMap();
-        for (JsonNode jsonNode : respNode.get("data")) {
-            for (JsonNode interf : jsonNode.get("list")) {
+        for (JsonNode data : jsonNode) {
+            for (JsonNode interf : data.get("list")) {
                 List<String> tags = JsonUtils.toListOfObject(interf.get("tag").toString(), String.class);
                 if (tags.contains(YApiConstant.ALLISON_1875_TAG)) {
                     result.put(interf.get("path").asText(), interf);
@@ -176,14 +164,14 @@ public class YApiSyncProc {
         }
     }
 
-    private void deleteInterface(YapiApi yapiApi, JsonNode jsonNode, Long recycleBinCatId) throws IOException {
+    private void deleteInterface(JsonNode jsonNode, Long recycleBinCatId) {
         if (recycleBinCatId.equals(jsonNode.get("catid").asLong())) {
             // 已在"回收站"分类中
             return;
         }
         Long id = jsonNode.get("_id").asLong();
 
-        JsonNode respNode = yapiApi.getEndpoint(id, docAnalyzerConfig.getYapiToken()).execute().body();
+        JsonNode respNode = yApiOpenProc.getEndpoint(id);
         ensureSuccess(respNode);
 
         Map<String, Object> body = Maps.newHashMap();
@@ -205,12 +193,12 @@ public class YApiSyncProc {
 
         body.put("desc", deleteMessage + desc);
         body.put("token", docAnalyzerConfig.getYapiToken());
-        Object respBody = yapiApi.updateEndpoint(body).execute().body();
-        log.info(JsonUtils.toJson(respBody));
+        JsonNode jsonNode1 = yApiOpenProc.updateEndpoint(body);
+        log.info(JsonUtils.toJson(jsonNode1));
     }
 
-    private void createYApiInterface(YapiApi yapiApi, String title, String url, String requestBodyJsonSchema,
-            String responseBodyJsonSchema, String description, String httpMethod, Long catId) throws IOException {
+    private void createYApiInterface(String title, String url, String requestBodyJsonSchema,
+            String responseBodyJsonSchema, String description, String httpMethod, Long catId) {
         Map<String, Object> form = Maps.newHashMap();
         form.put("title", title);
         form.put("path", url);
@@ -228,17 +216,8 @@ public class YApiSyncProc {
         form.put("method", httpMethod);
         form.put("catid", catId);
         form.put("token", docAnalyzerConfig.getYapiToken());
-        Object body = yapiApi.createOrUpdateEndpoint(form).execute().body();
-        log.info(JsonUtils.toJson(body));
-    }
-
-    private static void ensureSuccess(CommonRespDto<?> resp) throws YapiException {
-        if (resp == null) {
-            throw new YapiException();
-        }
-        if (resp.getErrcode() != 0) {
-            throw new YapiException(resp.getErrmsg());
-        }
+        JsonNode responseBody = yApiOpenProc.createOrUpdateEndpoint(form);
+        log.info(JsonUtils.toJson(responseBody));
     }
 
     private JsonPropertyDescriptionValueDto toJpdvSkipNull(String nullableJson) {

@@ -29,7 +29,6 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <log4j2.version>2.14.1</log4j2.version>
         <jackson.version>2.12.3</jackson.version>
-        <retrofit.version>2.3.0</retrofit.version>
     </properties>
 
     <dependencyManagement>
@@ -155,25 +154,11 @@
                 <version>5.3.7</version>
             </dependency>
 
-            <!-- retrofit -->
+            <!-- jodd http -->
             <dependency>
-                <groupId>com.squareup.retrofit2</groupId>
-                <artifactId>retrofit</artifactId>
-                <version>${retrofit.version}</version>
-            </dependency>
-
-            <!-- retrofit converter-jackson -->
-            <dependency>
-                <groupId>com.squareup.retrofit2</groupId>
-                <artifactId>converter-jackson</artifactId>
-                <version>${retrofit.version}</version>
-            </dependency>
-
-            <!-- retrofit adapter-rxjava2 -->
-            <dependency>
-                <groupId>com.squareup.retrofit2</groupId>
-                <artifactId>adapter-rxjava2</artifactId>
-                <version>${retrofit.version}</version>
+                <groupId>org.jodd</groupId>
+                <artifactId>jodd-http</artifactId>
+                <version>6.0.6</version>
             </dependency>
 
             <!-- commons dbutils -->

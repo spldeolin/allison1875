@@ -29,22 +29,10 @@
             <artifactId>flexmark-all</artifactId>
         </dependency>
 
-        <!-- retrofit -->
+        <!-- jodd http -->
         <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-        </dependency>
-
-        <!-- retrofit converter-jackson -->
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-jackson</artifactId>
-        </dependency>
-
-        <!-- retrofit adapter-rxjava2 -->
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>adapter-rxjava2</artifactId>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-http</artifactId>
         </dependency>
     </dependencies>
 

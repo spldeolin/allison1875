@@ -10,6 +10,10 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
  */
 public class MarkdownUtils {
 
+    private MarkdownUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static String convertToHtml(String markdown) {
         MutableDataSet options = new MutableDataSet();
         Parser parser = Parser.builder(options).build();
