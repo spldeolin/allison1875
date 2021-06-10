@@ -9,10 +9,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
-import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
-import com.spldeolin.allison1875.docanalyzer.yapi.javabean.CommonRespDto;
-import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
-import com.spldeolin.allison1875.docanalyzer.yapi.javabean.ProjectGetRespDto;
+import com.spldeolin.allison1875.docanalyzer.exception.YapiException;
+import com.spldeolin.allison1875.docanalyzer.javabean.YApiCommonRespDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.YApiProjectGetRespDto;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 
@@ -25,23 +25,23 @@ public class YApiOpenProc {
     @Inject
     private DocAnalyzerConfig docAnalyzerConfig;
 
-    public ProjectGetRespDto getProject() {
+    public YApiProjectGetRespDto getProject() {
         String url = docAnalyzerConfig.getYapiUrl() + "/api/project/get" + tokenQuery();
         HttpResponse response = HttpRequest.get(url).send();
-        CommonRespDto<ProjectGetRespDto> responseBody = JsonUtils
-                .toParameterizedObject(response.bodyText(), new TypeReference<CommonRespDto<ProjectGetRespDto>>() {
+        YApiCommonRespDto<YApiProjectGetRespDto> responseBody = JsonUtils.toParameterizedObject(response.bodyText(),
+                new TypeReference<YApiCommonRespDto<YApiProjectGetRespDto>>() {
                 });
         ensureSuccess(responseBody);
         return responseBody.getData();
     }
 
-    public List<InterfaceListMenuRespDto> listCats(Long projectId) {
+    public List<YApiInterfaceListMenuRespDto> listCats(Long projectId) {
         String url =
                 docAnalyzerConfig.getYapiUrl() + "/api/interface/list_menu" + tokenQuery() + "&project_id=" + projectId;
         HttpResponse response = HttpRequest.get(url).send();
-        CommonRespDto<List<InterfaceListMenuRespDto>> responseBody = JsonUtils
+        YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>> responseBody = JsonUtils
                 .toParameterizedObject(response.bodyText(),
-                        new TypeReference<CommonRespDto<List<InterfaceListMenuRespDto>>>() {
+                        new TypeReference<YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>>>() {
                         });
         ensureSuccess(responseBody);
         return responseBody.getData();
@@ -100,7 +100,7 @@ public class YApiOpenProc {
         return "?token=" + docAnalyzerConfig.getYapiToken();
     }
 
-    private static void ensureSuccess(CommonRespDto<?> resp) throws YapiException {
+    private static void ensureSuccess(YApiCommonRespDto<?> resp) throws YapiException {
         if (resp == null) {
             throw new YapiException();
         }

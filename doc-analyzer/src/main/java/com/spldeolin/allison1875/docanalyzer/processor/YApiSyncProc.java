@@ -23,12 +23,12 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
+import com.spldeolin.allison1875.docanalyzer.exception.YapiException;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespDto;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
-import com.spldeolin.allison1875.docanalyzer.yapi.YapiException;
-import com.spldeolin.allison1875.docanalyzer.yapi.javabean.InterfaceListMenuRespDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -126,9 +126,9 @@ public class YApiSyncProc {
     }
 
     public Map<String, Long> getYapiCatIdsEachName(Long projectId) {
-        List<InterfaceListMenuRespDto> cats = yApiOpenProc.listCats(projectId);
+        List<YApiInterfaceListMenuRespDto> cats = yApiOpenProc.listCats(projectId);
         Map<String, Long> result = Maps.newHashMap();
-        for (InterfaceListMenuRespDto cat : cats) {
+        for (YApiInterfaceListMenuRespDto cat : cats) {
             result.put(cat.getName(), cat.getId());
         }
         return result;

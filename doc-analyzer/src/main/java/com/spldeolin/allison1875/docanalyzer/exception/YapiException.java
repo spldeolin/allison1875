@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.docanalyzer.yapi;
+package com.spldeolin.allison1875.docanalyzer.exception;
 
 /**
  * @author Deolin 2020-08-02
