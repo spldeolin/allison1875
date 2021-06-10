@@ -161,11 +161,11 @@
                 <version>6.0.6</version>
             </dependency>
 
-            <!-- commons dbutils -->
+            <!-- jodd db -->
             <dependency>
-                <groupId>commons-dbutils</groupId>
-                <artifactId>commons-dbutils</artifactId>
-                <version>1.7</version>
+                <groupId>org.jodd</groupId>
+                <artifactId>jodd-db</artifactId>
+                <version>6.0.0</version>
             </dependency>
 
             <!-- hikari cp -->

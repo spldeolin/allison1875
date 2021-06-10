@@ -22,10 +22,10 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <!-- commons dbutils -->
+        <!-- jodd db -->
         <dependency>
-            <groupId>commons-dbutils</groupId>
-            <artifactId>commons-dbutils</artifactId>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-db</artifactId>
         </dependency>
 
         <!-- hikari cp -->
