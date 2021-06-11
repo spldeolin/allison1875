@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.base.util.exception.FileBackupException;
+import jodd.io.FileUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -18,7 +18,7 @@ public class FileBackupUtils {
         String srcPath = src.getPath();
         String destPath = srcPath + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss") + ".bak";
         try {
-            FileUtils.copyFile(src, new File(destPath));
+            FileUtil.copyFile(src, new File(destPath));
             log.info("File [{}] back up to [{}]", srcPath, destPath);
         } catch (IOException e) {
             log.error("src={}", src, e);

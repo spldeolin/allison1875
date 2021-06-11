@@ -1,17 +1,18 @@
 package com.spldeolin.allison1875.inspector.processor;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Iterator;
-import org.apache.commons.io.FileUtils;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
+import jodd.io.FileUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -28,12 +29,10 @@ public class DetectPardonProc {
         Collection<PardonDto> pardons = Lists.newArrayList();
         String pardonDirectoryPath = config.getPardonDirectoryPath();
         if (StringUtils.isNotEmpty(pardonDirectoryPath)) {
-            Iterator<File> fileIterator = FileUtils
-                    .iterateFiles(new File(pardonDirectoryPath), new String[]{"json"}, true);
-            if (fileIterator.hasNext()) {
-                File jsonFile = fileIterator.next();
+            Set<File> jsonFiles = FileFindUtils.asFilesRecursively(Paths.get(pardonDirectoryPath), "json");
+            for (File jsonFile : jsonFiles) {
                 try {
-                    String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
+                    String json = FileUtil.readString(jsonFile);
                     if (json.startsWith("[")) {
                         pardons.addAll(JsonUtils.toListOfObject(json, PardonDto.class));
                     } else {

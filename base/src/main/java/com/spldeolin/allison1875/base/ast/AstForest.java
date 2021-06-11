@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
 import org.atteo.evo.inflector.English;
 import org.codehaus.plexus.util.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Sets;
+import com.spldeolin.allison1875.base.util.FileFindUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -116,10 +116,7 @@ public class AstForest implements Iterable<CompilationUnit> {
     }
 
     private Set<Path> collectJavas(Path directory) {
-        Set<Path> javaPaths = Sets.newLinkedHashSet();
-        FileUtils.iterateFiles(directory.toFile(), new String[]{"java"}, true)
-                .forEachRemaining(javaFile -> javaPaths.add(javaFile.toPath()));
-
+        Set<Path> javaPaths = FileFindUtils.asPathsRecursively(directory, "java");
         int javaCount = javaPaths.size();
         log.info("collect {} of {} from directory [{}]", javaCount, English.plural("java file", javaCount), directory);
         return javaPaths;

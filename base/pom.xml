@@ -75,12 +75,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!-- commons io -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-
         <!-- validator -->
         <dependency>
             <groupId>javax.validation</groupId>

@@ -7,10 +7,11 @@ import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.atteo.evo.inflector.English;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -23,6 +24,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import jodd.io.FileUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -147,7 +149,7 @@ public class GenerateMapperXmlQueryMethodProc {
 
         List<String> newLines = Lists.newArrayList();
         try {
-            List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
+            List<String> lines = Arrays.asList(FileUtil.readLines(mapperXml, StandardCharsets.UTF_8.name()));
             Collections.reverse(lines);
             for (String line : lines) {
                 newLines.add(line);
@@ -159,8 +161,7 @@ public class GenerateMapperXmlQueryMethodProc {
                 }
             }
             Collections.reverse(newLines);
-
-            FileUtils.writeLines(mapperXml, newLines);
+            FileUtil.writeString(mapperXml, Joiner.on('\n').join(newLines), StandardCharsets.UTF_8.name());
         } catch (IOException e) {
             log.error(e);
         }

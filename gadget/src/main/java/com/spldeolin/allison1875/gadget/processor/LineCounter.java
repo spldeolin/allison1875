@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.io.FileUtils;
+import java.util.Set;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -26,6 +26,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.gadget.LineCounterConfig;
@@ -103,15 +104,14 @@ public class LineCounter implements Allison1875MainProcessor {
 
     }
 
-    private Collection<File> detectXmls(AstForest astForest) {
-        Collection<File> result = Lists.newArrayList();
-        FileUtils.iterateFiles(MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
-                .resolve(baseConfig.getResourcesDirectoryLayout()).toFile(), new String[]{"xml"}, true)
-                .forEachRemaining(result::add);
+    private Set<File> detectXmls(AstForest astForest) {
+        Set<File> result = FileFindUtils.asFilesRecursively(
+                MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
+                        .resolve(baseConfig.getResourcesDirectoryLayout()), "xml");
         File directory = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
                 .resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
         if (directory.exists()) {
-            FileUtils.iterateFiles(directory, new String[]{"xml"}, true).forEachRemaining(result::add);
+            result = FileFindUtils.asFilesRecursively(directory.toPath(), "xml");
         }
         return result;
     }

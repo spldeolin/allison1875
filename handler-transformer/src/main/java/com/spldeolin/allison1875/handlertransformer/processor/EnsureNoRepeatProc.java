@@ -1,12 +1,11 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
-import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
 import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import jodd.io.FileNameUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -44,14 +43,12 @@ public class EnsureNoRepeatProc {
         return methodName;
     }
 
-    private HandlerTransformerConfig handlerTransformerConfig;
-
     /**
      * 确保参数coidName与AST森林中所有的java文件名均不重名
      */
     public String inAstForest(AstForest astForest, String coidName) {
         boolean conflicting = astForest.getJavasInForest().stream()
-                .anyMatch(java -> FilenameUtils.getBaseName(java.toFile().getName()).equals(coidName));
+                .anyMatch(java -> FileNameUtil.getBaseName(java.toFile().getName()).equals(coidName));
         if (conflicting) {
             return inAstForest(astForest, concatEx(coidName));
         } else {

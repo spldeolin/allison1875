@@ -2,12 +2,10 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
@@ -20,6 +18,7 @@ import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import jodd.io.FileUtil;
 
 /**
  * @author Deolin 2020-07-18
@@ -44,12 +43,12 @@ public class MapperXmlProc {
             sourceCodeLines.add(String.format("<mapper namespace=\"%s\">",
                     mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
             sourceCodeLines.add("</mapper>");
-            FileUtils.writeLines(mapperXmlFile, sourceCodeLines);
+            FileUtil.writeString(mapperXmlFile, Joiner.on("\n").join(sourceCodeLines));
         }
 
         List<String> newLines = Lists.newArrayList();
 
-        String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
+        String content = FileUtil.readString(mapperXmlFile);
         List<String> lines = MoreStringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines(sourceCodes);
 
@@ -89,7 +88,7 @@ public class MapperXmlProc {
         String finalContent = Joiner.on(System.lineSeparator()).join(newLines).replace("${leftAnchor}", leftAnchor)
                 .replace("${rightAnchor}", rightAnchor);
 
-        FileUtils.writeStringToFile(mapperXmlFile, finalContent, StandardCharsets.UTF_8);
+        FileUtil.writeString(mapperXmlFile, finalContent);
         return this;
     }
 

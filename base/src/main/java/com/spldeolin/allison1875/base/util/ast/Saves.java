@@ -6,16 +6,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.base.Version;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.FileBackupUtils;
+import jodd.io.FileUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -94,8 +93,8 @@ public class Saves {
         apiSaveBuffer.get().clear();
         rawReplaceBuffer.get().forEach((cu, newCodeText) -> {
             try {
-                FileUtils
-                        .writeStringToFile(Locations.getAbsolutePath(cu).toFile(), newCodeText, StandardCharsets.UTF_8);
+                FileUtil.writeString(Locations.getAbsolutePath(cu).toFile(), newCodeText,
+                        StandardCharsets.UTF_8.name());
             } catch (IOException e) {
                 log.error("FileUtils#writeStringToFile", e);
             }
@@ -103,23 +102,7 @@ public class Saves {
         rawReplaceBuffer.get().clear();
     }
 
-    public static void saveAllWithBC(String batchCode) {
-        for (CompilationUnit cu : apiSaveBuffer.get()) {
-            Saves.save(cu);
-            try {
-                String content = FileUtils
-                        .readFileToString(Locations.getStorage(cu).getPath().toFile(), StandardCharsets.UTF_8);
-                content = String.format("/* %s bc:%s */\n", Version.title, batchCode) + content;
-                FileUtils.writeStringToFile(Locations.getStorage(cu).getPath().toFile(), content,
-                        StandardCharsets.UTF_8);
-            } catch (IOException ignored) {
-            }
-        }
-        apiSaveBuffer.get().clear();
-    }
-
-    @Deprecated
-    public static void save(CompilationUnit cu) {
+    private static void save(CompilationUnit cu) {
         Storage storage = cu.getStorage().orElseThrow(StorageAbsentException::new);
         File file = storage.getDirectory().resolve(storage.getFileName()).toFile();
         if (file.exists()) {
