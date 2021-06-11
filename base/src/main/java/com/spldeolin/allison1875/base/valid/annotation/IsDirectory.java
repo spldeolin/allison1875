@@ -15,8 +15,8 @@ import com.spldeolin.allison1875.base.valid.validator.StringIsDirectoryValidator
  * 必须是目录
  *
  * <pre>
- *  支持类型：Path、String、
- *  规则：被申明的Map对象中，不允许出现value中指定的key
+ *  支持类型：Path、String
+ *  规则：被申明的Path或String对象，必须是一个存在的目录
  *  </pre>
  *
  * @author Deolin 2021-02-20
