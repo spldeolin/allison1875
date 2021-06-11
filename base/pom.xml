@@ -89,10 +89,10 @@
             <artifactId>evo-inflector</artifactId>
         </dependency>
 
-        <!-- redisson -->
+        <!-- jodd util -->
         <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-util</artifactId>
         </dependency>
 
         <!-- maven model -->

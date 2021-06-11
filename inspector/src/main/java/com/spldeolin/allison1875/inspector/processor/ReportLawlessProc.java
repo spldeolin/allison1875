@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.inspector.processor;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class ReportLawlessProc {
             Path csvGbkFile = outputDirectory.resolve(fileName + "-gbk.csv");
             try {
                 FileUtil.writeString(csvFile.toFile(), csvContent);
-                FileUtil.writeString(csvGbkFile.toFile(), csvContent, "GBK");
+                FileUtil.writeString(csvGbkFile.toFile(), csvContent, Charset.forName("GBK"));
                 log.info("Lawless print to [{}] completed.", csvFile);
                 log.info("Lawless print to [{}] completed.", csvGbkFile);
             } catch (IOException e) {

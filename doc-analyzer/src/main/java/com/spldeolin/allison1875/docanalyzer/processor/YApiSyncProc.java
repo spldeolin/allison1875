@@ -4,10 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -18,7 +15,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.redis.RedissonFactory;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -50,56 +46,42 @@ public class YApiSyncProc {
     private DocAnalyzerConfig docAnalyzerConfig;
 
     @Inject
-    private RedissonFactory redissonFactory;
-
-    @Inject
     private YApiOpenProc yApiOpenProc;
 
     public void process(Collection<EndpointDto> endpoints) throws Exception {
-        String baseUrl = docAnalyzerConfig.getYapiUrl();
-
         Long projectId = yApiOpenProc.getProject().getId();
 
-        RedissonClient redisson = redissonFactory.getRedissonClient();
-        RLock lock = redisson.getLock("allison1875_docanalyzer_" + baseUrl + "_" + projectId);
-        // 尝试加锁，最多等待100秒，上锁以后30秒自动解锁
-        if (lock.tryLock(100, 20, TimeUnit.SECONDS)) {
-            try {
-                Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
-                catNames.add("回收站");
-                Set<String> yapiCatNames = this.getYapiCatIdsEachName(projectId).keySet();
-                this.createYApiCat(Sets.difference(catNames, yapiCatNames), projectId);
+        Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
+        catNames.add("回收站");
+        Set<String> yapiCatNames = this.getYapiCatIdsEachName(projectId).keySet();
+        this.createYApiCat(Sets.difference(catNames, yapiCatNames), projectId);
 
-                Map<String, Long> catName2catId = this.getYapiCatIdsEachName(projectId);
+        Map<String, Long> catName2catId = this.getYapiCatIdsEachName(projectId);
 
-                Map<String, JsonNode> yapiUrls = this.listAutoInterfaces(projectId);
-                Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
+        Map<String, JsonNode> yapiUrls = this.listAutoInterfaces(projectId);
+        Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
 
-                // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
-                for (String yapiUrl : yapiUrls.keySet()) {
-                    if (!analysisUrls.contains(yapiUrl)) {
-                        this.deleteInterface(yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
-                    }
-                }
-
-                // 新增接口
-                for (EndpointDto endpoint : endpoints) {
-                    Collection<String> descriptionLines = endpoint.getDescriptionLines();
-                    String title = Iterables.getFirst(descriptionLines, null);
-                    if (title == null || title.length() == 0) {
-                        title = endpoint.getHandlerSimpleName();
-                    }
-                    String yapiDesc = endpointToStringProc.toString(endpoint);
-
-                    String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
-                    String respJs = toJson(endpoint.getResponseBodyJsonSchema());
-
-                    this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
-                            endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
-                }
-            } finally {
-                lock.unlock();
+        // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
+        for (String yapiUrl : yapiUrls.keySet()) {
+            if (!analysisUrls.contains(yapiUrl)) {
+                this.deleteInterface(yapiUrls.get(yapiUrl), catName2catId.get("回收站"));
             }
+        }
+
+        // 新增接口
+        for (EndpointDto endpoint : endpoints) {
+            Collection<String> descriptionLines = endpoint.getDescriptionLines();
+            String title = Iterables.getFirst(descriptionLines, null);
+            if (title == null || title.length() == 0) {
+                title = endpoint.getHandlerSimpleName();
+            }
+            String yapiDesc = endpointToStringProc.toString(endpoint);
+
+            String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
+            String respJs = toJson(endpoint.getResponseBodyJsonSchema());
+
+            this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc, endpoint.getHttpMethod(),
+                    catName2catId.get(endpoint.getCat()));
         }
     }
 

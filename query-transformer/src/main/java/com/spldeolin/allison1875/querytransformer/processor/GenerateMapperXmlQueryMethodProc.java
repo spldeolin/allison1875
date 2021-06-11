@@ -6,7 +6,6 @@ import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -149,7 +148,7 @@ public class GenerateMapperXmlQueryMethodProc {
 
         List<String> newLines = Lists.newArrayList();
         try {
-            List<String> lines = Arrays.asList(FileUtil.readLines(mapperXml, StandardCharsets.UTF_8.name()));
+            List<String> lines = Arrays.asList(FileUtil.readLines(mapperXml));
             Collections.reverse(lines);
             for (String line : lines) {
                 newLines.add(line);
@@ -161,7 +160,7 @@ public class GenerateMapperXmlQueryMethodProc {
                 }
             }
             Collections.reverse(newLines);
-            FileUtil.writeString(mapperXml, Joiner.on('\n').join(newLines), StandardCharsets.UTF_8.name());
+            FileUtil.writeString(mapperXml, Joiner.on('\n').join(newLines));
         } catch (IOException e) {
             log.error(e);
         }

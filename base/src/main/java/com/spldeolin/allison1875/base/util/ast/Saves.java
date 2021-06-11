@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.base.util.ast;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,8 +92,7 @@ public class Saves {
         apiSaveBuffer.get().clear();
         rawReplaceBuffer.get().forEach((cu, newCodeText) -> {
             try {
-                FileUtil.writeString(Locations.getAbsolutePath(cu).toFile(), newCodeText,
-                        StandardCharsets.UTF_8.name());
+                FileUtil.writeString(Locations.getAbsolutePath(cu).toFile(), newCodeText);
             } catch (IOException e) {
                 log.error("FileUtils#writeStringToFile", e);
             }
