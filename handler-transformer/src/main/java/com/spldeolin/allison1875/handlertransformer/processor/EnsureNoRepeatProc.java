@@ -2,10 +2,10 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
-import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import jodd.io.FileNameUtil;
+import jodd.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -59,15 +59,15 @@ public class EnsureNoRepeatProc {
     private String concatEx(String coidName) {
         String newName;
         if (coidName.endsWith("ReqDto")) {
-            newName = Substring.last("ReqDto").removeFrom(coidName) + "ExReqDto";
+            newName = StringUtil.replaceLast(coidName, "ReqDto", "ExReqDto");
         } else if (coidName.endsWith("RespDto")) {
-            newName = Substring.last("RespDto").removeFrom(coidName) + "ExRespDto";
+            newName = StringUtil.replaceLast(coidName, "RespDto", "ExRespDto");
         } else if (coidName.endsWith("Dto")) {
-            newName = Substring.last("Dto").removeFrom(coidName) + "ExDto";
+            newName = StringUtil.replaceLast(coidName, "Dto", "ExDto");
         } else if (coidName.endsWith("Service")) {
-            newName = Substring.last("Service").removeFrom(coidName) + "ExService";
+            newName = StringUtil.replaceLast(coidName, "Service", "ExService");
         } else if (coidName.endsWith("ServiceImpl")) {
-            newName = Substring.last("ServiceImpl").removeFrom(coidName) + "ExServiceImpl";
+            newName = StringUtil.replaceLast(coidName, "ServiceImpl", "ExServiceImpl");
         } else {
             newName = coidName + "Ex";
         }

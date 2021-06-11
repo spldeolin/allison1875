@@ -22,10 +22,10 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
-import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
+import jodd.util.StringUtil;
 
 /**
  * @author Deolin 2020-12-26
@@ -79,18 +79,6 @@ public class JavabeanCuBuilder<C> {
         return this;
     }
 
-    public JavabeanCuBuilder<C> importDeclaration(String importName, Boolean isAsterisk) {
-        boolean endsWith = importName.endsWith(".*");
-        if (isAsterisk && !endsWith) {
-            importName = importName + ".*";
-        }
-        if (!isAsterisk && endsWith) {
-            importName = Substring.last(".*").removeFrom(importName);
-        }
-        this.importDeclaration(importName);
-        return this;
-    }
-
     public JavabeanCuBuilder<C> importDeclaration(ImportDeclaration importDeclaration) {
         Objects.requireNonNull(importDeclaration, "importDeclaration cannot be null.");
         importDeclarations.add(importDeclaration);
@@ -99,7 +87,7 @@ public class JavabeanCuBuilder<C> {
 
     public JavabeanCuBuilder<C> importDeclaration(String importName) {
         if (importName.endsWith(".*")) {
-            importDeclarations.add(new ImportDeclaration(Substring.last(".*").removeFrom(importName), false, true));
+            importDeclarations.add(new ImportDeclaration(StringUtil.cutSuffix(importName, ".*"), false, true));
         } else {
             importDeclarations.add(new ImportDeclaration(importName, false, false));
         }

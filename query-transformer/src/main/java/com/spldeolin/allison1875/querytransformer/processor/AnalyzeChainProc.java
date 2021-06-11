@@ -11,14 +11,13 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
-import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
-import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
+import jodd.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -28,19 +27,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AnalyzeChainProc {
 
-    private String sureNotToRepeat(String name, List<String> names, int index) {
-        if (!names.contains(name)) {
-            names.add(name);
-            return name;
-        }
-        index++;
-        return this.sureNotToRepeat(name + index, names, index);
-    }
-
     public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design) {
         String chainCode = chain.toString();
-        String betweenCode = Substring.between(Substring.first('.'), Substring.last(".")).from(chainCode)
-                .orElseThrow(IllegalChainException::new);
+        String betweenCode = StringUtil.substring(chainCode, chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
 
         MethodCallExpr queryMce = chain
@@ -105,6 +94,15 @@ public class AnalyzeChainProc {
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
         return result;
+    }
+
+    private String sureNotToRepeat(String name, List<String> names, int index) {
+        if (!names.contains(name)) {
+            names.add(name);
+            return name;
+        }
+        index++;
+        return this.sureNotToRepeat(name + index, names, index);
     }
 
 }

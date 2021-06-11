@@ -5,11 +5,11 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.mu.util.Substring;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import jodd.util.StringUtil;
 
 /**
  * 插入
@@ -39,7 +39,7 @@ public class BatchUpdateEvenNullXmlProc {
         // 删除最后一个语句中，最后的逗号
         if (xmlLines.size() > 0) {
             int last = xmlLines.size() - 1;
-            xmlLines.set(last, Substring.last(",").removeFrom(xmlLines.get(last)));
+            xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {

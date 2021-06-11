@@ -4,7 +4,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
-import com.google.mu.util.Substring;
+import jodd.util.StringUtil;
 
 /**
  * @author Deolin 2019-12-03
@@ -27,7 +27,7 @@ public class MoreStringUtils {
      * </code>，则无事发生
      */
     public static String replaceLast(String from, String target, String replacement) {
-        return Substring.last(target).replaceFrom(from, replacement);
+        return StringUtil.replaceLast(from, target, replacement);
     }
 
     public static String upperFirstLetter(String s) {

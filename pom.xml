@@ -102,13 +102,6 @@
                 <version>30.1.1-jre</version>
             </dependency>
 
-            <!-- mug -->
-            <dependency>
-                <groupId>com.google.mug</groupId>
-                <artifactId>mug</artifactId>
-                <version>5.3</version>
-            </dependency>
-
             <!-- commons lang3 -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -159,13 +152,6 @@
                 <groupId>org.jodd</groupId>
                 <artifactId>jodd-db</artifactId>
                 <version>6.0.0</version>
-            </dependency>
-
-            <!-- hikari cp -->
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>4.0.3</version>
             </dependency>
 
             <!-- mysql -->
