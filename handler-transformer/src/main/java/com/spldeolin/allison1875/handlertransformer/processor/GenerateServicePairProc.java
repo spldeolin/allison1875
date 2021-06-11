@@ -26,12 +26,12 @@ import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-03-05
  */
-@Slf4j
+@Log4j2
 @Singleton
 public class GenerateServicePairProc {
 

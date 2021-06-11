@@ -14,13 +14,13 @@ import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHa
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-01-12
  */
 @Singleton
-@Slf4j
+@Log4j2
 public class ServiceProc {
 
     @Inject

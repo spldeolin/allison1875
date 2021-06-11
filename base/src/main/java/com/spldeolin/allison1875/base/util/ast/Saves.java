@@ -17,14 +17,14 @@ import com.spldeolin.allison1875.base.util.FileBackupUtils;
 import jodd.io.FileUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 将CompilationUnit保存到硬盘
  *
  * @author Deolin 2020-01-26
  */
-@Slf4j
+@Log4j2
 public class Saves {
 
     private static final ThreadLocal<Set<CompilationUnit>> apiSaveBuffer = ThreadLocal.withInitial(Sets::newHashSet);

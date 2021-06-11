@@ -19,12 +19,12 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-06-09
  */
-@Slf4j
+@Log4j2
 @Singleton
 public class ReplaceDesignProc {
 
