@@ -68,7 +68,7 @@ public class GenerateMapperXmlQueryMethodProc {
                         ifTag += " AND " + varName + " != ''";
                     }
                     ifTag += "\">";
-                    switch (byPhrase.getVerb()) {
+                    switch (byPhrase.getPredicate()) {
                         case EQUALS:
                             xmlLines.add(ifTag);
                             xmlLines.add(DOUBLE_INDENT + " AND " + property.getColumnName() + " = " + dollarVar);

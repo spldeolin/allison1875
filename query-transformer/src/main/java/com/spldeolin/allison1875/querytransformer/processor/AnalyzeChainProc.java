@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
+import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.support.ByChainPredicate;
@@ -57,7 +57,7 @@ public class AnalyzeChainProc {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
                 phrase.setVarName(sureNotToRepeat(fae.getNameAsString(), varNames, 1));
-                phrase.setVerb(VerbEnum.of(((MethodCallExpr) parent).getNameAsString()));
+                phrase.setPredicate(PredicateEnum.of(((MethodCallExpr) parent).getNameAsString()));
                 phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
                 byPhrases.add(phrase);
             }
@@ -65,7 +65,7 @@ public class AnalyzeChainProc {
                 Node parent = fae.getParentNode().get();
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
-                phrase.setVerb(VerbEnum.of(((MethodCallExpr) parent).getNameAsString()));
+                phrase.setPredicate(PredicateEnum.of(((MethodCallExpr) parent).getNameAsString()));
                 orderPhrases.add(phrase);
             }
         }

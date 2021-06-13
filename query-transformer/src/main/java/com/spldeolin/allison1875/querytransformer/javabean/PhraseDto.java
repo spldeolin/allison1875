@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import com.github.javaparser.ast.expr.Expression;
-import com.spldeolin.allison1875.querytransformer.enums.VerbEnum;
+import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,21 +16,21 @@ public class PhraseDto {
 
     private String varName;
 
-    private VerbEnum verb;
+    private PredicateEnum predicate;
 
     private Expression objectExpr;
 
     public String toString() {
-        if (verb == null && objectExpr == null) {
+        if (predicate == null && objectExpr == null) {
             return subjectPropertyName;
         }
         if (objectExpr == null) {
-            return subjectPropertyName + " " + verb.getValue();
+            return subjectPropertyName + " " + predicate.getValue();
         }
-        if (verb == null) {
+        if (predicate == null) {
             return subjectPropertyName + " . " + objectExpr;
         }
-        return subjectPropertyName + " " + verb.getValue() + " " + objectExpr;
+        return subjectPropertyName + " " + predicate.getValue() + " " + objectExpr;
 
     }
 

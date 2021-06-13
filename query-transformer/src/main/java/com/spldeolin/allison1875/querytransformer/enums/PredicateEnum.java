@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum VerbEnum {
+public enum PredicateEnum {
 
     EQUALS("eq"),
 
@@ -42,11 +42,11 @@ public enum VerbEnum {
     private final String value;
 
     public static boolean isValid(String value) {
-        return Arrays.stream(VerbEnum.values()).anyMatch(one -> one.getValue().equals(value));
+        return Arrays.stream(PredicateEnum.values()).anyMatch(one -> one.getValue().equals(value));
     }
 
-    public static VerbEnum of(String value) {
-        return Arrays.stream(VerbEnum.values()).filter(one -> one.getValue().equals(value)).findAny().orElse(null);
+    public static PredicateEnum of(String value) {
+        return Arrays.stream(PredicateEnum.values()).filter(one -> one.getValue().equals(value)).findAny().orElse(null);
     }
 
 }
