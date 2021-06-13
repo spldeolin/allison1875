@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
@@ -43,9 +42,6 @@ public class LineCounter implements Allison1875MainProcessor {
 
     @Inject
     private LineCounterConfig lineCounterConfig;
-
-    @Inject
-    private BaseConfig baseConfig;
 
     @Override
     public void process(AstForest astForest) {
@@ -106,10 +102,9 @@ public class LineCounter implements Allison1875MainProcessor {
 
     private Set<File> detectXmls(AstForest astForest) {
         Set<File> result = FileFindUtils.asFilesRecursively(
-                MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
-                        .resolve(baseConfig.getResourcesDirectoryLayout()), "xml");
-        File directory = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
-                .resolve(baseConfig.getTestResourcesDirectoryLayout()).toFile();
+                MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).resolve("src/main/resources"), "xml");
+        File directory = MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).resolve("src/main/resources")
+                .toFile();
         if (directory.exists()) {
             result = FileFindUtils.asFilesRecursively(directory.toPath(), "xml");
         }

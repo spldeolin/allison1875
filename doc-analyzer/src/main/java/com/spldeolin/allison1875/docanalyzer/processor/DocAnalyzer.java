@@ -10,7 +10,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.BaseConfig;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -55,9 +54,6 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     @Inject
     private DocAnalyzerConfig config;
-
-    @Inject
-    private BaseConfig baseConfig;
 
     @Override
     public void process(AstForest astForest) {

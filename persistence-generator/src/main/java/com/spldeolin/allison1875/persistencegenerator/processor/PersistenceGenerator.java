@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -14,7 +15,6 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PathDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInsertEvenNullProc;
@@ -155,9 +155,6 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private GenerateEntityProc entityProc;
 
     @Inject
-    private PathProc pathProc;
-
-    @Inject
     private MapperXmlProc mapperXmlProc;
 
     @Inject
@@ -166,10 +163,11 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     @Inject
     private PersistenceGeneratorConfig config;
 
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
     @Override
     public void process(AstForest astForest) {
-        PathDto pathDto = pathProc.process(astForest);
-
         // 构建并遍历 PersistenceDto对象
         Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoProc.process(astForest);
         if (persistenceDtos.size() == 0) {
@@ -229,7 +227,9 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityGeneration);
             try {
-                mapperXmlProc.process(persistence, mapper, pathDto.getMapperXmlPath(),
+                Path mapperXmlDirectory = astForest.getPrimaryJavaRoot()
+                        .resolve(persistenceGeneratorConfig.getMapperXmlDirectoryPath());
+                mapperXmlProc.process(persistence, mapper, mapperXmlDirectory,
                         Lists.newArrayList(resultMapXmlProc.process(persistence, entityName),
                                 allCloumnSqlXmlProc.process(persistence),
                                 insertXmlProc.process(persistence, entityName, insertMethodName),
