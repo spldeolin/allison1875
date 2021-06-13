@@ -2,6 +2,9 @@ package com.spldeolin.allison1875.inspector.javabean;
 
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.javaparser.ast.Node;
+import com.spldeolin.allison1875.base.util.ast.Authors;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import lombok.Data;
 
 /**
@@ -36,5 +39,12 @@ public class LawlessDto {
 
     @JsonProperty("修复时间")
     private LocalDateTime fixedAt;
+
+    public LawlessDto(Node node, String qualifier, String message) {
+        this.sourceCode = Locations.getAbsolutePathWithLineNo(node);
+        this.qualifier = qualifier;
+        this.message = message;
+        this.author = Authors.getAuthor(node);
+    }
 
 }
