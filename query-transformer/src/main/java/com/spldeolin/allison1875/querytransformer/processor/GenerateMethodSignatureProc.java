@@ -22,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class GenerateMapperQueryMethodProc {
+public class GenerateMethodSignatureProc {
 
     @Inject
     private QueryTransformerConfig queryTransformerConfig;

@@ -19,11 +19,13 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
+import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
 import jodd.io.FileUtil;
+import jodd.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -31,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class GenerateMapperXmlQueryMethodProc {
+public class GenerateMethodXmlProc {
 
     public void process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
@@ -137,6 +139,18 @@ public class GenerateMapperXmlQueryMethodProc {
                             break;
                     }
                 }
+            }
+            if (chainAnalysis.getOrderPhrases().size() > 0) {
+                xmlLines.add(SINGLE_INDENT + "ORDER BY");
+                for (PhraseDto orderPhrase : chainAnalysis.getOrderPhrases()) {
+                    PropertyDto property = designMeta.getProperties().get(orderPhrase.getSubjectPropertyName());
+                    xmlLines.add(
+                            DOUBLE_INDENT + property.getColumnName() + (orderPhrase.getPredicate() == PredicateEnum.DESC
+                                    ? " DESC," : ","));
+                }
+                // 删除最后一个语句中，最后的逗号
+                int last = xmlLines.size() - 1;
+                xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
             }
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");

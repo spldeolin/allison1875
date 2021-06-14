@@ -40,10 +40,10 @@ public class QueryTransformer implements Allison1875MainProcessor {
     private AnalyzeChainProc analyzeChainProc;
 
     @Inject
-    private GenerateMapperXmlQueryMethodProc generateMapperXmlQueryMethodProc;
+    private GenerateMethodXmlProc generateMapperXmlQueryMethodProc;
 
     @Inject
-    private GenerateMapperQueryMethodProc createMapperQueryMethodProc;
+    private GenerateMethodSignatureProc createMapperQueryMethodProc;
 
     @Inject
     private FindEntityAndSuperEntityProc findEntityAndSuperEntityProc;
