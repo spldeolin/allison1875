@@ -10,7 +10,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
@@ -42,14 +41,12 @@ public class ReplaceDesignProc {
             if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(designMeta.getMapperName())).isPresent()) {
                 List<FieldDeclaration> fields = service.getFields();
                 if (fields.size() > 0) {
-                    String lastFieldCode = Iterables.getLast(fields).getTokenRange()
-                            .orElseThrow(RangeAbsentException::new).toString();
+                    String lastFieldCode = TokenRanges.getRawCode(Iterables.getLast(fields));
                     replaces.add(new Replace(lastFieldCode, lastFieldCode + autowiredField));
                 } else {
                     List<MethodDeclaration> methods = service.getMethods();
                     if (methods.size() > 0) {
-                        String firstMethodCode = methods.get(0).getTokenRange().orElseThrow(RangeAbsentException::new)
-                                .toString();
+                        String firstMethodCode = TokenRanges.getRawCode(methods.get(0));
                         replaces.add(new Replace(firstMethodCode, autowiredField + firstMethodCode));
                     }
                 }
@@ -72,8 +69,7 @@ public class ReplaceDesignProc {
             chainExprReplacement = argumentBuild + "\n" + chainExprReplacement;
         }
 
-        replaces.add(new Replace(chainExpr.getTokenRange().orElseThrow(RangeAbsentException::new).toString(),
-                chainExprReplacement));
+        replaces.add(new Replace(TokenRanges.getRawCode(chainExpr), chainExprReplacement));
 
         return replaces;
     }

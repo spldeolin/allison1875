@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.FileBackupUtils;
 import jodd.io.FileUtil;
@@ -46,7 +44,7 @@ public class Saves {
         if (rawReplaceBuffer.get().containsKey(cu)) {
             oldCodeText = rawReplaceBuffer.get().get(cu);
         } else {
-            oldCodeText = cu.getTokenRange().orElseThrow(RangeAbsentException::new).toString();
+            oldCodeText = TokenRanges.getRawCode(cu);
         }
         String newCodeText = oldCodeText.replace(target, replacement);
 
@@ -68,11 +66,10 @@ public class Saves {
             return;
         }
         String newCodeText;
-        TokenRange javaTokens = cu.getTokenRange().orElseThrow(RangeAbsentException::new);
         if (rawReplaceBuffer.get().containsKey(cu)) {
             newCodeText = rawReplaceBuffer.get().get(cu);
         } else {
-            newCodeText = javaTokens.toString();
+            newCodeText = TokenRanges.getRawCode(cu);
         }
         for (Replace replace : replaces) {
             newCodeText = newCodeText.replace(replace.getTarget(), replace.getReplacement());
