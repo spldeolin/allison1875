@@ -186,7 +186,7 @@ public class GenerateMethodXmlProc {
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
             startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
         }
-        if (resultTransformation.getIsEntityOrRecord()) {
+        if (resultTransformation.getIsSpecifiedEntity()) {
             startTag += " resultMap='all'>";
         } else {
             startTag += " resultType='" + resultTransformation.getOneImport() + "'>";

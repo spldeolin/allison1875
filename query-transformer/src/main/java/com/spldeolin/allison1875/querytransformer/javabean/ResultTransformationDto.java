@@ -15,6 +15,6 @@ public class ResultTransformationDto {
 
     private Type resultType;
 
-    private Boolean isEntityOrRecord;
+    private Boolean isSpecifiedEntity;
 
 }

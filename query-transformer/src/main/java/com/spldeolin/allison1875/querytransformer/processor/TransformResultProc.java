@@ -50,7 +50,7 @@ public class TransformResultProc {
                 VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode().get()
                         .getParentNode().get();
                 Type vdeType = vde.getCommonType();
-                return new ResultTransformationDto().setResultType(vdeType).setIsEntityOrRecord(true);
+                return new ResultTransformationDto().setResultType(vdeType).setIsSpecifiedEntity(true);
             }
         }
 
@@ -85,7 +85,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
             }
-            result.setIsEntityOrRecord(false);
+            result.setIsSpecifiedEntity(false);
             return result;
 
         } else if (phrases.size() == 1) {
@@ -99,7 +99,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
             }
-            result.setIsEntityOrRecord(false);
+            result.setIsSpecifiedEntity(false);
             return result;
 
         } else {
@@ -111,7 +111,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
             }
-            result.setIsEntityOrRecord(true);
+            result.setIsSpecifiedEntity(false);
             return result;
         }
     }

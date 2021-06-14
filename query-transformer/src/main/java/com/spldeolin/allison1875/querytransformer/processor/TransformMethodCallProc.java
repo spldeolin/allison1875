@@ -21,7 +21,7 @@ public class TransformMethodCallProc {
     public String process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         String result = "";
-        if (!resultTransformation.getIsEntityOrRecord()) {
+        if (!resultTransformation.getIsSpecifiedEntity()) {
             result += resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
         }
 
