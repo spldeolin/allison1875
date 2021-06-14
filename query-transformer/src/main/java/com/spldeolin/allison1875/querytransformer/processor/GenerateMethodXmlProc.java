@@ -152,6 +152,9 @@ public class GenerateMethodXmlProc {
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
             }
+            if (!chainAnalysis.isReturnManyOrOne()) {
+                xmlLines.add(SINGLE_INDENT + "LIMIT 1");
+            }
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
         } else {
