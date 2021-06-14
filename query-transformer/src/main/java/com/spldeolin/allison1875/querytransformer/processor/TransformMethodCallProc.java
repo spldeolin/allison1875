@@ -48,16 +48,17 @@ public class TransformMethodCallProc {
         String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
         StringBuilder result = new StringBuilder(
-                String.format("%s %s = new %s()", javabeanTypeName, javabeanVarName, javabeanTypeName));
+                String.format("%s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
-            result.append(".set").append(MoreStringUtils.upperFirstLetter(updatePhrase.getSubjectPropertyName()))
-                    .append("(").append(updatePhrase.getObjectExpr()).append(")");
+            result.append("\n").append(javabeanVarName).append(".set")
+                    .append(MoreStringUtils.upperFirstLetter(updatePhrase.getSubjectPropertyName())).append("(")
+                    .append(updatePhrase.getObjectExpr()).append(");");
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
-            result.append(".set").append(MoreStringUtils.upperFirstLetter(byPhrase.getSubjectPropertyName()))
-                    .append("(").append(byPhrase.getObjectExpr()).append(")");
+            result.append("\n").append(javabeanVarName).append(".set")
+                    .append(MoreStringUtils.upperFirstLetter(byPhrase.getSubjectPropertyName())).append("(")
+                    .append(byPhrase.getObjectExpr()).append(");");
         }
-        result.append(";");
         return result.toString();
     }
 
