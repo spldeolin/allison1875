@@ -45,9 +45,10 @@ public class TransformParameterProc {
 
         List<String> imports = Lists.newArrayList();
         List<Parameter> params = Lists.newArrayList();
+        boolean isJavabean = false;
 
-        Set<PhraseDto> phrases = chainAnalysis.getByPhrases();
-        phrases.addAll(chainAnalysis.getUpdatePhrases());
+        Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
+        phrases.addAll(chainAnalysis.getByPhrases());
         if (phrases.size() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
@@ -73,6 +74,7 @@ public class TransformParameterProc {
             param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));
             params.add(param);
             imports.add(cond.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            isJavabean = true;
         } else if (phrases.size() > 0) {
             List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {
@@ -90,7 +92,7 @@ public class TransformParameterProc {
             return null;
         }
 
-        return new ParameterTransformationDto().setImports(imports).setParameters(params);
+        return new ParameterTransformationDto().setImports(imports).setParameters(params).setIsJavabean(isJavabean);
     }
 
     private String sureNotToRepeat(String name, List<String> names, int index) {

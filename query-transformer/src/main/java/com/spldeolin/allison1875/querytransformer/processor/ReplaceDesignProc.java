@@ -1,20 +1,20 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
 import java.util.List;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.RangeAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
+import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
@@ -35,13 +35,9 @@ public class ReplaceDesignProc {
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         List<Saves.Replace> replaces = Lists.newArrayList();
 
-        // overwirte service
-        String methodCallCode = transformMethodCallProc.process(designMeta, chainAnalysis);
-
         // ensure service import & autowired
-        String autowiredField = StaticJavaParser.parseBodyDeclaration(
-                String.format("@Autowired private %s %s;", designMeta.getMapperName(),
-                        MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()))).toString();
+        String autowiredField = String.format("@Autowired private %s %s;", designMeta.getMapperName(),
+                MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()));
         chainAnalysis.getChain().findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
             if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(designMeta.getMapperName())).isPresent()) {
                 List<FieldDeclaration> fields = service.getFields();
@@ -57,18 +53,27 @@ public class ReplaceDesignProc {
                         replaces.add(new Replace(firstMethodCode, autowiredField + firstMethodCode));
                     }
                 }
-
-                service.getMembers().add(0, StaticJavaParser.parseBodyDeclaration(
-                        String.format("@Autowired private %s %s;", designMeta.getMapperName(),
-                                MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()))));
-                Imports.ensureImported(service, designMeta.getMapperQualifier());
-                Imports.ensureImported(service, AnnotationConstant.AUTOWIRED_QUALIFIER);
             }
         });
 
-        replaces.add(
-                new Replace(chainAnalysis.getChain().getTokenRange().orElseThrow(RangeAbsentException::new).toString(),
-                        methodCallCode));
+        ExpressionStmt exprStmt = chainAnalysis.getChain().findAncestor(ExpressionStmt.class)
+                .orElseThrow(() -> new RuntimeException("cannot find Expression Stmt"));
+        Expression chainExpr = exprStmt.getExpression();
+        log.info("chainExpr={}", chainExpr);
+
+        // overwirte methodCall
+        String chainReplacement = transformMethodCallProc
+                .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+        String chainExprReplacement = TokenRanges.getRawCode(chainExpr)
+                .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), chainReplacement);
+
+        String argumentBuild = transformMethodCallProc.argumentBuild(chainAnalysis, parameterTransformation);
+        if (argumentBuild != null) {
+            chainExprReplacement = argumentBuild + "\n" + chainExprReplacement;
+        }
+
+        replaces.add(new Replace(chainExpr.getTokenRange().orElseThrow(RangeAbsentException::new).toString(),
+                chainExprReplacement));
 
         return replaces;
     }

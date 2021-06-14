@@ -16,4 +16,6 @@ public class ParameterTransformationDto {
 
     private List<Parameter> parameters;
 
+    private Boolean isJavabean;
+
 }
