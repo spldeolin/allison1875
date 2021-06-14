@@ -27,8 +27,7 @@ public class TransformMethodCallProc {
 
         result += MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
                 + "(";
-
-        if (parameterTransformation.getIsJavabean()) {
+        if (parameterTransformation != null && parameterTransformation.getIsJavabean()) {
             result += MoreStringUtils
                     .lowerFirstLetter(parameterTransformation.getParameters().get(0).getTypeAsString());
         } else {
@@ -42,7 +41,7 @@ public class TransformMethodCallProc {
     }
 
     public String argumentBuild(ChainAnalysisDto chainAnalysis, ParameterTransformationDto parameterTransformation) {
-        if (!parameterTransformation.getIsJavabean()) {
+        if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
             return null;
         }
         String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();

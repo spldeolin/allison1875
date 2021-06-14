@@ -37,7 +37,7 @@ public class GenerateMethodSignatureProc {
         if (resultTransformation.getOneImport() != null) {
             Imports.ensureImported(mapper, resultTransformation.getOneImport());
         }
-        if (parameterTransformation.getImports() != null) {
+        if (parameterTransformation != null) {
             for (String anImport : parameterTransformation.getImports()) {
                 Imports.ensureImported(mapper, anImport);
             }
@@ -46,7 +46,9 @@ public class GenerateMethodSignatureProc {
         MethodDeclaration method = new MethodDeclaration();
         method.setType(resultTransformation.getResultType());
         method.setName(chainAnalysis.getMethodName());
-        method.setParameters(new NodeList<>(parameterTransformation.getParameters()));
+        if (parameterTransformation != null) {
+            method.setParameters(new NodeList<>(parameterTransformation.getParameters()));
+        }
         method.setBody(null);
         mapper.getMembers().add(0, method);
         Saves.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
