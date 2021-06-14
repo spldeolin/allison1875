@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.base.util.HashUtil;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
@@ -102,7 +103,8 @@ public class QueryTransformer implements Allison1875MainProcessor {
     }
 
     private DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration queryDesign) {
-        FieldDeclaration queryMetaField = queryDesign.getFieldByName("meta").orElseThrow(IllegalChainException::new);
+        FieldDeclaration queryMetaField = queryDesign.getFieldByName(TokenWordConstant.META_FIELD_NAME)
+                .orElseThrow(IllegalChainException::new);
         Expression initializer = queryMetaField.getVariable(0).getInitializer().orElseThrow(IllegalChainException::new);
         String metaJson = StringEscapeUtils.unescapeJava(initializer.asStringLiteralExpr().getValue());
         return JsonUtils.toObject(metaJson, DesignMeta.class);

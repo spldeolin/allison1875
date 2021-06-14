@@ -24,6 +24,7 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
@@ -71,7 +72,7 @@ public class GenerateDesignProc {
             }
             propertiesByName.put(property.getPropertyName(), property);
         }
-        cu.addOrphanComment(new LineComment("@formatter:" + "off"));
+        cu.addOrphanComment(new LineComment("@formatter:off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
         Javadoc javadoc = entityGeneration.getEntity().getJavadoc()
                 .orElse(Javadocs.createJavadoc(null, persistenceGeneratorConfig.getAuthor()));
@@ -193,7 +194,7 @@ public class GenerateDesignProc {
         meta.setProperties(propertiesByName);
         meta.setTableName(persistence.getTableName());
         String metaJson = JsonUtils.toJson(meta);
-        designCoid.addFieldWithInitializer("String", "meta",
+        designCoid.addFieldWithInitializer("String", TokenWordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
         cu.addOrphanComment(new LineComment(HashUtil.md5(designCoid.toString())));
