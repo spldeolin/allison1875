@@ -31,7 +31,7 @@ public class ValidateUtils {
 
     private static <T> void reportAndExit(Set<ConstraintViolation<T>> violations) {
         if (violations.size() > 0) {
-            log.error("Allison 1875 cannot work any more cause invalid config");
+            log.error("Allison 1875 fail to work cause invalid config");
             for (ConstraintViolation<?> violation : violations) {
                 String configName =
                         violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath().toString()
