@@ -50,12 +50,12 @@ public class TransformMethodCallProc {
                 String.format("%s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
             result.append("\n").append(javabeanVarName).append(".set")
-                    .append(MoreStringUtils.upperFirstLetter(updatePhrase.getSubjectPropertyName())).append("(")
+                    .append(MoreStringUtils.upperFirstLetter(updatePhrase.getVarName())).append("(")
                     .append(updatePhrase.getObjectExpr()).append(");");
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
             result.append("\n").append(javabeanVarName).append(".set")
-                    .append(MoreStringUtils.upperFirstLetter(byPhrase.getSubjectPropertyName())).append("(")
+                    .append(MoreStringUtils.upperFirstLetter(byPhrase.getVarName())).append("(")
                     .append(byPhrase.getObjectExpr()).append(");");
         }
         return result.toString();
