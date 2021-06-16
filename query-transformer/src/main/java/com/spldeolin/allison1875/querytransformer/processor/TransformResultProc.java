@@ -41,9 +41,6 @@ public class TransformResultProc {
 
     public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
-        if (!chainAnalysis.isQueryOrUpdate()) {
-            return new ResultTransformationDto().setResultType(PrimitiveType.intType());
-        }
         if (chainAnalysis.getChain().getParentNode().isPresent()) {
             if (chainAnalysis.getChain().getParentNode().get().getParentNode()
                     .filter(parent -> parent instanceof VariableDeclarationExpr).isPresent()) {
@@ -52,6 +49,10 @@ public class TransformResultProc {
                 Type vdeType = vde.getCommonType();
                 return new ResultTransformationDto().setResultType(vdeType).setIsSpecifiedEntity(true);
             }
+        }
+
+        if (!chainAnalysis.isQueryOrUpdate()) {
+            return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsSpecifiedEntity(false);
         }
 
         Map<String, PropertyDto> properties = designMeta.getProperties();

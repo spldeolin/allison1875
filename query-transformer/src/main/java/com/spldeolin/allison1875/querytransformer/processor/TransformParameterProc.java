@@ -9,6 +9,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -47,7 +48,7 @@ public class TransformParameterProc {
         List<Parameter> params = Lists.newArrayList();
         boolean isJavabean = false;
 
-        Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
+        Set<PhraseDto> phrases = Sets.newHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
         if (phrases.size() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
