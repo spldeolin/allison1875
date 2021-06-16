@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -49,16 +50,27 @@ public class JsonSchemaTraverseUtilsTest {
             names.add(propertyName);
             paths.add(path);
 
-            System.out.println(path);
+            if (isArrayAndChildIsObject(jsonSchema) || isNotArray(jsonSchema)) {
+                System.out.println(path);
+            }
 
             if (jsonSchema instanceof ReferenceSchema) {
-//                System.out.println(path + "的数据结构与" + id2Path.get(jsonSchema.get$ref()) + "一致");
+                System.out.println(path + "的数据结构与" + id2Path.get(jsonSchema.get$ref()) + "一致");
             }
 
         });
 
         System.out.println(names);
         System.out.println(paths);
+    }
+
+    private static boolean isNotArray(JsonSchema jsonSchema) {
+        return !jsonSchema.isArraySchema();
+    }
+
+    private static boolean isArrayAndChildIsObject(JsonSchema jsonSchema) {
+        return jsonSchema.isArraySchema() && jsonSchema.asArraySchema().getItems().isSingleItems() && (jsonSchema
+                .asArraySchema().getItems().asSingleItems().getSchema()) instanceof ObjectSchema;
     }
 
 }

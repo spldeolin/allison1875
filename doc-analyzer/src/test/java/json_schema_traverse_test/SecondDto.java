@@ -18,7 +18,7 @@ public class SecondDto {
     private Integer age;
 
     @NotNull
-    private BigDecimal[][][][] salary;
+    private BigDecimal[] salary;
 
     private ThirdDto aaaa;
 

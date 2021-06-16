@@ -20,6 +20,6 @@ public class RootDto {
     private String name;
 
     @NotNull
-    private Collection<SecondDto>[] dtos;
+    private Collection<SecondDto> dtos;
 
 }
