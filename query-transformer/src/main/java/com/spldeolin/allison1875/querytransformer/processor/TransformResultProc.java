@@ -58,6 +58,7 @@ public class TransformResultProc {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
         Set<PhraseDto> phrases = chainAnalysis.getQueryPhrases();
+        log.info("queryPhrases.size()={}", chainAnalysis.getQueryPhrases().size());
         if (phrases.size() > 1) {
             // 指定了2个及以上属性，生成一个Javabean作为返回值类型
             JavabeanArg javabeanArg = new JavabeanArg();

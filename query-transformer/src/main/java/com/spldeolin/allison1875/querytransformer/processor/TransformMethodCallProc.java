@@ -36,6 +36,7 @@ public class TransformMethodCallProc {
             result += phrases.stream().map(p -> p.getObjectExpr().toString()).collect(Collectors.joining(", "));
         }
         result += ")";
+        log.info("Method Call built [{}]", result);
 
         return result;
     }
@@ -44,6 +45,7 @@ public class TransformMethodCallProc {
         if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
             return null;
         }
+        log.info("build Javabean setter call");
         String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
         StringBuilder result = new StringBuilder(

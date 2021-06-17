@@ -32,10 +32,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JavabeanFactory {
 
-    /**
-     * TODO JavabeanFactory#buildCu 如果absulutePath对应的文件已存在，需要在新的primaryType使用原有的Javadoc Author
-     * TODO JavabeanFactory#buildCu 如果absulutePath对应的文件已存在，需要打印field的变动点
-     */
     public static CompilationUnit buildCu(JavabeanArg javabeanArg) {
         CompilationUnit cu = new CompilationUnit();
         Path absulutePath = CodeGenerationUtils

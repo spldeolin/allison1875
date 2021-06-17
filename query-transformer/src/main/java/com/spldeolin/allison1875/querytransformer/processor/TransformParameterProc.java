@@ -41,7 +41,6 @@ public class TransformParameterProc {
     @Nullable
     public ParameterTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
-
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
         List<String> imports = Lists.newArrayList();
@@ -50,6 +49,7 @@ public class TransformParameterProc {
 
         Set<PhraseDto> phrases = Sets.newHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
+        log.info("phrases.size()={}", phrases.size());
         if (phrases.size() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
