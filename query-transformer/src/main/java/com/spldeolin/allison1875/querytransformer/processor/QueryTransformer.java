@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.HashUtil;
+import com.spldeolin.allison1875.base.util.HashUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
@@ -126,7 +126,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                             + "], this Design file need to regenerate");
         }
         TypeDeclaration<?> primaryType = designCu.getPrimaryType().get();
-        String hashing = HashUtil.md5(primaryType.toString());
+        String hashing = HashUtils.md5(primaryType.toString());
 
         if (!hashing.equals(hashcode)) {
             throw new IllegalChainException(

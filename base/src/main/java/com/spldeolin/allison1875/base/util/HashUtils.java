@@ -6,9 +6,9 @@ import com.google.common.hash.Hashing;
 /**
  * @author Deolin 2021-06-02
  */
-public class HashUtil {
+public class HashUtils {
 
-    private HashUtil() {
+    private HashUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

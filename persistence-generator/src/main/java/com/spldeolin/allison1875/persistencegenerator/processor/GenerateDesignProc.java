@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.HashUtil;
+import com.spldeolin.allison1875.base.util.HashUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -197,7 +197,7 @@ public class GenerateDesignProc {
         designCoid.addFieldWithInitializer("String", TokenWordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
-        cu.addOrphanComment(new LineComment(HashUtil.md5(designCoid.toString())));
+        cu.addOrphanComment(new LineComment(HashUtils.md5(designCoid.toString())));
 
         Saves.add(cu);
     }
