@@ -8,12 +8,12 @@ import com.google.common.base.Preconditions;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.GuiceUtils;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-06-15
  */
-@Slf4j
+@Log4j2
 public class Allison1875 {
 
     public static void allison1875(Class<?> primaryClass, Allison1875Component... allison1875Components) {

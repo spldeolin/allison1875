@@ -1,12 +1,12 @@
 package com.spldeolin.allison1875.base.ancestor.newedition;
 
 import com.google.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2021-06-15
  */
-@Slf4j
+@Log4j2
 public abstract class Allison1875Config extends Allison1875Component {
 
     @Override
