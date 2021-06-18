@@ -63,7 +63,7 @@ public class TransformResultProc {
             // 指定了2个及以上属性，生成一个Javabean作为返回值类型
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getMapperConditionQualifier());
+            javabeanArg.setPackageName(config.getMapperRecordQualifier());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
             List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {

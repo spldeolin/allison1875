@@ -192,7 +192,7 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
      * output:
      *  com.company.orginization.project.mapper
      *  com.company.orginization.project.entity
-     *  com.company.orginization.project.querydesign
+     *  com.company.orginization.project.design
      *
      *
      * e.g.2:
@@ -202,7 +202,7 @@ public final class PersistenceGeneratorConfig extends AbstractModule {
      * output:
      *  com.company.orginization.project.mapper.module.sub
      *  com.company.orginization.project.entity.module.sub
-     *  com.company.orginization.project.querydesign.module.sub
+     *  com.company.orginization.project.design.module.sub
      *
      * </pre>
      */

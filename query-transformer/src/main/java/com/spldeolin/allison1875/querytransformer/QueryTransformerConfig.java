@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.querytransformer;
 
-import java.util.Map;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import lombok.Data;
@@ -13,12 +11,6 @@ import lombok.Data;
 @Singleton
 @Data
 public final class QueryTransformerConfig extends AbstractModule {
-
-    /**
-     * Entity通用属性的类型
-     */
-    @NotNull
-    private Map<String, String> entityCommonPropertyTypes;
 
     /**
      * Entity父类的全限定名
@@ -36,6 +28,36 @@ public final class QueryTransformerConfig extends AbstractModule {
      */
     @NotEmpty
     private String mapperRecordQualifier;
+
+    /**
+     * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
+     *
+     * <pre>
+     * e.g.1:
+     * input:
+     *  com.company.orginization.project.-
+     *
+     * output:
+     *  com.company.orginization.project.cond
+     *  com.company.orginization.project.record
+     *
+     *
+     * e.g.2:
+     * input:
+     *  com.company.orginization.project.-.module.sub
+     *
+     * output:
+     *  com.company.orginization.project.cond.module.sub
+     *  com.company.orginization.project.record.module.sub
+     *
+     * </pre>
+     */
+    public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
+        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
+            this.mapperConditionQualifier = packageNameWithWildcard.replace(".-", ".cond");
+            this.mapperRecordQualifier = packageNameWithWildcard.replace(".-", ".record");
+        }
+    }
 
     @Override
     protected void configure() {
