@@ -19,7 +19,6 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
-import com.spldeolin.allison1875.docanalyzer.exception.YapiException;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespDto;
@@ -137,15 +136,6 @@ public class YApiSyncProc {
         return result;
     }
 
-    private void ensureSuccess(JsonNode respNode) {
-        if (respNode == null) {
-            throw new YapiException();
-        }
-        if (respNode.get("errcode").asInt() != 0 || respNode.get("data") == null) {
-            throw new YapiException(respNode.toString());
-        }
-    }
-
     private void deleteInterface(JsonNode jsonNode, Long recycleBinCatId) {
         if (recycleBinCatId.equals(jsonNode.get("catid").asLong())) {
             // 已在"回收站"分类中
@@ -154,7 +144,6 @@ public class YApiSyncProc {
         Long id = jsonNode.get("_id").asLong();
 
         JsonNode respNode = yApiOpenProc.getEndpoint(id);
-        ensureSuccess(respNode);
 
         Map<String, Object> body = Maps.newHashMap();
         body.put("id", id);
