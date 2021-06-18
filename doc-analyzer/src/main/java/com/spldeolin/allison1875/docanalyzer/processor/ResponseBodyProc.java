@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -9,10 +7,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.handle.ObtainConcernedResponseBodyHandle;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,20 +22,20 @@ import lombok.extern.log4j.Log4j2;
 public class ResponseBodyProc {
 
     @Inject
-    private ObtainConcernedResponseBodyHandle obtainConcernedResponseBodyHandle;
-
-    @Inject
     private EnumSchemaProc enumSchemaProc;
 
     @Inject
     private ReferenceSchemaProc referenceSchemaProc;
+
+    @Inject
+    private GetBodyResolvedTypeProc getBodyResolvedTypeProc;
 
 
     public JsonSchema analyze(JsonSchemaGenerator jsg, ClassOrInterfaceDeclaration controller,
             MethodDeclaration handler) {
         String responseBodyDescribe = null;
         try {
-            ResolvedType responseBody = findResponseBody(controller, handler);
+            ResolvedType responseBody = getBodyResolvedTypeProc.getResponseBody(controller, handler);
             if (responseBody != null) {
                 responseBodyDescribe = responseBody.describe();
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
@@ -53,25 +49,6 @@ public class ResponseBodyProc {
                     MethodQualifiers.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
         }
         return null;
-    }
-
-    /**
-     * 1. controller上没有声明@RestController且handler上没有声明@ResponseBody时，认为没有ResponseBody
-     * 2. 采用ConcernedResponseBodyTypeResolver提供的策略来获取ResponseBody
-     * 3. 发生任何异常时，都会认为没有ResponseBody
-     * 异常均会被log.error，除非目标项目源码更新后没有及时编译，否则不应该抛出异常
-     */
-    private ResolvedType findResponseBody(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        try {
-            if (Annotations.isAnnotationAbsent(controller, RestController.class) && Annotations
-                    .isAnnotationAbsent(handler, ResponseBody.class)) {
-                return null;
-            }
-            return obtainConcernedResponseBodyHandle.findConcernedResponseBodyType(handler);
-        } catch (Exception e) {
-            log.error(e);
-            return null;
-        }
     }
 
 }

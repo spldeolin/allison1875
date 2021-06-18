@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.handle.MoreAnalyzeHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
@@ -32,7 +33,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     private ListHandlersProc listHandlersProc;
 
     @Inject
-    private RequestMappingProc requestMappingProcessor;
+    private RequestMappingProc requestMappingProc;
 
     @Inject
     private CopyEndpointProc copyEndpointProc;
@@ -54,6 +55,9 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     @Inject
     private DocAnalyzerConfig config;
+
+    @Inject
+    private MoreAnalyzeHandle moreAnalyzeHandle;
 
     @Override
     public void process(AstForest astForest) {
@@ -90,7 +94,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
                         responseBodyProc.analyze(jsg, controller.getCoid(), handler.getMd()));
 
                 // 处理controller级与handler级的@RequestMapping
-                RequestMappingFullDto requestMappingFullDto = requestMappingProcessor
+                RequestMappingFullDto requestMappingFullDto = requestMappingProc
                         .analyze(controller.getReflection(), handler.getReflection(), config.getGlobalUrlPrefix());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
@@ -110,6 +114,9 @@ public class DocAnalyzer implements Allison1875MainProcessor {
             log.info("YApi sync failed.", e);
         }
         log.info(endpoints.size());
+
+        // 支持外部进行更多分析
+        moreAnalyzeHandle.analyze(handlers);
     }
 
 }

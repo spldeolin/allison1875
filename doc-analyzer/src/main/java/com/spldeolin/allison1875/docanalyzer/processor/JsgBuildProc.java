@@ -7,6 +7,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import javax.annotation.Nullable;
 import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -62,9 +63,14 @@ public class JsgBuildProc {
     @Inject
     private AccessDescriptionHandle accessDescriptionHandle;
 
-    public JsonSchemaGenerator analyzeAstAndBuildJsg(AstForest astForest) {
-        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = analyze(astForest);
-        astForest.reset();
+    public JsonSchemaGenerator analyzeAstAndBuildJsg(@Nullable AstForest astForest) {
+        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs;
+        if (astForest != null) {
+            jpdvs = analyze(astForest);
+            astForest.reset();
+        } else {
+            jpdvs = HashBasedTable.create();
+        }
 
         // 缺省配置
         ObjectMapper customOm = JsonUtils.createObjectMapper();
