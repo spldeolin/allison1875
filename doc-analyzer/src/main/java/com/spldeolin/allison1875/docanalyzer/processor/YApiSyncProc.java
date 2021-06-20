@@ -153,7 +153,7 @@ public class YApiSyncProc {
         body.put("tag", tags);
 
         String desc = "";
-        JsonNode descNode = respNode.get("data").get("desc");
+        JsonNode descNode = respNode.get("desc");
         if (descNode != null) {
             desc = descNode.asText();
         }
