@@ -138,7 +138,7 @@ public class ReqRespProc {
                 }
                 this.moveAnnotationsFromDtoToField(dto, fieldBuilder);
                 fieldBuilder.type(calcType(dto));
-                fieldBuilder.fieldName(MoreStringUtils.upperCamelToLowerCamel(dto.getNameAsString()));
+                fieldBuilder.fieldName(MoreStringUtils.lowerFirstLetter(dto.getNameAsString()));
                 parentCoid.replace(dto, fieldBuilder.build());
             }
         }
