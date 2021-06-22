@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
+import java.util.List;
 import com.github.javaparser.ast.type.Type;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -11,7 +12,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ResultTransformationDto {
 
-    private String oneImport;
+    private List<String> imports;
 
     private Type resultType;
 

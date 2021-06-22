@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
@@ -81,9 +82,11 @@ public class TransformResultProc {
             Saves.add(cu);
             TypeDeclaration<?> resultType = cu.getPrimaryType().orElseThrow(RuntimeException::new);
             ResultTransformationDto result = new ResultTransformationDto();
-            result.setOneImport(resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            result.setImports(
+                    Lists.newArrayList(resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
+                result.getImports().add(ImportConstants.LIST.getNameAsString());
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
             }
@@ -95,9 +98,10 @@ public class TransformResultProc {
             String propertyName = Iterables.getOnlyElement(phrases).getSubjectPropertyName();
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
             ResultTransformationDto result = new ResultTransformationDto();
-            result.setOneImport(javaType.getQualifier());
+            result.setImports(Lists.newArrayList(javaType.getQualifier()));
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
+                result.getImports().add(ImportConstants.LIST.getNameAsString());
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
             }
@@ -107,9 +111,10 @@ public class TransformResultProc {
         } else {
             // 没有指定属性，使用Entity作为返回值类型
             ResultTransformationDto result = new ResultTransformationDto();
-            result.setOneImport(designMeta.getEntityQualifier());
+            result.setImports(Lists.newArrayList(designMeta.getEntityQualifier()));
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
+                result.getImports().add(ImportConstants.LIST.getNameAsString());
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
             }

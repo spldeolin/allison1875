@@ -72,7 +72,11 @@ public class Saves {
             newCodeText = TokenRanges.getRawCode(cu);
         }
         for (Replace replace : replaces) {
-            newCodeText = newCodeText.replace(replace.getTarget(), replace.getReplacement());
+            if (replace.getTarget() == null) {
+                newCodeText = replace.getReplacement() + newCodeText;
+            } else {
+                newCodeText = newCodeText.replace(replace.getTarget(), replace.getReplacement());
+            }
         }
 
         rawReplaceBuffer.get().put(cu, newCodeText);

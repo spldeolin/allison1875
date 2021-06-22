@@ -1,6 +1,9 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -8,8 +11,10 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
@@ -34,7 +39,31 @@ public class ReplaceDesignProc {
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         List<Saves.Replace> replaces = Lists.newArrayList();
 
-        // ensure service import & autowired
+        // ensure import
+        chainAnalysis.getChain().findCompilationUnit().ifPresent(cu -> {
+            Set<String> imports = Sets.newHashSet();
+            if (parameterTransformation != null) {
+                imports.addAll(parameterTransformation.getImports());
+            }
+            imports.addAll(resultTransformation.getImports());
+            imports.add(designMeta.getEntityQualifier());
+            imports.add(designMeta.getMapperQualifier());
+            imports.add(AnnotationConstant.AUTOWIRED_QUALIFIER);
+            StringBuilder appendImports = new StringBuilder();
+            for (String anImport : imports) {
+                appendImports.append("import ").append(anImport).append(";\n");
+            }
+
+            Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
+            if (packageDeclaration.isPresent()) {
+                String packageCode = TokenRanges.getRawCode(packageDeclaration.get());
+                replaces.add(new Replace(packageCode, packageCode + "\n\n" + appendImports));
+            } else {
+                replaces.add(new Replace(null, appendImports.toString()));
+            }
+        });
+
+        // ensure autowired
         chainAnalysis.getChain().findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
             if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(designMeta.getMapperName())).isPresent()) {
                 List<FieldDeclaration> fields = service.getFields();

@@ -43,7 +43,8 @@ public class GenerateMethodXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         if (chainAnalysis.isQueryOrUpdate()) {
             // QUERY
-            String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
+            String startTag = this
+                    .concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -200,7 +201,7 @@ public class GenerateMethodXmlProc {
         return xmlLines;
     }
 
-    private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,
+    private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
@@ -209,7 +210,7 @@ public class GenerateMethodXmlProc {
         if (resultTransformation.getIsSpecifiedEntity()) {
             startTag += " resultMap='all'>";
         } else {
-            startTag += " resultType='" + resultTransformation.getOneImport() + "'>";
+            startTag += " resultType='" + designMeta.getEntityQualifier() + "'>";
         }
         return startTag;
     }

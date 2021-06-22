@@ -99,6 +99,8 @@ public class QueryTransformer implements Allison1875MainProcessor {
 
         if (detected == 0) {
             log.warn("no tables detect.");
+        } else {
+            log.info("# REMEBER REFORMAT CODE #");
         }
     }
 

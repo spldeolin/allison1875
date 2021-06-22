@@ -34,8 +34,8 @@ public class GenerateMethodSignatureProc {
             return;
         }
 
-        if (resultTransformation.getOneImport() != null) {
-            Imports.ensureImported(mapper, resultTransformation.getOneImport());
+        for (String anImport : resultTransformation.getImports()) {
+            Imports.ensureImported(mapper, anImport);
         }
         if (parameterTransformation != null) {
             for (String anImport : parameterTransformation.getImports()) {
