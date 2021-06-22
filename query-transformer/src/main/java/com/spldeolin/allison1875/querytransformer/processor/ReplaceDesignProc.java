@@ -61,7 +61,7 @@ public class ReplaceDesignProc {
         // overwirte methodCall
         String chainReplacement = transformMethodCallProc
                 .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
-        String chainExprReplacement = TokenRanges.getRawCode(chainExpr)
+        String chainExprReplacement = chainAnalysis.getIndent() + TokenRanges.getRawCode(chainExpr)
                 .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), chainReplacement);
 
         String argumentBuild = transformMethodCallProc.argumentBuild(chainAnalysis, parameterTransformation);

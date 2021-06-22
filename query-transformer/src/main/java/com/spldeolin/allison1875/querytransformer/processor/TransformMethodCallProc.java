@@ -45,18 +45,19 @@ public class TransformMethodCallProc {
         if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
             return null;
         }
+
         log.info("build Javabean setter call");
         String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
-        StringBuilder result = new StringBuilder(
-                String.format("%s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
+        StringBuilder result = new StringBuilder();
+        result.append(String.format("%s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
-            result.append("\n").append(javabeanVarName).append(".set")
+            result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")
                     .append(MoreStringUtils.upperFirstLetter(updatePhrase.getVarName())).append("(")
                     .append(updatePhrase.getObjectExpr()).append(");");
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
-            result.append("\n").append(javabeanVarName).append(".set")
+            result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")
                     .append(MoreStringUtils.upperFirstLetter(byPhrase.getVarName())).append("(")
                     .append(byPhrase.getObjectExpr()).append(");");
         }

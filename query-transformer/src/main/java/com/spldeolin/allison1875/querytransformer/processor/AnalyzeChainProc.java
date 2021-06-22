@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
@@ -93,6 +94,7 @@ public class AnalyzeChainProc {
         result.setOrderPhrases(orderPhrases);
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
+        result.setIndent(TokenRanges.getStartIndent(chain));
         return result;
     }
 

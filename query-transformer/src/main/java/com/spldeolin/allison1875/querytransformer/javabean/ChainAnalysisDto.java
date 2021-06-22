@@ -29,4 +29,6 @@ public class ChainAnalysisDto {
 
     private MethodCallExpr chain;
 
+    private String indent;
+
 }
