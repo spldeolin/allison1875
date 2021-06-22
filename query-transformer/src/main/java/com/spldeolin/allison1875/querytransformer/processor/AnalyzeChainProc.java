@@ -59,7 +59,9 @@ public class AnalyzeChainProc {
                 phrase.setSubjectPropertyName(fae.getNameAsString());
                 phrase.setVarName(sureNotToRepeat(fae.getNameAsString(), varNames, 1));
                 phrase.setPredicate(PredicateEnum.of(((MethodCallExpr) parent).getNameAsString()));
-                phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
+                if (((MethodCallExpr) parent).getArguments().size() > 0) {
+                    phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
+                }
                 byPhrases.add(phrase);
             }
             if (describe.startsWith(OrderChainPredicate.class.getName())) {

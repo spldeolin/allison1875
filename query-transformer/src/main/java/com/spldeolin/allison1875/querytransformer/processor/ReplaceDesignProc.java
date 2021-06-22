@@ -35,19 +35,25 @@ public class ReplaceDesignProc {
         List<Saves.Replace> replaces = Lists.newArrayList();
 
         // ensure service import & autowired
-        String autowiredField = String.format("@Autowired private %s %s;", designMeta.getMapperName(),
-                MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()));
         chainAnalysis.getChain().findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
             if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(designMeta.getMapperName())).isPresent()) {
                 List<FieldDeclaration> fields = service.getFields();
                 if (fields.size() > 0) {
                     String lastFieldCode = TokenRanges.getRawCode(Iterables.getLast(fields));
-                    replaces.add(new Replace(lastFieldCode, lastFieldCode + autowiredField));
+                    String indent = TokenRanges.getStartIndent(Iterables.getLast(fields));
+                    String autowiredField = String
+                            .format("@Autowired\n%sprivate %s %s;", indent, designMeta.getMapperName(),
+                                    MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()));
+                    replaces.add(new Replace(lastFieldCode, lastFieldCode + "\n\n" + indent + autowiredField));
                 } else {
                     List<MethodDeclaration> methods = service.getMethods();
                     if (methods.size() > 0) {
                         String firstMethodCode = TokenRanges.getRawCode(methods.get(0));
-                        replaces.add(new Replace(firstMethodCode, autowiredField + firstMethodCode));
+                        String indent = TokenRanges.getStartIndent(methods.get(0));
+                        String autowiredField = String
+                                .format("@Autowired\n%sprivate %s %s;", indent, designMeta.getMapperName(),
+                                        MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()));
+                        replaces.add(new Replace(firstMethodCode, autowiredField + "\n\n" + indent + firstMethodCode));
                     }
                 }
             }
@@ -61,12 +67,12 @@ public class ReplaceDesignProc {
         // overwirte methodCall
         String chainReplacement = transformMethodCallProc
                 .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
-        String chainExprReplacement = chainAnalysis.getIndent() + TokenRanges.getRawCode(chainExpr)
+        String chainExprReplacement = TokenRanges.getRawCode(chainExpr)
                 .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), chainReplacement);
 
         String argumentBuild = transformMethodCallProc.argumentBuild(chainAnalysis, parameterTransformation);
         if (argumentBuild != null) {
-            chainExprReplacement = argumentBuild + "\n" + chainExprReplacement;
+            chainExprReplacement = argumentBuild + "\n" + chainAnalysis.getIndent() + chainExprReplacement;
         }
 
         replaces.add(new Replace(TokenRanges.getRawCode(chainExpr), chainExprReplacement));
