@@ -23,6 +23,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
@@ -57,6 +58,9 @@ public class TransformParameterProc {
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
             List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {
+                if (phrase.getPredicate() == PredicateEnum.IS_NULL || phrase.getPredicate() == PredicateEnum.NOT_NULL) {
+                    continue;
+                }
                 String propertyName = phrase.getSubjectPropertyName();
                 String varName = sureNotToRepeat(propertyName, varNames, 1);
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();

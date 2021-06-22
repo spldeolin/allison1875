@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
@@ -57,6 +58,9 @@ public class TransformMethodCallProc {
                     .append(updatePhrase.getObjectExpr()).append(");");
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
+            if (byPhrase.getPredicate() == PredicateEnum.IS_NULL || byPhrase.getPredicate() == PredicateEnum.NOT_NULL) {
+                continue;
+            }
             result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")
                     .append(MoreStringUtils.upperFirstLetter(byPhrase.getVarName())).append("(")
                     .append(byPhrase.getObjectExpr()).append(");");
