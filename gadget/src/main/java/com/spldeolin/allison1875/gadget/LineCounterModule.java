@@ -1,24 +1,32 @@
 package com.spldeolin.allison1875.gadget;
 
-import java.util.Set;
-import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.gadget.processor.LineCounter;
+import lombok.ToString;
 
 /**
  * @author Deolin 2020-12-07
  */
-public class LineCounterModule extends Allison1875Module {
+@ToString
+public final class LineCounterModule extends Allison1875Module {
 
-    @Override
-    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
-        return LineCounter.class;
+    private final LineCounterConfig lineCounterConfig;
+
+    public LineCounterModule(LineCounterConfig lineCounterConfig) {
+        this.lineCounterConfig = lineCounterConfig;
     }
 
     @Override
-    protected Set<Class<?>> provideConfigTypes() {
-        return Sets.newHashSet(LineCounter.class);
+    protected void configure() {
+        ValidateUtils.ensureValid(lineCounterConfig);
+        bind(LineCounterConfig.class).toInstance(lineCounterConfig);
+    }
+
+    @Override
+    public Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+        return LineCounter.class;
     }
 
 }

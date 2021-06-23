@@ -2,8 +2,6 @@ package com.spldeolin.allison1875.inspector;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.valid.annotation.IsDirectory;
 import lombok.Data;
 
@@ -12,9 +10,8 @@ import lombok.Data;
  *
  * @author Deolin 2020-02-18
  */
-@Singleton
 @Data
-public final class InspectorConfig extends AbstractModule {
+public final class InspectorConfig {
 
     /**
      * 工程所在的Git本地仓库的路径
@@ -39,10 +36,5 @@ public final class InspectorConfig extends AbstractModule {
      */
     @IsDirectory
     private String lawlessDirectoryPath;
-
-    @Override
-    protected void configure() {
-        bind(InspectorConfig.class).toInstance(this);
-    }
 
 }

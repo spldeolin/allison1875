@@ -1,21 +1,13 @@
 package com.spldeolin.allison1875.querytransformer;
 
 import javax.validation.constraints.NotEmpty;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import lombok.Data;
 
 /**
  * @author Deolin 2020-08-09
  */
-@Singleton
 @Data
-public final class QueryTransformerConfig extends AbstractModule {
-
-    /**
-     * Entity父类的全限定名
-     */
-    private String superEntityQualifier;
+public final class QueryTransformerConfig {
 
     /**
      * Mapper方法签名中Condition类的路径
@@ -57,11 +49,6 @@ public final class QueryTransformerConfig extends AbstractModule {
             this.mapperConditionQualifier = packageNameWithWildcard.replace(".-", ".cond");
             this.mapperRecordQualifier = packageNameWithWildcard.replace(".-", ".record");
         }
-    }
-
-    @Override
-    protected void configure() {
-        bind(QueryTransformerConfig.class).toInstance(this);
     }
 
 }

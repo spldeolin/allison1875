@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer;
 
 import javax.validation.constraints.NotEmpty;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import lombok.Data;
 
 /**
@@ -10,9 +8,8 @@ import lombok.Data;
  *
  * @author Deolin 2020-08-25
  */
-@Singleton
 @Data
-public final class HandlerTransformerConfig extends AbstractModule {
+public final class HandlerTransformerConfig {
 
     /**
      * 控制层 @RequestBody类型所在包的包名
@@ -49,11 +46,6 @@ public final class HandlerTransformerConfig extends AbstractModule {
      */
     @NotEmpty
     private String pageTypeQualifier;
-
-    @Override
-    protected void configure() {
-        bind(HandlerTransformerConfig.class).toInstance(this);
-    }
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>

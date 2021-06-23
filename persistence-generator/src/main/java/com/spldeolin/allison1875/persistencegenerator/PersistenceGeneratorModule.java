@@ -1,28 +1,32 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
-import java.util.Set;
-import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
+import lombok.ToString;
 
 /**
  * @author Deolin 2020-12-08
  */
-public class PersistenceGeneratorModule extends Allison1875Module {
+@ToString
+public final class PersistenceGeneratorModule extends Allison1875Module {
+
+    private final PersistenceGeneratorConfig persistenceGeneratorConfig;
+
+    public PersistenceGeneratorModule(PersistenceGeneratorConfig persistenceGeneratorConfig) {
+        this.persistenceGeneratorConfig = persistenceGeneratorConfig;
+    }
 
     @Override
     protected void configure() {
+        ValidateUtils.ensureValid(persistenceGeneratorConfig);
+        bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
     }
 
     @Override
-    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+    public Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
         return PersistenceGenerator.class;
-    }
-
-    @Override
-    protected Set<Class<?>> provideConfigTypes() {
-        return Sets.newHashSet(PersistenceGeneratorConfig.class);
     }
 
 }

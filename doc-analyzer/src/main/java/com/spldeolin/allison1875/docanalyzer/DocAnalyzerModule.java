@@ -1,30 +1,32 @@
 package com.spldeolin.allison1875.docanalyzer;
 
-import java.util.Set;
-import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.docanalyzer.processor.DocAnalyzer;
-import lombok.extern.log4j.Log4j2;
+import lombok.ToString;
 
 /**
  * @author Deolin 2020-12-06
  */
-@Log4j2
-public class DocAnalyzerModule extends Allison1875Module {
+@ToString
+public final class DocAnalyzerModule extends Allison1875Module {
+
+    private final DocAnalyzerConfig docAnalyzerConfig;
+
+    public DocAnalyzerModule(DocAnalyzerConfig docAnalyzerConfig) {
+        this.docAnalyzerConfig = docAnalyzerConfig;
+    }
 
     @Override
     protected void configure() {
+        ValidateUtils.ensureValid(docAnalyzerConfig);
+        bind(DocAnalyzerConfig.class).toInstance(docAnalyzerConfig);
     }
 
     @Override
-    protected Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+    public Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
         return DocAnalyzer.class;
-    }
-
-    @Override
-    protected Set<Class<?>> provideConfigTypes() {
-        return Sets.newHashSet(DocAnalyzerConfig.class);
     }
 
 }

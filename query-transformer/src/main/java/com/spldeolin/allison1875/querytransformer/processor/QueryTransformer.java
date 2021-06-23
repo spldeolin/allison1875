@@ -47,9 +47,6 @@ public class QueryTransformer implements Allison1875MainProcessor {
     private GenerateMethodSignatureProc createMapperQueryMethodProc;
 
     @Inject
-    private FindEntityAndSuperEntityProc findEntityAndSuperEntityProc;
-
-    @Inject
     private TransformParameterProc transformParameterProc;
 
     @Inject
