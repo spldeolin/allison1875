@@ -14,6 +14,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class FileBackupUtils {
 
+    private FileBackupUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static void backup(File src) throws FileBackupException {
         String srcPath = src.getPath();
         String destPath = srcPath + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss") + ".bak";

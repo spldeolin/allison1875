@@ -14,6 +14,10 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
  */
 public class Imports {
 
+    private Imports() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static void ensureImported(Node node, String importName) {
         if (StringUtils.isEmpty(importName)) {
             return;

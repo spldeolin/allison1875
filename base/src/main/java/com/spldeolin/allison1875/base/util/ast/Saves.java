@@ -29,6 +29,10 @@ public class Saves {
     private static final ThreadLocal<Map<CompilationUnit, String>> rawReplaceBuffer = ThreadLocal
             .withInitial(Maps::newHashMap);
 
+    private Saves() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * 使用这种方式加入的CU对象在SaveAll时，会使用Javaparser的 Code Format
      */

@@ -5,6 +5,10 @@ package com.spldeolin.allison1875.base.util;
  */
 public class LoadClassUtils {
 
+    private LoadClassUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     /**
      * 使用参数classloader对参数name进行类加载
      *

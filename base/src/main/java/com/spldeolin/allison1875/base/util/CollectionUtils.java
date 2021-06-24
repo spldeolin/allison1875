@@ -7,6 +7,10 @@ import java.util.Collection;
  */
 public class CollectionUtils {
 
+    private CollectionUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
     }

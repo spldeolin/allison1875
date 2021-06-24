@@ -11,6 +11,10 @@ public class GuiceUtils {
 
     private static final ThreadLocal<Injector> injectorContext = new ThreadLocal<>();
 
+    private GuiceUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static Injector createInjector(Module... modules) {
         Injector injector = injectorContext.get();
         if (injector == null) {

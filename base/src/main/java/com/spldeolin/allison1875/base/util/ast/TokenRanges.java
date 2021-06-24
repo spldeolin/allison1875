@@ -10,6 +10,10 @@ import com.google.common.base.Strings;
  */
 public class TokenRanges {
 
+    private TokenRanges() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static String getRawCode(Node node) {
         return node.getTokenRange().orElseThrow(() -> new RuntimeException("Token Range absent")).toString();
     }

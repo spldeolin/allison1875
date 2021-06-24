@@ -16,6 +16,10 @@ public class ValidateUtils {
 
     public static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
+    private ValidateUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static <T> void ensureValid(T object) {
         Set<ConstraintViolation<T>> violations = VALIDATOR.validate(object);
         reportAndExit(violations);
