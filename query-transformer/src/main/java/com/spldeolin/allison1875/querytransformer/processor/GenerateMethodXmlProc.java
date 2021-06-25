@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.atteo.evo.inflector.English;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
@@ -43,8 +42,7 @@ public class GenerateMethodXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         if (chainAnalysis.isQueryOrUpdate()) {
             // QUERY
-            String startTag = this
-                    .concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+            String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -142,24 +140,22 @@ public class GenerateMethodXmlProc {
                         xmlLines.add(SINGLE_INDENT + "</if>");
                         break;
                     case IN:
-                        String pluralVarName = English.plural(varName);
-                        xmlLines.add(SINGLE_INDENT + "<if test=\"" + pluralVarName + " != null\">");
-                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + pluralVarName + ".size() > 0\">");
+                        xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
+                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
                         xmlLines.add(TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='"
-                                + pluralVarName + "' item='one' separator=','>#{one}</foreach>)");
+                                + varName + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
-                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + pluralVarName + ".size() == 0\">");
+                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
                         xmlLines.add(TREBLE_INDENT + "AND FALSE");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                         break;
                     case NOT_IN:
-                        pluralVarName = English.plural(varName);
                         xmlLines.add(SINGLE_INDENT + String
-                                .format("<if test=\"%s != null and %s.size() > 0\">", pluralVarName, pluralVarName));
+                                .format("<if test=\"%s != null and %s.size() > 0\">", varName, varName));
                         xmlLines.add(
                                 DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
-                                        + pluralVarName + "' item='one' separator=','>#{one}</foreach>)");
+                                        + varName + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                         break;
                     case GREATER_THEN:
@@ -201,16 +197,16 @@ public class GenerateMethodXmlProc {
         return xmlLines;
     }
 
-    private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
             startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
         }
-        if (resultTransformation.getIsSpecifiedEntity()) {
-            startTag += " resultMap='all'>";
+        if (resultTransformation.getJavabeanQualifier() != null) {
+            startTag += " resultType='" + resultTransformation.getJavabeanQualifier() + "'>";
         } else {
-            startTag += " resultType='" + designMeta.getEntityQualifier() + "'>";
+            startTag += " resultMap='all'>";
         }
         return startTag;
     }

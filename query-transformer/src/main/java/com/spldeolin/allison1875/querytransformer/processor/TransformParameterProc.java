@@ -48,7 +48,7 @@ public class TransformParameterProc {
         List<Parameter> params = Lists.newArrayList();
         boolean isJavabean = false;
 
-        Set<PhraseDto> phrases = Sets.newHashSet(chainAnalysis.getUpdatePhrases());
+        Set<PhraseDto> phrases = Sets.newLinkedHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
         log.info("phrases.size()={}", phrases.size());
         if (phrases.size() > 3) {
@@ -67,7 +67,11 @@ public class TransformParameterProc {
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
-                fieldArg.setTypeName(javaType.getSimpleName());
+                if (phrase.getPredicate() == PredicateEnum.IN || phrase.getPredicate() == PredicateEnum.NOT_IN) {
+                    fieldArg.setTypeName("Collection<" + javaType.getSimpleName() + ">");
+                } else {
+                    fieldArg.setTypeName(javaType.getSimpleName());
+                }
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
@@ -88,7 +92,11 @@ public class TransformParameterProc {
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 Parameter param = new Parameter();
                 param.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", varName)));
-                param.setType(javaType.getSimpleName());
+                if (phrase.getPredicate() == PredicateEnum.IN || phrase.getPredicate() == PredicateEnum.NOT_IN) {
+                    param.setType("Collection<" + javaType.getSimpleName() + ">");
+                } else {
+                    param.setType(javaType.getSimpleName());
+                }
                 param.setName(varName);
                 imports.add(javaType.getQualifier());
                 params.add(param);

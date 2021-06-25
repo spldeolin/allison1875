@@ -41,7 +41,7 @@ public class ReplaceDesignProc {
 
         // ensure import
         chainAnalysis.getChain().findCompilationUnit().ifPresent(cu -> {
-            Set<String> imports = Sets.newHashSet();
+            Set<String> imports = Sets.newLinkedHashSet();
             if (parameterTransformation != null) {
                 imports.addAll(parameterTransformation.getImports());
             }

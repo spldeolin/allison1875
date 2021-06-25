@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import com.github.javaparser.ast.type.Type;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,10 +14,13 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ResultTransformationDto {
 
-    private List<String> imports;
+    private List<String> imports = Lists.newArrayList();
 
     private Type resultType;
 
     private Boolean isSpecifiedEntity;
+
+    @Nullable
+    private String javabeanQualifier;
 
 }

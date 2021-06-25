@@ -42,18 +42,24 @@ public class TransformResultProc {
 
     public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
+        if (!chainAnalysis.isQueryOrUpdate()) {
+            return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsSpecifiedEntity(false);
+        }
+
         if (chainAnalysis.getChain().getParentNode().isPresent()) {
             if (chainAnalysis.getChain().getParentNode().get().getParentNode()
                     .filter(parent -> parent instanceof VariableDeclarationExpr).isPresent()) {
                 VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode().get()
                         .getParentNode().get();
                 Type vdeType = vde.getCommonType();
-                return new ResultTransformationDto().setResultType(vdeType).setIsSpecifiedEntity(true);
+                ResultTransformationDto result = new ResultTransformationDto().setResultType(vdeType)
+                        .setIsSpecifiedEntity(true);
+                result.getImports().add(designMeta.getEntityQualifier());
+                if (vdeType.toString().contains("List")) {
+                    result.getImports().add(ImportConstants.LIST.getNameAsString());
+                }
+                return result;
             }
-        }
-
-        if (!chainAnalysis.isQueryOrUpdate()) {
-            return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsSpecifiedEntity(false);
         }
 
         Map<String, PropertyDto> properties = designMeta.getProperties();
@@ -82,8 +88,8 @@ public class TransformResultProc {
             Saves.add(cu);
             TypeDeclaration<?> resultType = cu.getPrimaryType().orElseThrow(RuntimeException::new);
             ResultTransformationDto result = new ResultTransformationDto();
-            result.setImports(
-                    Lists.newArrayList(resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
+            result.setJavabeanQualifier(resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            result.getImports().add(result.getJavabeanQualifier());
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());

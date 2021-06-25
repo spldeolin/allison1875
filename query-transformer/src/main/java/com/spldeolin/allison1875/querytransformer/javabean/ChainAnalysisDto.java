@@ -19,13 +19,13 @@ public class ChainAnalysisDto {
 
     private boolean returnManyOrOne;
 
-    private Set<PhraseDto> queryPhrases = Sets.newHashSet();
+    private Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
 
-    private Set<PhraseDto> byPhrases = Sets.newHashSet();
+    private Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
 
-    private Set<PhraseDto> orderPhrases = Sets.newHashSet();
+    private Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
 
-    private Set<PhraseDto> updatePhrases = Sets.newHashSet();
+    private Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
 
     private MethodCallExpr chain;
 
