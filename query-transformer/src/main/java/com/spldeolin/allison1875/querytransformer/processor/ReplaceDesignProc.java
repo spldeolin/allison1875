@@ -93,17 +93,28 @@ public class ReplaceDesignProc {
         Expression chainExpr = exprStmt.getExpression();
         log.info("chainExpr={}", chainExpr);
 
-        // overwirte methodCall
-        String chainReplacement = transformMethodCallProc
-                .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
-        String chainExprReplacement = TokenRanges.getRawCode(chainExpr)
-                .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), chainReplacement);
+        // transform Method Call code
+        String methodCallCode = transformMethodCallProc.process(designMeta, chainAnalysis, parameterTransformation);
 
+        // transform Method Call and Assigned code
+        String chainExprReplacement;
+        if (resultTransformation.getIsAssigned()) {
+            // replace Method Call
+            chainExprReplacement = TokenRanges.getRawCode(chainExpr)
+                    .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), methodCallCode);
+        } else {
+            // concat Method Call with Assigned
+            chainExprReplacement = resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
+            chainExprReplacement += methodCallCode;
+        }
+
+        // transform Javabean augument build
         String argumentBuild = transformMethodCallProc.argumentBuild(chainAnalysis, parameterTransformation);
         if (argumentBuild != null) {
             chainExprReplacement = argumentBuild + "\n" + chainAnalysis.getIndent() + chainExprReplacement;
         }
 
+        // overwirte Chain Expression
         replaces.add(new Replace(TokenRanges.getRawCode(chainExpr), chainExprReplacement));
 
         return replaces;

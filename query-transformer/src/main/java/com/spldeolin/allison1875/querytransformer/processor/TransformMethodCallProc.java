@@ -9,7 +9,6 @@ import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -20,14 +19,10 @@ import lombok.extern.log4j.Log4j2;
 public class TransformMethodCallProc {
 
     public String process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
-        String result = "";
-        if (!resultTransformation.getIsSpecifiedEntity()) {
-            result += resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
-        }
-
-        result += MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
-                + "(";
+            ParameterTransformationDto parameterTransformation) {
+        String result =
+                MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
+                        + "(";
         if (parameterTransformation != null && parameterTransformation.getIsJavabean()) {
             result += MoreStringUtils
                     .lowerFirstLetter(parameterTransformation.getParameters().get(0).getTypeAsString());

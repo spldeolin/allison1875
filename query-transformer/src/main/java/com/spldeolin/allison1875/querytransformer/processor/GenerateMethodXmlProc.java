@@ -52,8 +52,11 @@ public class GenerateMethodXmlProc {
                 for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {
                     xmlLines.add(
                             DOUBLE_INDENT + MoreStringUtils.lowerCamelToUnderscore(queryPhrase.getSubjectPropertyName())
-                                    + " AS " + queryPhrase.getSubjectPropertyName());
+                                    + " AS " + queryPhrase.getSubjectPropertyName() + ",");
                 }
+                // 删除最后一个语句中，最后的逗号
+                int last = xmlLines.size() - 1;
+                xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
             }
             xmlLines.add(SINGLE_INDENT + "FROM");
             xmlLines.add(DOUBLE_INDENT + designMeta.getTableName());
@@ -131,7 +134,7 @@ public class GenerateMethodXmlProc {
                 switch (byPhrase.getPredicate()) {
                     case EQUALS:
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + " AND " + property.getColumnName() + " = " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " = " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                         break;
                     case NOT_EQUALS:
@@ -179,10 +182,10 @@ public class GenerateMethodXmlProc {
                         xmlLines.add(SINGLE_INDENT + "</if>");
                         break;
                     case NOT_NULL:
-                        xmlLines.add(SINGLE_INDENT + "AND " + property.getColumnName() + " IS NOT NULL");
+                        xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NOT NULL");
                         break;
                     case IS_NULL:
-                        xmlLines.add(SINGLE_INDENT + "AND " + property.getColumnName() + " IS NULL");
+                        xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NULL");
                         break;
                     case LIKE:
                         xmlLines.add(ifTag);

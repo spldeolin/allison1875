@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
@@ -15,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
+import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
@@ -42,24 +42,22 @@ public class TransformResultProc {
 
     public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
+        boolean isAssigned = isAssigned(chainAnalysis);
+
         if (!chainAnalysis.isQueryOrUpdate()) {
-            return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsSpecifiedEntity(false);
+            return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsAssigned(isAssigned);
         }
 
-        if (chainAnalysis.getChain().getParentNode().isPresent()) {
-            if (chainAnalysis.getChain().getParentNode().get().getParentNode()
-                    .filter(parent -> parent instanceof VariableDeclarationExpr).isPresent()) {
-                VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode().get()
-                        .getParentNode().get();
-                Type vdeType = vde.getCommonType();
-                ResultTransformationDto result = new ResultTransformationDto().setResultType(vdeType)
-                        .setIsSpecifiedEntity(true);
-                result.getImports().add(designMeta.getEntityQualifier());
-                if (vdeType.toString().contains("List")) {
-                    result.getImports().add(ImportConstants.LIST.getNameAsString());
-                }
-                return result;
+        if (isAssigned) {
+            VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode()
+                    .orElseThrow(ParentAbsentException::new).getParentNode().orElseThrow(ParentAbsentException::new);
+            Type vdeType = vde.getCommonType();
+            ResultTransformationDto result = new ResultTransformationDto().setResultType(vdeType).setIsAssigned(true);
+            result.getImports().add(designMeta.getEntityQualifier());
+            if (vdeType.toString().contains("List")) {
+                result.getImports().add(ImportConstants.LIST.getNameAsString());
             }
+            return result;
         }
 
         Map<String, PropertyDto> properties = designMeta.getProperties();
@@ -72,10 +70,9 @@ public class TransformResultProc {
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperRecordQualifier());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
-            List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
-                String varName = sureNotToRepeat(propertyName, varNames, 1);
+                String varName = propertyName;
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
@@ -96,7 +93,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
             }
-            result.setIsSpecifiedEntity(false);
+            result.setIsAssigned(false);
             return result;
 
         } else if (phrases.size() == 1) {
@@ -111,7 +108,7 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
             }
-            result.setIsSpecifiedEntity(false);
+            result.setIsAssigned(false);
             return result;
 
         } else {
@@ -124,18 +121,17 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
             }
-            result.setIsSpecifiedEntity(false);
+            result.setIsAssigned(false);
             return result;
         }
     }
 
-    private String sureNotToRepeat(String name, List<String> names, int index) {
-        if (!names.contains(name)) {
-            names.add(name);
-            return name;
+    private boolean isAssigned(ChainAnalysisDto chainAnalysis) {
+        if (chainAnalysis.getChain().getParentNode().isPresent()) {
+            return chainAnalysis.getChain().getParentNode().get().getParentNode()
+                    .filter(parent -> parent instanceof VariableDeclarationExpr).isPresent();
         }
-        index++;
-        return this.sureNotToRepeat(name + index, names, index);
+        return false;
     }
 
 }

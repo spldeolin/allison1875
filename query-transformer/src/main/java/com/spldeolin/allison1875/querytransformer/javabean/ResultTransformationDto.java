@@ -18,7 +18,7 @@ public class ResultTransformationDto {
 
     private Type resultType;
 
-    private Boolean isSpecifiedEntity;
+    private Boolean isAssigned;
 
     @Nullable
     private String javabeanQualifier;

@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
@@ -56,13 +57,12 @@ public class TransformParameterProc {
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionQualifier());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
-            List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {
                 if (phrase.getPredicate() == PredicateEnum.IS_NULL || phrase.getPredicate() == PredicateEnum.NOT_NULL) {
                     continue;
                 }
                 String propertyName = phrase.getSubjectPropertyName();
-                String varName = sureNotToRepeat(propertyName, varNames, 1);
+                String varName = phrase.getVarName();
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
@@ -83,12 +83,15 @@ public class TransformParameterProc {
             param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));
             params.add(param);
             imports.add(cond.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            if (phrases.stream().anyMatch(phrase -> phrase.getPredicate() == PredicateEnum.IN
+                    || phrase.getPredicate() == PredicateEnum.NOT_IN)) {
+                imports.add(ImportConstants.COLLECTION.getNameAsString());
+            }
             isJavabean = true;
         } else if (phrases.size() > 0) {
-            List<String> varNames = Lists.newArrayList();
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
-                String varName = sureNotToRepeat(propertyName, varNames, 1);
+                String varName = phrase.getVarName();
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 Parameter param = new Parameter();
                 param.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", varName)));
@@ -106,15 +109,6 @@ public class TransformParameterProc {
         }
 
         return new ParameterTransformationDto().setImports(imports).setParameters(params).setIsJavabean(isJavabean);
-    }
-
-    private String sureNotToRepeat(String name, List<String> names, int index) {
-        if (!names.contains(name)) {
-            names.add(name);
-            return name;
-        }
-        index++;
-        return this.sureNotToRepeat(name + index, names, index);
     }
 
 }

@@ -57,8 +57,10 @@ public class AnalyzeChainProc {
                 Node parent = fae.getParentNode().get();
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
-                phrase.setVarName(sureNotToRepeat(fae.getNameAsString(), varNames, 1));
                 phrase.setPredicate(PredicateEnum.of(((MethodCallExpr) parent).getNameAsString()));
+                if (phrase.getPredicate() != PredicateEnum.IS_NULL && phrase.getPredicate() != PredicateEnum.NOT_NULL) {
+                    phrase.setVarName(ensureNoRepeation(fae.getNameAsString(), varNames));
+                }
                 if (((MethodCallExpr) parent).getArguments().size() > 0) {
                     phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
                 }
@@ -77,7 +79,7 @@ public class AnalyzeChainProc {
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());
-                phrase.setVarName(sureNotToRepeat(mce.getNameAsString(), varNames, 1));
+                phrase.setVarName(ensureNoRepeation(mce.getNameAsString(), varNames));
                 phrase.setObjectExpr(mce.getArgument(0));
                 updatePhrases.add(phrase);
             }
@@ -100,13 +102,20 @@ public class AnalyzeChainProc {
         return result;
     }
 
-    private String sureNotToRepeat(String name, List<String> names, int index) {
+    private String ensureNoRepeation(String name, List<String> names) {
         if (!names.contains(name)) {
             names.add(name);
             return name;
         }
-        index++;
-        return this.sureNotToRepeat(name + index, names, index);
+        return ensureNoRepeation(name, names, 2);
+    }
+
+    private String ensureNoRepeation(String name, List<String> names, int index) {
+        if (!names.contains(name + index)) {
+            names.add(name + index);
+            return name + index;
+        }
+        return this.ensureNoRepeation(name, names, index + 1);
     }
 
 }
