@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.base.factory.javabean;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import com.github.javaparser.ast.CompilationUnit;
@@ -29,10 +30,11 @@ public class JavabeanArg {
 
     private String description;
 
-    private String authorName;
+    @NotBlank
+    private String authorName = "Allison 1875";
 
     @NotNull
-    private List<FieldArg> fieldArgs = Lists.newArrayList();
+    private List<@NotNull @Valid FieldArg> fieldArgs = Lists.newArrayList();
 
     private BiConsumer<CompilationUnit, ClassOrInterfaceDeclaration> more4Javabean;
 

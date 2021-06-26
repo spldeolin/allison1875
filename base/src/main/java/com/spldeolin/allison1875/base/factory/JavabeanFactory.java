@@ -24,6 +24,7 @@ import com.google.common.collect.Sets.SetView;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.util.ValidateUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -33,6 +34,8 @@ import lombok.extern.log4j.Log4j2;
 public class JavabeanFactory {
 
     public static CompilationUnit buildCu(JavabeanArg javabeanArg) {
+        ValidateUtils.ensureValid(javabeanArg);
+
         CompilationUnit cu = new CompilationUnit();
         Path absulutePath = CodeGenerationUtils
                 .fileInPackageAbsolutePath(javabeanArg.getAstForest().getPrimaryJavaRoot(),
