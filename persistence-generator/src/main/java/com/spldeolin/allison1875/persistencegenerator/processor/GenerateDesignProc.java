@@ -123,7 +123,7 @@ public class GenerateDesignProc {
                     "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getSimpleName()
                             + " " + property.getPropertyName() + ");"));
         }
-        nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("void over();"));
+        nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
         nextableUpdateChainCoid
                 .addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
         designCoid.addMember(nextableUpdateChainCoid);
