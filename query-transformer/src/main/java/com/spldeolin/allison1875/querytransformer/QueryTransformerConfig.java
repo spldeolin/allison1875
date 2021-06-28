@@ -10,16 +10,16 @@ import lombok.Data;
 public final class QueryTransformerConfig {
 
     /**
-     * Mapper方法签名中Condition类的路径
+     * Mapper方法签名中Condition类的包名
      */
     @NotEmpty
-    private String mapperConditionQualifier;
+    private String mapperConditionPackage;
 
     /**
-     * Mapper方法签名中Record类的路径
+     * Mapper方法签名中Record类的包名
      */
     @NotEmpty
-    private String mapperRecordQualifier;
+    private String mapperRecordPackage;
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
@@ -46,8 +46,8 @@ public final class QueryTransformerConfig {
      */
     public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
         if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
-            this.mapperConditionQualifier = packageNameWithWildcard.replace(".-", ".cond");
-            this.mapperRecordQualifier = packageNameWithWildcard.replace(".-", ".record");
+            this.mapperConditionPackage = packageNameWithWildcard.replace(".-", ".cond");
+            this.mapperRecordPackage = packageNameWithWildcard.replace(".-", ".record");
         }
     }
 
