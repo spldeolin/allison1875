@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.base.json;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -14,10 +14,9 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import com.spldeolin.allison1875.base.util.CollectionUtils;
 
 
-public class IgnoreCollectionNullElementDeserializeModule extends SimpleModule {
+public class IgnoreNullElementDeserializeModule extends SimpleModule {
 
     private static class CustomizedCollectionDeserializer extends CollectionDeserializer {
 
@@ -30,15 +29,10 @@ public class IgnoreCollectionNullElementDeserializeModule extends SimpleModule {
         @Override
         public Collection<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
             Collection<Object> oldCol = super.deserialize(jp, ctxt);
-            Collection<Object> newCol = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(oldCol)) {
-                for (Object obj : oldCol) {
-                    if (obj != null) {
-                        newCol.add(obj);
-                    }
-                }
+            if (oldCol != null) {
+                oldCol.removeIf(Objects::isNull);
             }
-            return newCol;
+            return oldCol;
         }
 
         @Override
