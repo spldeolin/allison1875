@@ -50,7 +50,7 @@ public class GenerateMethodSignatureProc {
             method.setParameters(new NodeList<>(parameterTransformation.getParameters()));
         }
         method.setBody(null);
-        mapper.getMembers().add(0, method);
+        mapper.getMembers().add(method);
         Saves.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
     }
 
