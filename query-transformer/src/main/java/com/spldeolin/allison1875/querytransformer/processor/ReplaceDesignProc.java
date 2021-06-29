@@ -104,7 +104,13 @@ public class ReplaceDesignProc {
                     .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), methodCallCode);
         } else {
             // concat Method Call with Assigned
-            chainExprReplacement = resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
+            if (chainAnalysis.isQueryOrUpdate()) {
+                chainExprReplacement =
+                        resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
+            } else {
+                chainExprReplacement =
+                        resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + "Count = ";
+            }
             chainExprReplacement += methodCallCode;
         }
 
