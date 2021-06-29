@@ -76,6 +76,10 @@ public class TransformParameterProc {
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
+            if (phrases.stream().anyMatch(phrase -> phrase.getPredicate() == PredicateEnum.IN
+                    || phrase.getPredicate() == PredicateEnum.NOT_IN)) {
+                cu.addImport(ImportConstants.COLLECTION);
+            }
             Saves.add(cu);
             TypeDeclaration<?> cond = cu.getPrimaryType().orElseThrow(RuntimeException::new);
             Parameter param = new Parameter();
