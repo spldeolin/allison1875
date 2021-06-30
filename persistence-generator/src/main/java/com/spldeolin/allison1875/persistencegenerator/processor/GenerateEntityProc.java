@@ -45,6 +45,7 @@ public class GenerateEntityProc {
                 cu.getImports().removeIf(ipt -> ipt.getNameAsString().equals(AnnotationConstant.ACCESSORS_QUALIFIER));
                 String superEntityName = superEntityQualifier.substring(superEntityQualifier.lastIndexOf('.') + 1);
                 javabean.addExtendedType(superEntityName);
+                javabean.addImplementedType("Cloneable");
                 javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
             }
