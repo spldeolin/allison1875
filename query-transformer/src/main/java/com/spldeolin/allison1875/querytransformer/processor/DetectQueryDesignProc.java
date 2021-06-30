@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -13,8 +13,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class DetectQueryDesignProc {
 
-    public Collection<MethodCallExpr> process(CompilationUnit cu) {
-        Collection<MethodCallExpr> mces = Lists.newArrayList();
+    public List<MethodCallExpr> process(CompilationUnit cu) {
+        List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {
             if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over") && mce.getParentNode()
                     .isPresent()) {

@@ -1,6 +1,9 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import org.apache.commons.lang3.tuple.Triple;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -11,6 +14,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -56,18 +60,34 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Inject
     private ReplaceDesignProc replaceDesignProc;
 
+    @Inject
+    private AppendAutowiredMapperProc appendAutowiredMapperProc;
+
     @Override
     public void process(AstForest astForest) {
         int detected = 0;
         for (CompilationUnit cu : astForest) {
-            List<Saves.Replace> replaces = Lists.newArrayList();
-            for (MethodCallExpr chain : detectQueryDesignProc.process(cu)) {
+            Collection<Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta>> chain2DesignMeta = Lists
+                    .newArrayList();
+            List<Replace> replaces = Lists.newArrayList();
+
+            List<MethodCallExpr> chains = detectQueryDesignProc.process(cu);
+            Set<String> autowiredMappers = Sets.newHashSet();
+            for (MethodCallExpr chain : chains) {
                 ClassOrInterfaceDeclaration design = findDesign(astForest, chain);
                 if (design == null) {
                     continue;
                 }
-
                 DesignMeta designMeta = parseDesignMeta(design);
+                chain2DesignMeta.add(Triple.of(chain, design, designMeta));
+
+                appendAutowiredMapperProc.append(autowiredMappers, replaces, chain, designMeta);
+            }
+
+            for (Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta> triple : chain2DesignMeta) {
+                MethodCallExpr chain = triple.getLeft();
+                ClassOrInterfaceDeclaration design = triple.getMiddle();
+                DesignMeta designMeta = triple.getRight();
 
                 ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design);
 
@@ -92,19 +112,9 @@ public class QueryTransformer implements Allison1875MainProcessor {
                         .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation));
 
                 detected++;
+                Saves.add(cu, replaces);
+                Saves.saveAll();
             }
-
-            List<Replace> distinctReplaces = Lists.newArrayList();
-            for (Replace replace : replaces) {
-                for (Replace distinctReplace : distinctReplaces) {
-                    if (!distinctReplace.getReplacement().trim().startsWith("@Autowired") || !distinctReplace
-                            .getReplacement().equals(replace.getReplacement())) {
-                        distinctReplaces.add(replace);
-                    }
-                }
-            }
-            Saves.add(cu, distinctReplaces);
-            Saves.saveAll();
         }
 
         if (detected == 0) {
