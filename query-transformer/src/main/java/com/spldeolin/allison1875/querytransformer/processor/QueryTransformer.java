@@ -10,15 +10,16 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.HashUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
@@ -58,40 +59,52 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Override
     public void process(AstForest astForest) {
         int detected = 0;
-        for (MethodCallExpr chain : detectQueryDesignProc.process(astForest)) {
-            ClassOrInterfaceDeclaration design = findDesign(astForest, chain);
-            if (design == null) {
-                continue;
+        for (CompilationUnit cu : astForest) {
+            List<Saves.Replace> replaces = Lists.newArrayList();
+            for (MethodCallExpr chain : detectQueryDesignProc.process(cu)) {
+                ClassOrInterfaceDeclaration design = findDesign(astForest, chain);
+                if (design == null) {
+                    continue;
+                }
+
+                DesignMeta designMeta = parseDesignMeta(design);
+
+                ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design);
+
+                // transform Parameter
+                ParameterTransformationDto parameterTransformation = transformParameterProc
+                        .transform(chainAnalysis, designMeta, astForest);
+
+                // transform Result Type
+                ResultTransformationDto resultTransformation = transformResultProc
+                        .transform(chainAnalysis, designMeta, astForest);
+
+                // create Method in Mapper
+                createMapperQueryMethodProc
+                        .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+
+                // create Method in mapper.xml
+                generateMapperXmlQueryMethodProc
+                        .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+
+                // transform Method Call and replace Design
+                replaces.addAll(replaceDesignProc
+                        .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation));
+
+                detected++;
             }
 
-            DesignMeta designMeta = parseDesignMeta(design);
-
-            ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design);
-
-            // transform Parameter
-            ParameterTransformationDto parameterTransformation = transformParameterProc
-                    .transform(chainAnalysis, designMeta, astForest);
-
-            // transform Result Type
-            ResultTransformationDto resultTransformation = transformResultProc
-                    .transform(chainAnalysis, designMeta, astForest);
-
-            // create Method in Mapper
-            createMapperQueryMethodProc
-                    .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
-
-            // create Method in mapper.xml
-            generateMapperXmlQueryMethodProc
-                    .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
-
-            // transform Method Call and replace Design
-            List<Saves.Replace> replaces = replaceDesignProc
-                    .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
-
-            // save
-            Saves.add(chain.findCompilationUnit().orElseThrow(CuAbsentException::new), replaces);
+            List<Replace> distinctReplaces = Lists.newArrayList();
+            for (Replace replace : replaces) {
+                for (Replace distinctReplace : distinctReplaces) {
+                    if (!distinctReplace.getReplacement().trim().startsWith("@Autowired") || !distinctReplace
+                            .getReplacement().equals(replace.getReplacement())) {
+                        distinctReplaces.add(replace);
+                    }
+                }
+            }
+            Saves.add(cu, distinctReplaces);
             Saves.saveAll();
-            detected++;
         }
 
         if (detected == 0) {
