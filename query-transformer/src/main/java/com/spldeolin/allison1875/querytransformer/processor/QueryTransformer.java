@@ -67,10 +67,13 @@ public class QueryTransformer implements Allison1875MainProcessor {
     public void process(AstForest astForest) {
         int detected = 0;
         for (CompilationUnit cu : astForest) {
-            Collection<Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta>> chain2DesignMeta = Lists
-                    .newArrayList();
+
+            // collect replace codes
             List<Replace> replaces = Lists.newArrayList();
 
+            // append needed mapper
+            Collection<Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta>> chain2DesignMeta = Lists
+                    .newArrayList();
             List<MethodCallExpr> chains = detectQueryDesignProc.process(cu);
             Set<String> autowiredMappers = Sets.newHashSet();
             for (MethodCallExpr chain : chains) {
@@ -84,6 +87,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                 appendAutowiredMapperProc.append(autowiredMappers, replaces, chain, designMeta);
             }
 
+            // resolve chain
             for (Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta> triple : chain2DesignMeta) {
                 MethodCallExpr chain = triple.getLeft();
                 ClassOrInterfaceDeclaration design = triple.getMiddle();
