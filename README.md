@@ -12,7 +12,7 @@ It enable developers get better programming experience and higher productivity w
 
 - *Spring Web MVC* oriented web API document generator
 - Inspection extensible source code inspector
-- Boilerplate code generator
+- Boilerplate code generator and transformer
 
 ## Contribution
 
