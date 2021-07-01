@@ -143,7 +143,7 @@ public class HandlerTransformer implements Allison1875MainProcessor {
         }
 
         if (detectCount == 0) {
-            log.warn("no Initializer detect.");
+            log.warn("no Initializer detected");
         }
     }
 

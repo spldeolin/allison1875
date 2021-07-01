@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -48,6 +49,8 @@ public class GenerateEntityProc {
                 javabean.addImplementedType("Cloneable");
                 javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
+                javabean.addMember(StaticJavaParser.parseBodyDeclaration(
+                        "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));
             }
         });
         for (PropertyDto property : persistence.getProperties()) {

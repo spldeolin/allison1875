@@ -77,6 +77,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                     designMeta = designProc.parseDesignMeta(design);
                 } catch (IllegalDesignException e) {
                     log.error("illegal design: " + e.getMessage());
+                    detected++;
                     continue;
                 }
                 chain2DesignMeta.add(Triple.of(chain, design, designMeta));
@@ -119,7 +120,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
         }
 
         if (detected == 0) {
-            log.warn("no tables detect.");
+            log.warn("no Chain detected");
         } else {
             log.info("# REMEBER REFORMAT CODE #");
         }
