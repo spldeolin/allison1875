@@ -35,8 +35,12 @@ public class Allison1875 {
 
         // launch main proecssors
         AstForest astForest = new AstForest(primaryClass, false);
-        for (Allison1875Module allison1875Module : allison1875Modules) {
-            injector.getInstance(allison1875Module.provideMainProcessorType()).process(astForest.reset());
+        for (int i = 0; i < allison1875Modules.length; i++) {
+            Allison1875Module allison1875Module = allison1875Modules[i];
+            if (i > 0) {
+                astForest.reset();
+            }
+            injector.getInstance(allison1875Module.provideMainProcessorType()).process(astForest);
         }
     }
 
