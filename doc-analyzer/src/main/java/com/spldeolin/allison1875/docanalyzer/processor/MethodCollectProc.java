@@ -6,7 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 内聚了 收集coid下所有method的功能
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2020-06-10
  */
 @Singleton
-@Slf4j
+@Log4j2
 public class MethodCollectProc {
 
     public Map<String, MethodDeclaration> collectMethods(ClassOrInterfaceDeclaration coid) {
