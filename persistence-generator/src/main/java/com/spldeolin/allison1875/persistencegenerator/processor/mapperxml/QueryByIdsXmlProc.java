@@ -25,6 +25,9 @@ public class QueryByIdsXmlProc {
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     public Collection<String> process(PersistenceDto persistence, String methodName) {
+        if (methodName == null) {
+            return null;
+        }
         List<String> xmlLines = Lists.newArrayList();
         if (persistence.getIdProperties().size() == 1) {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
