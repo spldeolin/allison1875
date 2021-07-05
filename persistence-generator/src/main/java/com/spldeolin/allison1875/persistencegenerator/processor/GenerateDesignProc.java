@@ -86,6 +86,8 @@ public class GenerateDesignProc {
                 StaticJavaParser.parseBodyDeclaration("public static QueryChain query(String methodName) {throw e;}"));
         designCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public static UpdateChain update(String methodName) {throw e;}"));
+        designCoid.addMember(
+                StaticJavaParser.parseBodyDeclaration("public static UpdateChain drop(String methodName) {throw e;}"));
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
@@ -117,6 +119,12 @@ public class GenerateDesignProc {
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(updateChainCoid);
+
+        ClassOrInterfaceDeclaration dropChainCoid = new ClassOrInterfaceDeclaration();
+        dropChainCoid.setPublic(true).setInterface(true).setName("DropChain");
+        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
+        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
+        designCoid.addMember(dropChainCoid);
 
         ClassOrInterfaceDeclaration nextableUpdateChainCoid = new ClassOrInterfaceDeclaration();
         nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain");
