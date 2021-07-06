@@ -41,6 +41,7 @@ public class GenerateMethodXmlProc {
                 .resolve(designMeta.getMapperRelativePath()).toFile();
 
         List<String> xmlLines = Lists.newArrayList();
+        xmlLines.add("");
         if (chainAnalysis.isQueryOrUpdate()) {
             // QUERY
             String startTag = this
