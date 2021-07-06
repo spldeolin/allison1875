@@ -29,7 +29,9 @@ public class TransformMethodCallProc {
         } else {
             Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
             phrases.addAll(chainAnalysis.getByPhrases());
-            result += phrases.stream().map(p -> p.getObjectExpr().toString()).collect(Collectors.joining(", "));
+            result += phrases.stream().filter(p -> p.getPredicate() != PredicateEnum.IS_NULL
+                    && p.getPredicate() != PredicateEnum.NOT_NULL).map(p -> p.getObjectExpr().toString())
+                    .collect(Collectors.joining(", "));
         }
         result += ")";
         log.info("Method Call built [{}]", result);

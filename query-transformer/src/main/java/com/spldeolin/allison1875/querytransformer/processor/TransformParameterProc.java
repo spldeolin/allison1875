@@ -52,7 +52,9 @@ public class TransformParameterProc {
         Set<PhraseDto> phrases = Sets.newLinkedHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
         log.info("phrases.size()={}", phrases.size());
-        if (phrases.size() > 3) {
+        if (phrases.stream()
+                .filter(p -> p.getPredicate() != PredicateEnum.NOT_NULL && p.getPredicate() != PredicateEnum.IS_NULL)
+                .count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionPackage());
@@ -94,6 +96,9 @@ public class TransformParameterProc {
             isJavabean = true;
         } else if (phrases.size() > 0) {
             for (PhraseDto phrase : phrases) {
+                if (phrase.getPredicate() == PredicateEnum.IS_NULL || phrase.getPredicate() == PredicateEnum.NOT_NULL) {
+                    continue;
+                }
                 String propertyName = phrase.getSubjectPropertyName();
                 String varName = phrase.getVarName();
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();

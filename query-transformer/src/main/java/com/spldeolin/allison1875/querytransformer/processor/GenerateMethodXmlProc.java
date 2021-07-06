@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -40,9 +41,11 @@ public class GenerateMethodXmlProc {
                 .resolve(designMeta.getMapperRelativePath()).toFile();
 
         List<String> xmlLines = Lists.newArrayList();
+        xmlLines.add("");
         if (chainAnalysis.isQueryOrUpdate()) {
             // QUERY
-            String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
+            String startTag = this
+                    .concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -200,7 +203,7 @@ public class GenerateMethodXmlProc {
         return xmlLines;
     }
 
-    private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,
+    private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
@@ -208,6 +211,11 @@ public class GenerateMethodXmlProc {
         }
         if (resultTransformation.getJavabeanQualifier() != null) {
             startTag += " resultType='" + resultTransformation.getJavabeanQualifier() + "'>";
+        } else if (chainAnalysis.getQueryPhrases().size() == 1) {
+            String resultTypeQ = designMeta.getProperties()
+                    .get(Iterables.getOnlyElement(chainAnalysis.getQueryPhrases()).getSubjectPropertyName())
+                    .getJavaType().getQualifier();
+            startTag += " resultType='" + resultTypeQ + "'>";
         } else {
             startTag += " resultMap='all'>";
         }
