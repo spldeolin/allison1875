@@ -94,6 +94,9 @@ public class TransformParameterProc {
             isJavabean = true;
         } else if (phrases.size() > 0) {
             for (PhraseDto phrase : phrases) {
+                if (phrase.getPredicate() == PredicateEnum.IS_NULL || phrase.getPredicate() == PredicateEnum.NOT_NULL) {
+                    continue;
+                }
                 String propertyName = phrase.getSubjectPropertyName();
                 String varName = phrase.getVarName();
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
