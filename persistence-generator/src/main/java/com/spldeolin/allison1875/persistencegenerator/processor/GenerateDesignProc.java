@@ -87,7 +87,7 @@ public class GenerateDesignProc {
         designCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public static UpdateChain update(String methodName) {throw e;}"));
         designCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration("public static UpdateChain drop(String methodName) {throw e;}"));
+                StaticJavaParser.parseBodyDeclaration("public static DropChain drop(String methodName) {throw e;}"));
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
