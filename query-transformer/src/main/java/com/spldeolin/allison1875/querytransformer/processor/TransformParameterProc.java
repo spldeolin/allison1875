@@ -52,7 +52,9 @@ public class TransformParameterProc {
         Set<PhraseDto> phrases = Sets.newLinkedHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
         log.info("phrases.size()={}", phrases.size());
-        if (phrases.size() > 3) {
+        if (phrases.stream()
+                .filter(p -> p.getPredicate() != PredicateEnum.NOT_NULL && p.getPredicate() != PredicateEnum.IS_NULL)
+                .count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionPackage());
