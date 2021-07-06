@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
+import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
@@ -41,9 +42,18 @@ public class AnalyzeChainProc {
         String methodName = queryMce.getArguments().get(0).asStringLiteralExpr().getValue();
         log.info("methodName={}", methodName);
 
-        boolean queryOrUpdate = betweenCode.startsWith("query(");
+        ChainMethodEnum chainMethod;
+        if (betweenCode.startsWith("query(")) {
+            chainMethod = ChainMethodEnum.query;
+        } else if (betweenCode.startsWith("update(")) {
+            chainMethod = ChainMethodEnum.update;
+        } else if (betweenCode.startsWith("drop(")) {
+            chainMethod = ChainMethodEnum.drop;
+        } else {
+            throw new IllegalChainException("chainMethod is none of query, update or drop");
+        }
         boolean returnManyOrOne = chainCode.endsWith("many()");
-        log.info("queryOrUpdate={} returnManyOrOne={}", queryOrUpdate, returnManyOrOne);
+        log.info("chainMethod={} returnManyOrOne={}", chainMethod, returnManyOrOne);
 
         Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
@@ -93,7 +103,7 @@ public class AnalyzeChainProc {
 
         ChainAnalysisDto result = new ChainAnalysisDto();
         result.setMethodName(methodName);
-        result.setQueryOrUpdate(queryOrUpdate);
+        result.setChainMethod(chainMethod);
         result.setReturnManyOrOne(returnManyOrOne);
         result.setQueryPhrases(queryPhrases);
         result.setByPhrases(byPhrases);

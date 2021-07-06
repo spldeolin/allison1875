@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 import java.util.Set;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Sets;
+import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -15,7 +16,7 @@ public class ChainAnalysisDto {
 
     private String methodName;
 
-    private boolean queryOrUpdate;
+    private ChainMethodEnum chainMethod;
 
     private boolean returnManyOrOne;
 

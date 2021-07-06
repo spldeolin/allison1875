@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
@@ -74,7 +75,7 @@ public class ReplaceDesignProc {
                     .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), methodCallCode);
         } else {
             // concat Method Call with Assigned
-            if (chainAnalysis.isQueryOrUpdate()) {
+            if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
                 chainExprReplacement =
                         resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
             } else {

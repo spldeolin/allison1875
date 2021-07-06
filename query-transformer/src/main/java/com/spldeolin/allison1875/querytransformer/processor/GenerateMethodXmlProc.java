@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
+import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
@@ -42,7 +43,7 @@ public class GenerateMethodXmlProc {
 
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add("");
-        if (chainAnalysis.isQueryOrUpdate()) {
+        if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
             // QUERY
             String startTag = this
                     .concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
@@ -81,7 +82,7 @@ public class GenerateMethodXmlProc {
             }
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
-        } else {
+        } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
             // UPDATE
             String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
             xmlLines.add(startTag);

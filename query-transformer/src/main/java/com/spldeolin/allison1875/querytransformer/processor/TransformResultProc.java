@@ -25,6 +25,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
@@ -44,7 +45,7 @@ public class TransformResultProc {
             AstForest astForest) {
         boolean isAssigned = isAssigned(chainAnalysis);
 
-        if (!chainAnalysis.isQueryOrUpdate()) {
+        if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
             return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsAssigned(isAssigned);
         }
 
