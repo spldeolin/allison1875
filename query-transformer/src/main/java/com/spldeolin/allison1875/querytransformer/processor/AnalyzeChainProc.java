@@ -36,9 +36,8 @@ public class AnalyzeChainProc {
         String betweenCode = StringUtil.substring(chainCode, chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
 
-        MethodCallExpr queryMce = chain
-                .findAll(MethodCallExpr.class, mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update"))
-                .get(0);
+        MethodCallExpr queryMce = chain.findAll(MethodCallExpr.class,
+                mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update", "drop")).get(0);
         String methodName = queryMce.getArguments().get(0).asStringLiteralExpr().getValue();
         log.info("methodName={}", methodName);
 

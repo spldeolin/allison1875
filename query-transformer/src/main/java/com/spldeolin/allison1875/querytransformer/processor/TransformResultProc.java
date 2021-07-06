@@ -45,7 +45,8 @@ public class TransformResultProc {
             AstForest astForest) {
         boolean isAssigned = isAssigned(chainAnalysis);
 
-        if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
+        if (chainAnalysis.getChainMethod() == ChainMethodEnum.update
+                || chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
             return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsAssigned(isAssigned);
         }
 

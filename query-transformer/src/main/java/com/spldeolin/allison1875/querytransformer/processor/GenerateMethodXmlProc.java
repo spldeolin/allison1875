@@ -97,8 +97,23 @@ public class GenerateMethodXmlProc {
             int last = xmlLines.size() - 1;
             xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
             xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
+        } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
+            // DROP
+            String startTag = concatDeleteStartTag(chainAnalysis, parameterTransformation);
+            xmlLines.add(startTag);
+            if (chainAnalysis.getByPhrases().size() > 0) {
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
+            xmlLines.add(SINGLE_INDENT + "DELETE FROM " + designMeta.getTableName());
+            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
+            if (chainAnalysis.getByPhrases().size() > 0) {
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
+            xmlLines.add("</delete>");
+        } else {
+            throw new RuntimeException("impossible unless bug");
         }
 
         List<String> newLines = Lists.newArrayList();
@@ -110,7 +125,9 @@ public class GenerateMethodXmlProc {
                 if (line.contains("</mapper>")) {
                     Collections.reverse(xmlLines);
                     for (String xmlLine : xmlLines) {
-                        newLines.add(SINGLE_INDENT + xmlLine);
+                        if (StringUtil.isNotBlank(xmlLine)) {
+                            newLines.add(SINGLE_INDENT + xmlLine);
+                        }
                     }
                 }
             }
@@ -226,6 +243,16 @@ public class GenerateMethodXmlProc {
     private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation) {
         String startTag = "<update id='" + chainAnalysis.getMethodName() + "'";
+        if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
+            startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
+        }
+        startTag += ">";
+        return startTag;
+    }
+
+    private String concatDeleteStartTag(ChainAnalysisDto chainAnalysis,
+            ParameterTransformationDto parameterTransformation) {
+        String startTag = "<delete id='" + chainAnalysis.getMethodName() + "'";
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
             startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
         }
