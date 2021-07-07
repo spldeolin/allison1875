@@ -77,7 +77,13 @@ public class AnalyzeChainProc {
             }
         }
         for (MethodCallExpr mce : chain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
-            String describe = mce.calculateResolvedType().describe();
+            String describe;
+            try {
+                describe = mce.calculateResolvedType().describe();
+            } catch (Exception e) {
+                log.info("fail to calculateResolvedType, ignore [{}({})]", mce.getName(), mce.getArguments());
+                continue;
+            }
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());
