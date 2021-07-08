@@ -62,8 +62,7 @@ public class GenerateDesignProc {
         cu.setStorage(designPath);
         cu.setPackageDeclaration(persistenceGeneratorConfig.getDesignPackage());
         cu.addImport(ImportConstants.LIST);
-        cu.addImport(ImportConstants.MAP);
-        cu.addImport(ImportConstants.MULTI_MAP);
+        cu.addImport(ImportConstants.ARRAY_LIST);
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
         cu.addImport(entityGeneration.getEntityQualifier());
@@ -91,8 +90,7 @@ public class GenerateDesignProc {
                 StaticJavaParser.parseBodyDeclaration("public static DropChain drop(String methodName) {throw e;}"));
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
-        queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain")
-                .addExtendedType("ReturnMapTermination");
+        queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("private QueryChain () {}"));
         for (PropertyDto property : properties) {
             FieldDeclaration field = StaticJavaParser
@@ -145,8 +143,7 @@ public class GenerateDesignProc {
         designCoid.addMember(byChainReturnCode);
 
         ClassOrInterfaceDeclaration nextableByChainReturnCoid = new ClassOrInterfaceDeclaration();
-        nextableByChainReturnCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainReturn")
-                .addExtendedType("ReturnMapTermination");
+        nextableByChainReturnCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainReturn");
         for (PropertyDto property : properties) {
             nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     "public ByChainPredicate<NextableByChainReturn, " + property.getJavaType().getSimpleName() + "> "
@@ -183,33 +180,12 @@ public class GenerateDesignProc {
 
         ClassOrInterfaceDeclaration nextableOrderChainCoid = new ClassOrInterfaceDeclaration();
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
-                .addExtendedType("ReturnMapTermination");
-        for (PropertyDto property : properties) {
-            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";")
-                    .asFieldDeclaration().setJavadocComment(property.getDescription()));
-        }
+                .addExtendedType("OrderChain");
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
-
-        ClassOrInterfaceDeclaration returnMapTerminationCoid = new ClassOrInterfaceDeclaration();
-        returnMapTerminationCoid.setPrivate(true).setStatic(true).setInterface(false).setName("ReturnMapTermination");
-        for (PropertyDto property : persistence.getProperties()) {
-            returnMapTerminationCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public Map<" + property.getJavaType().getSimpleName() + ", " + persistence.getEntityName()
-                            + "> each" + MoreStringUtils.upperFirstLetter(property.getPropertyName())
-                            + "() { throw e; }"));
-        }
-        for (PropertyDto property : persistence.getProperties()) {
-            returnMapTerminationCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public Multimap<" + property.getJavaType().getSimpleName() + ", " + persistence.getEntityName()
-                            + "> multiEach" + MoreStringUtils.upperFirstLetter(property.getPropertyName())
-                            + "() { throw e; }"));
-        }
-        designCoid.addMember(returnMapTerminationCoid);
 
         DesignMeta meta = new DesignMeta();
         meta.setEntityQualifier(entityGeneration.getEntityQualifier());
