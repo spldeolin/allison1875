@@ -11,7 +11,9 @@ public interface ImportConstants {
 
     ImportDeclaration LIST = new ImportDeclaration("java.util.List", false, false);
 
-    ImportDeclaration ARRAY_LIST = new ImportDeclaration("java.util.ArrayList", false, false);
+    ImportDeclaration MAP = new ImportDeclaration("java.util.Map", false, false);
+
+    ImportDeclaration MULTI_MAP = new ImportDeclaration("com.google.common.collect.Multimap", false, false);
 
     ImportDeclaration JAVA_UTIL = new ImportDeclaration("java.util", false, true);
 
