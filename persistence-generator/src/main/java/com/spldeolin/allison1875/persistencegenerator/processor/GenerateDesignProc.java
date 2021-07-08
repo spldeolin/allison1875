@@ -118,12 +118,6 @@ public class GenerateDesignProc {
         }
         designCoid.addMember(updateChainCoid);
 
-        ClassOrInterfaceDeclaration dropChainCoid = new ClassOrInterfaceDeclaration();
-        dropChainCoid.setPublic(true).setInterface(true).setName("DropChain");
-        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
-        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
-        designCoid.addMember(dropChainCoid);
-
         ClassOrInterfaceDeclaration nextableUpdateChainCoid = new ClassOrInterfaceDeclaration();
         nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain")
                 .addExtendedType("UpdateChain");
@@ -131,6 +125,12 @@ public class GenerateDesignProc {
         nextableUpdateChainCoid
                 .addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
         designCoid.addMember(nextableUpdateChainCoid);
+
+        ClassOrInterfaceDeclaration dropChainCoid = new ClassOrInterfaceDeclaration();
+        dropChainCoid.setPublic(true).setInterface(true).setName("DropChain");
+        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
+        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
+        designCoid.addMember(dropChainCoid);
 
         ClassOrInterfaceDeclaration byChainReturnCode = new ClassOrInterfaceDeclaration();
         byChainReturnCode.setPublic(true).setStatic(true).setInterface(false).setName("ByChainReturn")
@@ -180,12 +180,8 @@ public class GenerateDesignProc {
         designCoid.addMember(orderChainCoid);
 
         ClassOrInterfaceDeclaration nextableOrderChainCoid = new ClassOrInterfaceDeclaration();
-        nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain");
-        for (PropertyDto property : properties) {
-            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";")
-                    .asFieldDeclaration().setJavadocComment(property.getDescription()));
-        }
+        nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
+                .addExtendedType("OrderChain");
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser
