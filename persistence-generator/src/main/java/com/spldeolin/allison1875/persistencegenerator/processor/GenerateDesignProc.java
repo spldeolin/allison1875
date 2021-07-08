@@ -94,7 +94,7 @@ public class GenerateDesignProc {
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("private QueryChain () {}"));
         for (PropertyDto property : properties) {
             FieldDeclaration field = StaticJavaParser
-                    .parseBodyDeclaration("public QueryChain " + property.getPropertyName() + " = new QueryChain();")
+                    .parseBodyDeclaration("public QueryChain " + property.getPropertyName() + ";")
                     .asFieldDeclaration();
             field.setJavadocComment(property.getDescription());
             queryChainCoid.addMember(field);
