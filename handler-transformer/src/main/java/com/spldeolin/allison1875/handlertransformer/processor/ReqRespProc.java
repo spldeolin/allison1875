@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
@@ -23,7 +25,6 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.handlertransformer.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
 import com.spldeolin.allison1875.handlertransformer.handle.FieldHandle;
@@ -131,15 +132,14 @@ public class ReqRespProc {
             // 遍历到NestDto时，将父节点中的自身替换为Field
             if (dto.getParentNode().filter(parent -> parent instanceof ClassOrInterfaceDeclaration).isPresent()) {
                 ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode().get();
-                FieldDeclarationBuilder fieldBuilder = new FieldDeclarationBuilder();
-                dto.getJavadoc().ifPresent(fieldBuilder::javadoc);
+                FieldDeclaration field = new FieldDeclaration();
                 if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-                    fieldBuilder.annotationExpr(AnnotationConstant.VALID);
+                    field.addAnnotation(AnnotationConstant.VALID);
                 }
-                this.moveAnnotationsFromDtoToField(dto, fieldBuilder);
-                fieldBuilder.type(calcType(dto));
-                fieldBuilder.fieldName(MoreStringUtils.lowerFirstLetter(dto.getNameAsString()));
-                parentCoid.replace(dto, fieldBuilder.build());
+                this.moveAnnotationsFromDtoToField(dto, field);
+                field.setPrivate(true).addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto)),
+                        MoreStringUtils.lowerFirstLetter(dto.getNameAsString())));
+                parentCoid.replace(dto, field);
             }
         }
         for (JavabeanCuBuilder<JavabeanTypeEnum> builder : builders) {
@@ -180,10 +180,10 @@ public class ReqRespProc {
         return javabeanType;
     }
 
-    private void moveAnnotationsFromDtoToField(ClassOrInterfaceDeclaration dto, FieldDeclarationBuilder fieldBuilder) {
+    private void moveAnnotationsFromDtoToField(ClassOrInterfaceDeclaration dto, FieldDeclaration field) {
         for (AnnotationExpr annotation : dto.getAnnotations()) {
             if (!StringUtils.equalsAny(annotation.getNameAsString(), "L", "P")) {
-                fieldBuilder.annotationExpr(annotation);
+                field.addAnnotation(annotation);
             }
         }
     }

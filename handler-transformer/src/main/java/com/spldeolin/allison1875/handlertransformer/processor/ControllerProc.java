@@ -1,15 +1,17 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.Collection;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.handlertransformer.builder.FieldDeclarationBuilder;
 import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
 import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
@@ -52,11 +54,13 @@ public class ControllerProc {
 
         // 确保controller有autowired 新生成的service
         if (!controller.getFieldByName(serviceGeneration.getServiceVarName()).isPresent()) {
-            FieldDeclarationBuilder serviceField = new FieldDeclarationBuilder();
-            serviceField.annotationExpr("@Autowired");
-            serviceField.type(serviceGeneration.getService().getNameAsString());
-            serviceField.fieldName(serviceGeneration.getServiceVarName());
-            controller.addMember(serviceField.build());
+            FieldDeclaration field = new FieldDeclaration();
+            field.addAnnotation(AnnotationConstant.AUTOWIRED);
+            field.setPrivate(true).addVariable(
+                    new VariableDeclarator(StaticJavaParser.parseType(serviceGeneration.getService().getNameAsString()),
+                            serviceGeneration.getServiceVarName()));
+
+            controller.addMember(field);
         }
         log.info("append @Autowired Field [{}] into Controller [{}].", serviceGeneration.getServiceVarName(),
                 controller.getNameAsString());
