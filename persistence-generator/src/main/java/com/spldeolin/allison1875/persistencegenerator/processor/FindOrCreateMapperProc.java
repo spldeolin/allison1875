@@ -59,6 +59,7 @@ public class FindOrCreateMapperProc {
             cu = new CompilationUnit();
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                     persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(persistenceGeneratorConfig.getMapperPackage());
             cu.addImport(ImportConstants.JAVA_UTIL);
             cu.addImport(entityGeneration.getEntityQualifier());
             cu.addImport(ImportConstants.APACHE_IBATIS);
