@@ -62,7 +62,8 @@ public class GenerateDesignProc {
         cu.setStorage(designPath);
         cu.setPackageDeclaration(persistenceGeneratorConfig.getDesignPackage());
         cu.addImport(ImportConstants.LIST);
-        cu.addImport(ImportConstants.ARRAY_LIST);
+        cu.addImport(ImportConstants.MAP);
+        cu.addImport(ImportConstants.MULTIMAP);
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
         cu.addImport(entityGeneration.getEntityQualifier());
@@ -103,6 +104,12 @@ public class GenerateDesignProc {
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
+                        persistence.getEntityName())));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
+                        persistence.getEntityName())));
         queryChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
         designCoid.addMember(queryChainCoid);
@@ -152,6 +159,12 @@ public class GenerateDesignProc {
         }
         nextableByChainReturnCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
+                        persistence.getEntityName())));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
+                        persistence.getEntityName())));
         nextableByChainReturnCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
         nextableByChainReturnCoid
@@ -183,9 +196,34 @@ public class GenerateDesignProc {
                 .addExtendedType("OrderChain");
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
+                        persistence.getEntityName())));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
+                        persistence.getEntityName())));
         nextableOrderChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
+
+        ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
+        eachCoid.setPublic(true).setStatic(false).setInterface(true).setName("Each").addTypeParameter("P");
+        for (PropertyDto property : persistence.getProperties()) {
+            eachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("Each<%s> %s = (Each<%s>) new Object();", property.getJavaType().getSimpleName(),
+                            property.getPropertyName(), property.getJavaType().getSimpleName())));
+        }
+        designCoid.addMember(eachCoid);
+
+        ClassOrInterfaceDeclaration multiEachCoid = new ClassOrInterfaceDeclaration();
+        multiEachCoid.setPublic(true).setStatic(false).setInterface(true).setName("MultiEach").addTypeParameter("P");
+        for (PropertyDto property : persistence.getProperties()) {
+            multiEachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("MultiEach<%s> %s = (MultiEach<%s>) new Object();",
+                            property.getJavaType().getSimpleName(), property.getPropertyName(),
+                            property.getJavaType().getSimpleName())));
+        }
+        designCoid.addMember(multiEachCoid);
 
         DesignMeta meta = new DesignMeta();
         meta.setEntityQualifier(entityGeneration.getEntityQualifier());
