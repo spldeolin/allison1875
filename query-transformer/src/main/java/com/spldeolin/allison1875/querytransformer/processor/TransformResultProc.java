@@ -44,17 +44,21 @@ public class TransformResultProc {
     public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest) {
         boolean isAssigned = isAssigned(chainAnalysis);
+        ResultTransformationDto result = new ResultTransformationDto();
+        result.setIsAssigned(isAssigned);
 
         if (chainAnalysis.getChainMethod() == ChainMethodEnum.update
                 || chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
-            return new ResultTransformationDto().setResultType(PrimitiveType.intType()).setIsAssigned(isAssigned);
+            result.setResultType(PrimitiveType.intType());
+            return result;
         }
 
         if (isAssigned) {
             VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode()
                     .orElseThrow(ParentAbsentException::new).getParentNode().orElseThrow(ParentAbsentException::new);
             Type vdeType = vde.getCommonType();
-            ResultTransformationDto result = new ResultTransformationDto().setResultType(vdeType).setIsAssigned(true);
+            result.setResultType(vdeType);
+            result.setElementTypeQualifier(designMeta.getEntityQualifier());
             result.getImports().add(designMeta.getEntityQualifier());
             if (vdeType.toString().contains("List")) {
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
@@ -86,23 +90,22 @@ public class TransformResultProc {
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
             Saves.add(cu);
             TypeDeclaration<?> resultType = cu.getPrimaryType().orElseThrow(RuntimeException::new);
-            ResultTransformationDto result = new ResultTransformationDto();
-            result.setJavabeanQualifier(resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-            result.getImports().add(result.getJavabeanQualifier());
+            String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+            result.setElementTypeQualifier(javabeanQualifier);
+            result.getImports().add(javabeanQualifier);
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
             }
-            result.setIsAssigned(false);
             return result;
 
         } else if (phrases.size() == 1) {
             // 指定了1个属性，使用该属性类型作为返回值类型
             String propertyName = Iterables.getOnlyElement(phrases).getSubjectPropertyName();
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
-            ResultTransformationDto result = new ResultTransformationDto();
+            result.setElementTypeQualifier(javaType.getQualifier());
             result.setImports(Lists.newArrayList(javaType.getQualifier()));
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
@@ -110,12 +113,11 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
             }
-            result.setIsAssigned(false);
             return result;
 
         } else {
             // 没有指定属性，使用Entity作为返回值类型
-            ResultTransformationDto result = new ResultTransformationDto();
+            result.setElementTypeQualifier(designMeta.getEntityQualifier());
             result.setImports(Lists.newArrayList(designMeta.getEntityQualifier()));
             if (chainAnalysis.isReturnManyOrOne()) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
@@ -123,7 +125,6 @@ public class TransformResultProc {
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
             }
-            result.setIsAssigned(false);
             return result;
         }
     }

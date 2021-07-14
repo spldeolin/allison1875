@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -45,8 +45,7 @@ public class GenerateMethodXmlProc {
         xmlLines.add("");
         if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
             // QUERY
-            String startTag = this
-                    .concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+            String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -221,21 +220,18 @@ public class GenerateMethodXmlProc {
         return xmlLines;
     }
 
-    private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
             startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
         }
-        if (resultTransformation.getJavabeanQualifier() != null) {
-            startTag += " resultType='" + resultTransformation.getJavabeanQualifier() + "'>";
-        } else if (chainAnalysis.getQueryPhrases().size() == 1) {
-            String resultTypeQ = designMeta.getProperties()
-                    .get(Iterables.getOnlyElement(chainAnalysis.getQueryPhrases()).getSubjectPropertyName())
-                    .getJavaType().getQualifier();
-            startTag += " resultType='" + resultTypeQ + "'>";
-        } else {
+        if (resultTransformation.getElementTypeQualifier() != null) {
+            startTag += " resultType='" + resultTransformation.getElementTypeQualifier() + "'>";
+        } else if (!resultTransformation.getResultType().equals(PrimitiveType.intType())) {
             startTag += " resultMap='all'>";
+        } else {
+            startTag += ">";
         }
         return startTag;
     }
