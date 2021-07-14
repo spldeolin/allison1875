@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
+import java.util.Objects;
 import com.github.javaparser.ast.expr.Expression;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import lombok.Data;
@@ -20,18 +21,22 @@ public class PhraseDto {
 
     private Expression objectExpr;
 
-    public String toString() {
-        if (predicate == null && objectExpr == null) {
-            return subjectPropertyName;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-        if (objectExpr == null) {
-            return subjectPropertyName + " " + predicate.getValue();
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        if (predicate == null) {
-            return subjectPropertyName + " . " + objectExpr;
-        }
-        return subjectPropertyName + " " + predicate.getValue() + " " + objectExpr;
+        PhraseDto phraseDto = (PhraseDto) o;
+        return Objects.equals(subjectPropertyName, phraseDto.subjectPropertyName) && predicate == phraseDto.predicate
+                && Objects.equals(objectExpr, phraseDto.objectExpr);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(subjectPropertyName, predicate, objectExpr);
     }
 
 }
