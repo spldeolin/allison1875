@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -59,42 +60,65 @@ public class ReplaceDesignProc {
             }
         });
 
-        ExpressionStmt exprStmt = chainAnalysis.getChain().findAncestor(ExpressionStmt.class)
+        Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
                 .orElseThrow(() -> new RuntimeException("cannot find Expression Stmt"));
-        Expression chainExpr = exprStmt.getExpression();
-        log.info("chainExpr={}", chainExpr);
+        String ancestorStatementCode = TokenRanges.getRawCode(ancestorStatement);
+        log.info("ancestorStatement={}", ancestorStatementCode);
 
         // transform Method Call code
-        String methodCallCode = transformMethodCallProc.process(designMeta, chainAnalysis, parameterTransformation);
+        String mceCode = transformMethodCallProc.methodCallExpr(designMeta, chainAnalysis, parameterTransformation);
+
+        String finalReplacement;
+        if (chainAnalysis.getChain().getParentNode().filter(parent -> parent instanceof ExpressionStmt).isPresent()) {
+            // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
+            finalReplacement = String
+                    .format("%s %s = %s;", resultTransformation.getResultType(), calcAssignVarName(chainAnalysis),
+                            mceCode);
+
+        } else if (chainAnalysis.getChain().getParentNode().filter(parent -> parent instanceof AssignExpr)
+                .isPresent()) {
+            // parent是AssignExpr的情况，例如：Entity a = Design.query("a").one();，则将chain替换成转化出的mce（chain是mce类型）
+            finalReplacement = ancestorStatementCode.replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode);
+
+        } else {
+            // 以外的情况，往往是继续调用mce返回值，例如：if (0 == Design.update("a").id(-1).over()) { }，则将chain替换成转化出的mce（chain是mce类型）
+            finalReplacement = ancestorStatementCode.replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode);
+        }
+
+        // 在ancestorStatement的上方添加argument build代码块（如果需要augument build的话）
+        String argumentBuildStmts = transformMethodCallProc.argumentBuildStmts(chainAnalysis, parameterTransformation);
+        if (argumentBuildStmts != null) {
+            finalReplacement = argumentBuildStmts + "\n" + chainAnalysis.getIndent() + finalReplacement;
+        }
 
         // transform Method Call and Assigned code
-        String chainExprReplacement;
-        if (resultTransformation.getIsAssigned()) {
-            // replace Method Call
-            chainExprReplacement = TokenRanges.getRawCode(chainExpr)
-                    .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), methodCallCode);
-        } else {
-            // concat Method Call with Assigned
-            if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
-                chainExprReplacement =
-                        resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
-            } else {
-                chainExprReplacement =
-                        resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + "Count = ";
-            }
-            chainExprReplacement += methodCallCode;
-        }
+//        String statementReplacement;
+//        if (resultTransformation.getIsAssigned()) {
+//            // replace Method Call
+//            statementReplacement = TokenRanges.getRawCode(ancestorStatement)
+//                    .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode);
+//        } else {
+//            // concat Method Call with Assigned
+//            if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
+//                statementReplacement =
+//                        resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + " = ";
+//            } else {
+//                statementReplacement =
+//                        resultTransformation.getResultType() + " " + chainAnalysis.getMethodName() + "Count = ";
+//            }
+//            statementReplacement += mceCode;
+//        }
 
-        // transform Javabean augument build
-        String argumentBuild = transformMethodCallProc.argumentBuild(chainAnalysis, parameterTransformation);
-        if (argumentBuild != null) {
-            chainExprReplacement = argumentBuild + "\n" + chainAnalysis.getIndent() + chainExprReplacement;
-        }
-
-        // overwirte Chain Expression
-        replaces.add(new Replace(TokenRanges.getRawCode(chainExpr), chainExprReplacement));
-
+        replaces.add(new Replace(ancestorStatementCode, finalReplacement));
         return replaces;
+    }
+
+    private String calcAssignVarName(ChainAnalysisDto chainAnalysis) {
+        if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop
+                || chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
+            return chainAnalysis.getMethodName() + "Count";
+        }
+        return chainAnalysis.getMethodName();
     }
 
 }

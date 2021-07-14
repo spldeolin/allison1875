@@ -3,17 +3,20 @@ package com.spldeolin.allison1875.querytransformer.processor;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.ast.Node;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
@@ -31,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AnalyzeChainProc {
 
-    public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design) {
+    public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta) {
         String chainCode = chain.toString();
         String betweenCode = StringUtil.substring(chainCode, chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
@@ -60,39 +63,45 @@ public class AnalyzeChainProc {
         Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
         List<String> varNames = Lists.newArrayList();
         for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
+            MethodCallExpr parent = (MethodCallExpr) fae.getParentNode().get();
+            PredicateEnum predicate = PredicateEnum.of(parent.getNameAsString());
             String describe = fae.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".QueryChain")) {
                 queryPhrases.add(new PhraseDto().setSubjectPropertyName(fae.getNameAsString()));
             }
             if (describe.startsWith(ByChainPredicate.class.getName()) && fae.getParentNode().isPresent()) {
-                Node parent = fae.getParentNode().get();
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
-                phrase.setPredicate(PredicateEnum.of(((MethodCallExpr) parent).getNameAsString()));
-                if (phrase.getPredicate() != PredicateEnum.IS_NULL && phrase.getPredicate() != PredicateEnum.NOT_NULL) {
+                phrase.setPredicate(predicate);
+                if (predicate != PredicateEnum.IS_NULL && predicate != PredicateEnum.NOT_NULL) {
                     phrase.setVarName(ensureNoRepeation(fae.getNameAsString(), varNames));
                 }
-                if (((MethodCallExpr) parent).getArguments().size() > 0) {
-                    phrase.setObjectExpr(((MethodCallExpr) parent).getArgument(0));
+                if (parent.getArguments().size() > 0) {
+                    phrase.setObjectExpr(parent.getArgument(0));
                 }
+
+                /*
+                    将分析过的in()和nin()中的实际参数替换为new ArrayList<字段具体类型>()的形式，
+                    以确保后续的in()和nin()出现在scope的mce或fae进行calculateResolvedType时，不会因无法解析泛型而抛出异常
+                 */
+                if (predicate == PredicateEnum.IN || predicate == PredicateEnum.NOT_IN) {
+                    String propertyType = designMeta.getProperties().get(fae.getNameAsString()).getJavaType()
+                            .getSimpleName();
+                    parent.setArgument(0, StaticJavaParser.parseExpression("new ArrayList<" + propertyType + ">()"));
+                    Imports.ensureImported(chain, ImportConstants.ARRAY_LIST);
+                }
+
                 byPhrases.add(phrase);
             }
             if (describe.startsWith(OrderChainPredicate.class.getName())) {
-                Node parent = fae.getParentNode().get();
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
-                phrase.setPredicate(PredicateEnum.of(((MethodCallExpr) parent).getNameAsString()));
+                phrase.setPredicate(predicate);
                 orderPhrases.add(phrase);
             }
         }
         for (MethodCallExpr mce : chain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
-            String describe;
-            try {
-                describe = mce.calculateResolvedType().describe();
-            } catch (Exception e) {
-                log.info("fail to calculateResolvedType, ignore [{}({})]", mce.getName(), mce.getArguments());
-                continue;
-            }
+            String describe = mce.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());
@@ -116,7 +125,7 @@ public class AnalyzeChainProc {
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
         result.setIndent(TokenRanges
-                .getStartIndent(chain.findAncestor(ExpressionStmt.class).orElseThrow(IllegalChainException::new)));
+                .getStartIndent(chain.findAncestor(Statement.class).orElseThrow(IllegalChainException::new)));
         return result;
     }
 

@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 @Singleton
 public class TransformMethodCallProc {
 
-    public String process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    public String methodCallExpr(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation) {
         String result =
                 MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
@@ -39,7 +39,8 @@ public class TransformMethodCallProc {
         return result;
     }
 
-    public String argumentBuild(ChainAnalysisDto chainAnalysis, ParameterTransformationDto parameterTransformation) {
+    public String argumentBuildStmts(ChainAnalysisDto chainAnalysis,
+            ParameterTransformationDto parameterTransformation) {
         if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
             return null;
         }
@@ -48,7 +49,7 @@ public class TransformMethodCallProc {
         String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
         StringBuilder result = new StringBuilder();
-        result.append(String.format("%s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
+        result.append(String.format("final %s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
             result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")
                     .append(MoreStringUtils.upperFirstLetter(updatePhrase.getVarName())).append("(")

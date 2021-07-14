@@ -91,7 +91,7 @@ public class QueryTransformer implements Allison1875MainProcessor {
                 ClassOrInterfaceDeclaration design = triple.getMiddle();
                 DesignMeta designMeta = triple.getRight();
 
-                ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design);
+                ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design, designMeta);
 
                 // transform Parameter
                 ParameterTransformationDto parameterTransformation = transformParameterProc
