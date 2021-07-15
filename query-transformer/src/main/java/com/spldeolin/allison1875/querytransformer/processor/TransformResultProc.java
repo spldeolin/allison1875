@@ -7,14 +7,12 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
-import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
-import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
@@ -26,6 +24,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNa
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
@@ -45,7 +44,6 @@ public class TransformResultProc {
             AstForest astForest) {
         boolean isAssigned = isAssigned(chainAnalysis);
         ResultTransformationDto result = new ResultTransformationDto();
-        result.setIsAssigned(isAssigned);
 
         if (chainAnalysis.getChainMethod() == ChainMethodEnum.update
                 || chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
@@ -54,15 +52,16 @@ public class TransformResultProc {
         }
 
         if (isAssigned) {
-            VariableDeclarationExpr vde = (VariableDeclarationExpr) chainAnalysis.getChain().getParentNode()
-                    .orElseThrow(ParentAbsentException::new).getParentNode().orElseThrow(ParentAbsentException::new);
-            Type vdeType = vde.getCommonType();
-            result.setResultType(vdeType);
-            result.setElementTypeQualifier(designMeta.getEntityQualifier());
-            result.getImports().add(designMeta.getEntityQualifier());
-            if (vdeType.toString().contains("List")) {
+            if (equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
+                    ReturnClassifyEnum.multiEach)) {
+                result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
+                result.setElementTypeQualifier(designMeta.getEntityQualifier());
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
+            } else {
+                result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
+                result.setElementTypeQualifier(designMeta.getEntityQualifier());
             }
+            result.getImports().add(designMeta.getEntityQualifier());
             return result;
         }
 
@@ -93,9 +92,16 @@ public class TransformResultProc {
             String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
             result.setElementTypeQualifier(javabeanQualifier);
             result.getImports().add(javabeanQualifier);
-            if (chainAnalysis.isReturnManyOrOne()) {
+            if (equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
+                    ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
+                    result.getImports().add(ImportConstants.MAP.getNameAsString());
+                }
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+                    result.getImports().add(ImportConstants.MULTIMAP.getNameAsString());
+                }
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
             }
@@ -107,9 +113,16 @@ public class TransformResultProc {
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
             result.setImports(Lists.newArrayList(javaType.getQualifier()));
-            if (chainAnalysis.isReturnManyOrOne()) {
+            if (equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
+                    ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
+                    result.getImports().add(ImportConstants.MAP.getNameAsString());
+                }
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+                    result.getImports().add(ImportConstants.MULTIMAP.getNameAsString());
+                }
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
             }
@@ -119,9 +132,16 @@ public class TransformResultProc {
             // 没有指定属性，使用Entity作为返回值类型
             result.setElementTypeQualifier(designMeta.getEntityQualifier());
             result.setImports(Lists.newArrayList(designMeta.getEntityQualifier()));
-            if (chainAnalysis.isReturnManyOrOne()) {
+            if (equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
+                    ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
+                    result.getImports().add(ImportConstants.MAP.getNameAsString());
+                }
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+                    result.getImports().add(ImportConstants.MULTIMAP.getNameAsString());
+                }
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
             }
@@ -133,6 +153,15 @@ public class TransformResultProc {
         if (chainAnalysis.getChain().getParentNode().isPresent()) {
             return chainAnalysis.getChain().getParentNode().get().getParentNode()
                     .filter(parent -> parent instanceof VariableDeclarationExpr).isPresent();
+        }
+        return false;
+    }
+
+    private boolean equalsAny(Object o, Object... os) {
+        for (Object one : os) {
+            if (o.equals(one)) {
+                return true;
+            }
         }
         return false;
     }

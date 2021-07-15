@@ -4,6 +4,7 @@ import java.util.Set;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -18,7 +19,7 @@ public class ChainAnalysisDto {
 
     private ChainMethodEnum chainMethod;
 
-    private boolean returnManyOrOne;
+    private ReturnClassifyEnum returnClassify;
 
     private Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
 
@@ -31,5 +32,9 @@ public class ChainAnalysisDto {
     private MethodCallExpr chain;
 
     private String indent;
+
+    private Boolean isAssigned;
+
+    private Boolean isAssignedToType;
 
 }

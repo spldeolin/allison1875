@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
@@ -54,8 +55,23 @@ public class AnalyzeChainProc {
         } else {
             throw new IllegalChainException("chainMethod is none of query, update or drop");
         }
-        boolean returnManyOrOne = chainCode.endsWith("many()");
-        log.info("chainMethod={} returnManyOrOne={}", chainMethod, returnManyOrOne);
+        ReturnClassifyEnum returnClassify;
+        if (chain.getNameAsString().equals("one")) {
+            returnClassify = ReturnClassifyEnum.one;
+        } else if (chain.getNameAsString().equals("many")) {
+            if (chain.getArguments().size() == 0) {
+                returnClassify = ReturnClassifyEnum.many;
+            } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
+                returnClassify = ReturnClassifyEnum.each;
+            } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("MultiEach")) {
+                returnClassify = ReturnClassifyEnum.multiEach;
+            } else {
+                throw new IllegalChainException("many() argument is none of each nor multiEach");
+            }
+        } else {
+            returnClassify = null;
+        }
+        log.info("chainMethod={} returnClassify={}", chainMethod, returnClassify);
 
         Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
@@ -118,7 +134,7 @@ public class AnalyzeChainProc {
         ChainAnalysisDto result = new ChainAnalysisDto();
         result.setMethodName(methodName);
         result.setChainMethod(chainMethod);
-        result.setReturnManyOrOne(returnManyOrOne);
+        result.setReturnClassify(returnClassify);
         result.setQueryPhrases(queryPhrases);
         result.setByPhrases(byPhrases);
         result.setOrderPhrases(orderPhrases);

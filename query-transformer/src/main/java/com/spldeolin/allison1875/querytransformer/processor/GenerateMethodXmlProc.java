@@ -21,6 +21,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
@@ -76,7 +77,7 @@ public class GenerateMethodXmlProc {
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
             }
-            if (!chainAnalysis.isReturnManyOrOne()) {
+            if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.one) {
                 xmlLines.add(SINGLE_INDENT + "LIMIT 1");
             }
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);

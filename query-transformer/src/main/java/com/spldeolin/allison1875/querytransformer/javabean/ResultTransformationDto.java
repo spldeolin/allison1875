@@ -18,8 +18,6 @@ public class ResultTransformationDto {
 
     private Type resultType;
 
-    private Boolean isAssigned;
-
     /**
      * 对于查询方法
      * 返回单条数据时，这个值是返回类型本身的全限定名；
