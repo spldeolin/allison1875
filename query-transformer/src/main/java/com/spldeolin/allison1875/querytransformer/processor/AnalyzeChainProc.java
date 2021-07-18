@@ -79,13 +79,13 @@ public class AnalyzeChainProc {
         Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
         List<String> varNames = Lists.newArrayList();
         for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
-            MethodCallExpr parent = (MethodCallExpr) fae.getParentNode().get();
-            PredicateEnum predicate = PredicateEnum.of(parent.getNameAsString());
             String describe = fae.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".QueryChain")) {
                 queryPhrases.add(new PhraseDto().setSubjectPropertyName(fae.getNameAsString()));
             }
             if (describe.startsWith(ByChainPredicate.class.getName()) && fae.getParentNode().isPresent()) {
+                MethodCallExpr parent = (MethodCallExpr) fae.getParentNode().get();
+                PredicateEnum predicate = PredicateEnum.of(parent.getNameAsString());
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
                 phrase.setPredicate(predicate);
@@ -110,6 +110,8 @@ public class AnalyzeChainProc {
                 byPhrases.add(phrase);
             }
             if (describe.startsWith(OrderChainPredicate.class.getName())) {
+                MethodCallExpr parent = (MethodCallExpr) fae.getParentNode().get();
+                PredicateEnum predicate = PredicateEnum.of(parent.getNameAsString());
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(fae.getNameAsString());
                 phrase.setPredicate(predicate);

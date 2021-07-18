@@ -120,9 +120,8 @@ public class TransformMethodCallProc {
             if (isAssignWithoutType) {
                 code = String.format("%s = ArrayListMultimap.create();", calcResultVarName(chainAnalysis));
             } else {
-                code = String
-                        .format("final Multimap<%s, %s> %s = Maps.newHashMap();", propertyTypeName, elementTypeName,
-                                calcResultVarName(chainAnalysis));
+                code = String.format("final Multimap<%s, %s> %s = ArrayListMultimap.create();", propertyTypeName,
+                        elementTypeName, calcResultVarName(chainAnalysis));
             }
             code += "\n" + chainAnalysis.getIndent() + String
                     .format("%sList.forEach(one -> %s.put(one.get%s(), one));", chainAnalysis.getMethodName(),
