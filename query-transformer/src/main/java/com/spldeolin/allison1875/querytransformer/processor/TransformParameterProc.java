@@ -18,6 +18,7 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -53,14 +54,14 @@ public class TransformParameterProc {
         phrases.addAll(chainAnalysis.getByPhrases());
         log.info("phrases.size()={}", phrases.size());
         if (phrases.stream()
-                .filter(p -> p.getPredicate() != PredicateEnum.NOT_NULL && p.getPredicate() != PredicateEnum.IS_NULL)
+                .filter(p -> !EqualsUtils.equalsAny(p.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL))
                 .count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionPackage());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
             for (PhraseDto phrase : phrases) {
-                if (phrase.getPredicate() == PredicateEnum.IS_NULL || phrase.getPredicate() == PredicateEnum.NOT_NULL) {
+                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
                     continue;
                 }
                 String propertyName = phrase.getSubjectPropertyName();
@@ -69,7 +70,7 @@ public class TransformParameterProc {
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
-                if (phrase.getPredicate() == PredicateEnum.IN || phrase.getPredicate() == PredicateEnum.NOT_IN) {
+                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN)) {
                     fieldArg.setTypeName("Collection<" + javaType.getSimpleName() + ">");
                 } else {
                     fieldArg.setTypeName(javaType.getSimpleName());
@@ -78,8 +79,8 @@ public class TransformParameterProc {
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
-            if (phrases.stream().anyMatch(phrase -> phrase.getPredicate() == PredicateEnum.IN
-                    || phrase.getPredicate() == PredicateEnum.NOT_IN)) {
+            if (phrases.stream().anyMatch(
+                    phrase -> EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN))) {
                 cu.addImport(ImportConstants.COLLECTION);
             }
             Saves.add(cu);
@@ -89,14 +90,14 @@ public class TransformParameterProc {
             param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));
             params.add(param);
             imports.add(cond.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-            if (phrases.stream().anyMatch(phrase -> phrase.getPredicate() == PredicateEnum.IN
-                    || phrase.getPredicate() == PredicateEnum.NOT_IN)) {
+            if (phrases.stream().anyMatch(
+                    phrase -> EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN))) {
                 imports.add(ImportConstants.COLLECTION.getNameAsString());
             }
             isJavabean = true;
         } else if (phrases.size() > 0) {
             for (PhraseDto phrase : phrases) {
-                if (phrase.getPredicate() == PredicateEnum.IS_NULL || phrase.getPredicate() == PredicateEnum.NOT_NULL) {
+                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
                     continue;
                 }
                 String propertyName = phrase.getSubjectPropertyName();
@@ -104,7 +105,8 @@ public class TransformParameterProc {
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 Parameter param = new Parameter();
                 param.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", varName)));
-                if (phrase.getPredicate() == PredicateEnum.IN || phrase.getPredicate() == PredicateEnum.NOT_IN) {
+
+                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN)) {
                     param.setType("Collection<" + javaType.getSimpleName() + ">");
                 } else {
                     param.setType(javaType.getSimpleName());

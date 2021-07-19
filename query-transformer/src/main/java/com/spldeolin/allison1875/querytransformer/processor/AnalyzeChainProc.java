@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -100,7 +101,7 @@ public class AnalyzeChainProc {
                     将分析过的in()和nin()中的实际参数替换为new ArrayList<字段具体类型>()的形式，
                     以确保后续的in()和nin()出现在scope的mce或fae进行calculateResolvedType时，不会因无法解析泛型而抛出异常
                  */
-                if (predicate == PredicateEnum.IN || predicate == PredicateEnum.NOT_IN) {
+                if (EqualsUtils.equalsAny(predicate, PredicateEnum.IN, PredicateEnum.NOT_IN)) {
                     String propertyType = designMeta.getProperties().get(fae.getNameAsString()).getJavaType()
                             .getSimpleName();
                     parent.setArgument(0, StaticJavaParser.parseExpression("new ArrayList<" + propertyType + ">()"));

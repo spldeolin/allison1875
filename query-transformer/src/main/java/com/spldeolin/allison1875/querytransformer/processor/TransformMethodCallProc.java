@@ -9,6 +9,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
+import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -66,7 +67,7 @@ public class TransformMethodCallProc {
                     .append(updatePhrase.getObjectExpr()).append(");");
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
-            if (byPhrase.getPredicate() == PredicateEnum.IS_NULL || byPhrase.getPredicate() == PredicateEnum.NOT_NULL) {
+            if (EqualsUtils.equalsAny(byPhrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
                 continue;
             }
             result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")

@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
@@ -85,8 +86,8 @@ public class ReplaceDesignProc {
 
         } else if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof AssignExpr).isPresent()) {
             // parent是VariableDeclarator的情况，例如：Entity a = Design.query("a").one();，则将chain替换成转化出的mce（chain是mce类型）
-            if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each
-                    || chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each,
+                    ReturnClassifyEnum.multiEach)) {
                 finalReplacement = String
                         .format("%s %s = %s;", resultTransformation.getResultType(), calcAssignVarName(chainAnalysis),
                                 mceCode);
@@ -95,8 +96,8 @@ public class ReplaceDesignProc {
                         .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode);
             }
         } else {
-            if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each
-                    || chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each,
+                    ReturnClassifyEnum.multiEach)) {
                 throw new UnsupportedOperationException(
                         "以 each 或 multiEach 为返回值的chain表达式，目前只支持定义在赋值语句中或是单独作为一个表达式的情况，不支持其位于其他表达式中的情况");
             }
@@ -120,12 +121,11 @@ public class ReplaceDesignProc {
     }
 
     private String calcAssignVarName(ChainAnalysisDto chainAnalysis) {
-        if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop
-                || chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
+        if (EqualsUtils.equalsAny(chainAnalysis.getChainMethod(), ChainMethodEnum.drop, ChainMethodEnum.update)) {
             return chainAnalysis.getMethodName() + "Count";
         }
-        if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each
-                || chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+        if (EqualsUtils
+                .equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
             return chainAnalysis.getMethodName() + "List";
         }
         return chainAnalysis.getMethodName();
