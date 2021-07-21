@@ -129,6 +129,7 @@ public class GenerateMethodXmlProc {
                             newLines.add(SINGLE_INDENT + xmlLine);
                         }
                     }
+                    newLines.add("");
                 }
             }
             Collections.reverse(newLines);
