@@ -37,4 +37,6 @@ public class ChainAnalysisDto {
 
     private Boolean isAssignedToType;
 
+    private Boolean isByForced;
+
 }

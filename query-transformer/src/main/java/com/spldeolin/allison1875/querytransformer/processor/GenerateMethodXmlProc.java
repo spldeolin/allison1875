@@ -37,6 +37,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GenerateMethodXmlProc {
 
+    public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
+
     public void process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
@@ -157,53 +159,88 @@ public class GenerateMethodXmlProc {
             ifTag += "\">";
             switch (byPhrase.getPredicate()) {
                 case EQUALS:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " = " + dollarVar);
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " = " + dollarVar);
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " = " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case NOT_EQUALS:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " != " + dollarVar);
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " != " + dollarVar);
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " != " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case IN:
-                    xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
-                    xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
-                    xmlLines.add(
-                            TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='" + varName
-                                    + "' item='one' separator=','>#{one}</foreach>)");
-                    xmlLines.add(DOUBLE_INDENT + "</if>");
-                    xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
-                    xmlLines.add(TREBLE_INDENT + "AND FALSE");
-                    xmlLines.add(DOUBLE_INDENT + "</if>");
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " IN (<foreach collection='"
+                                + varName + "' item='one' separator=','>#{one}</foreach>)");
+                    } else {
+                        xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
+                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
+                        xmlLines.add(TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='"
+                                + varName + "' item='one' separator=','>#{one}</foreach>)");
+                        xmlLines.add(DOUBLE_INDENT + "</if>");
+                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
+                        xmlLines.add(TREBLE_INDENT + "AND FALSE");
+                        xmlLines.add(DOUBLE_INDENT + "</if>");
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case NOT_IN:
-                    xmlLines.add(SINGLE_INDENT + String
-                            .format("<if test=\"%s != null and %s.size() > 0\">", varName, varName));
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
-                            + varName + "' item='one' separator=','>#{one}</foreach>)");
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(
+                                SINGLE_INDENT_WITH_AND + property.getColumnName() + " NOT IN (<foreach collection='"
+                                        + varName + "' item='one' separator=','>#{one}</foreach>)");
+                    } else {
+                        xmlLines.add(SINGLE_INDENT + String
+                                .format("<if test=\"%s != null and %s.size() > 0\">", varName, varName));
+                        xmlLines.add(
+                                DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
+                                        + varName + "' item='one' separator=','>#{one}</foreach>)");
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case GREATER_THEN:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " > " + dollarVar);
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case GREATER_OR_EQUALS:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " >= " + dollarVar);
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case LESS_THEN:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " &lt; " + dollarVar);
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case LESS_OR_EQUALS:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " &lt;= " + dollarVar);
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
                 case NOT_NULL:
                     xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NOT NULL");
@@ -212,10 +249,17 @@ public class GenerateMethodXmlProc {
                     xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NULL");
                     break;
                 case LIKE:
-                    xmlLines.add(ifTag);
-                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
-                            + ", '%')");
-                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    if (chainAnalysis.getIsByForced()) {
+                        xmlLines.add(
+                                SINGLE_INDENT_WITH_AND + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
+                                        + ", '%')");
+                    } else {
+                        xmlLines.add(ifTag);
+                        xmlLines.add(
+                                DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
+                                        + ", '%')");
+                        xmlLines.add(SINGLE_INDENT + "</if>");
+                    }
                     break;
             }
         }

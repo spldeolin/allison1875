@@ -7,4 +7,6 @@ public interface TokenWordConstant {
 
     String META_FIELD_NAME = "meta";
 
+    String BY_FORCED_METHOD_NAME = "byForced";
+
 }

@@ -101,6 +101,9 @@ public class GenerateDesignProc {
         }
         queryChainCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public ByChainReturn<NextableByChainReturn> by() { throw e; }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("public ByChainReturn<NextableByChainReturn> %s() { throw e; }",
+                        TokenWordConstant.BY_FORCED_METHOD_NAME)));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser
                 .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
@@ -130,12 +133,16 @@ public class GenerateDesignProc {
         nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
         nextableUpdateChainCoid
                 .addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
+        nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("ByChainReturn<NextableByChainVoid> %s();", TokenWordConstant.BY_FORCED_METHOD_NAME)));
         designCoid.addMember(nextableUpdateChainCoid);
 
         ClassOrInterfaceDeclaration dropChainCoid = new ClassOrInterfaceDeclaration();
         dropChainCoid.setPublic(true).setInterface(true).setName("DropChain");
         dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
         dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
+        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                String.format("ByChainReturn<NextableByChainVoid> %s();", TokenWordConstant.BY_FORCED_METHOD_NAME)));
         designCoid.addMember(dropChainCoid);
 
         ClassOrInterfaceDeclaration byChainReturnCode = new ClassOrInterfaceDeclaration();
