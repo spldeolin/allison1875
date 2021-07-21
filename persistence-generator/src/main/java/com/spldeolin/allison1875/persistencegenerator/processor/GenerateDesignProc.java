@@ -233,6 +233,9 @@ public class GenerateDesignProc {
         meta.setMapperRelativePath(
                 persistenceGeneratorConfig.getMapperXmlDirectoryPath() + File.separator + persistence.getMapperName()
                         + ".xml");
+        if (persistence.getIsDeleteFlagExist()) {
+            meta.setNotDeletedSql(persistenceGeneratorConfig.getNotDeletedSql());
+        }
         meta.setProperties(propertiesByName);
         meta.setTableName(persistence.getTableName());
         String metaJson = JsonUtils.toJson(meta);

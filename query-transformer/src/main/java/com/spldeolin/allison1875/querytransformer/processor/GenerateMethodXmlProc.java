@@ -140,82 +140,82 @@ public class GenerateMethodXmlProc {
 
     private List<String> concatWhereSection(DesignMeta designMeta, ChainAnalysisDto chainAnalysis) {
         List<String> xmlLines = Lists.newArrayList();
-        if (chainAnalysis.getByPhrases().size() > 0) {
-            xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
-            for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
-                PropertyDto property = designMeta.getProperties().get(byPhrase.getSubjectPropertyName());
-                String varName = byPhrase.getVarName();
-                String dollarVar = "#{" + varName + "}";
+        xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
+        if (designMeta.getNotDeletedSql() != null) {
+            xmlLines.add(SINGLE_INDENT + "  AND " + designMeta.getNotDeletedSql());
+        }
+        for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
+            PropertyDto property = designMeta.getProperties().get(byPhrase.getSubjectPropertyName());
+            String varName = byPhrase.getVarName();
+            String dollarVar = "#{" + varName + "}";
 
-                String ifTag = SINGLE_INDENT + "<if test=\"" + varName + " != null";
-                if (property.getJavaType().getQualifier().equals("java.lang.String")) {
-                    ifTag += " AND " + varName + " != ''";
-                }
-                ifTag += "\">";
-                switch (byPhrase.getPredicate()) {
-                    case EQUALS:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " = " + dollarVar);
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case NOT_EQUALS:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " != " + dollarVar);
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case IN:
-                        xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
-                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
-                        xmlLines.add(TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='"
-                                + varName + "' item='one' separator=','>#{one}</foreach>)");
-                        xmlLines.add(DOUBLE_INDENT + "</if>");
-                        xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
-                        xmlLines.add(TREBLE_INDENT + "AND FALSE");
-                        xmlLines.add(DOUBLE_INDENT + "</if>");
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case NOT_IN:
-                        xmlLines.add(SINGLE_INDENT + String
-                                .format("<if test=\"%s != null and %s.size() > 0\">", varName, varName));
-                        xmlLines.add(
-                                DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
-                                        + varName + "' item='one' separator=','>#{one}</foreach>)");
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case GREATER_THEN:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case GREATER_OR_EQUALS:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case LESS_THEN:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case LESS_OR_EQUALS:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                    case NOT_NULL:
-                        xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NOT NULL");
-                        break;
-                    case IS_NULL:
-                        xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NULL");
-                        break;
-                    case LIKE:
-                        xmlLines.add(ifTag);
-                        xmlLines.add(
-                                DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
-                                        + ", '%')");
-                        xmlLines.add(SINGLE_INDENT + "</if>");
-                        break;
-                }
+            String ifTag = SINGLE_INDENT + "<if test=\"" + varName + " != null";
+            if (property.getJavaType().getQualifier().equals("java.lang.String")) {
+                ifTag += " AND " + varName + " != ''";
+            }
+            ifTag += "\">";
+            switch (byPhrase.getPredicate()) {
+                case EQUALS:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " = " + dollarVar);
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case NOT_EQUALS:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " != " + dollarVar);
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case IN:
+                    xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
+                    xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
+                    xmlLines.add(
+                            TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='" + varName
+                                    + "' item='one' separator=','>#{one}</foreach>)");
+                    xmlLines.add(DOUBLE_INDENT + "</if>");
+                    xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
+                    xmlLines.add(TREBLE_INDENT + "AND FALSE");
+                    xmlLines.add(DOUBLE_INDENT + "</if>");
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case NOT_IN:
+                    xmlLines.add(SINGLE_INDENT + String
+                            .format("<if test=\"%s != null and %s.size() > 0\">", varName, varName));
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
+                            + varName + "' item='one' separator=','>#{one}</foreach>)");
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case GREATER_THEN:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case GREATER_OR_EQUALS:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case LESS_THEN:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case LESS_OR_EQUALS:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
+                case NOT_NULL:
+                    xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NOT NULL");
+                    break;
+                case IS_NULL:
+                    xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NULL");
+                    break;
+                case LIKE:
+                    xmlLines.add(ifTag);
+                    xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
+                            + ", '%')");
+                    xmlLines.add(SINGLE_INDENT + "</if>");
+                    break;
             }
         }
         return xmlLines;

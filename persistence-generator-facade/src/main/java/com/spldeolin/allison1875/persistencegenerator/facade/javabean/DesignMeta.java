@@ -23,4 +23,10 @@ public class DesignMeta {
 
     private String tableName;
 
+    /**
+     * 如果有逻辑删除，怎么样算作“数据未被删”
+     * 如果properties中有逻辑删除标识，则值来自PersistenceGeneratorConfig#notDeletedSql
+     */
+    private String notDeletedSql;
+
 }
