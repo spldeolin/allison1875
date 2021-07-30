@@ -10,7 +10,7 @@ import lombok.ToString;
  * @author Deolin 2020-12-08
  */
 @ToString
-public final class PersistenceGeneratorModule extends Allison1875Module {
+public class PersistenceGeneratorModule extends Allison1875Module {
 
     private final PersistenceGeneratorConfig persistenceGeneratorConfig;
 

@@ -10,7 +10,7 @@ import lombok.ToString;
  * @author Deolin 2020-12-09
  */
 @ToString
-public final class QueryTransformerModule extends Allison1875Module {
+public class QueryTransformerModule extends Allison1875Module {
 
     private final QueryTransformerConfig queryTransformerConfig;
 

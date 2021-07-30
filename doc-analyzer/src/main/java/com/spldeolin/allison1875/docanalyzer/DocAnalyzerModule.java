@@ -10,7 +10,7 @@ import lombok.ToString;
  * @author Deolin 2020-12-06
  */
 @ToString
-public final class DocAnalyzerModule extends Allison1875Module {
+public class DocAnalyzerModule extends Allison1875Module {
 
     private final DocAnalyzerConfig docAnalyzerConfig;
 

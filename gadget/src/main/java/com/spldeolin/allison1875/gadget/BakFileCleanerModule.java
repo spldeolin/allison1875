@@ -9,7 +9,7 @@ import lombok.ToString;
  * @author Deolin 2020-12-07
  */
 @ToString
-public final class BakFileCleanerModule extends Allison1875Module {
+public class BakFileCleanerModule extends Allison1875Module {
 
     @Override
     protected void configure() {

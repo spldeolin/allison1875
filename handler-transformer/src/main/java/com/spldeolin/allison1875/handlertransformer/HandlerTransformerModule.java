@@ -10,7 +10,7 @@ import lombok.ToString;
  * @author Deolin 2020-12-07
  */
 @ToString
-public final class HandlerTransformerModule extends Allison1875Module {
+public class HandlerTransformerModule extends Allison1875Module {
 
     private final HandlerTransformerConfig handlerTransformerConfig;
 

@@ -10,7 +10,7 @@ import lombok.ToString;
  * @author Deolin 2020-12-07
  */
 @ToString
-public final class LineCounterModule extends Allison1875Module {
+public class LineCounterModule extends Allison1875Module {
 
     private final LineCounterConfig lineCounterConfig;
 
