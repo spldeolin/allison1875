@@ -20,7 +20,7 @@ public class JdbcTypeHandle {
         if (columnType == null || dataType == null) {
             throw new IllegalArgumentException("illegal argument.");
         }
-        if ("tinyint(1)".equalsIgnoreCase(columnType)) {
+        if (StringUtils.containsIgnoreCase(columnType, "tinyint(1)")) {
             return new JavaTypeNamingDto().setClass(Boolean.class);
         }
         if (StringUtils.equalsAnyIgnoreCase(dataType, "varchar", "char", "text", "longtext")) {
