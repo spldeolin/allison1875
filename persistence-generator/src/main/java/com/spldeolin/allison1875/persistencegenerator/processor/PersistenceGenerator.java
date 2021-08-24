@@ -30,6 +30,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryById
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKeysProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.SaveProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllCloumnSqlXmlProc;
@@ -46,6 +47,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByKeyXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByKeysXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.SaveXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProc;
 import lombok.extern.log4j.Log4j2;
@@ -151,6 +153,12 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private ListAllXmlProc listAllXmlProc;
 
     @Inject
+    private SaveProc saveProc;
+
+    @Inject
+    private SaveXmlProc saveXmlProc;
+
+    @Inject
     private BuildPersistenceDtoProc buildPersistenceDtoProc;
 
     @Inject
@@ -229,6 +237,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
             String queryByEntityMethodName = queryByEntityProc.process(persistence, mapper);
             String listAllMethodName = listAllProc.process(persistence, mapper);
+            String saveMethodName = saveProc.process(persistence, mapper);
 
             // 将临时删除的开发者自定义方法添加到Mapper的最后
             customMethods.forEach(one -> mapper.getMembers().addLast(one));
@@ -248,15 +257,16 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                                 batchUpdateEvenNullXmlProc.process(persistence, batchUpdateEvenNullMethodName),
                                 queryByIdXmlProc.process(persistence, queryByIdMethodName),
                                 updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
-                                updateByIdEvenNullXmlProc
-                                        .process(persistence, entityName, updateByIdEvenNullMethodName),
+                                updateByIdEvenNullXmlProc.process(persistence, entityName,
+                                        updateByIdEvenNullMethodName),
                                 queryByIdsXmlProc.process(persistence, queryByIdsProcMethodName),
                                 queryByIdsXmlProc.process(persistence, queryByIdsEachIdMethodName),
                                 queryByKeyXmlProc.process(persistence, queryByKeyDtos),
                                 deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
                                 queryByKeysXmlProc.process(persistence, queryByKeysDtos),
                                 queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName),
-                                listAllXmlProc.process(persistence, listAllMethodName)));
+                                listAllXmlProc.process(persistence, listAllMethodName),
+                                saveXmlProc.process(persistence, entityName, saveMethodName)));
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }
