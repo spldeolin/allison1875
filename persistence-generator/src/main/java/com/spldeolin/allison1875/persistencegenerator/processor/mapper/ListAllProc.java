@@ -30,10 +30,7 @@ public class ListAllProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "listAll");
             MethodDeclaration listAll = new MethodDeclaration();
-            Long listAllLimit = persistenceGeneratorConfig.getListAllLimit();
-            Javadoc javadoc = new JavadocComment(
-                    String.format("获取全部\n\n出于性能考虑，这个方法只会返回最多%s条数据\n事实上，只建议对数据量不大于%s的配置表或常量表使用该方法，否则无法返回“全部”数据",
-                            listAllLimit, listAllLimit) + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            Javadoc javadoc = new JavadocComment("获取全部" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
             listAll.setType(StaticJavaParser.parseType("List<" + persistence.getEntityName() + ">"));
             listAll.setName(methodName);
 
