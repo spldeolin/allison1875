@@ -31,7 +31,6 @@ public class ListAllXmlProc {
         if (persistence.getIsDeleteFlagExist()) {
             result.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
         }
-        result.add(BaseConstant.SINGLE_INDENT + "LIMIT " + persistenceGeneratorConfig.getListAllLimit());
         result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
         result.add("</select>");
         result.add("");

@@ -122,12 +122,6 @@ public final class PersistenceGeneratorConfig {
     @NotNull
     private Collection<String> alreadyInSuperEntity;
 
-    /**
-     * listAll方法返回值的最多条数，disableListAll=true时，此项失效
-     */
-    @NotNull
-    private Long listAllLimit = 500L;
-
     @NotNull
     private Boolean disableInsert;
 
