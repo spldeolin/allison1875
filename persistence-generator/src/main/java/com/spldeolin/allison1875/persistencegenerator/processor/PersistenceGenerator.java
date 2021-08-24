@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchInse
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchUpdateEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.BatchUpdateProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.DeleteByKeyProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertOrUpdateProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.InsertProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.ListAllProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByEntityProc;
@@ -30,7 +31,6 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryById
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByIdsProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKeyProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.QueryByKeysProc;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapper.SaveProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdEvenNullProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapper.UpdateByIdProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.AllCloumnSqlXmlProc;
@@ -39,6 +39,7 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchI
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchUpdateEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.BatchUpdateXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.DeleteByKeyXmlProc;
+import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertOrUpdateXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.InsertXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ListAllXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByEntityXmlProc;
@@ -47,7 +48,6 @@ import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryB
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByKeyXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.QueryByKeysXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.ResultMapXmlProc;
-import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.SaveXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdEvenNullXmlProc;
 import com.spldeolin.allison1875.persistencegenerator.processor.mapperxml.UpdateByIdXmlProc;
 import lombok.extern.log4j.Log4j2;
@@ -153,10 +153,10 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
     private ListAllXmlProc listAllXmlProc;
 
     @Inject
-    private SaveProc saveProc;
+    private InsertOrUpdateProc insertOrUpdateProc;
 
     @Inject
-    private SaveXmlProc saveXmlProc;
+    private InsertOrUpdateXmlProc insertOrUpdateXmlProc;
 
     @Inject
     private BuildPersistenceDtoProc buildPersistenceDtoProc;
@@ -237,7 +237,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             }
             String queryByEntityMethodName = queryByEntityProc.process(persistence, mapper);
             String listAllMethodName = listAllProc.process(persistence, mapper);
-            String saveMethodName = saveProc.process(persistence, mapper);
+            String insertOrUpdateMethodName = insertOrUpdateProc.process(persistence, mapper);
 
             // 将临时删除的开发者自定义方法添加到Mapper的最后
             customMethods.forEach(one -> mapper.getMembers().addLast(one));
@@ -266,7 +266,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                                 queryByKeysXmlProc.process(persistence, queryByKeysDtos),
                                 queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName),
                                 listAllXmlProc.process(persistence, listAllMethodName),
-                                saveXmlProc.process(persistence, entityName, saveMethodName)));
+                                insertOrUpdateXmlProc.process(persistence, entityName, insertOrUpdateMethodName)));
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }

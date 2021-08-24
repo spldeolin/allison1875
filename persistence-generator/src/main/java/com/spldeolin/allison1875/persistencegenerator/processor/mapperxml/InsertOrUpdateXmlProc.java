@@ -16,13 +16,13 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
  * @author Deolin 2020-07-19
  */
 @Singleton
-public class SaveXmlProc {
+public class InsertOrUpdateXmlProc {
 
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     public Collection<String> process(PersistenceDto persistence, String entityName, String methodName) {
-        if (persistenceGeneratorConfig.getDisableSave()) {
+        if (persistenceGeneratorConfig.getDisableInsertOrUpdate()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();

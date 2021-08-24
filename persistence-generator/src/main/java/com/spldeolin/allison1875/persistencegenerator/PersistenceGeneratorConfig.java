@@ -168,7 +168,7 @@ public final class PersistenceGeneratorConfig {
     private Boolean disableListAll;
 
     @NotNull
-    private Boolean disableSave;
+    private Boolean disableInsertOrUpdate;
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
