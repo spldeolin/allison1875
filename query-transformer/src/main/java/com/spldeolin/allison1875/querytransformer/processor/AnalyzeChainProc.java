@@ -150,7 +150,7 @@ public class AnalyzeChainProc {
         result.setIndent(TokenRanges.getStartIndent(
                 chain.findAncestor(Statement.class).orElseThrow(IllegalChainException::new)));
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
-        result.setLotNo(new LotNo(ModuleAbbr.QT, JsonUtils.toJson(result)));
+        result.setLotNo(LotNo.build(ModuleAbbr.QT, JsonUtils.toJson(result), false));
         return result;
     }
 

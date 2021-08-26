@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
@@ -40,8 +39,8 @@ public class QueryByIdsEachIdProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIdsEachId");
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + Constant.PROHIBIT_MODIFICATION_JAVADOC)
-                    .parse();
+            Javadoc javadoc = new JavadocComment(
+                    "根据多个ID查询，并以ID作为key映射到Map" + persistence.getLotNo().asJavadocDescription()).parse();
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
             Imports.ensureImported(mapper, "java.util.Map");
             Imports.ensureImported(mapper, "java.util.Collection");

@@ -78,9 +78,8 @@ public class GenerateEntityProc {
     }
 
     private String concatEntityDescription(PersistenceDto persistence) {
-        return persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName() + Strings
-                .repeat(BaseConstant.NEW_LINE, 2) + "<p><p>" + "<strong>该类型" + BaseConstant.BY_ALLISON_1875
-                + "</strong>";
+        return persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
+                + Strings.repeat(BaseConstant.NEW_LINE, 2) + persistence.getLotNo().asJavadocDescription();
     }
 
     private String cancatPropertyDescription(PropertyDto property) {

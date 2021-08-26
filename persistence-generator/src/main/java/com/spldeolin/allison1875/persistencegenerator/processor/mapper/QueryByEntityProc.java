@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
@@ -29,7 +28,7 @@ public class QueryByEntityProc extends MapperProc {
 
         String methodName = super.calcMethodName(mapper, "queryByEntity");
         MethodDeclaration queryByEntity = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+        Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + persistence.getLotNo().asJavadocDescription()).parse();
         Imports.ensureImported(mapper, "java.util.List");
         queryByEntity.setType(parseType("List<" + persistence.getEntityName() + ">"));
         queryByEntity.setName(methodName);

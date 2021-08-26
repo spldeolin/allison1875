@@ -10,13 +10,13 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import jodd.io.FileUtil;
 
@@ -25,9 +25,6 @@ import jodd.io.FileUtil;
  */
 @Singleton
 public class MapperXmlProc {
-
-    @Inject
-    private AnchorProc anchorProc;
 
     public MapperXmlProc process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
             Path mapperXmlDirectory, Collection<Collection<String>> sourceCodes) throws IOException {
@@ -50,20 +47,22 @@ public class MapperXmlProc {
 
         String content = FileUtil.readString(mapperXmlFile);
         List<String> lines = MoreStringUtils.splitLineByLine(content);
-        List<String> generatedLines = getGeneratedLines(sourceCodes);
+        List<String> generatedLines = getGeneratedLines(sourceCodes, persistence);
 
-        if (content.contains(BaseConstant.BY_ALLISON_1875)) {
+        if (StringUtils.containsAny(content, BaseConstant.BY_ALLISON_1875, LotNo.TAG_PREFIXION + ModuleAbbr.PG)) {
             boolean inAnchorRange = false;
             for (String line : lines) {
                 if (!inAnchorRange) {
-                    if (line.contains(BaseConstant.BY_ALLISON_1875)) {
+                    if (StringUtils.containsAny(line, BaseConstant.BY_ALLISON_1875,
+                            LotNo.TAG_PREFIXION + ModuleAbbr.PG)) {
                         // 从 范围外 进入
                         inAnchorRange = true;
                     } else {
                         newLines.add(line);
                     }
                 } else {
-                    if (line.contains(BaseConstant.BY_ALLISON_1875)) {
+                    if (StringUtils.containsAny(line, BaseConstant.BY_ALLISON_1875,
+                            LotNo.TAG_PREFIXION + ModuleAbbr.PG)) {
                         // 从 范围内 离开
                         inAnchorRange = false;
                         newLines.addAll(generatedLines);
@@ -82,19 +81,13 @@ public class MapperXmlProc {
             Collections.reverse(newLines);
         }
 
-        String leftAnchor = anchorProc.createLeftAnchor(persistence);
-        String rightAnchor = anchorProc.createRightAnchor(persistence);
-
-        String finalContent = Joiner.on(System.lineSeparator()).join(newLines).replace("${leftAnchor}", leftAnchor)
-                .replace("${rightAnchor}", rightAnchor);
-
-        FileUtil.writeString(mapperXmlFile, finalContent);
+        FileUtil.writeString(mapperXmlFile, Joiner.on(System.lineSeparator()).join(newLines));
         return this;
     }
 
-    private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes) {
+    private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes, PersistenceDto persistence) {
         List<String> auto = Lists.newArrayList();
-        auto.add(BaseConstant.SINGLE_INDENT + Constant.PROHIBIT_MODIFICATION_XML_BEGIN);
+        auto.add(BaseConstant.SINGLE_INDENT + persistence.getLotNo().asXmlComment().replace("<!--", "<!-- [START]"));
         auto.add("");
         for (Collection<String> sourceCode : sourceCodes) {
             if (CollectionUtils.isNotEmpty(sourceCode)) {
@@ -111,7 +104,7 @@ public class MapperXmlProc {
             auto.remove(auto.size() - 1);
         }
         auto.add("");
-        auto.add(BaseConstant.SINGLE_INDENT + Constant.PROHIBIT_MODIFICATION_XML_END);
+        auto.add(BaseConstant.SINGLE_INDENT + persistence.getLotNo().asXmlComment().replace("<!--", "<!-- [END]"));
         return auto;
     }
 

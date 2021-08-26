@@ -9,7 +9,6 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
@@ -30,15 +29,15 @@ public class BatchUpdateEvenNullProc extends MapperProc {
 
         String methodName = super.calcMethodName(mapper, "batchUpdateEvenNull");
         MethodDeclaration update = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment("（批量版）根据ID更新数据，为null的属性会被更新为null" + Constant.PROHIBIT_MODIFICATION_JAVADOC)
-                .parse();
+        Javadoc javadoc = new JavadocComment(
+                "（批量版）根据ID更新数据，为null的属性会被更新为null" + persistence.getLotNo().asJavadocDescription()).parse();
         javadoc.addBlockTag("param", "entities", "（多个）" + persistence.getDescrption());
         javadoc.addBlockTag("return", "更新条数");
         update.setJavadocComment(javadoc);
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
-        update.addParameter(StaticJavaParser
-                .parseParameter("@Param(\"entities\") Collection<" + persistence.getEntityName() + "> entities"));
+        update.addParameter(StaticJavaParser.parseParameter(
+                "@Param(\"entities\") Collection<" + persistence.getEntityName() + "> entities"));
         update.setBody(null);
         mapper.getMembers().addLast(update);
         return methodName;

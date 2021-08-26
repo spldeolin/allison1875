@@ -14,7 +14,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
@@ -40,7 +39,7 @@ public class QueryByKeysProc extends MapperProc {
                 "queryBy" + English.plural(MoreStringUtils.upperFirstLetter(key.getPropertyName())));
         MethodDeclaration method = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
-                "根据多个" + key.getDescription() + "查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+                "根据多个" + key.getDescription() + "查询" + persistence.getLotNo().asJavadocDescription()).parse();
         Imports.ensureImported(mapper, "java.util.List");
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));
         method.setName(methodName);

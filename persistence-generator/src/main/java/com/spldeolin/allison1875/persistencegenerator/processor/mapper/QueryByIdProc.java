@@ -14,7 +14,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
@@ -37,7 +36,7 @@ public class QueryByIdProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("根据ID查询" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            Javadoc javadoc = new JavadocComment("根据ID查询" + persistence.getLotNo().asJavadocDescription()).parse();
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName(methodName);
 

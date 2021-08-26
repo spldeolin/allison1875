@@ -16,6 +16,7 @@ import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.util.ast.Saves;
@@ -64,7 +65,8 @@ public class FindOrCreateMapperProc {
             cu.addImport(entityGeneration.getEntityQualifier());
             cu.addImport(ImportConstants.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = new JavadocComment(persistence.getDescrption()).parse();
+            LotNo lotNo = LotNo.build(persistence.getLotNo().getModuleAbbr(), persistence.getLotNo().getHash(), false);
+            Javadoc javadoc = new JavadocComment(persistence.getDescrption() + lotNo.asJavadocDescription()).parse();
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityGeneration.getEntityName()));
             javadoc.addBlockTag(
                     new JavadocBlockTag(Type.AUTHOR, persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));

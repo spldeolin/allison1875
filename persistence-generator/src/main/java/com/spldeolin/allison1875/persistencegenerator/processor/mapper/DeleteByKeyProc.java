@@ -10,7 +10,6 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
@@ -31,7 +30,7 @@ public class DeleteByKeyProc extends MapperProc {
             MethodDeclaration method = new MethodDeclaration();
             String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
             Javadoc javadoc = new JavadocComment(
-                    "根据" + key.getDescription() + "删除" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+                    "根据" + key.getDescription() + "删除" + persistence.getLotNo().asJavadocDescription()).parse();
             javadoc.addBlockTag("param", varName, key.getDescription());
             javadoc.addBlockTag("return", "删除条数");
             method.setJavadocComment(javadoc);

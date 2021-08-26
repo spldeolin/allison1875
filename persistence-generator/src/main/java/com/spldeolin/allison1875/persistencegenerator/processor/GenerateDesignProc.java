@@ -76,7 +76,8 @@ public class GenerateDesignProc {
         cu.addOrphanComment(new LineComment("@formatter:" + "off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
         Javadoc javadoc = entityGeneration.getEntity().getJavadoc()
-                .orElse(Javadocs.createJavadoc(null, persistenceGeneratorConfig.getAuthor()));
+                .orElse(Javadocs.createJavadoc(persistence.getLotNo().asJavadocDescription(),
+                        persistenceGeneratorConfig.getAuthor()));
         designCoid.setJavadocComment(javadoc);
         designCoid.addAnnotation(StaticJavaParser.parseAnnotation("@SuppressWarnings(\"all\")"));
         designCoid.setPublic(true).setInterface(false).setName(designName);
@@ -85,8 +86,8 @@ public class GenerateDesignProc {
         designCoid.addMember(StaticJavaParser.parseBodyDeclaration("private " + designName + "() {}"));
         designCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public static QueryChain query(String methodName) {throw e;}"));
-        designCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public static UpdateChain update(String methodName) {throw e;}"));
+        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public static UpdateChain update(String methodName) {throw e;}"));
         designCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public static DropChain drop(String methodName) {throw e;}"));
 
@@ -94,8 +95,8 @@ public class GenerateDesignProc {
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("private QueryChain () {}"));
         for (PropertyDto property : properties) {
-            FieldDeclaration field = StaticJavaParser
-                    .parseBodyDeclaration("public QueryChain " + property.getPropertyName() + ";").asFieldDeclaration();
+            FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(
+                    "public QueryChain " + property.getPropertyName() + ";").asFieldDeclaration();
             field.setJavadocComment(property.getDescription());
             queryChainCoid.addMember(field);
         }
@@ -105,24 +106,24 @@ public class GenerateDesignProc {
                 String.format("public ByChainReturn<NextableByChainReturn> %s() { throw e; }",
                         TokenWordConstant.BY_FORCED_METHOD_NAME)));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
-        queryChainCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
                         persistence.getEntityName())));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
                         persistence.getEntityName())));
-        queryChainCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
         designCoid.addMember(queryChainCoid);
 
         ClassOrInterfaceDeclaration updateChainCoid = new ClassOrInterfaceDeclaration();
         updateChainCoid.setPublic(true).setInterface(true).setName("UpdateChain");
         for (PropertyDto property : properties) {
             updateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getSimpleName()
-                            + " " + property.getPropertyName() + ");").asMethodDeclaration()
+                            "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getSimpleName()
+                                    + " " + property.getPropertyName() + ");").asMethodDeclaration()
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(updateChainCoid);
@@ -131,8 +132,8 @@ public class GenerateDesignProc {
         nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain")
                 .addExtendedType("UpdateChain");
         nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
-        nextableUpdateChainCoid
-                .addMember(StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
+        nextableUpdateChainCoid.addMember(
+                StaticJavaParser.parseBodyDeclaration("ByChainReturn<NextableByChainVoid> by();"));
         nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("ByChainReturn<NextableByChainVoid> %s();", TokenWordConstant.BY_FORCED_METHOD_NAME)));
         designCoid.addMember(nextableUpdateChainCoid);
@@ -150,8 +151,8 @@ public class GenerateDesignProc {
                 .addTypeParameter("NEXT");
         for (PropertyDto property : properties) {
             byChainReturnCode.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public ByChainPredicate<NEXT, " + property.getJavaType().getSimpleName() + "> " + property
-                            .getPropertyName() + ";").asFieldDeclaration()
+                            "public ByChainPredicate<NEXT, " + property.getJavaType().getSimpleName() + "> "
+                                    + property.getPropertyName() + ";").asFieldDeclaration()
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(byChainReturnCode);
@@ -160,30 +161,30 @@ public class GenerateDesignProc {
         nextableByChainReturnCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainReturn");
         for (PropertyDto property : properties) {
             nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public ByChainPredicate<NextableByChainReturn, " + property.getJavaType().getSimpleName() + "> "
-                            + property.getPropertyName() + ";").asFieldDeclaration()
+                            "public ByChainPredicate<NextableByChainReturn, " + property.getJavaType().getSimpleName() + "> "
+                                    + property.getPropertyName() + ";").asFieldDeclaration()
                     .setJavadocComment(property.getDescription()));
         }
-        nextableByChainReturnCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
                         persistence.getEntityName())));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
                         persistence.getEntityName())));
-        nextableByChainReturnCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
-        nextableByChainReturnCoid
-                .addMember(StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+        nextableByChainReturnCoid.addMember(
+                StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         designCoid.addMember(nextableByChainReturnCoid);
 
         ClassOrInterfaceDeclaration nextableByChainVoidCoid = new ClassOrInterfaceDeclaration();
         nextableByChainVoidCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainVoid");
         for (PropertyDto property : properties) {
             nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public ByChainPredicate<NextableByChainVoid, " + property.getJavaType().getSimpleName() + "> "
-                            + property.getPropertyName() + ";").asFieldDeclaration()
+                            "public ByChainPredicate<NextableByChainVoid, " + property.getJavaType().getSimpleName() + "> "
+                                    + property.getPropertyName() + ";").asFieldDeclaration()
                     .setJavadocComment(property.getDescription()));
         }
         nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int over() { throw e; }"));
@@ -193,7 +194,7 @@ public class GenerateDesignProc {
         orderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("OrderChain");
         for (PropertyDto property : properties) {
             orderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";")
+                            "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";")
                     .asFieldDeclaration().setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(orderChainCoid);
@@ -201,16 +202,16 @@ public class GenerateDesignProc {
         ClassOrInterfaceDeclaration nextableOrderChainCoid = new ClassOrInterfaceDeclaration();
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
                 .addExtendedType("OrderChain");
-        nextableOrderChainCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
                         persistence.getEntityName())));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
                         persistence.getEntityName())));
-        nextableOrderChainCoid.addMember(StaticJavaParser
-                .parseBodyDeclaration("public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
 
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();

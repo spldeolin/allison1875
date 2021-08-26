@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
 import java.util.Collection;
+import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import lombok.Data;
 
@@ -42,5 +43,7 @@ public class PersistenceDto {
      * 存在逻辑删除标识符
      */
     private Boolean isDeleteFlagExist = false;
+
+    private LotNo lotNo;
 
 }

@@ -8,7 +8,6 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
@@ -30,7 +29,7 @@ public class ListAllProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "listAll");
             MethodDeclaration listAll = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("获取全部" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+            Javadoc javadoc = new JavadocComment("获取全部" + persistence.getLotNo().asJavadocDescription()).parse();
             listAll.setType(StaticJavaParser.parseType("List<" + persistence.getEntityName() + ">"));
             listAll.setName(methodName);
 

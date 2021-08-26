@@ -8,7 +8,6 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
@@ -30,8 +29,8 @@ public class UpdateByIdProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateById");
             MethodDeclaration updateById = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("根据ID更新数据，忽略值为null的属性" + Constant.PROHIBIT_MODIFICATION_JAVADOC)
-                    .parse();
+            Javadoc javadoc = new JavadocComment(
+                    "根据ID更新数据，忽略值为null的属性" + persistence.getLotNo().asJavadocDescription()).parse();
             javadoc.addBlockTag("param", "entity", persistence.getDescrption());
             javadoc.addBlockTag("return", "更新条数");
             updateById.setJavadocComment(javadoc);

@@ -7,7 +7,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
@@ -54,6 +57,7 @@ public class BuildPersistenceDtoProc {
             dto.setNonIdProperties(Lists.newArrayList());
             dto.setKeyProperties(Lists.newArrayList());
             dto.setProperties(Lists.newArrayList());
+            dto.setLotNo(LotNo.build(ModuleAbbr.PG, JsonUtils.toJson(dto), true));
             persistences.put(infoSchema.getTableName(), dto);
         }
         for (InformationSchemaDto infoSchema : infoSchemas) {

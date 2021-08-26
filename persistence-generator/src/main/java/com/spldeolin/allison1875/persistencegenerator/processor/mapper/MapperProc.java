@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import lombok.extern.log4j.Log4j2;
 
@@ -32,7 +32,7 @@ public abstract class MapperProc {
         List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
         for (MethodDeclaration method : methods) {
             Collection<String> descriptionLines = JavadocDescriptions.getAsLines(method);
-            if (descriptionLines.stream().anyMatch(line -> line.contains(BaseConstant.BY_ALLISON_1875))) {
+            if (descriptionLines.stream().anyMatch(line -> line.contains(LotNo.TAG_PREFIXION))) {
                 method.remove();
             }
         }

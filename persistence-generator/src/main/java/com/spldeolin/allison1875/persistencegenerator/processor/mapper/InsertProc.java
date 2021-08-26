@@ -8,7 +8,6 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.constant.Constant;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 
 /**
@@ -28,7 +27,7 @@ public class InsertProc extends MapperProc {
         }
         String methodName = super.calcMethodName(mapper, "insert");
         MethodDeclaration insert = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment("插入" + Constant.PROHIBIT_MODIFICATION_JAVADOC).parse();
+        Javadoc javadoc = new JavadocComment("插入" + persistence.getLotNo().asJavadocDescription()).parse();
         javadoc.addBlockTag("param", "entity", persistence.getDescrption());
         javadoc.addBlockTag("return", "插入条数");
         insert.setJavadocComment(javadoc);
