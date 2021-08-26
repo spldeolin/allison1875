@@ -32,8 +32,6 @@ public class ListAllProc extends MapperProc {
             Javadoc javadoc = new JavadocComment("获取全部" + persistence.getLotNo().asJavadocDescription()).parse();
             listAll.setType(StaticJavaParser.parseType("List<" + persistence.getEntityName() + ">"));
             listAll.setName(methodName);
-
-            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
             listAll.setJavadocComment(javadoc);
             listAll.setBody(null);
             mapper.getMembers().addLast(listAll);

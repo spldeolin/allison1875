@@ -28,10 +28,7 @@ public class InsertOrUpdateProc extends MapperProc {
         String methodName = super.calcMethodName(mapper, "insertOrUpdate");
         MethodDeclaration insert = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment(
-                "尝试插入，若指定了id并存在，则更新（INSERT ON DUPLICATE KEY UPDATE）" + persistence.getLotNo()
-                        .asJavadocDescription()).parse();
-        javadoc.addBlockTag("param", "entity", persistence.getDescrption());
-        javadoc.addBlockTag("return", "插入或更新条数");
+                "尝试插入，若指定了id并存在，则更新，即INSERT ON DUPLICATE KEY UPDATE" + persistence.getLotNo().asJavadocDescription()).parse();
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);

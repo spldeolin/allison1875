@@ -30,9 +30,7 @@ public class DeleteByKeyProc extends MapperProc {
             MethodDeclaration method = new MethodDeclaration();
             String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
             Javadoc javadoc = new JavadocComment(
-                    "根据" + key.getDescription() + "删除" + persistence.getLotNo().asJavadocDescription()).parse();
-            javadoc.addBlockTag("param", varName, key.getDescription());
-            javadoc.addBlockTag("return", "删除条数");
+                    "根据「" + key.getDescription() + "」删除" + persistence.getLotNo().asJavadocDescription()).parse();
             method.setJavadocComment(javadoc);
             method.setType(PrimitiveType.intType());
             method.setName(methodName);

@@ -28,8 +28,6 @@ public class InsertProc extends MapperProc {
         String methodName = super.calcMethodName(mapper, "insert");
         MethodDeclaration insert = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment("插入" + persistence.getLotNo().asJavadocDescription()).parse();
-        javadoc.addBlockTag("param", "entity", persistence.getDescrption());
-        javadoc.addBlockTag("return", "插入条数");
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);

@@ -29,8 +29,6 @@ public class BatchInsertProc extends MapperProc {
         String methodName = super.calcMethodName(mapper, "batchInsert");
         MethodDeclaration insert = new MethodDeclaration();
         Javadoc javadoc = new JavadocComment("批量插入" + persistence.getLotNo().asJavadocDescription()).parse();
-        javadoc.addBlockTag("param", "entities", "（多个）" + persistence.getDescrption());
-        javadoc.addBlockTag("return", "插入条数");
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);

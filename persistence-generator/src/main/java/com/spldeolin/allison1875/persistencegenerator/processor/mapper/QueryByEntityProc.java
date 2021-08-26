@@ -34,8 +34,6 @@ public class QueryByEntityProc extends MapperProc {
         queryByEntity.setName(methodName);
         queryByEntity.addParameter(persistence.getEntityName(), "entity");
         queryByEntity.setBody(null);
-        javadoc.addBlockTag("param", "entity", "条件");
-        javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
         queryByEntity.setJavadocComment(javadoc);
         mapper.getMembers().addLast(queryByEntity);
         return methodName;

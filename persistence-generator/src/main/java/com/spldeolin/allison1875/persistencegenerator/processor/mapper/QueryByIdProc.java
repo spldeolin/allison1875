@@ -45,7 +45,6 @@ public class QueryByIdProc extends MapperProc {
                 String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
                 Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
-                javadoc.addBlockTag("param", varName, onlyPk.getDescription());
             } else {
                 Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
                 for (PropertyDto pk : persistence.getIdProperties()) {
@@ -53,10 +52,8 @@ public class QueryByIdProc extends MapperProc {
                     Parameter parameter = parseParameter(
                             "@Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName() + " " + varName);
                     queryById.addParameter(parameter);
-                    javadoc.addBlockTag("param", varName, pk.getDescription());
                 }
             }
-            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
             queryById.setJavadocComment(javadoc);
             queryById.setBody(null);
             mapper.getMembers().addLast(queryById);

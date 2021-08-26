@@ -30,9 +30,7 @@ public class UpdateByIdEvenNullProc extends MapperProc {
             methodName = calcMethodName(mapper, "updateByIdEvenNull");
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
             Javadoc javadoc = new JavadocComment(
-                    "根据ID更新数据，为null的属性会被更新为null" + persistence.getLotNo().asJavadocDescription()).parse();
-            javadoc.addBlockTag("param", "entity", persistence.getDescrption());
-            javadoc.addBlockTag("return", "更新条数");
+                    "根据ID更新数据，为null属性对应的字段会被更新为null" + persistence.getLotNo().asJavadocDescription()).parse();
             updateByIdEvenNull.setJavadocComment(javadoc);
             updateByIdEvenNull.setType(PrimitiveType.intType());
             updateByIdEvenNull.setName(methodName);

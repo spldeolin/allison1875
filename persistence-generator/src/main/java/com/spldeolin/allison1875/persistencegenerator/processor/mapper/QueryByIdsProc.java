@@ -52,8 +52,6 @@ public class QueryByIdsProc extends MapperProc {
                             + varsName);
             queryByIds.addParameter(parameter);
             queryByIds.setBody(null);
-            javadoc.addBlockTag("param", varsName, "（多个）" + onlyPk.getDescription());
-            javadoc.addBlockTag("return", "（多个）" + persistence.getDescrption());
             queryByIds.setJavadocComment(javadoc);
             mapper.getMembers().addLast(queryByIds);
         }
