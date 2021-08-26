@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
@@ -52,16 +53,16 @@ public class ReqRespProc {
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
             throw new IllegalArgumentException(
-                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDto和RespDto。[" + firstLineDto + "] 当前：" + initBody
-                            .findAll(LocalClassDeclarationStmt.class).stream()
+                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDto和RespDto。[" + firstLineDto + "] 当前：" + initBody.findAll(
+                                    LocalClassDeclarationStmt.class).stream()
                             .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
         }
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {
             for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
                 if (!StringUtils.equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req", "Resp")) {
                     throw new IllegalArgumentException(
-                            "构造代码块下类的命名只能是「Req」或者「Resp」。[" + firstLineDto + "] 当前：" + initBody
-                                    .findAll(LocalClassDeclarationStmt.class).stream()
+                            "构造代码块下类的命名只能是「Req」或者「Resp」。[" + firstLineDto + "] 当前：" + initBody.findAll(
+                                            LocalClassDeclarationStmt.class).stream()
                                     .map(one -> one.getClassDeclaration().getNameAsString())
                                     .collect(Collectors.joining("、")));
                 }
@@ -112,6 +113,7 @@ public class ReqRespProc {
                             AnnotationConstant.DATA_QUALIFIER, handlerTransformerConfig.getPageTypeQualifier()));
             ClassOrInterfaceDeclaration clone = dto.clone();
             clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
+            clone.setJavadocComment(LotNo.TAG_PREFIXION + firstLineDto.getLotNo());
             clone.getAnnotations().clear();
             clone.addAnnotation(AnnotationConstant.DATA);
             clone.addAnnotation(AnnotationConstant.ACCESSORS);

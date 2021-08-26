@@ -8,6 +8,9 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
@@ -82,6 +85,7 @@ public class ParseFirstLineProc {
             result.setHandlerDescription("未指定描述");
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
+        result.setLotNo(LotNo.build(ModuleAbbr.HT, JsonUtils.toJson(result), false));
         return result;
     }
 
