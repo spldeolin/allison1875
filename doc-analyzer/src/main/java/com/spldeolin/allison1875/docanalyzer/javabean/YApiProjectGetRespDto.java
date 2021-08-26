@@ -12,6 +12,8 @@ public class YApiProjectGetRespDto {
     @JsonProperty("_id")
     private Long id;
 
+    private String name;
+
     // and more...
 
 }

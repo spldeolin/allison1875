@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -22,6 +23,7 @@ import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.YApiProjectGetRespDto;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
 import jodd.util.StringUtil;
@@ -49,7 +51,8 @@ public class YApiSyncProc {
     private YApiOpenProc yApiOpenProc;
 
     public void process(Collection<EndpointDto> endpoints) throws Exception {
-        Long projectId = yApiOpenProc.getProject().getId();
+        YApiProjectGetRespDto project = yApiOpenProc.getProject();
+        Long projectId = project.getId();
 
         Set<String> catNames = endpoints.stream().map(EndpointDto::getCat).collect(Collectors.toSet());
         catNames.add("回收站");
@@ -80,8 +83,11 @@ public class YApiSyncProc {
             String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
             String respJs = toJson(endpoint.getResponseBodyJsonSchema());
 
-            this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc, endpoint.getHttpMethod(),
-                    catName2catId.get(endpoint.getCat()));
+            JsonNode yApiInterface = this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
+                    endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
+            log.info("Endpoint [{}] output to YApi Project [{}]({}...{}), response: {}", endpoint.getUrl(),
+                    project.getName(), StringUtils.left(docAnalyzerConfig.getYapiToken(), 6),
+                    StringUtils.right(docAnalyzerConfig.getYapiToken(), 6), JsonUtils.toJson(yApiInterface));
         }
     }
 
@@ -159,8 +165,8 @@ public class YApiSyncProc {
             desc = descNode.asText();
         }
         String deleteMessage = MarkdownUtils.convertToHtml("> 该接口已被删除，或是它的URL已被更改，**禁止调用**\n");
-        deleteMessage = MoreStringUtils
-                .replaceLast(deleteMessage, "<strong>", "<span style='background:black;color:#FFD9E6'>");
+        deleteMessage = MoreStringUtils.replaceLast(deleteMessage, "<strong>",
+                "<span style='background:black;color:#FFD9E6'>");
         deleteMessage = MoreStringUtils.replaceLast(deleteMessage, "</strong>", "</span>");
 
         body.put("desc", deleteMessage + desc);
@@ -169,7 +175,7 @@ public class YApiSyncProc {
         log.info(JsonUtils.toJson(jsonNode1));
     }
 
-    private void createYApiInterface(String title, String url, String requestBodyJsonSchema,
+    private JsonNode createYApiInterface(String title, String url, String requestBodyJsonSchema,
             String responseBodyJsonSchema, String description, String httpMethod, Long catId) {
         Map<String, Object> form = Maps.newHashMap();
         form.put("title", title);
@@ -189,7 +195,7 @@ public class YApiSyncProc {
         form.put("catid", catId);
         form.put("token", docAnalyzerConfig.getYapiToken());
         JsonNode responseBody = yApiOpenProc.createOrUpdateEndpoint(form);
-        log.info(JsonUtils.toJson(responseBody));
+        return responseBody;
     }
 
     private JsonPropertyDescriptionValueDto toJpdvSkipNull(String nullableJson) {
