@@ -1,10 +1,13 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.handle.MoreHandlerAnalysisHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 
@@ -36,7 +39,7 @@ public class EndpointToStringProc {
             // sb并不是只有换号符时
             if (StringUtils.isNotBlank(sb)) {
                 sb.insert(0, "##### 注释\n");
-                comment = sb.deleteCharAt(sb.length() - 1).toString();
+                comment = StringEscapeUtils.escapeHtml4(sb.deleteCharAt(sb.length() - 1).toString());
             }
         }
 
@@ -53,7 +56,7 @@ public class EndpointToStringProc {
         String moreText = moreHandlerAnalysisHandle.moreToString(dto.getMore());
 
         String allison1875Note = "\n---\n";
-        allison1875Note += "*该YApi文档" + BaseConstant.BY_ALLISON_1875 + "*";
+        allison1875Note += LotNo.TAG_PREFIXION + LotNo.build(ModuleAbbr.DA, JsonUtils.toJson(dto), true);
 
         return Joiner.on('\n').skipNulls().join(deprecatedNode, comment, developer, code, moreText, allison1875Note);
     }
