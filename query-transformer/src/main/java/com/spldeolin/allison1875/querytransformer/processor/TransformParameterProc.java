@@ -59,6 +59,7 @@ public class TransformParameterProc {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionPackage());
+            javabeanArg.setDescription(chainAnalysis.getLotNo().asJavadocDescription());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
             for (PhraseDto phrase : phrases) {
                 if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {

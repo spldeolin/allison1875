@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.Expression;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class PhraseDto {
 
     private PredicateEnum predicate;
 
+    @JsonIgnore
     private Expression objectExpr;
 
     @Override

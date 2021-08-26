@@ -48,6 +48,7 @@ public class GenerateMethodXmlProc {
         xmlLines.add("");
         if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
             // QUERY
+            xmlLines.add(concatLotNoComment(chainAnalysis));
             String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -86,6 +87,7 @@ public class GenerateMethodXmlProc {
             xmlLines.add("</select>");
         } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
             // UPDATE
+            xmlLines.add(concatLotNoComment(chainAnalysis));
             String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -103,6 +105,7 @@ public class GenerateMethodXmlProc {
             xmlLines.add("</update>");
         } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
             // DROP
+            xmlLines.add(concatLotNoComment(chainAnalysis));
             String startTag = concatDeleteStartTag(chainAnalysis, parameterTransformation);
             xmlLines.add(startTag);
             if (chainAnalysis.getByPhrases().size() > 0) {
@@ -264,6 +267,10 @@ public class GenerateMethodXmlProc {
             }
         }
         return xmlLines;
+    }
+
+    private String concatLotNoComment(ChainAnalysisDto chainAnalysis) {
+        return chainAnalysis.getLotNo().asXmlComment();
     }
 
     private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,

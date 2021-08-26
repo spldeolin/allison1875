@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Sets;
+import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import lombok.Data;
@@ -29,6 +31,7 @@ public class ChainAnalysisDto {
 
     private Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
 
+    @JsonIgnore
     private MethodCallExpr chain;
 
     private String indent;
@@ -38,5 +41,7 @@ public class ChainAnalysisDto {
     private Boolean isAssignedToType;
 
     private Boolean isByForced;
+
+    private LotNo lotNo;
 
 }

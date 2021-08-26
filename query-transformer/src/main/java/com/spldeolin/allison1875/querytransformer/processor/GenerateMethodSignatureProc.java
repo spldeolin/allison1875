@@ -44,6 +44,7 @@ public class GenerateMethodSignatureProc {
         }
 
         MethodDeclaration method = new MethodDeclaration();
+        method.setJavadocComment(chainAnalysis.getLotNo().asJavadocDescription());
         method.setType(resultTransformation.getResultType());
         method.setName(chainAnalysis.getMethodName());
         if (parameterTransformation != null) {

@@ -12,9 +12,12 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
@@ -144,9 +147,10 @@ public class AnalyzeChainProc {
         result.setOrderPhrases(orderPhrases);
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
-        result.setIndent(TokenRanges
-                .getStartIndent(chain.findAncestor(Statement.class).orElseThrow(IllegalChainException::new)));
+        result.setIndent(TokenRanges.getStartIndent(
+                chain.findAncestor(Statement.class).orElseThrow(IllegalChainException::new)));
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
+        result.setLotNo(new LotNo(ModuleAbbr.QT, JsonUtils.toJson(result)));
         return result;
     }
 

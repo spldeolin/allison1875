@@ -75,6 +75,7 @@ public class TransformResultProc {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperRecordPackage());
+            javabeanArg.setDescription(chainAnalysis.getLotNo().asJavadocDescription());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
@@ -82,7 +83,8 @@ public class TransformResultProc {
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
-                fieldArg.setDescription(properties.get(propertyName).getDescription());
+                fieldArg.setDescription(properties.get(propertyName).getDescription() + chainAnalysis.getLotNo()
+                        .asJavadocDescription());
                 fieldArg.setTypeName(javaType.getSimpleName());
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
