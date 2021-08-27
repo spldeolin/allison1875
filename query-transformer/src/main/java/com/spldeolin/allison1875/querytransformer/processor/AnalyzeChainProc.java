@@ -126,7 +126,7 @@ public class AnalyzeChainProc {
                 orderPhrases.add(phrase);
             }
         }
-        if (keyPropertyName != null && containsAsSubject(queryPhrases, keyPropertyName)) {
+        if (keyPropertyName != null && queryPhrases.size() > 0 && containsAsSubject(queryPhrases, keyPropertyName)) {
             log.warn("Each or MultiEach Key is not declared in Query Phrases, auto add in");
             queryPhrases.add(new PhraseDto().setSubjectPropertyName(keyPropertyName));
         }
