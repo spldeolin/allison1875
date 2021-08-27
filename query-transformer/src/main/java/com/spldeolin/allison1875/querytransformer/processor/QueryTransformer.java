@@ -56,6 +56,9 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Inject
     private DesignProc designProc;
 
+    @Inject
+    private FindMapperProc findMapperProc;
+
     @Override
     public void process(AstForest astForest) {
         int detected = 0;
@@ -65,8 +68,8 @@ public class QueryTransformer implements Allison1875MainProcessor {
             List<Replace> replaces = Lists.newArrayList();
 
             // append needed mapper
-            Collection<Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta>> chain2DesignMeta = Lists
-                    .newArrayList();
+            Collection<Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta>> chain2DesignMeta =
+                    Lists.newArrayList();
             List<MethodCallExpr> chains = detectQueryDesignProc.process(cu);
             Set<String> autowiredMappers = Sets.newHashSet();
             for (MethodCallExpr chain : chains) {
@@ -91,27 +94,34 @@ public class QueryTransformer implements Allison1875MainProcessor {
                 ClassOrInterfaceDeclaration design = triple.getMiddle();
                 DesignMeta designMeta = triple.getRight();
 
+                // analyze chain
                 ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design, designMeta);
 
+                if (findMapperProc.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
+                    log.warn("Method [{}] naming conflict exist in Mapper [{}]", chainAnalysis.getMethodName(),
+                            designMeta.getMapperName());
+                    continue;
+                }
+
                 // transform Parameter
-                ParameterTransformationDto parameterTransformation = transformParameterProc
-                        .transform(chainAnalysis, designMeta, astForest);
+                ParameterTransformationDto parameterTransformation = transformParameterProc.transform(chainAnalysis,
+                        designMeta, astForest);
 
                 // transform Result Type
-                ResultTransformationDto resultTransformation = transformResultProc
-                        .transform(chainAnalysis, designMeta, astForest);
+                ResultTransformationDto resultTransformation = transformResultProc.transform(chainAnalysis, designMeta,
+                        astForest);
 
                 // create Method in Mapper
-                createMapperQueryMethodProc
-                        .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+                createMapperQueryMethodProc.process(astForest, designMeta, chainAnalysis, parameterTransformation,
+                        resultTransformation);
 
                 // create Method in mapper.xml
-                generateMapperXmlQueryMethodProc
-                        .process(astForest, designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+                generateMapperXmlQueryMethodProc.process(astForest, designMeta, chainAnalysis, parameterTransformation,
+                        resultTransformation);
 
                 // transform Method Call and replace Design
-                replaces.addAll(replaceDesignProc
-                        .process(designMeta, chainAnalysis, parameterTransformation, resultTransformation));
+                replaces.addAll(replaceDesignProc.process(designMeta, chainAnalysis, parameterTransformation,
+                        resultTransformation));
 
                 detected++;
                 Saves.add(cu, replaces);

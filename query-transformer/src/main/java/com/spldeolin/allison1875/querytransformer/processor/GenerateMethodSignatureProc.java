@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -27,9 +26,12 @@ public class GenerateMethodSignatureProc {
     @Inject
     private QueryTransformerConfig queryTransformerConfig;
 
+    @Inject
+    private FindMapperProc findMapperProc;
+
     public void process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
-        ClassOrInterfaceDeclaration mapper = findMapper(astForest, designMeta);
+        ClassOrInterfaceDeclaration mapper = findMapperProc.findMapper(astForest, designMeta);
         if (mapper == null) {
             return;
         }
@@ -53,14 +55,6 @@ public class GenerateMethodSignatureProc {
         method.setBody(null);
         mapper.getMembers().add(method);
         Saves.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
-    }
-
-    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta designMeta) {
-        CompilationUnit cu = astForest.findCu(designMeta.getMapperQualifier());
-        if (cu == null) {
-            return null;
-        }
-        return cu.getPrimaryType().orElseThrow(RuntimeException::new).asClassOrInterfaceDeclaration();
     }
 
 }
