@@ -61,6 +61,7 @@ public class AnalyzeChainProc {
             throw new IllegalChainException("chainMethod is none of query, update or drop");
         }
         ReturnClassifyEnum returnClassify;
+        String keyPropertyName = null;
         if (chain.getNameAsString().equals("one")) {
             returnClassify = ReturnClassifyEnum.one;
         } else if (chain.getNameAsString().equals("many")) {
@@ -68,8 +69,10 @@ public class AnalyzeChainProc {
                 returnClassify = ReturnClassifyEnum.many;
             } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
                 returnClassify = ReturnClassifyEnum.each;
+                keyPropertyName = chain.getArgument(0).asFieldAccessExpr().getNameAsString();
             } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("MultiEach")) {
                 returnClassify = ReturnClassifyEnum.multiEach;
+                keyPropertyName = chain.getArgument(0).asFieldAccessExpr().getNameAsString();
             } else {
                 throw new IllegalChainException("many() argument is none of each nor multiEach");
             }
@@ -123,6 +126,10 @@ public class AnalyzeChainProc {
                 orderPhrases.add(phrase);
             }
         }
+        if (keyPropertyName != null && containsAsSubject(queryPhrases, keyPropertyName)) {
+            log.warn("Each or MultiEach Key is not declared in Query Phrases, auto add in");
+            queryPhrases.add(new PhraseDto().setSubjectPropertyName(keyPropertyName));
+        }
         for (MethodCallExpr mce : chain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
             String describe = mce.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
@@ -152,6 +159,10 @@ public class AnalyzeChainProc {
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
         result.setLotNo(LotNo.build(ModuleAbbr.QT, JsonUtils.toJson(result), false));
         return result;
+    }
+
+    private boolean containsAsSubject(Set<PhraseDto> queryPhrases, String keyPropertyName) {
+        return queryPhrases.stream().noneMatch(p -> p.getSubjectPropertyName().equals(keyPropertyName));
     }
 
     private String ensureNoRepeation(String name, List<String> names) {
