@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.querytransformer.processor;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node.TreeTraversal;
@@ -126,8 +127,11 @@ public class AnalyzeChainProc {
                 orderPhrases.add(phrase);
             }
         }
-        if (keyPropertyName != null && queryPhrases.size() > 0 && containsAsSubject(queryPhrases, keyPropertyName)) {
-            log.warn("Each or MultiEach Key is not declared in Query Phrases, auto add in");
+        List<String> queryPropertyNames = queryPhrases.stream().map(PhraseDto::getSubjectPropertyName)
+                .collect(Collectors.toList());
+        if (keyPropertyName != null && queryPropertyNames.size() > 0 && !queryPropertyNames.contains(keyPropertyName)) {
+            log.warn("Each or MultiEach Key [{}] is not declared in Query Phrases [{}], auto add in", keyPropertyName,
+                    queryPropertyNames);
             queryPhrases.add(new PhraseDto().setSubjectPropertyName(keyPropertyName));
         }
         for (MethodCallExpr mce : chain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
