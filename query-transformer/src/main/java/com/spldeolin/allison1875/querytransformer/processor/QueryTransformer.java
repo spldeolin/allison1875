@@ -1,18 +1,19 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
-import java.util.Collection;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
-import org.apache.commons.lang3.tuple.Triple;
+import java.util.concurrent.atomic.AtomicInteger;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -59,81 +60,81 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Inject
     private FindMapperProc findMapperProc;
 
+    private static final AtomicInteger detected = new AtomicInteger(0);
+
     @Override
     public void process(AstForest astForest) {
-        int detected = 0;
         for (CompilationUnit cu : astForest) {
-
-            // collect replace codes
-            List<Replace> replaces = Lists.newArrayList();
-
-            // append needed mapper
-            Collection<Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta>> chain2DesignMeta =
-                    Lists.newArrayList();
-            List<MethodCallExpr> chains = detectQueryDesignProc.process(cu);
-            Set<String> autowiredMappers = Sets.newHashSet();
-            for (MethodCallExpr chain : chains) {
-                ClassOrInterfaceDeclaration design;
-                DesignMeta designMeta;
-                try {
-                    design = designProc.findDesign(astForest, chain);
-                    designMeta = designProc.parseDesignMeta(design);
-                } catch (IllegalDesignException e) {
-                    log.error("illegal design: " + e.getMessage());
-                    detected++;
-                    continue;
-                }
-                chain2DesignMeta.add(Triple.of(chain, design, designMeta));
-
-                appendAutowiredMapperProc.append(autowiredMappers, replaces, chain, designMeta);
-            }
-
-            // resolve chain
-            for (Triple<MethodCallExpr, ClassOrInterfaceDeclaration, DesignMeta> triple : chain2DesignMeta) {
-                MethodCallExpr chain = triple.getLeft();
-                ClassOrInterfaceDeclaration design = triple.getMiddle();
-                DesignMeta designMeta = triple.getRight();
-
-                // analyze chain
-                ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design, designMeta);
-
-                if (findMapperProc.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
-                    log.warn("Method [{}] naming conflict exist in Mapper [{}]", chainAnalysis.getMethodName(),
-                            designMeta.getMapperName());
-                    continue;
-                }
-
-                // transform Parameter
-                ParameterTransformationDto parameterTransformation = transformParameterProc.transform(chainAnalysis,
-                        designMeta, astForest);
-
-                // transform Result Type
-                ResultTransformationDto resultTransformation = transformResultProc.transform(chainAnalysis, designMeta,
-                        astForest);
-
-                // create Method in Mapper
-                createMapperQueryMethodProc.process(astForest, designMeta, chainAnalysis, parameterTransformation,
-                        resultTransformation);
-
-                // create Method in mapper.xml
-                generateMapperXmlQueryMethodProc.process(astForest, designMeta, chainAnalysis, parameterTransformation,
-                        resultTransformation);
-
-                // transform Method Call and replace Design
-                replaces.addAll(replaceDesignProc.process(designMeta, chainAnalysis, parameterTransformation,
-                        resultTransformation));
-
-                detected++;
-                Saves.add(cu, replaces);
-                Saves.saveAll();
-            }
+            tryDetectAndTransform(astForest, cu);
         }
-
-        if (detected == 0) {
-            log.warn("no Chain detected");
+        if (detected.get() == 0) {
+            log.warn("no valid Chain detected");
         } else {
             log.info("# REMEBER REFORMAT CODE #");
         }
+    }
+
+    private void tryDetectAndTransform(AstForest astForest, CompilationUnit cu) {
+        MethodCallExpr chain = detectQueryDesignProc.processFirst(cu);
+        if (chain == null) {
+            return;
+        }
+
+        ClassOrInterfaceDeclaration design;
+        DesignMeta designMeta;
+        try {
+            design = designProc.findDesign(astForest, chain);
+            designMeta = designProc.parseDesignMeta(design);
+        } catch (IllegalDesignException e) {
+            log.error("illegal design: " + e.getMessage());
+            return;
+        }
+
+        // analyze chain
+        ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design, designMeta);
+
+        if (findMapperProc.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
+            log.warn("Method naming from [{}] conflict exist in Mapper [{}]", chain.toString(),
+                    designMeta.getMapperName());
+            return;
+        }
+
+        // transform Parameter
+        ParameterTransformationDto parameterTransformation = transformParameterProc.transform(chainAnalysis, designMeta,
+                astForest);
+
+        // transform Result Type
+        ResultTransformationDto resultTransformation = transformResultProc.transform(chainAnalysis, designMeta,
+                astForest);
+
+        // create Method in Mapper
+        createMapperQueryMethodProc.process(astForest, designMeta, chainAnalysis, parameterTransformation,
+                resultTransformation);
+
+        // create Method in mapper.xml
+        generateMapperXmlQueryMethodProc.process(astForest, designMeta, chainAnalysis, parameterTransformation,
+                resultTransformation);
+
+        // append autowired mapper
+        List<Replace> replaces = Lists.newArrayList();
+        replaces.addAll(appendAutowiredMapperProc.append(chain, designMeta));
+
+        // transform Method Call and replace Design
+        replaces.addAll(
+                replaceDesignProc.process(designMeta, chainAnalysis, parameterTransformation, resultTransformation));
+        Saves.add(cu, replaces);
+
+        Saves.saveAll();
+        detected.addAndGet(1);
+
+        Path javaPath = Locations.getAbsolutePath(cu);
+        try {
+            cu = StaticJavaParser.parse(javaPath);
+        } catch (IOException e) {
+            log.warn("SourceCode parse unsuccessfully [{}]", javaPath, e);
+            return;
+        }
+        this.tryDetectAndTransform(astForest, cu);
     }
 
 }

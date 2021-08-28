@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 
@@ -22,6 +23,10 @@ public class DetectQueryDesignProc {
             }
         }
         return mces;
+    }
+
+    public MethodCallExpr processFirst(CompilationUnit cu) {
+        return Iterables.getFirst(process(cu), null);
     }
 
 }
