@@ -85,7 +85,7 @@ public class GenerateEntityProc {
     private String cancatPropertyDescription(PropertyDto property) {
         String result = property.getDescription();
         result += BaseConstant.NEW_LINE + "<p>" + property.getColumnName();
-        if (property.getLength() != null) {
+        if (property.getLength() != null && property.getLength() != 0) {
             result += BaseConstant.NEW_LINE + "<p>长度：" + property.getLength();
         }
         if (property.getNotnull()) {
