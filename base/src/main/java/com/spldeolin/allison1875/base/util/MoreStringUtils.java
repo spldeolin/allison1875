@@ -62,4 +62,25 @@ public class MoreStringUtils {
         return string.toUpperCase().endsWith(suffix.toUpperCase());
     }
 
+    public static String compressConsecutiveSpaces(String text) {
+        if (text == null) {
+            return null;
+        }
+        return text.replaceAll("\\s+", " ");
+    }
+
+    public static String removeNewLine(String text) {
+        if (text == null) {
+            return null;
+        }
+        return text.replaceAll("[\\r\\n]+", " ");
+    }
+
+    public static String removeBlankLine(String text) {
+        if (text == null) {
+            return null;
+        }
+        return text.replaceAll("(?m)^[ \\t]*\\r?\\n", " ");
+    }
+
 }
