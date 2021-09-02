@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.util.TextUtils;
 
 /**
  * <sql id="all"></sql> 标签
@@ -20,8 +21,9 @@ public class AllCloumnSqlXmlProc {
     public Collection<String> process(PersistenceDto persistence) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add("<sql id=\"all\">");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + persistence.getProperties().stream().map(PropertyDto::getColumnName)
-                .collect(Collectors.joining(", ")));
+        xmlLines.addAll(TextUtils.formatLines(BaseConstant.SINGLE_INDENT,
+                persistence.getProperties().stream().map(PropertyDto::getColumnName).collect(Collectors.toList()),
+                120 - BaseConstant.SINGLE_INDENT.length()));
         xmlLines.add("</sql>");
         xmlLines.add("");
         return xmlLines;
