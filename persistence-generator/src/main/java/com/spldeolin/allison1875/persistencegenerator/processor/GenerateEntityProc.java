@@ -37,6 +37,7 @@ public class GenerateEntityProc {
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthorName(persistenceGeneratorConfig.getAuthor());
+        arg.setLotNo(persistence.getLotNo());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
@@ -66,6 +67,10 @@ public class GenerateEntityProc {
             arg.getFieldArgs().add(fieldArg);
         }
         CompilationUnit cu = JavabeanFactory.buildCu(arg);
+        if (cu == null) {
+            return new EntityGeneration().setSameNameAndLotNoPresent(true);
+        }
+
         Saves.add(cu);
 
         EntityGeneration result = new EntityGeneration();

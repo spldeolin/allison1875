@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base.factory;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,10 +22,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
+import jodd.io.FileUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -37,15 +40,31 @@ public class JavabeanFactory {
         ValidateUtils.ensureValid(javabeanArg);
 
         CompilationUnit cu = new CompilationUnit();
-        Path absulutePath = CodeGenerationUtils
-                .fileInPackageAbsolutePath(javabeanArg.getAstForest().getPrimaryJavaRoot(),
-                        javabeanArg.getPackageName(), javabeanArg.getClassName() + ".java");
+        Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(
+                javabeanArg.getAstForest().getPrimaryJavaRoot(), javabeanArg.getPackageName(),
+                javabeanArg.getClassName() + ".java");
 
         // 收集既存Javabean中的成员变量
         TreeSet<String> originalProperties = Sets.newTreeSet();
-        // 收集既存javabean的作者信息
+
         List<JavadocBlockTag> authorTags = Lists.newArrayList();
         if (absulutePath.toFile().exists()) {
+            // 如果javabean已存在，并且外部指定了lotNo，对比lotNo
+            if (javabeanArg.getLotNo() != null) {
+                try {
+                    boolean sameLot = FileUtil.readString(absulutePath.toFile())
+                            .contains(LotNo.TAG_PREFIXION + javabeanArg.getLotNo().toString());
+                    if (sameLot) {
+                        log.info("Class with same name [{}] and same lot no [{}] is present, no more building",
+                                javabeanArg.getClassName(), javabeanArg.getLotNo());
+                        return null;
+                    }
+                } catch (IOException e) {
+                    log.error("failed to FileUtil.readString, e={}", absulutePath, e);
+                }
+            }
+
+            // 如果javabean已存在，收集既存javabean的作者信息
             try {
                 CompilationUnit existCu = StaticJavaParser.parse(absulutePath);
                 for (FieldDeclaration field : existCu.findAll(FieldDeclaration.class)) {

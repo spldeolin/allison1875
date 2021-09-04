@@ -43,8 +43,7 @@ public class LotNo {
         this.versionText = versionText;
         this.hash = hash;
         this.unmodifiable = unmodifiable;
-        this.text = String.format("%s%s-%s%s", moduleAbbr, Version.lotNoVersion, hash,
-                unmodifiable ? NO_MANUAL_MODIFICATION : "");
+        this.text = String.format("%s%s-%s", moduleAbbr, Version.lotNoVersion, hash);
     }
 
     public static LotNo build(ModuleAbbr moduleAbbr, String information, Boolean unmodifiable) {
@@ -67,11 +66,11 @@ public class LotNo {
     }
 
     public String asJavadocDescription() {
-        return "\n\n<p> " + TAG_PREFIXION + this;
+        return "\n\n<p> " + TAG_PREFIXION + this + (unmodifiable ? NO_MANUAL_MODIFICATION : "");
     }
 
     public String asXmlComment() {
-        return "<!-- " + TAG_PREFIXION + this + " -->";
+        return "<!-- " + TAG_PREFIXION + this + (unmodifiable ? NO_MANUAL_MODIFICATION : "") + " -->";
     }
 
     @Override

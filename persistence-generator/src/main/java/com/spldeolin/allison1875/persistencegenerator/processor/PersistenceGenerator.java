@@ -194,6 +194,9 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
 
             // 重新生成Entity
             EntityGeneration entityGeneration = entityProc.process(persistence, astForest);
+            if (entityGeneration.isSameNameAndLotNoPresent()) {
+                continue;
+            }
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
