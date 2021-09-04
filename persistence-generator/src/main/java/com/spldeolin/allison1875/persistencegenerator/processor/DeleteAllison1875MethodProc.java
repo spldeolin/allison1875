@@ -17,7 +17,7 @@ public class DeleteAllison1875MethodProc {
     public void process(ClassOrInterfaceDeclaration mapper) {
         for (MethodDeclaration method : mapper.getMethods()) {
             boolean byAllison1875 = StringUtils.containsAny(JavadocDescriptions.getRaw(method),
-                    BaseConstant.BY_ALLISON_1875, LotNo.TAG_PREFIXION);
+                    BaseConstant.BY_ALLISON_1875, LotNo.NO_MANUAL_MODIFICATION);
             if (byAllison1875) {
                 method.remove();
             }

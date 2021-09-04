@@ -207,7 +207,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             // 重新生成QueryDesign
             generateDesignProc.process(persistence, entityGeneration, mapper, astForest);
 
-            // 删除Mapper中所有Allison 1875生成的方法
+            // 删除Mapper中所有Allison 1875生成的并且声明了不可人为修改的方法
             deleteAllison1875MethodProc.process(mapper);
 
             // 临时删除Mapper中所有开发者自定义方法
