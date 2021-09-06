@@ -214,7 +214,7 @@ public class GenerateMethodXmlProc {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " > " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "and " + property.getColumnName() + " > " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
@@ -223,7 +223,7 @@ public class GenerateMethodXmlProc {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " >= " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "and " + property.getColumnName() + " >= " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
@@ -232,7 +232,7 @@ public class GenerateMethodXmlProc {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " &lt; " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "and " + property.getColumnName() + " &lt; " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
@@ -241,7 +241,7 @@ public class GenerateMethodXmlProc {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " &lt;= " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "and " + property.getColumnName() + " &lt;= " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
@@ -259,7 +259,7 @@ public class GenerateMethodXmlProc {
                     } else {
                         xmlLines.add(ifTag);
                         xmlLines.add(
-                                DOUBLE_INDENT + "and " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
+                                DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
                                         + ", '%')");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
