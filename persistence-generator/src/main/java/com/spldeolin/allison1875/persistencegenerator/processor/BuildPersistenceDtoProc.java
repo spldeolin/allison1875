@@ -57,7 +57,6 @@ public class BuildPersistenceDtoProc {
             dto.setNonIdProperties(Lists.newArrayList());
             dto.setKeyProperties(Lists.newArrayList());
             dto.setProperties(Lists.newArrayList());
-            dto.setLotNo(LotNo.build(ModuleAbbr.PG, JsonUtils.toJson(dto), true));
             persistences.put(infoSchema.getTableName(), dto);
         }
         for (InformationSchemaDto infoSchema : infoSchemas) {
@@ -70,8 +69,7 @@ public class BuildPersistenceDtoProc {
             property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
             JavaTypeNamingDto javaType = jdbcTypeHandle.jdbcType2javaType(infoSchema, astForest);
             if (javaType == null) {
-                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(),
-                        infoSchema.getDataType(), infoSchema.getColumnType());
+                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(), infoSchema.getDataType(), infoSchema.getColumnType());
                 continue;
             }
             property.setJavaType(javaType);
@@ -79,25 +77,33 @@ public class BuildPersistenceDtoProc {
             property.setLength(infoSchema.getCharacterMaximumLength());
             property.setNotnull("NO".equals(infoSchema.getIsNullable()));
             property.setDefaultV(infoSchema.getColumnDefault());
-            PersistenceDto persistence = persistences.get(infoSchema.getTableName());
+            PersistenceDto dto = persistences.get(infoSchema.getTableName());
 
-            persistence.getProperties().add(property);
+            dto.getProperties().add(property);
             if ("PRI".equalsIgnoreCase(infoSchema.getColumnKey())) {
-                persistence.getIdProperties().add(property);
+                dto.getIdProperties().add(property);
             } else {
-                persistence.getNonIdProperties().add(property);
+                dto.getNonIdProperties().add(property);
                 if (columnName.endsWith("_id") && !persistenceGeneratorConfig.getNotKeyColumns().contains(columnName)) {
-                    persistence.getKeyProperties().add(property);
+                    dto.getKeyProperties().add(property);
                 }
             }
 
             if (columnName.equals(deleteFlag)) {
-                persistence.setIsDeleteFlagExist(true);
+                dto.setIsDeleteFlagExist(true);
             }
+
+            dto.setLotNo(LotNo.build(ModuleAbbr.PG, JsonUtils.toJson(dto), true));
         }
+
+        reportWhileNoDeleleFlag(deleteFlag, persistences);
+
+        return persistences.values();
+    }
+
+    private void reportWhileNoDeleleFlag(String deleteFlag, Map<String, PersistenceDto> persistences) {
         persistences.values().stream().filter(dto -> !dto.getIsDeleteFlagExist())
                 .forEach(dto -> log.info("数据表[{}]没有逻辑删除标识符[{}]", dto.getTableName(), deleteFlag));
-        return persistences.values();
     }
 
     private String getDeleteFlagName() {
