@@ -89,7 +89,7 @@ public class ValidProc {
         }
 
         DecimalMax decimalMax = find(annotatedElement, DecimalMax.class);
-        if (decimalMin != null) {
+        if (decimalMax != null) {
             valids.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
                     .setNote(decimalMax.value()));
         }
