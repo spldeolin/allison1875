@@ -32,12 +32,12 @@ public class BatchInsertEvenNullXmlProc {
         xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <include refid=\"all\"/> )");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <foreach collection=\"entities\" item=\"one\" separator=\",\">");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\",\">(");
         xmlLines.addAll(TextUtils.formatLines(BaseConstant.TREBLE_INDENT,
                 persistence.getProperties().stream().map(p -> "#{one." + p.getPropertyName() + "}")
                         .collect(Collectors.toList()), 120 - BaseConstant.SINGLE_INDENT.length()));
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "</foreach> )");
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + ")</foreach>");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
         xmlLines.add("</insert>");
         xmlLines.add("");
         return xmlLines;
