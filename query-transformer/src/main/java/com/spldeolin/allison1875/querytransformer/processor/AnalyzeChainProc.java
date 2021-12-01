@@ -4,22 +4,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
-import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -106,14 +104,11 @@ public class AnalyzeChainProc {
                 }
 
                 /*
-                    将分析过的in()和nin()中的实际参数替换为new ArrayList<字段具体类型>()的形式，
+                    将分析过的in()和nin()中的实际参数替换为null，
                     以确保后续的in()和nin()出现在scope的mce或fae进行calculateResolvedType时，不会因无法解析泛型而抛出异常
                  */
                 if (EqualsUtils.equalsAny(predicate, PredicateEnum.IN, PredicateEnum.NOT_IN)) {
-                    String propertyType = designMeta.getProperties().get(fae.getNameAsString()).getJavaType()
-                            .getSimpleName();
-                    parent.setArgument(0, StaticJavaParser.parseExpression("new ArrayList<" + propertyType + ">()"));
-                    Imports.ensureImported(chain, ImportConstants.ARRAY_LIST);
+                    parent.setArgument(0, new NullLiteralExpr());
                 }
 
                 byPhrases.add(phrase);
@@ -163,10 +158,6 @@ public class AnalyzeChainProc {
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
         result.setLotNo(LotNo.build(ModuleAbbr.QT, JsonUtils.toJson(result), false));
         return result;
-    }
-
-    private boolean containsAsSubject(Set<PhraseDto> queryPhrases, String keyPropertyName) {
-        return queryPhrases.stream().noneMatch(p -> p.getSubjectPropertyName().equals(keyPropertyName));
     }
 
     private String ensureNoRepeation(String name, List<String> names) {
