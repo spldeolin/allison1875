@@ -49,7 +49,8 @@ public class GenerateMethodXmlProc {
         if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
             // QUERY
             xmlLines.add(concatLotNoComment(chainAnalysis));
-            String startTag = this.concatSelectStartTag(chainAnalysis, parameterTransformation, resultTransformation);
+            String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation,
+                    resultTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -201,8 +202,9 @@ public class GenerateMethodXmlProc {
                                 SINGLE_INDENT_WITH_AND + property.getColumnName() + " NOT IN (<foreach collection='"
                                         + varName + "' item='one' separator=','>#{one}</foreach>)");
                     } else {
-                        xmlLines.add(SINGLE_INDENT + String
-                                .format("<if test=\"%s != null and %s.size() > 0\">", varName, varName));
+                        xmlLines.add(
+                                SINGLE_INDENT + String.format("<if test=\"%s != null and %s.size() > 0\">", varName,
+                                        varName));
                         xmlLines.add(
                                 DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
                                         + varName + "' item='one' separator=','>#{one}</foreach>)");
@@ -273,13 +275,14 @@ public class GenerateMethodXmlProc {
         return chainAnalysis.getLotNo().asXmlComment();
     }
 
-    private String concatSelectStartTag(ChainAnalysisDto chainAnalysis,
+    private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
             startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
         }
-        if (resultTransformation.getElementTypeQualifier() != null) {
+        if (resultTransformation.getElementTypeQualifier() != null && !resultTransformation.getElementTypeQualifier()
+                .equals(designMeta.getEntityQualifier())) {
             startTag += " resultType='" + resultTransformation.getElementTypeQualifier() + "'>";
         } else if (!resultTransformation.getResultType().equals(PrimitiveType.intType())) {
             startTag += " resultMap='all'>";
