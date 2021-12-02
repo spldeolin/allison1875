@@ -75,6 +75,8 @@ public class AnalyzeChainProc {
             } else {
                 throw new IllegalChainException("many() argument is none of each nor multiEach");
             }
+        } else if (chain.getNameAsString().equals("count")) {
+            returnClassify = ReturnClassifyEnum.count;
         } else {
             returnClassify = null;
         }

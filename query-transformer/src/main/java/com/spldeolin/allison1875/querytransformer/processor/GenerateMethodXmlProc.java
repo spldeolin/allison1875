@@ -54,7 +54,9 @@ public class GenerateMethodXmlProc {
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "SELECT");
-            if (chainAnalysis.getQueryPhrases().size() == 0) {
+            if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
+                xmlLines.add(DOUBLE_INDENT + "COUNT(*)");
+            } else if (chainAnalysis.getQueryPhrases().size() == 0) {
                 xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
             } else {
                 for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {

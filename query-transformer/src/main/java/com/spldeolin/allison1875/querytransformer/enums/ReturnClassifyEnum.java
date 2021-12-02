@@ -18,4 +18,6 @@ public enum ReturnClassifyEnum {
 
     multiEach,
 
+    count,
+
 }

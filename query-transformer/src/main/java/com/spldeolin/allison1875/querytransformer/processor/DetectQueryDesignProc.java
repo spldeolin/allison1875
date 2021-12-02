@@ -17,7 +17,7 @@ public class DetectQueryDesignProc {
     public List<MethodCallExpr> process(CompilationUnit cu) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {
-            if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over") && mce.getParentNode()
+            if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count") && mce.getParentNode()
                     .isPresent()) {
                 mces.add(mce);
             }

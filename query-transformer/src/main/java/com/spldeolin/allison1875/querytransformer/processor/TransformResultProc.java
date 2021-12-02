@@ -51,10 +51,14 @@ public class TransformResultProc {
             return result;
         }
 
+        if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
+            result.setResultType(PrimitiveType.intType());
+            return result;
+        }
+
         if (isAssigned) {
-            if (EqualsUtils
-                    .equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
-                            ReturnClassifyEnum.multiEach)) {
+            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
+                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
                 result.setElementTypeQualifier(designMeta.getEntityQualifier());
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
