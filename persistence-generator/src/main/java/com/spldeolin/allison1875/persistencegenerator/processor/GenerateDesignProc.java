@@ -116,6 +116,7 @@ public class GenerateDesignProc {
                         persistence.getEntityName())));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         designCoid.addMember(queryChainCoid);
 
         ClassOrInterfaceDeclaration updateChainCoid = new ClassOrInterfaceDeclaration();
@@ -175,6 +176,7 @@ public class GenerateDesignProc {
                         persistence.getEntityName())));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         nextableByChainReturnCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         designCoid.addMember(nextableByChainReturnCoid);
@@ -212,6 +214,7 @@ public class GenerateDesignProc {
                         persistence.getEntityName())));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
 
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
