@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -140,7 +141,7 @@ public class ReqRespProc {
                 }
                 this.moveAnnotationsFromDtoToField(dto, field);
                 field.setPrivate(true).addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto)),
-                        MoreStringUtils.lowerFirstLetter(dto.getNameAsString())));
+                        standardizeNestDtoFieldName(dto)));
                 parentCoid.replace(dto, field);
             }
         }
@@ -162,6 +163,18 @@ public class ReqRespProc {
             result.getDtoQualifiers().add(builder.getJavabeanQualifier());
         }
         return result;
+    }
+
+    private String standardizeNestDtoFieldName(ClassOrInterfaceDeclaration dto) {
+        boolean isCollectionOrPage =
+                dto.getAnnotationByName("L").isPresent() || dto.getAnnotationByName("P").isPresent();
+        String typeName = dto.getNameAsString();
+        String fieldName = MoreStringUtils.lowerFirstLetter(typeName);
+        fieldName = StringUtils.removeEndIgnoreCase(fieldName, "dto");
+        if (isCollectionOrPage) {
+            fieldName = English.plural(fieldName);
+        }
+        return fieldName;
     }
 
     private JavabeanTypeEnum estimateJavabeanType(ClassOrInterfaceDeclaration dto) {
