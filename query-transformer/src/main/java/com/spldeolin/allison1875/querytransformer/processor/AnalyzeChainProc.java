@@ -88,6 +88,11 @@ public class AnalyzeChainProc {
         Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
         List<String> varNames = Lists.newArrayList();
         for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
+            if (!designMeta.getProperties().containsKey(fae.getNameAsString())) {
+                // 例如：XxxxDesign.query("xx").by().privilegeCode.in(Lists.newArrayList(OneTypeEnum.FIRST.getCode()))
+                // .many();，应当OneTypeEnum.FIRST被跳过
+                continue;
+            }
             String describe = fae.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".QueryChain")) {
                 queryPhrases.add(new PhraseDto().setSubjectPropertyName(fae.getNameAsString()));
