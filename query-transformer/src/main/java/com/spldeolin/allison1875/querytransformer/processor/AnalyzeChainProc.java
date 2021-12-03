@@ -90,7 +90,7 @@ public class AnalyzeChainProc {
         for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
             if (!designMeta.getProperties().containsKey(fae.getNameAsString())) {
                 // 例如：XxxxDesign.query("xx").by().privilegeCode.in(Lists.newArrayList(OneTypeEnum.FIRST.getCode()))
-                // .many();，应当OneTypeEnum.FIRST被跳过
+                // .many();，其中的OneTypeEnum.FIRST应当被跳过
                 continue;
             }
             String describe = fae.calculateResolvedType().describe();
