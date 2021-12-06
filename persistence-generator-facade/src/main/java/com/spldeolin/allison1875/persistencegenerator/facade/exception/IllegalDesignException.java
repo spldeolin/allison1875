@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.exception;
+package com.spldeolin.allison1875.persistencegenerator.facade.exception;
 
 /**
  * @author Deolin 2021-05-29

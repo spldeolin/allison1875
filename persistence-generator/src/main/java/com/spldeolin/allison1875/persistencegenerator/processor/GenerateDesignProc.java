@@ -43,6 +43,9 @@ public class GenerateDesignProc {
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
+    @Inject
+    private FindMethodNamingOffsetProc methodNamingOffsetProc;
+
     public void process(PersistenceDto persistence, EntityGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
         if (!persistenceGeneratorConfig.getEnableGenerateDesign()) {
@@ -52,6 +55,8 @@ public class GenerateDesignProc {
         String designName = concatDesignName(persistence);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                 persistenceGeneratorConfig.getDesignPackage(), designName + ".java");
+
+        FieldDeclaration methodNamingOffsetField = methodNamingOffsetProc.findMethodNamingOffsetField(designPath);
 
         Collection<PropertyDto> properties = persistence.getProperties();
         properties.removeIf(
@@ -86,10 +91,13 @@ public class GenerateDesignProc {
         designCoid.addMember(StaticJavaParser.parseBodyDeclaration("private " + designName + "() {}"));
         designCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public static QueryChain query(String methodName) {throw e;}"));
+        designCoid.addMember(StaticJavaParser.parseBodyDeclaration("public static QueryChain query() {throw e;}"));
         designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public static UpdateChain update(String methodName) {throw e;}"));
+        designCoid.addMember(StaticJavaParser.parseBodyDeclaration("public static UpdateChain update() {throw e;}"));
         designCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public static DropChain drop(String methodName) {throw e;}"));
+        designCoid.addMember(StaticJavaParser.parseBodyDeclaration("public static DropChain drop() {throw e;}"));
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain");
@@ -252,6 +260,7 @@ public class GenerateDesignProc {
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", TokenWordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
+        designCoid.addMember(methodNamingOffsetField);
         cu.addType(designCoid);
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 

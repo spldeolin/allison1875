@@ -19,6 +19,8 @@ public class ChainAnalysisDto {
 
     private String methodName;
 
+    private Boolean noSpecifiedMethodName;
+
     private ChainMethodEnum chainMethod;
 
     private ReturnClassifyEnum returnClassify;

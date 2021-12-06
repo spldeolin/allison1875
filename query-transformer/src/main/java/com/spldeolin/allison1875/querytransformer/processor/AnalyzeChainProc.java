@@ -5,7 +5,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.Node.TreeTraversal;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
@@ -44,10 +46,11 @@ public class AnalyzeChainProc {
         String betweenCode = StringUtil.substring(chainCode, chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
 
-        MethodCallExpr queryMce = chain.findAll(MethodCallExpr.class,
-                mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update", "drop")).get(0);
-        String methodName = queryMce.getArguments().get(0).asStringLiteralExpr().getValue();
-        log.info("methodName={}", methodName);
+        String methodName = this.analyzeSpecifiedMethodName(chain);
+        boolean noSpecifiedMethodName = StringUtils.isEmpty(methodName);
+        if (!noSpecifiedMethodName) {
+            log.info("use specified methodName={}", methodName);
+        }
 
         ChainMethodEnum chainMethod;
         if (betweenCode.startsWith("query(")) {
@@ -153,6 +156,7 @@ public class AnalyzeChainProc {
 
         ChainAnalysisDto result = new ChainAnalysisDto();
         result.setMethodName(methodName);
+        result.setNoSpecifiedMethodName(noSpecifiedMethodName);
         result.setChainMethod(chainMethod);
         result.setReturnClassify(returnClassify);
         result.setQueryPhrases(queryPhrases);
@@ -181,6 +185,17 @@ public class AnalyzeChainProc {
             return name + index;
         }
         return this.ensureNoRepeation(name, names, index + 1);
+    }
+
+    private String analyzeSpecifiedMethodName(MethodCallExpr chain) {
+        MethodCallExpr queryMce = chain.findAll(MethodCallExpr.class,
+                mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update", "drop")).get(0);
+        NodeList<Expression> arguments = queryMce.getArguments();
+        if (arguments.size() == 0) {
+            return null;
+        }
+        String methodName = arguments.get(0).asStringLiteralExpr().getValue().trim();
+        return methodName;
     }
 
 }

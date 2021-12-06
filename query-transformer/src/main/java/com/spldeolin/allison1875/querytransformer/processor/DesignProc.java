@@ -14,10 +14,10 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
+import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
-import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
 
 /**
  * @author Deolin 2021-07-01
@@ -50,13 +50,22 @@ public class DesignProc {
         return designCu.getType(0).asClassOrInterfaceDeclaration();
     }
 
-    public DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration queryDesign) {
-        FieldDeclaration queryMetaField = queryDesign.getFieldByName(TokenWordConstant.META_FIELD_NAME)
+    public DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration design) {
+        FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.META_FIELD_NAME)
                 .orElseThrow(IllegalChainException::new);
         Expression initializer = queryMetaField.getVariable(0).getInitializer()
                 .orElseThrow(IllegalDesignException::new);
         String metaJson = StringEscapeUtils.unescapeJava(initializer.asStringLiteralExpr().getValue());
         return JsonUtils.toObject(metaJson, DesignMeta.class);
+    }
+
+    public StringBuilder parseOffset(ClassOrInterfaceDeclaration design) {
+        FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.OFFSET_FIELD_NAME)
+                .orElseThrow(IllegalChainException::new);
+        Expression initializer = queryMetaField.getVariable(0).getInitializer()
+                .orElseThrow(IllegalDesignException::new);
+        String offsetText = initializer.asStringLiteralExpr().getValue();
+        return new StringBuilder(offsetText);
     }
 
 }

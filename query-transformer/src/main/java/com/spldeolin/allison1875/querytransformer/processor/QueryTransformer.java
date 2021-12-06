@@ -16,8 +16,8 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
+import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
-import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
@@ -60,6 +60,9 @@ public class QueryTransformer implements Allison1875MainProcessor {
     @Inject
     private FindMapperProc findMapperProc;
 
+    @Inject
+    private OffsetMethodNameProc offsetMethodNameProc;
+
     private static final AtomicInteger detected = new AtomicInteger(0);
 
     @Override
@@ -93,6 +96,12 @@ public class QueryTransformer implements Allison1875MainProcessor {
         // analyze chain
         ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design, designMeta);
 
+        // use offset method naming (if no specified)
+        if (chainAnalysis.getNoSpecifiedMethodName()) {
+            offsetMethodNameProc.useOffsetMethod(chainAnalysis, designMeta, design);
+        }
+
+        // if naming conflict, ignore this Design Chain
         if (findMapperProc.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
             log.warn("Method naming from [{}] conflict exist in Mapper [{}]", chain.toString(),
                     designMeta.getMapperName());
