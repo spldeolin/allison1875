@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
-import javax.inject.Singleton;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
 
 /**

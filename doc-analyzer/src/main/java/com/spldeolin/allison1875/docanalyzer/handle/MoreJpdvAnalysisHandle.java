@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
 import java.lang.reflect.Field;
-import javax.inject.Singleton;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 
 /**

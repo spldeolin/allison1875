@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.docanalyzer.handle;
 
-import javax.inject.Singleton;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.inject.Singleton;
 
 /**
  * @author Deolin 2020-07-08

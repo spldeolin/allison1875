@@ -2,8 +2,8 @@ package com.spldeolin.allison1875.docanalyzer.handle;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
-import javax.inject.Singleton;
 import com.google.common.collect.Lists;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 
 /**
