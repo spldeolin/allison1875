@@ -28,10 +28,10 @@ public class InsertOrUpdateXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO " + persistence.getTableName());
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> %s, </if>",
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> `%s`, </if>",
                     property.getPropertyName(), property.getColumnName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
@@ -44,7 +44,7 @@ public class InsertOrUpdateXmlProc {
         xmlLines.add(BaseConstant.SINGLE_INDENT + "ON DUPLICATE KEY UPDATE");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim suffixOverrides=\",\">");
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> %s = #{%s}, </if>",
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> `%s` = #{%s}, </if>",
                     nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");

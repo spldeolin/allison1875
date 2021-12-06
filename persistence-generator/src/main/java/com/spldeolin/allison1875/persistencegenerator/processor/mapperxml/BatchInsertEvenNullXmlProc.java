@@ -29,7 +29,7 @@ public class BatchInsertEvenNullXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
+        xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO `%s`", persistence.getTableName()));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <include refid=\"all\"/> )");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\",\">(");

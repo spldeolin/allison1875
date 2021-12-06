@@ -26,7 +26,7 @@ public class ListAllXmlProc {
         result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
         result.add(BaseConstant.SINGLE_INDENT + "SELECT");
         result.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
-        result.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
+        result.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
         result.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
             result.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());

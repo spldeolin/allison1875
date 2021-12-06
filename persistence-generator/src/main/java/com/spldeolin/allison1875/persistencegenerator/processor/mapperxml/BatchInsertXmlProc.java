@@ -29,12 +29,11 @@ public class BatchInsertXmlProc {
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "INSERT INTO " + persistence.getTableName());
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + "INSERT INTO `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + String
-                    .format("<if test=\"one.%s!=null\"> %s, </if>", property.getPropertyName(),
-                            property.getColumnName()));
+            xmlLines.add(BaseConstant.TREBLE_INDENT + String.format("<if test=\"one.%s!=null\"> `%s`, </if>",
+                    property.getPropertyName(), property.getColumnName()));
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<trim prefix=\"VALUE (\" suffix=\")\" suffixOverrides=\",\">");

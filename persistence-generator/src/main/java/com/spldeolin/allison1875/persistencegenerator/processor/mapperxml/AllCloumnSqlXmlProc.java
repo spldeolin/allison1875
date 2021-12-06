@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.util.TextUtils;
 
@@ -22,8 +21,8 @@ public class AllCloumnSqlXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add("<sql id=\"all\">");
         xmlLines.addAll(TextUtils.formatLines(BaseConstant.SINGLE_INDENT,
-                persistence.getProperties().stream().map(PropertyDto::getColumnName).collect(Collectors.toList()),
-                120 - BaseConstant.SINGLE_INDENT.length()));
+                persistence.getProperties().stream().map(one -> "`" + one.getColumnName() + "`")
+                        .collect(Collectors.toList()), 120 - BaseConstant.SINGLE_INDENT.length()));
         xmlLines.add("</sql>");
         xmlLines.add("");
         return xmlLines;
