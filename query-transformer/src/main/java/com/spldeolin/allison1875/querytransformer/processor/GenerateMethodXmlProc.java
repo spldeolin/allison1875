@@ -289,7 +289,7 @@ public class GenerateMethodXmlProc {
         } else if (!resultTransformation.getResultType().equals(PrimitiveType.intType())) {
             startTag += " resultMap='all'>";
         } else {
-            startTag += ">";
+            startTag += " resultType='int'>";
         }
         return startTag;
     }
