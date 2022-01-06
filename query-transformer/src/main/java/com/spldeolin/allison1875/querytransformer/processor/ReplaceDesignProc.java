@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -39,8 +40,8 @@ public class ReplaceDesignProc {
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         List<Saves.Replace> replaces = Lists.newArrayList();
 
-        MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallProc
-                .mapOrMultimapBuildStmts(designMeta, chainAnalysis, resultTransformation);
+        MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallProc.mapOrMultimapBuildStmts(designMeta,
+                chainAnalysis, resultTransformation);
 
         // ensure import
         chainAnalysis.getChain().findCompilationUnit().ifPresent(cu -> {
@@ -80,20 +81,21 @@ public class ReplaceDesignProc {
         String finalReplacement;
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
             // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
-            finalReplacement = String
-                    .format("%s %s = %s;", resultTransformation.getResultType(), calcAssignVarName(chainAnalysis),
-                            mceCode);
+            finalReplacement = String.format("%s %s = %s;", resultTransformation.getResultType(),
+                    calcAssignVarName(chainAnalysis), mceCode);
 
-        } else if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof AssignExpr).isPresent()) {
-            // parent是VariableDeclarator的情况，例如：Entity a = Design.query("a").one();，则将chain替换成转化出的mce（chain是mce类型）
+        } else if (chainAnalysis.getChain().getParentNode()
+                .filter(p -> p instanceof AssignExpr || p instanceof VariableDeclarator).isPresent()) {
+            // parent是VariableDeclarator的情况，例如：Entity a = Design.query("a").one();
+            // 或是AssignExpr的情况，例如：a = Design.query("a").one();
+            // 则将chain替换成转化出的mce（chain是mce类型）
             if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each,
                     ReturnClassifyEnum.multiEach)) {
-                finalReplacement = String
-                        .format("%s %s = %s;", resultTransformation.getResultType(), calcAssignVarName(chainAnalysis),
-                                mceCode);
+                finalReplacement = String.format("%s %s = %s;", resultTransformation.getResultType(),
+                        calcAssignVarName(chainAnalysis), mceCode);
             } else {
-                finalReplacement = ancestorStatementCode
-                        .replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode);
+                finalReplacement = ancestorStatementCode.replace(TokenRanges.getRawCode(chainAnalysis.getChain()),
+                        mceCode);
             }
         } else {
             if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each,
@@ -124,8 +126,8 @@ public class ReplaceDesignProc {
         if (EqualsUtils.equalsAny(chainAnalysis.getChainMethod(), ChainMethodEnum.drop, ChainMethodEnum.update)) {
             return chainAnalysis.getMethodName() + "Count";
         }
-        if (EqualsUtils
-                .equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
+        if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each,
+                ReturnClassifyEnum.multiEach)) {
             return chainAnalysis.getMethodName() + "List";
         }
         return chainAnalysis.getMethodName();
