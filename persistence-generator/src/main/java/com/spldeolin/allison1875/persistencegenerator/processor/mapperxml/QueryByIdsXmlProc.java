@@ -38,13 +38,13 @@ public class QueryByIdsXmlProc {
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + onlyPk.getColumnName() + String.format(
-                    " IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + onlyPk.getColumnName() + String.format(
+                    "` IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
                     English.plural(MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName()))));
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");

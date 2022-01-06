@@ -29,12 +29,11 @@ public class UpdateByIdXmlProc {
         if (persistence.getIdProperties().size() > 0) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<set>");
             for (PropertyDto nonId : persistence.getNonIdProperties()) {
-                xmlLines.add(BaseConstant.DOUBLE_INDENT + String
-                        .format("<if test=\"%s!=null\"> %s = #{%s}, </if>", nonId.getPropertyName(),
-                                nonId.getColumnName(), nonId.getPropertyName()));
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> `%s` = #{%s}, </if>",
+                        nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</set>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
@@ -42,8 +41,8 @@ public class UpdateByIdXmlProc {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
             }
             for (PropertyDto id : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + String
-                        .format("  AND %s = #{%s}", id.getColumnName(), id.getPropertyName()));
+                xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  AND `%s` = #{%s}", id.getColumnName(),
+                        id.getPropertyName()));
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</update>");

@@ -28,11 +28,11 @@ public class InsertXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO " + persistence.getTableName());
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String
-                    .format("<if test=\"%s!=null\"> %s, </if>", property.getPropertyName(), property.getColumnName()));
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> `%s`, </if>",
+                    property.getPropertyName(), property.getColumnName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"VALUES (\" suffix=\")\" suffixOverrides=\",\">");

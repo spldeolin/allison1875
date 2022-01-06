@@ -30,11 +30,12 @@ public class BatchUpdateEvenNullXmlProc {
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE " + persistence.getTableName());
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "SET");
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
             xmlLines.add(
-                    BaseConstant.TREBLE_INDENT + nonId.getColumnName() + " = #{one." + nonId.getPropertyName() + "},");
+                    BaseConstant.TREBLE_INDENT + "`" + nonId.getColumnName() + "` = #{one." + nonId.getPropertyName()
+                            + "},");
         }
         // 删除最后一个语句中，最后的逗号
         if (xmlLines.size() > 0) {
@@ -46,8 +47,8 @@ public class BatchUpdateEvenNullXmlProc {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
         }
         for (PropertyDto idProperty : persistence.getIdProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{one." + idProperty
-                    .getPropertyName() + "}");
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{one."
+                    + idProperty.getPropertyName() + "}");
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");

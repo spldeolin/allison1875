@@ -30,11 +30,12 @@ public class UpdateByIdEvenNullXmlProc {
         if (persistence.getIdProperties().size() > 0) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
             for (PropertyDto nonId : persistence.getNonIdProperties()) {
                 xmlLines.add(
-                        BaseConstant.DOUBLE_INDENT + nonId.getColumnName() + " = #{" + nonId.getPropertyName() + "},");
+                        BaseConstant.DOUBLE_INDENT + "`" + nonId.getColumnName() + "` = #{" + nonId.getPropertyName()
+                                + "},");
             }
             // 删除最后一个语句中，最后的逗号
             if (xmlLines.size() > 0) {
@@ -46,8 +47,8 @@ public class UpdateByIdEvenNullXmlProc {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
             }
             for (PropertyDto idProperty : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{" + idProperty
-                        .getPropertyName() + "}");
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{"
+                        + idProperty.getPropertyName() + "}");
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
