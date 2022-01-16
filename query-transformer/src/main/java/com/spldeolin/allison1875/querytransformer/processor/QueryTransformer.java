@@ -17,6 +17,7 @@ import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.base.util.ast.Saves.Replace;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
+import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
@@ -90,6 +91,8 @@ public class QueryTransformer implements Allison1875MainProcessor {
             designMeta = designProc.parseDesignMeta(design);
         } catch (IllegalDesignException e) {
             log.error("illegal design: " + e.getMessage());
+            return;
+        } catch (SameNameTerminationMethodException e) {
             return;
         }
 

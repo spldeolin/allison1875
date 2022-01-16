@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
 import org.atteo.evo.inflector.English;
-import org.codehaus.plexus.util.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.util.FileFindUtils;
@@ -124,19 +123,7 @@ public class AstForest implements Iterable<CompilationUnit> {
     public CompilationUnit findCu(String primaryTypeQualifier) {
         Path absPath = getPrimaryJavaRoot().resolve(primaryTypeQualifier.replace('.', File.separatorChar) + ".java");
         CompilationUnit result = Cus.parseCu(absPath);
-        if (result == null) {
-            throw new RuntimeException("Failed to find CU");
-        }
         return result;
-    }
-
-    public CompilationUnit findCu(String packageName, String primaryTypeName) {
-        String primaryTypeQualifier = "";
-        if (StringUtils.isNotEmpty(packageName)) {
-            primaryTypeQualifier += packageName + ".";
-        }
-        primaryTypeQualifier += primaryTypeName;
-        return findCu(primaryTypeQualifier);
     }
 
 }

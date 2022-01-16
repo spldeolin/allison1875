@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
+import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
@@ -27,6 +28,9 @@ public class DesignProc {
     public ClassOrInterfaceDeclaration findDesign(AstForest astForest, MethodCallExpr chain) {
         String designQualifier = chain.findAll(NameExpr.class).get(0).calculateResolvedType().describe();
         CompilationUnit designCu = astForest.findCu(designQualifier);
+        if (designCu == null) {
+            throw new SameNameTerminationMethodException();
+        }
 
         List<Comment> orphanComments = designCu.getOrphanComments();
         if (orphanComments.size() < 2 || !orphanComments.get(1).isLineComment()) {
