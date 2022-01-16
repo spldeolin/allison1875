@@ -91,7 +91,13 @@ public class JsgBuildProc {
                 String fieldNameMight = m.getName();
                 JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
                 if (jpdv != null) {
-                    return jpdv.getDocIgnore();
+                    Boolean docIgnore = jpdv.getDocIgnore();
+                    if (docIgnore) {
+                        return true;
+                    } else {
+                        // 没有doc-ignore仍需要考虑是否有@JsonIgnore注解
+                        return super.hasIgnoreMarker(m);
+                    }
                 }
 
                 return super.hasIgnoreMarker(m);
@@ -136,8 +142,8 @@ public class JsgBuildProc {
                 if (isLikeCollection) {
                     AnnotatedType at = field.getAnnotatedType();
                     if (at instanceof AnnotatedParameterizedType) {
-                        AnnotatedType[] fieldTypeArguments = ((AnnotatedParameterizedType) at)
-                                .getAnnotatedActualTypeArguments();
+                        AnnotatedType[] fieldTypeArguments =
+                                ((AnnotatedParameterizedType) at).getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
                             Collection<ValidatorDto> theOnlyElementValids = validProc.process(theOnlyTypeArgument);
