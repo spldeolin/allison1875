@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
@@ -60,24 +59,23 @@ public class GenerateMethodXmlProc {
                 xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
             } else {
                 for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {
-                    xmlLines.add(
-                            DOUBLE_INDENT + MoreStringUtils.lowerCamelToUnderscore(queryPhrase.getSubjectPropertyName())
-                                    + " AS " + queryPhrase.getSubjectPropertyName() + ",");
+                    PropertyDto property = designMeta.getProperties().get(queryPhrase.getSubjectPropertyName());
+                    xmlLines.add(DOUBLE_INDENT + "`" + property.getColumnName() + "` AS " + property.getPropertyName()
+                            + ",");
                 }
                 // 删除最后一个语句中，最后的逗号
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
             }
             xmlLines.add(SINGLE_INDENT + "FROM");
-            xmlLines.add(DOUBLE_INDENT + designMeta.getTableName());
+            xmlLines.add(DOUBLE_INDENT + "`" + designMeta.getTableName() + "`");
             xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
             if (chainAnalysis.getOrderPhrases().size() > 0) {
                 xmlLines.add(SINGLE_INDENT + "ORDER BY");
                 for (PhraseDto orderPhrase : chainAnalysis.getOrderPhrases()) {
                     PropertyDto property = designMeta.getProperties().get(orderPhrase.getSubjectPropertyName());
-                    xmlLines.add(
-                            DOUBLE_INDENT + property.getColumnName() + (orderPhrase.getPredicate() == PredicateEnum.DESC
-                                    ? " DESC," : ","));
+                    xmlLines.add(DOUBLE_INDENT + "`" + property.getColumnName() + "`" + (
+                            orderPhrase.getPredicate() == PredicateEnum.DESC ? " DESC," : ","));
                 }
                 // 删除最后一个语句中，最后的逗号
                 int last = xmlLines.size() - 1;
@@ -94,11 +92,12 @@ public class GenerateMethodXmlProc {
             String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
             xmlLines.add(startTag);
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            xmlLines.add(SINGLE_INDENT + "UPDATE " + designMeta.getTableName());
+            xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
             xmlLines.add(SINGLE_INDENT + "SET");
             for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
                 PropertyDto property = designMeta.getProperties().get(updatePhrase.getSubjectPropertyName());
-                xmlLines.add(DOUBLE_INDENT + property.getColumnName() + " = #{" + updatePhrase.getVarName() + "},");
+                xmlLines.add(
+                        DOUBLE_INDENT + "`" + property.getColumnName() + "` = #{" + updatePhrase.getVarName() + "},");
             }
             // 删除最后一个语句中，最后的逗号
             int last = xmlLines.size() - 1;
@@ -114,7 +113,7 @@ public class GenerateMethodXmlProc {
             if (chainAnalysis.getByPhrases().size() > 0) {
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             }
-            xmlLines.add(SINGLE_INDENT + "DELETE FROM " + designMeta.getTableName());
+            xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
             xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
             if (chainAnalysis.getByPhrases().size() > 0) {
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
@@ -166,30 +165,31 @@ public class GenerateMethodXmlProc {
             switch (byPhrase.getPredicate()) {
                 case EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " = " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` = " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " = " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND `" + property.getColumnName() + "` = " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case NOT_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " != " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` != " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " != " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND `" + property.getColumnName() + "` != " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case IN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " IN (<foreach collection='"
-                                + varName + "' item='one' separator=','>#{one}</foreach>)");
+                        xmlLines.add(
+                                SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` IN (<foreach collection='"
+                                        + varName + "' item='one' separator=','>#{one}</foreach>)");
                     } else {
                         xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
                         xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
-                        xmlLines.add(TREBLE_INDENT + "AND " + property.getColumnName() + " IN (<foreach collection='"
+                        xmlLines.add(TREBLE_INDENT + "AND `" + property.getColumnName() + "` IN (<foreach collection='"
                                 + varName + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
@@ -200,70 +200,69 @@ public class GenerateMethodXmlProc {
                     break;
                 case NOT_IN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(
-                                SINGLE_INDENT_WITH_AND + property.getColumnName() + " NOT IN (<foreach collection='"
-                                        + varName + "' item='one' separator=','>#{one}</foreach>)");
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName()
+                                + "` NOT IN (<foreach collection='" + varName
+                                + "' item='one' separator=','>#{one}</foreach>)");
                     } else {
                         xmlLines.add(
                                 SINGLE_INDENT + String.format("<if test=\"%s != null and %s.size() > 0\">", varName,
                                         varName));
                         xmlLines.add(
-                                DOUBLE_INDENT + "AND " + property.getColumnName() + " NOT IN (<foreach collection='"
+                                DOUBLE_INDENT + "AND `" + property.getColumnName() + "` NOT IN (<foreach collection='"
                                         + varName + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case GREATER_THEN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " > " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` > " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " > " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND `" + property.getColumnName() + "` > " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case GREATER_OR_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " >= " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` >= " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " >= " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND `" + property.getColumnName() + "` >= " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case LESS_THEN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " &lt; " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` &lt; " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt; " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND `" + property.getColumnName() + "` &lt; " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case LESS_OR_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + property.getColumnName() + " &lt;= " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` &lt;= " + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + property.getColumnName() + " &lt;= " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND `" + property.getColumnName() + "` &lt;= " + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case NOT_NULL:
-                    xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NOT NULL");
+                    xmlLines.add(SINGLE_INDENT + "  AND `" + property.getColumnName() + "` IS NOT NULL");
                     break;
                 case IS_NULL:
-                    xmlLines.add(SINGLE_INDENT + "  AND " + property.getColumnName() + " IS NULL");
+                    xmlLines.add(SINGLE_INDENT + "  AND `" + property.getColumnName() + "` IS NULL");
                     break;
                 case LIKE:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(
-                                SINGLE_INDENT_WITH_AND + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
-                                        + ", '%')");
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + "`" + property.getColumnName() + "` LIKE CONCAT('%', "
+                                + dollarVar + ", '%')");
                     } else {
                         xmlLines.add(ifTag);
                         xmlLines.add(
-                                DOUBLE_INDENT + "AND " + property.getColumnName() + " LIKE CONCAT('%', " + dollarVar
+                                DOUBLE_INDENT + "AND `" + property.getColumnName() + "` LIKE CONCAT('%', " + dollarVar
                                         + ", '%')");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
