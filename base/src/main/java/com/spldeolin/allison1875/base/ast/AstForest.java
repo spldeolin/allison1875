@@ -121,7 +121,13 @@ public class AstForest implements Iterable<CompilationUnit> {
     }
 
     public CompilationUnit findCu(String primaryTypeQualifier) {
-        Path absPath = getPrimaryJavaRoot().resolve(primaryTypeQualifier.replace('.', File.separatorChar) + ".java");
+        Path absPath;
+        try {
+            absPath = getPrimaryJavaRoot().resolve(primaryTypeQualifier.replace('.', File.separatorChar) + ".java");
+        } catch (Exception e) {
+            log.info("impossible path, qualifier={}", primaryTypeQualifier, e);
+            return null;
+        }
         CompilationUnit result = Cus.parseCu(absPath);
         return result;
     }
