@@ -29,8 +29,9 @@ public class UpdateByIdProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateById");
             MethodDeclaration updateById = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment(
-                    "根据ID更新数据，忽略值为null的属性" + persistence.getLotNo().asJavadocDescription()).parse();
+            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                    .asJavadocDescription() : "";
+            Javadoc javadoc = new JavadocComment("根据ID更新数据，忽略值为null的属性" + lotNoText).parse();
             updateById.setJavadocComment(javadoc);
             updateById.setType(PrimitiveType.intType());
             updateById.setName(methodName);

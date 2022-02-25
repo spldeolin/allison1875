@@ -35,8 +35,9 @@ public class QueryByKeyProc extends MapperProc {
         }
         String methodName = calcMethodName(mapper, "queryBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment(
-                "根据「" + key.getDescription() + "」查询" + persistence.getLotNo().asJavadocDescription()).parse();
+        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                .asJavadocDescription() : "";
+        Javadoc javadoc = new JavadocComment("根据「" + key.getDescription() + "」查询" + lotNoText).parse();
 
         Imports.ensureImported(mapper, "java.util.List");
         method.setType(parseType("List<" + persistence.getEntityName() + ">"));

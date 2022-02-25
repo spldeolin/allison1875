@@ -39,7 +39,9 @@ public class QueryByIdsProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("根据多个ID查询" + persistence.getLotNo().asJavadocDescription()).parse();
+            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                    .asJavadocDescription() : "";
+            Javadoc javadoc = new JavadocComment("根据多个ID查询" + lotNoText).parse();
             Imports.ensureImported(mapper, "java.util.List");
             Imports.ensureImported(mapper, "java.util.Collection");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");

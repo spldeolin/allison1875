@@ -29,8 +29,9 @@ public class UpdateByIdEvenNullProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateByIdEvenNull");
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment(
-                    "根据ID更新数据，为null属性对应的字段会被更新为null" + persistence.getLotNo().asJavadocDescription()).parse();
+            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                    .asJavadocDescription() : "";
+            Javadoc javadoc = new JavadocComment("根据ID更新数据，为null属性对应的字段会被更新为null" + lotNoText).parse();
             updateByIdEvenNull.setJavadocComment(javadoc);
             updateByIdEvenNull.setType(PrimitiveType.intType());
             updateByIdEvenNull.setName(methodName);

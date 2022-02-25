@@ -36,8 +36,9 @@ public class DeleteByKeyProc extends MapperProc {
                 "deleteBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
         String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
-        Javadoc javadoc = new JavadocComment(
-                "根据「" + key.getDescription() + "」删除" + persistence.getLotNo().asJavadocDescription()).parse();
+        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                .asJavadocDescription() : "";
+        Javadoc javadoc = new JavadocComment("根据「" + key.getDescription() + "」删除" + lotNoText).parse();
         method.setJavadocComment(javadoc);
         method.setType(PrimitiveType.intType());
         method.setName(methodName);

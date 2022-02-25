@@ -122,6 +122,11 @@ public final class PersistenceGeneratorConfig {
     @NotNull
     private Collection<String> alreadyInSuperEntity;
 
+    /**
+     * mapper接口中的方法是否打印Lot No信息
+     */
+    private Boolean mapperInterfaceMethodPrintLotNo = true;
+
     @NotNull
     private Boolean disableInsert;
 

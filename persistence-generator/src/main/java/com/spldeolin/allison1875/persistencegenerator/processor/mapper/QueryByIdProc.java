@@ -36,7 +36,9 @@ public class QueryByIdProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("根据ID查询" + persistence.getLotNo().asJavadocDescription()).parse();
+            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                    .asJavadocDescription() : "";
+            Javadoc javadoc = new JavadocComment("根据ID查询" + lotNoText).parse();
             queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
             queryById.setName(methodName);
 

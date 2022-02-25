@@ -29,8 +29,9 @@ public class BatchUpdateEvenNullProc extends MapperProc {
 
         String methodName = super.calcMethodName(mapper, "batchUpdateEvenNull");
         MethodDeclaration update = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment(
-                "批量根据ID更新数据，为null对应的字段会被更新为null" + persistence.getLotNo().asJavadocDescription()).parse();
+        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                .asJavadocDescription() : "";
+        Javadoc javadoc = new JavadocComment("批量根据ID更新数据，为null对应的字段会被更新为null" + lotNoText).parse();
         update.setJavadocComment(javadoc);
         update.setType(PrimitiveType.intType());
         update.setName(methodName);

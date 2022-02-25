@@ -29,7 +29,9 @@ public class BatchUpdateProc extends MapperProc {
 
         String methodName = super.calcMethodName(mapper, "batchUpdate");
         MethodDeclaration update = new MethodDeclaration();
-        Javadoc javadoc = new JavadocComment("批量根据ID更新数据" + persistence.getLotNo().asJavadocDescription()).parse();
+        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                .asJavadocDescription() : "";
+        Javadoc javadoc = new JavadocComment("批量根据ID更新数据" + lotNoText).parse();
         update.setJavadocComment(javadoc);
         update.setType(PrimitiveType.intType());
         update.setName(methodName);

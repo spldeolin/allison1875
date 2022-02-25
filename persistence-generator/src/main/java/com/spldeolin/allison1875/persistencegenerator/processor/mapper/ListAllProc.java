@@ -29,7 +29,9 @@ public class ListAllProc extends MapperProc {
         if (persistence.getIdProperties().size() > 0) {
             methodName = super.calcMethodName(mapper, "listAll");
             MethodDeclaration listAll = new MethodDeclaration();
-            Javadoc javadoc = new JavadocComment("获取全部" + persistence.getLotNo().asJavadocDescription()).parse();
+            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                    .asJavadocDescription() : "";
+            Javadoc javadoc = new JavadocComment("获取全部" + lotNoText).parse();
             listAll.setType(StaticJavaParser.parseType("List<" + persistence.getEntityName() + ">"));
             listAll.setName(methodName);
             listAll.setJavadocComment(javadoc);
