@@ -28,8 +28,7 @@ public class BatchInsertEvenNullProc extends MapperProc {
         }
         String methodName = super.calcMethodName(mapper, "batchInsertEvenNull");
         MethodDeclaration insert = new MethodDeclaration();
-        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
-                .asJavadocDescription() : "";
+        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("批量插入，为null的属性会被作为null插入" + lotNoText).parse();
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());

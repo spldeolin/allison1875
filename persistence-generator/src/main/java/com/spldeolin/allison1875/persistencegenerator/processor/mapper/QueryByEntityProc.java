@@ -28,8 +28,7 @@ public class QueryByEntityProc extends MapperProc {
 
         String methodName = super.calcMethodName(mapper, "queryByEntity");
         MethodDeclaration queryByEntity = new MethodDeclaration();
-        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
-                .asJavadocDescription() : "";
+        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + lotNoText).parse();
         Imports.ensureImported(mapper, "java.util.List");
         queryByEntity.setType(parseType("List<" + persistence.getEntityName() + ">"));

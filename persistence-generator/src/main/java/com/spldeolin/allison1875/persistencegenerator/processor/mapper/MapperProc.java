@@ -6,6 +6,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -37,6 +39,12 @@ public abstract class MapperProc {
             }
         }
         return mapper.getMethodsByName(methodName).size() > 0;
+    }
+
+    protected String getLotNoText(PersistenceGeneratorConfig persistenceGeneratorConfig, PersistenceDto persistence) {
+        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
+                .asJavadocDescription() : "\n\n<p>" + LotNo.NO_MANUAL_MODIFICATION;
+        return lotNoText;
     }
 
 }

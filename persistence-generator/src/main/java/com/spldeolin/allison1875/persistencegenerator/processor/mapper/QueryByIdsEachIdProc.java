@@ -39,8 +39,7 @@ public class QueryByIdsEachIdProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIdsEachId");
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
-                    .asJavadocDescription() : "";
+            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
             Javadoc javadoc = new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + lotNoText).parse();
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
             Imports.ensureImported(mapper, "java.util.Map");

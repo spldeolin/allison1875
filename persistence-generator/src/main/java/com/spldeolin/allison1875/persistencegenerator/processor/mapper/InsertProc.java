@@ -27,8 +27,7 @@ public class InsertProc extends MapperProc {
         }
         String methodName = super.calcMethodName(mapper, "insert");
         MethodDeclaration insert = new MethodDeclaration();
-        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
-                .asJavadocDescription() : "";
+        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("插入" + lotNoText).parse();
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());

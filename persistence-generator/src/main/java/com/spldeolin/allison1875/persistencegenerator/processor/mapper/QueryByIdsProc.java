@@ -39,8 +39,7 @@ public class QueryByIdsProc extends MapperProc {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
-            String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
-                    .asJavadocDescription() : "";
+            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
             Javadoc javadoc = new JavadocComment("根据多个ID查询" + lotNoText).parse();
             Imports.ensureImported(mapper, "java.util.List");
             Imports.ensureImported(mapper, "java.util.Collection");
