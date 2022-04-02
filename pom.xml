@@ -18,6 +18,7 @@
         <module>persistence-generator</module>
         <module>persistence-generator-facade</module>
         <module>query-transformer</module>
+        <module>form-generator</module>
     </modules>
 
     <name>Allison 1875</name>
