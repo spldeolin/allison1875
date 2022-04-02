@@ -10,7 +10,7 @@ public class Version {
 
     public static final String logDisplayVersion = "Allison 1875 8.6";
 
-    public static final String lotNoVersion = "0806S";
+    public static final String lotNoVersion = "0806R";
 
     public static void greeting() {
         log.info(logDisplayVersion);
