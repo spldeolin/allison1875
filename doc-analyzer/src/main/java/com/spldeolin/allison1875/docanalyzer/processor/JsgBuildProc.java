@@ -169,7 +169,7 @@ public class JsgBuildProc {
                 }
                 if (annotated instanceof Method) {
                     Method method = (Method) annotated;
-                    String fieldName = MoreStringUtils.lowerFirstLetter(method.getName().substring(2));
+                    String fieldName = MoreStringUtils.lowerFirstLetter(method.getName().substring(3));
                     try {
                         return method.getDeclaringClass().getDeclaredField(fieldName);
                     } catch (NoSuchFieldException e) {
