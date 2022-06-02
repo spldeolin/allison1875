@@ -7,11 +7,11 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import javax.annotation.Nullable;
 import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -63,15 +63,8 @@ public class JsgBuildProc {
     @Inject
     private AccessDescriptionHandle accessDescriptionHandle;
 
-    public JsonSchemaGenerator analyzeAstAndBuildJsg(@Nullable AstForest astForest) {
-        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs;
-        if (astForest != null) {
-            jpdvs = analyze(astForest);
-            astForest.reset();
-        } else {
-            jpdvs = HashBasedTable.create();
-        }
-
+    public JsonSchemaGenerator analyzeAstAndBuildJsg(Table<String, String, JsonPropertyDescriptionValueDto> jpdvs,
+            boolean forReqOrResp) {
         // 缺省配置
         ObjectMapper customOm = JsonUtils.createObjectMapper();
 
@@ -90,16 +83,26 @@ public class JsgBuildProc {
                 String className = m.getDeclaringClass().getName().replace('$', '.');
                 String fieldNameMight = m.getName();
                 JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
+
+                // 当开发者指定了doc-ignore时，算作ignore
                 if (jpdv != null) {
-                    Boolean docIgnore = jpdv.getDocIgnore();
-                    if (docIgnore) {
+                    if (jpdv.getDocIgnore()) {
                         return true;
-                    } else {
-                        // 没有doc-ignore仍需要考虑是否有@JsonIgnore注解
-                        return super.hasIgnoreMarker(m);
                     }
                 }
 
+                // 当开发者指定了Access.READ_ONLY时，如果是reqDto，则算作ignore
+                Access propertyAccess = super.findPropertyAccess(m);
+                if (forReqOrResp && propertyAccess == Access.READ_ONLY) {
+                    return true;
+                }
+
+                // 当开发者指定了Access.WRITE_ONLY时候，如果是respDto，则算作ignore
+                if (!forReqOrResp && propertyAccess == Access.WRITE_ONLY) {
+                    return true;
+                }
+
+                // 没有特殊情况，仍需要考虑是否有@JsonIgnore注解
                 return super.hasIgnoreMarker(m);
             }
 
@@ -214,7 +217,7 @@ public class JsgBuildProc {
         return jsg;
     }
 
-    private Table<String, String, JsonPropertyDescriptionValueDto> analyze(AstForest astForest) {
+    public Table<String, String, JsonPropertyDescriptionValueDto> analyzeJpdvs(AstForest astForest) {
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
         for (CompilationUnit cu : astForest) {
             for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {

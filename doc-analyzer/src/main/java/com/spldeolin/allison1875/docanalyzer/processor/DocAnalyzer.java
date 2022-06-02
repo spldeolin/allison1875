@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -16,6 +17,7 @@ import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 import lombok.extern.log4j.Log4j2;
 
@@ -62,8 +64,11 @@ public class DocAnalyzer implements Allison1875MainProcessor {
                 .collect(Collectors.toSet());
         astForest = new AstForest(astForest.getPrimaryClass(), true, dependencyProjectPaths);
 
-        // 首次遍历并解析astForest，然后构建jsg对象，jsg对象为后续生成JsonSchema所需，构建完毕后重置astForest游标
-        JsonSchemaGenerator jsg = jsgBuildProc.analyzeAstAndBuildJsg(astForest);
+        // 首次遍历并解析astForest，然后构建2个jsg对象，jsg对象为后续req与resp生成JsonSchema所需，构建完毕后重置astForest游标
+        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = jsgBuildProc.analyzeJpdvs(astForest);
+        JsonSchemaGenerator jsg4req = jsgBuildProc.analyzeAstAndBuildJsg(jpdvs, true);
+        JsonSchemaGenerator jsg4resp = jsgBuildProc.analyzeAstAndBuildJsg(jpdvs, false);
+        astForest.reset();
 
         // 收集endpoint
         Collection<EndpointDto> endpoints = Lists.newArrayList();
@@ -83,15 +88,15 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
             try {
                 // 分析Request Body
-                endpoint.setRequestBodyJsonSchema(requestBodyProc.analyze(jsg, handler.getMd()));
+                endpoint.setRequestBodyJsonSchema(requestBodyProc.analyze(jsg4req, handler.getMd()));
 
                 // 分析Response Body
                 endpoint.setResponseBodyJsonSchema(
-                        responseBodyProc.analyze(jsg, controller.getCoid(), handler.getMd()));
+                        responseBodyProc.analyze(jsg4resp, controller.getCoid(), handler.getMd()));
 
                 // 处理controller级与handler级的@RequestMapping
-                RequestMappingFullDto requestMappingFullDto = requestMappingProc
-                        .analyze(controller.getReflection(), handler.getReflection(), config.getGlobalUrlPrefix());
+                RequestMappingFullDto requestMappingFullDto = requestMappingProc.analyze(controller.getReflection(),
+                        handler.getReflection(), config.getGlobalUrlPrefix());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
                 Collection<EndpointDto> copies = copyEndpointProc.process(endpoint, requestMappingFullDto);
