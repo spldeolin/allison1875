@@ -109,7 +109,12 @@ public class JsgBuildProc {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
-                Collection<ValidatorDto> valids = validProc.process(annotated.getAnnotated());
+                Collection<ValidatorDto> valids;
+                if (forReqOrResp) {
+                    valids = validProc.process(annotated.getAnnotated());
+                } else {
+                    valids = Lists.newArrayList();
+                }
 
                 if (field == null) {
                     JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
@@ -142,7 +147,7 @@ public class JsgBuildProc {
                     e.g: private Collection<@NotBlank @Length(max = 10) String> userNames;
                  */
                 boolean isLikeCollection = Collection.class.isAssignableFrom(annotated.getType().getRawClass());
-                if (isLikeCollection) {
+                if (forReqOrResp && isLikeCollection) {
                     AnnotatedType at = field.getAnnotatedType();
                     if (at instanceof AnnotatedParameterizedType) {
                         AnnotatedType[] fieldTypeArguments =
@@ -150,7 +155,8 @@ public class JsgBuildProc {
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
                             Collection<ValidatorDto> theOnlyElementValids = validProc.process(theOnlyTypeArgument);
-                            theOnlyElementValids.forEach(one -> one.setValidatorType("列表内元素" + one.getValidatorType()));
+                            theOnlyElementValids.forEach(
+                                    one -> one.setValidatorType("列表内元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);
                         }
                     }
