@@ -69,7 +69,7 @@ public class GenerateMethodXmlProc {
             }
             xmlLines.add(SINGLE_INDENT + "FROM");
             xmlLines.add(DOUBLE_INDENT + "`" + designMeta.getTableName() + "`");
-            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
+            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
             if (chainAnalysis.getOrderPhrases().size() > 0) {
                 xmlLines.add(SINGLE_INDENT + "ORDER BY");
                 for (PhraseDto orderPhrase : chainAnalysis.getOrderPhrases()) {
@@ -102,7 +102,7 @@ public class GenerateMethodXmlProc {
             // 删除最后一个语句中，最后的逗号
             int last = xmlLines.size() - 1;
             xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
-            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
+            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
         } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
@@ -114,7 +114,7 @@ public class GenerateMethodXmlProc {
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             }
             xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
-            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis));
+            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
             if (chainAnalysis.getByPhrases().size() > 0) {
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             }
@@ -146,10 +146,11 @@ public class GenerateMethodXmlProc {
         }
     }
 
-    private List<String> concatWhereSection(DesignMeta designMeta, ChainAnalysisDto chainAnalysis) {
+    private List<String> concatWhereSection(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+            boolean needNotDeletedSql) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
-        if (designMeta.getNotDeletedSql() != null) {
+        if (needNotDeletedSql && designMeta.getNotDeletedSql() != null) {
             xmlLines.add(SINGLE_INDENT + "  AND " + designMeta.getNotDeletedSql());
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
