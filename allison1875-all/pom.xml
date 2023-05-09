@@ -51,6 +51,11 @@
             <artifactId>query-transformer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>star-transformer</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

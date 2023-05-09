@@ -1,7 +1,6 @@
-package com.spldeolin.allison1875.querytransformer.javabean;
+package com.spldeolin.allison1875.startransformer.javabean;
 
 import java.util.List;
-import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,7 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PhraseDto {
 
-    private ChainMethodEnum chainMethod;
+    private Boolean isOneToOne;
 
     private String dtEntityName;
 
@@ -20,6 +19,10 @@ public class PhraseDto {
 
     private String dtDesignQulifier;
 
-    private List<String> omKeys;
+    private String fk;
+
+    private List<String> keys;
+
+    private List<String> mkeys;
 
 }

@@ -1,9 +1,9 @@
-package com.spldeolin.allison1875.querytransformer;
+package com.spldeolin.allison1875.startransformer;
 
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import com.spldeolin.allison1875.querytransformer.processor.StarTransformer;
+import com.spldeolin.allison1875.startransformer.processor.StarTransformer;
 import lombok.ToString;
 
 /**

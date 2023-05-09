@@ -1,8 +1,7 @@
-package com.spldeolin.allison1875.querytransformer.javabean;
+package com.spldeolin.allison1875.startransformer.javabean;
 
 import java.util.List;
 import com.github.javaparser.ast.expr.Expression;
-import com.spldeolin.allison1875.base.LotNo;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -22,8 +21,6 @@ public class ChainAnalysisDto {
     private Expression cftSecondArgument;
 
     private List<PhraseDto> phrases;
-
-    private LotNo lotNo;
 
     // 这里还是需要metaInfo的，3个方案：A约定大于配置，通过entityName从astForest中寻找Mapper；B汇总到一个类，pg生产时写到design包的MetaInfo包下；C从XxxxDesign进行读取
 
