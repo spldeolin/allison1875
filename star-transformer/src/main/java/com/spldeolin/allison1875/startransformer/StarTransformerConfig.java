@@ -15,4 +15,10 @@ public final class StarTransformerConfig {
     @NotEmpty
     private String designPackage;
 
+    /**
+     * WholeDto类的包名（根据目标工程的情况填写）
+     */
+    @NotEmpty
+    private String wholeDtoPackge;
+
 }

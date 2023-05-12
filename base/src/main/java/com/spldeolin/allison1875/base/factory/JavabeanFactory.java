@@ -88,6 +88,8 @@ public class JavabeanFactory {
         cu.setPackageDeclaration(javabeanArg.getPackageName());
         cu.addImport(AnnotationConstant.DATA_QUALIFIER);
         cu.addImport(AnnotationConstant.ACCESSORS_QUALIFIER);
+        cu.addImport("com.google.common.collect.*");
+        cu.addImport("java.util.*");
 
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.addAnnotation(AnnotationConstant.DATA);
