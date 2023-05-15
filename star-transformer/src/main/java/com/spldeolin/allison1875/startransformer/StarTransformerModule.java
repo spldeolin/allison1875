@@ -12,10 +12,10 @@ import lombok.ToString;
 @ToString
 public class StarTransformerModule extends Allison1875Module {
 
-    private final StarTransformerConfig queryTransformerConfig;
+    private final StarTransformerConfig starTransformerConfig;
 
-    public StarTransformerModule(StarTransformerConfig queryTransformerConfig) {
-        this.queryTransformerConfig = queryTransformerConfig;
+    public StarTransformerModule(StarTransformerConfig starTransformerConfig) {
+        this.starTransformerConfig = starTransformerConfig;
     }
 
     @Override
@@ -25,8 +25,8 @@ public class StarTransformerModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        ValidateUtils.ensureValid(queryTransformerConfig);
-        bind(StarTransformerConfig.class).toInstance(queryTransformerConfig);
+        ValidateUtils.ensureValid(starTransformerConfig);
+        bind(StarTransformerConfig.class).toInstance(starTransformerConfig);
     }
 
 }
