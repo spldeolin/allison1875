@@ -31,8 +31,20 @@ public class AnalyzeChainProc {
 
     public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
             throws IllegalChainException {
-        return process(starChain, astForest, wholeDtoNames, Lists.newArrayList(), Lists.newArrayList(),
-                Lists.newArrayList());
+        ChainAnalysisDto analysis = process(starChain, astForest, wholeDtoNames, Lists.newArrayList(),
+                Lists.newArrayList(), Lists.newArrayList());
+
+        for (PhraseDto phrase : analysis.getPhrases()) {
+            if (!phrase.getFkTypeQualifier()
+                    .equals(analysis.getCftSecondArgument().calculateResolvedType().describe())) {
+                throw new IllegalChainException(
+                        "Incompatible types: [" + phrase.getDtEntityName() + "::" + CodeGenerationUtils.getterName(
+                                Object.class, phrase.getFk()) + "] is not convertible to ["
+                                + analysis.getCftSecondArgument() + "]");
+            }
+        }
+
+        return analysis;
     }
 
     private ChainAnalysisDto process(MethodCallExpr mce, AstForest astForest, Set<String> wholeDtoNames,
@@ -47,6 +59,14 @@ public class AnalyzeChainProc {
             phrase.setDtDesignQulifier(starTransformerConfig.getDesignPackage() + "." + phrase.getDtDesignName());
             String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
             phrase.setFk(CodeGenerationUtils.getterToPropertyName(getterName));
+            try {
+                phrase.setFkTypeQualifier(
+                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
+            } catch (Exception e) {
+                // Just trying again will work, I don't know why
+                phrase.setFkTypeQualifier(
+                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
+            }
             // One to One的维度表无法指定任何key，因为只有一条数据，没有意义
             phrase.setKeys(Lists.newArrayList());
             phrase.setMkeys(Lists.newArrayList());
@@ -62,6 +82,14 @@ public class AnalyzeChainProc {
             phrase.setDtDesignQulifier(starTransformerConfig.getDesignPackage() + "." + phrase.getDtDesignName());
             String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
             phrase.setFk(CodeGenerationUtils.getterToPropertyName(getterName));
+            try {
+                phrase.setFkTypeQualifier(
+                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
+            } catch (Exception e) {
+                // Just trying again will work, I don't know why
+                phrase.setFkTypeQualifier(
+                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
+            }
             // 递归到此时，收集到的keys和mkeys均属于这个dt，组装完毕后需要清空并重新收集
             phrase.setKeys(Lists.newArrayList(keys));
             phrase.setMkeys(Lists.newArrayList(mkeys));

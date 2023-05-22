@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.FileBackupUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
 import lombok.extern.log4j.Log4j2;
@@ -57,9 +58,9 @@ public class StarTransformer implements Allison1875MainProcessor {
                     try {
                         analysis = analyzeChainProc.process(starChain, astForest, wholeDtoNames);
                         log.info("chainAnalysis={}", analysis);
-                    } catch (Exception e) {
+                    } catch (IllegalChainException e) {
                         log.error("illegal chain: " + e.getMessage());
-                        return;
+                        continue;
                     }
 
                     // transform 'XxxWholeDto' Javabean

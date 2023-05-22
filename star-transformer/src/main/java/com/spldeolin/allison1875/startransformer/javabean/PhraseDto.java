@@ -25,6 +25,8 @@ public class PhraseDto {
 
     private String fk;
 
+    private String fkTypeQualifier;
+
     private List<String> keys;
 
     private List<String> mkeys;
