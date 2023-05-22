@@ -5,6 +5,9 @@ import java.util.Set;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -31,12 +34,13 @@ public class AnalyzeChainProc {
 
     public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
             throws IllegalChainException {
-        ChainAnalysisDto analysis = process(starChain, astForest, wholeDtoNames, Lists.newArrayList(),
+        ChainAnalysisDto analysis = this.process(starChain, astForest, wholeDtoNames, Lists.newArrayList(),
                 Lists.newArrayList(), Lists.newArrayList());
 
         for (PhraseDto phrase : analysis.getPhrases()) {
             if (!phrase.getFkTypeQualifier()
                     .equals(analysis.getCftSecondArgument().calculateResolvedType().describe())) {
+                // 由于泛型擦除，StarSchema在第一个参数是MethodReferenceExpr的情况，可能无法在编译时进行类型校验，所以再此处进行校验
                 throw new IllegalChainException(
                         "Incompatible types: [" + phrase.getDtEntityName() + "::" + CodeGenerationUtils.getterName(
                                 Object.class, phrase.getFk()) + "] is not convertible to ["
@@ -59,14 +63,8 @@ public class AnalyzeChainProc {
             phrase.setDtDesignQulifier(starTransformerConfig.getDesignPackage() + "." + phrase.getDtDesignName());
             String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
             phrase.setFk(CodeGenerationUtils.getterToPropertyName(getterName));
-            try {
-                phrase.setFkTypeQualifier(
-                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
-            } catch (Exception e) {
-                // Just trying again will work, I don't know why
-                phrase.setFkTypeQualifier(
-                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
-            }
+            phrase.setFkTypeQualifier(
+                    resolveWithTryingAgain(mce.getArgument(0).asMethodReferenceExpr()).getReturnType().describe());
             // One to One的维度表无法指定任何key，因为只有一条数据，没有意义
             phrase.setKeys(Lists.newArrayList());
             phrase.setMkeys(Lists.newArrayList());
@@ -82,14 +80,8 @@ public class AnalyzeChainProc {
             phrase.setDtDesignQulifier(starTransformerConfig.getDesignPackage() + "." + phrase.getDtDesignName());
             String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
             phrase.setFk(CodeGenerationUtils.getterToPropertyName(getterName));
-            try {
-                phrase.setFkTypeQualifier(
-                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
-            } catch (Exception e) {
-                // Just trying again will work, I don't know why
-                phrase.setFkTypeQualifier(
-                        mce.getArgument(0).asMethodReferenceExpr().resolve().getReturnType().describe());
-            }
+            phrase.setFkTypeQualifier(
+                    resolveWithTryingAgain(mce.getArgument(0).asMethodReferenceExpr()).getReturnType().describe());
             // 递归到此时，收集到的keys和mkeys均属于这个dt，组装完毕后需要清空并重新收集
             phrase.setKeys(Lists.newArrayList(keys));
             phrase.setMkeys(Lists.newArrayList(mkeys));
@@ -112,14 +104,22 @@ public class AnalyzeChainProc {
             mkeys.add(CodeGenerationUtils.getterToPropertyName(getterName));
         }
         if (ChainMethodEnum.cft.toString().equals(mce.getNameAsString())) {
+            MethodReferenceExpr firstArgment = mce.getArgument(0).asMethodReferenceExpr();
+            Expression secondArgment = mce.getArgument(1);
+            ResolvedMethodDeclaration resolve1 = resolveWithTryingAgain(firstArgment);
+            ResolvedType resolve2 = secondArgment.calculateResolvedType();
+            if (!resolve1.getReturnType().describe().equals(resolve2.describe())) {
+                // 由于泛型擦除，StarSchema在第一个参数是MethodReferenceExpr的情况，可能无法在编译时进行类型校验，所以再此处进行校验
+                throw new IllegalChainException(
+                        "Incompatible types: [" + secondArgment + "] is not convertible to [" + firstArgment + "]");
+            }
             ChainAnalysisDto analysis = new ChainAnalysisDto();
-            analysis.setCftEntityName(mce.getArgument(0).asMethodReferenceExpr().getScope().toString());
-            analysis.setCftEntityQualifier(
-                    mce.getArgument(0).asMethodReferenceExpr().getScope().calculateResolvedType().describe());
+            analysis.setCftEntityName(firstArgment.getScope().toString());
+            analysis.setCftEntityQualifier(firstArgment.getScope().calculateResolvedType().describe());
             analysis.setCftDesignName(analysis.getCftEntityName().replace("Entity", "Design"));
             analysis.setCftDesignQualifier(
                     starTransformerConfig.getDesignPackage() + "." + analysis.getCftDesignName());
-            analysis.setCftSecondArgument(mce.getArgument(1));
+            analysis.setCftSecondArgument(secondArgment);
             analysis.setPhrases(phrases);
             String wholeDtoName = this.ensureNoRepeatInAstForest(astForest, wholeDtoNames,
                     analysis.getCftEntityName().replace("Entity", "WholeDto"));
@@ -152,6 +152,15 @@ public class AnalyzeChainProc {
 
     private String concatEx(String coidName) {
         return coidName.replace("Dto", "ExDto");
+    }
+
+    private ResolvedMethodDeclaration resolveWithTryingAgain(MethodReferenceExpr methodReferenceExpr) {
+        // Just trying again will work, I don't know why
+        try {
+            return methodReferenceExpr.resolve();
+        } catch (Exception e) {
+            return methodReferenceExpr.resolve();
+        }
     }
 
 }
