@@ -95,11 +95,8 @@ public class AnalyzeChainProc {
             analysis.setPhrases(phrases);
             String wholeDtoName = this.ensureNoRepeatInAstForest(astForest, wholeDtoNames,
                     analysis.getCftEntityName().replace("Entity", "WholeDto"));
-            if (astForest.getJavasInForest().stream()
-                    .anyMatch(java -> FileNameUtil.getBaseName(java.toFile().getName()).equals(wholeDtoName))) {
-                throw new IllegalChainException("WholeDto '" + wholeDtoName + "' has existed, ignore");
-            }
             analysis.setWholeDtoName(wholeDtoName);
+            wholeDtoNames.add(wholeDtoName);
             return analysis;
         }
         if (mce.getScope().filter(Expression::isMethodCallExpr).isPresent()) {
@@ -121,13 +118,12 @@ public class AnalyzeChainProc {
             log.info("File [{}.java] exist in AstForest, rename to [{}.java]", coidName, rename);
             return ensureNoRepeatInAstForest(astForest, wholeDtoNames, rename);
         } else {
-            wholeDtoNames.add(coidName);
             return coidName;
         }
     }
 
     private String concatEx(String coidName) {
-        return coidName.replace("WholeDto", "WholeExDto");
+        return coidName.replace("Dto", "ExDto");
     }
 
 }

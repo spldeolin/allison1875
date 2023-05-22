@@ -51,7 +51,7 @@ public class StarTransformer implements Allison1875MainProcessor {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
             for (BlockStmt block : cu.findAll(BlockStmt.class)) {
-                for (MethodCallExpr starChain : detectStarChainProc.process(cu)) {
+                for (MethodCallExpr starChain : detectStarChainProc.process(block)) {
                     // analyze chain
                     ChainAnalysisDto analysis;
                     try {

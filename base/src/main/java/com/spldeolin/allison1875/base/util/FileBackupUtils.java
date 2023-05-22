@@ -19,6 +19,9 @@ public class FileBackupUtils {
     }
 
     public static void backup(File src) throws FileBackupException {
+        if (!src.exists()) {
+            return;
+        }
         String srcPath = src.getPath();
         String destPath = srcPath + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss") + ".bak";
         try {
