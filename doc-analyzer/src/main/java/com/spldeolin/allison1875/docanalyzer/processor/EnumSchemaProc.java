@@ -36,8 +36,8 @@ public class EnumSchemaProc {
 
                     String jpd = jsonSchema.getDescription();
                     if (jpd != null) {
-                        JsonPropertyDescriptionValueDto jpdv = JsonUtils
-                                .toObject(jpd, JsonPropertyDescriptionValueDto.class);
+                        JsonPropertyDescriptionValueDto jpdv = JsonUtils.toObject(jpd,
+                                JsonPropertyDescriptionValueDto.class);
                         jpdv.setEcats(ecats);
                         jsonSchema.setDescription(JsonUtils.toJson(jpdv));
                     }

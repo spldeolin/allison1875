@@ -16,8 +16,7 @@ public class Sample {
             /**
              * aasdf
              */
-            @NotNull
-            String a;
+            @NotNull String a;
 
             class Dddd {
 

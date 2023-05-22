@@ -21,7 +21,8 @@ public abstract class MapperProc {
         while (true) {
             if (existDeclared(mapper, expectMethodName)) {
                 String newName = expectMethodName + "V" + v;
-                log.warn("[{}]中已声明了的名为[{}]方法，待生成的方法重命名为[{}]", mapper.getNameAsString(), expectMethodName, newName);
+                log.warn("[{}]中已声明了的名为[{}]方法，待生成的方法重命名为[{}]", mapper.getNameAsString(),
+                        expectMethodName, newName);
                 expectMethodName = newName;
                 v++;
             } else {

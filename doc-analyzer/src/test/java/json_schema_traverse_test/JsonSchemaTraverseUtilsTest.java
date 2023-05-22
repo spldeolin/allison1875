@@ -69,8 +69,8 @@ public class JsonSchemaTraverseUtilsTest {
     }
 
     private static boolean isArrayAndChildIsObject(JsonSchema jsonSchema) {
-        return jsonSchema.isArraySchema() && jsonSchema.asArraySchema().getItems().isSingleItems() && (jsonSchema
-                .asArraySchema().getItems().asSingleItems().getSchema()) instanceof ObjectSchema;
+        return jsonSchema.isArraySchema() && jsonSchema.asArraySchema().getItems().isSingleItems()
+                && (jsonSchema.asArraySchema().getItems().asSingleItems().getSchema()) instanceof ObjectSchema;
     }
 
 }

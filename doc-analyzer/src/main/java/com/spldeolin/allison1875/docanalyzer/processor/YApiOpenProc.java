@@ -39,10 +39,9 @@ public class YApiOpenProc {
         String url =
                 docAnalyzerConfig.getYapiUrl() + "/api/interface/list_menu" + tokenQuery() + "&project_id=" + projectId;
         HttpResponse response = HttpRequest.get(url).send();
-        YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>> responseBody = JsonUtils
-                .toParameterizedObject(response.bodyText(),
-                        new TypeReference<YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>>>() {
-                        });
+        YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>> responseBody = JsonUtils.toParameterizedObject(
+                response.bodyText(), new TypeReference<YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>>>() {
+                });
         ensureSuccess(responseBody);
         return responseBody.getData();
     }

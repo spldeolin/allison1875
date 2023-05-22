@@ -26,8 +26,8 @@ public class Saves {
 
     private static final ThreadLocal<Set<CompilationUnit>> apiSaveBuffer = ThreadLocal.withInitial(Sets::newHashSet);
 
-    private static final ThreadLocal<Map<CompilationUnit, String>> rawReplaceBuffer = ThreadLocal
-            .withInitial(Maps::newHashMap);
+    private static final ThreadLocal<Map<CompilationUnit, String>> rawReplaceBuffer = ThreadLocal.withInitial(
+            Maps::newHashMap);
 
     private Saves() {
         throw new UnsupportedOperationException("Never instantiate me.");

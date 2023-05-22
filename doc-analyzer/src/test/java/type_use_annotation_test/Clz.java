@@ -26,8 +26,8 @@ public class Clz {
         Field strings = Clz.class.getDeclaredField("strings");
         AnnotatedType at = strings.getAnnotatedType();
         if (at instanceof AnnotatedParameterizedType) {
-            AnnotatedType[] annotatedActualTypeArguments = ((AnnotatedParameterizedType) at)
-                    .getAnnotatedActualTypeArguments(); // @NotEmpty String
+            AnnotatedType[] annotatedActualTypeArguments =
+                    ((AnnotatedParameterizedType) at).getAnnotatedActualTypeArguments(); // @NotEmpty String
             Annotation[] annotations = annotatedActualTypeArguments[0].getAnnotations();
             System.out.println(Arrays.toString(annotations));
         }

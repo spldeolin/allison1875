@@ -35,8 +35,8 @@ public class ListControllersProc {
                 // 非宿主controller
                 continue;
             }
-            for (ClassOrInterfaceDeclaration controller : cu
-                    .findAll(ClassOrInterfaceDeclaration.class, this::isController)) {
+            for (ClassOrInterfaceDeclaration controller : cu.findAll(ClassOrInterfaceDeclaration.class,
+                    this::isController)) {
                 if (findIgnoreFlag(controller)) {
                     continue;
                 }
@@ -71,8 +71,8 @@ public class ListControllersProc {
     private String findCat(NodeWithJavadoc<?> node) {
         for (String line : JavadocDescriptions.getAsLines(node)) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_CAT)) {
-                String catContent = org.apache.commons.lang3.StringUtils
-                        .removeStartIgnoreCase(line, ControllerMarkerConstant.DOC_CAT).trim();
+                String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line,
+                        ControllerMarkerConstant.DOC_CAT).trim();
                 if (catContent.length() > 0) {
                     return catContent;
                 }

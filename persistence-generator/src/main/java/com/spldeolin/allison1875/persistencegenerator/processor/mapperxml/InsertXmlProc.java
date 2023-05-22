@@ -37,9 +37,8 @@ public class InsertXmlProc {
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"VALUES (\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String
-                    .format("<if test=\"%s!=null\"> #{%s}, </if>", property.getPropertyName(),
-                            property.getPropertyName()));
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> #{%s}, </if>",
+                    property.getPropertyName(), property.getPropertyName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);

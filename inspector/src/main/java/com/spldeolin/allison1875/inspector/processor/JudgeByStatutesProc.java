@@ -60,8 +60,8 @@ public class JudgeByStatutesProc {
             }
         });
 
-        lawlesses.addAll(lawlesses.stream().sorted(Comparator.comparing(LawlessDto::getStatuteNo))
-                .collect(Collectors.toList()));
+        lawlesses.addAll(
+                lawlesses.stream().sorted(Comparator.comparing(LawlessDto::getStatuteNo)).collect(Collectors.toList()));
 
         log.info("All inspections completed");
         return lawlesses;

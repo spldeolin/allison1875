@@ -71,8 +71,8 @@ public class GetBodyResolvedTypeProc {
      */
     public ResolvedType getResponseBody(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         try {
-            if (Annotations.isAnnotationAbsent(controller, RestController.class) && Annotations
-                    .isAnnotationAbsent(handler, ResponseBody.class)) {
+            if (Annotations.isAnnotationAbsent(controller, RestController.class) && Annotations.isAnnotationAbsent(
+                    handler, ResponseBody.class)) {
                 return null;
             }
             return obtainConcernedResponseBodyHandle.findConcernedResponseBodyType(handler);

@@ -46,8 +46,8 @@ public class TreeNode {
             }
         });
 
-        JsonSchema jsonSchema = JsonSchemaGenerateUtils
-                .generateSchema("type_use_annotation_test.TreeNode", new JsonSchemaGenerator(om));
+        JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema("type_use_annotation_test.TreeNode",
+                new JsonSchemaGenerator(om));
 
         JsonNode jsonNode = om.readTree(JsonUtils.toJson(jsonSchema));
         log.info(JsonUtils.toJson(jsonSchema));

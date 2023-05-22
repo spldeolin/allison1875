@@ -38,9 +38,8 @@ public class BatchInsertXmlProc {
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<trim prefix=\"VALUE (\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + String
-                    .format("<if test=\"one.%s!=null\"> #{one.%s}, </if>", property.getPropertyName(),
-                            property.getPropertyName()));
+            xmlLines.add(BaseConstant.TREBLE_INDENT + String.format("<if test=\"one.%s!=null\"> #{one.%s}, </if>",
+                    property.getPropertyName(), property.getPropertyName()));
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>;");

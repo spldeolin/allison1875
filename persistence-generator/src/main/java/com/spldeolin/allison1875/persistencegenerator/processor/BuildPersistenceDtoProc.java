@@ -69,7 +69,8 @@ public class BuildPersistenceDtoProc {
             property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
             JavaTypeNamingDto javaType = jdbcTypeHandle.jdbcType2javaType(infoSchema, astForest);
             if (javaType == null) {
-                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(), infoSchema.getDataType(), infoSchema.getColumnType());
+                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(),
+                        infoSchema.getDataType(), infoSchema.getColumnType());
                 continue;
             }
             property.setJavaType(javaType);

@@ -35,13 +35,13 @@ public class TransformMethodCallProc {
                 MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
                         + "(";
         if (parameterTransformation != null && parameterTransformation.getIsJavabean()) {
-            result += MoreStringUtils
-                    .lowerFirstLetter(parameterTransformation.getParameters().get(0).getTypeAsString());
+            result += MoreStringUtils.lowerFirstLetter(
+                    parameterTransformation.getParameters().get(0).getTypeAsString());
         } else {
             Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
             phrases.addAll(chainAnalysis.getByPhrases());
             result += phrases.stream().filter(p -> p.getPredicate() != PredicateEnum.IS_NULL
-                    && p.getPredicate() != PredicateEnum.NOT_NULL).map(p -> p.getObjectExpr().toString())
+                            && p.getPredicate() != PredicateEnum.NOT_NULL).map(p -> p.getObjectExpr().toString())
                     .collect(Collectors.joining(", "));
         }
         result += ")";
@@ -84,8 +84,8 @@ public class TransformMethodCallProc {
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils
-                    .substringAfterLast(resultTransformation.getElementTypeQualifier(), ".");
+            String elementTypeName = StringUtils.substringAfterLast(resultTransformation.getElementTypeQualifier(),
+                    ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode().get().getParentNode()
                     .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
@@ -97,9 +97,9 @@ public class TransformMethodCallProc {
                 code = String.format("final Map<%s, %s> %s = Maps.newHashMap();", propertyTypeName, elementTypeName,
                         calcResultVarName(chainAnalysis));
             }
-            code += "\n" + chainAnalysis.getIndent() + String
-                    .format("%sList.forEach(one -> %s.put(one.get%s(), one));", chainAnalysis.getMethodName(),
-                            calcResultVarName(chainAnalysis), MoreStringUtils.upperFirstLetter(propertyName));
+            code += "\n" + chainAnalysis.getIndent() + String.format("%sList.forEach(one -> %s.put(one.get%s(), one));",
+                    chainAnalysis.getMethodName(), calcResultVarName(chainAnalysis),
+                    MoreStringUtils.upperFirstLetter(propertyName));
             MapOrMultimapBuiltDto result = new MapOrMultimapBuiltDto();
             result.setCode(code);
             result.getImports().add(ImportConstants.MAP.getNameAsString());
@@ -110,12 +110,12 @@ public class TransformMethodCallProc {
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils
-                    .substringAfterLast(resultTransformation.getElementTypeQualifier(), ".");
+            String elementTypeName = StringUtils.substringAfterLast(resultTransformation.getElementTypeQualifier(),
+                    ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode()
-                    .orElseThrow(ParentAbsentException::new).getParentNode().filter(gp -> gp instanceof ExpressionStmt))
-                    .isPresent();
+                    .orElseThrow(ParentAbsentException::new).getParentNode()
+                    .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
 
             String code;
             if (isAssignWithoutType) {
@@ -124,9 +124,9 @@ public class TransformMethodCallProc {
                 code = String.format("final Multimap<%s, %s> %s = ArrayListMultimap.create();", propertyTypeName,
                         elementTypeName, calcResultVarName(chainAnalysis));
             }
-            code += "\n" + chainAnalysis.getIndent() + String
-                    .format("%sList.forEach(one -> %s.put(one.get%s(), one));", chainAnalysis.getMethodName(),
-                            calcResultVarName(chainAnalysis), MoreStringUtils.upperFirstLetter(propertyName));
+            code += "\n" + chainAnalysis.getIndent() + String.format("%sList.forEach(one -> %s.put(one.get%s(), one));",
+                    chainAnalysis.getMethodName(), calcResultVarName(chainAnalysis),
+                    MoreStringUtils.upperFirstLetter(propertyName));
             MapOrMultimapBuiltDto result = new MapOrMultimapBuiltDto();
             result.setCode(code);
             result.getImports().add(ImportConstants.MULTIMAP.getNameAsString());

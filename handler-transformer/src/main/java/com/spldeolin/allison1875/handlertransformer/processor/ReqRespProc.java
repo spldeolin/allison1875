@@ -54,8 +54,8 @@ public class ReqRespProc {
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
             throw new IllegalArgumentException(
-                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDto和RespDto。[" + firstLineDto + "] 当前：" + initBody.findAll(
-                                    LocalClassDeclarationStmt.class).stream()
+                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDto和RespDto。[" + firstLineDto + "] 当前："
+                            + initBody.findAll(LocalClassDeclarationStmt.class).stream()
                             .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
         }
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {

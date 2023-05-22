@@ -38,16 +38,16 @@ public class ListHandlersProc {
 
         Collection<HandlerFullDto> result = Lists.newArrayList();
         for (ControllerFullDto controller : controllers) {
-            Map<String, MethodDeclaration> methodsByShortestQualifier = methodCollectProc
-                    .collectMethods(controller.getCoid());
+            Map<String, MethodDeclaration> methodsByShortestQualifier = methodCollectProc.collectMethods(
+                    controller.getCoid());
 
             for (Method reflectionHandler : controller.getReflection().getDeclaredMethods()) {
                 if (!this.isHandler(reflectionHandler)) {
                     continue;
                 }
 
-                MethodDeclaration handler = methodsByShortestQualifier
-                        .get(MethodQualifiers.getShortestQualifiedSignature(reflectionHandler));
+                MethodDeclaration handler = methodsByShortestQualifier.get(
+                        MethodQualifiers.getShortestQualifiedSignature(reflectionHandler));
                 if (handler == null) {
                     // 可能是源码删除了某个handler但未编译，所以reflectionMethod存在，但MethodDeclaration已经不存在了
                     // 这种情况没有继续处理该handler的必要了
@@ -86,8 +86,8 @@ public class ListHandlersProc {
     private String findCat(NodeWithJavadoc<?> node) {
         for (String line : JavadocDescriptions.getAsLines(node)) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_CAT)) {
-                String catContent = org.apache.commons.lang3.StringUtils
-                        .removeStartIgnoreCase(line, ControllerMarkerConstant.DOC_CAT).trim();
+                String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line,
+                        ControllerMarkerConstant.DOC_CAT).trim();
                 if (catContent.length() > 0) {
                     return catContent;
                 }

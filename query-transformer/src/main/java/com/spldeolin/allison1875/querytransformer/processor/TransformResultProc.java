@@ -99,9 +99,8 @@ public class TransformResultProc {
             String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
             result.setElementTypeQualifier(javabeanQualifier);
             result.getImports().add(javabeanQualifier);
-            if (EqualsUtils
-                    .equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
-                            ReturnClassifyEnum.multiEach)) {
+            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
+                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
@@ -121,9 +120,8 @@ public class TransformResultProc {
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
             result.setImports(Lists.newArrayList(javaType.getQualifier()));
-            if (EqualsUtils
-                    .equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
-                            ReturnClassifyEnum.multiEach)) {
+            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
+                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
@@ -141,9 +139,8 @@ public class TransformResultProc {
             // 没有指定属性，使用Entity作为返回值类型
             result.setElementTypeQualifier(designMeta.getEntityQualifier());
             result.setImports(Lists.newArrayList(designMeta.getEntityQualifier()));
-            if (EqualsUtils
-                    .equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many, ReturnClassifyEnum.each,
-                            ReturnClassifyEnum.multiEach)) {
+            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
+                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
                 result.getImports().add(ImportConstants.LIST.getNameAsString());
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {

@@ -66,9 +66,8 @@ public class ControllerProc {
                 controller.getNameAsString());
 
         // 使用handle创建Handler方法，并追加到controller中
-        HandlerCreation handlerCreation = createHandlerHandle
-                .createHandler(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(),
-                        serviceGeneration);
+        HandlerCreation handlerCreation = createHandlerHandle.createHandler(firstLineDto,
+                reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(), serviceGeneration);
         controller.addMember(handlerCreation.getHandler());
         log.info("append Handler [{}] into Controller [{}].", handlerCreation.getHandler().getNameAsString(),
                 controller.getNameAsString());

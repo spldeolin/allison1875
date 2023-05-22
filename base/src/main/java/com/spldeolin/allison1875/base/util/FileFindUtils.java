@@ -21,7 +21,7 @@ public class FileFindUtils {
     public static void recursively(Path directory, String extension, Consumer<Path> action) {
         try {
             Files.find(directory, Integer.MAX_VALUE,
-                    (filePath, fileAttr) -> extension.equals(FileNameUtil.getExtension(filePath.toString())))
+                            (filePath, fileAttr) -> extension.equals(FileNameUtil.getExtension(filePath.toString())))
                     .forEach(action);
         } catch (IOException e) {
             throw new RuntimeException("fail to find files from [" + directory + "]", e);
@@ -31,7 +31,7 @@ public class FileFindUtils {
     public static Set<File> asFilesRecursively(Path directory, String extension) {
         try {
             return Files.find(directory, Integer.MAX_VALUE,
-                    (filePath, fileAttr) -> extension.equals(FileNameUtil.getExtension(filePath.toString())))
+                            (filePath, fileAttr) -> extension.equals(FileNameUtil.getExtension(filePath.toString())))
                     .map(Path::toFile).collect(Collectors.toSet());
         } catch (IOException e) {
             throw new RuntimeException("fail to find files from [" + directory + "]", e);
@@ -41,7 +41,7 @@ public class FileFindUtils {
     public static Set<Path> asPathsRecursively(Path directory, String extension) {
         try {
             return Files.find(directory, Integer.MAX_VALUE,
-                    (filePath, fileAttr) -> extension.equals(FileNameUtil.getExtension(filePath.toString())))
+                            (filePath, fileAttr) -> extension.equals(FileNameUtil.getExtension(filePath.toString())))
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             throw new RuntimeException("fail to find files from [" + directory + "]", e);

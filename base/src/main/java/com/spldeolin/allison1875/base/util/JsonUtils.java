@@ -162,8 +162,8 @@ public class JsonUtils {
      */
     public static <T> List<T> toListOfObject(String json, Class<T> clazz, ObjectMapper om) throws JsonException {
         try {
-            @SuppressWarnings("unchecked") Class<T[]> arrayClass = (Class<T[]>) Class
-                    .forName("[L" + clazz.getName() + ";");
+            @SuppressWarnings("unchecked") Class<T[]> arrayClass = (Class<T[]>) Class.forName(
+                    "[L" + clazz.getName() + ";");
             return Lists.newArrayList(om.readValue(json, arrayClass));
         } catch (IOException | ClassNotFoundException e) {
             log.error("json={}, clazz={}", json, clazz, e);

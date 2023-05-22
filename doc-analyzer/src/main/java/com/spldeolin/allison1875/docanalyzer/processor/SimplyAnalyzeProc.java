@@ -35,8 +35,8 @@ public class SimplyAnalyzeProc {
     }
 
     private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        return Annotations.isAnnotationPresent(handler, Deprecated.class) || Annotations
-                .isAnnotationPresent(controller, Deprecated.class);
+        return Annotations.isAnnotationPresent(handler, Deprecated.class) || Annotations.isAnnotationPresent(controller,
+                Deprecated.class);
     }
 
 }

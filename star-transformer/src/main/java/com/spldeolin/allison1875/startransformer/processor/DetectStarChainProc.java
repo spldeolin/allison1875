@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.startransformer.processor;
 
+import java.util.List;
+import java.util.Optional;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -7,9 +9,6 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.support.StarSchema;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Deolin 2023-05-12

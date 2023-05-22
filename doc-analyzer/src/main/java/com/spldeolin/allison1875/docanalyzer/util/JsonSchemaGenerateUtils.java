@@ -50,8 +50,8 @@ public class JsonSchemaGenerateUtils {
         if (lastDotIndex == -1) {
             throw new DotAbsentInStringException();
         }
-        return innerClassMightDescribe.substring(0, lastDotIndex) + '$' + innerClassMightDescribe
-                .substring(lastDotIndex + 1);
+        return innerClassMightDescribe.substring(0, lastDotIndex) + '$' + innerClassMightDescribe.substring(
+                lastDotIndex + 1);
     }
 
 }

@@ -95,8 +95,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
 
                     // 创建所有所需的Javabean
-                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc
-                            .createJavabeans(astForest, cu, firstLineDto, dtos);
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.createJavabeans(astForest, cu, firstLineDto,
+                            dtos);
 
                     // 创建Service Pair
                     GenerateServiceParam param = new GenerateServiceParam();
@@ -112,8 +112,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                     }
 
                     // 在controller中创建handler
-                    HandlerCreation handlerCreation = controllerProc
-                            .createHandlerToController(firstLineDto, controller, serviceGeneration, reqDtoRespDtoInfo);
+                    HandlerCreation handlerCreation = controllerProc.createHandlerToController(firstLineDto, controller,
+                            serviceGeneration, reqDtoRespDtoInfo);
 
                     // 从controller中删除init
                     boolean anyTransformed = init.remove();
@@ -131,9 +131,8 @@ public class HandlerTransformer implements Allison1875MainProcessor {
                         Saves.add(cu);
 
                         // 更多的转化操作
-                        Collection<CompilationUnit> moreCus = moreTransformHandle
-                                .transform(astForest.clone(), firstLineDto, handlerCreation,
-                                        reqDtoRespDtoInfo.getDtoQualifiers());
+                        Collection<CompilationUnit> moreCus = moreTransformHandle.transform(astForest.clone(),
+                                firstLineDto, handlerCreation, reqDtoRespDtoInfo.getDtoQualifiers());
                         moreCus.forEach(Saves::add);
 
                         Saves.saveAll();

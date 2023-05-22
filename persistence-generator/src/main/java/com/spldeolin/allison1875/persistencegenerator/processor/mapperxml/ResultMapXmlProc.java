@@ -20,12 +20,12 @@ public class ResultMapXmlProc {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<resultMap id=\"all\" type=\"%s\">", entityName));
         for (PropertyDto id : persistence.getIdProperties()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + String
-                    .format("<id column=\"%s\" property=\"%s\"/>", id.getColumnName(), id.getPropertyName()));
+            xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("<id column=\"%s\" property=\"%s\"/>",
+                    id.getColumnName(), id.getPropertyName()));
         }
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + String
-                    .format("<result column=\"%s\" property=\"%s\"/>", nonId.getColumnName(), nonId.getPropertyName()));
+            xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("<result column=\"%s\" property=\"%s\"/>",
+                    nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add("</resultMap>");
         xmlLines.add("");

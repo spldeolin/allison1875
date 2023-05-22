@@ -36,8 +36,8 @@ public class ServiceProc {
         serviceBuilder.servicePackageDeclaration(handlerTransformerConfig.getServicePackage());
         serviceBuilder.implPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
         serviceBuilder.importDeclarations(cu.getImports());
-        List<String> imports = Lists
-                .newArrayList("java.util.Collection", handlerTransformerConfig.getPageTypeQualifier());
+        List<String> imports = Lists.newArrayList("java.util.Collection",
+                handlerTransformerConfig.getPageTypeQualifier());
         if (reqDtoRespDtoInfo.getReqDtoQualifier() != null) {
             imports.add(reqDtoRespDtoInfo.getReqDtoQualifier());
         }
@@ -49,8 +49,8 @@ public class ServiceProc {
         serviceBuilder.serviceName(MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "Service");
 
         // 使用handle创建service实现方法
-        CreateServiceMethodHandleResult creation = createServiceMethodHandle
-                .createMethodImpl(firstLineDto, reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType());
+        CreateServiceMethodHandleResult creation = createServiceMethodHandle.createMethodImpl(firstLineDto,
+                reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType());
         serviceBuilder.method(creation.getServiceMethod());
         serviceBuilder.importDeclarationsString(creation.getAppendImports());
 
