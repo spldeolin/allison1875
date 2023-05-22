@@ -1,5 +1,10 @@
 package com.spldeolin.allison1875.startransformer.processor;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Writer;
+import org.apache.commons.lang3.StringUtils;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -10,6 +15,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -25,12 +31,6 @@ import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.atteo.evo.inflector.English;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.Writer;
 
 /**
  * @author Deolin 2023-05-05
@@ -176,27 +176,47 @@ public class StarTransformer implements Allison1875MainProcessor {
                             block.addStatement(++i, forEach);
                         }
                     }
+                    block.addStatement(++i, StaticJavaParser.parseStatement(
+                            "whole." + CodeGenerationUtils.setterName(entityNameToVarName(analysis.getCftEntityName()))
+                                    + "(" + entityNameToVarName(analysis.getCftEntityName()) + ");"));
+                    for (PhraseDto phrase : analysis.getPhrases()) {
+                        String dtVarName = English.plural(entityNameToVarName(phrase.getDtEntityName()),
+                                phrase.getIsOneToOne() ? 1 : 2);
+                        block.addStatement(++i, StaticJavaParser.parseStatement(
+                                "whole." + CodeGenerationUtils.setterName(dtVarName) + "(" + dtVarName + ");"));
+                        for (String key : phrase.getKeys()) {
+                            block.addStatement(++i, StaticJavaParser.parseStatement(
+                                    "whole." + CodeGenerationUtils.setterName(dtVarName) + "Each"
+                                            + StringUtils.capitalize(key) + "(" + dtVarName + "Each"
+                                            + StringUtils.capitalize(key) + ");"));
+                        }
+                        for (String mkey : phrase.getMkeys()) {
+                            block.addStatement(++i, StaticJavaParser.parseStatement(
+                                    "whole." + CodeGenerationUtils.setterName(dtVarName) + "Each"
+                                            + StringUtils.capitalize(mkey) + "(" + dtVarName + "Each"
+                                            + StringUtils.capitalize(mkey) + ");"));
+                        }
+                    }
 
                     // add import
-                    cu.addImport("com.google.common.collect.*");
-                    cu.addImport("java.util.*");
-                    cu.addImport(analysis.getCftEntityQualifier());
                     cu.addImport(analysis.getCftDesignQualifier());
                     for (PhraseDto phrase : analysis.getPhrases()) {
                         cu.addImport(phrase.getDtDesignQulifier());
                         cu.addImport(phrase.getDtEntityQualifier());
                     }
 
-                    Saves.saveAll();
                     detected++;
                 }
-                if (detected > 0) {
-                    try (Writer writer = new BufferedWriter(new FileWriter(Locations.getAbsolutePath(cu).toString()))) {
-                        LexicalPreservingPrinter.print(cu, writer);
-                    } catch (Exception e) {
-                        log.error(e);
-                    }
+            }
+            if (detected > 0) {
+                cu.addImport("com.google.common.collect.*");
+                cu.addImport("java.util.*");
+                try (Writer writer = new BufferedWriter(new FileWriter(Locations.getAbsolutePath(cu).toString()))) {
+                    LexicalPreservingPrinter.print(cu, writer);
+                } catch (Exception e) {
+                    log.error(e);
                 }
+                Saves.saveAll(); // save all WholeDtos
             }
         }
         if (detected == 0) {
