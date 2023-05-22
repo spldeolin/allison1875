@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.startransformer.processor;
 
 import java.util.List;
+import java.util.Set;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -28,12 +29,14 @@ public class AnalyzeChainProc {
     @Inject
     private StarTransformerConfig starTransformerConfig;
 
-    public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest) throws IllegalChainException {
-        return process(starChain, astForest, Lists.newArrayList(), Lists.newArrayList(), Lists.newArrayList());
+    public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
+            throws IllegalChainException {
+        return process(starChain, astForest, wholeDtoNames, Lists.newArrayList(), Lists.newArrayList(),
+                Lists.newArrayList());
     }
 
-    private ChainAnalysisDto process(MethodCallExpr mce, AstForest astForest, List<PhraseDto> phrases,
-            List<String> keys, List<String> mkeys) throws IllegalChainException {
+    private ChainAnalysisDto process(MethodCallExpr mce, AstForest astForest, Set<String> wholeDtoNames,
+            List<PhraseDto> phrases, List<String> keys, List<String> mkeys) throws IllegalChainException {
         if (ChainMethodEnum.oo.toString().equals(mce.getNameAsString())) {
             PhraseDto phrase = new PhraseDto();
             phrase.setIsOneToOne(true);
@@ -81,27 +84,50 @@ public class AnalyzeChainProc {
             mkeys.add(CodeGenerationUtils.getterToPropertyName(getterName));
         }
         if (ChainMethodEnum.cft.toString().equals(mce.getNameAsString())) {
-            ChainAnalysisDto chainAnalysis = new ChainAnalysisDto();
-            chainAnalysis.setCftEntityName(mce.getArgument(0).asMethodReferenceExpr().getScope().toString());
-            chainAnalysis.setCftEntityQualifier(
+            ChainAnalysisDto analysis = new ChainAnalysisDto();
+            analysis.setCftEntityName(mce.getArgument(0).asMethodReferenceExpr().getScope().toString());
+            analysis.setCftEntityQualifier(
                     mce.getArgument(0).asMethodReferenceExpr().getScope().calculateResolvedType().describe());
-            chainAnalysis.setCftDesignName(chainAnalysis.getCftEntityName().replace("Entity", "Design"));
-            chainAnalysis.setCftDesignQualifier(
-                    starTransformerConfig.getDesignPackage() + "." + chainAnalysis.getCftDesignName());
-            chainAnalysis.setCftSecondArgument(mce.getArgument(1));
-            chainAnalysis.setPhrases(phrases);
-            String wholeDtoName = chainAnalysis.getCftEntityName().replace("Entity", "WholeDto");
+            analysis.setCftDesignName(analysis.getCftEntityName().replace("Entity", "Design"));
+            analysis.setCftDesignQualifier(
+                    starTransformerConfig.getDesignPackage() + "." + analysis.getCftDesignName());
+            analysis.setCftSecondArgument(mce.getArgument(1));
+            analysis.setPhrases(phrases);
+            String wholeDtoName = this.ensureNoRepeatInAstForest(astForest, wholeDtoNames,
+                    analysis.getCftEntityName().replace("Entity", "WholeDto"));
             if (astForest.getJavasInForest().stream()
                     .anyMatch(java -> FileNameUtil.getBaseName(java.toFile().getName()).equals(wholeDtoName))) {
                 throw new IllegalChainException("WholeDto '" + wholeDtoName + "' has existed, ignore");
             }
-            chainAnalysis.setWholeDtoName(wholeDtoName);
-            return chainAnalysis;
+            analysis.setWholeDtoName(wholeDtoName);
+            return analysis;
         }
         if (mce.getScope().filter(Expression::isMethodCallExpr).isPresent()) {
-            return this.process(mce.getScope().get().asMethodCallExpr(), astForest, phrases, keys, mkeys);
+            return this.process(mce.getScope().get().asMethodCallExpr(), astForest, wholeDtoNames, phrases, keys,
+                    mkeys);
         }
         throw new RuntimeException("impossible unless bug.");
+    }
+
+    /**
+     * 确保参数coidName与在AstForest中所有的java文件名均不重名
+     */
+    private String ensureNoRepeatInAstForest(AstForest astForest, Set<String> wholeDtoNames, String coidName) {
+        boolean conflicting = astForest.getJavasInForest().stream()
+                .anyMatch(java -> FileNameUtil.getBaseName(java.toFile().getName()).equals(coidName));
+        conflicting |= wholeDtoNames.contains(coidName);
+        if (conflicting) {
+            String rename = concatEx(coidName);
+            log.info("File [{}.java] exist in AstForest, rename to [{}.java]", coidName, rename);
+            return ensureNoRepeatInAstForest(astForest, wholeDtoNames, rename);
+        } else {
+            wholeDtoNames.add(coidName);
+            return coidName;
+        }
+    }
+
+    private String concatEx(String coidName) {
+        return coidName.replace("WholeDto", "WholeExDto");
     }
 
 }
