@@ -12,9 +12,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ChainAnalysisDto {
 
-    private String cftEntityName;
-
     private String cftEntityQualifier;
+
+    private String cftEntityName;
 
     private String cftDesignName;
 

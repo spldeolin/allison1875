@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -13,10 +14,10 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
@@ -30,6 +31,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.support.ByChainPredicate;
+import com.spldeolin.allison1875.support.EntityKey;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.log4j.Log4j2;
 
@@ -66,11 +68,12 @@ public class GenerateDesignProc {
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
         cu.setPackageDeclaration(persistenceGeneratorConfig.getDesignPackage());
-        cu.addImport(ImportConstants.LIST);
-        cu.addImport(ImportConstants.MAP);
-        cu.addImport(ImportConstants.MULTIMAP);
+        cu.addImport(List.class);
+        cu.addImport(Map.class);
+        cu.addImport(Multimap.class);
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
+        cu.addImport(EntityKey.class);
         cu.addImport(entityGeneration.getEntityQualifier());
         for (PropertyDto property : properties) {
             if (!property.getJavaType().getQualifier().startsWith("java.lang")) {
@@ -243,6 +246,12 @@ public class GenerateDesignProc {
                             property.getJavaType().getSimpleName())));
         }
         designCoid.addMember(multiEachCoid);
+
+        for (PropertyDto property : persistence.getProperties()) {
+            designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "public static EntityKey<" + persistence.getEntityName() + "," + property.getJavaType()
+                            .getSimpleName() + "> " + property.getPropertyName() + ";"));
+        }
 
         DesignMeta meta = new DesignMeta();
         meta.setEntityQualifier(entityGeneration.getEntityQualifier());

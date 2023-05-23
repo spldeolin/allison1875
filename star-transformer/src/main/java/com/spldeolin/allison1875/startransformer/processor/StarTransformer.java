@@ -74,9 +74,8 @@ public class StarTransformer implements Allison1875MainProcessor {
 
                     // add import
                     cu.addImport(javabeanArg.getPackageName() + "." + javabeanArg.getClassName());
-                    cu.addImport(analysis.getCftDesignQualifier());
+                    cu.addImport(analysis.getCftEntityQualifier());
                     for (PhraseDto phrase : analysis.getPhrases()) {
-                        cu.addImport(phrase.getDtDesignQulifier());
                         cu.addImport(phrase.getDtEntityQualifier());
                     }
                     anyTransformed = true;

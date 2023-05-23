@@ -4,16 +4,14 @@ import java.util.List;
 import java.util.Set;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
-import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-import com.github.javaparser.resolution.types.ResolvedType;
-import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
+import com.spldeolin.allison1875.base.util.NamingUtils;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
@@ -34,21 +32,8 @@ public class AnalyzeChainProc {
 
     public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
             throws IllegalChainException {
-        ChainAnalysisDto analysis = this.process(starChain, astForest, wholeDtoNames, Lists.newArrayList(),
-                Lists.newArrayList(), Lists.newArrayList());
-
-        for (PhraseDto phrase : analysis.getPhrases()) {
-            if (!phrase.getFkTypeQualifier()
-                    .equals(analysis.getCftSecondArgument().calculateResolvedType().describe())) {
-                // 由于泛型擦除，StarSchema在第一个参数是MethodReferenceExpr的情况，可能无法在编译时进行类型校验，所以再此处进行校验
-                throw new IllegalChainException(
-                        "Incompatible types: [" + phrase.getDtEntityName() + "::" + CodeGenerationUtils.getterName(
-                                Object.class, phrase.getFk()) + "] is not convertible to ["
-                                + analysis.getCftSecondArgument() + "]");
-            }
-        }
-
-        return analysis;
+        return this.process(starChain, astForest, wholeDtoNames, Lists.newArrayList(), Lists.newArrayList(),
+                Lists.newArrayList());
     }
 
     private ChainAnalysisDto process(MethodCallExpr mce, AstForest astForest, Set<String> wholeDtoNames,
@@ -56,15 +41,14 @@ public class AnalyzeChainProc {
         if (ChainMethodEnum.oo.toString().equals(mce.getNameAsString())) {
             PhraseDto phrase = new PhraseDto();
             phrase.setIsOneToOne(true);
+            FieldAccessExpr fae = mce.getArgument(0).asFieldAccessExpr();
             phrase.setDtEntityQualifier(
-                    mce.getArgument(0).asMethodReferenceExpr().getScope().calculateResolvedType().describe());
-            phrase.setDtEntityName(mce.getArgument(0).asMethodReferenceExpr().getScope().toString());
-            phrase.setDtDesignName(phrase.getDtEntityName().replace("Entity", "Design"));
-            phrase.setDtDesignQulifier(starTransformerConfig.getDesignPackage() + "." + phrase.getDtDesignName());
-            String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
-            phrase.setFk(CodeGenerationUtils.getterToPropertyName(getterName));
+                    fae.resolve().getType().asReferenceType().getGenericParameterByName("E").get().describe());
+            phrase.setDtEntityName(NamingUtils.qualifierToTypeName(phrase.getDtEntityQualifier()));
+            phrase.setDtDesignName(fae.getScope().toString());
+            phrase.setFk(fae.getNameAsString());
             phrase.setFkTypeQualifier(
-                    resolveWithTryingAgain(mce.getArgument(0).asMethodReferenceExpr()).getReturnType().describe());
+                    fae.resolve().getType().asReferenceType().getGenericParameterByName("K").get().describe());
             // One to One的维度表无法指定任何key，因为只有一条数据，没有意义
             phrase.setKeys(Lists.newArrayList());
             phrase.setMkeys(Lists.newArrayList());
@@ -73,15 +57,14 @@ public class AnalyzeChainProc {
         if (ChainMethodEnum.om.toString().equals(mce.getNameAsString())) {
             PhraseDto phrase = new PhraseDto();
             phrase.setIsOneToOne(false);
+            FieldAccessExpr fae = mce.getArgument(0).asFieldAccessExpr();
             phrase.setDtEntityQualifier(
-                    mce.getArgument(0).asMethodReferenceExpr().getScope().calculateResolvedType().describe());
-            phrase.setDtEntityName(mce.getArgument(0).asMethodReferenceExpr().getScope().toString());
-            phrase.setDtDesignName(phrase.getDtEntityName().replace("Entity", "Design"));
-            phrase.setDtDesignQulifier(starTransformerConfig.getDesignPackage() + "." + phrase.getDtDesignName());
-            String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
-            phrase.setFk(CodeGenerationUtils.getterToPropertyName(getterName));
+                    fae.resolve().getType().asReferenceType().getGenericParameterByName("E").get().describe());
+            phrase.setDtEntityName(NamingUtils.qualifierToTypeName(phrase.getDtEntityQualifier()));
+            phrase.setDtDesignName(fae.getScope().toString());
+            phrase.setFk(fae.getNameAsString());
             phrase.setFkTypeQualifier(
-                    resolveWithTryingAgain(mce.getArgument(0).asMethodReferenceExpr()).getReturnType().describe());
+                    fae.resolve().getType().asReferenceType().getGenericParameterByName("K").get().describe());
             // 递归到此时，收集到的keys和mkeys均属于这个dt，组装完毕后需要清空并重新收集
             phrase.setKeys(Lists.newArrayList(keys));
             phrase.setMkeys(Lists.newArrayList(mkeys));
@@ -96,30 +79,20 @@ public class AnalyzeChainProc {
             mkeys.clear();
         }
         if (ChainMethodEnum.key.toString().equals(mce.getNameAsString())) {
-            String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
-            keys.add(CodeGenerationUtils.getterToPropertyName(getterName));
+            keys.add(mce.getArgument(0).asFieldAccessExpr().getNameAsString());
         }
         if (ChainMethodEnum.mkey.toString().equals(mce.getNameAsString())) {
-            String getterName = mce.getArgument(0).asMethodReferenceExpr().getIdentifier();
-            mkeys.add(CodeGenerationUtils.getterToPropertyName(getterName));
+            mkeys.add(mce.getArgument(0).asFieldAccessExpr().getNameAsString());
         }
         if (ChainMethodEnum.cft.toString().equals(mce.getNameAsString())) {
-            MethodReferenceExpr firstArgment = mce.getArgument(0).asMethodReferenceExpr();
-            Expression secondArgment = mce.getArgument(1);
-            ResolvedMethodDeclaration resolve1 = resolveWithTryingAgain(firstArgment);
-            ResolvedType resolve2 = secondArgment.calculateResolvedType();
-            if (!resolve1.getReturnType().describe().equals(resolve2.describe())) {
-                // 由于泛型擦除，StarSchema在第一个参数是MethodReferenceExpr的情况，可能无法在编译时进行类型校验，所以再此处进行校验
-                throw new IllegalChainException(
-                        "Incompatible types: [" + secondArgment + "] is not convertible to [" + firstArgment + "]");
-            }
+            FieldAccessExpr fae = mce.getArgument(0).asFieldAccessExpr();
             ChainAnalysisDto analysis = new ChainAnalysisDto();
-            analysis.setCftEntityName(firstArgment.getScope().toString());
-            analysis.setCftEntityQualifier(firstArgment.getScope().calculateResolvedType().describe());
-            analysis.setCftDesignName(analysis.getCftEntityName().replace("Entity", "Design"));
-            analysis.setCftDesignQualifier(
-                    starTransformerConfig.getDesignPackage() + "." + analysis.getCftDesignName());
-            analysis.setCftSecondArgument(secondArgment);
+            analysis.setCftEntityQualifier(
+                    fae.resolve().getType().asReferenceType().getGenericParameterByName("E").get().describe());
+            analysis.setCftEntityName(NamingUtils.qualifierToTypeName(analysis.getCftEntityQualifier()));
+            analysis.setCftDesignName(fae.getScope().toString());
+            analysis.setCftDesignQualifier(fae.getScope().calculateResolvedType().describe());
+            analysis.setCftSecondArgument(mce.getArgument(1));
             analysis.setPhrases(phrases);
             String wholeDtoName = this.ensureNoRepeatInAstForest(astForest, wholeDtoNames,
                     analysis.getCftEntityName().replace("Entity", "WholeDto"));
@@ -152,15 +125,6 @@ public class AnalyzeChainProc {
 
     private String concatEx(String coidName) {
         return coidName.replace("Dto", "ExDto");
-    }
-
-    private ResolvedMethodDeclaration resolveWithTryingAgain(MethodReferenceExpr methodReferenceExpr) {
-        // Just trying again will work, I don't know why
-        try {
-            return methodReferenceExpr.resolve();
-        } catch (Exception e) {
-            return methodReferenceExpr.resolve();
-        }
     }
 
 }

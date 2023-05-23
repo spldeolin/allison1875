@@ -21,8 +21,6 @@ public class PhraseDto {
 
     private String dtDesignName;
 
-    private String dtDesignQulifier;
-
     private String fk;
 
     private String fkTypeQualifier;
