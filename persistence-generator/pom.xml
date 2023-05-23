@@ -22,10 +22,10 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <!-- jodd db -->
+        <!-- jooq -->
         <dependency>
-            <groupId>org.jodd</groupId>
-            <artifactId>jodd-db</artifactId>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
         </dependency>
 
         <!-- mysql -->

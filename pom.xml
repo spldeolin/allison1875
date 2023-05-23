@@ -145,11 +145,11 @@
                 <version>6.0.6</version>
             </dependency>
 
-            <!-- jodd db -->
+            <!-- jooq -->
             <dependency>
-                <groupId>org.jodd</groupId>
-                <artifactId>jodd-db</artifactId>
-                <version>6.0.0</version>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+                <version>3.14.16</version>
             </dependency>
 
             <!-- mysql -->
