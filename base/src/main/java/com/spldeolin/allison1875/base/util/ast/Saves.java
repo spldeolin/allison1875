@@ -41,21 +41,6 @@ public class Saves {
         apiSaveBuffer.get().add(cu);
     }
 
-    /**
-     * 使用这种方式加入的CU对象在SaveAll时，会保持原有的 Code Format
-     */
-    public static void add(CompilationUnit cu, String target, String replacement) {
-        String oldCodeText;
-        if (rawReplaceBuffer.get().containsKey(cu)) {
-            oldCodeText = rawReplaceBuffer.get().get(cu);
-        } else {
-            oldCodeText = TokenRanges.getRawCode(cu);
-        }
-        String newCodeText = oldCodeText.replace(target, replacement);
-
-        rawReplaceBuffer.get().put(cu, newCodeText);
-    }
-
     @Data
     @AllArgsConstructor
     public static class Replace {
@@ -87,14 +72,15 @@ public class Saves {
         rawReplaceBuffer.get().put(cu, newCodeText);
     }
 
-    public static Set<CompilationUnit> listAllBuffers() {
-        Set<CompilationUnit> result = apiSaveBuffer.get();
-        result.addAll(rawReplaceBuffer.get().keySet());
-        return result;
-    }
-
     public static void saveAll() {
-        apiSaveBuffer.get().forEach(Saves::save);
+        for (CompilationUnit cu : apiSaveBuffer.get()) {
+            Storage storage = cu.getStorage().orElseThrow(StorageAbsentException::new);
+            File file = storage.getDirectory().resolve(storage.getFileName()).toFile();
+            if (file.exists()) {
+                FileBackupUtils.backup(file);
+            }
+            storage.save();
+        }
         apiSaveBuffer.get().clear();
         rawReplaceBuffer.get().forEach((cu, newCodeText) -> {
             try {
@@ -104,15 +90,6 @@ public class Saves {
             }
         });
         rawReplaceBuffer.get().clear();
-    }
-
-    private static void save(CompilationUnit cu) {
-        Storage storage = cu.getStorage().orElseThrow(StorageAbsentException::new);
-        File file = storage.getDirectory().resolve(storage.getFileName()).toFile();
-        if (file.exists()) {
-            FileBackupUtils.backup(file);
-        }
-        storage.save();
     }
 
 }
