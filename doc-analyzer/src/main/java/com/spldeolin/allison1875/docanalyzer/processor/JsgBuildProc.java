@@ -30,7 +30,6 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.handle.AccessDescriptionHandle;
@@ -235,18 +234,25 @@ public class JsgBuildProc {
 
     private void collectPropertyDescriptions(ClassOrInterfaceDeclaration coid,
             Table<String, String, JsonPropertyDescriptionValueDto> table) {
-        String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-        String javabeanQualifier = qualifier;
-        for (FieldDeclaration field : coid.getFields()) {
-            Collection<String> javadocDescLines = accessDescriptionHandle.accessField(field);
-            for (VariableDeclarator var : field.getVariables()) {
-                JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
-                String varName = var.getNameAsString();
-                jpdv.setDescriptionLines(javadocDescLines);
-                jpdv.setDocIgnore(findIgnoreFlag(javadocDescLines));
-                table.put(javabeanQualifier, varName, jpdv);
+        /*
+        这里不存在coid不应算作非法，而应忽略。
+        因为coid可能是一个声明在class内部的class（比如handler-transformer转化前的block）
+        这样的coid是符合Java语法的，会被扫描到的，但确实是没有qualifier的
+         */
+        coid.getFullyQualifiedName().ifPresent(qualifier -> {
+            String javabeanQualifier = qualifier;
+            for (FieldDeclaration field : coid.getFields()) {
+                Collection<String> javadocDescLines = accessDescriptionHandle.accessField(field);
+                for (VariableDeclarator var : field.getVariables()) {
+                    JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
+                    String varName = var.getNameAsString();
+                    jpdv.setDescriptionLines(javadocDescLines);
+                    jpdv.setDocIgnore(findIgnoreFlag(javadocDescLines));
+                    table.put(javabeanQualifier, varName, jpdv);
+                }
             }
-        }
+        });
+
     }
 
     private boolean findIgnoreFlag(Collection<String> javadocDescLines) {
