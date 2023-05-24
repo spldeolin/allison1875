@@ -138,11 +138,11 @@
                 <version>6.0.1</version>
             </dependency>
 
-            <!-- jodd http -->
+            <!-- okhttp3 -->
             <dependency>
-                <groupId>org.jodd</groupId>
-                <artifactId>jodd-http</artifactId>
-                <version>6.0.6</version>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>3.14.9</version>
             </dependency>
 
             <!-- jooq -->

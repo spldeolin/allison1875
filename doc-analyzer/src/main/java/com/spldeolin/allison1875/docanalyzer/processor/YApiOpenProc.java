@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -13,8 +12,12 @@ import com.spldeolin.allison1875.docanalyzer.exception.YapiException;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiCommonRespDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiProjectGetRespDto;
-import jodd.http.HttpRequest;
-import jodd.http.HttpResponse;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * @author Deolin 2021-06-10
@@ -22,81 +25,124 @@ import jodd.http.HttpResponse;
 @Singleton
 public class YApiOpenProc {
 
+    private static final OkHttpClient okHttpClient = new OkHttpClient();
+
+    private static final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
     @Inject
-    private DocAnalyzerConfig docAnalyzerConfig;
+    private DocAnalyzerConfig config;
 
     public YApiProjectGetRespDto getProject() {
-        String url = docAnalyzerConfig.getYapiUrl() + "/api/project/get" + tokenQuery();
-        HttpResponse response = HttpRequest.get(url).send();
-        YApiCommonRespDto<YApiProjectGetRespDto> responseBody = JsonUtils.toParameterizedObject(response.bodyText(),
-                new TypeReference<YApiCommonRespDto<YApiProjectGetRespDto>>() {
-                });
-        ensureSuccess(responseBody);
-        return responseBody.getData();
+        String url = config.getYapiUrl() + "/api/project/get" + tokenQuery();
+        try (Response response = okHttpClient.newCall(new Builder().url(url).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            YApiCommonRespDto<YApiProjectGetRespDto> responseBody = JsonUtils.toParameterizedObject(
+                    response.body().string(), new TypeReference<YApiCommonRespDto<YApiProjectGetRespDto>>() {
+                    });
+            ensureSuccess(responseBody);
+            return responseBody.getData();
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
     public List<YApiInterfaceListMenuRespDto> listCats(Long projectId) {
-        String url =
-                docAnalyzerConfig.getYapiUrl() + "/api/interface/list_menu" + tokenQuery() + "&project_id=" + projectId;
-        HttpResponse response = HttpRequest.get(url).send();
-        YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>> responseBody = JsonUtils.toParameterizedObject(
-                response.bodyText(), new TypeReference<YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>>>() {
-                });
-        ensureSuccess(responseBody);
-        return responseBody.getData();
+        String url = config.getYapiUrl() + "/api/interface/list_menu" + tokenQuery() + "&project_id=" + projectId;
+        try (Response response = okHttpClient.newCall(new Builder().url(url).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>> responseBody = JsonUtils.toParameterizedObject(
+                    response.body().string(),
+                    new TypeReference<YApiCommonRespDto<List<YApiInterfaceListMenuRespDto>>>() {
+                    });
+            ensureSuccess(responseBody);
+            return responseBody.getData();
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
     public JsonNode listCatsAsJsonNode(Long projectId) {
-        String url =
-                docAnalyzerConfig.getYapiUrl() + "/api/interface/list_menu" + tokenQuery() + "&project_id=" + projectId;
-        HttpResponse response = HttpRequest.get(url).send();
-        JsonNode responseBody = JsonUtils.toTree(response.bodyText());
-        ensureSuccess(responseBody);
-        return responseBody.get("data");
+        String url = config.getYapiUrl() + "/api/interface/list_menu" + tokenQuery() + "&project_id=" + projectId;
+        try (Response response = okHttpClient.newCall(new Builder().url(url).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            JsonNode responseBody = JsonUtils.toTree(response.body().string());
+            ensureSuccess(responseBody);
+            return responseBody.get("data");
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
     //
     public JsonNode createCat(String desc, String name, Long projectId) {
-        String url = docAnalyzerConfig.getYapiUrl() + "/api/interface/add_cat";
-        Map<String, Object> form = Maps.newHashMap();
-        form.put("desc", desc);
-        form.put("name", name);
-        form.put("project_id", projectId);
-        form.put("token", docAnalyzerConfig.getYapiToken());
-        HttpResponse response = HttpRequest.post(url).form(form).send();
-        JsonNode responseBody = JsonUtils.toTree(response.bodyText());
-        ensureSuccess(responseBody);
-        return responseBody;
+        String url = config.getYapiUrl() + "/api/interface/add_cat";
+        RequestBody formBody = new FormBody.Builder().add("desc", desc).add("name", name)
+                .add("project_id", projectId.toString()).add("token", config.getYapiToken()).build();
+        try (Response response = okHttpClient.newCall(new Builder().url(url).post(formBody).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            JsonNode responseBody = JsonUtils.toTree(response.body().string());
+            ensureSuccess(responseBody);
+            return responseBody;
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
     public JsonNode getEndpoint(Long id) {
-        String url = docAnalyzerConfig.getYapiUrl() + "/api/interface/get" + tokenQuery() + "&id=" + id;
-        HttpResponse response = HttpRequest.get(url).send();
-        JsonNode responseBody = JsonUtils.toTree(response.bodyText());
-        ensureSuccess(responseBody);
-        return responseBody.get("data");
+        String url = config.getYapiUrl() + "/api/interface/get" + tokenQuery() + "&id=" + id;
+        try (Response response = okHttpClient.newCall(new Builder().url(url).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            JsonNode responseBody = JsonUtils.toTree(response.body().string());
+            ensureSuccess(responseBody);
+            return responseBody.get("data");
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
-    public JsonNode createOrUpdateEndpoint(Map<String, Object> requestBody) {
-        String url = docAnalyzerConfig.getYapiUrl() + "/api/interface/save";
-        HttpResponse response = HttpRequest.post(url)
-                .bodyText(JsonUtils.toJson(requestBody), "application/json", "utf-8").send();
-        JsonNode responseBody = JsonUtils.toTree(response.bodyText());
-        ensureSuccess(responseBody);
-        return responseBody;
+    public JsonNode createOrUpdateEndpoint(Map<String, Object> requestBodyMap) {
+        String url = config.getYapiUrl() + "/api/interface/save";
+        RequestBody requestBody = RequestBody.create(mediaType, JsonUtils.toJson(requestBodyMap));
+        try (Response response = okHttpClient.newCall(new Builder().url(url).post(requestBody).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            JsonNode responseBody = JsonUtils.toTree(response.body().string());
+            ensureSuccess(responseBody);
+            return responseBody;
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
-    public JsonNode updateEndpoint(Map<String, Object> requestBody) {
-        String url = docAnalyzerConfig.getYapiUrl() + "/api/interface/up";
-        HttpResponse response = HttpRequest.post(url)
-                .bodyText(JsonUtils.toJson(requestBody), "application/json", "utf-8").send();
-        JsonNode responseBody = JsonUtils.toTree(response.bodyText());
-        ensureSuccess(responseBody);
-        return responseBody;
+    public JsonNode updateEndpoint(Map<String, Object> requestBodyMap) {
+        String url = config.getYapiUrl() + "/api/interface/up";
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),
+                JsonUtils.toJson(requestBodyMap));
+        try (Response response = okHttpClient.newCall(new Builder().url(url).post(requestBody).build()).execute()) {
+            if (response.body() == null) {
+                throw new YapiException("response body absent");
+            }
+            JsonNode responseBody = JsonUtils.toTree(response.body().string());
+            ensureSuccess(responseBody);
+            return responseBody;
+        } catch (Exception e) {
+            throw new YapiException(e);
+        }
     }
 
     private String tokenQuery() {
-        return "?token=" + docAnalyzerConfig.getYapiToken();
+        return "?token=" + config.getYapiToken();
     }
 
     private static void ensureSuccess(YApiCommonRespDto<?> resp) throws YapiException {
