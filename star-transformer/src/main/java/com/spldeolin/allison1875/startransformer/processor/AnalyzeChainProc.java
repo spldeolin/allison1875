@@ -7,17 +7,18 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.NamingUtils;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
-import jodd.io.FileNameUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -112,7 +113,7 @@ public class AnalyzeChainProc {
      */
     private String ensureNoRepeatInAstForest(AstForest astForest, Set<String> wholeDtoNames, String coidName) {
         boolean conflicting = astForest.getJavasInForest().stream()
-                .anyMatch(java -> FileNameUtil.getBaseName(java.toFile().getName()).equals(coidName));
+                .anyMatch(java -> Files.getNameWithoutExtension(java.toFile().getName()).equals(coidName));
         conflicting |= wholeDtoNames.contains(coidName);
         if (conflicting) {
             String rename = concatEx(coidName);
@@ -124,7 +125,7 @@ public class AnalyzeChainProc {
     }
 
     private String concatEx(String coidName) {
-        return coidName.replace("Dto", "ExDto");
+        return MoreStringUtils.replaceLast(coidName, "Dto", "ExDto");
     }
 
 }

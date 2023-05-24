@@ -26,7 +26,6 @@ import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespD
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiProjectGetRespDto;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
-import jodd.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -75,7 +74,7 @@ public class YApiSyncProc {
         for (EndpointDto endpoint : endpoints) {
             Collection<String> descriptionLines = endpoint.getDescriptionLines();
             String title = Iterables.getFirst(descriptionLines, null);
-            if (StringUtil.isEmpty(title)) {
+            if (StringUtils.isEmpty(title)) {
                 title = endpoint.getHandlerSimpleName();
             }
             String yapiDesc = endpointToStringProc.toString(endpoint);

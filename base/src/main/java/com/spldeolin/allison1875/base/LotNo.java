@@ -2,9 +2,7 @@ package com.spldeolin.allison1875.base;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.StringUtils;
-import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
-import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -50,19 +48,6 @@ public class LotNo {
         String hash = StringUtils.upperCase(
                 Hashing.murmur3_32().hashString(information, StandardCharsets.UTF_8).toString());
         return new LotNo(moduleAbbr, Version.lotNoVersion, hash, unmodifiable);
-    }
-
-    public static LotNo parse(String text) {
-        Preconditions.checkNotNull(text);
-        String[] snippets = text.split("\\W");
-        if (snippets.length != 2) {
-            throw new IllegalArgumentException("cannot parse Lot No '" + text + "'");
-        }
-        ModuleAbbr moduleAbbr = ModuleAbbr.valueOf(snippets[0].substring(0, 2));
-        String versionText = StringUtil.cutSuffix(snippets[0], moduleAbbr.toString());
-        String hash = snippets[1];
-        Boolean unmodifiable = text.contains(NO_MANUAL_MODIFICATION);
-        return new LotNo(moduleAbbr, versionText, hash, unmodifiable);
     }
 
     public String asJavadocDescription() {

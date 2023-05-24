@@ -21,7 +21,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import jodd.util.StringUtil;
 
 /**
  * @author Deolin 2021-01-10
@@ -80,7 +79,8 @@ public class SingleMethodServiceCuBuilder {
 
     public SingleMethodServiceCuBuilder importDeclaration(String importName) {
         if (importName.endsWith(".*")) {
-            importDeclarations.add(new ImportDeclaration(StringUtil.cutSuffix(importName, ".*"), false, true));
+            importDeclarations.add(
+                    new ImportDeclaration(MoreStringUtils.replaceLast(importName, ".*", ""), false, true));
         } else {
             importDeclarations.add(new ImportDeclaration(importName, false, false));
         }

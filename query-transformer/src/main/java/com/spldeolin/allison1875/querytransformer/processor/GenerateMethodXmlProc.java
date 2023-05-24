@@ -6,16 +6,19 @@ import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
@@ -25,8 +28,6 @@ import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
-import jodd.io.FileUtil;
-import jodd.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -65,7 +66,7 @@ public class GenerateMethodXmlProc {
                 }
                 // 删除最后一个语句中，最后的逗号
                 int last = xmlLines.size() - 1;
-                xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
+                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
             }
             xmlLines.add(SINGLE_INDENT + "FROM");
             xmlLines.add(DOUBLE_INDENT + "`" + designMeta.getTableName() + "`");
@@ -79,7 +80,7 @@ public class GenerateMethodXmlProc {
                 }
                 // 删除最后一个语句中，最后的逗号
                 int last = xmlLines.size() - 1;
-                xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
+                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
             }
             if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.one) {
                 xmlLines.add(SINGLE_INDENT + "LIMIT 1");
@@ -101,7 +102,7 @@ public class GenerateMethodXmlProc {
             }
             // 删除最后一个语句中，最后的逗号
             int last = xmlLines.size() - 1;
-            xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
+            xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
             xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
@@ -125,14 +126,14 @@ public class GenerateMethodXmlProc {
 
         List<String> newLines = Lists.newArrayList();
         try {
-            List<String> lines = Arrays.asList(FileUtil.readLines(mapperXml));
+            List<String> lines = Collections.singletonList(Files.toString(mapperXml, StandardCharsets.UTF_8));
             Collections.reverse(lines);
             for (String line : lines) {
                 newLines.add(line);
                 if (line.contains("</mapper>")) {
                     Collections.reverse(xmlLines);
                     for (String xmlLine : xmlLines) {
-                        if (StringUtil.isNotBlank(xmlLine)) {
+                        if (StringUtils.isNotBlank(xmlLine)) {
                             newLines.add(SINGLE_INDENT + xmlLine);
                         }
                     }
@@ -140,7 +141,7 @@ public class GenerateMethodXmlProc {
                 }
             }
             Collections.reverse(newLines);
-            FileUtil.writeString(mapperXml, Joiner.on('\n').join(newLines));
+            Files.write(Joiner.on('\n').join(newLines), mapperXml, StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error(e);
         }

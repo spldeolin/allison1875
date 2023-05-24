@@ -69,7 +69,7 @@
                 <version>${log4j2.version}</version>
             </dependency>
 
-            <!-- jackson (jsr310, yaml, csv, jsonSchema) -->
+            <!-- jackson (jsr310, csv, jsonSchema) -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -129,13 +129,6 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
                 <version>5.3.8</version>
-            </dependency>
-
-            <!-- jodd util -->
-            <dependency>
-                <groupId>org.jodd</groupId>
-                <artifactId>jodd-util</artifactId>
-                <version>6.0.1</version>
             </dependency>
 
             <!-- okhttp3 -->

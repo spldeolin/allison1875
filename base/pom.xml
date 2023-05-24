@@ -77,12 +77,6 @@
             <artifactId>evo-inflector</artifactId>
         </dependency>
 
-        <!-- jodd util -->
-        <dependency>
-            <groupId>org.jodd</groupId>
-            <artifactId>jodd-util</artifactId>
-        </dependency>
-
         <!-- maven model -->
         <dependency>
             <groupId>org.apache.maven</groupId>

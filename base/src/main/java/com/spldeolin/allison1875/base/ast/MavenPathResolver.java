@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.base.ast;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Model;
@@ -45,7 +44,7 @@ public class MavenPathResolver {
             return childPath;
         }
         Path parentPomPath = childPath.resolve(parent.getRelativePath()).normalize();
-        if (!Files.exists(parentPomPath)) {
+        if (parentPomPath.toFile().exists()) {
             return childPath;
         }
         Model parentModel = mavenXpp3Reader.read(new FileReader(parentPomPath.toString()));

@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.gadget.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -19,6 +19,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -90,7 +91,7 @@ public class LineCounter implements Allison1875MainProcessor {
         for (File xml : detectXmls(astForest)) {
             try {
                 String xmlPath = commonPath.relativize(xml.toPath()).normalize().toString();
-                allXmls.put(xmlPath, (int) Files.lines(xml.toPath()).count());
+                allXmls.put(xmlPath, Files.readLines(xml, StandardCharsets.UTF_8).size());
             } catch (IOException e) {
                 log.error("xml={}", xml, e);
             }

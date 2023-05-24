@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.base.util.ast;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,9 +10,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
 import com.spldeolin.allison1875.base.util.FileBackupUtils;
-import jodd.io.FileUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -97,7 +98,7 @@ public class Saves {
         apiSaveBuffer.get().clear();
         rawReplaceBuffer.get().forEach((cu, newCodeText) -> {
             try {
-                FileUtil.writeString(Locations.getAbsolutePath(cu).toFile(), newCodeText);
+                Files.write(newCodeText, Locations.getAbsolutePath(cu).toFile(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 log.error("FileUtils#writeStringToFile", e);
             }

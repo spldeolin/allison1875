@@ -6,10 +6,10 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import jodd.util.StringUtil;
 
 /**
  * 根据主键更新，即便属性的值为null，也更新为null
@@ -40,7 +40,7 @@ public class UpdateByIdEvenNullXmlProc {
             // 删除最后一个语句中，最后的逗号
             if (xmlLines.size() > 0) {
                 int last = xmlLines.size() - 1;
-                xmlLines.set(last, StringUtil.cutSuffix(xmlLines.get(last), ","));
+                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {

@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.startransformer.processor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +11,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
@@ -94,7 +94,7 @@ public class StarTransformer implements Allison1875MainProcessor {
             fileNewContents.forEach((path, content) -> {
                 FileBackupUtils.backup(path);
                 try {
-                    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+                    Files.write(content, path.toFile(), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     log.error("FileUtils#writeStringToFile", e);
                 }

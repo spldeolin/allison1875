@@ -1,11 +1,11 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
-import jodd.io.FileNameUtil;
-import jodd.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -48,7 +48,7 @@ public class EnsureNoRepeatProc {
      */
     public String inAstForest(AstForest astForest, String coidName) {
         boolean conflicting = astForest.getJavasInForest().stream()
-                .anyMatch(java -> FileNameUtil.getBaseName(java.toFile().getName()).equals(coidName));
+                .anyMatch(java -> Files.getNameWithoutExtension(java.toFile().getName()).equals(coidName));
         if (conflicting) {
             return inAstForest(astForest, concatEx(coidName));
         } else {
@@ -59,15 +59,15 @@ public class EnsureNoRepeatProc {
     private String concatEx(String coidName) {
         String newName;
         if (coidName.endsWith("ReqDto")) {
-            newName = StringUtil.replaceLast(coidName, "ReqDto", "ExReqDto");
+            newName = MoreStringUtils.replaceLast(coidName, "ReqDto", "ExReqDto");
         } else if (coidName.endsWith("RespDto")) {
-            newName = StringUtil.replaceLast(coidName, "RespDto", "ExRespDto");
+            newName = MoreStringUtils.replaceLast(coidName, "RespDto", "ExRespDto");
         } else if (coidName.endsWith("Dto")) {
-            newName = StringUtil.replaceLast(coidName, "Dto", "ExDto");
+            newName = MoreStringUtils.replaceLast(coidName, "Dto", "ExDto");
         } else if (coidName.endsWith("Service")) {
-            newName = StringUtil.replaceLast(coidName, "Service", "ExService");
+            newName = MoreStringUtils.replaceLast(coidName, "Service", "ExService");
         } else if (coidName.endsWith("ServiceImpl")) {
-            newName = StringUtil.replaceLast(coidName, "ServiceImpl", "ExServiceImpl");
+            newName = MoreStringUtils.replaceLast(coidName, "ServiceImpl", "ExServiceImpl");
         } else {
             newName = coidName + "Ex";
         }

@@ -24,8 +24,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import jodd.util.StringUtil;
 
 /**
  * @author Deolin 2020-12-26
@@ -87,7 +87,8 @@ public class JavabeanCuBuilder<C> {
 
     public JavabeanCuBuilder<C> importDeclaration(String importName) {
         if (importName.endsWith(".*")) {
-            importDeclarations.add(new ImportDeclaration(StringUtil.cutSuffix(importName, ".*"), false, true));
+            importDeclarations.add(
+                    new ImportDeclaration(MoreStringUtils.replaceLast(importName, ".*", ""), false, true));
         } else {
             importDeclarations.add(new ImportDeclaration(importName, false, false));
         }

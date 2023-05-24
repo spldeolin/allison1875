@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.base.factory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,12 +23,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import com.google.common.io.Files;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import jodd.io.FileUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -52,7 +53,7 @@ public class JavabeanFactory {
             // 如果javabean已存在，并且外部指定了lotNo，对比lotNo
             if (javabeanArg.getLotNo() != null) {
                 try {
-                    boolean sameLot = FileUtil.readString(absulutePath.toFile())
+                    boolean sameLot = Files.toString(absulutePath.toFile(), StandardCharsets.UTF_8)
                             .contains(LotNo.TAG_PREFIXION + javabeanArg.getLotNo().toString());
                     if (sameLot) {
                         log.info("Class with same name [{}] and same lot no [{}] is present, no more building",

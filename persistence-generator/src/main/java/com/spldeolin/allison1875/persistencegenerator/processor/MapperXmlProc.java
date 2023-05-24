@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
@@ -18,7 +20,6 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import jodd.io.FileUtil;
 
 /**
  * @author Deolin 2020-07-18
@@ -40,12 +41,12 @@ public class MapperXmlProc {
             sourceCodeLines.add(String.format("<mapper namespace=\"%s\">",
                     mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
             sourceCodeLines.add("</mapper>");
-            FileUtil.writeString(mapperXmlFile, Joiner.on("\n").join(sourceCodeLines));
+            Files.write(Joiner.on("\n").join(sourceCodeLines), mapperXmlFile, StandardCharsets.UTF_8);
         }
 
         List<String> newLines = Lists.newArrayList();
 
-        String content = FileUtil.readString(mapperXmlFile);
+        String content = Files.toString(mapperXmlFile, StandardCharsets.UTF_8);
         List<String> lines = MoreStringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines(sourceCodes, persistence);
 
@@ -81,7 +82,7 @@ public class MapperXmlProc {
             Collections.reverse(newLines);
         }
 
-        FileUtil.writeString(mapperXmlFile, Joiner.on(System.lineSeparator()).join(newLines));
+        Files.write(Joiner.on(System.lineSeparator()).join(newLines), mapperXmlFile, StandardCharsets.UTF_8);
         return this;
     }
 
