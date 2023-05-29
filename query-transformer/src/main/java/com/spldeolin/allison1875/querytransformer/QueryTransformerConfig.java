@@ -22,6 +22,12 @@ public final class QueryTransformerConfig {
     private String mapperRecordPackage;
 
     /**
+     * Design类的包名
+     */
+    @NotEmpty
+    private String designPackage;
+
+    /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
      *
      * <pre>
@@ -46,8 +52,9 @@ public final class QueryTransformerConfig {
      */
     public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
         if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
-            this.mapperConditionPackage = packageNameWithWildcard.replace(".-", ".cond");
-            this.mapperRecordPackage = packageNameWithWildcard.replace(".-", ".record");
+            this.mapperConditionPackage = packageNameWithWildcard.replace(".-", ".javabean.cond");
+            this.mapperRecordPackage = packageNameWithWildcard.replace(".-", ".javabean.record");
+            this.designPackage = packageNameWithWildcard.replace(".-", ".design");
         }
     }
 

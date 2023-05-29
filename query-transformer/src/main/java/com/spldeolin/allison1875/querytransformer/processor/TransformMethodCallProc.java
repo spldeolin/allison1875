@@ -1,13 +1,16 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
+import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
@@ -50,7 +53,7 @@ public class TransformMethodCallProc {
         return result;
     }
 
-    public String argumentBuildStmts(ChainAnalysisDto chainAnalysis,
+    public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation) {
         if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
             return null;
@@ -59,22 +62,23 @@ public class TransformMethodCallProc {
         log.info("build Javabean setter call");
         String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
-        StringBuilder result = new StringBuilder();
-        result.append(String.format("final %s %s = new %s();", javabeanTypeName, javabeanVarName, javabeanTypeName));
+        List<Statement> result = Lists.newArrayList();
+        result.add(StaticJavaParser.parseStatement(
+                "final " + javabeanTypeName + " " + javabeanVarName + " = new " + javabeanTypeName + "();"));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
-            result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")
-                    .append(MoreStringUtils.upperFirstLetter(updatePhrase.getVarName())).append("(")
-                    .append(updatePhrase.getObjectExpr()).append(");");
+            result.add(StaticJavaParser.parseStatement(
+                    javabeanVarName + ".set" + MoreStringUtils.upperFirstLetter(updatePhrase.getVarName()) + "("
+                            + updatePhrase.getObjectExpr() + ");"));
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
             if (EqualsUtils.equalsAny(byPhrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
                 continue;
             }
-            result.append("\n").append(chainAnalysis.getIndent()).append(javabeanVarName).append(".set")
-                    .append(MoreStringUtils.upperFirstLetter(byPhrase.getVarName())).append("(")
-                    .append(byPhrase.getObjectExpr()).append(");");
+            result.add(StaticJavaParser.parseStatement(
+                    javabeanVarName + ".set" + MoreStringUtils.upperFirstLetter(byPhrase.getVarName()) + "("
+                            + byPhrase.getObjectExpr() + ");"));
         }
-        return result.toString();
+        return result;
     }
 
     public MapOrMultimapBuiltDto mapOrMultimapBuildStmts(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
@@ -90,20 +94,20 @@ public class TransformMethodCallProc {
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode().get().getParentNode()
                     .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
 
-            String code;
+            List<Statement> statements = Lists.newArrayList();
             if (isAssignWithoutType) {
-                code = String.format("%s = Maps.newHashMap();", calcResultVarName(chainAnalysis));
+                statements.add(
+                        StaticJavaParser.parseStatement(calcResultVarName(chainAnalysis) + " = Maps.newHashMap();"));
             } else {
-                code = String.format("final Map<%s, %s> %s = Maps.newHashMap();", propertyTypeName, elementTypeName,
-                        calcResultVarName(chainAnalysis));
+                statements.add(StaticJavaParser.parseStatement(
+                        "final Map<" + propertyTypeName + ", " + elementTypeName + "> " + calcResultVarName(
+                                chainAnalysis) + " = Maps.newHashMap();"));
             }
-            code += "\n" + chainAnalysis.getIndent() + String.format("%sList.forEach(one -> %s.put(one.get%s(), one));",
-                    chainAnalysis.getMethodName(), calcResultVarName(chainAnalysis),
-                    MoreStringUtils.upperFirstLetter(propertyName));
+            statements.add(StaticJavaParser.parseStatement(
+                    chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
+                            + ".put(one.get" + MoreStringUtils.upperFirstLetter(propertyName) + "(), one));"));
             MapOrMultimapBuiltDto result = new MapOrMultimapBuiltDto();
-            result.setCode(code);
-            result.getImports().add(ImportConstants.MAP.getNameAsString());
-            result.getImports().add(ImportConstants.MAPS.getNameAsString());
+            result.setStatements(statements);
             return result;
         }
 
@@ -117,20 +121,20 @@ public class TransformMethodCallProc {
                     .orElseThrow(ParentAbsentException::new).getParentNode()
                     .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
 
-            String code;
+            List<Statement> statements = Lists.newArrayList();
             if (isAssignWithoutType) {
-                code = String.format("%s = ArrayListMultimap.create();", calcResultVarName(chainAnalysis));
+                statements.add(StaticJavaParser.parseStatement(
+                        calcResultVarName(chainAnalysis) + " = ArrayListMultimap.create();"));
             } else {
-                code = String.format("final Multimap<%s, %s> %s = ArrayListMultimap.create();", propertyTypeName,
-                        elementTypeName, calcResultVarName(chainAnalysis));
+                statements.add(StaticJavaParser.parseStatement(
+                        "final Multimap<" + propertyTypeName + ", " + elementTypeName + "> " + calcResultVarName(
+                                chainAnalysis) + " = ArrayListMultimap.create();"));
             }
-            code += "\n" + chainAnalysis.getIndent() + String.format("%sList.forEach(one -> %s.put(one.get%s(), one));",
-                    chainAnalysis.getMethodName(), calcResultVarName(chainAnalysis),
-                    MoreStringUtils.upperFirstLetter(propertyName));
+            statements.add(StaticJavaParser.parseStatement(
+                    chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
+                            + ".put(one.get" + MoreStringUtils.upperFirstLetter(propertyName) + "(), one));"));
             MapOrMultimapBuiltDto result = new MapOrMultimapBuiltDto();
-            result.setCode(code);
-            result.getImports().add(ImportConstants.MULTIMAP.getNameAsString());
-            result.getImports().add(ImportConstants.ARRAY_LIST_MULTIMAP.getNameAsString());
+            result.setStatements(statements);
             return result;
         }
 

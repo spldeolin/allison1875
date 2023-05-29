@@ -11,7 +11,6 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -32,7 +31,7 @@ public class OffsetMethodNameProc {
     @Inject
     private DesignProc designProc;
 
-    public void useOffsetMethod(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
+    public CompilationUnit useOffsetMethod(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             ClassOrInterfaceDeclaration design) {
         // 获取并使用offset方法名
         StringBuilder offsetText = designProc.parseOffset(design);
@@ -67,7 +66,7 @@ public class OffsetMethodNameProc {
         Comment hashComment = Iterables.getLast(cu.getOrphanComments());
         hashComment.remove();
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(design)));
-        Saves.add(cu);
+        return cu;
     }
 
 }

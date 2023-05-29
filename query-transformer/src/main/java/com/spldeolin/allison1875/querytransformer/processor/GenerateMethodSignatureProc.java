@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.processor;
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -8,9 +9,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
-import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
@@ -24,16 +23,13 @@ import lombok.extern.log4j.Log4j2;
 public class GenerateMethodSignatureProc {
 
     @Inject
-    private QueryTransformerConfig queryTransformerConfig;
-
-    @Inject
     private FindMapperProc findMapperProc;
 
-    public void process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    public CompilationUnit process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         ClassOrInterfaceDeclaration mapper = findMapperProc.findMapper(astForest, designMeta);
         if (mapper == null) {
-            return;
+            return null;
         }
 
         for (String anImport : resultTransformation.getImports()) {
@@ -54,7 +50,7 @@ public class GenerateMethodSignatureProc {
         }
         method.setBody(null);
         mapper.getMembers().add(method);
-        Saves.add(mapper.findCompilationUnit().orElseThrow(CuAbsentException::new));
+        return mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
     }
 
 }

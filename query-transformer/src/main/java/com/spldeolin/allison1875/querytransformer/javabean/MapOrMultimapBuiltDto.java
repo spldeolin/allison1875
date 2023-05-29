@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
-import java.util.Collection;
-import com.google.common.collect.Lists;
+import java.util.List;
+import com.github.javaparser.ast.stmt.Statement;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,8 +12,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class MapOrMultimapBuiltDto {
 
-    private String code;
-
-    private final Collection<String> imports = Lists.newArrayList();
+    private List<Statement> statements;
 
 }

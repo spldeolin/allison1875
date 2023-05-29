@@ -22,12 +22,10 @@ public class FileBackupUtils {
         if (!src.exists()) {
             return;
         }
-        Path srcPath = src.toPath();
-        Path destPath = srcPath.resolve(srcPath).resolve(".")
-                .resolve(TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss")).resolve(".bak");
+        File dest = new File(src.getPath() + "." + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd_HHmmss") + ".bak");
         try {
-            Files.copy(src, destPath.toFile());
-            log.info("File [{}] back up to [{}]", srcPath, destPath);
+            Files.copy(src, dest);
+            log.info("File [{}] back up to [{}]", src, dest);
         } catch (IOException e) {
             log.error("src={}", src, e);
             throw new FileBackupException(e);

@@ -13,14 +13,13 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.constant.ImportConstants;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -43,7 +42,7 @@ public class TransformParameterProc {
 
     @Nullable
     public ParameterTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
-            AstForest astForest) {
+            AstForest astForest, List<FileFlush> flushes) {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
         List<String> imports = Lists.newArrayList();
@@ -82,19 +81,15 @@ public class TransformParameterProc {
             CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
             if (phrases.stream().anyMatch(
                     phrase -> EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN))) {
-                cu.addImport(ImportConstants.COLLECTION);
+                cu.addImport("java.util.*");
             }
-            Saves.add(cu);
+            flushes.add(FileFlush.build(cu));
             TypeDeclaration<?> cond = cu.getPrimaryType().orElseThrow(RuntimeException::new);
             Parameter param = new Parameter();
             param.setType(cond.getNameAsString());
             param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));
             params.add(param);
             imports.add(cond.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-            if (phrases.stream().anyMatch(
-                    phrase -> EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN))) {
-                imports.add(ImportConstants.COLLECTION.getNameAsString());
-            }
             isJavabean = true;
         } else if (phrases.size() > 0) {
             for (PhraseDto phrase : phrases) {

@@ -6,6 +6,7 @@ import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
@@ -39,7 +41,7 @@ public class GenerateMethodXmlProc {
 
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
-    public void process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    public FileFlush process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
                 .resolve(designMeta.getMapperRelativePath()).toFile();
@@ -126,7 +128,7 @@ public class GenerateMethodXmlProc {
 
         List<String> newLines = Lists.newArrayList();
         try {
-            List<String> lines = Collections.singletonList(Files.toString(mapperXml, StandardCharsets.UTF_8));
+            List<String> lines = Files.readLines(mapperXml, StandardCharsets.UTF_8);
             Collections.reverse(lines);
             for (String line : lines) {
                 newLines.add(line);
@@ -141,9 +143,9 @@ public class GenerateMethodXmlProc {
                 }
             }
             Collections.reverse(newLines);
-            Files.write(Joiner.on('\n').join(newLines), mapperXml, StandardCharsets.UTF_8);
+            return FileFlush.build(mapperXml, Joiner.on('\n').join(newLines));
         } catch (IOException e) {
-            log.error(e);
+            throw new UncheckedIOException(e);
         }
     }
 

@@ -1,24 +1,19 @@
 package com.spldeolin.allison1875.startransformer.processor;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.util.FileBackupUtils;
-import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
@@ -45,7 +40,7 @@ public class StarTransformer implements Allison1875MainProcessor {
 
     @Override
     public void process(AstForest astForest) {
-        Map<Path, String> fileNewContents = Maps.newLinkedHashMap();
+        List<FileFlush> flushes = Lists.newArrayList();
         Set<String> wholeDtoNames = Sets.newHashSet();
 
         for (CompilationUnit cu : astForest) {
@@ -67,7 +62,7 @@ public class StarTransformer implements Allison1875MainProcessor {
                     JavabeanArg javabeanArg = new JavabeanArg();
                     CompilationUnit wholeDtoCu = transformWholeDtoProc.transformWholeDto(javabeanArg, astForest,
                             analysis);
-                    fileNewContents.put(Locations.getAbsolutePath(wholeDtoCu), wholeDtoCu.toString());
+                    flushes.add(FileFlush.build(wholeDtoCu));
 
                     // transform Query Chain and replace Star Chain
                     transformChainProc.transformAndReplaceStar(block, analysis, starChain);
@@ -85,20 +80,13 @@ public class StarTransformer implements Allison1875MainProcessor {
             if (anyTransformed) {
                 cu.addImport("com.google.common.collect.*");
                 cu.addImport("java.util.*");
-                fileNewContents.put(Locations.getAbsolutePath(cu), LexicalPreservingPrinter.print(cu));
+                flushes.add(FileFlush.buildLexicalPreserving(cu));
             }
         }
 
         // write all to file
-        if (fileNewContents.size() > 0) {
-            fileNewContents.forEach((path, content) -> {
-                FileBackupUtils.backup(path);
-                try {
-                    Files.write(content, path.toFile(), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    log.error("FileUtils#writeStringToFile", e);
-                }
-            });
+        if (flushes.size() > 0) {
+            flushes.forEach(FileFlush::flush);
             log.info("# REMEBER REFORMAT CODE #");
         } else {
             log.warn("no valid Chain transformed");

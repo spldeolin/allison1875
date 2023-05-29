@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
@@ -35,6 +36,8 @@ public class ChainAnalysisDto {
 
     @JsonIgnore
     private MethodCallExpr chain;
+
+    private BlockStmt directBlock;
 
     private String indent;
 
