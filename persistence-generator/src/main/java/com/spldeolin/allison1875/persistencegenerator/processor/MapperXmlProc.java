@@ -15,6 +15,7 @@ import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
@@ -27,8 +28,8 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 @Singleton
 public class MapperXmlProc {
 
-    public MapperXmlProc process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
-            Path mapperXmlDirectory, Collection<Collection<String>> sourceCodes) throws IOException {
+    public FileFlush process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
+            Collection<Collection<String>> sourceCodes) throws IOException {
         // find
         File mapperXmlFile = mapperXmlDirectory.resolve(persistence.getMapperName() + ".xml").toFile();
 
@@ -82,8 +83,7 @@ public class MapperXmlProc {
             Collections.reverse(newLines);
         }
 
-        Files.write(Joiner.on(System.lineSeparator()).join(newLines), mapperXmlFile, StandardCharsets.UTF_8);
-        return this;
+        return FileFlush.build(mapperXmlFile, Joiner.on(System.lineSeparator()).join(newLines));
     }
 
     private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes, PersistenceDto persistence) {

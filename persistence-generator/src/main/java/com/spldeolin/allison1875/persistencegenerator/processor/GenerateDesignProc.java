@@ -22,7 +22,6 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -48,10 +47,10 @@ public class GenerateDesignProc {
     @Inject
     private FindMethodNamingOffsetProc methodNamingOffsetProc;
 
-    public void process(PersistenceDto persistence, EntityGeneration entityGeneration,
+    public CompilationUnit process(PersistenceDto persistence, EntityGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
         if (!persistenceGeneratorConfig.getEnableGenerateDesign()) {
-            return;
+            return null;
         }
 
         String designName = concatDesignName(persistence);
@@ -273,7 +272,7 @@ public class GenerateDesignProc {
         cu.addType(designCoid);
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 
-        Saves.add(cu);
+        return cu;
     }
 
     private String concatDesignName(PersistenceDto persistence) {

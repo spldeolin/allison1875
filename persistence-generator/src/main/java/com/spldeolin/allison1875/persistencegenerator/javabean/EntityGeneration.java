@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import lombok.Data;
@@ -21,5 +22,7 @@ public class EntityGeneration {
     private JavabeanArg javabeanArg;
 
     private ClassOrInterfaceDeclaration entity;
+
+    private CompilationUnit entityCu;
 
 }

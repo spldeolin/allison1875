@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.processor;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
@@ -10,7 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.util.ast.Saves;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
@@ -190,6 +191,8 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
         }
+
+        List<FileFlush> flushes = Lists.newArrayList();
         for (PersistenceDto persistence : persistenceDtos) {
 
             // 重新生成Entity
@@ -197,6 +200,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             if (entityGeneration.isSameNameAndLotNoPresent()) {
                 continue;
             }
+            flushes.add(FileFlush.build(entityGeneration.getEntityCu()));
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
@@ -206,9 +210,13 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
+            mapper.findCompilationUnit().ifPresent(cu -> flushes.add(FileFlush.build(cu)));
 
-            // 重新生成QueryDesign
-            generateDesignProc.process(persistence, entityGeneration, mapper, astForest);
+            // 重新生成Design
+            CompilationUnit designCu = generateDesignProc.process(persistence, entityGeneration, mapper, astForest);
+            if (designCu != null) {
+                flushes.add(FileFlush.build(designCu));
+            }
 
             // 删除Mapper中所有Allison 1875生成的并且声明了不可人为修改的方法
             deleteAllison1875MethodProc.process(mapper);
@@ -250,7 +258,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
             try {
                 Path mapperXmlDirectory = astForest.getAstForestRoot()
                         .resolve(persistenceGeneratorConfig.getMapperXmlDirectoryPath());
-                mapperXmlProc.process(persistence, mapper, mapperXmlDirectory,
+                FileFlush xmlFlush = mapperXmlProc.process(persistence, mapper, mapperXmlDirectory,
                         Lists.newArrayList(resultMapXmlProc.process(persistence, entityName),
                                 allCloumnSqlXmlProc.process(persistence),
                                 insertXmlProc.process(persistence, entityName, insertMethodName),
@@ -270,12 +278,17 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                                 queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName),
                                 listAllXmlProc.process(persistence, listAllMethodName),
                                 insertOrUpdateXmlProc.process(persistence, entityName, insertOrUpdateMethodName)));
+                flushes.add(xmlFlush);
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }
         }
 
-        Saves.saveAll();
+        // write all to file
+        if (flushes.size() > 0) {
+            flushes.forEach(FileFlush::flush);
+            log.info("# REMEBER REFORMAT CODE #");
+        }
     }
 
     private String getEntityNameInXml(EntityGeneration entityGeneration) {

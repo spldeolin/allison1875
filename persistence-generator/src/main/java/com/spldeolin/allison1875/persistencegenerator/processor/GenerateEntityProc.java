@@ -13,7 +13,6 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.factory.JavabeanFactory;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
@@ -71,7 +70,6 @@ public class GenerateEntityProc {
             return new EntityGeneration().setSameNameAndLotNoPresent(true);
         }
 
-        Saves.add(cu);
 
         EntityGeneration result = new EntityGeneration();
         result.setJavabeanArg(arg);
@@ -79,6 +77,7 @@ public class GenerateEntityProc {
         result.setEntityName(arg.getClassName());
         result.setEntityQualifier(cu.getPrimaryType().orElseThrow(QualifierAbsentException::new).getFullyQualifiedName()
                 .orElseThrow(QualifierAbsentException::new));
+        result.setEntityCu(cu);
         return result;
     }
 

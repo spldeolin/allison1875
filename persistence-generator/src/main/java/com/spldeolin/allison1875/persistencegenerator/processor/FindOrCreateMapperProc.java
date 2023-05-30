@@ -19,7 +19,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -75,8 +74,6 @@ public class FindOrCreateMapperProc {
             mapper.setInterface(true);
             cu.addType(mapper);
         }
-
-        Saves.add(cu);
         return mapper;
     }
 
