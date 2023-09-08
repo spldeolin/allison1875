@@ -210,7 +210,6 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
-            mapper.findCompilationUnit().ifPresent(cu -> flushes.add(FileFlush.build(cu)));
 
             // 重新生成Design
             CompilationUnit designCu = generateDesignProc.process(persistence, entityGeneration, mapper, astForest);
@@ -279,6 +278,7 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
                                 listAllXmlProc.process(persistence, listAllMethodName),
                                 insertOrUpdateXmlProc.process(persistence, entityName, insertOrUpdateMethodName)));
                 flushes.add(xmlFlush);
+                mapper.findCompilationUnit().ifPresent(cu -> flushes.add(FileFlush.build(cu)));
             } catch (Exception e) {
                 log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
             }
