@@ -127,6 +127,16 @@ public final class PersistenceGeneratorConfig {
      */
     private Boolean mapperInterfaceMethodPrintLotNo = true;
 
+    /**
+     * 是否为entity实现java.io.Serializable接口
+     */
+    private Boolean enableEntityImplementSerializable;
+
+    /**
+     * 是否为entity实现java.lang.Cloneable接口
+     */
+    private Boolean enableEntityImplementCloneable;
+
     @NotNull
     private Boolean disableInsert;
 
