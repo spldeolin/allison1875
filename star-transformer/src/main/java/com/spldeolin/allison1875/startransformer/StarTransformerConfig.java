@@ -21,4 +21,9 @@ public final class StarTransformerConfig {
     @NotEmpty
     private String wholeDtoPackge;
 
+    /**
+     * 是否为entity实现java.io.Serializable接口
+     */
+    private Boolean enableEntityImplementSerializable;
+
 }
