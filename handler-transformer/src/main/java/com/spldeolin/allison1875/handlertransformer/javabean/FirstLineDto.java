@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.LotNo;
 import lombok.Data;
@@ -10,6 +12,9 @@ import lombok.Data;
  */
 @Data
 public class FirstLineDto {
+
+    @JsonIgnore
+    private InitializerDeclaration init;
 
     private String handlerUrl;
 

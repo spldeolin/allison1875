@@ -1,8 +1,11 @@
 package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -51,6 +54,7 @@ public class ControllerProc {
 
     public HandlerCreation createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
             ServiceGeneration serviceGeneration, ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
+        NodeList<BodyDeclaration<?>> members = controller.getMembers();
 
         // 确保controller有autowired 新生成的service
         if (!controller.getFieldByName(serviceGeneration.getServiceVarName()).isPresent()) {
@@ -60,7 +64,10 @@ public class ControllerProc {
                     new VariableDeclarator(StaticJavaParser.parseType(serviceGeneration.getService().getNameAsString()),
                             serviceGeneration.getServiceVarName()));
 
-            controller.addMember(field);
+            int lastIndexOfFieldDeclaration = IntStream.range(0, members.size())
+                    .filter(i -> members.get(i) instanceof FieldDeclaration).reduce((first, second) -> second)
+                    .orElse(-1);
+            members.add(lastIndexOfFieldDeclaration + 1, field);
         }
         log.info("append @Autowired Field [{}] into Controller [{}].", serviceGeneration.getServiceVarName(),
                 controller.getNameAsString());
@@ -68,9 +75,8 @@ public class ControllerProc {
         // 使用handle创建Handler方法，并追加到controller中
         HandlerCreation handlerCreation = createHandlerHandle.createHandler(firstLineDto,
                 reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(), serviceGeneration);
-        controller.addMember(handlerCreation.getHandler());
-        log.info("append Handler [{}] into Controller [{}].", handlerCreation.getHandler().getNameAsString(),
-                controller.getNameAsString());
+        boolean replace = members.replace(firstLineDto.getInit(), handlerCreation.getHandler());
+        handlerCreation.setAnyTransformed(replace);
 
         for (String appendImport : handlerCreation.getAppendImports()) {
             Imports.ensureImported(controller, appendImport);

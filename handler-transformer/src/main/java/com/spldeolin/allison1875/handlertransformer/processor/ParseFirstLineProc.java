@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.processor;
 
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.Statement;
@@ -12,7 +12,6 @@ import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import lombok.extern.log4j.Log4j2;
@@ -24,15 +23,14 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ParseFirstLineProc {
 
-    @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
 
     @Inject
     private MoreTransformHandle moreTransformHandle;
 
-    public FirstLineDto parse(NodeList<Statement> statements) {
+    public FirstLineDto parse(InitializerDeclaration init) {
         FirstLineDto result = new FirstLineDto();
-        for (Statement stmt : statements) {
+        result.setInit(init);
+        for (Statement stmt : init.getBody().getStatements()) {
             stmt.ifExpressionStmt(exprStmt -> exprStmt.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     if (vd.getInitializer().isPresent()) {

@@ -23,4 +23,6 @@ public class HandlerCreation {
      */
     private Collection<String> appendImports = Lists.newArrayList();
 
+    private Boolean anyTransformed;
+
 }
