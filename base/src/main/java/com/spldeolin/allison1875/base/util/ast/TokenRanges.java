@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base.util.ast;
 
+import com.github.javaparser.JavaToken;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.Node;
@@ -15,7 +16,14 @@ public class TokenRanges {
     }
 
     public static String getRawCode(Node node) {
-        return node.getTokenRange().orElseThrow(() -> new RuntimeException("Token Range absent")).toString();
+        if (node.getComment().isPresent()) {
+            JavaToken begin = node.getComment().get().getTokenRange()
+                    .orElseThrow(() -> new RuntimeException("Token Range absent")).getBegin();
+            JavaToken end = node.getTokenRange().orElseThrow(() -> new RuntimeException("Token Range absent")).getEnd();
+            return new TokenRange(begin, end).toString();
+        } else {
+            return node.getTokenRange().orElseThrow(() -> new RuntimeException("Token Range absent")).toString();
+        }
     }
 
     public static String getStartIndent(Node node) {
