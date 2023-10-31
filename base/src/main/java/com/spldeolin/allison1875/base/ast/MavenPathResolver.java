@@ -44,7 +44,7 @@ public class MavenPathResolver {
             return childPath;
         }
         Path parentPomPath = childPath.resolve(parent.getRelativePath()).normalize();
-        if (parentPomPath.toFile().exists()) {
+        if (!parentPomPath.toFile().exists()) {
             return childPath;
         }
         Model parentModel = mavenXpp3Reader.read(new FileReader(parentPomPath.toString()));
