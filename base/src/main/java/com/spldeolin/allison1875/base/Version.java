@@ -8,9 +8,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Version {
 
-    public static final String logDisplayVersion = "Allison 1875 9.0-SNAPSHOT";
+    public static final String logDisplayVersion = "Allison 1875 9.0";
 
-    public static final String lotNoVersion = "0900S";
+    public static final String lotNoVersion = "0900R";
 
     public static void greeting() {
         log.info(logDisplayVersion);
