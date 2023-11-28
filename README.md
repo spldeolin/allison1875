@@ -1,18 +1,42 @@
 # *Allison 1875*
 
-> 「 *Dedicated to allison, I cannot say anymore* 」
+> 「 *Dedicated to allison, I cannot say anymore.* 」
 
-*Allison 1875* is a no-code-pollutional Java source code analyzing and transforming toolkit.
+*Allison 1875* is a toolkit for ultra-low-code-intrusive analysis and transformation of Java source code.
 
-It enable developers get better programming experience and higher productivity working via parsing code as Abstract Syntax Tree (AST).
+She provides a variety of practical source code tools, enabling developers to have a better experience and higher
+productivity during development. Hers underlying foundation is based on transforming Java source code into Abstract
+Syntax Trees (AST).
 
 ## Features
 
-*Allison 1875* provides the following developers friendly tools for now.
+*Allison 1875* provides the following tools for now.
 
-- *Spring Web MVC* oriented web API document generator
-- Inspection extensible source code inspector
-- Boilerplate code generator and transformer
+- Analyze and generate API documentation for the web API implemented through *Spring Web MVC* standard annotations. (
+  doc-analyzer)
+
+- Generate the persistence layer source code based on the MySQL table structure, including MyBatis mapper, Entity, and
+  the 'Design' class required by other *Allison 1875* tools. The generation results are idempotent and do not affect the
+  code written by developers manually. (persistence-generator)
+
+- Transform convenient-to-code initialization blocks in the source code that adhere to the conventions established by
+  *Allison 1875* into standard *Spring Web MVC* request methods. Ensure that the parameters and return values of these
+  request methods accurately reflect the data structures, validation, comments, and other aspects in the transformation
+  results accurately reflect the information specified by developers in the initialization blocks. (handler-transformer)
+
+- Apply user-developed inspection methods to inspect the source code. (inspector)
+
+- Transform fluent-style expressions in the source code adhering to Allison1875 conventions (referred to as QueryChain)
+  into standard MyBatis CRUD mapping methods and SQL statements. Ensure that the parameters, return values, internal
+  implementations, and other aspects in the transformation results accurately reflect the information specified by
+  developers in the QueryChain.  (query-transformer)
+
+- Transform convenient-to-code expressions in the source code adhering to Allison1875 conventions (referred to as
+  StarChain) into source code composed of QueryChains and data assembly logic. After a subsequent transformation through
+  query-transformer, transform into code, that used to query from a fact table and its dimension tables, and assemble
+  data according to the one-to-one or one-to-many relationships specified by StarChain. (star-transfomer)
+
+- and other small, convenient tools. (gadget)
 
 ## Contribution
 
