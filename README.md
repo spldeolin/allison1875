@@ -15,7 +15,7 @@ Syntax Trees (AST).
 - Analyze and generate API documentation for the web API implemented through *Spring Web MVC* standard annotations. (
   doc-analyzer)
 
-- Generate the persistence layer source code based on the MySQL table structure, including MyBatis mapper, Entity, and
+- Generate the persistence layer source code based on the MySQL table structure, including *MyBatis* mapper, Entity, and
   the 'Design' class required by other *Allison 1875* tools. The generation results are idempotent and do not affect the
   code written by developers manually. (persistence-generator)
 
@@ -26,12 +26,13 @@ Syntax Trees (AST).
 
 - Apply user-developed inspection methods to inspect the source code. (inspector)
 
-- Transform fluent-style expressions in the source code adhering to Allison1875 conventions (referred to as QueryChain)
-  into standard MyBatis CRUD mapping methods and SQL statements. Ensure that the parameters, return values, internal
+- Transform fluent-style expressions in the source code adhering to *Allison 1875* conventions (referred to as
+  QueryChain)
+  into standard *MyBatis* CRUD mapping methods and SQL statements. Ensure that the parameters, return values, internal
   implementations, and other aspects in the transformation results accurately reflect the information specified by
   developers in the QueryChain.  (query-transformer)
 
-- Transform convenient-to-code expressions in the source code adhering to Allison1875 conventions (referred to as
+- Transform convenient-to-code expressions in the source code adhering to *Allison 1875* conventions (referred to as
   StarChain) into source code composed of QueryChains and data assembly logic. After a subsequent transformation through
   query-transformer, transform into code, that used to query from a fact table and its dimension tables, and assemble
   data according to the one-to-one or one-to-many relationships specified by StarChain. (star-transfomer)
