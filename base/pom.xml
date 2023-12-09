@@ -61,6 +61,12 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <!-- commons io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
         <!-- hibernate validator -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>
