@@ -1,12 +1,10 @@
 package com.spldeolin.allison1875.base.util.ast;
 
-import java.io.File;
 import java.util.Set;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
-import com.spldeolin.allison1875.base.util.FileBackupUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -45,10 +43,6 @@ public class Saves {
     public static void saveAll() {
         for (CompilationUnit cu : apiSaveBuffer.get()) {
             Storage storage = cu.getStorage().orElseThrow(StorageAbsentException::new);
-            File file = storage.getDirectory().resolve(storage.getFileName()).toFile();
-            if (file.exists()) {
-                FileBackupUtils.backup(file);
-            }
             storage.save();
         }
         apiSaveBuffer.get().clear();
