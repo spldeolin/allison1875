@@ -22,6 +22,12 @@ public final class QueryTransformerConfig {
     private String mapperRecordPackage;
 
     /**
+     * 为生成的代码指定作者
+     */
+    @NotEmpty
+    private String author;
+
+    /**
      * Design类的包名
      */
     @NotEmpty

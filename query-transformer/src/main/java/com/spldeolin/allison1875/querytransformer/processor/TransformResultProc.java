@@ -80,6 +80,7 @@ public class TransformResultProc {
             javabeanArg.setPackageName(config.getMapperRecordPackage());
             javabeanArg.setDescription(chainAnalysis.getLotNo().asJavadocDescription());
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
+            javabeanArg.setAuthorName(config.getAuthor());
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
                 String varName = propertyName;
