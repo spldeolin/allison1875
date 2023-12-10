@@ -68,6 +68,10 @@ public class QueryTransformer implements Allison1875MainProcessor {
             LexicalPreservingPrinter.setup(cu);
             boolean anyTransformed = false;
 
+            if (cu.findAll(BlockStmt.class).isEmpty()) {
+                continue;
+            }
+
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {
                 for (MethodCallExpr chain : detectQueryChain.process(directBlock)) {
                     ClassOrInterfaceDeclaration design;
