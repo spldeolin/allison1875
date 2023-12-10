@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -257,9 +258,8 @@ public class GenerateDesignProc {
         meta.setEntityName(entityGeneration.getEntityName());
         meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         meta.setMapperName(mapper.getNameAsString());
-        meta.setMapperRelativePath(
-                persistenceGeneratorConfig.getMapperXmlDirectoryPath() + File.separator + persistence.getMapperName()
-                        + ".xml");
+        meta.setMapperRelativePaths(persistenceGeneratorConfig.getMapperXmlDirectoryPaths().stream()
+                .map(one -> one + File.separator + persistence.getMapperName() + ".xml").collect(Collectors.toList()));
         if (persistence.getIsDeleteFlagExist()) {
             meta.setNotDeletedSql(persistenceGeneratorConfig.getNotDeletedSql());
         }

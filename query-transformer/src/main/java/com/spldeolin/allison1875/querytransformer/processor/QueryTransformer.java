@@ -116,9 +116,10 @@ public class QueryTransformer implements Allison1875MainProcessor {
                     }
 
                     // create Method in mapper.xml
-                    FileFlush xmlFlush = generateMapperXmlQueryMethodProc.process(astForest, designMeta, chainAnalysis,
+                    List<FileFlush> xmlFlushes = generateMapperXmlQueryMethodProc.process(astForest, designMeta,
+                            chainAnalysis,
                             parameterTransformation, resultTransformation);
-                    flushes.add(xmlFlush);
+                    flushes.addAll(xmlFlushes);
 
                     // append autowired mapper
                     appendAutowiredMapperProc.append(chain, designMeta);

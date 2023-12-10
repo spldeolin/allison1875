@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.facade.javabean;
 
+import java.util.List;
 import java.util.Map;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class DesignMeta {
 
     private String mapperName;
 
-    private String mapperRelativePath;
+    private List<String> mapperRelativePaths;
 
     private Map<String, PropertyDto> properties;
 

@@ -254,33 +254,34 @@ public class PersistenceGenerator implements Allison1875MainProcessor {
 
             // 在Mapper.xml中覆盖生成基础方法
             String entityName = getEntityNameInXml(entityGeneration);
-            try {
-                Path mapperXmlDirectory = astForest.getAstForestRoot()
-                        .resolve(persistenceGeneratorConfig.getMapperXmlDirectoryPath());
-                FileFlush xmlFlush = mapperXmlProc.process(persistence, mapper, mapperXmlDirectory,
-                        Lists.newArrayList(resultMapXmlProc.process(persistence, entityName),
-                                allCloumnSqlXmlProc.process(persistence),
-                                insertXmlProc.process(persistence, entityName, insertMethodName),
-                                batchInsertXmlProc.process(persistence, batchInsertMethodName),
-                                batchInsertEvenNullXmlProc.process(persistence, batchInsertEvenNullMethodName),
-                                batchUpdateXmlProc.process(persistence, batchUpdateMethodName),
-                                batchUpdateEvenNullXmlProc.process(persistence, batchUpdateEvenNullMethodName),
-                                queryByIdXmlProc.process(persistence, queryByIdMethodName),
-                                updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
-                                updateByIdEvenNullXmlProc.process(persistence, entityName,
-                                        updateByIdEvenNullMethodName),
-                                queryByIdsXmlProc.process(persistence, queryByIdsProcMethodName),
-                                queryByIdsXmlProc.process(persistence, queryByIdsEachIdMethodName),
-                                queryByKeyXmlProc.process(persistence, queryByKeyDtos),
-                                deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
-                                queryByKeysXmlProc.process(persistence, queryByKeysDtos),
-                                queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName),
-                                listAllXmlProc.process(persistence, listAllMethodName),
-                                insertOrUpdateXmlProc.process(persistence, entityName, insertOrUpdateMethodName)));
-                flushes.add(xmlFlush);
-                mapper.findCompilationUnit().ifPresent(cu -> flushes.add(FileFlush.build(cu)));
-            } catch (Exception e) {
-                log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
+            for (String mapperXmlDirectoryPath : persistenceGeneratorConfig.getMapperXmlDirectoryPaths()) {
+                try {
+                    Path mapperXmlDirectory = astForest.getAstForestRoot().resolve(mapperXmlDirectoryPath);
+                    FileFlush xmlFlush = mapperXmlProc.process(persistence, mapper, mapperXmlDirectory,
+                            Lists.newArrayList(resultMapXmlProc.process(persistence, entityName),
+                                    allCloumnSqlXmlProc.process(persistence),
+                                    insertXmlProc.process(persistence, entityName, insertMethodName),
+                                    batchInsertXmlProc.process(persistence, batchInsertMethodName),
+                                    batchInsertEvenNullXmlProc.process(persistence, batchInsertEvenNullMethodName),
+                                    batchUpdateXmlProc.process(persistence, batchUpdateMethodName),
+                                    batchUpdateEvenNullXmlProc.process(persistence, batchUpdateEvenNullMethodName),
+                                    queryByIdXmlProc.process(persistence, queryByIdMethodName),
+                                    updateByIdXmlProc.process(persistence, entityName, updateByIdMethodName),
+                                    updateByIdEvenNullXmlProc.process(persistence, entityName,
+                                            updateByIdEvenNullMethodName),
+                                    queryByIdsXmlProc.process(persistence, queryByIdsProcMethodName),
+                                    queryByIdsXmlProc.process(persistence, queryByIdsEachIdMethodName),
+                                    queryByKeyXmlProc.process(persistence, queryByKeyDtos),
+                                    deleteByKeyXmlProc.process(persistence, deleteByKeyDtos),
+                                    queryByKeysXmlProc.process(persistence, queryByKeysDtos),
+                                    queryByEntityXmlProc.process(persistence, entityName, queryByEntityMethodName),
+                                    listAllXmlProc.process(persistence, listAllMethodName),
+                                    insertOrUpdateXmlProc.process(persistence, entityName, insertOrUpdateMethodName)));
+                    flushes.add(xmlFlush);
+                    mapper.findCompilationUnit().ifPresent(cu -> flushes.add(FileFlush.build(cu)));
+                } catch (Exception e) {
+                    log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
+                }
             }
         }
 

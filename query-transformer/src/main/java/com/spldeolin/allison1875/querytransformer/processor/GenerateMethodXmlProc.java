@@ -41,112 +41,119 @@ public class GenerateMethodXmlProc {
 
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
-    public FileFlush process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    public List<FileFlush> process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
-        File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass())
-                .resolve(designMeta.getMapperRelativePath()).toFile();
+        List<FileFlush> result = Lists.newArrayList();
 
-        List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add("");
-        if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
-            // QUERY
-            xmlLines.add(concatLotNoComment(chainAnalysis));
-            String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation,
-                    resultTransformation);
-            xmlLines.add(startTag);
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            xmlLines.add(SINGLE_INDENT + "SELECT");
-            if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
-                xmlLines.add(DOUBLE_INDENT + "COUNT(*)");
-            } else if (chainAnalysis.getQueryPhrases().size() == 0) {
-                xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
-            } else {
-                for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {
-                    PropertyDto property = designMeta.getProperties().get(queryPhrase.getSubjectPropertyName());
-                    xmlLines.add(DOUBLE_INDENT + "`" + property.getColumnName() + "` AS " + property.getPropertyName()
-                            + ",");
-                }
-                // 删除最后一个语句中，最后的逗号
-                int last = xmlLines.size() - 1;
-                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
-            }
-            xmlLines.add(SINGLE_INDENT + "FROM");
-            xmlLines.add(DOUBLE_INDENT + "`" + designMeta.getTableName() + "`");
-            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
-            if (chainAnalysis.getOrderPhrases().size() > 0) {
-                xmlLines.add(SINGLE_INDENT + "ORDER BY");
-                for (PhraseDto orderPhrase : chainAnalysis.getOrderPhrases()) {
-                    PropertyDto property = designMeta.getProperties().get(orderPhrase.getSubjectPropertyName());
-                    xmlLines.add(DOUBLE_INDENT + "`" + property.getColumnName() + "`" + (
-                            orderPhrase.getPredicate() == PredicateEnum.DESC ? " DESC," : ","));
-                }
-                // 删除最后一个语句中，最后的逗号
-                int last = xmlLines.size() - 1;
-                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
-            }
-            if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.one) {
-                xmlLines.add(SINGLE_INDENT + "LIMIT 1");
-            }
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            xmlLines.add("</select>");
-        } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
-            // UPDATE
-            xmlLines.add(concatLotNoComment(chainAnalysis));
-            String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
-            xmlLines.add(startTag);
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
-            xmlLines.add(SINGLE_INDENT + "SET");
-            for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
-                PropertyDto property = designMeta.getProperties().get(updatePhrase.getSubjectPropertyName());
-                xmlLines.add(
-                        DOUBLE_INDENT + "`" + property.getColumnName() + "` = #{" + updatePhrase.getVarName() + "},");
-            }
-            // 删除最后一个语句中，最后的逗号
-            int last = xmlLines.size() - 1;
-            xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
-            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            xmlLines.add("</update>");
-        } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
-            // DROP
-            xmlLines.add(concatLotNoComment(chainAnalysis));
-            String startTag = concatDeleteStartTag(chainAnalysis, parameterTransformation);
-            xmlLines.add(startTag);
-            if (chainAnalysis.getByPhrases().size() > 0) {
+        for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
+            File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).resolve(mapperRelativePath)
+                    .toFile();
+
+            List<String> xmlLines = Lists.newArrayList();
+            xmlLines.add("");
+            if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
+                // QUERY
+                xmlLines.add(concatLotNoComment(chainAnalysis));
+                String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation,
+                        resultTransformation);
+                xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
-            xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
-            xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
-            if (chainAnalysis.getByPhrases().size() > 0) {
-                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            }
-            xmlLines.add("</delete>");
-        } else {
-            throw new RuntimeException("impossible unless bug");
-        }
-
-        List<String> newLines = Lists.newArrayList();
-        try {
-            List<String> lines = Files.readLines(mapperXml, StandardCharsets.UTF_8);
-            Collections.reverse(lines);
-            for (String line : lines) {
-                newLines.add(line);
-                if (line.contains("</mapper>")) {
-                    Collections.reverse(xmlLines);
-                    for (String xmlLine : xmlLines) {
-                        if (StringUtils.isNotBlank(xmlLine)) {
-                            newLines.add(SINGLE_INDENT + xmlLine);
-                        }
+                xmlLines.add(SINGLE_INDENT + "SELECT");
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
+                    xmlLines.add(DOUBLE_INDENT + "COUNT(*)");
+                } else if (chainAnalysis.getQueryPhrases().size() == 0) {
+                    xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
+                } else {
+                    for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {
+                        PropertyDto property = designMeta.getProperties().get(queryPhrase.getSubjectPropertyName());
+                        xmlLines.add(
+                                DOUBLE_INDENT + "`" + property.getColumnName() + "` AS " + property.getPropertyName()
+                                        + ",");
                     }
-                    newLines.add("");
+                    // 删除最后一个语句中，最后的逗号
+                    int last = xmlLines.size() - 1;
+                    xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 }
+                xmlLines.add(SINGLE_INDENT + "FROM");
+                xmlLines.add(DOUBLE_INDENT + "`" + designMeta.getTableName() + "`");
+                xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
+                if (chainAnalysis.getOrderPhrases().size() > 0) {
+                    xmlLines.add(SINGLE_INDENT + "ORDER BY");
+                    for (PhraseDto orderPhrase : chainAnalysis.getOrderPhrases()) {
+                        PropertyDto property = designMeta.getProperties().get(orderPhrase.getSubjectPropertyName());
+                        xmlLines.add(DOUBLE_INDENT + "`" + property.getColumnName() + "`" + (
+                                orderPhrase.getPredicate() == PredicateEnum.DESC ? " DESC," : ","));
+                    }
+                    // 删除最后一个语句中，最后的逗号
+                    int last = xmlLines.size() - 1;
+                    xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
+                }
+                if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.one) {
+                    xmlLines.add(SINGLE_INDENT + "LIMIT 1");
+                }
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                xmlLines.add("</select>");
+            } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
+                // UPDATE
+                xmlLines.add(concatLotNoComment(chainAnalysis));
+                String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
+                xmlLines.add(startTag);
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
+                xmlLines.add(SINGLE_INDENT + "SET");
+                for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
+                    PropertyDto property = designMeta.getProperties().get(updatePhrase.getSubjectPropertyName());
+                    xmlLines.add(DOUBLE_INDENT + "`" + property.getColumnName() + "` = #{" + updatePhrase.getVarName()
+                            + "},");
+                }
+                // 删除最后一个语句中，最后的逗号
+                int last = xmlLines.size() - 1;
+                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
+                xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
+                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                xmlLines.add("</update>");
+            } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
+                // DROP
+                xmlLines.add(concatLotNoComment(chainAnalysis));
+                String startTag = concatDeleteStartTag(chainAnalysis, parameterTransformation);
+                xmlLines.add(startTag);
+                if (chainAnalysis.getByPhrases().size() > 0) {
+                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                }
+                xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
+                xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
+                if (chainAnalysis.getByPhrases().size() > 0) {
+                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                }
+                xmlLines.add("</delete>");
+            } else {
+                throw new RuntimeException("impossible unless bug");
             }
-            Collections.reverse(newLines);
-            return FileFlush.build(mapperXml, Joiner.on('\n').join(newLines));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+
+            List<String> newLines = Lists.newArrayList();
+            try {
+                List<String> lines = Files.readLines(mapperXml, StandardCharsets.UTF_8);
+                Collections.reverse(lines);
+                for (String line : lines) {
+                    newLines.add(line);
+                    if (line.contains("</mapper>")) {
+                        Collections.reverse(xmlLines);
+                        for (String xmlLine : xmlLines) {
+                            if (StringUtils.isNotBlank(xmlLine)) {
+                                newLines.add(SINGLE_INDENT + xmlLine);
+                            }
+                        }
+                        newLines.add("");
+                    }
+                }
+                Collections.reverse(newLines);
+
+                result.add(FileFlush.build(mapperXml, Joiner.on('\n').join(newLines)));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
+        return result;
     }
 
     private List<String> concatWhereSection(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,

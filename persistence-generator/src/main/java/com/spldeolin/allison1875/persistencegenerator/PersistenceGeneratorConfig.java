@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -51,7 +52,7 @@ public final class PersistenceGeneratorConfig {
      * mapper.xml所在目录的相对路径（根据目标工程的情况填写）
      */
     @NotEmpty
-    private String mapperXmlDirectoryPath;
+    private List<String> mapperXmlDirectoryPaths;
 
     /**
      * mapper接口的包名（根据目标工程的情况填写）
