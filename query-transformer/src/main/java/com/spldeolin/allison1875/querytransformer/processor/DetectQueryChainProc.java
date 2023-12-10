@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.google.common.collect.Lists;
@@ -34,6 +35,23 @@ public class DetectQueryChainProc {
         return mces;
     }
 
+    private boolean finalNameExprRecursively(FieldAccessExpr fae, String untilNameExprMatchedQualifier) {
+        Expression scope = fae.getScope();
+        if (scope.isMethodCallExpr()) {
+            return finalNameExprRecursively(scope.asMethodCallExpr(), untilNameExprMatchedQualifier);
+        }
+        if (scope.isFieldAccessExpr()) {
+            Expression scopeOfFae = scope.asFieldAccessExpr().getScope();
+            if (scopeOfFae.isMethodCallExpr()) {
+                return finalNameExprRecursively(scopeOfFae.asMethodCallExpr(), untilNameExprMatchedQualifier);
+            }
+            if (scopeOfFae.isFieldAccessExpr()) {
+                return finalNameExprRecursively(scopeOfFae.asFieldAccessExpr(), untilNameExprMatchedQualifier);
+            }
+        }
+        return false;
+    }
+
     private boolean finalNameExprRecursively(MethodCallExpr mce, String untilNameExprMatchedQualifier) {
         Optional<Expression> scope = mce.getScope();
         if (scope.isPresent()) {
@@ -44,6 +62,9 @@ public class DetectQueryChainProc {
                 Expression scopeOfFae = scope.get().asFieldAccessExpr().getScope();
                 if (scopeOfFae.isMethodCallExpr()) {
                     return finalNameExprRecursively(scopeOfFae.asMethodCallExpr(), untilNameExprMatchedQualifier);
+                }
+                if (scopeOfFae.isFieldAccessExpr()) {
+                    return finalNameExprRecursively(scopeOfFae.asFieldAccessExpr(), untilNameExprMatchedQualifier);
                 }
             }
             if (scope.get().isNameExpr()) {
