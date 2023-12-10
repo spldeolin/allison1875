@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
@@ -42,7 +43,7 @@ public class MapperXmlProc {
             sourceCodeLines.add(String.format("<mapper namespace=\"%s\">",
                     mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
             sourceCodeLines.add("</mapper>");
-            Files.write(Joiner.on("\n").join(sourceCodeLines), mapperXmlFile, StandardCharsets.UTF_8);
+            FileUtils.writeLines(mapperXmlFile, StandardCharsets.UTF_8.name(), sourceCodeLines);
         }
 
         List<String> newLines = Lists.newArrayList();

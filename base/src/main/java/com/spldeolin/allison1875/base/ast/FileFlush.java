@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.google.common.io.Files;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 
 /**
@@ -44,7 +44,7 @@ public class FileFlush {
 
     public void flush() {
         try {
-            Files.write(newContent.getBytes(StandardCharsets.UTF_8), src);
+            FileUtils.writeStringToFile(src, newContent, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
