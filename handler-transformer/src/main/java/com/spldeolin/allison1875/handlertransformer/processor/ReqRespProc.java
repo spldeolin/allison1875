@@ -117,14 +117,16 @@ public class ReqRespProc {
             builder.importDeclarations(cu.getImports());
             builder.importDeclarationsString(
                     Lists.newArrayList(AnnotationConstant.VALID_QUALIFIER, "java.util.Collection",
-                            AnnotationConstant.DATA_QUALIFIER, handlerTransformerConfig.getPageTypeQualifier()));
+                            AnnotationConstant.DATA_QUALIFIER, AnnotationConstant.ACCESSORS_QUALIFIER,
+                            AnnotationConstant.FIELD_DEFAULTS_QUALIFIER, AnnotationConstant.ACCESS_LEVEL_QUALIFIER,
+                            handlerTransformerConfig.getPageTypeQualifier()));
             ClassOrInterfaceDeclaration clone = dto.clone();
-            clone.setPublic(true).getFields().forEach(field -> field.setPrivate(true));
+            clone.setPublic(true);
             clone.setJavadocComment(LotNo.TAG_PREFIXION + firstLineDto.getLotNo());
             clone.getAnnotations().clear();
             clone.addAnnotation(AnnotationConstant.DATA);
             clone.addAnnotation(AnnotationConstant.ACCESSORS);
-            builder.importDeclaration(AnnotationConstant.ACCESSORS_QUALIFIER);
+            clone.addAnnotation(AnnotationConstant.FIELD_DEFAULTS_PRIVATE);
             Authors.ensureAuthorExist(clone, handlerTransformerConfig.getAuthor());
             builder.coid(clone);
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
