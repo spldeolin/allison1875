@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.TreeSet;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -89,12 +88,15 @@ public class JavabeanFactory {
         cu.setPackageDeclaration(javabeanArg.getPackageName());
         cu.addImport(AnnotationConstant.DATA_QUALIFIER);
         cu.addImport(AnnotationConstant.ACCESSORS_QUALIFIER);
+        cu.addImport(AnnotationConstant.FIELD_DEFAULTS_QUALIFIER);
+        cu.addImport(AnnotationConstant.ACCESS_LEVEL_QUALIFIER);
         cu.addImport("com.google.common.collect.*");
         cu.addImport("java.util.*");
 
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.addAnnotation(AnnotationConstant.DATA);
         coid.addAnnotation(AnnotationConstant.ACCESSORS);
+        coid.addAnnotation(AnnotationConstant.FIELD_DEFAULTS_PRIVATE);
         coid.setPublic(true).setInterface(false).setName(javabeanArg.getClassName());
         String description = MoreObjects.firstNonNull(javabeanArg.getDescription(), "");
         Javadoc javadoc = new JavadocComment(description).parse();
@@ -106,7 +108,7 @@ public class JavabeanFactory {
             if (fieldArg.getTypeQualifier() != null) {
                 cu.addImport(fieldArg.getTypeQualifier());
             }
-            FieldDeclaration field = coid.addField(fieldArg.getTypeName(), fieldArg.getFieldName(), Keyword.PRIVATE);
+            FieldDeclaration field = coid.addField(fieldArg.getTypeName(), fieldArg.getFieldName());
             if (fieldArg.getDescription() != null) {
                 field.setJavadocComment(fieldArg.getDescription());
             }

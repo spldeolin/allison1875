@@ -38,6 +38,13 @@ public interface AnnotationConstant {
 
     AnnotationExpr ACCESSORS = StaticJavaParser.parseAnnotation("@Accessors(chain = true)");
 
+    String FIELD_DEFAULTS_QUALIFIER = "lombok.experimental.FieldDefaults";
+
+    String ACCESS_LEVEL_QUALIFIER = "lombok.AccessLevel";
+
+    AnnotationExpr FIELD_DEFAULTS_PRIVATE = StaticJavaParser.parseAnnotation(
+            "@FieldDefaults(level = AccessLevel.PRIVATE)");
+
     String ACCESSORS_QUALIFIER = "lombok.experimental.Accessors";
 
     String CONTROLLER_QUALIFIER = "org.springframework.stereotype.Controller";
