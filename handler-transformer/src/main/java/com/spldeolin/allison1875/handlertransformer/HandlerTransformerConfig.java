@@ -18,10 +18,22 @@ public final class HandlerTransformerConfig {
     private String reqDtoPackage;
 
     /**
+     * 控制层 ReqDto中的NestDto所在的包的报名，
+     * null代表包名缺省为 ${reqDtoPackage}.dto
+     */
+    private String reqNestDtoPackage;
+
+    /**
      * 控制层 @ResponseBody业务数据部分类型所在包的包名
      */
     @NotEmpty
     private String respDtoPackage;
+
+    /**
+     * 控制层 RespDto中的NestDto所在的包的报名，
+     * null代表包名缺省为 ${respDtoPackage}.dto
+     */
+    private String respNestDtoPackage;
 
     /**
      * 业务层 Service接口所在包的包名

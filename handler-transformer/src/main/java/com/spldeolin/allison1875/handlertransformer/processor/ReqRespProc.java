@@ -103,9 +103,15 @@ public class ReqRespProc {
             } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
                 pkg = handlerTransformerConfig.getRespDtoPackage();
             } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-                pkg = handlerTransformerConfig.getReqDtoPackage() + ".dto";
+                pkg = handlerTransformerConfig.getReqNestDtoPackage();
+                if (pkg == null) {
+                    pkg = handlerTransformerConfig.getReqDtoPackage() + ".dto";
+                }
             } else {
-                pkg = handlerTransformerConfig.getRespDtoPackage() + ".dto";
+                pkg = handlerTransformerConfig.getRespNestDtoPackage();
+                if (pkg == null) {
+                    pkg = handlerTransformerConfig.getRespDtoPackage() + ".dto";
+                }
             }
             builder.packageDeclaration(pkg);
             builder.importDeclarations(cu.getImports());
