@@ -7,6 +7,8 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -108,7 +110,7 @@ public class JsgBuildProc {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
-                Collection<ValidatorDto> valids;
+                List<ValidatorDto> valids;
                 if (forReqOrResp) {
                     valids = validProc.process(annotated.getAnnotated());
                 } else {
@@ -139,6 +141,8 @@ public class JsgBuildProc {
                     }
                 }
 
+                jpdv.setAnnotatedName(annotated.toString());
+
                 jpdv.setValids(valids);
 
                 /*
@@ -162,9 +166,7 @@ public class JsgBuildProc {
                 }
 
                 JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(field, JsonFormat.class);
-                if (jsonFormat != null) {
-                    jpdv.setJsonFormatPattern(jsonFormat.pattern());
-                }
+                jpdv.setJsonFormatPattern(Optional.ofNullable(jsonFormat).map(JsonFormat::pattern).orElse(""));
 
                 jpdv.setMore(moreJpdvAnalysisHandle.moreAnalysisFromField(field));
 

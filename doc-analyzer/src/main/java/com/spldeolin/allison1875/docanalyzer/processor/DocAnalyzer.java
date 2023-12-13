@@ -14,6 +14,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
+import com.spldeolin.allison1875.docanalyzer.handle.RequestMappingHandle;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
@@ -34,7 +36,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
     private ListHandlersProc listHandlersProc;
 
     @Inject
-    private RequestMappingProc requestMappingProc;
+    private RequestMappingHandle requestMappingHandle;
 
     @Inject
     private CopyEndpointProc copyEndpointProc;
@@ -44,6 +46,9 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
     @Inject
     private YApiSyncProc yapiSyncProc;
+
+    @Inject
+    private MarkdownOutputProc markdownOutputProc;
 
     @Inject
     private JsgBuildProc jsgBuildProc;
@@ -75,7 +80,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
         // 遍历controller、遍历handler
         Collection<HandlerFullDto> handlers = listHandlersProc.process(astForest);
-        if (handlers.size() == 0) {
+        if (handlers.isEmpty()) {
             log.warn("no Handler detected");
             return;
         }
@@ -95,7 +100,7 @@ public class DocAnalyzer implements Allison1875MainProcessor {
                         responseBodyProc.analyze(jsg4resp, controller.getCoid(), handler.getMd()));
 
                 // 处理controller级与handler级的@RequestMapping
-                RequestMappingFullDto requestMappingFullDto = requestMappingProc.analyze(controller.getReflection(),
+                RequestMappingFullDto requestMappingFullDto = requestMappingHandle.analyze(controller.getReflection(),
                         handler.getReflection(), config.getGlobalUrlPrefix());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
@@ -108,12 +113,22 @@ public class DocAnalyzer implements Allison1875MainProcessor {
             }
         }
 
-        // 同步到YApi
-        try {
-            yapiSyncProc.process(endpoints);
-        } catch (Exception e) {
-            log.info("fail to output to YApi", e);
+        if (config.getOutputTo() == OutputToEnum.YAPI) {
+            try {
+                yapiSyncProc.process(endpoints);
+            } catch (Exception e) {
+                log.error("fail to output to YApi", e);
+            }
         }
+
+        if (config.getOutputTo() == OutputToEnum.LOCAL_MARKDOWN) {
+            try {
+                markdownOutputProc.process(endpoints);
+            } catch (Exception e) {
+                log.error("fail to output to Markdown", e);
+            }
+        }
+
         log.info(endpoints.size());
     }
 

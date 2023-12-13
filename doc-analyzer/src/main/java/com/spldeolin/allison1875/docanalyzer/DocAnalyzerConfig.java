@@ -2,9 +2,9 @@ package com.spldeolin.allison1875.docanalyzer;
 
 
 import java.util.Collection;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.base.valid.annotation.IsDirectory;
+import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
 import lombok.Data;
 
 /**
@@ -28,15 +28,24 @@ public final class DocAnalyzerConfig {
     private String globalUrlPrefix;
 
     /**
+     * 文档输出到...
+     */
+    @NotNull
+    private OutputToEnum outputTo;
+
+    /**
      * YApi请求URL
      */
-    @NotEmpty
     private String yapiUrl;
 
     /**
      * YApi项目的TOKEN
      */
-    @NotEmpty
     private String yapiToken;
+
+    /**
+     * Markdown文件的目录的路径
+     */
+    private String markdownDirectoryPath;
 
 }

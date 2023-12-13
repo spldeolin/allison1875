@@ -23,7 +23,7 @@ public class ReferenceSchemaProc {
         }
 
         // 处理ReferenceSchema
-        JsonSchemaTraverseUtils.traverse("根节点", rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
+        JsonSchemaTraverseUtils.traverse(rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
             JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
             String path = paths.get(parentJsonSchema);
             if (path == null) {

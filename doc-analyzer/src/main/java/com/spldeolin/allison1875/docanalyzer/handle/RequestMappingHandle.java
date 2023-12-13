@@ -1,17 +1,19 @@
-package com.spldeolin.allison1875.docanalyzer.processor;
+package com.spldeolin.allison1875.docanalyzer.handle;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.ListIterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -23,7 +25,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
  * @author Deolin 2020-06-10
  */
 @Singleton
-public class RequestMappingProc {
+public class RequestMappingHandle {
 
     @Inject
     AntPathMatcher pathMatcher;
@@ -37,19 +39,65 @@ public class RequestMappingProc {
         String[] methodPaths = methodRequestMapping.value();
         RequestMethod[] methodVerbs = methodRequestMapping.method();
 
+        // 将controller层的path与method层的path进行组合
         List<String> combinedUrls = combineUrl(controllerPaths, methodPaths);
-        // 添加全局前缀
+
+        // 为组合后的url添加全局前缀
         if (StringUtils.isNotBlank(globalUrlPrefix)) {
-            ListIterator<String> itr = combinedUrls.listIterator();
-            while (itr.hasNext()) {
-                itr.set(globalUrlPrefix + itr.next());
-            }
+            combinedUrls.replaceAll(combineUrl -> globalUrlPrefix + combineUrl);
         }
+
+        final MutableBoolean questionMark = new MutableBoolean(false);
+
+        // 为组合后的url添加@RequestMapping.params条件
+        combinedUrls.replaceAll(combinedUrl -> {
+            StringBuilder sb = new StringBuilder(combinedUrl);
+            if (controllerRequestMapping != null) {
+                for (String param : controllerRequestMapping.params()) {
+                    if (questionMark.isFalse()) {
+                        questionMark.setTrue();
+                        sb.append("?");
+                    } else {
+                        sb.append("&");
+                    }
+                    sb.append(param);
+                }
+            }
+            for (String param : methodRequestMapping.params()) {
+                if (questionMark.isFalse()) {
+                    questionMark.setTrue();
+                    sb.append("?");
+                } else {
+                    sb.append("&");
+                }
+                sb.append(param);
+            }
+            return sb.toString();
+        });
+
+        // 为组合后的url条件@RequestParam参数
+        combinedUrls.replaceAll(combinedUrl -> {
+            StringBuilder sb = new StringBuilder(combinedUrl);
+            for (Parameter parameter : reflectionMethod.getParameters()) {
+                RequestParam requestParam = AnnotatedElementUtils.findMergedAnnotation(parameter, RequestParam.class);
+                if (requestParam != null) {
+                    if (questionMark.isFalse()) {
+                        questionMark.setTrue();
+                        sb.append("?");
+                    } else {
+                        sb.append("&");
+                    }
+                    sb.append(requestParam.value()).append("={").append(requestParam.value()).append("}");
+                }
+            }
+            return sb.toString();
+        });
+
         Collection<RequestMethod> combinedVerbs = combineVerb(controllerVerbs, methodVerbs);
         return new RequestMappingFullDto(combinedUrls, combinedVerbs);
     }
 
-    private RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {
+    protected RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {
         return AnnotatedElementUtils.findMergedAnnotation(annotated, RequestMapping.class);
     }
 

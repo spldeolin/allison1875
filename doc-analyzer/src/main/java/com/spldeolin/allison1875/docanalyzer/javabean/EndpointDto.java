@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.javabean;
 
-import java.util.Collection;
+import java.util.List;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ public class EndpointDto {
 
     private String handlerSimpleName;
 
-    private Collection<String> descriptionLines;
+    private List<String> descriptionLines;
 
     private String url;
 

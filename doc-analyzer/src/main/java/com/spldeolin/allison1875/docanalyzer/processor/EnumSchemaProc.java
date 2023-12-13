@@ -21,7 +21,7 @@ public class EnumSchemaProc {
     private static final ObjectMapper om = JsonUtils.createObjectMapper();
 
     public void process(JsonSchema rootJsonSchema) {
-        JsonSchemaTraverseUtils.traverse("", rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
+        JsonSchemaTraverseUtils.traverse(rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
             if (jsonSchema.isValueTypeSchema()) {
                 Set<String> enums = jsonSchema.asValueTypeSchema().getEnums();
                 if (enums != null) {

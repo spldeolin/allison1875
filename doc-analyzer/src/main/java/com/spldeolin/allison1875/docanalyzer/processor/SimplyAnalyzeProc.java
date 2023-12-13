@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
@@ -27,7 +28,7 @@ public class SimplyAnalyzeProc {
     public void process(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint) {
         endpoint.setCat(handler.getCat().trim());
         endpoint.setHandlerSimpleName(controller.getName() + "_" + handler.getMd().getName());
-        endpoint.setDescriptionLines(accessDescriptionHandle.accessMethod(handler));
+        endpoint.setDescriptionLines(Lists.newArrayList(accessDescriptionHandle.accessMethod(handler)));
         endpoint.setIsDeprecated(isDeprecated(controller, handler.getMd()));
         endpoint.setAuthor(Authors.getAuthor(handler.getMd()));
         endpoint.setSourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler.getMd()));

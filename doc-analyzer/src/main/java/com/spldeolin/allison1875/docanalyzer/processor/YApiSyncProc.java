@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.github.javaparser.utils.StringEscapeUtils;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -44,12 +45,16 @@ public class YApiSyncProc {
     private EndpointToStringProc endpointToStringProc;
 
     @Inject
-    private DocAnalyzerConfig docAnalyzerConfig;
+    private DocAnalyzerConfig config;
 
     @Inject
     private YApiOpenProc yApiOpenProc;
 
     public void process(Collection<EndpointDto> endpoints) throws Exception {
+        Preconditions.checkNotNull(config.getYapiUrl(), "requried 'DocAnalyzerConfig#yapiUrl' Property cannot be null");
+        Preconditions.checkNotNull(config.getYapiToken(),
+                "requried 'DocAnalyzerConfig#yapiToken' Property cannot be null");
+
         YApiProjectGetRespDto project = yApiOpenProc.getProject();
         Long projectId = project.getId();
 
@@ -85,8 +90,8 @@ public class YApiSyncProc {
             JsonNode yApiInterface = this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
                     endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
             log.info("Endpoint [{}] output to YApi Project [{}]({}...{}), response: {}", endpoint.getUrl(),
-                    project.getName(), StringUtils.left(docAnalyzerConfig.getYapiToken(), 6),
-                    StringUtils.right(docAnalyzerConfig.getYapiToken(), 6), JsonUtils.toJson(yApiInterface));
+                    project.getName(), StringUtils.left(config.getYapiToken(), 6),
+                    StringUtils.right(config.getYapiToken(), 6), JsonUtils.toJson(yApiInterface));
         }
     }
 
@@ -103,7 +108,7 @@ public class YApiSyncProc {
         }
 
         // jpdv -> Pretty String
-        JsonSchemaTraverseUtils.traverse("根节点", bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema) -> {
+        JsonSchemaTraverseUtils.traverse(bodyJsonSchema, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
             JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
             if (jpdv != null) {
                 jsonSchema.setDescription(jpdvToStringProc.toString(jpdv));
@@ -169,7 +174,7 @@ public class YApiSyncProc {
         deleteMessage = MoreStringUtils.replaceLast(deleteMessage, "</strong>", "</span>");
 
         body.put("desc", deleteMessage + desc);
-        body.put("token", docAnalyzerConfig.getYapiToken());
+        body.put("token", config.getYapiToken());
         JsonNode jsonNode1 = yApiOpenProc.updateEndpoint(body);
         log.info(JsonUtils.toJson(jsonNode1));
     }
@@ -192,7 +197,7 @@ public class YApiSyncProc {
         form.put("desc", MarkdownUtils.convertToHtml(description));
         form.put("method", httpMethod);
         form.put("catid", catId);
-        form.put("token", docAnalyzerConfig.getYapiToken());
+        form.put("token", config.getYapiToken());
         JsonNode responseBody = yApiOpenProc.createOrUpdateEndpoint(form);
         return responseBody;
     }

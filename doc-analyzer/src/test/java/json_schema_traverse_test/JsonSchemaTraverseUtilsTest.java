@@ -28,7 +28,7 @@ public class JsonSchemaTraverseUtilsTest {
 
         Map<String, String> id2Path = Maps.newHashMap();
         id2Path.put(root.getId(), "root");
-        JsonSchemaTraverseUtils.traverse("root", root, (propertyName, jsonSchema, parentJsonSchema) -> {
+        JsonSchemaTraverseUtils.traverse(root, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
             String path = pathMap.get(parentJsonSchema);
             if (path == null) {
                 path = propertyName;

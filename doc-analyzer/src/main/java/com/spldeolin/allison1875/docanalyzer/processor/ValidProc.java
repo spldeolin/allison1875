@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.processor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
@@ -37,8 +38,8 @@ public class ValidProc {
     @Inject
     private AnalyzeCustomValidationHandle analyzeCustomValidationHandle;
 
-    public Collection<ValidatorDto> process(AnnotatedElement annotatedElement) {
-        Collection<ValidatorDto> valids = Lists.newArrayList();
+    public List<ValidatorDto> process(AnnotatedElement annotatedElement) {
+        List<ValidatorDto> valids = Lists.newArrayList();
         NotNull notNull = find(annotatedElement, NotNull.class);
         if (notNull != null) {
             valids.add(new ValidatorDto().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));
