@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.gadget;
 
-import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.gadget.processor.LineCounter;
@@ -25,7 +25,7 @@ public class LineCounterModule extends Allison1875Module {
     }
 
     @Override
-    public Class<? extends Allison1875MainProcessor> provideMainProcessorType() {
+    public Class<? extends Allison1875MainService> provideMainProcessorType() {
         return LineCounter.class;
     }
 

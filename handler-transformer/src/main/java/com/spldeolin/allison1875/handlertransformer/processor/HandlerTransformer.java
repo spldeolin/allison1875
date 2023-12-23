@@ -10,7 +10,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
@@ -31,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class HandlerTransformer implements Allison1875MainProcessor {
+public class HandlerTransformer implements Allison1875MainService {
 
     @Inject
     private HandlerTransformerConfig handlerTransformerConfig;

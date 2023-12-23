@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.ancestor.Allison1875MainProcessor;
+import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class StarTransformer implements Allison1875MainProcessor {
+public class StarTransformer implements Allison1875MainService {
 
     @Inject
     private DetectStarChainProc detectStarChainProc;
