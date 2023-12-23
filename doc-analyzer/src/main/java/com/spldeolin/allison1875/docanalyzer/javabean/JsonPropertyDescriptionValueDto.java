@@ -5,8 +5,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.Lists;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-04-27
@@ -14,36 +16,37 @@ import lombok.experimental.Accessors;
 @JsonInclude(Include.NON_NULL)
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class JsonPropertyDescriptionValueDto {
 
     public static final JsonPropertyDescriptionValueDto EMPTY =
             new JsonPropertyDescriptionValueDto().setDescriptionLines(
             Lists.newArrayList()).setJsonFormatPattern("");
 
-    private String annotatedName;
+    String annotatedName;
 
-    private Collection<String> descriptionLines;
+    Collection<String> descriptionLines;
 
     /**
      * 解析自声明在Field上的校验注解
      *
      * e.g: @NotEmpty private Collection<String> userNames;
      */
-    private List<ValidatorDto> valids = Lists.newArrayList();
+    List<ValidatorDto> valids = Lists.newArrayList();
 
-    private String jsonFormatPattern;
+    String jsonFormatPattern;
 
-    private Boolean isFieldCrossingValids = false;
+    Boolean isFieldCrossingValids = false;
 
-    private Boolean docIgnore = false;
+    Boolean docIgnore = false;
 
-    private String referencePath;
+    String referencePath;
 
-    private Collection<EnumCodeAndTitleDto> ecats;
+    Collection<EnumCodeAndTitleDto> ecats;
 
     /**
      * 拓展信息
      */
-    private Object more;
+    Object more;
 
 }

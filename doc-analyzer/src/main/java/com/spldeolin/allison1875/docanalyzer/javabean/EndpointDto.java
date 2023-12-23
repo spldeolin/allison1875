@@ -2,39 +2,42 @@ package com.spldeolin.allison1875.docanalyzer.javabean;
 
 import java.util.List;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-06-01
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EndpointDto {
 
-    private String cat;
+    String cat;
 
-    private String handlerSimpleName;
+    String handlerSimpleName;
 
-    private List<String> descriptionLines;
+    List<String> descriptionLines;
 
-    private String url;
+    String url;
 
-    private String httpMethod;
+    String httpMethod;
 
-    private Boolean isDeprecated;
+    Boolean isDeprecated;
 
-    private String requestBodyDescribe;
+    String requestBodyDescribe;
 
-    private JsonSchema requestBodyJsonSchema;
+    JsonSchema requestBodyJsonSchema;
 
-    private String responseBodyDescribe;
+    String responseBodyDescribe;
 
-    private JsonSchema responseBodyJsonSchema;
+    JsonSchema responseBodyJsonSchema;
 
-    private String author;
+    String author;
 
-    private String sourceCode;
+    String sourceCode;
 
-    private Object more;
+    Object more;
 
     public EndpointDto copy() {
         EndpointDto result = new EndpointDto();
