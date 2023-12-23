@@ -3,8 +3,10 @@ package com.spldeolin.allison1875.base;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.hash.Hashing;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * 生产批号
@@ -18,23 +20,24 @@ import lombok.Data;
  *
  * @author Deolin 2021-08-25
  */
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class LotNo {
 
     public static final String TAG_PREFIXION = "Allison 1875 Lot No: ";
 
     public static final String NO_MANUAL_MODIFICATION = " (don't modify manually)";
 
-    private final ModuleAbbr moduleAbbr;
+    final ModuleAbbr moduleAbbr;
 
-    private final String versionText;
+    final String versionText;
 
-    private final String hash;
+    final String hash;
 
-    private final Boolean unmodifiable;
+    final Boolean unmodifiable;
 
-    private final String text;
+    final String text;
 
     private LotNo(ModuleAbbr moduleAbbr, String versionText, String hash, Boolean unmodifiable) {
         this.moduleAbbr = moduleAbbr;

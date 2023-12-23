@@ -2,28 +2,31 @@ package com.spldeolin.allison1875.startransformer.javabean;
 
 import java.util.List;
 import com.github.javaparser.ast.expr.Expression;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2023-05-02
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChainAnalysisDto {
 
-    private String cftEntityQualifier;
+     String cftEntityQualifier;
 
-    private String cftEntityName;
+     String cftEntityName;
 
-    private String cftDesignName;
+     String cftDesignName;
 
-    private String cftDesignQualifier;
+     String cftDesignQualifier;
 
-    private Expression cftSecondArgument;
+     Expression cftSecondArgument;
 
-    private List<PhraseDto> phrases;
+     List<PhraseDto> phrases;
 
-    private String wholeDtoName;
+     String wholeDtoName;
 
 }

@@ -1,25 +1,28 @@
 package com.spldeolin.allison1875.persistencegenerator.facade.javabean;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-07-12
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PropertyDto {
 
-    private String columnName;
+     String columnName;
 
-    private String propertyName;
+     String propertyName;
 
-    private JavaTypeNamingDto javaType;
+     JavaTypeNamingDto javaType;
 
-    private String description;
+     String description;
 
-    private Long length;
+     Long length;
 
-    private Boolean notnull;
+     Boolean notnull;
 
-    private String defaultV;
+     String defaultV;
 
 }

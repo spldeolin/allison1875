@@ -5,8 +5,10 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.exception.StorageAbsentException;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -32,11 +34,12 @@ public class Saves {
 
     @Data
     @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Replace {
 
-        private String target;
+        String target;
 
-        private String replacement;
+        String replacement;
 
     }
 

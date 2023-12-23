@@ -4,187 +4,158 @@ import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-07-11
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public final class PersistenceGeneratorConfig {
 
     /**
      * 数据库连接
      */
-    @NotEmpty
-    private String jdbcUrl;
+    @NotEmpty String jdbcUrl;
 
     /**
      * 数据库用户名
      */
-    @NotEmpty
-    private String userName;
+    @NotEmpty String userName;
 
     /**
      * 数据库密码
      */
-    @NotEmpty
-    private String password;
+    @NotEmpty String password;
 
     /**
      * 为生成的代码指定作者
      */
-    @NotEmpty
-    private String author;
+    @NotEmpty String author;
 
     /**
      * 指定schema
      */
-    @NotEmpty
-    private String schema;
+    @NotEmpty String schema;
 
     /**
      * 指定table，非必填，未填写时代表schema下所有的table
      */
-    @NotNull
-    private Collection<String> tables;
+    @NotNull Collection<String> tables;
 
     /**
      * mapper.xml所在目录的相对路径（根据目标工程的情况填写）
      */
-    @NotEmpty
-    private List<String> mapperXmlDirectoryPaths;
+    @NotEmpty List<String> mapperXmlDirectoryPaths;
 
     /**
      * mapper接口的包名（根据目标工程的情况填写）
      */
-    @NotEmpty
-    private String mapperPackage;
+    @NotEmpty String mapperPackage;
 
     /**
      * Entity类的包名（根据目标工程的情况填写）
      */
-    @NotEmpty
-    private String entityPackage;
+    @NotEmpty String entityPackage;
 
     /**
      * 是否为[query-transformer]生成Design类
      */
-    @NotNull
-    private Boolean enableGenerateDesign;
+    @NotNull Boolean enableGenerateDesign;
 
     /**
      * QueryDesign类的包名（根据目标工程的情况填写）
      */
-    @NotEmpty
-    private String designPackage;
+    @NotEmpty String designPackage;
 
     /**
      * mapper.xml的标签中，是否使用别名来引用Entity类
      */
-    @NotNull
-    private Boolean isEntityUsingAlias;
+    @NotNull Boolean isEntityUsingAlias;
 
     /**
      * # 生成出的Entity类是否以Entity作为类名的结尾
      */
-    @NotNull
-    private Boolean isEntityEndWithEntity;
+    @NotNull Boolean isEntityEndWithEntity;
 
     /**
      * 如果有逻辑删除，怎么样算作“数据被删”，非必填，只支持等式SQL
      */
-    private String deletedSql;
+    String deletedSql;
 
     /**
      * 如果有逻辑删除，怎么样算作“数据未被删”，非必填，只支持等式SQL
      */
-    private String notDeletedSql;
+    String notDeletedSql;
 
     /**
      * 对项目隐藏，仅在数据库中可见的表字段
      */
-    @NotNull
-    private Collection<String> hiddenColumns;
+    @NotNull Collection<String> hiddenColumns;
 
     /**
      * 即便符合persistence-generator对外键的定义，也不会被当作外键的表字段（一般用于忽略为创建人ID和更新人ID生成query方法）
      */
-    @NotNull
-    private Collection<String> notKeyColumns;
+    @NotNull Collection<String> notKeyColumns;
 
     /**
      * Entity父类的全限定名
      */
-    private String superEntityQualifier;
+    String superEntityQualifier;
 
     /**
      * 已在Entit父类中声明，无需在具体Entity中再次声明的表字段
      */
-    @NotNull
-    private Collection<String> alreadyInSuperEntity;
+    @NotNull Collection<String> alreadyInSuperEntity;
 
     /**
      * mapper接口中的方法是否打印Lot No信息
      */
-    private Boolean mapperInterfaceMethodPrintLotNo = true;
+    Boolean mapperInterfaceMethodPrintLotNo = true;
 
     /**
      * 是否为entity实现java.io.Serializable接口
      */
-    private Boolean enableEntityImplementSerializable;
+    Boolean enableEntityImplementSerializable;
 
     /**
      * 是否为entity实现java.lang.Cloneable接口
      */
-    private Boolean enableEntityImplementCloneable;
+    Boolean enableEntityImplementCloneable;
 
-    @NotNull
-    private Boolean disableInsert;
+    @NotNull Boolean disableInsert;
 
-    @NotNull
-    private Boolean disableBatchInsert;
+    @NotNull Boolean disableBatchInsert;
 
-    @NotNull
-    private Boolean disableBatchInsertEvenNull;
+    @NotNull Boolean disableBatchInsertEvenNull;
 
-    @NotNull
-    private Boolean disableBatchUpdate;
+    @NotNull Boolean disableBatchUpdate;
 
-    @NotNull
-    private Boolean disableBatchUpdateEvenNull;
+    @NotNull Boolean disableBatchUpdateEvenNull;
 
-    @NotNull
-    private Boolean disableQueryById;
+    @NotNull Boolean disableQueryById;
 
-    @NotNull
-    private Boolean disableUpdateById;
+    @NotNull Boolean disableUpdateById;
 
-    @NotNull
-    private Boolean disableUpdateByIdEvenNull;
+    @NotNull Boolean disableUpdateByIdEvenNull;
 
-    @NotNull
-    private Boolean disableQueryByIds;
+    @NotNull Boolean disableQueryByIds;
 
-    @NotNull
-    private Boolean disableQueryByIdsEachId;
+    @NotNull Boolean disableQueryByIdsEachId;
 
-    @NotNull
-    private Boolean disableQueryByKey;
+    @NotNull Boolean disableQueryByKey;
 
-    @NotNull
-    private Boolean disableDeleteByKey;
+    @NotNull Boolean disableDeleteByKey;
 
-    @NotNull
-    private Boolean disableQueryByKeys;
+    @NotNull Boolean disableQueryByKeys;
 
-    @NotNull
-    private Boolean disableQueryByEntity;
+    @NotNull Boolean disableQueryByEntity;
 
-    @NotNull
-    private Boolean disableListAll;
+    @NotNull Boolean disableListAll;
 
-    @NotNull
-    private Boolean disableInsertOrUpdate;
+    @NotNull Boolean disableInsertOrUpdate;
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>

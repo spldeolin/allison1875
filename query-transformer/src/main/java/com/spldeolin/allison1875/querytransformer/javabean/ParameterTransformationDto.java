@@ -2,20 +2,23 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.List;
 import com.github.javaparser.ast.body.Parameter;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2021-06-01
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ParameterTransformationDto {
 
-    private List<String> imports;
+     List<String> imports;
 
-    private List<Parameter> parameters;
+     List<Parameter> parameters;
 
-    private Boolean isJavabean;
+     Boolean isJavabean;
 
 }

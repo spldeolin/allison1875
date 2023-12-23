@@ -1,16 +1,19 @@
 package com.spldeolin.allison1875.inspector.javabean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-02-24
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PardonDto {
 
     @JsonProperty("源码位置")
-    private String sourceCode;
+    String sourceCode;
 
     /**
      * - type qualifier
@@ -19,9 +22,9 @@ public class PardonDto {
      * - or else null
      */
     @JsonProperty("全限定名")
-    private String qualifier;
+    String qualifier;
 
     @JsonProperty("条目号")
-    private String statuteNo;
+    String statuteNo;
 
 }

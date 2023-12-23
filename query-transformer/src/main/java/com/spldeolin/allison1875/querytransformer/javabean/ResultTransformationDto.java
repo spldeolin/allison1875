@@ -4,19 +4,22 @@ import java.util.List;
 import javax.annotation.Nullable;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.Lists;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2021-06-01
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResultTransformationDto {
 
-    private List<String> imports = Lists.newArrayList();
+    List<String> imports = Lists.newArrayList();
 
-    private Type resultType;
+    Type resultType;
 
     /**
      * 对于查询方法
@@ -29,6 +32,6 @@ public class ResultTransformationDto {
      * 这个值是null
      */
     @Nullable
-    private String elementTypeQualifier;
+    String elementTypeQualifier;
 
 }

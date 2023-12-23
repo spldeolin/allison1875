@@ -2,32 +2,35 @@ package com.spldeolin.allison1875.persistencegenerator.facade.javabean;
 
 import java.util.List;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-10-06
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DesignMeta {
 
-    private String entityQualifier;
+    String entityQualifier;
 
-    private String entityName;
+    String entityName;
 
-    private String mapperQualifier;
+    String mapperQualifier;
 
-    private String mapperName;
+    String mapperName;
 
-    private List<String> mapperRelativePaths;
+    List<String> mapperRelativePaths;
 
-    private Map<String, PropertyDto> properties;
+    Map<String, PropertyDto> properties;
 
-    private String tableName;
+    String tableName;
 
     /**
      * 如果有逻辑删除，怎么样算作“数据未被删”
      * 如果properties中有逻辑删除标识，则值来自PersistenceGeneratorConfig#notDeletedSql
      */
-    private String notDeletedSql;
+    String notDeletedSql;
 
 }

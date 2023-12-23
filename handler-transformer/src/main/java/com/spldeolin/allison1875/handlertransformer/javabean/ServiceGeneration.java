@@ -1,20 +1,23 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2021-03-05
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ServiceGeneration {
 
-    private String serviceVarName;
+     String serviceVarName;
 
-    private ClassOrInterfaceDeclaration service;
+     ClassOrInterfaceDeclaration service;
 
-    private String serviceQualifier;
+     String serviceQualifier;
 
-    private String methodName;
+     String methodName;
 
 }

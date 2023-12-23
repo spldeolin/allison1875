@@ -5,30 +5,33 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.base.LotNo;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-12-22
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FirstLineDto {
 
     @JsonIgnore
-    private InitializerDeclaration init;
+    InitializerDeclaration init;
 
-    private String handlerUrl;
+    String handlerUrl;
 
-    private String handlerName;
+    String handlerName;
 
-    private String handlerDescription;
+    String handlerDescription;
 
-    private String presentServiceQualifier;
+    String presentServiceQualifier;
 
-    private String serviceName;
+    String serviceName;
 
-    private final Map<String, Object> more = Maps.newHashMap();
+    final Map<String, Object> more = Maps.newHashMap();
 
-    private LotNo lotNo;
+    LotNo lotNo;
 
     @Override
     public String toString() {

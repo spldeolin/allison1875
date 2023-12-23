@@ -5,16 +5,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-02-22
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class LawlessDto {
 
     @JsonProperty("源码位置")
-    private String sourceCode;
+    String sourceCode;
 
     /**
      * - type qualifier
@@ -23,22 +26,22 @@ public class LawlessDto {
      * - or else null
      */
     @JsonProperty("全限定名")
-    private String qualifier;
+    String qualifier;
 
     @JsonProperty("规约号")
-    private String statuteNo;
+    String statuteNo;
 
     @JsonProperty("详细信息")
-    private String message;
+    String message;
 
     @JsonProperty("作者")
-    private String author;
+    String author;
 
     @JsonProperty("修复者")
-    private String fixer;
+    String fixer;
 
     @JsonProperty("修复时间")
-    private LocalDateTime fixedAt;
+    LocalDateTime fixedAt;
 
     public LawlessDto(Node node, String qualifier, String message) {
         this.sourceCode = Locations.getAbsolutePathWithLineNo(node);

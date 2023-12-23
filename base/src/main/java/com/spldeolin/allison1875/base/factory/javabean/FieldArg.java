@@ -4,26 +4,27 @@ import java.util.function.BiConsumer;
 import javax.validation.constraints.NotBlank;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2021-05-26
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FieldArg {
 
-    private String typeQualifier;
+    String typeQualifier;
 
-    private String description;
+    String description;
 
-    @NotBlank
-    private String typeName;
+    @NotBlank String typeName;
 
-    @NotBlank
-    private String fieldName;
+    @NotBlank String fieldName;
 
-    private BiConsumer<ClassOrInterfaceDeclaration, FieldDeclaration> more4Field;
+    BiConsumer<ClassOrInterfaceDeclaration, FieldDeclaration> more4Field;
 
 }

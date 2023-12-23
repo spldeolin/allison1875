@@ -1,31 +1,34 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-07-11
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InformationSchemaDto {
 
-    private String tableName;
+     String tableName;
 
-    private String tableComment;
+     String tableComment;
 
-    private String columnName;
+     String columnName;
 
-    private String dataType;
+     String dataType;
 
-    private String columnType;
+     String columnType;
 
-    private String columnComment;
+     String columnComment;
 
-    private String columnKey;
+     String columnKey;
 
-    private Long characterMaximumLength;
+     Long characterMaximumLength;
 
-    private String isNullable; // YES NO
+     String isNullable; // YES NO
 
-    private String columnDefault;
+     String columnDefault;
 
 }

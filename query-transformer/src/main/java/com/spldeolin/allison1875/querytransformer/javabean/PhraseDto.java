@@ -4,24 +4,27 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.Expression;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2021-05-30
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhraseDto {
 
-    private String subjectPropertyName;
+    String subjectPropertyName;
 
-    private String varName;
+    String varName;
 
-    private PredicateEnum predicate;
+    PredicateEnum predicate;
 
     @JsonIgnore
-    private Expression objectExpr;
+    Expression objectExpr;
 
     @Override
     public boolean equals(Object o) {

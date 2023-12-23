@@ -8,45 +8,48 @@ import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-12-09
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChainAnalysisDto {
 
-    private String methodName;
+    String methodName;
 
-    private Boolean noSpecifiedMethodName;
+    Boolean noSpecifiedMethodName;
 
-    private ChainMethodEnum chainMethod;
+    ChainMethodEnum chainMethod;
 
-    private ReturnClassifyEnum returnClassify;
+    ReturnClassifyEnum returnClassify;
 
-    private Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
+    Set<PhraseDto> queryPhrases = Sets.newLinkedHashSet();
 
-    private Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
+    Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
 
-    private Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
+    Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
 
-    private Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
+    Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
 
     @JsonIgnore
-    private MethodCallExpr chain;
+    MethodCallExpr chain;
 
-    private BlockStmt directBlock;
+    BlockStmt directBlock;
 
-    private String indent;
+    String indent;
 
-    private Boolean isAssigned;
+    Boolean isAssigned;
 
-    private Boolean isAssignedToType;
+    Boolean isAssignedToType;
 
-    private Boolean isByForced;
+    Boolean isByForced;
 
-    private LotNo lotNo;
+    LotNo lotNo;
 
 }

@@ -3,32 +3,35 @@ package com.spldeolin.allison1875.startransformer.javabean;
 import java.util.List;
 import java.util.Map;
 import com.google.common.collect.Maps;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2023-05-02
  */
 @Data
 @Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhraseDto {
 
-    private Boolean isOneToOne;
+     Boolean isOneToOne;
 
-    private String dtEntityQualifier;
+     String dtEntityQualifier;
 
-    private String dtEntityName;
+     String dtEntityName;
 
-    private String dtDesignName;
+     String dtDesignName;
 
-    private String fk;
+     String fk;
 
-    private String fkTypeQualifier;
+     String fkTypeQualifier;
 
-    private List<String> keys;
+     List<String> keys;
 
-    private List<String> mkeys;
+     List<String> mkeys;
 
-    private Map<String, String> entityFieldTypesEachFieldName = Maps.newHashMap();
+     Map<String, String> entityFieldTypesEachFieldName = Maps.newHashMap();
 
 }

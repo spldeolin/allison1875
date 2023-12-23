@@ -1,37 +1,36 @@
 package com.spldeolin.allison1875.querytransformer;
 
 import javax.validation.constraints.NotEmpty;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-08-09
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public final class QueryTransformerConfig {
 
     /**
      * Mapper方法签名中Condition类的包名
      */
-    @NotEmpty
-    private String mapperConditionPackage;
+    @NotEmpty String mapperConditionPackage;
 
     /**
      * Mapper方法签名中Record类的包名
      */
-    @NotEmpty
-    private String mapperRecordPackage;
+    @NotEmpty String mapperRecordPackage;
 
     /**
      * 为生成的代码指定作者
      */
-    @NotEmpty
-    private String author;
+    @NotEmpty String author;
 
     /**
      * Design类的包名
      */
-    @NotEmpty
-    private String designPackage;
+    @NotEmpty String designPackage;
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>

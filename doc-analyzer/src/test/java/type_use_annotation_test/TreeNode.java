@@ -14,7 +14,9 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,15 +24,14 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TreeNode {
 
-    @NotNull
-    private Long id;
+    @NotNull Long id;
 
-    @NotBlank
-    private String title;
+    @NotBlank String title;
 
-    private Collection<@NotBlank TreeNode>[][] children;
+    Collection<@NotBlank TreeNode>[][] children;
 
     public static void main(String[] args) throws JsonSchemaException, JsonProcessingException {
         ObjectMapper om = JsonUtils.createObjectMapper();
