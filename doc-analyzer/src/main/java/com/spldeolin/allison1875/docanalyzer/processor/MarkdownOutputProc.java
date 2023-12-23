@@ -1,10 +1,15 @@
 package com.spldeolin.allison1875.docanalyzer.processor;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -14,6 +19,7 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
@@ -28,12 +34,33 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MarkdownOutputProc {
 
+    private static final EasyRandom er;
+
     @Inject
     private DocAnalyzerConfig config;
+
+    static {
+        EasyRandomParameters erp = new EasyRandomParameters();
+        erp.collectionSizeRange(2, 2);
+        erp.stringLengthRange(1, 8);
+        erp.randomizationDepth(5);
+        erp.ignoreRandomizationErrors(true);
+        erp.randomize(String.class, () -> RandomStringUtils.randomAlphanumeric(8));
+        erp.randomize(Integer.class, () -> RandomUtils.nextInt(0, 99999));
+        erp.randomize(Long.class, () -> RandomUtils.nextLong(1000000000L, 9999999999L));
+        erp.randomize(BigDecimal.class,
+                () -> new BigDecimal(RandomStringUtils.randomNumeric(5) + "." + RandomStringUtils.randomNumeric(2)));
+        erp.randomize(Object.class, () -> "x");
+        er = new EasyRandom(erp);
+    }
 
     public void process(Collection<EndpointDto> endpoints) throws Exception {
         Preconditions.checkNotNull(config.getMarkdownDirectoryPath(),
                 "requried 'DocAnalyzerConfig#markdownDirectoryPath' Property cannot be null");
+        Preconditions.checkNotNull(config.getEnableCurl(),
+                "requried 'DocAnalyzerConfig#enableCurl' Property cannot be null");
+        Preconditions.checkNotNull(config.getEnableResponseBodySample(),
+                "requried 'DocAnalyzerConfig#enableResponseBodySample' Property cannot be null");
 
         Multimap<String/*cat*/, EndpointDto> endpointMap = ArrayListMultimap.create();
         endpoints.forEach(e -> endpointMap.put(e.getCat(), e));
@@ -41,65 +68,81 @@ public class MarkdownOutputProc {
         for (String cat : endpointMap.keySet()) {
             StringBuilder content = new StringBuilder();
             for (EndpointDto endpoint : endpointMap.get(cat)) {
-                String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
-                if (StringUtils.isEmpty(title)) {
-                    title = endpoint.getHandlerSimpleName();
+                try {
+                    String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
+                    if (StringUtils.isEmpty(title)) {
+                        title = endpoint.getHandlerSimpleName();
+                    }
+                    content.append("## ").append(title).append("\n");
+
+                    if (endpoint.getDescriptionLines().size() > 1) {
+                        endpoint.getDescriptionLines().stream().skip(1)
+                                .forEach(line -> content.append(line).append("\n\n"));
+                    }
+
+                    content.append("### 请求方法与URL" + "\n");
+                    content.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl())
+                            .append("`\n");
+
+                    content.append("### Request Body的数据结构（application/json）\n");
+                    if (endpoint.getRequestBodyJsonSchema() != null) {
+                        content.append(this.buildReqOrRespBodyPart(endpoint, true));
+                    } else {
+                        content.append("无需Request Body\n");
+                    }
+
+                    content.append("### Response Body的数据结构（application/json）\n");
+                    if (endpoint.getResponseBodyJsonSchema() != null) {
+                        content.append(this.buildReqOrRespBodyPart(endpoint, false));
+                    } else {
+                        content.append("没有Response Body\n");
+                    }
+
+                    // 生成cURL
+                    if (config.getEnableCurl() && endpoint.getRequestBodyDescribe() != null) {
+                        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe());
+                        if (fakeReqJson != null) {
+                            content.append("### cURL\n");
+                            content.append("```shell\n");
+                            content.append(String.format("curl --request %s --url 'http://localhost:8080%s' --header "
+                                            + "'content-type:application/json' " + "--data '",
+                                    endpoint.getHttpMethod().toUpperCase(), endpoint.getUrl()));
+                            content.append(fakeReqJson);
+                            content.append("'\n```\n");
+                        }
+                    }
+
+                    // 生成返回值示例
+                    if (config.getEnableResponseBodySample() && endpoint.getResponseBodyDescribe() != null) {
+                        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe());
+                        if (fakeRespJson != null) {
+                            content.append("### Response Body的示例\n");
+                            content.append("```json\n");
+                            content.append(fakeRespJson);
+                            content.append("\n```\n");
+                        }
+                    }
+
+                    // markdown语法的分隔线
+                    content.append("\n---\n");
+                } catch (Exception e) {
+                    log.error("fail to output to markdown, endpoint={}", endpoint, e);
                 }
-                content.append("## ").append(title).append("\n");
-
-                if (endpoint.getDescriptionLines().size() > 1) {
-                    endpoint.getDescriptionLines().stream().skip(1)
-                            .forEach(line -> content.append(line).append("\n\n"));
-                }
-
-                content.append("### 请求方法与URL" + "\n");
-                content.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl())
-                        .append("`\n");
-
-                content.append("### Request Body的数据结构（application/json）\n");
-                if (endpoint.getRequestBodyJsonSchema() != null) {
-                    content.append(this.buildReqOrRespBodyPart(endpoint, true));
-                } else {
-                    content.append("无需Request Body\n");
-                }
-
-                content.append("### Response Body的数据结构（application/json）\n");
-                if (endpoint.getResponseBodyJsonSchema() != null) {
-                    content.append(this.buildReqOrRespBodyPart(endpoint, false));
-                } else {
-                    content.append("没有Response Body\n");
-                }
-
-                // TODO MarkdownOutProc中需要生成cURL
-//                content.append("### cURL\n");
-//                content.append("```java\n");
-//                content.append(String.format(
-//                        "curl --request %s --url 'http://localhost:8080%s' --header 'content-type:application/json' "
-//                                + "--data '", endpoint.getHttpMethod().toUpperCase(), endpoint.getUrl()));
-//                StringBuilder sb = new StringBuilder(64);
-//                StringBuilder closeMarks = new StringBuilder(64);
-//                JsonSchemaTraverseUtils.traverse(endpoint.getRequestBodyJsonSchema(),
-//                        (propertyName, jsonSchema, parentJsonSchema, depth) -> {
-//                            if (jsonSchema.isArraySchema()) {
-//
-//                            } else if (jsonSchema.isObjectSchema()) {
-//
-//                            } else {
-//                                sb.append("\"").append(propertyName).append("\" : xxx");
-//                                if (parentJsonSchema.isObjectSchema()) {
-//                                    Lists.newArrayList(parentJsonSchema.asObjectSchema().getProperties().keySet())
-//                                    .indexOf()
-//                                }
-//                            }
-//                        });
-//                content.append(sb).append(closeMarks.reverse());
-//                content.append("'\n```\n");
-                content.append("\n---\n");
             }
 
             File md = new File(config.getMarkdownDirectoryPath() + File.separator + cat + ".md");
             FileUtils.writeStringToFile(md, content.toString(), StandardCharsets.UTF_8);
             log.info("create markdown file. file={}", md);
+        }
+    }
+
+    private String fakeJsonByDescribe(String describe) throws Exception {
+        try {
+            Object fakeDto = er.nextObject(LoadClassUtils.loadClass(describe, this.getClass().getClassLoader()));
+            return JsonUtils.toJsonPrettily(fakeDto);
+        } catch (Exception e) {
+            log.error("fail to fake json, describe={}", describe, e);
+            throw e;
         }
     }
 
@@ -155,7 +198,9 @@ public class MarkdownOutputProc {
             }
             content.append("|");
             // 注释
-            content.append(Joiner.on("<br>").join(jpdv.getDescriptionLines())).append("|");
+            if (jpdv.getDescriptionLines() != null) { // 目前已知类似“返回值是List<String>”的情况会导致这个属性为null
+                content.append(Joiner.on("<br>").join(jpdv.getDescriptionLines())).append("|");
+            }
             if (isReqBody) {
                 // 校验项
                 if (jpdv.getValids().size() == 1) {

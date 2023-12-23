@@ -145,6 +145,13 @@
                 <version>3.14.9</version>
             </dependency>
 
+            <!-- easy-random -->
+            <dependency>
+                <groupId>org.jeasy</groupId>
+                <artifactId>easy-random-core</artifactId>
+                <version>4.3.0</version>
+            </dependency>
+
             <!-- jooq -->
             <dependency>
                 <groupId>org.jooq</groupId>

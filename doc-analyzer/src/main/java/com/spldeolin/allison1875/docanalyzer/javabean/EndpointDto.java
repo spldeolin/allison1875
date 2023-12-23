@@ -22,7 +22,11 @@ public class EndpointDto {
 
     private Boolean isDeprecated;
 
+    private String requestBodyDescribe;
+
     private JsonSchema requestBodyJsonSchema;
+
+    private String responseBodyDescribe;
 
     private JsonSchema responseBodyJsonSchema;
 
@@ -40,7 +44,9 @@ public class EndpointDto {
         result.setUrl(url);
         result.setHttpMethod(httpMethod);
         result.setIsDeprecated(isDeprecated);
+        result.setRequestBodyDescribe(requestBodyDescribe);
         result.setRequestBodyJsonSchema(requestBodyJsonSchema);
+        result.setResponseBodyDescribe(responseBodyDescribe);
         result.setResponseBodyJsonSchema(responseBodyJsonSchema);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);

@@ -34,18 +34,28 @@ public final class DocAnalyzerConfig {
     private OutputToEnum outputTo;
 
     /**
-     * YApi请求URL
+     * 文档输出到YApi时，YApi请求URL
      */
     private String yapiUrl;
 
     /**
-     * YApi项目的TOKEN
+     * 文档输出到YApi时，YApi项目的TOKEN
      */
     private String yapiToken;
 
     /**
-     * Markdown文件的目录的路径
+     * 文档输出到markdown时，Markdown文件的目录的路径
      */
     private String markdownDirectoryPath;
+
+    /**
+     * 文档输出到markdown时，是否启用cURL命令的输出
+     */
+    private Boolean enableCurl;
+
+    /**
+     * 文档输出到markdown时，是否启用Response Body示例的输出
+     */
+    private Boolean enableResponseBodySample;
 
 }

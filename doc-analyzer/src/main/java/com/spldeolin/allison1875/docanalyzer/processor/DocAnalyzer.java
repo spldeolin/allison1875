@@ -16,6 +16,7 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
 import com.spldeolin.allison1875.docanalyzer.handle.RequestMappingHandle;
+import com.spldeolin.allison1875.docanalyzer.javabean.BodyTypeAnalysisDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
@@ -93,11 +94,15 @@ public class DocAnalyzer implements Allison1875MainProcessor {
 
             try {
                 // 分析Request Body
-                endpoint.setRequestBodyJsonSchema(requestBodyProc.analyze(jsg4req, handler.getMd()));
+                BodyTypeAnalysisDto reqBodyAnalysis = requestBodyProc.analyze(jsg4req, handler.getMd());
+                endpoint.setRequestBodyDescribe(reqBodyAnalysis.getDescribe());
+                endpoint.setRequestBodyJsonSchema(reqBodyAnalysis.getJsonSchema());
 
                 // 分析Response Body
-                endpoint.setResponseBodyJsonSchema(
-                        responseBodyProc.analyze(jsg4resp, controller.getCoid(), handler.getMd()));
+                BodyTypeAnalysisDto respBodyAnalysis = responseBodyProc.analyze(jsg4resp, controller.getCoid(),
+                        handler.getMd());
+                endpoint.setResponseBodyDescribe(respBodyAnalysis.getDescribe());
+                endpoint.setResponseBodyJsonSchema(respBodyAnalysis.getJsonSchema());
 
                 // 处理controller级与handler级的@RequestMapping
                 RequestMappingFullDto requestMappingFullDto = requestMappingHandle.analyze(controller.getReflection(),
