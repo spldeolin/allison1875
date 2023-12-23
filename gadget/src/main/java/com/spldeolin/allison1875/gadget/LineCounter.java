@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.gadget.processor;
+package com.spldeolin.allison1875.gadget;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,6 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
-import com.spldeolin.allison1875.gadget.LineCounterConfig;
 import lombok.extern.log4j.Log4j2;
 
 /**
