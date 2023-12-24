@@ -1,0 +1,129 @@
+package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+
+import java.util.Collection;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
+import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
+import com.spldeolin.allison1875.persistencegenerator.processor.BuildPersistenceDtoService;
+import com.spldeolin.allison1875.persistencegenerator.processor.CommentService;
+import com.spldeolin.allison1875.persistencegenerator.processor.JdbcTypeService;
+import com.spldeolin.allison1875.persistencegenerator.processor.QueryInformationSchemaService;
+import lombok.extern.log4j.Log4j2;
+
+/**
+ * @author Deolin 2020-07-12
+ */
+@Singleton
+@Log4j2
+public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoService {
+
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
+    @Inject
+    private QueryInformationSchemaService queryInformationSchemaService;
+
+    @Inject
+    private JdbcTypeService jdbcTypeService;
+
+    @Inject
+    private CommentService commentService;
+
+    @Override
+    public Collection<PersistenceDto> process(AstForest astForest) {
+        // 查询information_schema.COLUMNS、information_schema.TABLES表
+        Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaService.process();
+        String deleteFlag = getDeleteFlagName();
+
+        Map<String, PersistenceDto> persistences = Maps.newHashMap();
+        for (InformationSchemaDto infoSchema : infoSchemas) {
+            PersistenceDto dto = new PersistenceDto();
+            String domainName = MoreStringUtils.underscoreToUpperCamel(infoSchema.getTableName());
+            dto.setTableName(infoSchema.getTableName());
+            dto.setEntityName(domainName + endWith());
+            dto.setMapperName(domainName + "Mapper");
+            dto.setDescrption(commentService.resolveTableComment(infoSchema));
+            dto.setIdProperties(Lists.newArrayList());
+            dto.setNonIdProperties(Lists.newArrayList());
+            dto.setKeyProperties(Lists.newArrayList());
+            dto.setProperties(Lists.newArrayList());
+            persistences.put(infoSchema.getTableName(), dto);
+        }
+        for (InformationSchemaDto infoSchema : infoSchemas) {
+            String columnName = infoSchema.getColumnName();
+            if (persistenceGeneratorConfig.getHiddenColumns().contains(columnName)) {
+                continue;
+            }
+            PropertyDto property = new PropertyDto();
+            property.setColumnName(columnName);
+            property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
+            JavaTypeNamingDto javaType = jdbcTypeService.jdbcType2javaType(infoSchema, astForest);
+            if (javaType == null) {
+                log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(),
+                        infoSchema.getDataType(), infoSchema.getColumnType());
+                continue;
+            }
+            property.setJavaType(javaType);
+            property.setDescription(commentService.resolveColumnComment(infoSchema));
+            property.setLength(infoSchema.getCharacterMaximumLength());
+            property.setNotnull("NO".equals(infoSchema.getIsNullable()));
+            property.setDefaultV(infoSchema.getColumnDefault());
+            PersistenceDto dto = persistences.get(infoSchema.getTableName());
+
+            dto.getProperties().add(property);
+            if ("PRI".equalsIgnoreCase(infoSchema.getColumnKey())) {
+                dto.getIdProperties().add(property);
+            } else {
+                dto.getNonIdProperties().add(property);
+                if (columnName.endsWith("_id") && !persistenceGeneratorConfig.getNotKeyColumns().contains(columnName)) {
+                    dto.getKeyProperties().add(property);
+                }
+            }
+
+            if (columnName.equals(deleteFlag)) {
+                dto.setIsDeleteFlagExist(true);
+            }
+
+            dto.setLotNo(LotNo.build(ModuleAbbr.PG, JsonUtils.toJson(dto), true));
+        }
+
+        reportWhileNoDeleleFlag(deleteFlag, persistences);
+
+        return persistences.values();
+    }
+
+    private void reportWhileNoDeleleFlag(String deleteFlag, Map<String, PersistenceDto> persistences) {
+        persistences.values().stream().filter(dto -> !dto.getIsDeleteFlagExist())
+                .forEach(dto -> log.info("数据表[{}]没有逻辑删除标识符[{}]", dto.getTableName(), deleteFlag));
+    }
+
+    private String getDeleteFlagName() {
+        String sql = persistenceGeneratorConfig.getNotDeletedSql();
+        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(persistenceGeneratorConfig.getDeletedSql())) {
+            return null;
+        }
+        if (!sql.contains("=")) {
+            log.warn("notDeletedSql非法，不是等式，认为没有删除标识符 [{}]", sql);
+            return null;
+        }
+        return sql.split("=")[0].trim();
+    }
+
+    private String endWith() {
+        return persistenceGeneratorConfig.getIsEntityEndWithEntity() ? "Entity" : "";
+    }
+
+}

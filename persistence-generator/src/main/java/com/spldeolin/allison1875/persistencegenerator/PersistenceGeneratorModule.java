@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.persistencegenerator;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import com.spldeolin.allison1875.persistencegenerator.processor.PersistenceGenerator;
 import lombok.ToString;
 
 /**
