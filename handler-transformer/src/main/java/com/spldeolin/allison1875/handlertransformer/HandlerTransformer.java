@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,14 +16,20 @@ import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
+import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
+import com.spldeolin.allison1875.handlertransformer.service.ControllerService;
+import com.spldeolin.allison1875.handlertransformer.service.DtoService;
+import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
+import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
+import com.spldeolin.allison1875.handlertransformer.service.InitializerCollectService;
+import com.spldeolin.allison1875.handlertransformer.service.MoreTransformService;
+import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
+import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -37,28 +43,28 @@ public class HandlerTransformer implements Allison1875MainService {
     private HandlerTransformerConfig handlerTransformerConfig;
 
     @Inject
-    private ControllerProc controllerProc;
+    private ControllerService controllerProc;
 
     @Inject
-    private InitializerCollectProc initializerCollectProc;
+    private InitializerCollectService initializerCollectProc;
 
     @Inject
-    private EnsureNoRepeatProc ensureNoRepeationProc;
+    private EnsureNoRepeatService ensureNoRepeationProc;
 
     @Inject
-    private ReqRespProc reqRespProc;
+    private ReqRespService reqRespProc;
 
     @Inject
-    private DtoProc dtoProc;
+    private DtoService dtoProc;
 
     @Inject
-    private ParseFirstLineProc parseFirstLineProc;
+    private ParseFirstLineService parseFirstLineProc;
 
     @Inject
-    private GenerateServicePairProc generateServicePairProc;
+    private GenerateServicePairService generateServicePairProc;
 
     @Inject
-    private MoreTransformHandle moreTransformHandle;
+    private MoreTransformService moreTransformHandle;
 
     @Override
     public void process(AstForest astForest) {

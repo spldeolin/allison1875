@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.util.Collection;
 import java.util.stream.IntStream;
@@ -15,11 +15,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.handlertransformer.handle.CreateHandlerHandle;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
+import com.spldeolin.allison1875.handlertransformer.service.ControllerService;
+import com.spldeolin.allison1875.handlertransformer.service.CreateHandlerService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -27,11 +28,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class ControllerProc {
+public class ControllerServiceImpl implements ControllerService {
 
     @Inject
-    private CreateHandlerHandle createHandlerHandle;
+    private CreateHandlerService createHandlerService;
 
+    @Override
     public Collection<ClassOrInterfaceDeclaration> collect(CompilationUnit cu) {
         return cu.findAll(ClassOrInterfaceDeclaration.class, this::isController);
     }
@@ -52,6 +54,7 @@ public class ControllerProc {
         return false;
     }
 
+    @Override
     public HandlerCreation createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
             ServiceGeneration serviceGeneration, ReqDtoRespDtoInfo reqDtoRespDtoInfo) {
         NodeList<BodyDeclaration<?>> members = controller.getMembers();
@@ -73,7 +76,7 @@ public class ControllerProc {
                 controller.getNameAsString());
 
         // 使用handle创建Handler方法，并追加到controller中
-        HandlerCreation handlerCreation = createHandlerHandle.createHandler(firstLineDto,
+        HandlerCreation handlerCreation = createHandlerService.createHandler(firstLineDto,
                 reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(), serviceGeneration);
         boolean replace = members.replace(firstLineDto.getInit(), handlerCreation.getHandler());
         handlerCreation.setAnyTransformed(replace);

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.handle;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -6,15 +6,17 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
+import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;
 
 /**
  * @author Deolin 2021-01-10
  */
 @Singleton
-public class CreateServiceMethodHandle {
+public class CreateServiceMethodServiceImpl implements CreateServiceMethodService {
 
+    @Override
     public CreateServiceMethodHandleResult createMethodImpl(FirstLineDto firstLineDto, String paramType,
             String resultType) {
         MethodDeclaration method = new MethodDeclaration();

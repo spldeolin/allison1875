@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -12,8 +12,9 @@ import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.handlertransformer.handle.MoreTransformHandle;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.service.MoreTransformService;
+import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -21,12 +22,13 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class ParseFirstLineProc {
+public class ParseFirstLineServiceImpl implements ParseFirstLineService {
 
 
     @Inject
-    private MoreTransformHandle moreTransformHandle;
+    private MoreTransformService moreTransformService;
 
+    @Override
     public FirstLineDto parse(InitializerDeclaration init) {
         FirstLineDto result = new FirstLineDto();
         result.setInit(init);
@@ -67,7 +69,7 @@ public class ParseFirstLineProc {
                                         i.toString());
                             }
                         }
-                        Map<String, Object> more = moreTransformHandle.parseMoreFromFirstLine(vd);
+                        Map<String, Object> more = moreTransformService.parseMoreFromFirstLine(vd);
                         if (more != null) {
                             result.getMore().putAll(more);
                         }

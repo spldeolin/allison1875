@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.handle.javabean;
+package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.util.Collection;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -14,18 +14,13 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class HandlerCreation {
+public class CreateServiceMethodHandleResult {
 
-    /**
-     * handler方法
-     */
-    MethodDeclaration handler;
+    MethodDeclaration serviceMethod;
 
     /**
      * 待追加的import声明
      */
     Collection<String> appendImports = Lists.newArrayList();
-
-    Boolean anyTransformed;
 
 }

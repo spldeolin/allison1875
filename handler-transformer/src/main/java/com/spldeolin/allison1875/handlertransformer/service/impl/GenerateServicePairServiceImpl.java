@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -21,12 +21,15 @@ import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.handle.CreateServiceMethodHandle;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.CreateServiceMethodHandleResult;
+import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
+import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;
+import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
+import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
+import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -34,20 +37,21 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Singleton
-public class GenerateServicePairProc {
+public class GenerateServicePairServiceImpl implements GenerateServicePairService {
 
     @Inject
-    private FindServiceProc findServiceProc;
+    private FindServiceService findServiceProc;
 
     @Inject
     private HandlerTransformerConfig conf;
 
     @Inject
-    private CreateServiceMethodHandle createServiceMethodHandle;
+    private CreateServiceMethodService createServiceMethodService;
 
     @Inject
-    private EnsureNoRepeatProc ensureNoRepeatProc;
+    private EnsureNoRepeatService ensureNoRepeatService;
 
+    @Override
     public ServiceGeneration generateService(GenerateServiceParam param) {
         FirstLineDto firstLineDto = param.getFirstLineDto();
         String presentServiceQualifier = firstLineDto.getPresentServiceQualifier();
@@ -81,10 +85,10 @@ public class GenerateServicePairProc {
         }
 
         // 调用handle创建Service Method，添加到ServicePair中
-        CreateServiceMethodHandleResult methodGeneration = createServiceMethodHandle.createMethodImpl(firstLineDto,
+        CreateServiceMethodHandleResult methodGeneration = createServiceMethodService.createMethodImpl(firstLineDto,
                 param.getReqDtoRespDtoInfo().getParamType(), param.getReqDtoRespDtoInfo().getResultType());
         // 方法名去重
-        String noRepeat = ensureNoRepeatProc.inService(pair.getService(),
+        String noRepeat = ensureNoRepeatService.inService(pair.getService(),
                 methodGeneration.getServiceMethod().getNameAsString());
         methodGeneration.getServiceMethod().setName(noRepeat);
 
@@ -135,7 +139,7 @@ public class GenerateServicePairProc {
         Authors.ensureAuthorExist(service, conf.getAuthor());
         service.setJavadocComment(LotNo.TAG_PREFIXION + lotNo);
         service.setPublic(true).setStatic(false).setInterface(true)
-                .setName(ensureNoRepeatProc.inAstForest(param.getAstForest(), serviceName));
+                .setName(ensureNoRepeatService.inAstForest(param.getAstForest(), serviceName));
         serviceCu.setTypes(new NodeList<>(service));
         Path storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, conf.getServicePackage(),
                 service.getName() + ".java");
@@ -154,7 +158,7 @@ public class GenerateServicePairProc {
         serviceImpl.setJavadocComment(LotNo.TAG_PREFIXION + lotNo);
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
-        String serviceImplName = ensureNoRepeatProc.inAstForest(param.getAstForest(),
+        String serviceImplName = ensureNoRepeatService.inAstForest(param.getAstForest(),
                 service.getNameAsString() + "Impl");
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName)
                 .addImplementedType(service.getNameAsString());

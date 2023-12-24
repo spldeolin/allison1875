@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.handle;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -7,16 +7,18 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
+import com.spldeolin.allison1875.handlertransformer.service.CreateHandlerService;
 
 /**
  * @author Deolin 2021-01-11
  */
 @Singleton
-public class CreateHandlerHandle {
+public class CreateHandlerServiceImpl implements CreateHandlerService {
 
+    @Override
     public HandlerCreation createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
             ServiceGeneration serviceGeneration) {
         MethodDeclaration handler = new MethodDeclaration();

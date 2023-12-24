@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.io.Files;
@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
+import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -13,11 +14,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class EnsureNoRepeatProc {
+public class EnsureNoRepeatServiceImpl implements EnsureNoRepeatService {
 
     /**
      * 确保参数firstLineDto中的handlerName与controller中所有的controller均不重名
      */
+    @Override
     public void inController(ClassOrInterfaceDeclaration controller, FirstLineDto firstLineDto) {
         String handlerName = firstLineDto.getHandlerName();
         if (controller.getMethodsByName(handlerName).size() > 0) {
@@ -33,6 +35,7 @@ public class EnsureNoRepeatProc {
     /**
      * 确保参数methodName与service中所有的方法均不重名
      */
+    @Override
     public String inService(ClassOrInterfaceDeclaration service, String methodName) {
         if (service.getMethodsByName(methodName).size() > 0) {
             String newMethodName = methodName + "Ex";
@@ -46,6 +49,7 @@ public class EnsureNoRepeatProc {
     /**
      * 确保参数coidName与AST森林中所有的java文件名均不重名
      */
+    @Override
     public String inAstForest(AstForest astForest, String coidName) {
         boolean conflicting = astForest.getJavasInForest().stream()
                 .anyMatch(java -> Files.getNameWithoutExtension(java.toFile().getName()).equals(coidName));

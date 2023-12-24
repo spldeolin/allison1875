@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
@@ -19,16 +19,18 @@ import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
+import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
 
 /**
  * @author Deolin 2021-03-04
  */
 @Singleton
-public class FindServiceProc {
+public class FindServiceServiceImpl implements FindServiceService {
 
     @Inject
     private HandlerTransformerConfig handlerTransformerConfig;
 
+    @Override
     public ServicePairDto findPresent(AstForest astForest, String presentServiceQualifier,
             Map<String, ServicePairDto> qualifier2Pair) {
         if (qualifier2Pair.get(presentServiceQualifier) != null) {
@@ -64,6 +66,7 @@ public class FindServiceProc {
         return result;
     }
 
+    @Override
     public ServicePairDto findGenerated(CompilationUnit controllerCu, String serviceName,
             Map<String, ServicePairDto> name2Pair) {
         if (name2Pair.get(serviceName) != null) {

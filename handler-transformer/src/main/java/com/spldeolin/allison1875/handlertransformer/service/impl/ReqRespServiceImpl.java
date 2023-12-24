@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.handlertransformer.processor;
+package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,10 +29,12 @@ import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
-import com.spldeolin.allison1875.handlertransformer.handle.FieldHandle;
-import com.spldeolin.allison1875.handlertransformer.handle.javabean.BeforeJavabeanCuBuildResult;
+import com.spldeolin.allison1875.handlertransformer.javabean.BeforeJavabeanCuBuildResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
+import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
+import com.spldeolin.allison1875.handlertransformer.service.FieldService;
+import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -40,17 +42,18 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class ReqRespProc {
+public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private HandlerTransformerConfig handlerTransformerConfig;
 
     @Inject
-    private FieldHandle fieldHandle;
+    private FieldService fieldService;
 
     @Inject
-    private EnsureNoRepeatProc ensureNoRepeatProc;
+    private EnsureNoRepeatService ensureNoRepeatService;
 
+    @Override
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
             throw new IllegalArgumentException(
@@ -79,6 +82,7 @@ public class ReqRespProc {
         }
     }
 
+    @Override
     public ReqDtoRespDtoInfo createJavabeans(AstForest astForest, CompilationUnit cu, FirstLineDto firstLineDto,
             List<ClassOrInterfaceDeclaration> dtos) {
         ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
@@ -93,7 +97,7 @@ public class ReqRespProc {
             builder.context(javabeanType);
 
             String javabeanName = standardizeJavabeanName(firstLineDto, dto, javabeanType);
-            javabeanName = ensureNoRepeatProc.inAstForest(astForest, javabeanName);
+            javabeanName = ensureNoRepeatService.inAstForest(astForest, javabeanName);
             dto.setName(javabeanName);
 
             // 计算每一个dto的package
@@ -160,7 +164,7 @@ public class ReqRespProc {
             // Field的额外操作
             Set<String> importNames = Sets.newHashSet();
             for (FieldDeclaration field : builder.getJavabean().getFields()) {
-                BeforeJavabeanCuBuildResult before = fieldHandle.beforeJavabeanCuBuild(field, builder.getContext());
+                BeforeJavabeanCuBuildResult before = fieldService.beforeJavabeanCuBuild(field, builder.getContext());
                 builder.getJavabean().replace(field, before.getField());
                 importNames.addAll(before.getAppendImports());
             }
