@@ -12,12 +12,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ServiceGeneration {
 
-     String serviceVarName;
+    String serviceVarName;
 
-     ClassOrInterfaceDeclaration service;
+    ClassOrInterfaceDeclaration service;
 
-     String serviceQualifier;
+    String serviceQualifier;
 
-     String methodName;
+    String methodName;
 
 }

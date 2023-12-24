@@ -14,16 +14,16 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateServiceParam {
 
-     CompilationUnit cu;
+    CompilationUnit cu;
 
-     FirstLineDto firstLineDto;
+    FirstLineDto firstLineDto;
 
-     ReqDtoRespDtoInfo reqDtoRespDtoInfo;
+    ReqDtoRespDtoInfo reqDtoRespDtoInfo;
 
-     AstForest astForest;
+    AstForest astForest;
 
-     Map<String, ServicePairDto> qualifier2Pair;
+    Map<String, ServicePairDto> qualifier2Pair;
 
-     Map<String, ServicePairDto> name2Pair;
+    Map<String, ServicePairDto> name2Pair;
 
 }

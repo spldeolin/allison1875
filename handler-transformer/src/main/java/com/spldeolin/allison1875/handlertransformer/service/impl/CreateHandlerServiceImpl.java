@@ -23,8 +23,7 @@ public class CreateHandlerServiceImpl implements CreateHandlerService {
             ServiceGeneration serviceGeneration) {
         MethodDeclaration handler = new MethodDeclaration();
 
-        handler.setJavadocComment(
-                firstLineDto.getHandlerDescription() + firstLineDto.getLotNo().asJavadocDescription());
+        handler.setJavadocComment(firstLineDto.getHandlerDescription());
 
         handler.addAnnotation(
                 StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", firstLineDto.getHandlerUrl())));

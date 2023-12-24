@@ -13,14 +13,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReqDtoRespDtoInfo {
 
-     String reqDtoQualifier = null;
+    String reqDtoQualifier = null;
 
-     String respDtoQualifier = null;
+    String respDtoQualifier = null;
 
-     String paramType = null;
+    String paramType = null;
 
-     String resultType = null;
+    String resultType = null;
 
-     final Collection<String> dtoQualifiers = Lists.newArrayList();
+    final Collection<String> dtoQualifiers = Lists.newArrayList();
 
 }

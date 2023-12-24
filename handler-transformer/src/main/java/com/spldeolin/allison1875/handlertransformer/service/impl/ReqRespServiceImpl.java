@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
@@ -126,7 +125,6 @@ public class ReqRespServiceImpl implements ReqRespService {
                             handlerTransformerConfig.getPageTypeQualifier()));
             ClassOrInterfaceDeclaration clone = dto.clone();
             clone.setPublic(true);
-            clone.setJavadocComment(LotNo.TAG_PREFIXION + firstLineDto.getLotNo());
             clone.getAnnotations().clear();
             clone.addAnnotation(AnnotationConstant.DATA);
             clone.addAnnotation(AnnotationConstant.ACCESSORS);

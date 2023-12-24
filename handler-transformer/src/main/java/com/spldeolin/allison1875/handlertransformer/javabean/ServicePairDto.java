@@ -16,8 +16,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ServicePairDto {
 
-     ClassOrInterfaceDeclaration service;
+    ClassOrInterfaceDeclaration service;
 
-     Collection<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
+    Collection<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
 
 }

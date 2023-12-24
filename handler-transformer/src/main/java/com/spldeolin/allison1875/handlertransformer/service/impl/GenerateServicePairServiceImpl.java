@@ -11,7 +11,6 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -74,14 +73,13 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
             pair = findServiceProc.findGenerated(param.getCu(), standardizedServiceName, param.getName2Pair());
             if (pair.getService() == null) {
                 // 生成全新的 Service 与 ServiceImpl （往往时第一次获取到ServiceName时）
-                pair = generateServicePair(param, standardizedServiceName, param.getName2Pair(),
-                        firstLineDto.getLotNo());
+                pair = generateServicePair(param, standardizedServiceName, param.getName2Pair());
             }
 
         } else {
             // 生成全新的 Service 与 ServiceImpl
             serviceName = MoreStringUtils.upperFirstLetter(param.getFirstLineDto().getHandlerName()) + "Service";
-            pair = generateServicePair(param, serviceName, param.getName2Pair(), firstLineDto.getLotNo());
+            pair = generateServicePair(param, serviceName, param.getName2Pair());
         }
 
         // 调用handle创建Service Method，添加到ServicePair中
@@ -129,7 +127,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
     }
 
     private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName,
-            Map<String, ServicePairDto> name2Pair, LotNo lotNo) {
+            Map<String, ServicePairDto> name2Pair) {
         Path sourceRoot = Locations.getStorage(param.getCu()).getSourceRoot();
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
@@ -137,7 +135,6 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceCu.setImports(param.getCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         Authors.ensureAuthorExist(service, conf.getAuthor());
-        service.setJavadocComment(LotNo.TAG_PREFIXION + lotNo);
         service.setPublic(true).setStatic(false).setInterface(true)
                 .setName(ensureNoRepeatService.inAstForest(param.getAstForest(), serviceName));
         serviceCu.setTypes(new NodeList<>(service));
@@ -155,7 +152,6 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceImplCu.addImport(AnnotationConstant.SERVICE_QUALIFIER);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         Authors.ensureAuthorExist(serviceImpl, conf.getAuthor());
-        serviceImpl.setJavadocComment(LotNo.TAG_PREFIXION + lotNo);
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
         String serviceImplName = ensureNoRepeatService.inAstForest(param.getAstForest(),
