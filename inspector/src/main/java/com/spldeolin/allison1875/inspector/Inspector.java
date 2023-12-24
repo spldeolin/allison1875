@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.processor;
+package com.spldeolin.allison1875.inspector;
 
 import java.util.Collection;
 import com.google.inject.Inject;
@@ -7,6 +7,9 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
+import com.spldeolin.allison1875.inspector.service.DetectPardonService;
+import com.spldeolin.allison1875.inspector.service.JudgeByStatutesService;
+import com.spldeolin.allison1875.inspector.service.ReportLawlessService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -17,13 +20,13 @@ import lombok.extern.log4j.Log4j2;
 public class Inspector implements Allison1875MainService {
 
     @Inject
-    private DetectPardonProc pardonDetectProc;
+    private DetectPardonService pardonDetectProc;
 
     @Inject
-    private ReportLawlessProc reportLawlessProc;
+    private ReportLawlessService reportLawlessProc;
 
     @Inject
-    private JudgeByStatutesProc judgeByStatutesProc;
+    private JudgeByStatutesService judgeByStatutesProc;
 
     @Override
     public void process(AstForest astForest) {

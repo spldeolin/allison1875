@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.processor;
+package com.spldeolin.allison1875.inspector.service.impl;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +14,7 @@ import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import com.spldeolin.allison1875.inspector.javabean.VcsResultDto;
+import com.spldeolin.allison1875.inspector.service.JudgeByStatutesService;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.extern.log4j.Log4j2;
 
@@ -22,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class JudgeByStatutesProc {
+public class JudgeByStatutesServiceImpl implements JudgeByStatutesService {
 
     @Inject
     private Collection<Statute> statutes;
@@ -31,8 +32,9 @@ public class JudgeByStatutesProc {
     private InspectorConfig config;
 
     @Inject
-    private VcsProc vcsProc;
+    private VcsServiceImpl vcsProc;
 
+    @Override
     public Collection<LawlessDto> process(Collection<PardonDto> pardons, AstForest astForest) {
         final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.processor;
+package com.spldeolin.allison1875.inspector.service.impl;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.VcsResultDto;
+import com.spldeolin.allison1875.inspector.service.VcsService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -29,11 +30,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class VcsProc {
+public class VcsServiceImpl implements VcsService {
 
     @Inject
     private InspectorConfig config;
 
+    @Override
     public VcsResultDto process(Path projectPath) {
         try {
             Git git = Git.open(projectPath.toFile());

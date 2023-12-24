@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.processor;
+package com.spldeolin.allison1875.inspector.service.impl;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -15,6 +15,7 @@ import com.spldeolin.allison1875.base.util.CsvUtils;
 import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
+import com.spldeolin.allison1875.inspector.service.ReportLawlessService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -22,11 +23,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class ReportLawlessProc {
+public class ReportLawlessServiceImpl implements ReportLawlessService {
 
     @Inject
     private InspectorConfig config;
 
+    @Override
     public void process(Collection<LawlessDto> lawlesses) {
         String lawlessDirectoryPath = config.getLawlessDirectoryPath();
         lawlesses.forEach(log::info);

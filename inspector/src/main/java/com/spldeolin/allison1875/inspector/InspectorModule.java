@@ -6,7 +6,6 @@ import com.google.inject.TypeLiteral;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
-import com.spldeolin.allison1875.inspector.processor.Inspector;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.ToString;
 

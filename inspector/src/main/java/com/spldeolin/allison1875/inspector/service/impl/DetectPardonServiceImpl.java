@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.inspector.processor;
+package com.spldeolin.allison1875.inspector.service.impl;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +14,7 @@ import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
+import com.spldeolin.allison1875.inspector.service.DetectPardonService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -21,11 +22,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class DetectPardonProc {
+public class DetectPardonServiceImpl implements DetectPardonService {
 
     @Inject
     private InspectorConfig config;
 
+    @Override
     public Collection<PardonDto> process() {
         Collection<PardonDto> pardons = Lists.newArrayList();
         String pardonDirectoryPath = config.getPardonDirectoryPath();
