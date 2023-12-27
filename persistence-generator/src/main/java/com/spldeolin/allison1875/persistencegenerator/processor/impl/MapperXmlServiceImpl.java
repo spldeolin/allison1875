@@ -38,7 +38,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         xmlLines.add("<sql id=\"all\">");
         xmlLines.addAll(TextUtils.formatLines(BaseConstant.SINGLE_INDENT,
                 persistence.getProperties().stream().map(one -> "`" + one.getColumnName() + "`")
-                        .collect(Collectors.toList()), 120 - BaseConstant.SINGLE_INDENT.length()));
+                        .collect(Collectors.toList()), 120));
         xmlLines.add("</sql>");
         xmlLines.add("");
         return xmlLines;
@@ -58,7 +58,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\",\">(");
         xmlLines.addAll(TextUtils.formatLines(BaseConstant.TREBLE_INDENT,
                 persistence.getProperties().stream().map(p -> "#{one." + p.getPropertyName() + "}")
-                        .collect(Collectors.toList()), 120 - BaseConstant.SINGLE_INDENT.length()));
+                        .collect(Collectors.toList()), 120));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + ")</foreach>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
         xmlLines.add("</insert>");

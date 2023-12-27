@@ -1,55 +1,46 @@
 package com.spldeolin.allison1875.persistencegenerator.util;
 
 import java.util.List;
-import java.util.ListIterator;
-import org.apache.commons.lang3.StringUtils;
+import org.codehaus.plexus.util.StringUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.util.CollectionUtils;
 
 /**
  * @author Deolin 2021-08-30
  */
 public class TextUtils {
 
-    public static List<String> formatLines(String everyLinePrefix, List<String> snippets, int maxLineLength) {
-        final String sep = ", ";
-        List<String> lines = Lists.newArrayList();
-        int currentLineLength = 0;
-        for (String snippet : snippets) {
-            // 如果添加下个元素，长度会是nextLength
-            int nextLength = currentLineLength + snippet.length() + 1;
+    public static List<String> formatLines(String linePrefix, List<String> lines, int x) {
+        if (CollectionUtils.isEmpty(lines)) {
+            return Lists.newArrayList();
+        }
 
-            if (nextLength > maxLineLength) {
-                // 如果添加下个元素，长度将会超过最大，添加到下一行，并清空currentLineLength
-                String thisLine = snippet + sep;
-                lines.add(thisLine);
-                currentLineLength = 0;
+        List<String> words = Lists.newArrayList();
+        lines.forEach(line -> words.addAll(Lists.newArrayList(line.split(", "))));
+
+        List<String> result = Lists.newArrayList(linePrefix);
+
+        for (String word : words) {
+            String line = Iterables.getLast(result);
+            // try add to this line
+            line += word + ", ";
+            // length out of the x
+            if (line.length() > x) {
+                // add to next new line
+                result.add(linePrefix + word + ", ");
             } else {
-                // 如果添加下个元素，长度将不会超过最大
-                String thisLine = Iterables.getLast(lines, "");
-                thisLine = thisLine + snippet + sep;
-                if (lines.size() == 0) {
-                    lines.add(thisLine);
-                } else {
-                    lines.set(lines.size() - 1, thisLine);
-                }
+                result.set(result.size() - 1, line);
             }
-            // 为本行累加长度
-            currentLineLength += snippet.length() + sep.length();
         }
 
-        // 为每一行执行trim，并添加前缀
-        ListIterator<String> itr = lines.listIterator();
-        while (itr.hasNext()) {
-            itr.set(everyLinePrefix + itr.next().trim());
-        }
+        // trim all lines end
+        result.replaceAll(line -> StringUtils.stripEnd(line, null));
 
-        // 删除最后一行 最后的,
-        String lastLine = Iterables.getLast(lines);
-        lastLine = StringUtils.stripEnd(lastLine, ",");
-        lines.set(lines.size() - 1, lastLine);
+        // remove last line last comma
+        result.set(result.size() - 1, result.get(result.size() - 1).replaceAll(",$", ""));
 
-        return lines;
+        return result;
     }
 
 }
