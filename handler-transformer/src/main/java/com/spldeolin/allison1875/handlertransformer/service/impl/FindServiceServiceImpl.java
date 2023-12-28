@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -15,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
@@ -117,15 +117,15 @@ public class FindServiceServiceImpl implements FindServiceService {
         Path serviceImplPath = Locations.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServiceImplPackage()));
         Collection<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
-        FileFindUtils.recursively(servicePath, "java", java -> {
+        FileUtils.iterateFiles(servicePath.toFile(), new String[]{"java"}, true).forEachRemaining(java -> {
             try {
-                serviceOrImplCu.add(StaticJavaParser.parse(java.toFile()));
+                serviceOrImplCu.add(StaticJavaParser.parse(java));
             } catch (FileNotFoundException | ParseProblemException ignored) {
             }
         });
-        FileFindUtils.recursively(serviceImplPath, "java", java -> {
+        FileUtils.iterateFiles(serviceImplPath.toFile(), new String[]{"java"}, true).forEachRemaining(java -> {
             try {
-                serviceOrImplCu.add(StaticJavaParser.parse(java.toFile()));
+                serviceOrImplCu.add(StaticJavaParser.parse(java));
             } catch (FileNotFoundException | ParseProblemException ignored) {
             }
         });
