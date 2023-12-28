@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.Set;
@@ -29,6 +29,7 @@ import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.log4j.Log4j2;
@@ -38,8 +39,9 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class AnalyzeChainProc {
+public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
+    @Override
     public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta) {
         String chainCode = chain.toString();
         String betweenCode = chainCode.substring(chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));

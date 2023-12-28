@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -13,6 +13,8 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateMethodSignatureService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -20,14 +22,15 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class GenerateMethodSignatureProc {
+public class GenerateMethodSignatureServiceImpl implements GenerateMethodSignatureService {
 
     @Inject
-    private FindMapperProc findMapperProc;
+    private FindMapperService findMapperService;
 
+    @Override
     public CompilationUnit process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
-        ClassOrInterfaceDeclaration mapper = findMapperProc.findMapper(astForest, designMeta);
+        ClassOrInterfaceDeclaration mapper = findMapperService.findMapper(astForest, designMeta);
         if (mapper == null) {
             return null;
         }

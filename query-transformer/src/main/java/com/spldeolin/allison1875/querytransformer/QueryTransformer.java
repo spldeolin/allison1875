@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer;
 
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
@@ -19,6 +19,17 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
+import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
+import com.spldeolin.allison1875.querytransformer.service.DesignService;
+import com.spldeolin.allison1875.querytransformer.service.DetectQueryChainService;
+import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateMethodSignatureService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
+import com.spldeolin.allison1875.querytransformer.service.OffsetMethodNameService;
+import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
+import com.spldeolin.allison1875.querytransformer.service.TransformParameterService;
+import com.spldeolin.allison1875.querytransformer.service.TransformResultService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -29,37 +40,37 @@ import lombok.extern.log4j.Log4j2;
 public class QueryTransformer implements Allison1875MainService {
 
     @Inject
-    private DetectQueryChainProc detectQueryChain;
+    private DetectQueryChainService detectQueryChainService;
 
     @Inject
-    private AnalyzeChainProc analyzeChainProc;
+    private AnalyzeChainService analyzeChainService;
 
     @Inject
-    private GenerateMethodXmlProc generateMapperXmlQueryMethodProc;
+    private GenerateMethodXmlService generateMethodXmlService;
 
     @Inject
-    private GenerateMethodSignatureProc createMapperQueryMethodProc;
+    private GenerateMethodSignatureService generateMethodSignatureService;
 
     @Inject
-    private TransformParameterProc transformParameterProc;
+    private TransformParameterService transformParameterService;
 
     @Inject
-    private TransformResultProc transformResultProc;
+    private TransformResultService transformResultService;
 
     @Inject
-    private ReplaceDesignProc replaceDesignProc;
+    private ReplaceDesignService replaceDesignService;
 
     @Inject
-    private AppendAutowiredMapperProc appendAutowiredMapperProc;
+    private AppendAutowiredMapperService appendAutowiredMapperService;
 
     @Inject
-    private DesignProc designProc;
+    private DesignService designService;
 
     @Inject
-    private FindMapperProc findMapperProc;
+    private FindMapperService findMapperService;
 
     @Inject
-    private OffsetMethodNameProc offsetMethodNameProc;
+    private OffsetMethodNameService offsetMethodNameService;
 
     @Override
     public void process(AstForest astForest) {
@@ -73,12 +84,12 @@ public class QueryTransformer implements Allison1875MainService {
             }
 
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {
-                for (MethodCallExpr chain : detectQueryChain.process(directBlock)) {
+                for (MethodCallExpr chain : detectQueryChainService.process(directBlock)) {
                     ClassOrInterfaceDeclaration design;
                     DesignMeta designMeta;
                     try {
-                        design = designProc.findDesign(astForest, chain);
-                        designMeta = designProc.parseDesignMeta(design);
+                        design = designService.findDesign(astForest, chain);
+                        designMeta = designService.parseDesignMeta(design);
                     } catch (IllegalDesignException e) {
                         log.error("illegal design: " + e.getMessage());
                         return;
@@ -87,49 +98,52 @@ public class QueryTransformer implements Allison1875MainService {
                     }
 
                     // analyze chain
-                    ChainAnalysisDto chainAnalysis = analyzeChainProc.process(chain, design, designMeta);
+                    ChainAnalysisDto chainAnalysis = analyzeChainService.process(chain, design, designMeta);
                     chainAnalysis.setDirectBlock(directBlock);
 
                     // use offset method naming (if no specified)
                     if (chainAnalysis.getNoSpecifiedMethodName()) {
-                        CompilationUnit designCu = offsetMethodNameProc.useOffsetMethod(chainAnalysis, designMeta,
+                        CompilationUnit designCu = offsetMethodNameService.useOffsetMethod(chainAnalysis, designMeta,
                                 design);
                         flushes.add(FileFlush.build(designCu));
                     }
 
                     // if naming conflict, ignore this Design Chain
-                    if (findMapperProc.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
+                    if (findMapperService.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
                         log.warn("Method naming from [{}] conflict exist in Mapper [{}]", chain.toString(),
                                 designMeta.getMapperName());
                         return;
                     }
 
                     // transform Parameter
-                    ParameterTransformationDto parameterTransformation = transformParameterProc.transform(chainAnalysis,
+                    ParameterTransformationDto parameterTransformation = transformParameterService.transform(
+                            chainAnalysis,
                             designMeta, astForest, flushes);
 
                     // transform Result Type
-                    ResultTransformationDto resultTransformation = transformResultProc.transform(chainAnalysis,
+                    ResultTransformationDto resultTransformation = transformResultService.transform(chainAnalysis,
                             designMeta, astForest, flushes);
 
                     // create Method in Mapper
-                    CompilationUnit mapperCu = createMapperQueryMethodProc.process(astForest, designMeta, chainAnalysis,
+                    CompilationUnit mapperCu = generateMethodSignatureService.process(astForest, designMeta,
+                            chainAnalysis,
                             parameterTransformation, resultTransformation);
                     if (mapperCu != null) {
                         flushes.add(FileFlush.build(mapperCu));
                     }
 
                     // create Method in mapper.xml
-                    List<FileFlush> xmlFlushes = generateMapperXmlQueryMethodProc.process(astForest, designMeta,
+                    List<FileFlush> xmlFlushes = generateMethodXmlService.process(astForest, designMeta,
                             chainAnalysis,
                             parameterTransformation, resultTransformation);
                     flushes.addAll(xmlFlushes);
 
                     // append autowired mapper
-                    appendAutowiredMapperProc.append(chain, designMeta);
+                    appendAutowiredMapperService.append(chain, designMeta);
 
                     // transform Method Call and replace Design
-                    replaceDesignProc.process(designMeta, chainAnalysis, parameterTransformation, resultTransformation);
+                    replaceDesignService.process(designMeta, chainAnalysis, parameterTransformation,
+                            resultTransformation);
 
                     anyTransformed = true;
                 }

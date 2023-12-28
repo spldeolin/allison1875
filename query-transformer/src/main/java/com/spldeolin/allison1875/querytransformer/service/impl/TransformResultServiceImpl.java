@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +29,7 @@ import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.service.TransformResultService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -36,11 +37,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class TransformResultProc {
+public class TransformResultServiceImpl implements TransformResultService {
 
     @Inject
     private QueryTransformerConfig config;
 
+    @Override
     public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta, AstForest astForest,
             List<FileFlush> flushes) {
         boolean isAssigned = isAssigned(chainAnalysis);

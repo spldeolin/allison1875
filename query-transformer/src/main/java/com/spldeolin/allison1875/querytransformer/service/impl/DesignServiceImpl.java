@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
@@ -19,12 +19,14 @@ import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameT
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
+import com.spldeolin.allison1875.querytransformer.service.DesignService;
 
 /**
  * @author Deolin 2021-07-01
  */
-public class DesignProc {
+public class DesignServiceImpl implements DesignService {
 
+    @Override
     public ClassOrInterfaceDeclaration findDesign(AstForest astForest, MethodCallExpr chain) {
         String designQualifier = chain.findAll(NameExpr.class).get(0).calculateResolvedType().describe();
         CompilationUnit designCu = astForest.findCu(designQualifier);
@@ -54,6 +56,7 @@ public class DesignProc {
         return designCu.getType(0).asClassOrInterfaceDeclaration();
     }
 
+    @Override
     public DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration design) {
         FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.META_FIELD_NAME)
                 .orElseThrow(IllegalChainException::new);
@@ -63,6 +66,7 @@ public class DesignProc {
         return JsonUtils.toObject(metaJson, DesignMeta.class);
     }
 
+    @Override
     public StringBuilder parseOffset(ClassOrInterfaceDeclaration design) {
         FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.OFFSET_FIELD_NAME)
                 .orElseThrow(IllegalChainException::new);

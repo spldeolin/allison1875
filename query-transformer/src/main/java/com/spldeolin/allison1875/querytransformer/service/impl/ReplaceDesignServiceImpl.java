@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import com.github.javaparser.StaticJavaParser;
@@ -20,6 +20,8 @@ import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.MapOrMultimapBuiltDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
+import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -27,11 +29,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Singleton
-public class ReplaceDesignProc {
+public class ReplaceDesignServiceImpl implements ReplaceDesignService {
 
     @Inject
-    private TransformMethodCallProc transformMethodCallProc;
+    private TransformMethodCallService transformMethodCallService;
 
+    @Override
     public void process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
 
@@ -49,7 +52,7 @@ public class ReplaceDesignProc {
         });
 
         // build Map  build Multimap
-        MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallProc.mapOrMultimapBuildStmts(designMeta,
+        MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallService.mapOrMultimapBuildStmts(designMeta,
                 chainAnalysis, resultTransformation);
 
         Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
@@ -58,7 +61,7 @@ public class ReplaceDesignProc {
         log.info("ancestorStatement={}", ancestorStatementCode);
 
         // transform Method Call code
-        String mceCode = transformMethodCallProc.methodCallExpr(designMeta, chainAnalysis, parameterTransformation);
+        String mceCode = transformMethodCallService.methodCallExpr(designMeta, chainAnalysis, parameterTransformation);
 
         List<Statement> replacementStatements = Lists.newArrayList();
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
@@ -93,7 +96,7 @@ public class ReplaceDesignProc {
         }
 
         // 在ancestorStatement的上方添加argument build代码块（如果需要augument build的话）
-        List<Statement> argumentBuildStmts = transformMethodCallProc.argumentBuildStmts(chainAnalysis,
+        List<Statement> argumentBuildStmts = transformMethodCallService.argumentBuildStmts(chainAnalysis,
                 parameterTransformation);
         if (argumentBuildStmts != null) {
             replacementStatements.addAll(0, argumentBuildStmts);

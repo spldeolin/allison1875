@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import static com.spldeolin.allison1875.base.constant.BaseConstant.DOUBLE_INDENT;
 import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
@@ -30,6 +30,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -37,10 +38,11 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class GenerateMethodXmlProc {
+public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
 
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
+    @Override
     public List<FileFlush> process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
         List<FileFlush> result = Lists.newArrayList();

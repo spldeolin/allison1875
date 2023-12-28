@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,7 @@ import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.querytransformer.service.TransformParameterService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -35,12 +36,13 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class TransformParameterProc {
+public class TransformParameterServiceImpl implements TransformParameterService {
 
     @Inject
     private QueryTransformerConfig config;
 
     @Nullable
+    @Override
     public ParameterTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             AstForest astForest, List<FileFlush> flushes) {
         Map<String, PropertyDto> properties = designMeta.getProperties();

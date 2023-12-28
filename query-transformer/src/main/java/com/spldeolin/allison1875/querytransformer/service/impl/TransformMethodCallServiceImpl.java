@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +23,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.MapOrMultimapBuiltDto
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -30,8 +31,9 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Singleton
-public class TransformMethodCallProc {
+public class TransformMethodCallServiceImpl implements TransformMethodCallService {
 
+    @Override
     public String methodCallExpr(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation) {
         String result =
@@ -53,6 +55,7 @@ public class TransformMethodCallProc {
         return result;
     }
 
+    @Override
     public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis,
             ParameterTransformationDto parameterTransformation) {
         if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
@@ -81,6 +84,7 @@ public class TransformMethodCallProc {
         return result;
     }
 
+    @Override
     public MapOrMultimapBuiltDto mapOrMultimapBuildStmts(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ResultTransformationDto resultTransformation) {
         Map<String, PropertyDto> properties = designMeta.getProperties();

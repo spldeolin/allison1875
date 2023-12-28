@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import com.github.javaparser.StaticJavaParser;
@@ -10,13 +10,15 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
 
 /**
  * @author Deolin 2021-06-30
  */
 @Singleton
-public class AppendAutowiredMapperProc {
+public class AppendAutowiredMapperServiceImpl implements AppendAutowiredMapperService {
 
+    @Override
     public void append(MethodCallExpr chain, DesignMeta designMeta) {
         // ensure mapper autowired
         chain.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {

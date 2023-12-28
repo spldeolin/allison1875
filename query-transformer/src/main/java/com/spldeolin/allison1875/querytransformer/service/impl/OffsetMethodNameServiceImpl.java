@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
@@ -18,6 +18,8 @@ import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
+import com.spldeolin.allison1875.querytransformer.service.DesignService;
+import com.spldeolin.allison1875.querytransformer.service.OffsetMethodNameService;
 import com.spldeolin.allison1875.querytransformer.util.CharUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,15 +28,16 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Singleton
-public class OffsetMethodNameProc {
+public class OffsetMethodNameServiceImpl implements OffsetMethodNameService {
 
     @Inject
-    private DesignProc designProc;
+    private DesignService designService;
 
+    @Override
     public CompilationUnit useOffsetMethod(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
             ClassOrInterfaceDeclaration design) {
         // 获取并使用offset方法名
-        StringBuilder offsetText = designProc.parseOffset(design);
+        StringBuilder offsetText = designService.parseOffset(design);
         String methodName;
         if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
             methodName = "query" + StringUtils.removeEnd(designMeta.getEntityName(), "Entity") + offsetText.charAt(0);

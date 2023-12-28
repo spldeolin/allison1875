@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.querytransformer.processor;
+package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,16 +12,18 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.service.DetectQueryChainService;
 
 /**
  * @author Deolin 2020-10-10
  */
 @Singleton
-public class DetectQueryChainProc {
+public class DetectQueryChainServiceImpl implements DetectQueryChainService {
 
     @Inject
     private QueryTransformerConfig config;
 
+    @Override
     public List<MethodCallExpr> process(Node node) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : node.findAll(MethodCallExpr.class)) {
