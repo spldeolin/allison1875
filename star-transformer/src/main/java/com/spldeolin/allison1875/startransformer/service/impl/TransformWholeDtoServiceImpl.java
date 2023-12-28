@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.startransformer.processor;
+package com.spldeolin.allison1875.startransformer.service.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -17,16 +17,18 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.startransformer.service.TransformWholeDtoService;
 
 /**
  * @author Deolin 2023-05-22
  */
 @Singleton
-public class TransformWholeDtoProc {
+public class TransformWholeDtoServiceImpl implements TransformWholeDtoService {
 
     @Inject
     private StarTransformerConfig config;
 
+    @Override
     public CompilationUnit transformWholeDto(JavabeanArg javabeanArg, AstForest astForest, ChainAnalysisDto analysis) {
         javabeanArg.setAstForest(astForest);
         javabeanArg.setPackageName(config.getWholeDtoPackge());

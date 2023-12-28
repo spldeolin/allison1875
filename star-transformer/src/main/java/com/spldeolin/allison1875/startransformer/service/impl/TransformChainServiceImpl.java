@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.startransformer.processor;
+package com.spldeolin.allison1875.startransformer.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
@@ -16,13 +16,15 @@ import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.startransformer.service.TransformChainService;
 
 /**
  * @author Deolin 2023-05-22
  */
 @Singleton
-public class TransformChainProc {
+public class TransformChainServiceImpl implements TransformChainService {
 
+    @Override
     public void transformAndReplaceStar(BlockStmt block, ChainAnalysisDto analysis, MethodCallExpr starChain) {
         int i = block.getStatements().indexOf(starChain.findAncestor(Statement.class).get());
         block.setStatement(i, StaticJavaParser.parseStatement(

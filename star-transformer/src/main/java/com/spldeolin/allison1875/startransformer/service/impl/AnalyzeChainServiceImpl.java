@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.startransformer.processor;
+package com.spldeolin.allison1875.startransformer.service.impl;
 
 import java.util.List;
 import java.util.Set;
@@ -8,17 +8,16 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.NamingUtils;
-import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.startransformer.service.AnalyzeChainService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -26,11 +25,9 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class AnalyzeChainProc {
+public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
-    @Inject
-    private StarTransformerConfig starTransformerConfig;
-
+    @Override
     public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
             throws IllegalChainException {
         return this.process(starChain, astForest, wholeDtoNames, Lists.newArrayList(), Lists.newArrayList(),

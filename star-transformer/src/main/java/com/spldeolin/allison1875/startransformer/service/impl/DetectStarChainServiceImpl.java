@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.startransformer.processor;
+package com.spldeolin.allison1875.startransformer.service.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,14 +8,16 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.startransformer.service.DetectStarChainService;
 import com.spldeolin.allison1875.support.StarSchema;
 
 /**
  * @author Deolin 2023-05-12
  */
 @Singleton
-public class DetectStarChainProc {
+public class DetectStarChainServiceImpl implements DetectStarChainService {
 
+    @Override
     public List<MethodCallExpr> process(Node cu) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {

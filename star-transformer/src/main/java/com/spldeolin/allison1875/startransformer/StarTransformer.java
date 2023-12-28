@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.startransformer.processor;
+package com.spldeolin.allison1875.startransformer;
 
 import java.util.List;
 import java.util.Set;
@@ -17,6 +17,10 @@ import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.startransformer.service.AnalyzeChainService;
+import com.spldeolin.allison1875.startransformer.service.DetectStarChainService;
+import com.spldeolin.allison1875.startransformer.service.TransformChainService;
+import com.spldeolin.allison1875.startransformer.service.TransformWholeDtoService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -27,16 +31,16 @@ import lombok.extern.log4j.Log4j2;
 public class StarTransformer implements Allison1875MainService {
 
     @Inject
-    private DetectStarChainProc detectStarChainProc;
+    private DetectStarChainService detectStarChainProc;
 
     @Inject
-    private AnalyzeChainProc analyzeChainProc;
+    private AnalyzeChainService analyzeChainProc;
 
     @Inject
-    private TransformWholeDtoProc transformWholeDtoProc;
+    private TransformWholeDtoService transformWholeDtoProc;
 
     @Inject
-    private TransformChainProc transformChainProc;
+    private TransformChainService transformChainProc;
 
     @Override
     public void process(AstForest astForest) {
