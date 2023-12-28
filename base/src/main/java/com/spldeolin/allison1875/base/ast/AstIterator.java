@@ -3,13 +3,12 @@ package com.spldeolin.allison1875.base.ast;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
-import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.resolution.SymbolResolver;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
-import com.spldeolin.allison1875.base.util.ast.Locations;
+import com.spldeolin.allison1875.base.util.ast.Cus;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -36,17 +35,7 @@ public class AstIterator implements Iterator<CompilationUnit> {
     @Override
     public CompilationUnit next() {
         Path javaPath = javaPaths.next();
-        try {
-            CompilationUnit cu = StaticJavaParser.parse(javaPath);
-            log.debug("CompilationUnit@{} <- SourceCode {}", cu.hashCode(),
-                    Locations.getStorage(cu).getSourceRoot().relativize(Locations.getAbsolutePath(cu)));
-            return cu;
-        } catch (ParseProblemException e) {
-            log.warn("SourceCode parse causing problems [{}] [{}]", javaPath, e.getMessage());
-        } catch (Exception e) {
-            log.warn("SourceCode parse unsuccessfully [{}]", javaPath, e);
-        }
-        return null;
+        return Cus.parseCu(javaPath);
     }
 
     private SymbolResolver createSymbolSolver() {

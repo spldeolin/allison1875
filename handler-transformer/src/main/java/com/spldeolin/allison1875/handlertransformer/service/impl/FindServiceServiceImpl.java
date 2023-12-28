@@ -1,12 +1,9 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
-import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import com.github.javaparser.ParseProblemException;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -16,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.ast.Cus;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
@@ -118,16 +116,10 @@ public class FindServiceServiceImpl implements FindServiceService {
                 .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServiceImplPackage()));
         Collection<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
         FileUtils.iterateFiles(servicePath.toFile(), new String[]{"java"}, true).forEachRemaining(java -> {
-            try {
-                serviceOrImplCu.add(StaticJavaParser.parse(java));
-            } catch (FileNotFoundException | ParseProblemException ignored) {
-            }
+            serviceOrImplCu.add(Cus.parseCu(java.toPath()));
         });
         FileUtils.iterateFiles(serviceImplPath.toFile(), new String[]{"java"}, true).forEachRemaining(java -> {
-            try {
-                serviceOrImplCu.add(StaticJavaParser.parse(java));
-            } catch (FileNotFoundException | ParseProblemException ignored) {
-            }
+            serviceOrImplCu.add(Cus.parseCu(java.toPath()));
         });
         return serviceOrImplCu;
     }

@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.TreeSet;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -28,6 +27,7 @@ import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
 import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
+import com.spldeolin.allison1875.base.util.ast.Cus;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -66,7 +66,7 @@ public class JavabeanFactory {
 
             // 如果javabean已存在，收集既存javabean的作者信息
             try {
-                CompilationUnit existCu = StaticJavaParser.parse(absulutePath);
+                CompilationUnit existCu = Cus.parseCu(absulutePath);
                 for (FieldDeclaration field : existCu.findAll(FieldDeclaration.class)) {
                     for (VariableDeclarator variable : field.getVariables()) {
                         originalProperties.add(variable.getNameAsString());
