@@ -17,14 +17,14 @@ import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.BuildPersistenceDtoService;
-import com.spldeolin.allison1875.persistencegenerator.processor.DeleteAllison1875MethodService;
-import com.spldeolin.allison1875.persistencegenerator.processor.FindOrCreateMapperService;
-import com.spldeolin.allison1875.persistencegenerator.processor.GenerateDesignService;
-import com.spldeolin.allison1875.persistencegenerator.processor.GenerateEntityService;
-import com.spldeolin.allison1875.persistencegenerator.processor.MapperService;
-import com.spldeolin.allison1875.persistencegenerator.processor.MapperXmlFileService;
-import com.spldeolin.allison1875.persistencegenerator.processor.MapperXmlService;
+import com.spldeolin.allison1875.persistencegenerator.service.BuildPersistenceDtoService;
+import com.spldeolin.allison1875.persistencegenerator.service.DeleteAllison1875MethodService;
+import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
+import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
+import com.spldeolin.allison1875.persistencegenerator.service.GenerateEntityService;
+import com.spldeolin.allison1875.persistencegenerator.service.MapperService;
+import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlFileService;
+import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlService;
 import lombok.extern.log4j.Log4j2;
 
 /**

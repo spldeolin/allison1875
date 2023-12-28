@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -30,8 +30,8 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDt
 import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.FindMethodNamingOffsetService;
-import com.spldeolin.allison1875.persistencegenerator.processor.GenerateDesignService;
+import com.spldeolin.allison1875.persistencegenerator.service.FindMethodNamingOffsetService;
+import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.EntityKey;
 import com.spldeolin.allison1875.support.OrderChainPredicate;

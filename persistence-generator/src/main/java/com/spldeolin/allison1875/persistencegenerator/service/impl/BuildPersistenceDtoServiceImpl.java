@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.util.Collection;
 import java.util.Map;
@@ -17,10 +17,10 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNa
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.BuildPersistenceDtoService;
-import com.spldeolin.allison1875.persistencegenerator.processor.CommentService;
-import com.spldeolin.allison1875.persistencegenerator.processor.JdbcTypeService;
-import com.spldeolin.allison1875.persistencegenerator.processor.QueryInformationSchemaService;
+import com.spldeolin.allison1875.persistencegenerator.service.BuildPersistenceDtoService;
+import com.spldeolin.allison1875.persistencegenerator.service.CommentService;
+import com.spldeolin.allison1875.persistencegenerator.service.JdbcTypeService;
+import com.spldeolin.allison1875.persistencegenerator.service.QueryInformationSchemaService;
 import lombok.extern.log4j.Log4j2;
 
 /**

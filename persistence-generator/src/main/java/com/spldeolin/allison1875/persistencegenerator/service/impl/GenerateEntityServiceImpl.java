@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -19,7 +19,7 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.GenerateEntityService;
+import com.spldeolin.allison1875.persistencegenerator.service.GenerateEntityService;
 import lombok.extern.log4j.Log4j2;
 
 /**

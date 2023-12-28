@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.MapperXmlFileService;
+import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlFileService;
 
 /**
  * @author Deolin 2020-07-18

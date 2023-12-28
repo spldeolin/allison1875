@@ -1,8 +1,8 @@
-package com.spldeolin.allison1875.persistencegenerator.processor;
+package com.spldeolin.allison1875.persistencegenerator.service;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.persistencegenerator.processor.impl.DeleteAllison1875MethodServiceImpl;
+import com.spldeolin.allison1875.persistencegenerator.service.impl.DeleteAllison1875MethodServiceImpl;
 
 /**
  * @author Deolin 2023-12-24

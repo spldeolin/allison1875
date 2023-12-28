@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.nio.file.Path;
 import com.github.javaparser.StaticJavaParser;
@@ -9,7 +9,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.ast.Cus;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
-import com.spldeolin.allison1875.persistencegenerator.processor.FindMethodNamingOffsetService;
+import com.spldeolin.allison1875.persistencegenerator.service.FindMethodNamingOffsetService;
 import lombok.extern.log4j.Log4j2;
 
 /**

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
 
@@ -17,7 +17,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDt
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.MapperXmlService;
+import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlService;
 import com.spldeolin.allison1875.persistencegenerator.util.TextUtils;
 
 /**

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.QueryInformationSchemaService;
+import com.spldeolin.allison1875.persistencegenerator.service.QueryInformationSchemaService;
 import lombok.extern.log4j.Log4j2;
 
 /**

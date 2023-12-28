@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.JdbcTypeService;
+import com.spldeolin.allison1875.persistencegenerator.service.JdbcTypeService;
 
 /**
  * @author Deolin 2021-03-23

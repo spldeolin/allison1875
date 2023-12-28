@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
-import com.spldeolin.allison1875.persistencegenerator.processor.DeleteAllison1875MethodService;
+import com.spldeolin.allison1875.persistencegenerator.service.DeleteAllison1875MethodService;
 
 /**
  * @author Deolin 2020-09-02

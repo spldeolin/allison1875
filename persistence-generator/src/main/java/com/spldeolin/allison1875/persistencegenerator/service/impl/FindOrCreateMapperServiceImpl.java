@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.processor.impl;
+package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import static com.github.javaparser.StaticJavaParser.parse;
 
@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.base.constant.ImportConstants;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.FindOrCreateMapperService;
+import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
 import lombok.extern.log4j.Log4j2;
 
 /**

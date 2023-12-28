@@ -1,11 +1,11 @@
-package com.spldeolin.allison1875.persistencegenerator.processor;
+package com.spldeolin.allison1875.persistencegenerator.service;
 
 import java.util.Collection;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
-import com.spldeolin.allison1875.persistencegenerator.processor.impl.MapperXmlServiceImpl;
+import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperXmlServiceImpl;
 
 /**
  * @author Deolin 2023-12-24
