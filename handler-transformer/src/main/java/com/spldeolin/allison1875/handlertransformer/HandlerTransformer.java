@@ -13,7 +13,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.base.constant.ImportConstants;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
@@ -124,7 +124,7 @@ public class HandlerTransformer implements Allison1875MainService {
                         Imports.ensureImported(cu, AnnotationConstant.VALID_QUALIFIER);
                         Imports.ensureImported(cu, AnnotationConstant.POST_MAPPING_QUALIFIER);
                         Imports.ensureImported(cu, AnnotationConstant.AUTOWIRED_QUALIFIER);
-                        Imports.ensureImported(cu, ImportConstants.COLLECTION);
+                        Imports.ensureImported(cu, ImportConstant.COLLECTION);
                         Saves.add(cu);
 
                         // 更多的转化操作

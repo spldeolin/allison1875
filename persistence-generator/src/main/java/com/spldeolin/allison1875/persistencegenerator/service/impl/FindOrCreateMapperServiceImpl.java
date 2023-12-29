@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.constant.ImportConstants;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -62,9 +62,9 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                     persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
             cu.setPackageDeclaration(persistenceGeneratorConfig.getMapperPackage());
-            cu.addImport(ImportConstants.JAVA_UTIL);
+            cu.addImport(ImportConstant.JAVA_UTIL);
             cu.addImport(entityGeneration.getEntityQualifier());
-            cu.addImport(ImportConstants.APACHE_IBATIS);
+            cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
             LotNo lotNo = LotNo.build(persistence.getLotNo().getModuleAbbr(), persistence.getLotNo().getHash(), false);
             Javadoc javadoc = new JavadocComment(persistence.getDescrption() + lotNo.asJavadocDescription()).parse();

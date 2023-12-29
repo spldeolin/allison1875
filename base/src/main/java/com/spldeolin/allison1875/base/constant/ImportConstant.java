@@ -5,7 +5,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 /**
  * @author Deolin 2021-01-24
  */
-public interface ImportConstants {
+public interface ImportConstant {
 
     ImportDeclaration COLLECTION = new ImportDeclaration("java.util.Collection", false, false);
 
