@@ -19,13 +19,13 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownOutputService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
+import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**

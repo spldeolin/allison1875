@@ -19,10 +19,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.VcsResultDto;
 import com.spldeolin.allison1875.inspector.service.VcsService;
+import com.spldeolin.allison1875.inspector.util.TimeUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**

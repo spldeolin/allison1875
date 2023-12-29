@@ -12,6 +12,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Cus {
 
+    private Cus() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static CompilationUnit parseCu(Path path) throws CompilationUnitParseException {
         if (!path.toFile().exists()) {
             throw new CompilationUnitParseException(String.format("path [%s] not exists", path));

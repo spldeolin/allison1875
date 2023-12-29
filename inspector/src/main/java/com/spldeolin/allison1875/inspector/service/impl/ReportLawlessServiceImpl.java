@@ -11,11 +11,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.CsvUtils;
-import com.spldeolin.allison1875.base.util.TimeUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import com.spldeolin.allison1875.inspector.service.ReportLawlessService;
+import com.spldeolin.allison1875.inspector.util.CsvUtils;
+import com.spldeolin.allison1875.inspector.util.TimeUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**

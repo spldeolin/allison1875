@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.inspector.util;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.exception.CsvException;
+import com.spldeolin.allison1875.inspector.util.exception.CsvException;
 import lombok.extern.log4j.Log4j2;
 
 /**

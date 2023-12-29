@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.docanalyzer.util;
 
 /**
  * @author Deolin 2020-05-31

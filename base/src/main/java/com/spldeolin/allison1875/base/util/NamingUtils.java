@@ -5,6 +5,10 @@ package com.spldeolin.allison1875.base.util;
  */
 public class NamingUtils {
 
+    private NamingUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static String qualifierToTypeName(String qualifier) {
         int lastDotIndex = qualifier.lastIndexOf('.');
         if (lastDotIndex >= 0) {

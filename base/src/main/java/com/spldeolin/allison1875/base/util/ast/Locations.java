@@ -35,13 +35,6 @@ public class Locations {
         return getAbsolutePath(node) + ":" + getBeginLine(node);
     }
 
-    /**
-     * @return e.g.: Locations.java:23
-     */
-    public static String getFileNameWithLineNo(Node node) {
-        return getStorage(node).getFileName() + ":" + getBeginLine(node);
-    }
-
     public static Storage getStorage(Node node) {
         return node.findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
                 .orElseThrow(StorageAbsentException::new);

@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
@@ -28,32 +26,6 @@ public class Authors {
     private Authors() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
-
-    /**
-     * 获取一个CompilationUnit的所有作者
-     * <p>
-     * 如果有与文件名同名的TypeDeclaration，则获取这个TypeDeclaration的所有作者信息，
-     * 否则获取所有最外层类型声明的所有作者信息，
-     * 获取方式参考{@link Authors#getEveryAuthor(Node)}
-     *
-     * @return 如果有多个作者，去重后每个作者信息为一行，每行均已trim
-     */
-    public static String getAuthor(CompilationUnit cu) {
-        Collection<String> authors;
-        if (cu.getPrimaryType().isPresent()) {
-            TypeDeclaration<?> primaryType = cu.getPrimaryType().get();
-            authors = getEveryAuthor(primaryType);
-
-        } else {
-            authors = Lists.newArrayList();
-            for (TypeDeclaration<?> type : cu.getTypes()) {
-                authors.addAll(getEveryAuthor(type));
-            }
-        }
-
-        return distinctAndConcat(authors);
-    }
-
 
     /**
      * 获取一个Node的所有作者

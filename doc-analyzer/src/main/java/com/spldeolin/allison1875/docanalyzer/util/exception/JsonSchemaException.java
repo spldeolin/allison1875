@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util.exception;
+package com.spldeolin.allison1875.docanalyzer.util.exception;
 
 /**
  * @author Deolin 2020-03-10

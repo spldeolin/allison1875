@@ -1,6 +1,6 @@
-package com.spldeolin.allison1875.base.util.exception;
+package com.spldeolin.allison1875.inspector.util.exception;
 
-import com.spldeolin.allison1875.base.util.CsvUtils;
+import com.spldeolin.allison1875.inspector.util.CsvUtils;
 
 /**
  * 工具类Csvs遇到预想以外的情况或是内部异常时，

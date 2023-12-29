@@ -12,12 +12,12 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.LoadClassUtils;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.ListControllersService;
+import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**

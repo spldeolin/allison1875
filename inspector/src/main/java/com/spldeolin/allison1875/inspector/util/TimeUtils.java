@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util;
+package com.spldeolin.allison1875.inspector.util;
 
 import java.time.Instant;
 import java.time.LocalDate;

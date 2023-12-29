@@ -11,6 +11,10 @@ import com.spldeolin.allison1875.base.util.CollectionUtils;
  */
 public class TextUtils {
 
+    private TextUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static List<String> formatLines(String linePrefix, List<String> lines, int x) {
         if (CollectionUtils.isEmpty(lines)) {
             return Lists.newArrayList();

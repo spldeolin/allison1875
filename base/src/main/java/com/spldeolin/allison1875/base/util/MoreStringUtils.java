@@ -50,10 +50,6 @@ public class MoreStringUtils {
         return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, string);
     }
 
-    public static String lowerCamelToUnderscore(String string) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, string);
-    }
-
     public static String slashToLowerCamel(String string) {
         StringBuilder sb = new StringBuilder(64);
         for (String part : string.split("/")) {
@@ -78,13 +74,6 @@ public class MoreStringUtils {
             return null;
         }
         return text.replaceAll("[\\r\\n]+", " ");
-    }
-
-    public static String removeBlankLine(String text) {
-        if (text == null) {
-            return null;
-        }
-        return text.replaceAll("(?m)^[ \\t]*\\r?\\n", " ");
     }
 
 }

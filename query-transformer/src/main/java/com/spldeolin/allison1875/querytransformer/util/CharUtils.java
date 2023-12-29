@@ -5,6 +5,10 @@ package com.spldeolin.allison1875.querytransformer.util;
  */
 public class CharUtils {
 
+    private CharUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
     public static int digitCharToInt(char c) {
         return Character.getNumericValue(c);
     }
