@@ -10,7 +10,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -46,9 +46,9 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
             resultTransformation.getImports().forEach(cu::addImport);
             cu.addImport(designMeta.getEntityQualifier());
             cu.addImport(designMeta.getMapperQualifier());
-            cu.addImport(AnnotationConstant.AUTOWIRED_QUALIFIER);
-            cu.addImport("java.util.*");
-            cu.addImport("com.google.common.collect.*");
+            cu.addImport(ImportConstant.SPRING_AUTOWIRED);
+            cu.addImport(ImportConstant.JAVA_UTIL);
+            cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
         });
 
         // build Map  build Multimap

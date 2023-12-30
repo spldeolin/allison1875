@@ -15,6 +15,7 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.MoreObjects;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
@@ -36,31 +37,27 @@ public class JavabeanGenerator {
                 arg.getPackageName(), className + ".java");
 
         if (absulutePath.toFile().exists()) {
-//            if (arg.getEntityExistenceResolution() == FileExistenceResolutionEnum.SKIP) {
-//                log.info("Entity [{}] is exist, use [skip] resolution", className);
-//                return null;
-//            }
             if (arg.getEntityExistenceResolution() == FileExistenceResolutionEnum.OVERWRITE) {
                 log.info("Entity [{}] is exist, use [overwrite] resolution", className);
-            }
-            if (arg.getEntityExistenceResolution() == FileExistenceResolutionEnum.RENAME) {
+            } else if (arg.getEntityExistenceResolution() == FileExistenceResolutionEnum.RENAME) {
                 String oldClassName = className;
                 absulutePath = rename(absulutePath);
                 className = FilenameUtils.getBaseName(absulutePath.toString());
                 log.info("Entity [{}] is exist, use [rename] resolution, newClassName={}", oldClassName, className);
+            } else {
+                throw new RuntimeException("impossible unless bug");
             }
         }
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(absulutePath);
         cu.setPackageDeclaration(arg.getPackageName());
-        cu.addImport(AnnotationConstant.DATA_QUALIFIER);
-        cu.addImport(AnnotationConstant.ACCESSORS_QUALIFIER);
-        cu.addImport(AnnotationConstant.FIELD_DEFAULTS_QUALIFIER);
-        cu.addImport(AnnotationConstant.ACCESS_LEVEL_QUALIFIER);
-        cu.addImport(AnnotationConstant.VALID_QUALIFIER);
-        cu.addImport("com.google.common.collect.*");
-        cu.addImport("java.util.*");
+        cu.addImport(ImportConstant.LOMBOK);
+        cu.addImport(ImportConstant.LOMBOK_EXPERIMENTAL);
+        cu.addImport(ImportConstant.JAVAX_VALID);
+        cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
+        cu.addImport(ImportConstant.JAVA_UTIL);
+        cu.addImport(ImportConstant.JAVA_TIME);
 
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.addAnnotation(AnnotationConstant.DATA);

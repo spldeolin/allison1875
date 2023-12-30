@@ -9,7 +9,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.util.ast.Annotations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
@@ -40,7 +40,8 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
             try {
                 boolean isRequestBody = false;
                 for (AnnotationExpr annotation : parameter.getAnnotations()) {
-                    if (AnnotationConstant.REQUEST_BODY_QUALIFIER.equals(annotation.resolve().getQualifiedName())) {
+                    if (ImportConstant.SPRING_REQUEST_BODY.getNameAsString()
+                            .equals(annotation.resolve().getQualifiedName())) {
                         if (result == null) {
                             result = parameter.getType().resolve();
                             isRequestBody = true;

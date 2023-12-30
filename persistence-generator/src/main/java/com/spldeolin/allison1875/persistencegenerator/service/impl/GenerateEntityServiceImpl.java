@@ -43,8 +43,6 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
             if (StringUtils.isNotEmpty(superEntityQualifier)) {
                 cu.addImport(superEntityQualifier);
-                cu.addImport(AnnotationConstant.EQUALS_AND_HASH_CODE_QUALIFIER);
-                cu.getImports().removeIf(ipt -> ipt.getNameAsString().equals(AnnotationConstant.ACCESSORS_QUALIFIER));
                 String superEntityName = superEntityQualifier.substring(superEntityQualifier.lastIndexOf('.') + 1);
                 javabean.addExtendedType(superEntityName);
                 javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);

@@ -149,8 +149,8 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceImplCu.setPackageDeclaration(conf.getServiceImplPackage());
         serviceImplCu.setImports(param.getCu().getImports());
         serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
-        serviceImplCu.addImport(AnnotationConstant.SLF4J_QUALIFIER);
-        serviceImplCu.addImport(AnnotationConstant.SERVICE_QUALIFIER);
+        serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
+        serviceImplCu.addImport(ImportConstant.SPRING_SERVICE);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         Authors.ensureAuthorExist(serviceImpl, conf.getAuthor());
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);

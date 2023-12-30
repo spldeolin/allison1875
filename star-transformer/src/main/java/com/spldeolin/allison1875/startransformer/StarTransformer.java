@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
@@ -84,8 +85,8 @@ public class StarTransformer implements Allison1875MainService {
             }
 
             if (anyTransformed) {
-                cu.addImport("com.google.common.collect.*");
-                cu.addImport("java.util.*");
+                cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
+                cu.addImport(ImportConstant.JAVA_UTIL);
                 flushes.add(FileFlush.buildLexicalPreserving(cu));
             }
         }

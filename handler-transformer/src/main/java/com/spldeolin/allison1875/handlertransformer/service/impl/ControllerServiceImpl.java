@@ -14,6 +14,7 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
@@ -42,8 +43,8 @@ public class ControllerServiceImpl implements ControllerService {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_QUALIFIER)
-                        || AnnotationConstant.CONTROLLER_QUALIFIER.equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(ImportConstant.SPRING_CONTROLLER.getNameAsString())
+                        || ImportConstant.SPRING_CONTROLLER.getNameAsString().equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {
@@ -98,8 +99,8 @@ public class ControllerServiceImpl implements ControllerService {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getRespDtoQualifier());
         }
         Imports.ensureImported(controller, serviceGeneration.getServiceQualifier());
-        Imports.ensureImported(controller, AnnotationConstant.VALID_QUALIFIER);
-        Imports.ensureImported(controller, AnnotationConstant.REQUEST_BODY_QUALIFIER);
+        Imports.ensureImported(controller, ImportConstant.JAVAX_VALID);
+        Imports.ensureImported(controller, ImportConstant.SPRING_REQUEST_BODY);
         return handlerCreation;
     }
 
