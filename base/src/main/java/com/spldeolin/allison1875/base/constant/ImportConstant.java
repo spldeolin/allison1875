@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.base.constant;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.ImportDeclaration;
 
 /**
@@ -8,33 +7,34 @@ import com.github.javaparser.ast.ImportDeclaration;
  */
 public interface ImportConstant {
 
-    ImportDeclaration JAVA_UTIL = StaticJavaParser.parseImport("java.util.*");
+    ImportDeclaration JAVA_UTIL = new ImportDeclaration("java.util", false, true);
 
-    ImportDeclaration JAVA_TIME = StaticJavaParser.parseImport("java.time.*");
+    ImportDeclaration JAVA_TIME = new ImportDeclaration("java.time", false, true);
 
-    ImportDeclaration GOOGLE_COMMON_COLLECTION = StaticJavaParser.parseImport("com.google.common.collect.*");
+    ImportDeclaration GOOGLE_COMMON_COLLECTION = new ImportDeclaration("com.google.common.collect", false, true);
 
-    ImportDeclaration APACHE_IBATIS = StaticJavaParser.parseImport("org.apache.ibatis.annotations.*");
+    ImportDeclaration APACHE_IBATIS = new ImportDeclaration("org.apache.ibatis.annotations", false, true);
 
-    ImportDeclaration LOMBOK = StaticJavaParser.parseImport("lombok.*");
+    ImportDeclaration LOMBOK = new ImportDeclaration("lombok", false, true);
 
-    ImportDeclaration LOMBOK_EXPERIMENTAL = StaticJavaParser.parseImport("lombok.experimental.*");
+    ImportDeclaration LOMBOK_EXPERIMENTAL = new ImportDeclaration("lombok.experimental", false, true);
 
-    ImportDeclaration LOMBOK_SLF4J = StaticJavaParser.parseImport("lombok.extern.slf4j.Slf4j");
+    ImportDeclaration LOMBOK_SLF4J = new ImportDeclaration("lombok.extern.slf4j.Slf4j", false, false);
 
-    ImportDeclaration SPRING_SERVICE = StaticJavaParser.parseImport("org.springframework.stereotype.Service");
+    ImportDeclaration SPRING_SERVICE = new ImportDeclaration("org.springframework.stereotype.Service", false, false);
 
-    ImportDeclaration SPRING_POST_MAPPING = StaticJavaParser.parseImport(
-            "org.springframework.web.bind.annotation.PostMapping");
+    ImportDeclaration SPRING_POST_MAPPING = new ImportDeclaration("org.springframework.web.bind.annotation.PostMapping",
+            false, false);
 
-    ImportDeclaration SPRING_REQUEST_BODY = StaticJavaParser.parseImport(
-            "org.springframework.web.bind.annotation.RequestBody");
+    ImportDeclaration SPRING_REQUEST_BODY = new ImportDeclaration("org.springframework.web.bind.annotation.RequestBody",
+            false, false);
 
-    ImportDeclaration JAVAX_VALID = StaticJavaParser.parseImport("javax.validation.Valid");
+    ImportDeclaration JAVAX_VALID = new ImportDeclaration("javax.validation.Valid", false, false);
 
-    ImportDeclaration SPRING_AUTOWIRED = StaticJavaParser.parseImport(
-            "org.springframework.beans.factory.annotation.Autowired");
+    ImportDeclaration SPRING_AUTOWIRED = new ImportDeclaration("org.springframework.beans.factory.annotation.Autowired",
+            false, false);
 
-    ImportDeclaration SPRING_CONTROLLER = StaticJavaParser.parseImport("org.springframework.stereotype.Controller");
+    ImportDeclaration SPRING_CONTROLLER = new ImportDeclaration("org.springframework.stereotype.Controller", false,
+            false);
 
 }
