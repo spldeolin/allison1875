@@ -223,7 +223,7 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     private String calcType(ClassOrInterfaceDeclaration dto) {
         if (dto.getAnnotationByName("L").isPresent()) {
-            return "Collection<" + dto.getNameAsString() + ">";
+            return "List<" + dto.getNameAsString() + ">";
         }
         if (dto.getAnnotationByName("P").isPresent()) {
             String[] split = handlerTransformerConfig.getPageTypeQualifier().split("\\.");
