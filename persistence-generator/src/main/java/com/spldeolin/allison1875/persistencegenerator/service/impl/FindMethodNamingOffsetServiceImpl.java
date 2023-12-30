@@ -21,8 +21,8 @@ public class FindMethodNamingOffsetServiceImpl implements FindMethodNamingOffset
 
     @Override
     public FieldDeclaration findMethodNamingOffsetField(Path designPath) {
-        CompilationUnit cu = Cus.parseCu(designPath);
-        if (cu != null) {
+        if (designPath.toFile().exists()) {
+            CompilationUnit cu = Cus.parseCu(designPath);
             TypeDeclaration<?> design = cu.getPrimaryType().orElseThrow(IllegalDesignException::new);
             FieldDeclaration offset = design.getFieldByName(TokenWordConstant.OFFSET_FIELD_NAME).orElse(null);
             if (offset != null) {

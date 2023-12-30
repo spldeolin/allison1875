@@ -5,13 +5,13 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.factory.JavabeanFactory;
-import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
-import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
+import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
@@ -29,7 +29,8 @@ public class TransformWholeDtoServiceImpl implements TransformWholeDtoService {
     private StarTransformerConfig config;
 
     @Override
-    public CompilationUnit transformWholeDto(JavabeanArg javabeanArg, AstForest astForest, ChainAnalysisDto analysis) {
+    public JavabeanGeneration transformWholeDto(JavabeanArg javabeanArg, AstForest astForest,
+            ChainAnalysisDto analysis) {
         javabeanArg.setAstForest(astForest);
         javabeanArg.setPackageName(config.getWholeDtoPackge());
         javabeanArg.setDescription("");
@@ -79,7 +80,7 @@ public class TransformWholeDtoServiceImpl implements TransformWholeDtoService {
                         "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
             }
         });
-        return JavabeanFactory.buildCu(javabeanArg);
+        return JavabeanGenerator.generate(javabeanArg);
     }
 
     private String entityNameToVarName(String entityName) {

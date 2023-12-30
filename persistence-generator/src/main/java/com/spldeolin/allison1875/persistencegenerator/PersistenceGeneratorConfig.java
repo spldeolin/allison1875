@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -124,6 +125,11 @@ public final class PersistenceGeneratorConfig {
      * 是否为entity实现java.lang.Cloneable接口
      */
     Boolean enableEntityImplementCloneable;
+
+    /**
+     * 生成Entity时，文件已存在的解决方式
+     */
+    @NotNull FileExistenceResolutionEnum entityExistenceResolution;
 
     @NotNull Boolean disableInsert;
 

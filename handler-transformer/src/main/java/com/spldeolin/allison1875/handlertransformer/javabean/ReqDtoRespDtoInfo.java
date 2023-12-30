@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.util.Collection;
+import java.util.List;
+import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -21,6 +23,8 @@ public class ReqDtoRespDtoInfo {
 
     String resultType = null;
 
-    final Collection<String> dtoQualifiers = Lists.newArrayList();
+    final Collection<String> javabeanQualifiers = Lists.newArrayList();
+
+    final List<CompilationUnit> javabeanCus = Lists.newArrayList();
 
 }

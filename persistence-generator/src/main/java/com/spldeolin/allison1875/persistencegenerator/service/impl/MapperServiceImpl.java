@@ -19,6 +19,7 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
@@ -40,7 +41,8 @@ public class MapperServiceImpl implements MapperService {
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
-    public String batchInsertEvenNull(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String batchInsertEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableBatchInsertEvenNull()) {
             return null;
         }
@@ -52,14 +54,15 @@ public class MapperServiceImpl implements MapperService {
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + persistence.getEntityName() + "> entities"));
+                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return methodName;
     }
 
     @Override
-    public String batchInsert(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String batchInsert(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableBatchInsert()) {
             return null;
         }
@@ -71,14 +74,15 @@ public class MapperServiceImpl implements MapperService {
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + persistence.getEntityName() + "> entities"));
+                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return methodName;
     }
 
     @Override
-    public String batchUpdateEvenNull(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String batchUpdateEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableBatchUpdateEvenNull()) {
             return null;
         }
@@ -91,14 +95,15 @@ public class MapperServiceImpl implements MapperService {
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + persistence.getEntityName() + "> entities"));
+                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
         update.setBody(null);
         mapper.getMembers().addLast(update);
         return methodName;
     }
 
     @Override
-    public String batchUpdate(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String batchUpdate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableBatchUpdate()) {
             return null;
         }
@@ -111,7 +116,7 @@ public class MapperServiceImpl implements MapperService {
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + persistence.getEntityName() + "> entities"));
+                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
         update.setBody(null);
         mapper.getMembers().addLast(update);
         return methodName;
@@ -140,7 +145,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String insertOrUpdate(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String insertOrUpdate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableInsertOrUpdate()) {
             return null;
         }
@@ -152,14 +158,15 @@ public class MapperServiceImpl implements MapperService {
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
-        insert.addParameter(persistence.getEntityName(), "entity");
+        insert.addParameter(javabeanGeneration.getJavabeanName(), "entity");
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return methodName;
     }
 
     @Override
-    public String insert(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String insert(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableInsert()) {
             return null;
         }
@@ -170,14 +177,15 @@ public class MapperServiceImpl implements MapperService {
         insert.setJavadocComment(javadoc);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
-        insert.addParameter(persistence.getEntityName(), "entity");
+        insert.addParameter(javabeanGeneration.getJavabeanName(), "entity");
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return methodName;
     }
 
     @Override
-    public String listAll(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String listAll(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableListAll()) {
             return null;
         }
@@ -187,7 +195,7 @@ public class MapperServiceImpl implements MapperService {
             MethodDeclaration listAll = new MethodDeclaration();
             String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
             Javadoc javadoc = new JavadocComment("获取全部" + lotNoText).parse();
-            listAll.setType(StaticJavaParser.parseType("List<" + persistence.getEntityName() + ">"));
+            listAll.setType(StaticJavaParser.parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
             listAll.setName(methodName);
             listAll.setJavadocComment(javadoc);
             listAll.setBody(null);
@@ -197,7 +205,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String queryByEntity(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String queryByEntity(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableQueryByEntity()) {
             return null;
         }
@@ -207,9 +216,9 @@ public class MapperServiceImpl implements MapperService {
         String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + lotNoText).parse();
         Imports.ensureImported(mapper, "java.util.List");
-        queryByEntity.setType(parseType("List<" + persistence.getEntityName() + ">"));
+        queryByEntity.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         queryByEntity.setName(methodName);
-        queryByEntity.addParameter(persistence.getEntityName(), "entity");
+        queryByEntity.addParameter(javabeanGeneration.getJavabeanName(), "entity");
         queryByEntity.setBody(null);
         queryByEntity.setJavadocComment(javadoc);
         mapper.getMembers().addLast(queryByEntity);
@@ -217,7 +226,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String queryById(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String queryById(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableQueryById()) {
             return null;
         }
@@ -227,7 +237,7 @@ public class MapperServiceImpl implements MapperService {
             MethodDeclaration queryById = new MethodDeclaration();
             String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
             Javadoc javadoc = new JavadocComment("根据ID查询" + lotNoText).parse();
-            queryById.setType(new ClassOrInterfaceType().setName(persistence.getEntityName()));
+            queryById.setType(new ClassOrInterfaceType().setName(javabeanGeneration.getJavabeanName()));
             queryById.setName(methodName);
 
             if (persistence.getIdProperties().size() == 1) {
@@ -252,7 +262,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String queryByIdsEachId(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String queryByIdsEachId(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableQueryByIdsEachId()) {
             return null;
         }
@@ -270,7 +281,8 @@ public class MapperServiceImpl implements MapperService {
             String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
             String pkTypeName = onlyPk.getJavaType().getSimpleName();
             queryByIdsEachId.addAnnotation(parseAnnotation("@MapKey(\"" + varName + "\")"));
-            queryByIdsEachId.setType(parseType("Map<" + pkTypeName + ", " + persistence.getEntityName() + ">"));
+            queryByIdsEachId.setType(
+                    parseType("Map<" + pkTypeName + ", " + javabeanGeneration.getJavabeanName() + ">"));
             queryByIdsEachId.setName(methodName);
             String varsName = English.plural(varName);
             queryByIdsEachId.addParameter(
@@ -283,7 +295,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String queryByIds(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String queryByIds(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableQueryByIds()) {
             return null;
         }
@@ -297,7 +310,7 @@ public class MapperServiceImpl implements MapperService {
             Imports.ensureImported(mapper, "java.util.Collection");
             Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
-            queryByIds.setType(parseType("List<" + persistence.getEntityName() + ">"));
+            queryByIds.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
             queryByIds.setName(methodName);
             String varsName = English.plural(MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName()));
             Parameter parameter = parseParameter(
@@ -312,7 +325,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String queryByKey(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
+    public String queryByKey(PersistenceDto persistence, JavabeanGeneration javabeanGeneration, PropertyDto key,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableQueryByKey()) {
             return null;
         }
@@ -322,7 +336,7 @@ public class MapperServiceImpl implements MapperService {
         Javadoc javadoc = new JavadocComment("根据「" + key.getDescription() + "」查询" + lotNoText).parse();
 
         Imports.ensureImported(mapper, "java.util.List");
-        method.setType(parseType("List<" + persistence.getEntityName() + ">"));
+        method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
         String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
         Parameter parameter = parseParameter(key.getJavaType().getSimpleName() + " " + varName);
@@ -334,7 +348,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public QueryByKeysDto queryByKeys(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
+    public QueryByKeysDto queryByKeys(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            PropertyDto key, ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableQueryByKeys()) {
             return null;
         }
@@ -344,7 +359,7 @@ public class MapperServiceImpl implements MapperService {
         String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("根据多个「" + key.getDescription() + "」查询" + lotNoText).parse();
         Imports.ensureImported(mapper, "java.util.List");
-        method.setType(parseType("List<" + persistence.getEntityName() + ">"));
+        method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
         String typeName = "Collection<" + key.getJavaType().getSimpleName() + ">";
         String varsName = English.plural(MoreStringUtils.lowerFirstLetter(key.getPropertyName()));
@@ -358,7 +373,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String updateByIdEvenNull(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String updateByIdEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableUpdateByIdEvenNull()) {
             return null;
         }
@@ -372,7 +388,7 @@ public class MapperServiceImpl implements MapperService {
             updateByIdEvenNull.setJavadocComment(javadoc);
             updateByIdEvenNull.setType(PrimitiveType.intType());
             updateByIdEvenNull.setName(methodName);
-            updateByIdEvenNull.addParameter(persistence.getEntityName(), "entity");
+            updateByIdEvenNull.addParameter(javabeanGeneration.getJavabeanName(), "entity");
             updateByIdEvenNull.setBody(null);
             mapper.getMembers().addLast(updateByIdEvenNull);
         }
@@ -380,7 +396,8 @@ public class MapperServiceImpl implements MapperService {
     }
 
     @Override
-    public String updateById(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper) {
+    public String updateById(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+            ClassOrInterfaceDeclaration mapper) {
         if (persistenceGeneratorConfig.getDisableUpdateById()) {
             return null;
         }
@@ -393,7 +410,7 @@ public class MapperServiceImpl implements MapperService {
             updateById.setJavadocComment(javadoc);
             updateById.setType(PrimitiveType.intType());
             updateById.setName(methodName);
-            updateById.addParameter(persistence.getEntityName(), "entity");
+            updateById.addParameter(javabeanGeneration.getJavabeanName(), "entity");
             updateById.setBody(null);
             mapper.getMembers().addLast(updateById);
         }

@@ -1,7 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -24,8 +25,11 @@ public class HandlerCreation {
     /**
      * 待追加的import声明
      */
-    Collection<String> appendImports = Lists.newArrayList();
+    final List<String> appendImports = Lists.newArrayList();
 
-    Boolean anyTransformed;
+    /**
+     * 待追加的Controller类的注解
+     */
+    final List<AnnotationExpr> appendAnnotations4Controller = Lists.newArrayList();
 
 }

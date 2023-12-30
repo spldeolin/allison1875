@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
@@ -15,18 +13,17 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
+import com.spldeolin.allison1875.base.exception.ParentAbsentException;
+import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Authors;
-import com.spldeolin.allison1875.base.util.ast.Imports;
-import com.spldeolin.allison1875.base.util.ast.Locations;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
-import com.spldeolin.allison1875.handlertransformer.builder.JavabeanCuBuilder;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
 import com.spldeolin.allison1875.handlertransformer.javabean.BeforeJavabeanCuBuildResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
@@ -82,97 +79,92 @@ public class ReqRespServiceImpl implements ReqRespService {
     }
 
     @Override
-    public ReqDtoRespDtoInfo createJavabeans(AstForest astForest, CompilationUnit cu, FirstLineDto firstLineDto,
+    public ReqDtoRespDtoInfo createJavabeans(AstForest astForest, FirstLineDto firstLineDto,
             List<ClassOrInterfaceDeclaration> dtos) {
         ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
-        Collection<JavabeanCuBuilder<JavabeanTypeEnum>> builders = Lists.newArrayList();
-        Collection<String> dtoQualifiers = Lists.newArrayList();
+
         // 生成ReqDto、RespDto、NestDto
         for (ClassOrInterfaceDeclaration dto : dtos) {
-            JavabeanCuBuilder<JavabeanTypeEnum> builder = new JavabeanCuBuilder<>();
-            builder.sourceRoot(Locations.getStorage(cu).getSourceRoot());
-            JavabeanTypeEnum javabeanType;
-            javabeanType = estimateJavabeanType(dto);
-            builder.context(javabeanType);
-
+            JavabeanTypeEnum javabeanType = estimateJavabeanType(dto);
+            String packageName = estimatePackageName(javabeanType);
             String javabeanName = standardizeJavabeanName(firstLineDto, dto, javabeanType);
-            javabeanName = ensureNoRepeatService.inAstForest(astForest, javabeanName);
-            dto.setName(javabeanName);
 
-            // 计算每一个dto的package
-            String pkg;
-            if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-                pkg = handlerTransformerConfig.getReqDtoPackage();
-            } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-                pkg = handlerTransformerConfig.getRespDtoPackage();
-            } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-                pkg = handlerTransformerConfig.getReqNestDtoPackage();
-                if (pkg == null) {
-                    pkg = handlerTransformerConfig.getReqDtoPackage() + ".dto";
+            JavabeanArg arg = new JavabeanArg();
+            arg.setAstForest(astForest);
+            arg.setPackageName(packageName);
+            arg.setClassName(javabeanName);
+            arg.setAuthorName(handlerTransformerConfig.getAuthor());
+            arg.setMore4Javabean((cu1, javabean) -> {
+                for (FieldDeclaration field : dto.getFields()) {
+                    BeforeJavabeanCuBuildResult before = fieldService.beforeJavabeanCuBuild(field, javabeanType);
+                    javabean.replace(field, before.getField());
+                    for (String appendImport : before.getAppendImports()) {
+                        cu1.addImport(appendImport);
+                    }
                 }
-            } else {
-                pkg = handlerTransformerConfig.getRespNestDtoPackage();
-                if (pkg == null) {
-                    pkg = handlerTransformerConfig.getRespDtoPackage() + ".dto";
-                }
-            }
-            builder.packageDeclaration(pkg);
-            builder.importDeclarations(cu.getImports());
-            builder.importDeclarationsString(
-                    Lists.newArrayList(AnnotationConstant.VALID_QUALIFIER, "java.util.Collection",
-                            AnnotationConstant.DATA_QUALIFIER, AnnotationConstant.ACCESSORS_QUALIFIER,
-                            AnnotationConstant.FIELD_DEFAULTS_QUALIFIER, AnnotationConstant.ACCESS_LEVEL_QUALIFIER,
-                            handlerTransformerConfig.getPageTypeQualifier()));
-            ClassOrInterfaceDeclaration clone = dto.clone();
-            clone.setPublic(true);
-            clone.getAnnotations().clear();
-            clone.addAnnotation(AnnotationConstant.DATA);
-            clone.addAnnotation(AnnotationConstant.ACCESSORS);
-            clone.addAnnotation(AnnotationConstant.FIELD_DEFAULTS_PRIVATE);
-            Authors.ensureAuthorExist(clone, handlerTransformerConfig.getAuthor());
-            builder.coid(clone);
+                javabean.setMembers(dto.getMembers());
+            });
+            arg.setEntityExistenceResolution(FileExistenceResolutionEnum.RENAME);
+            JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(arg);
+            result.getJavabeanCus().add(javabeanGeneration.getCu());
+
+            dto.setName(javabeanGeneration.getJavabeanName());
+
+            String javabeanQualifier = javabeanGeneration.getJavabeanQualifier();
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
                 result.setParamType(calcType(dto));
-                result.setReqDtoQualifier(pkg + "." + clone.getNameAsString());
+                result.setReqDtoQualifier(javabeanQualifier);
             }
             if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
                 result.setResultType(calcType(dto));
-                result.setRespDtoQualifier(pkg + "." + clone.getNameAsString());
+                result.setRespDtoQualifier(javabeanQualifier);
             }
-            builders.add(builder);
-            dtoQualifiers.add(pkg + "." + clone.getNameAsString());
+            result.getJavabeanQualifiers().add(javabeanQualifier);
 
             // 遍历到NestDto时，将父节点中的自身替换为Field
-            if (dto.getParentNode().filter(parent -> parent instanceof ClassOrInterfaceDeclaration).isPresent()) {
-                ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode().get();
+            if (Lists.newArrayList(JavabeanTypeEnum.NEST_DTO_IN_REQ, JavabeanTypeEnum.NEST_DTO_IN_RESP)
+                    .contains(javabeanType)) {
+                ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode()
+                        .orElseThrow(ParentAbsentException::new);
                 FieldDeclaration field = new FieldDeclaration();
                 if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
                     field.addAnnotation(AnnotationConstant.VALID);
                 }
                 this.moveAnnotationsFromDtoToField(dto, field);
-                field.setPrivate(true).addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto)),
+                field.addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto)),
                         standardizeNestDtoFieldName(dto)));
                 parentCoid.replace(dto, field);
             }
         }
-        for (JavabeanCuBuilder<JavabeanTypeEnum> builder : builders) {
-            builder.importDeclarationsString(dtoQualifiers);
-            CompilationUnit javabeanCu = builder.build();
 
-            // Field的额外操作
-            Set<String> importNames = Sets.newHashSet();
-            for (FieldDeclaration field : builder.getJavabean().getFields()) {
-                BeforeJavabeanCuBuildResult before = fieldService.beforeJavabeanCuBuild(field, builder.getContext());
-                builder.getJavabean().replace(field, before.getField());
-                importNames.addAll(before.getAppendImports());
+        for (CompilationUnit javabeanCu : result.getJavabeanCus()) {
+            for (String javabeanQualifier : result.getJavabeanQualifiers()) {
+                javabeanCu.addImport(javabeanQualifier);
             }
-            importNames.forEach(importName -> Imports.ensureImported(javabeanCu, importName));
-
-            Saves.add(javabeanCu);
-            log.info("generate Javabean [{}].", builder.getJavabean().getNameAsString());
-            result.getDtoQualifiers().add(builder.getJavabeanQualifier());
+            javabeanCu.addImport(handlerTransformerConfig.getPageTypeQualifier());
         }
+
         return result;
+    }
+
+    private String estimatePackageName(JavabeanTypeEnum javabeanType) {
+        String packageName;
+        if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
+            packageName = handlerTransformerConfig.getReqDtoPackage();
+        } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
+            packageName = handlerTransformerConfig.getRespDtoPackage();
+        } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
+            packageName = handlerTransformerConfig.getReqNestDtoPackage();
+            if (packageName == null) {
+                packageName = handlerTransformerConfig.getReqDtoPackage() + ".dto";
+            }
+        } else {
+            packageName = handlerTransformerConfig.getRespNestDtoPackage();
+            if (packageName == null) {
+                packageName = handlerTransformerConfig.getRespDtoPackage() + ".dto";
+            }
+        }
+        return packageName;
     }
 
     private String standardizeNestDtoFieldName(ClassOrInterfaceDeclaration dto) {

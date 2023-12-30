@@ -21,6 +21,6 @@ public class BeforeJavabeanCuBuildResult {
     /**
      * 待追加的import声明
      */
-    Collection<String> appendImports = Lists.newArrayList();
+    final Collection<String> appendImports = Lists.newArrayList();
 
 }

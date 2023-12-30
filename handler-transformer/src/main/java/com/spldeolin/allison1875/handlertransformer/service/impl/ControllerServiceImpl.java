@@ -78,12 +78,18 @@ public class ControllerServiceImpl implements ControllerService {
         // 使用handle创建Handler方法，并追加到controller中
         HandlerCreation handlerCreation = createHandlerService.createHandler(firstLineDto,
                 reqDtoRespDtoInfo.getParamType(), reqDtoRespDtoInfo.getResultType(), serviceGeneration);
-        boolean replace = members.replace(firstLineDto.getInit(), handlerCreation.getHandler());
-        handlerCreation.setAnyTransformed(replace);
+        members.replace(firstLineDto.getInit(), handlerCreation.getHandler());
+
+        for (AnnotationExpr annotationExpr : handlerCreation.getAppendAnnotations4Controller()) {
+            if (!controller.getAnnotations().contains(annotationExpr)) {
+                controller.addAnnotation(annotationExpr);
+            }
+        }
 
         for (String appendImport : handlerCreation.getAppendImports()) {
             Imports.ensureImported(controller, appendImport);
         }
+
 
         if (reqDtoRespDtoInfo.getReqDtoQualifier() != null) {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getReqDtoQualifier());
@@ -92,6 +98,8 @@ public class ControllerServiceImpl implements ControllerService {
             Imports.ensureImported(controller, reqDtoRespDtoInfo.getRespDtoQualifier());
         }
         Imports.ensureImported(controller, serviceGeneration.getServiceQualifier());
+        Imports.ensureImported(controller, AnnotationConstant.VALID_QUALIFIER);
+        Imports.ensureImported(controller, AnnotationConstant.REQUEST_BODY_QUALIFIER);
         return handlerCreation;
     }
 

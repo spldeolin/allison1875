@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.factory.javabean;
+package com.spldeolin.allison1875.base.generator.javabean;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -37,6 +37,6 @@ public class JavabeanArg {
 
     BiConsumer<CompilationUnit, ClassOrInterfaceDeclaration> more4Javabean;
 
-    LotNo lotNo;
+    @NotNull FileExistenceResolutionEnum entityExistenceResolution;
 
 }

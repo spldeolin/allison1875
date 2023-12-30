@@ -12,13 +12,12 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
-import com.spldeolin.allison1875.base.exception.CuAbsentException;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Authors;
 import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
-import com.spldeolin.allison1875.base.util.ast.Saves;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
@@ -98,16 +97,18 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         pair.getService().addMember(serviceMethod);
         Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getReqDtoQualifier());
         Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getRespDtoQualifier());
+        Imports.ensureImported(pair.getService(), ImportConstant.JAVA_UTIL);
+        Imports.ensureImported(pair.getService(), conf.getPageTypeQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
-        Saves.add(pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new));
 
         // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
         for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
             serviceImpl.addMember(serviceMethodImpl);
             Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getReqDtoQualifier());
             Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getRespDtoQualifier());
+            Imports.ensureImported(pair.getService(), ImportConstant.JAVA_UTIL);
+            Imports.ensureImported(pair.getService(), conf.getPageTypeQualifier());
             log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
-            Saves.add(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new));
         }
 
         // 将生成的方法所需的import 均添加到 Service 和 每个 ServiceImpl
@@ -120,6 +121,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         ServiceGeneration result = new ServiceGeneration();
         result.setServiceVarName(MoreStringUtils.lowerFirstLetter(pair.getService().getNameAsString()));
         result.setService(pair.getService());
+        result.getServiceImpls().addAll(pair.getServiceImpls());
         result.setServiceQualifier(
                 pair.getService().getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         result.setMethodName(serviceMethod.getNameAsString());
@@ -141,7 +143,6 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         Path storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, conf.getServicePackage(),
                 service.getName() + ".java");
         serviceCu.setStorage(storage);
-        Saves.add(serviceCu);
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
@@ -162,7 +163,6 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, conf.getServiceImplPackage(),
                 serviceImpl.getName() + ".java");
         serviceImplCu.setStorage(storage);
-        Saves.add(serviceImplCu);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
         pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
         name2Pair.put(serviceName, pair);

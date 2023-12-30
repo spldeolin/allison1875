@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -28,7 +29,6 @@ import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordC
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
-import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.FindMethodNamingOffsetService;
 import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
@@ -51,7 +51,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
     private FindMethodNamingOffsetService findMethodNamingOffsetService;
 
     @Override
-    public CompilationUnit process(PersistenceDto persistence, EntityGeneration entityGeneration,
+    public CompilationUnit process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
         if (!persistenceGeneratorConfig.getEnableGenerateDesign()) {
             return null;
@@ -78,7 +78,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         cu.addImport(ByChainPredicate.class);
         cu.addImport(OrderChainPredicate.class);
         cu.addImport(EntityKey.class);
-        cu.addImport(entityGeneration.getEntityQualifier());
+        cu.addImport(javabeanGeneration.getJavabeanQualifier());
         for (PropertyDto property : properties) {
             if (!property.getJavaType().getQualifier().startsWith("java.lang")) {
                 cu.addImport(property.getJavaType().getQualifier());
@@ -87,7 +87,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         }
         cu.addOrphanComment(new LineComment("@formatter:" + "off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
-        Javadoc javadoc = entityGeneration.getEntity().getJavadoc()
+        Javadoc javadoc = javabeanGeneration.getCoid().getJavadoc()
                 .orElse(Javadocs.createJavadoc(persistence.getLotNo().asJavadocDescription(),
                         persistenceGeneratorConfig.getAuthor()));
         designCoid.setJavadocComment(javadoc);
@@ -122,15 +122,15 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
                         TokenWordConstant.BY_FORCED_METHOD_NAME)));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+                "public List<" + javabeanGeneration.getJavabeanName() + "> many() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
-                        persistence.getEntityName())));
+                        javabeanGeneration.getJavabeanName())));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                        persistence.getEntityName())));
+                        javabeanGeneration.getJavabeanName())));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+                "public " + javabeanGeneration.getJavabeanName() + " one() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         designCoid.addMember(queryChainCoid);
 
@@ -182,15 +182,15 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
                     .setJavadocComment(property.getDescription()));
         }
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+                "public List<" + javabeanGeneration.getJavabeanName() + "> many() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
-                        persistence.getEntityName())));
+                        javabeanGeneration.getJavabeanName())));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                        persistence.getEntityName())));
+                        javabeanGeneration.getJavabeanName())));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+                "public " + javabeanGeneration.getJavabeanName() + " one() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         nextableByChainReturnCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
@@ -220,15 +220,15 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
                 .addExtendedType("OrderChain");
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public List<" + entityGeneration.getEntityName() + "> many() { throw e; }"));
+                "public List<" + javabeanGeneration.getJavabeanName() + "> many() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
-                        persistence.getEntityName())));
+                        javabeanGeneration.getJavabeanName())));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                        persistence.getEntityName())));
+                        javabeanGeneration.getJavabeanName())));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public " + entityGeneration.getEntityName() + " one() { throw e; }"));
+                "public " + javabeanGeneration.getJavabeanName() + " one() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
 
@@ -253,13 +253,13 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
 
         for (PropertyDto property : persistence.getProperties()) {
             designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public static EntityKey<" + persistence.getEntityName() + "," + property.getJavaType()
+                    "public static EntityKey<" + javabeanGeneration.getJavabeanName() + "," + property.getJavaType()
                             .getSimpleName() + "> " + property.getPropertyName() + ";"));
         }
 
         DesignMeta meta = new DesignMeta();
-        meta.setEntityQualifier(entityGeneration.getEntityQualifier());
-        meta.setEntityName(entityGeneration.getEntityName());
+        meta.setEntityQualifier(javabeanGeneration.getJavabeanQualifier());
+        meta.setEntityName(javabeanGeneration.getJavabeanName());
         meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         meta.setMapperName(mapper.getNameAsString());
         meta.setMapperRelativePaths(persistenceGeneratorConfig.getMapperXmlDirectoryPaths().stream()

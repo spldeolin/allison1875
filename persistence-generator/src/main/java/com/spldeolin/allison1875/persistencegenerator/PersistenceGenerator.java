@@ -12,8 +12,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
@@ -73,24 +73,22 @@ public class PersistenceGenerator implements Allison1875MainService {
         List<FileFlush> flushes = Lists.newArrayList();
         for (PersistenceDto persistence : persistenceDtos) {
 
-            // 重新生成Entity
-            EntityGeneration entityGeneration = generateEntityService.process(persistence, astForest);
-            if (entityGeneration.isSameNameAndLotNoPresent()) {
-                continue;
-            }
-            flushes.add(FileFlush.build(entityGeneration.getEntityCu()));
+            // 生成Entity
+            JavabeanGeneration javabeanGeneration = generateEntityService.process(persistence, astForest);
+            flushes.add(javabeanGeneration.getFileFlush());
 
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
-                mapper = findOrCreateMapperService.process(persistence, entityGeneration, astForest);
+                mapper = findOrCreateMapperService.process(persistence, javabeanGeneration, astForest);
             } catch (Exception e) {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
 
             // 重新生成Design
-            CompilationUnit designCu = generateDesignService.process(persistence, entityGeneration, mapper, astForest);
+            CompilationUnit designCu = generateDesignService.process(persistence, javabeanGeneration, mapper,
+                    astForest);
             if (designCu != null) {
                 flushes.add(FileFlush.build(designCu));
             }
@@ -103,35 +101,38 @@ public class PersistenceGenerator implements Allison1875MainService {
             customMethods.forEach(MethodDeclaration::remove);
 
             // 在Mapper中生成基础方法
-            String insertMethodName = mapperService.insert(persistence, mapper);
-            String batchInsertMethodName = mapperService.batchInsert(persistence, mapper);
-            String batchInsertEvenNullMethodName = mapperService.batchInsertEvenNull(persistence, mapper);
-            String batchUpdateMethodName = mapperService.batchUpdate(persistence, mapper);
-            String batchUpdateEvenNullMethodName = mapperService.batchUpdateEvenNull(persistence, mapper);
-            String queryByIdMethodName = mapperService.queryById(persistence, mapper);
-            String updateByIdMethodName = mapperService.updateById(persistence, mapper);
-            String updateByIdEvenNullMethodName = mapperService.updateByIdEvenNull(persistence, mapper);
-            String queryByIdsProcMethodName = mapperService.queryByIds(persistence, mapper);
-            String queryByIdsEachIdMethodName = mapperService.queryByIdsEachId(persistence, mapper);
+            String insertMethodName = mapperService.insert(persistence, javabeanGeneration, mapper);
+            String batchInsertMethodName = mapperService.batchInsert(persistence, javabeanGeneration, mapper);
+            String batchInsertEvenNullMethodName = mapperService.batchInsertEvenNull(persistence, javabeanGeneration,
+                    mapper);
+            String batchUpdateMethodName = mapperService.batchUpdate(persistence, javabeanGeneration, mapper);
+            String batchUpdateEvenNullMethodName = mapperService.batchUpdateEvenNull(persistence, javabeanGeneration,
+                    mapper);
+            String queryByIdMethodName = mapperService.queryById(persistence, javabeanGeneration, mapper);
+            String updateByIdMethodName = mapperService.updateById(persistence, javabeanGeneration, mapper);
+            String updateByIdEvenNullMethodName = mapperService.updateByIdEvenNull(persistence, javabeanGeneration,
+                    mapper);
+            String queryByIdsProcMethodName = mapperService.queryByIds(persistence, javabeanGeneration, mapper);
+            String queryByIdsEachIdMethodName = mapperService.queryByIdsEachId(persistence, javabeanGeneration, mapper);
             Collection<KeyMethodNameDto> queryByKeyDtos = Lists.newArrayList();
             Collection<KeyMethodNameDto> deleteByKeyDtos = Lists.newArrayList();
             Collection<QueryByKeysDto> queryByKeysDtos = Lists.newArrayList();
             for (PropertyDto key : persistence.getKeyProperties()) {
                 queryByKeyDtos.add(new KeyMethodNameDto().setKey(key)
-                        .setMethodName(mapperService.queryByKey(persistence, key, mapper)));
+                        .setMethodName(mapperService.queryByKey(persistence, javabeanGeneration, key, mapper)));
                 deleteByKeyDtos.add(new KeyMethodNameDto().setKey(key)
                         .setMethodName(mapperService.deleteByKey(persistence, key, mapper)));
-                queryByKeysDtos.add(mapperService.queryByKeys(persistence, key, mapper));
+                queryByKeysDtos.add(mapperService.queryByKeys(persistence, javabeanGeneration, key, mapper));
             }
-            String queryByEntityMethodName = mapperService.queryByEntity(persistence, mapper);
-            String listAllMethodName = mapperService.listAll(persistence, mapper);
-            String insertOrUpdateMethodName = mapperService.insertOrUpdate(persistence, mapper);
+            String queryByEntityMethodName = mapperService.queryByEntity(persistence, javabeanGeneration, mapper);
+            String listAllMethodName = mapperService.listAll(persistence, javabeanGeneration, mapper);
+            String insertOrUpdateMethodName = mapperService.insertOrUpdate(persistence, javabeanGeneration, mapper);
 
             // 将临时删除的开发者自定义方法添加到Mapper的最后
             customMethods.forEach(one -> mapper.getMembers().addLast(one));
 
             // 在Mapper.xml中覆盖生成基础方法
-            String entityName = getEntityNameInXml(entityGeneration);
+            String entityName = getEntityNameInXml(javabeanGeneration);
             for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
                 try {
                     Path mapperXmlDirectory = astForest.getAstForestRoot().resolve(mapperXmlDirectoryPath);
@@ -171,11 +172,11 @@ public class PersistenceGenerator implements Allison1875MainService {
         }
     }
 
-    private String getEntityNameInXml(EntityGeneration entityGeneration) {
+    private String getEntityNameInXml(JavabeanGeneration javabeanGeneration) {
         if (config.getIsEntityUsingAlias()) {
-            return entityGeneration.getEntityName();
+            return javabeanGeneration.getJavabeanName();
         } else {
-            return entityGeneration.getEntityQualifier();
+            return javabeanGeneration.getJavabeanQualifier();
         }
     }
 

@@ -4,7 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.GenerateDesignServiceImpl;
 
@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.GenerateDesig
 @ImplementedBy(GenerateDesignServiceImpl.class)
 public interface GenerateDesignService {
 
-    CompilationUnit process(PersistenceDto persistence, EntityGeneration entityGeneration,
+    CompilationUnit process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest);
 
 }

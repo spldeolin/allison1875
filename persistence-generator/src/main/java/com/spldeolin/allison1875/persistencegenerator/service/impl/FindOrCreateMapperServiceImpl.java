@@ -19,8 +19,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +36,7 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
-    public ClassOrInterfaceDeclaration process(PersistenceDto persistence, EntityGeneration entityGeneration,
+    public ClassOrInterfaceDeclaration process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             AstForest astForest) throws IOException {
 
         // find
@@ -63,12 +63,12 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
                     persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
             cu.setPackageDeclaration(persistenceGeneratorConfig.getMapperPackage());
             cu.addImport(ImportConstant.JAVA_UTIL);
-            cu.addImport(entityGeneration.getEntityQualifier());
+            cu.addImport(javabeanGeneration.getJavabeanQualifier());
             cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
             LotNo lotNo = LotNo.build(persistence.getLotNo().getModuleAbbr(), persistence.getLotNo().getHash(), false);
             Javadoc javadoc = new JavadocComment(persistence.getDescrption() + lotNo.asJavadocDescription()).parse();
-            javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, entityGeneration.getEntityName()));
+            javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
             javadoc.addBlockTag(
                     new JavadocBlockTag(Type.AUTHOR, persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
             mapper.setJavadocComment(javadoc);

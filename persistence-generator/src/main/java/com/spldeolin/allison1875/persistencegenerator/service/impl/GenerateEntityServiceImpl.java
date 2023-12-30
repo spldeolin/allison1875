@@ -4,20 +4,18 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.factory.JavabeanFactory;
-import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
-import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
+import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.EntityGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.GenerateEntityService;
 import lombok.extern.log4j.Log4j2;
@@ -33,14 +31,13 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
-    public EntityGeneration process(PersistenceDto persistence, AstForest astForest) {
+    public JavabeanGeneration process(PersistenceDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
         arg.setPackageName(persistenceGeneratorConfig.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthorName(persistenceGeneratorConfig.getAuthor());
-        arg.setLotNo(persistence.getLotNo());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
@@ -77,20 +74,8 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             fieldArg.setFieldName(property.getPropertyName());
             arg.getFieldArgs().add(fieldArg);
         }
-        CompilationUnit cu = JavabeanFactory.buildCu(arg);
-        if (cu == null) {
-            return new EntityGeneration().setSameNameAndLotNoPresent(true);
-        }
-
-
-        EntityGeneration result = new EntityGeneration();
-        result.setJavabeanArg(arg);
-        result.setEntity(cu.getPrimaryType().orElseThrow(RuntimeException::new).asClassOrInterfaceDeclaration());
-        result.setEntityName(arg.getClassName());
-        result.setEntityQualifier(cu.getPrimaryType().orElseThrow(QualifierAbsentException::new).getFullyQualifiedName()
-                .orElseThrow(QualifierAbsentException::new));
-        result.setEntityCu(cu);
-        return result;
+        arg.setEntityExistenceResolution(persistenceGeneratorConfig.getEntityExistenceResolution());
+        return JavabeanGenerator.generate(arg);
     }
 
     private String concatEntityDescription(PersistenceDto persistence) {

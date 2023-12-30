@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service;
 
 import java.util.List;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.ImplementedBy;
@@ -18,7 +17,7 @@ public interface ReqRespService {
 
     void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto);
 
-    ReqDtoRespDtoInfo createJavabeans(AstForest astForest, CompilationUnit cu, FirstLineDto firstLineDto,
+    ReqDtoRespDtoInfo createJavabeans(AstForest astForest, FirstLineDto firstLineDto,
             List<ClassOrInterfaceDeclaration> dtos);
 
 }

@@ -5,19 +5,20 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
+import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.factory.JavabeanFactory;
-import com.spldeolin.allison1875.base.factory.javabean.FieldArg;
-import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
+import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -81,13 +82,10 @@ public class TransformParameterServiceImpl implements TransformParameterService 
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
-            CompilationUnit cu = JavabeanFactory.buildCu(javabeanArg);
-            if (phrases.stream().anyMatch(
-                    phrase -> EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN))) {
-                cu.addImport("java.util.*");
-            }
-            flushes.add(FileFlush.build(cu));
-            TypeDeclaration<?> cond = cu.getPrimaryType().orElseThrow(RuntimeException::new);
+            javabeanArg.setEntityExistenceResolution(FileExistenceResolutionEnum.RENAME);
+            JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(javabeanArg);
+            flushes.add(javabeanGeneration.getFileFlush());
+            ClassOrInterfaceDeclaration cond = javabeanGeneration.getCoid();
             Parameter param = new Parameter();
             param.setType(cond.getNameAsString());
             param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));

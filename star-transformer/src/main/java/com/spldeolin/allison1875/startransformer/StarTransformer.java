@@ -13,7 +13,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
-import com.spldeolin.allison1875.base.factory.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
@@ -64,15 +65,16 @@ public class StarTransformer implements Allison1875MainService {
 
                     // transform 'XxxWholeDto' Javabean
                     JavabeanArg javabeanArg = new JavabeanArg();
-                    CompilationUnit wholeDtoCu = transformWholeDtoProc.transformWholeDto(javabeanArg, astForest,
+                    JavabeanGeneration javabeanGeneration = transformWholeDtoProc.transformWholeDto(javabeanArg,
+                            astForest,
                             analysis);
-                    flushes.add(FileFlush.build(wholeDtoCu));
+                    flushes.add(javabeanGeneration.getFileFlush());
 
                     // transform Query Chain and replace Star Chain
                     transformChainProc.transformAndReplaceStar(block, analysis, starChain);
 
                     // add import
-                    cu.addImport(javabeanArg.getPackageName() + "." + javabeanArg.getClassName());
+                    cu.addImport(javabeanGeneration.getJavabeanQualifier());
                     cu.addImport(analysis.getCftEntityQualifier());
                     for (PhraseDto phrase : analysis.getPhrases()) {
                         cu.addImport(phrase.getDtEntityQualifier());
