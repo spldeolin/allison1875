@@ -9,7 +9,6 @@ import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
@@ -20,6 +19,7 @@ import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
@@ -67,10 +67,10 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
             LotNo lotNo = LotNo.build(persistence.getLotNo().getModuleAbbr(), persistence.getLotNo().getHash(), false);
-            Javadoc javadoc = new JavadocComment(persistence.getDescrption() + lotNo.asJavadocDescription()).parse();
+            String comment = persistence.getDescrption() + lotNo.asJavadocDescription();
+            Javadoc javadoc = Javadocs.createJavadoc(comment,
+                    persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
-            javadoc.addBlockTag(
-                    new JavadocBlockTag(Type.AUTHOR, persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now()));
             mapper.setJavadocComment(javadoc);
             mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
             mapper.setInterface(true);
