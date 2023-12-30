@@ -7,10 +7,6 @@ import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.javadoc.Javadoc;
-import com.github.javaparser.javadoc.JavadocBlockTag;
-import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.MoreObjects;
 import com.spldeolin.allison1875.base.ast.FileFlush;
@@ -21,6 +17,7 @@ import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
+import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -65,9 +62,7 @@ public class JavabeanGenerator {
         coid.addAnnotation(AnnotationConstant.FIELD_DEFAULTS_PRIVATE);
         coid.setPublic(true).setInterface(false).setName(className);
         String description = MoreObjects.firstNonNull(arg.getDescription(), "");
-        Javadoc javadoc = new JavadocComment(description).parse();
-        javadoc.getBlockTags().add(new JavadocBlockTag(Type.AUTHOR, arg.getAuthorName() + " " + LocalDate.now()));
-        coid.setJavadocComment(javadoc);
+        coid.setJavadocComment(Javadocs.createJavadoc(description, arg.getAuthorName() + " " + LocalDate.now()));
         cu.addType(coid);
 
         for (FieldArg fieldArg : arg.getFieldArgs()) {
