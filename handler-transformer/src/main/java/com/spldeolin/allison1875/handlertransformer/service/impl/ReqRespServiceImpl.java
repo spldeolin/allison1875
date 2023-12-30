@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -25,10 +26,8 @@ import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
-import com.spldeolin.allison1875.handlertransformer.javabean.BeforeJavabeanCuBuildResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
-import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
 import com.spldeolin.allison1875.handlertransformer.service.FieldService;
 import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
 import lombok.extern.log4j.Log4j2;
@@ -45,9 +44,6 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private FieldService fieldService;
-
-    @Inject
-    private EnsureNoRepeatService ensureNoRepeatService;
 
     @Override
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
@@ -96,10 +92,11 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setAuthorName(handlerTransformerConfig.getAuthor());
             arg.setMore4Javabean((cu1, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
-                    BeforeJavabeanCuBuildResult before = fieldService.beforeJavabeanCuBuild(field, javabeanType);
-                    javabean.replace(field, before.getField());
-                    for (String appendImport : before.getAppendImports()) {
-                        cu1.addImport(appendImport);
+                    for (ImportDeclaration anImport : fieldService.resolveLongType(field, javabeanType)) {
+                        cu1.addImport(anImport);
+                    }
+                    for (ImportDeclaration anImport : fieldService.resolveTimeType(field, javabeanType)) {
+                        cu1.addImport(anImport);
                     }
                 }
                 javabean.setMembers(dto.getMembers());
