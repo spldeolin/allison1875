@@ -15,7 +15,7 @@ public interface BaseConstant {
 
     String TREBLE_INDENT = Strings.repeat(SINGLE_INDENT, 3);
 
-    String NEW_LINE = "\r\n";
+    String NEW_LINE = System.lineSeparator();
 
     String FORMATTER_OFF_MARKER = "<!-- @formatter:off -->";
 
