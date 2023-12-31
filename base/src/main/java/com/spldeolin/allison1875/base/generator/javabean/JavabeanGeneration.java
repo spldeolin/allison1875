@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.base.generator.javabean;
 
+import java.nio.file.Path;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.spldeolin.allison1875.base.ast.FileFlush;
@@ -25,5 +26,7 @@ public class JavabeanGeneration {
     String javabeanQualifier;
 
     ClassOrInterfaceDeclaration coid;
+
+    Path path;
 
 }

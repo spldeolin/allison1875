@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.support.StarSchema;
 public class DetectStarChainServiceImpl implements DetectStarChainService {
 
     @Override
-    public List<MethodCallExpr> process(Node cu) {
+    public List<MethodCallExpr> detect(Node cu) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : cu.findAll(MethodCallExpr.class)) {
             if ("over".equals(mce.getNameAsString()) && mce.getParentNode().isPresent()) {

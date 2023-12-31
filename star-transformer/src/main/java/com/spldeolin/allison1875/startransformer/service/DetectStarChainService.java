@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.startransformer.service.impl.DetectStarChainSer
 @ImplementedBy(DetectStarChainServiceImpl.class)
 public interface DetectStarChainService {
 
-    List<MethodCallExpr> process(Node cu);
+    List<MethodCallExpr> detect(Node cu);
 
 }

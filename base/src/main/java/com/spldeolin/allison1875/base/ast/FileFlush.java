@@ -8,10 +8,12 @@ import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.spldeolin.allison1875.base.util.ast.Locations;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2023-05-26
  */
+@Log4j2
 public class FileFlush {
 
     private File src;
@@ -45,6 +47,7 @@ public class FileFlush {
     public void flush() {
         try {
             FileUtils.writeStringToFile(src, newContent, StandardCharsets.UTF_8);
+            log.info("File flushed, path={}", src.getPath());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -1,14 +1,12 @@
 package com.spldeolin.allison1875.startransformer.service.impl;
 
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -19,9 +17,9 @@ import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.NamingUtils;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
-import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.startransformer.service.AnalyzeChainService;
+import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
+import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -29,12 +27,11 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class AnalyzeChainServiceImpl implements AnalyzeChainService {
+public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
 
     @Override
-    public ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
-            throws IllegalChainException {
-        return this.process(starChain, astForest, wholeDtoNames, Lists.newArrayList(), Lists.newArrayList(),
+    public StarAnalysisDto analyze(MethodCallExpr starChain, AstForest astForest) throws IllegalChainException {
+        return this.analyzeRecursively(starChain, astForest, Lists.newArrayList(), Lists.newArrayList(),
                 Lists.newArrayList());
     }
 
@@ -47,8 +44,8 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         }
     }
 
-    private ChainAnalysisDto process(MethodCallExpr mce, AstForest astForest, Set<String> wholeDtoNames,
-            List<PhraseDto> phrases, List<String> keys, List<String> mkeys) throws IllegalChainException {
+    private StarAnalysisDto analyzeRecursively(MethodCallExpr mce, AstForest astForest, List<PhraseDto> phrases,
+            List<String> keys, List<String> mkeys) throws IllegalChainException {
         if (ChainMethodEnum.oo.toString().equals(mce.getNameAsString())) {
             PhraseDto phrase = new PhraseDto();
             phrase.setIsOneToOne(true);
@@ -97,7 +94,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         }
         if (ChainMethodEnum.cft.toString().equals(mce.getNameAsString())) {
             FieldAccessExpr fae = mce.getArgument(0).asFieldAccessExpr();
-            ChainAnalysisDto analysis = new ChainAnalysisDto();
+            StarAnalysisDto analysis = new StarAnalysisDto();
             analysis.setCftEntityQualifier(
                     fae.resolve().getType().asReferenceType().getGenericParameterByName("E").get().describe());
             analysis.setCftEntityName(NamingUtils.qualifierToTypeName(analysis.getCftEntityQualifier()));
@@ -109,35 +106,12 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             analysis.setWholeDtoName(wholeDtoName);
             String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(analysis)));
             analysis.setLotNo(String.format("ST%s-%s", Allison1875.SHORT_VERSION, hash));
-            wholeDtoNames.add(wholeDtoName);
             return analysis;
         }
         if (mce.getScope().filter(Expression::isMethodCallExpr).isPresent()) {
-            return this.process(mce.getScope().get().asMethodCallExpr(), astForest, wholeDtoNames, phrases, keys,
-                    mkeys);
+            return this.analyzeRecursively(mce.getScope().get().asMethodCallExpr(), astForest, phrases, keys, mkeys);
         }
-        throw new RuntimeException("impossible unless bug.");
-    }
-
-
-    /**
-     * 确保参数coidName与在AstForest中所有的java文件名均不重名
-     */
-    private String ensureNoRepeatInAstForest(AstForest astForest, Set<String> wholeDtoNames, String coidName) {
-        boolean conflicting = astForest.getJavasInForest().stream()
-                .anyMatch(java -> Files.getNameWithoutExtension(java.toFile().getName()).equals(coidName));
-        conflicting |= wholeDtoNames.contains(coidName);
-        if (conflicting) {
-            String rename = concatEx(coidName);
-            log.info("File [{}.java] exist in AstForest, rename to [{}.java]", coidName, rename);
-            return ensureNoRepeatInAstForest(astForest, wholeDtoNames, rename);
-        } else {
-            return coidName;
-        }
-    }
-
-    private String concatEx(String coidName) {
-        return MoreStringUtils.replaceLast(coidName, "Dto", "ExDto");
+        throw new IllegalChainException("impossible unless bug.");
     }
 
 }

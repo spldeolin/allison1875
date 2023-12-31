@@ -4,16 +4,16 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.startransformer.service.impl.TransformChainServiceImpl;
+import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
+import com.spldeolin.allison1875.startransformer.service.impl.TransformStarChainServiceImpl;
 
 /**
  * @author Deolin 2023-12-28
  */
-@ImplementedBy(TransformChainServiceImpl.class)
-public interface TransformChainService {
+@ImplementedBy(TransformStarChainServiceImpl.class)
+public interface TransformStarChainService {
 
-    void transformAndReplaceStar(BlockStmt block, ChainAnalysisDto analysis, MethodCallExpr starChain,
+    void transformStarChain(BlockStmt block, StarAnalysisDto analysis, MethodCallExpr starChain,
             JavabeanGeneration javabeanGeneration);
 
 }

@@ -1,13 +1,11 @@
 package com.spldeolin.allison1875.startransformer;
 
 import java.util.List;
-import java.util.Set;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
@@ -16,12 +14,12 @@ import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
-import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.startransformer.service.AnalyzeChainService;
+import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
+import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService;
 import com.spldeolin.allison1875.startransformer.service.DetectStarChainService;
-import com.spldeolin.allison1875.startransformer.service.TransformChainService;
-import com.spldeolin.allison1875.startransformer.service.TransformWholeDtoService;
+import com.spldeolin.allison1875.startransformer.service.GenerateWholeDtoService;
+import com.spldeolin.allison1875.startransformer.service.TransformStarChainService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -32,46 +30,61 @@ import lombok.extern.log4j.Log4j2;
 public class StarTransformer implements Allison1875MainService {
 
     @Inject
-    private DetectStarChainService detectStarChainProc;
+    private DetectStarChainService detectStarChainService;
 
     @Inject
-    private AnalyzeChainService analyzeChainProc;
+    private AnalyzeStarChainService analyzeStarChainService;
 
     @Inject
-    private TransformWholeDtoService transformWholeDtoProc;
+    private GenerateWholeDtoService generateWholeDtoService;
 
     @Inject
-    private TransformChainService transformChainProc;
+    private TransformStarChainService transformStarChainService;
 
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
-        Set<String> wholeDtoNames = Sets.newHashSet();
 
         for (CompilationUnit cu : astForest) {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
+
             for (BlockStmt block : cu.findAll(BlockStmt.class)) {
-                for (MethodCallExpr starChain : detectStarChainProc.process(block)) {
+                for (MethodCallExpr starChain : detectStarChainService.detect(block)) {
+
                     // analyze chain
-                    ChainAnalysisDto analysis;
+                    StarAnalysisDto analysis;
                     try {
-                        analysis = analyzeChainProc.process(starChain, astForest, wholeDtoNames);
-                        log.info("chainAnalysis={}", analysis);
+                        analysis = analyzeStarChainService.analyze(starChain, astForest);
+                        log.info("success to analyze Star Chain, analysis={}", analysis);
                     } catch (IllegalChainException e) {
-                        log.error("illegal chain: " + e.getMessage());
+                        log.error("fail to analyze Star Chain, starChain={}", starChain, e);
                         continue;
                     }
 
-                    // transform 'XxxWholeDto' Javabean
-                    JavabeanGeneration wholeDtoGeneration = transformWholeDtoProc.transformWholeDto(astForest,
-                            analysis);
+                    // generate 'XxxWholeDto' Javabean
+                    JavabeanGeneration wholeDtoGeneration;
+                    try {
+                        wholeDtoGeneration = generateWholeDtoService.generate(astForest, analysis);
+                        log.info("success to generate Whole DTO, qualifier={} path={}",
+                                wholeDtoGeneration.getJavabeanQualifier(), wholeDtoGeneration.getPath());
+                    } catch (Exception e) {
+                        log.error("fail to generate Whole DTO, analysis={}", analysis, e);
+                        continue;
+                    }
                     flushes.add(wholeDtoGeneration.getFileFlush());
 
                     // transform Query Chain and replace Star Chain
-                    transformChainProc.transformAndReplaceStar(block, analysis, starChain, wholeDtoGeneration);
+                    try {
+                        transformStarChainService.transformStarChain(block, analysis, starChain, wholeDtoGeneration);
+                        log.info("success to transform Star Chain");
+                    } catch (Exception e) {
+                        log.error("fail to transformStarChain Star Chain, starAnalysis={}", analysis, e);
+                    }
 
                     // add import
+                    cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
+                    cu.addImport(ImportConstant.JAVA_UTIL);
                     cu.addImport(wholeDtoGeneration.getJavabeanQualifier());
                     cu.addImport(analysis.getCftEntityQualifier());
                     for (PhraseDto phrase : analysis.getPhrases()) {
@@ -80,15 +93,12 @@ public class StarTransformer implements Allison1875MainService {
                     anyTransformed = true;
                 }
             }
-
             if (anyTransformed) {
-                cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
-                cu.addImport(ImportConstant.JAVA_UTIL);
                 flushes.add(FileFlush.buildLexicalPreserving(cu));
             }
         }
 
-        // write all to file
+        // flush
         if (flushes.size() > 0) {
             flushes.forEach(FileFlush::flush);
             log.info("# REMEBER REFORMAT CODE #");

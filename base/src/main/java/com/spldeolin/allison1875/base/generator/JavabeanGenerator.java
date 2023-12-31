@@ -90,6 +90,7 @@ public class JavabeanGenerator {
         result.setJavabeanName(className);
         result.setJavabeanQualifier(arg.getPackageName() + "." + className);
         result.setCoid(coid);
+        result.setPath(absulutePath);
         return result;
     }
 
