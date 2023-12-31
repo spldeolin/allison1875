@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.GenerateEntit
 @ImplementedBy(GenerateEntityServiceImpl.class)
 public interface GenerateEntityService {
 
-    JavabeanGeneration process(PersistenceDto persistence, AstForest astForest);
+    JavabeanGeneration generate(PersistenceDto persistence, AstForest astForest);
 
 }

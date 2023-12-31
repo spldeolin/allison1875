@@ -112,9 +112,14 @@ public final class PersistenceGeneratorConfig {
     @NotNull Collection<String> alreadyInSuperEntity;
 
     /**
-     * mapper接口中的方法是否打印Lot No信息
+     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
      */
-    Boolean mapperInterfaceMethodPrintLotNo = true;
+    @NotNull Boolean enableNoModifyAnnounce;
+
+    /**
+     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: PG1000S-967D9357 的声明
+     */
+    @NotNull Boolean enableLotNoAnnounce;
 
     /**
      * 是否为entity实现java.io.Serializable接口

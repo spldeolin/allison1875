@@ -74,7 +74,7 @@ public class PersistenceGenerator implements Allison1875MainService {
         for (PersistenceDto persistence : persistenceDtos) {
 
             // 生成Entity
-            JavabeanGeneration javabeanGeneration = generateEntityService.process(persistence, astForest);
+            JavabeanGeneration javabeanGeneration = generateEntityService.generate(persistence, astForest);
             flushes.add(javabeanGeneration.getFileFlush());
 
             // 寻找或创建Mapper
@@ -93,7 +93,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                 flushes.add(FileFlush.build(designCu));
             }
 
-            // 删除Mapper中所有Allison 1875生成的并且声明了不可人为修改的方法
+            // 删除Mapper中所有声明了LotNoAnnounce或者NoModifyAnnounce的方法
             deleteAllison1875MethodService.process(mapper);
 
             // 临时删除Mapper中所有开发者自定义方法

@@ -13,14 +13,14 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
-import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlFileService;
 
@@ -29,6 +29,13 @@ import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlFileServi
  */
 @Singleton
 public class MapperXmlFileServiceImpl implements MapperXmlFileService {
+
+    private static final String startMark = "[START]";
+
+    private static final String endMark = "[END]";
+
+    @Inject
+    private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
     public FileFlush process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
@@ -54,20 +61,18 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
         List<String> lines = MoreStringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines(sourceCodes, persistence);
 
-        if (StringUtils.containsAny(content, BaseConstant.BY_ALLISON_1875, LotNo.TAG_PREFIXION + ModuleAbbr.PG)) {
+        if (StringUtils.containsAny(content, startMark, endMark)) {
             boolean inAnchorRange = false;
             for (String line : lines) {
                 if (!inAnchorRange) {
-                    if (StringUtils.containsAny(line, BaseConstant.BY_ALLISON_1875,
-                            LotNo.TAG_PREFIXION + ModuleAbbr.PG)) {
+                    if (StringUtils.containsAny(line, startMark, endMark)) {
                         // 从 范围外 进入
                         inAnchorRange = true;
                     } else {
                         newLines.add(line);
                     }
                 } else {
-                    if (StringUtils.containsAny(line, BaseConstant.BY_ALLISON_1875,
-                            LotNo.TAG_PREFIXION + ModuleAbbr.PG)) {
+                    if (StringUtils.containsAny(line, startMark, endMark)) {
                         // 从 范围内 离开
                         inAnchorRange = false;
                         newLines.addAll(generatedLines);
@@ -86,12 +91,24 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
             Collections.reverse(newLines);
         }
 
-        return FileFlush.build(mapperXmlFile, Joiner.on(System.lineSeparator()).join(newLines));
+        return FileFlush.build(mapperXmlFile, Joiner.on(BaseConstant.NEW_LINE).join(newLines));
+    }
+
+    private String concatXmlComment(PersistenceDto persistence) {
+        String result = "<!--";
+        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()) {
+            result += " " + BaseConstant.NO_MODIFY_ANNOUNCE;
+        }
+        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+            result += " " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
+        }
+        result += " -->";
+        return result;
     }
 
     private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes, PersistenceDto persistence) {
         List<String> auto = Lists.newArrayList();
-        auto.add(BaseConstant.SINGLE_INDENT + persistence.getLotNo().asXmlComment().replace("<!--", "<!-- [START]"));
+        auto.add(BaseConstant.SINGLE_INDENT + concatXmlComment(persistence).replace("<!--", "<!-- " + startMark));
         auto.add("");
         for (Collection<String> sourceCode : sourceCodes) {
             if (CollectionUtils.isNotEmpty(sourceCode)) {
@@ -104,11 +121,11 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
                 }
             }
         }
-        if (auto.get(auto.size() - 1).equals("")) {
+        if (auto.get(auto.size() - 1).isEmpty()) {
             auto.remove(auto.size() - 1);
         }
         auto.add("");
-        auto.add(BaseConstant.SINGLE_INDENT + persistence.getLotNo().asXmlComment().replace("<!--", "<!-- [END]"));
+        auto.add(BaseConstant.SINGLE_INDENT + concatXmlComment(persistence).replace("<!--", "<!-- " + endMark));
         return auto;
     }
 

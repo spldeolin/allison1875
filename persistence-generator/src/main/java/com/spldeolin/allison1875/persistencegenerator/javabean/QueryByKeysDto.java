@@ -14,10 +14,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QueryByKeysDto {
 
-     PropertyDto key;
+    PropertyDto key;
 
-     String methodName;
+    String methodName;
 
-     String varsName;
+    String varsName;
 
 }

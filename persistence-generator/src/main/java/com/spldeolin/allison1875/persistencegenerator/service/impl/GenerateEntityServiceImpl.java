@@ -4,7 +4,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
@@ -31,12 +30,12 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
-    public JavabeanGeneration process(PersistenceDto persistence, AstForest astForest) {
+    public JavabeanGeneration generate(PersistenceDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
         arg.setPackageName(persistenceGeneratorConfig.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
-        arg.setDescription(concatEntityDescription(persistence));
+        arg.setDescription(concatEntityCooment(persistence));
         arg.setAuthorName(persistenceGeneratorConfig.getAuthor());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
@@ -76,26 +75,36 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
         return JavabeanGenerator.generate(arg);
     }
 
-    private String concatEntityDescription(PersistenceDto persistence) {
-        return persistence.getDescrption() + BaseConstant.NEW_LINE + "<p>" + persistence.getTableName()
-                + Strings.repeat(BaseConstant.NEW_LINE, 2) + persistence.getLotNo().asJavadocDescription();
+    private String concatEntityCooment(PersistenceDto persistence) {
+        String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
+        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()
+                || persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE;
+        }
+        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
+        }
+        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
+        }
+        return result;
     }
 
     private String cancatPropertyDescription(PropertyDto property) {
         String result = property.getDescription();
-        result += BaseConstant.NEW_LINE + "<p>" + property.getColumnName();
+        result += BaseConstant.JAVA_DOC_NEW_LINE + property.getColumnName();
         if (property.getLength() != null && property.getLength() != 0) {
-            result += BaseConstant.NEW_LINE + "<p>长度：" + property.getLength();
+            result += BaseConstant.JAVA_DOC_NEW_LINE + "长度：" + property.getLength();
         }
         if (property.getNotnull()) {
-            result += BaseConstant.NEW_LINE + "<p>不能为null";
+            result += BaseConstant.JAVA_DOC_NEW_LINE + "不能为null";
         }
         if (property.getDefaultV() != null) {
             String defaultV = property.getDefaultV();
             if (!"CURRENT_TIMESTAMP".equals(defaultV)) {
                 defaultV = "'" + defaultV + "'";
             }
-            result += BaseConstant.NEW_LINE + "<p>默认：" + defaultV;
+            result += BaseConstant.JAVA_DOC_NEW_LINE + "默认：" + defaultV;
         }
         return result;
     }

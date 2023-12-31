@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
 import java.util.Collection;
-import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -47,6 +46,6 @@ public class PersistenceDto {
      */
     Boolean isDeleteFlagExist = false;
 
-    LotNo lotNo;
+    String lotNo;
 
 }

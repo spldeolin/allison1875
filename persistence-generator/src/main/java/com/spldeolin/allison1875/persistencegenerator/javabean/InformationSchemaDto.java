@@ -11,24 +11,24 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InformationSchemaDto {
 
-     String tableName;
+    String tableName;
 
-     String tableComment;
+    String tableComment;
 
-     String columnName;
+    String columnName;
 
-     String dataType;
+    String dataType;
 
-     String columnType;
+    String columnType;
 
-     String columnComment;
+    String columnComment;
 
-     String columnKey;
+    String columnKey;
 
-     Long characterMaximumLength;
+    Long characterMaximumLength;
 
-     String isNullable; // YES NO
+    String isNullable; // YES NO
 
-     String columnDefault;
+    String columnDefault;
 
 }

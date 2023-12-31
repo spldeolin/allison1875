@@ -12,14 +12,12 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
-import com.github.javaparser.javadoc.Javadoc;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
@@ -50,9 +48,8 @@ public class MapperServiceImpl implements MapperService {
         }
         String methodName = this.calcMethodName(mapper, "batchInsertEvenNull");
         MethodDeclaration insert = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("批量插入，为null的属性会被作为null插入" + lotNoText).parse();
-        insert.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence, "批量插入，为null的属性会被作为null插入");
+        insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
@@ -70,9 +67,8 @@ public class MapperServiceImpl implements MapperService {
         }
         String methodName = this.calcMethodName(mapper, "batchInsert");
         MethodDeclaration insert = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("批量插入" + lotNoText).parse();
-        insert.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence, "批量插入");
+        insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
@@ -91,9 +87,8 @@ public class MapperServiceImpl implements MapperService {
 
         String methodName = this.calcMethodName(mapper, "batchUpdateEvenNull");
         MethodDeclaration update = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("批量根据ID更新数据，为null对应的字段会被更新为null" + lotNoText).parse();
-        update.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence, "批量根据ID更新数据，为null对应的字段会被更新为null");
+        update.setJavadocComment(comment);
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
@@ -112,9 +107,8 @@ public class MapperServiceImpl implements MapperService {
 
         String methodName = this.calcMethodName(mapper, "batchUpdate");
         MethodDeclaration update = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("批量根据ID更新数据" + lotNoText).parse();
-        update.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence, "批量根据ID更新数据");
+        update.setJavadocComment(comment);
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
@@ -133,9 +127,8 @@ public class MapperServiceImpl implements MapperService {
                 "deleteBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
         String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("根据「" + key.getDescription() + "」删除" + lotNoText).parse();
-        method.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence, "根据「" + key.getDescription() + "」删除");
+        method.setJavadocComment(comment);
         method.setType(PrimitiveType.intType());
         method.setName(methodName);
 
@@ -154,10 +147,9 @@ public class MapperServiceImpl implements MapperService {
         }
         String methodName = this.calcMethodName(mapper, "insertOrUpdate");
         MethodDeclaration insert = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment(
-                "尝试插入，若指定了id并存在，则更新，即INSERT ON DUPLICATE KEY UPDATE" + lotNoText).parse();
-        insert.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence,
+                "尝试插入，若指定了id并存在，则更新，即INSERT ON DUPLICATE KEY UPDATE");
+        insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(javabeanGeneration.getJavabeanName(), "entity");
@@ -174,9 +166,8 @@ public class MapperServiceImpl implements MapperService {
         }
         String methodName = this.calcMethodName(mapper, "insert");
         MethodDeclaration insert = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("插入" + lotNoText).parse();
-        insert.setJavadocComment(javadoc);
+        String comment = concatMapperMethodComment(persistence, "插入");
+        insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(javabeanGeneration.getJavabeanName(), "entity");
@@ -195,11 +186,10 @@ public class MapperServiceImpl implements MapperService {
         if (persistence.getIdProperties().size() > 0) {
             methodName = this.calcMethodName(mapper, "listAll");
             MethodDeclaration listAll = new MethodDeclaration();
-            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-            Javadoc javadoc = new JavadocComment("获取全部" + lotNoText).parse();
+            String comment = concatMapperMethodComment(persistence, "获取全部");
             listAll.setType(StaticJavaParser.parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
             listAll.setName(methodName);
-            listAll.setJavadocComment(javadoc);
+            listAll.setJavadocComment(comment);
             listAll.setBody(null);
             mapper.getMembers().addLast(listAll);
         }
@@ -215,14 +205,13 @@ public class MapperServiceImpl implements MapperService {
 
         String methodName = this.calcMethodName(mapper, "queryByEntity");
         MethodDeclaration queryByEntity = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + lotNoText).parse();
+        String comment = concatMapperMethodComment(persistence, "根据实体内的属性查询");
         mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         queryByEntity.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         queryByEntity.setName(methodName);
         queryByEntity.addParameter(javabeanGeneration.getJavabeanName(), "entity");
         queryByEntity.setBody(null);
-        queryByEntity.setJavadocComment(javadoc);
+        queryByEntity.setJavadocComment(comment);
         mapper.getMembers().addLast(queryByEntity);
         return methodName;
     }
@@ -237,8 +226,7 @@ public class MapperServiceImpl implements MapperService {
         if (persistence.getIdProperties().size() > 0) {
             methodName = this.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
-            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-            Javadoc javadoc = new JavadocComment("根据ID查询" + lotNoText).parse();
+            String comment = concatMapperMethodComment(persistence, "根据ID查询");
             queryById.setType(new ClassOrInterfaceType().setName(javabeanGeneration.getJavabeanName()));
             queryById.setName(methodName);
 
@@ -257,7 +245,7 @@ public class MapperServiceImpl implements MapperService {
                     queryById.addParameter(parameter);
                 }
             }
-            queryById.setJavadocComment(javadoc);
+            queryById.setJavadocComment(comment);
             queryById.setBody(null);
             mapper.getMembers().addLast(queryById);
         }
@@ -274,8 +262,7 @@ public class MapperServiceImpl implements MapperService {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIdsEachId");
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
-            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-            Javadoc javadoc = new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + lotNoText).parse();
+            String comment = concatMapperMethodComment(persistence, "根据多个ID查询，并以ID作为key映射到Map");
             CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
             cu.addImport(ImportConstant.APACHE_IBATIS);
             cu.addImport(ImportConstant.JAVA_UTIL);
@@ -290,7 +277,7 @@ public class MapperServiceImpl implements MapperService {
             queryByIdsEachId.addParameter(
                     parseParameter("@Param(\"" + varsName + "\") Collection<" + pkTypeName + "> " + varsName));
             queryByIdsEachId.setBody(null);
-            queryByIdsEachId.setJavadocComment(javadoc);
+            queryByIdsEachId.setJavadocComment(comment);
             mapper.getMembers().addLast(queryByIdsEachId);
         }
         return methodName;
@@ -306,8 +293,7 @@ public class MapperServiceImpl implements MapperService {
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
-            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-            Javadoc javadoc = new JavadocComment("根据多个ID查询" + lotNoText).parse();
+            String comment = concatMapperMethodComment(persistence, "根据多个ID查询");
             CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
             cu.addImport(ImportConstant.APACHE_IBATIS);
             cu.addImport(ImportConstant.JAVA_UTIL);
@@ -320,7 +306,7 @@ public class MapperServiceImpl implements MapperService {
                             + varsName);
             queryByIds.addParameter(parameter);
             queryByIds.setBody(null);
-            queryByIds.setJavadocComment(javadoc);
+            queryByIds.setJavadocComment(comment);
             mapper.getMembers().addLast(queryByIds);
         }
         return methodName;
@@ -334,8 +320,7 @@ public class MapperServiceImpl implements MapperService {
         }
         String methodName = calcMethodName(mapper, "queryBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("根据「" + key.getDescription() + "」查询" + lotNoText).parse();
+        String comment = concatMapperMethodComment(persistence, "根据「" + key.getDescription() + "」查询");
         mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
@@ -343,7 +328,7 @@ public class MapperServiceImpl implements MapperService {
         Parameter parameter = parseParameter(key.getJavaType().getSimpleName() + " " + varName);
         method.addParameter(parameter);
         method.setBody(null);
-        method.setJavadocComment(javadoc);
+        method.setJavadocComment(comment);
         mapper.getMembers().addLast(method);
         return methodName;
     }
@@ -357,8 +342,7 @@ public class MapperServiceImpl implements MapperService {
         String methodName = calcMethodName(mapper,
                 "queryBy" + English.plural(MoreStringUtils.upperFirstLetter(key.getPropertyName())));
         MethodDeclaration method = new MethodDeclaration();
-        String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-        Javadoc javadoc = new JavadocComment("根据多个「" + key.getDescription() + "」查询" + lotNoText).parse();
+        String comment = concatMapperMethodComment(persistence, "根据多个「" + key.getDescription() + "」查询");
         mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
@@ -368,7 +352,7 @@ public class MapperServiceImpl implements MapperService {
         Parameter parameter = parseParameter(paramAnno + " " + typeName + " " + varsName);
         method.addParameter(parameter);
         method.setBody(null);
-        method.setJavadocComment(javadoc);
+        method.setJavadocComment(comment);
         mapper.getMembers().addLast(method);
         return new QueryByKeysDto().setKey(key).setMethodName(methodName).setVarsName(varsName);
     }
@@ -383,10 +367,9 @@ public class MapperServiceImpl implements MapperService {
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateByIdEvenNull");
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
-            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-            Javadoc javadoc = new JavadocComment(
-                    "根据ID更新数据，为null属性对应的字段会被更新为null" + lotNoText).parse();
-            updateByIdEvenNull.setJavadocComment(javadoc);
+            String comment = concatMapperMethodComment(persistence,
+                    "根据ID更新数据，为null属性对应的字段会被更新为null");
+            updateByIdEvenNull.setJavadocComment(comment);
             updateByIdEvenNull.setType(PrimitiveType.intType());
             updateByIdEvenNull.setName(methodName);
             updateByIdEvenNull.addParameter(javabeanGeneration.getJavabeanName(), "entity");
@@ -406,9 +389,8 @@ public class MapperServiceImpl implements MapperService {
         if (persistence.getIdProperties().size() > 0) {
             methodName = calcMethodName(mapper, "updateById");
             MethodDeclaration updateById = new MethodDeclaration();
-            String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
-            Javadoc javadoc = new JavadocComment("根据ID更新数据，忽略值为null的属性" + lotNoText).parse();
-            updateById.setJavadocComment(javadoc);
+            String comment = concatMapperMethodComment(persistence, "根据ID更新数据，忽略值为null的属性");
+            updateById.setJavadocComment(comment);
             updateById.setType(PrimitiveType.intType());
             updateById.setName(methodName);
             updateById.addParameter(javabeanGeneration.getJavabeanName(), "entity");
@@ -437,17 +419,26 @@ public class MapperServiceImpl implements MapperService {
         List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
         for (MethodDeclaration method : methods) {
             Collection<String> descriptionLines = JavadocDescriptions.getAsLines(method);
-            if (descriptionLines.stream().anyMatch(line -> line.contains(LotNo.TAG_PREFIXION))) {
+            if (descriptionLines.stream().anyMatch(line -> line.contains(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION))) {
                 method.remove();
             }
         }
         return mapper.getMethodsByName(methodName).size() > 0;
     }
 
-    private String getLotNoText(PersistenceGeneratorConfig persistenceGeneratorConfig, PersistenceDto persistence) {
-        String lotNoText = persistenceGeneratorConfig.getMapperInterfaceMethodPrintLotNo() ? persistence.getLotNo()
-                .asJavadocDescription() : "\n\n<p>" + LotNo.NO_MANUAL_MODIFICATION;
-        return lotNoText;
+    private String concatMapperMethodComment(PersistenceDto persistence, String methodDescription) {
+        String result = methodDescription;
+        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()
+                || persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE;
+        }
+        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
+        }
+        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
+        }
+        return result;
     }
 
 }

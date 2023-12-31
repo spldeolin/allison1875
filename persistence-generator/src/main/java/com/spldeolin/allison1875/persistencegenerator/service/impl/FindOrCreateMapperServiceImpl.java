@@ -15,8 +15,8 @@ import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
@@ -66,9 +66,7 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             cu.addImport(javabeanGeneration.getJavabeanQualifier());
             cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
-            LotNo lotNo = LotNo.build(persistence.getLotNo().getModuleAbbr(), persistence.getLotNo().getHash(), false);
-            String comment = persistence.getDescrption() + lotNo.asJavadocDescription();
-            Javadoc javadoc = Javadocs.createJavadoc(comment,
+            Javadoc javadoc = Javadocs.createJavadoc(concatMapperDescription(persistence),
                     persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
             mapper.setJavadocComment(javadoc);
@@ -77,6 +75,15 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             cu.addType(mapper);
         }
         return mapper;
+    }
+
+    private String concatMapperDescription(PersistenceDto persistence) {
+        String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
+        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE;
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
+        }
+        return result;
     }
 
 }

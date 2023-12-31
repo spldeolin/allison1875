@@ -11,13 +11,13 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
-import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 

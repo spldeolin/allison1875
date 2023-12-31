@@ -14,8 +14,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeyMethodNameDto {
 
-     PropertyDto key;
+    PropertyDto key;
 
-     String methodName;
+    String methodName;
 
 }

@@ -1,9 +1,8 @@
-package com.spldeolin.allison1875.persistencegenerator.facade.util;
+package com.spldeolin.allison1875.base.util;
 
 import java.nio.charset.StandardCharsets;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.hash.Hashing;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
 
 /**
  * @author Deolin 2021-08-30
@@ -12,6 +11,10 @@ public class HashingUtils {
 
     private HashingUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
+    public static String hashString(String string) {
+        return Hashing.murmur3_128().hashString(string, StandardCharsets.UTF_8).toString();
     }
 
     public static String hashTypeDeclaration(TypeDeclaration<?> typeDeclaration) {

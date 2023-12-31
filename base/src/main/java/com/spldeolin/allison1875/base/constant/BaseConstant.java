@@ -7,8 +7,6 @@ import com.google.common.base.Strings;
  */
 public interface BaseConstant {
 
-    String BY_ALLISON_1875 = "由Allison 1875生成，请勿人为修改";
-
     String SINGLE_INDENT = "    ";
 
     String DOUBLE_INDENT = Strings.repeat(SINGLE_INDENT, 2);
@@ -17,8 +15,14 @@ public interface BaseConstant {
 
     String NEW_LINE = System.lineSeparator();
 
+    String JAVA_DOC_NEW_LINE = System.lineSeparator() + "<p>";
+
     String FORMATTER_OFF_MARKER = "<!-- @formatter:off -->";
 
     String FORMATTER_ON_MARKER = "<!-- @formatter:on -->";
+
+    String LOT_NO_ANNOUNCE_PREFIXION = "Allison 1875 Lot No: ";
+
+    String NO_MODIFY_ANNOUNCE = "Any modifications may be overwritten by future code generations.";
 
 }

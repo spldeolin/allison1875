@@ -12,6 +12,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Maps;
@@ -21,14 +22,13 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.facade.util.HashingUtils;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.FindMethodNamingOffsetService;
 import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
@@ -87,9 +87,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         }
         cu.addOrphanComment(new LineComment("@formatter:" + "off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
-        Javadoc javadoc = javabeanGeneration.getCoid().getJavadoc()
-                .orElse(Javadocs.createJavadoc(persistence.getLotNo().asJavadocDescription(),
-                        persistenceGeneratorConfig.getAuthor()));
+        Javadoc javadoc = javabeanGeneration.getCoid().getJavadoc().orElse(new Javadoc(new JavadocDescription()));
         designCoid.setJavadocComment(javadoc);
         designCoid.addAnnotation(StaticJavaParser.parseAnnotation("@SuppressWarnings(\"all\")"));
         designCoid.setPublic(true).setInterface(false).setName(designName);
