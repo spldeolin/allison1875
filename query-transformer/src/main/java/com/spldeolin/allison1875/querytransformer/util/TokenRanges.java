@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.util.ast;
+package com.spldeolin.allison1875.querytransformer.util;
 
 import com.github.javaparser.JavaToken;
 import com.github.javaparser.TokenRange;

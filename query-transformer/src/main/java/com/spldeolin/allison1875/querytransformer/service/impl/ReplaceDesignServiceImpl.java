@@ -12,7 +12,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
-import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
@@ -22,6 +21,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformati
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
 import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
+import com.spldeolin.allison1875.querytransformer.util.TokenRanges;
 import lombok.extern.log4j.Log4j2;
 
 /**
