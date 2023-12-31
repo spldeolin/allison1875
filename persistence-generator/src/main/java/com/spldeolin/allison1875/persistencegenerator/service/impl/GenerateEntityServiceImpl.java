@@ -35,7 +35,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
         arg.setAstForest(astForest);
         arg.setPackageName(persistenceGeneratorConfig.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
-        arg.setDescription(concatEntityCooment(persistence));
+        arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthorName(persistenceGeneratorConfig.getAuthor());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
@@ -75,7 +75,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
         return JavabeanGenerator.generate(arg);
     }
 
-    private String concatEntityCooment(PersistenceDto persistence) {
+    private String concatEntityDescription(PersistenceDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
         if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()
                 || persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
