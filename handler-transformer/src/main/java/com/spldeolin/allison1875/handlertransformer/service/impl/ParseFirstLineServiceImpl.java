@@ -6,6 +6,9 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.Version;
+import com.spldeolin.allison1875.base.util.HashingUtils;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
@@ -71,6 +74,8 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
             result.setHandlerDescription("未指定描述");
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
+        String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(result)));
+        result.setLotNo(String.format("PG%s-%s", Version.lotNoVersion, hash));
         return result;
     }
 

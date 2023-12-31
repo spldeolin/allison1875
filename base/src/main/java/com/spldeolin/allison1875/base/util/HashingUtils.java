@@ -14,7 +14,7 @@ public class HashingUtils {
     }
 
     public static String hashString(String string) {
-        return Hashing.murmur3_128().hashString(string, StandardCharsets.UTF_8).toString();
+        return Hashing.murmur3_32().hashString(string, StandardCharsets.UTF_8).toString();
     }
 
     public static String hashTypeDeclaration(TypeDeclaration<?> typeDeclaration) {

@@ -5,8 +5,11 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
@@ -18,12 +21,15 @@ import com.spldeolin.allison1875.handlertransformer.service.CreateHandlerService
 @Singleton
 public class CreateHandlerServiceImpl implements CreateHandlerService {
 
+    @Inject
+    private HandlerTransformerConfig handlerTransformerConfig;
+
     @Override
     public HandlerCreation createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
             ServiceGeneration serviceGeneration) {
         MethodDeclaration handler = new MethodDeclaration();
 
-        handler.setJavadocComment(firstLineDto.getHandlerDescription());
+        handler.setJavadocComment(concatHandlerDescription(firstLineDto));
 
         handler.addAnnotation(
                 StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", firstLineDto.getHandlerUrl())));
@@ -68,6 +74,14 @@ public class CreateHandlerServiceImpl implements CreateHandlerService {
         handler.setBody(body);
 
         return new HandlerCreation().setHandler(handler);
+    }
+
+    private String concatHandlerDescription(FirstLineDto firstLine) {
+        String result = firstLine.getHandlerDescription();
+        if (handlerTransformerConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
+        }
+        return result;
     }
 
 }

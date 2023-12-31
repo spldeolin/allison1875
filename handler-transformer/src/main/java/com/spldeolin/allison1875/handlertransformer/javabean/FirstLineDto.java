@@ -26,6 +26,8 @@ public class FirstLineDto {
 
     String serviceName;
 
+    String lotNo;
+
     @Override
     public String toString() {
         return handlerUrl + " " + handlerDescription;

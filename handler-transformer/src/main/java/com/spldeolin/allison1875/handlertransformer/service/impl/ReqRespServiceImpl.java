@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
 import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
@@ -89,6 +90,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setAstForest(astForest);
             arg.setPackageName(packageName);
             arg.setClassName(javabeanName);
+            arg.setDescription(concatDtoDescription(firstLineDto));
             arg.setAuthorName(handlerTransformerConfig.getAuthor());
             arg.setMore4Javabean((cu1, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
@@ -230,6 +232,14 @@ public class ReqRespServiceImpl implements ReqRespService {
             return split[split.length - 1] + "<" + dto.getNameAsString() + ">";
         }
         return dto.getNameAsString();
+    }
+
+    private String concatDtoDescription(FirstLineDto firstLine) {
+        String result = "";
+        if (handlerTransformerConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
+        }
+        return result;
     }
 
 }

@@ -12,11 +12,12 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Authors;
+import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
@@ -41,7 +42,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
     private FindServiceService findServiceProc;
 
     @Inject
-    private HandlerTransformerConfig conf;
+    private HandlerTransformerConfig handlerTransformerConfig;
 
     @Inject
     private CreateServiceMethodService createServiceMethodService;
@@ -99,7 +100,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serverCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
         serverCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
         serverCu.addImport(ImportConstant.JAVA_UTIL);
-        serverCu.addImport(conf.getPageTypeQualifier());
+        serverCu.addImport(handlerTransformerConfig.getPageTypeQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
 
         // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
@@ -109,7 +110,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
             serverImplCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
             serverImplCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
             serverImplCu.addImport(ImportConstant.JAVA_UTIL);
-            serverImplCu.addImport(conf.getPageTypeQualifier());
+            serverImplCu.addImport(handlerTransformerConfig.getPageTypeQualifier());
             log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
         }
 
@@ -138,26 +139,28 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         Path sourceRoot = Locations.getStorage(param.getCu()).getSourceRoot();
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
-        serviceCu.setPackageDeclaration(conf.getServicePackage());
+        serviceCu.setPackageDeclaration(handlerTransformerConfig.getServicePackage());
         serviceCu.setImports(param.getCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
-        Authors.ensureAuthorExist(service, conf.getAuthor());
+        service.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
+                handlerTransformerConfig.getAuthor()));
         service.setPublic(true).setStatic(false).setInterface(true)
                 .setName(ensureNoRepeatService.inAstForest(param.getAstForest(), serviceName));
         serviceCu.setTypes(new NodeList<>(service));
-        Path storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, conf.getServicePackage(),
-                service.getName() + ".java");
+        Path storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
+                handlerTransformerConfig.getServicePackage(), service.getName() + ".java");
         serviceCu.setStorage(storage);
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(conf.getServiceImplPackage());
+        serviceImplCu.setPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
         serviceImplCu.setImports(param.getCu().getImports());
         serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
         serviceImplCu.addImport(ImportConstant.SPRING_SERVICE);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-        Authors.ensureAuthorExist(serviceImpl, conf.getAuthor());
+        serviceImpl.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
+                handlerTransformerConfig.getAuthor()));
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
         String serviceImplName = ensureNoRepeatService.inAstForest(param.getAstForest(),
@@ -165,8 +168,8 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName)
                 .addImplementedType(service.getNameAsString());
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, conf.getServiceImplPackage(),
-                serviceImpl.getName() + ".java");
+        storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
+                handlerTransformerConfig.getServiceImplPackage(), serviceImpl.getName() + ".java");
         serviceImplCu.setStorage(storage);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
         pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
@@ -182,6 +185,14 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         // report standardize
         if (!result.equals(serviceName)) {
             log.info("Service name standardize from [{}] to [{}]", serviceName, result);
+        }
+        return result;
+    }
+
+    private String concatServiceDescription(FirstLineDto firstLine) {
+        String result = "";
+        if (handlerTransformerConfig.getEnableLotNoAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
         }
         return result;
     }

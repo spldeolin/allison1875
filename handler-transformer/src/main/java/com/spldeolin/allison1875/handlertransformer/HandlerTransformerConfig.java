@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -55,6 +56,11 @@ public final class HandlerTransformerConfig {
      * 分页对象的全限定名
      */
     @NotEmpty String pageTypeQualifier;
+
+    /**
+     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: HT1000S-967D9357 的声明
+     */
+    @NotNull Boolean enableLotNoAnnounce;
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
