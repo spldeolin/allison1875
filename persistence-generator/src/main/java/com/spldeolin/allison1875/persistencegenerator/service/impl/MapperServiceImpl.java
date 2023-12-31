@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -19,9 +20,10 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.LotNo;
+import com.spldeolin.allison1875.base.constant.ImportConstant;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -215,7 +217,7 @@ public class MapperServiceImpl implements MapperService {
         MethodDeclaration queryByEntity = new MethodDeclaration();
         String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("根据实体内的属性查询" + lotNoText).parse();
-        Imports.ensureImported(mapper, "java.util.List");
+        mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         queryByEntity.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         queryByEntity.setName(methodName);
         queryByEntity.addParameter(javabeanGeneration.getJavabeanName(), "entity");
@@ -246,7 +248,8 @@ public class MapperServiceImpl implements MapperService {
                 Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
             } else {
-                Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
+                mapper.findCompilationUnit().orElseThrow(CuAbsentException::new)
+                        .addImport(ImportConstant.APACHE_IBATIS);
                 for (PropertyDto pk : persistence.getIdProperties()) {
                     String varName = MoreStringUtils.lowerFirstLetter(pk.getPropertyName());
                     Parameter parameter = parseParameter(
@@ -273,10 +276,9 @@ public class MapperServiceImpl implements MapperService {
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
             String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
             Javadoc javadoc = new JavadocComment("根据多个ID查询，并以ID作为key映射到Map" + lotNoText).parse();
-            Imports.ensureImported(mapper, "org.apache.ibatis.annotations.MapKey");
-            Imports.ensureImported(mapper, "java.util.Map");
-            Imports.ensureImported(mapper, "java.util.Collection");
-            Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
+            CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
+            cu.addImport(ImportConstant.APACHE_IBATIS);
+            cu.addImport(ImportConstant.JAVA_UTIL);
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
             String pkTypeName = onlyPk.getJavaType().getSimpleName();
@@ -306,9 +308,9 @@ public class MapperServiceImpl implements MapperService {
             MethodDeclaration queryByIds = new MethodDeclaration();
             String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
             Javadoc javadoc = new JavadocComment("根据多个ID查询" + lotNoText).parse();
-            Imports.ensureImported(mapper, "java.util.List");
-            Imports.ensureImported(mapper, "java.util.Collection");
-            Imports.ensureImported(mapper, "org.apache.ibatis.annotations.Param");
+            CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
+            cu.addImport(ImportConstant.APACHE_IBATIS);
+            cu.addImport(ImportConstant.JAVA_UTIL);
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             queryByIds.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
             queryByIds.setName(methodName);
@@ -334,8 +336,7 @@ public class MapperServiceImpl implements MapperService {
         MethodDeclaration method = new MethodDeclaration();
         String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("根据「" + key.getDescription() + "」查询" + lotNoText).parse();
-
-        Imports.ensureImported(mapper, "java.util.List");
+        mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
         String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
@@ -358,7 +359,7 @@ public class MapperServiceImpl implements MapperService {
         MethodDeclaration method = new MethodDeclaration();
         String lotNoText = getLotNoText(persistenceGeneratorConfig, persistence);
         Javadoc javadoc = new JavadocComment("根据多个「" + key.getDescription() + "」查询" + lotNoText).parse();
-        Imports.ensureImported(mapper, "java.util.List");
+        mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
         String typeName = "Collection<" + key.getJavaType().getSimpleName() + ">";

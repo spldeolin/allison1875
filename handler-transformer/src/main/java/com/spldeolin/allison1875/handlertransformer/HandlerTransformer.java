@@ -17,7 +17,6 @@ import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
@@ -127,12 +126,12 @@ public class HandlerTransformer implements Allison1875MainService {
                     log.info("replace Initializer [{}] to Handler [{}] in Controller [{}].", firstLineDto,
                             handlerCreation.getHandler().getName(), controller.getName());
 
-                    Imports.ensureImported(cu, handlerTransformerConfig.getPageTypeQualifier());
-                    Imports.ensureImported(cu, ImportConstant.SPRING_REQUEST_BODY);
-                    Imports.ensureImported(cu, ImportConstant.JAVAX_VALID);
-                    Imports.ensureImported(cu, ImportConstant.SPRING_POST_MAPPING);
-                    Imports.ensureImported(cu, ImportConstant.SPRING_AUTOWIRED);
-                    Imports.ensureImported(cu, ImportConstant.JAVA_UTIL);
+                    cu.addImport(handlerTransformerConfig.getPageTypeQualifier());
+                    cu.addImport(ImportConstant.SPRING_REQUEST_BODY);
+                    cu.addImport(ImportConstant.JAVAX_VALID);
+                    cu.addImport(ImportConstant.SPRING_POST_MAPPING);
+                    cu.addImport(ImportConstant.SPRING_AUTOWIRED);
+                    cu.addImport(ImportConstant.JAVA_UTIL);
 
                     // 更多的转化操作
                     Collection<CompilationUnit> moreCus = moreTransformHandle.transform(astForest.clone(), firstLineDto,

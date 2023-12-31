@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
@@ -36,11 +35,11 @@ public class GenerateMethodSignatureServiceImpl implements GenerateMethodSignatu
         }
 
         for (String anImport : resultTransformation.getImports()) {
-            Imports.ensureImported(mapper, anImport);
+            mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(anImport);
         }
         if (parameterTransformation != null) {
             for (String anImport : parameterTransformation.getImports()) {
-                Imports.ensureImported(mapper, anImport);
+                mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(anImport);
             }
         }
 

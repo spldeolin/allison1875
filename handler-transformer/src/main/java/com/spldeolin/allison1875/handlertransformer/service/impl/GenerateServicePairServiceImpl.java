@@ -13,10 +13,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Authors;
-import com.spldeolin.allison1875.base.util.ast.Imports;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
@@ -95,27 +95,32 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
         serviceMethod.setBody(null);
         pair.getService().addMember(serviceMethod);
-        Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-        Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getRespDtoQualifier());
-        Imports.ensureImported(pair.getService(), ImportConstant.JAVA_UTIL);
-        Imports.ensureImported(pair.getService(), conf.getPageTypeQualifier());
+        CompilationUnit serverCu = pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new);
+        serverCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+        serverCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
+        serverCu.addImport(ImportConstant.JAVA_UTIL);
+        serverCu.addImport(conf.getPageTypeQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
 
         // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
         for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
             serviceImpl.addMember(serviceMethodImpl);
-            Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-            Imports.ensureImported(serviceImpl, param.getReqDtoRespDtoInfo().getRespDtoQualifier());
-            Imports.ensureImported(pair.getService(), ImportConstant.JAVA_UTIL);
-            Imports.ensureImported(pair.getService(), conf.getPageTypeQualifier());
+            CompilationUnit serverImplCu = serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new);
+            serverImplCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+            serverImplCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
+            serverImplCu.addImport(ImportConstant.JAVA_UTIL);
+            serverImplCu.addImport(conf.getPageTypeQualifier());
             log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
         }
 
         // 将生成的方法所需的import 均添加到 Service 和 每个 ServiceImpl
         for (String appendImport : methodGeneration.getAppendImports()) {
-            Imports.ensureImported(pair.getService(), appendImport);
-            Imports.ensureImported(pair.getService(), param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-            pair.getServiceImpls().forEach(serviceImpl -> Imports.ensureImported(serviceImpl, appendImport));
+            CompilationUnit serviceCu = pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new);
+            serviceCu.addImport(appendImport);
+            serviceCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+            pair.getServiceImpls().forEach(
+                    serviceImpl -> serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new)
+                            .addImport(appendImport));
         }
 
         ServiceGeneration result = new ServiceGeneration();

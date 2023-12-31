@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
-import com.spldeolin.allison1875.base.util.ast.Imports;
+import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
@@ -87,20 +87,16 @@ public class ControllerServiceImpl implements ControllerService {
             }
         }
 
+        CompilationUnit controllerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
         for (String appendImport : handlerCreation.getAppendImports()) {
-            Imports.ensureImported(controller, appendImport);
+            controllerCu.addImport(appendImport);
         }
 
-
-        if (reqDtoRespDtoInfo.getReqDtoQualifier() != null) {
-            Imports.ensureImported(controller, reqDtoRespDtoInfo.getReqDtoQualifier());
-        }
-        if (reqDtoRespDtoInfo.getRespDtoQualifier() != null) {
-            Imports.ensureImported(controller, reqDtoRespDtoInfo.getRespDtoQualifier());
-        }
-        Imports.ensureImported(controller, serviceGeneration.getServiceQualifier());
-        Imports.ensureImported(controller, ImportConstant.JAVAX_VALID);
-        Imports.ensureImported(controller, ImportConstant.SPRING_REQUEST_BODY);
+        controllerCu.addImport(reqDtoRespDtoInfo.getReqDtoQualifier());
+        controllerCu.addImport(reqDtoRespDtoInfo.getRespDtoQualifier());
+        controllerCu.addImport(serviceGeneration.getServiceQualifier());
+        controllerCu.addImport(ImportConstant.JAVAX_VALID);
+        controllerCu.addImport(ImportConstant.SPRING_REQUEST_BODY);
         return handlerCreation;
     }
 
