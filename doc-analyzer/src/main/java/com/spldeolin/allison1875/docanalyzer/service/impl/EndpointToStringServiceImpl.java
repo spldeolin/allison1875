@@ -5,9 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
-import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
+import com.spldeolin.allison1875.base.Version;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.service.EndpointToStringService;
 import com.spldeolin.allison1875.docanalyzer.service.MoreHandlerAnalysisService;
@@ -17,6 +19,9 @@ import com.spldeolin.allison1875.docanalyzer.service.MoreHandlerAnalysisService;
  */
 @Singleton
 public class EndpointToStringServiceImpl implements EndpointToStringService {
+
+    @Inject
+    private DocAnalyzerConfig docAnalyzerConfig;
 
     @Inject
     private MoreHandlerAnalysisService moreHandlerAnalysisService;
@@ -57,10 +62,26 @@ public class EndpointToStringServiceImpl implements EndpointToStringService {
 
         String moreText = moreHandlerAnalysisService.moreToString(dto.getMore());
 
-        String allison1875Note = "\n---\n";
-        allison1875Note += LotNo.TAG_PREFIXION + LotNo.build(ModuleAbbr.DA, JsonUtils.toJson(dto), true);
+        String allison1875Announce = "";
+        if (docAnalyzerConfig.getEnableNoModifyAnnounce() || docAnalyzerConfig.getEnableLotNoAnnounce()) {
+            allison1875Announce += BaseConstant.NEW_LINE + "---";
+            if (docAnalyzerConfig.getEnableNoModifyAnnounce()) {
+                allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
+            }
+            if (docAnalyzerConfig.getEnableLotNoAnnounce()) {
+                if (docAnalyzerConfig.getEnableNoModifyAnnounce()) {
+                    allison1875Announce += " ";
+                } else {
+                    allison1875Announce += BaseConstant.NEW_LINE;
+                }
+                String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(dto)));
+                allison1875Announce +=
+                        BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + String.format("DA%s-%s", Version.lotNoVersion, hash);
+            }
+        }
 
-        return Joiner.on('\n').skipNulls().join(deprecatedNode, comment, developer, code, moreText, allison1875Note);
+        return Joiner.on('\n').skipNulls()
+                .join(deprecatedNode, comment, developer, code, moreText, allison1875Announce);
     }
 
 }

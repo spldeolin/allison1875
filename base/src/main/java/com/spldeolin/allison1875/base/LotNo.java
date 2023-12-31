@@ -67,7 +67,7 @@ public class LotNo {
     }
 
     public enum ModuleAbbr {
-        DA, QT
+        QT
     }
 
 }

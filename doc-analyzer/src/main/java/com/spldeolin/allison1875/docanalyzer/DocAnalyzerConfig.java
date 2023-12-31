@@ -58,4 +58,14 @@ public final class DocAnalyzerConfig {
      */
     Boolean enableResponseBodySample;
 
+    /**
+     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
+     */
+    @NotNull Boolean enableNoModifyAnnounce;
+
+    /**
+     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: PG1000S-967D9357 的声明
+     */
+    @NotNull Boolean enableLotNoAnnounce;
+
 }
