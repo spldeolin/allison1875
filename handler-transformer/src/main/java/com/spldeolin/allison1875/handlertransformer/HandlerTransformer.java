@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.handlertransformer;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,7 +27,6 @@ import com.spldeolin.allison1875.handlertransformer.service.DtoService;
 import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
 import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
 import com.spldeolin.allison1875.handlertransformer.service.InitializerCollectService;
-import com.spldeolin.allison1875.handlertransformer.service.MoreTransformService;
 import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
 import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
 import lombok.extern.log4j.Log4j2;
@@ -64,9 +62,6 @@ public class HandlerTransformer implements Allison1875MainService {
     @Inject
     private GenerateServicePairService generateServicePairProc;
 
-    @Inject
-    private MoreTransformService moreTransformHandle;
-
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
@@ -74,7 +69,6 @@ public class HandlerTransformer implements Allison1875MainService {
         Map<String, ServicePairDto> name2Pair = Maps.newHashMap();
 
         for (CompilationUnit cu : astForest) {
-//            LexicalPreservingPrinter.setup(cu);
             boolean anyTransformed = false;
 
             for (ClassOrInterfaceDeclaration controller : controllerProc.collect(cu)) {
@@ -132,11 +126,6 @@ public class HandlerTransformer implements Allison1875MainService {
                     cu.addImport(ImportConstant.SPRING_POST_MAPPING);
                     cu.addImport(ImportConstant.SPRING_AUTOWIRED);
                     cu.addImport(ImportConstant.JAVA_UTIL);
-
-                    // 更多的转化操作
-                    Collection<CompilationUnit> moreCus = moreTransformHandle.transform(astForest.clone(), firstLineDto,
-                            handlerCreation, reqDtoRespDtoInfo.getJavabeanQualifiers());
-                    moreCus.forEach(moreCu -> flushes.add(FileFlush.build(moreCu)));
 
                     anyTransformed = true;
                 }
