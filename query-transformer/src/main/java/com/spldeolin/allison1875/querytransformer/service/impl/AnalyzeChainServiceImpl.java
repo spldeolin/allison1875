@@ -11,7 +11,6 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
@@ -20,7 +19,6 @@ import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
-import com.spldeolin.allison1875.base.util.ast.TokenRanges;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
@@ -165,8 +163,6 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         result.setOrderPhrases(orderPhrases);
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
-        result.setIndent(TokenRanges.getStartIndent(
-                chain.findAncestor(Statement.class).orElseThrow(IllegalChainException::new)));
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
         result.setLotNo(LotNo.build(ModuleAbbr.QT, JsonUtils.toJson(result), false));
         return result;

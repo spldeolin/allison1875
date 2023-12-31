@@ -42,8 +42,6 @@ public class ChainAnalysisDto {
 
     BlockStmt directBlock;
 
-    String indent;
-
     Boolean isAssigned;
 
     Boolean isAssignedToType;
