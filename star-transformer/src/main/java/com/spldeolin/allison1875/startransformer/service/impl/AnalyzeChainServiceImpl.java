@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.startransformer.service.impl;
 
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
@@ -9,8 +10,11 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
+import com.spldeolin.allison1875.base.util.HashingUtils;
+import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.NamingUtils;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
@@ -32,6 +36,15 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             throws IllegalChainException {
         return this.process(starChain, astForest, wholeDtoNames, Lists.newArrayList(), Lists.newArrayList(),
                 Lists.newArrayList());
+    }
+
+    @Override
+    public String buildWholeDtoNameFromEntityName(String entityName) {
+        if (entityName.endsWith("Entity")) {
+            return MoreStringUtils.replaceLast(entityName, "Entity", "WholeDto");
+        } else {
+            return entityName + "WholeDto";
+        }
     }
 
     private ChainAnalysisDto process(MethodCallExpr mce, AstForest astForest, Set<String> wholeDtoNames,
@@ -92,9 +105,10 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             analysis.setCftDesignQualifier(fae.getScope().calculateResolvedType().describe());
             analysis.setCftSecondArgument(mce.getArgument(1));
             analysis.setPhrases(phrases);
-            String wholeDtoName = this.ensureNoRepeatInAstForest(astForest, wholeDtoNames,
-                    analysis.getCftEntityName().replace("Entity", "WholeDto"));
+            String wholeDtoName = this.buildWholeDtoNameFromEntityName(analysis.getCftEntityName());
             analysis.setWholeDtoName(wholeDtoName);
+            String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(analysis)));
+            analysis.setLotNo(String.format("ST%s-%s", Allison1875.SHORT_VERSION, hash));
             wholeDtoNames.add(wholeDtoName);
             return analysis;
         }
@@ -104,6 +118,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         }
         throw new RuntimeException("impossible unless bug.");
     }
+
 
     /**
      * 确保参数coidName与在AstForest中所有的java文件名均不重名

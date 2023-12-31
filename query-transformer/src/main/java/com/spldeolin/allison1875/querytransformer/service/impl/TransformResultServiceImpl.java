@@ -97,7 +97,7 @@ public class TransformResultServiceImpl implements TransformResultService {
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
-            javabeanArg.setEntityExistenceResolution(FileExistenceResolutionEnum.RENAME);
+            javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
             JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(javabeanArg);
             flushes.add(javabeanGeneration.getFileFlush());
             ClassOrInterfaceDeclaration resultType = javabeanGeneration.getCoid();

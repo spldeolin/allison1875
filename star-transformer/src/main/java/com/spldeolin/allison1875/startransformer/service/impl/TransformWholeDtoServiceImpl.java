@@ -8,6 +8,8 @@ import com.github.javaparser.StaticJavaParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.base.constant.BaseConstant;
+import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
 import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
 import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
@@ -29,12 +31,15 @@ public class TransformWholeDtoServiceImpl implements TransformWholeDtoService {
     private StarTransformerConfig config;
 
     @Override
-    public JavabeanGeneration transformWholeDto(JavabeanArg javabeanArg, AstForest astForest,
-            ChainAnalysisDto analysis) {
+    public JavabeanGeneration transformWholeDto(AstForest astForest, ChainAnalysisDto analysis) {
+        JavabeanArg javabeanArg = new JavabeanArg();
         javabeanArg.setAstForest(astForest);
         javabeanArg.setPackageName(config.getWholeDtoPackge());
-        javabeanArg.setDescription("");
         javabeanArg.setClassName(analysis.getWholeDtoName());
+        if (config.getEnableLotNoAnnounce()) {
+            javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
+        }
+        javabeanArg.setAuthorName(config.getAuthor());
         FieldArg cftFieldArg = new FieldArg();
         cftFieldArg.setTypeQualifier(analysis.getCftEntityQualifier());
         cftFieldArg.setTypeName(analysis.getCftEntityName());
@@ -73,13 +78,14 @@ public class TransformWholeDtoServiceImpl implements TransformWholeDtoService {
             }
         }
         javabeanArg.setMore4Javabean((cu, javabean) -> {
-            if (BooleanUtils.isTrue(config.getEnableEntityImplementSerializable())) {
+            if (BooleanUtils.isTrue(config.getEnableImplementSerializable())) {
                 cu.addImport("java.io.Serializable");
                 javabean.addImplementedType("Serializable");
                 javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
                         "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
             }
         });
+        javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
         return JavabeanGenerator.generate(javabeanArg);
     }
 

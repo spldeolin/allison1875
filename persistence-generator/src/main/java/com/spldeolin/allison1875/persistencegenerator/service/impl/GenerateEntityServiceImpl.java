@@ -71,7 +71,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             fieldArg.setFieldName(property.getPropertyName());
             arg.getFieldArgs().add(fieldArg);
         }
-        arg.setEntityExistenceResolution(persistenceGeneratorConfig.getEntityExistenceResolution());
+        arg.setJavabeanExistenceResolution(persistenceGeneratorConfig.getEntityExistenceResolution());
         return JavabeanGenerator.generate(arg);
     }
 

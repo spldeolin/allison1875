@@ -34,9 +34,9 @@ public class JavabeanGenerator {
                 arg.getPackageName(), className + ".java");
 
         if (absulutePath.toFile().exists()) {
-            if (arg.getEntityExistenceResolution() == FileExistenceResolutionEnum.OVERWRITE) {
+            if (arg.getJavabeanExistenceResolution() == FileExistenceResolutionEnum.OVERWRITE) {
                 log.info("Entity [{}] is exist, use [overwrite] resolution", className);
-            } else if (arg.getEntityExistenceResolution() == FileExistenceResolutionEnum.RENAME) {
+            } else if (arg.getJavabeanExistenceResolution() == FileExistenceResolutionEnum.RENAME) {
                 String oldClassName = className;
                 absulutePath = rename(absulutePath);
                 className = FilenameUtils.getBaseName(absulutePath.toString());

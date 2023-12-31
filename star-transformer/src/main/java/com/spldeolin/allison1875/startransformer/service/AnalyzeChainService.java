@@ -17,4 +17,6 @@ public interface AnalyzeChainService {
     ChainAnalysisDto process(MethodCallExpr starChain, AstForest astForest, Set<String> wholeDtoNames)
             throws IllegalChainException;
 
+    String buildWholeDtoNameFromEntityName(String entityName);
+
 }

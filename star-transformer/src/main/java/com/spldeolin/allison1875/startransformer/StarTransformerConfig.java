@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.startransformer;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -23,8 +24,18 @@ public final class StarTransformerConfig {
     @NotEmpty String wholeDtoPackge;
 
     /**
-     * 是否为entity实现java.io.Serializable接口
+     * 是否为WholeDto类实现java.io.Serializable接口
      */
-    Boolean enableEntityImplementSerializable;
+    Boolean enableImplementSerializable;
+
+    /**
+     * 为生成的代码指定作者
+     */
+    @NotEmpty String author;
+
+    /**
+     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: ST1000S-967D9357 的声明
+     */
+    @NotNull Boolean enableLotNoAnnounce;
 
 }

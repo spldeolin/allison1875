@@ -103,7 +103,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 }
                 javabean.setMembers(dto.getMembers());
             });
-            arg.setEntityExistenceResolution(FileExistenceResolutionEnum.RENAME);
+            arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
             JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(arg);
             result.getJavabeanCus().add(javabeanGeneration.getCu());
 

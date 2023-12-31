@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.startransformer.javabean;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.Expression;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -23,10 +24,13 @@ public class ChainAnalysisDto {
 
      String cftDesignQualifier;
 
+     @JsonIgnore
      Expression cftSecondArgument;
 
      List<PhraseDto> phrases;
 
      String wholeDtoName;
+
+     String lotNo;
 
 }

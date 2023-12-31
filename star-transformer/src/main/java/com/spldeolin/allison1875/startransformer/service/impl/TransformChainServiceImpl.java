@@ -12,6 +12,7 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
@@ -25,10 +26,11 @@ import com.spldeolin.allison1875.startransformer.service.TransformChainService;
 public class TransformChainServiceImpl implements TransformChainService {
 
     @Override
-    public void transformAndReplaceStar(BlockStmt block, ChainAnalysisDto analysis, MethodCallExpr starChain) {
+    public void transformAndReplaceStar(BlockStmt block, ChainAnalysisDto analysis, MethodCallExpr starChain,
+            JavabeanGeneration javabeanGeneration) {
         int i = block.getStatements().indexOf(starChain.findAncestor(Statement.class).get());
         block.setStatement(i, StaticJavaParser.parseStatement(
-                analysis.getWholeDtoName() + " whole = new " + analysis.getWholeDtoName() + "();"));
+                javabeanGeneration.getJavabeanName() + " whole = new " + javabeanGeneration.getJavabeanName() + "();"));
         block.addStatement(++i, StaticJavaParser.parseStatement(
                 analysis.getCftEntityName() + " " + entityNameToVarName(analysis.getCftEntityName()) + " = "
                         + analysis.getCftDesignName() + "." + "query().byForced().id.eq("

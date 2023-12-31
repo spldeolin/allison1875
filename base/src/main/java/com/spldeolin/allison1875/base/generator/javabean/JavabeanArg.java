@@ -31,12 +31,13 @@ public class JavabeanArg {
 
     String description;
 
-    @NotBlank String authorName = "Allison 1875";
+    @NotBlank String authorName;
 
-    @NotNull List<@NotNull @Valid FieldArg> fieldArgs = Lists.newArrayList();
+    @Valid
+    final List<FieldArg> fieldArgs = Lists.newArrayList();
 
     BiConsumer<CompilationUnit, ClassOrInterfaceDeclaration> more4Javabean;
 
-    @NotNull FileExistenceResolutionEnum entityExistenceResolution;
+    @NotNull FileExistenceResolutionEnum javabeanExistenceResolution;
 
 }
