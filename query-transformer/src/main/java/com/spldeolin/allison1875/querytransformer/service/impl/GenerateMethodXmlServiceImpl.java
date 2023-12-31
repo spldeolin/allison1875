@@ -15,6 +15,7 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
@@ -23,6 +24,7 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
@@ -41,6 +43,9 @@ import lombok.extern.log4j.Log4j2;
 public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
 
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
+
+    @Inject
+    private QueryTransformerConfig queryTransformerConfig;
 
     @Override
     public List<FileFlush> process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
@@ -286,7 +291,10 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     }
 
     private String concatLotNoComment(ChainAnalysisDto chainAnalysis) {
-        return chainAnalysis.getLotNo().asXmlComment();
+        if (queryTransformerConfig.getEnableLotNoAnnounce()) {
+            return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
+        }
+        return "";
     }
 
     private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,

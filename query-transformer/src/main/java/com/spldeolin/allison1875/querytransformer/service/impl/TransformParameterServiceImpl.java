@@ -61,7 +61,9 @@ public class TransformParameterServiceImpl implements TransformParameterService 
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionPackage());
-            javabeanArg.setDescription(chainAnalysis.getLotNo().asJavadocDescription());
+            if (config.getEnableLotNoAnnounce()) {
+                javabeanArg.setDescription(chainAnalysis.getLotNo());
+            }
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
             javabeanArg.setAuthorName(config.getAuthor());
             for (PhraseDto phrase : phrases) {

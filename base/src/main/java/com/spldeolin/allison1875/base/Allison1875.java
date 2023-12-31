@@ -16,8 +16,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Allison1875 {
 
+    public static final String SHORT_VERSION = "1000S";
+
+    private static final String version = "Allison 1875 10.0-SNAPSHOT";
+
     public static void allison1875(Class<?> primaryClass, Allison1875Module... allison1875Modules) {
-        Version.greeting();
+        printBanner();
         Locale.setDefault(Locale.ENGLISH);
 
         // argument check
@@ -42,6 +46,13 @@ public class Allison1875 {
             }
             injector.getInstance(allison1875Module.provideMainProcessorType()).process(astForest);
         }
+    }
+
+    private static void printBanner() {
+        System.out.println();
+        System.out.println(version);
+        System.out.println("about Allison 1875: https://github.com/spldeolin/allison1875");
+        System.out.println();
     }
 
 }

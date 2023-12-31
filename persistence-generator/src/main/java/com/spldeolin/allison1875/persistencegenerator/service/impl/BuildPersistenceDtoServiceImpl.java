@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.Version;
+import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -98,7 +98,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
             }
 
             String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(dto)));
-            dto.setLotNo(String.format("PG%s-%s", Version.lotNoVersion, hash));
+            dto.setLotNo(String.format("PG%s-%s", Allison1875.SHORT_VERSION, hash));
         }
 
         reportWhileNoDeleleFlag(deleteFlag, persistences);

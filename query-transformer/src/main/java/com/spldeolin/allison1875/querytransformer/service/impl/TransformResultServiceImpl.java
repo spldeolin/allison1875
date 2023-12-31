@@ -81,7 +81,9 @@ public class TransformResultServiceImpl implements TransformResultService {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperRecordPackage());
-            javabeanArg.setDescription(chainAnalysis.getLotNo().asJavadocDescription());
+            if (config.getEnableLotNoAnnounce()) {
+                javabeanArg.setDescription(chainAnalysis.getLotNo());
+            }
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
             javabeanArg.setAuthorName(config.getAuthor());
             for (PhraseDto phrase : phrases) {
@@ -90,8 +92,7 @@ public class TransformResultServiceImpl implements TransformResultService {
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
-                fieldArg.setDescription(properties.get(propertyName).getDescription() + chainAnalysis.getLotNo()
-                        .asJavadocDescription());
+                fieldArg.setDescription(properties.get(propertyName).getDescription());
                 fieldArg.setTypeName(javaType.getSimpleName());
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);

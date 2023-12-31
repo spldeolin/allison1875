@@ -14,10 +14,10 @@ import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.LotNo;
-import com.spldeolin.allison1875.base.LotNo.ModuleAbbr;
+import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
+import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -164,7 +164,8 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
-        result.setLotNo(LotNo.build(ModuleAbbr.QT, JsonUtils.toJson(result), false));
+        String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(result)));
+        result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
     }
 

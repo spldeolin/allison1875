@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.querytransformer;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -31,6 +32,11 @@ public final class QueryTransformerConfig {
      * Design类的包名
      */
     @NotEmpty String designPackage;
+
+    /**
+     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: PG1000S-967D9357 的声明
+     */
+    @NotNull Boolean enableLotNoAnnounce;
 
     /**
      * 使用通配符的方式设置所有包名，通配符是<code>.-</code>

@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.Version;
+import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -76,7 +76,8 @@ public class EndpointToStringServiceImpl implements EndpointToStringService {
                 }
                 String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(dto)));
                 allison1875Announce +=
-                        BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + String.format("DA%s-%s", Version.lotNoVersion, hash);
+                        BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + String.format("DA%s-%s", Allison1875.SHORT_VERSION,
+                                hash);
             }
         }
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.base.LotNo;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import lombok.AccessLevel;
@@ -20,6 +19,9 @@ import lombok.experimental.FieldDefaults;
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChainAnalysisDto {
+
+    @JsonIgnore
+    MethodCallExpr chain;
 
     String methodName;
 
@@ -37,9 +39,6 @@ public class ChainAnalysisDto {
 
     Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
 
-    @JsonIgnore
-    MethodCallExpr chain;
-
     BlockStmt directBlock;
 
     Boolean isAssigned;
@@ -48,6 +47,6 @@ public class ChainAnalysisDto {
 
     Boolean isByForced;
 
-    LotNo lotNo;
+    String lotNo;
 
 }

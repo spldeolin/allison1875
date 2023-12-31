@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
@@ -25,6 +26,9 @@ public class GenerateMethodSignatureServiceImpl implements GenerateMethodSignatu
 
     @Inject
     private FindMapperService findMapperService;
+
+    @Inject
+    private QueryTransformerConfig queryTransformerConfig;
 
     @Override
     public CompilationUnit process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
@@ -44,7 +48,9 @@ public class GenerateMethodSignatureServiceImpl implements GenerateMethodSignatu
         }
 
         MethodDeclaration method = new MethodDeclaration();
-        method.setJavadocComment(chainAnalysis.getLotNo().asJavadocDescription());
+        if (queryTransformerConfig.getEnableLotNoAnnounce()) {
+            method.setJavadocComment(chainAnalysis.getLotNo());
+        }
         method.setType(resultTransformation.getResultType());
         method.setName(chainAnalysis.getMethodName());
         if (parameterTransformation != null) {
