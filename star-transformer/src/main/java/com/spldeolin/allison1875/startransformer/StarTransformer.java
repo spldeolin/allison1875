@@ -56,7 +56,7 @@ public class StarTransformer implements Allison1875MainService {
                     StarAnalysisDto analysis;
                     try {
                         analysis = analyzeStarChainService.analyze(starChain, astForest);
-                        log.info("success to analyze Star Chain, analysis={}", analysis);
+                        log.info("Star Chain analyzed, analysis={}", analysis);
                     } catch (IllegalChainException e) {
                         log.error("fail to analyze Star Chain, starChain={}", starChain, e);
                         continue;
@@ -66,7 +66,7 @@ public class StarTransformer implements Allison1875MainService {
                     JavabeanGeneration wholeDtoGeneration;
                     try {
                         wholeDtoGeneration = generateWholeDtoService.generate(astForest, analysis);
-                        log.info("success to generate Whole DTO, qualifier={} path={}",
+                        log.info("Whole DTO generated, qualifier={} path={}",
                                 wholeDtoGeneration.getJavabeanQualifier(), wholeDtoGeneration.getPath());
                     } catch (Exception e) {
                         log.error("fail to generate Whole DTO, analysis={}", analysis, e);
@@ -77,7 +77,7 @@ public class StarTransformer implements Allison1875MainService {
                     // transform Query Chain and replace Star Chain
                     try {
                         transformStarChainService.transformStarChain(block, analysis, starChain, wholeDtoGeneration);
-                        log.info("success to transform Star Chain");
+                        log.info("Star Chain transformed");
                     } catch (Exception e) {
                         log.error("fail to transformStarChain Star Chain, starAnalysis={}", analysis, e);
                     }
