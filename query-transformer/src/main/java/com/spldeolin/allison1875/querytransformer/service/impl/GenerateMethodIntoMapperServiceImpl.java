@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
+import com.spldeolin.allison1875.base.service.AntiDuplicationService;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
@@ -30,6 +31,9 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
     @Inject
     private QueryTransformerConfig queryTransformerConfig;
 
+    @Inject
+    private AntiDuplicationService antiDuplicationService;
+
     @Override
     public CompilationUnit generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
@@ -37,6 +41,9 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
         if (mapper == null) {
             return null;
         }
+
+        String methodName = chainAnalysis.getMethodName();
+        methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
 
         for (String anImport : resultGeneration.getImports()) {
             mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(anImport);
@@ -50,7 +57,7 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
             method.setJavadocComment(chainAnalysis.getLotNo());
         }
         method.setType(resultGeneration.getResultType());
-        method.setName(chainAnalysis.getMethodName());
+        method.setName(methodName);
         method.setParameters(new NodeList<>(paramGeneration.getParameters()));
         method.setBody(null);
         mapper.getMembers().add(method);

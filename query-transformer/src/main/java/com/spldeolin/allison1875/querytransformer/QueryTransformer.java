@@ -108,10 +108,6 @@ public class QueryTransformer implements Allison1875MainService {
                     }
                     analysis.setDirectBlock(directBlock);
 
-                    // if methodName duplicated, rename
-                    analysis.setMethodName(findMapperService.renameIfMethodNameDuplicated(astForest, designMeta,
-                            analysis.getMethodName()));
-
                     // generate Parameter
                     ParamGenerationDto paramGeneration;
                     try {

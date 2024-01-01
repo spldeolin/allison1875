@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.service.AntiDuplicationService;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
@@ -29,7 +30,6 @@ import com.spldeolin.allison1875.querytransformer.exception.IllegalChainExceptio
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
-import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.log4j.Log4j2;
@@ -42,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
     @Inject
-    private FindMapperService findMapperService;
+    private AntiDuplicationService antiDuplicationService;
 
     @Override
     public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta)
@@ -109,7 +109,8 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
                 phrase.setSubjectPropertyName(fae.getNameAsString());
                 phrase.setPredicate(predicate);
                 if (predicate != PredicateEnum.IS_NULL && predicate != PredicateEnum.NOT_NULL) {
-                    phrase.setVarName(ensureNoRepeation(fae.getNameAsString(), varNames));
+                    String varName = antiDuplicationService.getNewElementIfExist(fae.getNameAsString(), varNames);
+                    phrase.setVarName(varName);
                 }
                 if (parent.getArguments().size() > 0) {
                     phrase.setObjectExpr(parent.getArgument(0));
@@ -146,7 +147,8 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());
-                phrase.setVarName(ensureNoRepeation(mce.getNameAsString(), varNames));
+                String varName = antiDuplicationService.getNewElementIfExist(mce.getNameAsString(), varNames);
+                phrase.setVarName(varName);
                 phrase.setObjectExpr(mce.getArgument(0));
                 updatePhrases.add(phrase);
             }
@@ -169,22 +171,6 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(result)));
         result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
-    }
-
-    private String ensureNoRepeation(String name, List<String> names) {
-        if (!names.contains(name)) {
-            names.add(name);
-            return name;
-        }
-        return ensureNoRepeation(name, names, 2);
-    }
-
-    private String ensureNoRepeation(String name, List<String> names, int index) {
-        if (!names.contains(name + index)) {
-            names.add(name + index);
-            return name + index;
-        }
-        return this.ensureNoRepeation(name, names, index + 1);
     }
 
     private String analyzeSpecifiedMethodName(ChainMethodEnum chainMethod, MethodCallExpr chain,

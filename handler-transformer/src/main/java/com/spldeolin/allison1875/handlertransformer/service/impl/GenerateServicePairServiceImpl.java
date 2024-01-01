@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.nio.file.Path;
 import java.util.Map;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -16,6 +17,7 @@ import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.exception.CuAbsentException;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.service.AntiDuplicationService;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import com.spldeolin.allison1875.base.util.ast.Locations;
@@ -26,7 +28,6 @@ import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicePara
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;
-import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
 import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
 import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
 import lombok.extern.log4j.Log4j2;
@@ -48,7 +49,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
     private CreateServiceMethodService createServiceMethodService;
 
     @Inject
-    private EnsureNoRepeatService ensureNoRepeatService;
+    private AntiDuplicationService antiDuplicationService;
 
     @Override
     public ServiceGeneration generateService(GenerateServiceParam param) {
@@ -86,9 +87,9 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         CreateServiceMethodHandleResult methodGeneration = createServiceMethodService.createMethodImpl(firstLineDto,
                 param.getReqDtoRespDtoInfo().getParamType(), param.getReqDtoRespDtoInfo().getResultType());
         // 方法名去重
-        String noRepeat = ensureNoRepeatService.inService(pair.getService(),
-                methodGeneration.getServiceMethod().getNameAsString());
-        methodGeneration.getServiceMethod().setName(noRepeat);
+        String serviceMethodName = antiDuplicationService.getNewMethodNameIfExist(
+                methodGeneration.getServiceMethod().getNameAsString(), pair.getService());
+        methodGeneration.getServiceMethod().setName(serviceMethodName);
 
         // 将方法以及Req、Resp的全名 添加到 Service
         MethodDeclaration serviceMethodImpl = methodGeneration.getServiceMethod();
@@ -144,12 +145,16 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         service.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
                 handlerTransformerConfig.getAuthor()));
-        service.setPublic(true).setStatic(false).setInterface(true)
-                .setName(ensureNoRepeatService.inAstForest(param.getAstForest(), serviceName));
-        serviceCu.setTypes(new NodeList<>(service));
-        Path storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
+        service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
                 handlerTransformerConfig.getServicePackage(), service.getName() + ".java");
-        serviceCu.setStorage(storage);
+
+        // anti-duplication
+        absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
+        service.setName(FilenameUtils.getBaseName(absolutePath.toString()));
+
+        serviceCu.setTypes(new NodeList<>(service));
+        serviceCu.setStorage(absolutePath);
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
@@ -163,14 +168,18 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
                 handlerTransformerConfig.getAuthor()));
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
-        String serviceImplName = ensureNoRepeatService.inAstForest(param.getAstForest(),
-                service.getNameAsString() + "Impl");
+        String serviceImplName = service.getNameAsString() + "Impl";
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName)
                 .addImplementedType(service.getNameAsString());
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        storage = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
+        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
                 handlerTransformerConfig.getServiceImplPackage(), serviceImpl.getName() + ".java");
-        serviceImplCu.setStorage(storage);
+
+        // anti-duplication
+        absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
+        serviceImpl.setName(FilenameUtils.getBaseName(absolutePath.toString()));
+
+        serviceImplCu.setStorage(absolutePath);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
         pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
         name2Pair.put(serviceName, pair);

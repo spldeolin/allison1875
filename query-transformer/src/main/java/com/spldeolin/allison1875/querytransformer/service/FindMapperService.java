@@ -14,6 +14,4 @@ public interface FindMapperService {
 
     ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta designMeta);
 
-    String renameIfMethodNameDuplicated(AstForest astForest, DesignMeta designMeta, String methodName);
-
 }

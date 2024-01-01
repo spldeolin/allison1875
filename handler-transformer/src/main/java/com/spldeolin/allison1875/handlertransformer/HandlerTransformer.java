@@ -24,7 +24,6 @@ import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.ControllerService;
 import com.spldeolin.allison1875.handlertransformer.service.DtoService;
-import com.spldeolin.allison1875.handlertransformer.service.EnsureNoRepeatService;
 import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
 import com.spldeolin.allison1875.handlertransformer.service.InitializerCollectService;
 import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
@@ -46,9 +45,6 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Inject
     private InitializerCollectService initializerCollectProc;
-
-    @Inject
-    private EnsureNoRepeatService ensureNoRepeationProc;
 
     @Inject
     private ReqRespService reqRespProc;
@@ -80,9 +76,6 @@ public class HandlerTransformer implements Allison1875MainService {
                     }
                     log.info("detect able to transform Initializer [{}] from Controller [{}].", firstLineDto,
                             controller.getNameAsString());
-
-                    // 当指定的handlerName在controller中已经存在同名handler时，handlerName后拼接Ex（递归，确保不会重名）
-                    ensureNoRepeationProc.inController(controller, firstLineDto);
 
                     // 校验init下的Req和Resp类
                     reqRespProc.checkInitBody(initBody, firstLineDto);

@@ -9,11 +9,13 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.MoreObjects;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
+import com.spldeolin.allison1875.base.service.AntiDuplicationService;
 import com.spldeolin.allison1875.base.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.base.service.javabean.FieldArg;
 import com.spldeolin.allison1875.base.service.javabean.JavabeanArg;
@@ -29,6 +31,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
 
+    @Inject
+    private AntiDuplicationService antiDuplicationService;
+
     @Override
     public JavabeanGeneration generate(JavabeanArg arg) {
         ValidateUtils.ensureValid(arg);
@@ -42,9 +47,9 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
                 log.info("Entity [{}] is exist, use [overwrite] resolution", className);
             } else if (arg.getJavabeanExistenceResolution() == FileExistenceResolutionEnum.RENAME) {
                 String oldClassName = className;
-                absulutePath = rename(absulutePath);
+                log.info("Entity [{}] is exist, use [rename] resolution", oldClassName);
+                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
                 className = FilenameUtils.getBaseName(absulutePath.toString());
-                log.info("Entity [{}] is exist, use [rename] resolution, newClassName={}", oldClassName, className);
             } else {
                 throw new RuntimeException("impossible unless bug");
             }
