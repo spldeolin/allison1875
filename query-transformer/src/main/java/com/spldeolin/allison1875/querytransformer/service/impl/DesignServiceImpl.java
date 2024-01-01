@@ -15,10 +15,10 @@ import com.spldeolin.allison1875.base.util.HashingUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
-import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
-import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
+import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
+import com.spldeolin.allison1875.querytransformer.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 
 /**
@@ -64,16 +64,6 @@ public class DesignServiceImpl implements DesignService {
                 .orElseThrow(IllegalDesignException::new);
         String metaJson = StringEscapeUtils.unescapeJava(initializer.asStringLiteralExpr().getValue());
         return JsonUtils.toObject(metaJson, DesignMeta.class);
-    }
-
-    @Override
-    public StringBuilder parseOffset(ClassOrInterfaceDeclaration design) {
-        FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.OFFSET_FIELD_NAME)
-                .orElseThrow(IllegalChainException::new);
-        Expression initializer = queryMetaField.getVariable(0).getInitializer()
-                .orElseThrow(IllegalDesignException::new);
-        String offsetText = initializer.asStringLiteralExpr().getValue();
-        return new StringBuilder(offsetText);
     }
 
 }

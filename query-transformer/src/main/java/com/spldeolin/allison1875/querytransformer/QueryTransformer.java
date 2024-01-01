@@ -13,10 +13,10 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
-import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
-import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
+import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
+import com.spldeolin.allison1875.querytransformer.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
@@ -29,7 +29,6 @@ import com.spldeolin.allison1875.querytransformer.service.GenerateMethodIntoMapp
 import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateParamService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateResultService;
-import com.spldeolin.allison1875.querytransformer.service.OffsetMethodNameService;
 import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
 import lombok.extern.log4j.Log4j2;
 
@@ -70,9 +69,6 @@ public class QueryTransformer implements Allison1875MainService {
     @Inject
     private FindMapperService findMapperService;
 
-    @Inject
-    private OffsetMethodNameService offsetMethodNameService;
-
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
@@ -112,19 +108,9 @@ public class QueryTransformer implements Allison1875MainService {
                     }
                     analysis.setDirectBlock(directBlock);
 
-                    // use offset method naming (if no specified)
-                    if (analysis.getNoSpecifiedMethodName()) {
-                        CompilationUnit designCu = offsetMethodNameService.useOffsetMethod(analysis, designMeta,
-                                design);
-                        flushes.add(FileFlush.build(designCu));
-                    }
-
-                    // if naming conflict, ignore this Design Chain
-                    if (findMapperService.isMapperMethodPresent(astForest, designMeta, analysis)) {
-                        log.warn("Method naming from [{}] conflict exist in Mapper [{}]", queryChain.toString(),
-                                designMeta.getMapperName());
-                        continue;
-                    }
+                    // if methodName duplicated, rename
+                    analysis.setMethodName(findMapperService.renameIfMethodNameDuplicated(astForest, designMeta,
+                            analysis.getMethodName()));
 
                     // generate Parameter
                     ParamGenerationDto paramGeneration;

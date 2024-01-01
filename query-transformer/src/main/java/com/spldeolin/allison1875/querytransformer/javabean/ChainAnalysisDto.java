@@ -25,8 +25,6 @@ public class ChainAnalysisDto {
 
     String methodName;
 
-    Boolean noSpecifiedMethodName;
-
     ChainMethodEnum chainMethod;
 
     ReturnClassifyEnum returnClassify;

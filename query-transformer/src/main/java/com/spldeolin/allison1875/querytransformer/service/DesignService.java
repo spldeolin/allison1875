@@ -17,6 +17,4 @@ public interface DesignService {
 
     DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration design);
 
-    StringBuilder parseOffset(ClassOrInterfaceDeclaration design);
-
 }

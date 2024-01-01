@@ -9,6 +9,4 @@ public interface TokenWordConstant {
 
     String BY_FORCED_METHOD_NAME = "byForced";
 
-    String OFFSET_FIELD_NAME = "offset";
-
 }

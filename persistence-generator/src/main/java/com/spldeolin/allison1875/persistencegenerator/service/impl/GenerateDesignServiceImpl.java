@@ -30,7 +30,6 @@ import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordC
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.service.FindMethodNamingOffsetService;
 import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.EntityKey;
@@ -47,9 +46,6 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
-    @Inject
-    private FindMethodNamingOffsetService findMethodNamingOffsetService;
-
     @Override
     public CompilationUnit process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
@@ -60,9 +56,6 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         String designName = concatDesignName(persistence);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                 persistenceGeneratorConfig.getDesignPackage(), designName + ".java");
-
-        FieldDeclaration methodNamingOffsetField = findMethodNamingOffsetService.findMethodNamingOffsetField(
-                designPath);
 
         Collection<PropertyDto> properties = persistence.getProperties();
         properties.removeIf(
@@ -270,7 +263,6 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", TokenWordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
-        designCoid.addMember(methodNamingOffsetField);
         cu.addType(designCoid);
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 

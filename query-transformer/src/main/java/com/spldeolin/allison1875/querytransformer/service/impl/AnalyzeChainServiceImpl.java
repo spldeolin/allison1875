@@ -13,6 +13,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.Allison1875;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
@@ -28,6 +29,7 @@ import com.spldeolin.allison1875.querytransformer.exception.IllegalChainExceptio
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
+import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.log4j.Log4j2;
@@ -39,18 +41,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
+    @Inject
+    private FindMapperService findMapperService;
+
     @Override
     public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta)
             throws IllegalChainException {
         String chainCode = chain.toString();
         String betweenCode = chainCode.substring(chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
-
-        String methodName = this.analyzeSpecifiedMethodName(chain);
-        boolean noSpecifiedMethodName = StringUtils.isEmpty(methodName);
-        if (!noSpecifiedMethodName) {
-            log.info("use specified methodName={}", methodName);
-        }
 
         ChainMethodEnum chainMethod;
         if (betweenCode.startsWith("query(")) {
@@ -62,6 +61,9 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         } else {
             throw new IllegalChainException("chainMethod is none of query, update or drop");
         }
+
+        String methodName = this.analyzeSpecifiedMethodName(chainMethod, chain, designMeta);
+
         ReturnClassifyEnum returnClassify;
         String keyPropertyName = null;
         if (chain.getNameAsString().equals("one")) {
@@ -156,7 +158,6 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
         ChainAnalysisDto result = new ChainAnalysisDto();
         result.setMethodName(methodName);
-        result.setNoSpecifiedMethodName(noSpecifiedMethodName);
         result.setChainMethod(chainMethod);
         result.setReturnClassify(returnClassify);
         result.setQueryPhrases(queryPhrases);
@@ -186,12 +187,15 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         return this.ensureNoRepeation(name, names, index + 1);
     }
 
-    private String analyzeSpecifiedMethodName(MethodCallExpr chain) {
+    private String analyzeSpecifiedMethodName(ChainMethodEnum chainMethod, MethodCallExpr chain,
+            DesignMeta designMeta) {
         MethodCallExpr queryMce = chain.findAll(MethodCallExpr.class,
                 mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update", "drop")).get(0);
         NodeList<Expression> arguments = queryMce.getArguments();
         if (arguments.size() == 0) {
-            return null;
+            String defaultMethodName = chainMethod.name() + StringUtils.removeEnd(designMeta.getEntityName(), "Entity");
+            log.info("Method name not specified in Query Chain, hence default '{}' is used", defaultMethodName);
+            return defaultMethodName;
         }
         String methodName = arguments.get(0).asStringLiteralExpr().getValue().trim();
         return methodName;

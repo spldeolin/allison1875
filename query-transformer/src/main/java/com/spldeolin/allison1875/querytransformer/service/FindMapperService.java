@@ -4,7 +4,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
-import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.service.impl.FindMapperServiceImpl;
 
 /**
@@ -15,6 +14,6 @@ public interface FindMapperService {
 
     ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta designMeta);
 
-    boolean isMapperMethodPresent(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis);
+    String renameIfMethodNameDuplicated(AstForest astForest, DesignMeta designMeta, String methodName);
 
 }
