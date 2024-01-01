@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.generator;
+package com.spldeolin.allison1875.base.service.impl;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,13 +9,15 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.MoreObjects;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
-import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.base.service.javabean.FieldArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.ValidateUtils;
 import com.spldeolin.allison1875.base.util.ast.Javadocs;
 import lombok.extern.log4j.Log4j2;
@@ -23,10 +25,12 @@ import lombok.extern.log4j.Log4j2;
 /**
  * @author Deolin 2021-05-26
  */
+@Singleton
 @Log4j2
-public class JavabeanGenerator {
+public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
 
-    public static JavabeanGeneration generate(JavabeanArg arg) {
+    @Override
+    public JavabeanGeneration generate(JavabeanArg arg) {
         ValidateUtils.ensureValid(arg);
 
         String className = arg.getClassName();
@@ -94,7 +98,7 @@ public class JavabeanGenerator {
         return result;
     }
 
-    private static Path rename(Path path) {
+    private Path rename(Path path) {
         String extension = FilenameUtils.getExtension(path.toString());
         Path newPath = Paths.get(FilenameUtils.removeExtension(path.toString()) + "Ex" + "." + extension);
         if (newPath.toFile().exists()) {

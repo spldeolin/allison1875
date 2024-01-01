@@ -9,10 +9,10 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
-import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.base.service.javabean.FieldArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -28,6 +28,9 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
 
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
+
+    @Inject
+    private JavabeanGeneratorService javabeanGeneratorService;
 
     @Override
     public JavabeanGeneration generate(PersistenceDto persistence, AstForest astForest) {
@@ -72,7 +75,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             arg.getFieldArgs().add(fieldArg);
         }
         arg.setJavabeanExistenceResolution(persistenceGeneratorConfig.getEntityExistenceResolution());
-        return JavabeanGenerator.generate(arg);
+        return javabeanGeneratorService.generate(arg);
     }
 
     private String concatEntityDescription(PersistenceDto persistence) {

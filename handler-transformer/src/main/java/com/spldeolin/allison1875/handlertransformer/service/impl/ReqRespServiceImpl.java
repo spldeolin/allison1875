@@ -21,9 +21,9 @@ import com.spldeolin.allison1875.base.constant.AnnotationConstant;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.exception.ParentAbsentException;
-import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
@@ -45,6 +45,9 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private FieldService fieldService;
+
+    @Inject
+    private JavabeanGeneratorService javabeanGeneratorService;
 
     @Override
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
@@ -104,7 +107,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 javabean.setMembers(dto.getMembers());
             });
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
-            JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(arg);
+            JavabeanGeneration javabeanGeneration = javabeanGeneratorService.generate(arg);
             result.getJavabeanCus().add(javabeanGeneration.getCu());
 
             dto.setName(javabeanGeneration.getJavabeanName());

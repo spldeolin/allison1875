@@ -12,7 +12,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.constant.ImportConstant;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;

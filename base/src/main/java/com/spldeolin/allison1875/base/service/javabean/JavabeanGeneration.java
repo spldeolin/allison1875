@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.base.generator.javabean;
+package com.spldeolin.allison1875.base.service.javabean;
 
 import java.nio.file.Path;
 import com.github.javaparser.ast.CompilationUnit;

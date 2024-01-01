@@ -10,10 +10,10 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
-import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
-import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.base.service.javabean.FieldArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.CollectionUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
@@ -29,6 +29,9 @@ public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
 
     @Inject
     private StarTransformerConfig config;
+
+    @Inject
+    private JavabeanGeneratorService javabeanGeneratorService;
 
     @Override
     public JavabeanGeneration generate(AstForest astForest, StarAnalysisDto analysis) {
@@ -86,7 +89,7 @@ public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
             }
         });
         javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
-        return JavabeanGenerator.generate(javabeanArg);
+        return javabeanGeneratorService.generate(javabeanArg);
     }
 
     private String entityNameToVarName(String entityName) {

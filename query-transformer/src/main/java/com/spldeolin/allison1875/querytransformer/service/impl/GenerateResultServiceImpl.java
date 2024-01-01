@@ -12,10 +12,10 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
-import com.spldeolin.allison1875.base.generator.javabean.FieldArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanArg;
-import com.spldeolin.allison1875.base.generator.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.base.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.base.service.javabean.FieldArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanArg;
+import com.spldeolin.allison1875.base.service.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.base.util.EqualsUtils;
 import com.spldeolin.allison1875.base.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -39,6 +39,9 @@ public class GenerateResultServiceImpl implements GenerateResultService {
 
     @Inject
     private QueryTransformerConfig config;
+
+    @Inject
+    private JavabeanGeneratorService javabeanGeneratorService;
 
     @Override
     public ResultGenerationDto generate(ChainAnalysisDto chainAnalysis, DesignMeta designMeta, AstForest astForest) {
@@ -94,7 +97,7 @@ public class GenerateResultServiceImpl implements GenerateResultService {
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
-            JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(javabeanArg);
+            JavabeanGeneration javabeanGeneration = javabeanGeneratorService.generate(javabeanArg);
             result.setRecordFlush(javabeanGeneration.getFileFlush());
             ClassOrInterfaceDeclaration resultType = javabeanGeneration.getCoid();
             String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
