@@ -29,9 +29,9 @@ import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
 import lombok.extern.log4j.Log4j2;
 
@@ -48,8 +48,8 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     private QueryTransformerConfig queryTransformerConfig;
 
     @Override
-    public List<FileFlush> process(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
+    public List<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+            ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
@@ -61,8 +61,8 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
                 // QUERY
                 xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, parameterTransformation,
-                        resultTransformation);
+                String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, paramGeneration,
+                        resultGeneration);
                 xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -103,7 +103,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
                 // UPDATE
                 xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = concatUpdateStartTag(chainAnalysis, parameterTransformation);
+                String startTag = concatUpdateStartTag(chainAnalysis, paramGeneration);
                 xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
@@ -122,7 +122,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
                 // DROP
                 xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = concatDeleteStartTag(chainAnalysis, parameterTransformation);
+                String startTag = concatDeleteStartTag(chainAnalysis, paramGeneration);
                 xmlLines.add(startTag);
                 if (chainAnalysis.getByPhrases().size() > 0) {
                     xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -298,15 +298,15 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     }
 
     private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
+            ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
-        if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
-            startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
+        if (paramGeneration.getParameters().size() == 1) {
+            startTag += " parameterType='" + paramGeneration.getImports().get(0) + "'";
         }
-        if (resultTransformation.getElementTypeQualifier() != null && !resultTransformation.getElementTypeQualifier()
+        if (resultGeneration.getElementTypeQualifier() != null && !resultGeneration.getElementTypeQualifier()
                 .equals(designMeta.getEntityQualifier())) {
-            startTag += " resultType='" + resultTransformation.getElementTypeQualifier() + "'>";
-        } else if (!resultTransformation.getResultType().equals(PrimitiveType.intType())) {
+            startTag += " resultType='" + resultGeneration.getElementTypeQualifier() + "'>";
+        } else if (!resultGeneration.getResultType().equals(PrimitiveType.intType())) {
             startTag += " resultMap='all'>";
         } else {
             startTag += " resultType='int'>";
@@ -314,21 +314,19 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
         return startTag;
     }
 
-    private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation) {
+    private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
         String startTag = "<update id='" + chainAnalysis.getMethodName() + "'";
-        if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
-            startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
+        if (paramGeneration.getParameters().size() == 1) {
+            startTag += " parameterType='" + paramGeneration.getImports().get(0) + "'";
         }
         startTag += ">";
         return startTag;
     }
 
-    private String concatDeleteStartTag(ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation) {
+    private String concatDeleteStartTag(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
         String startTag = "<delete id='" + chainAnalysis.getMethodName() + "'";
-        if (parameterTransformation != null && parameterTransformation.getParameters().size() == 1) {
-            startTag += " parameterType='" + parameterTransformation.getImports().get(0) + "'";
+        if (paramGeneration.getParameters().size() == 1) {
+            startTag += " parameterType='" + paramGeneration.getImports().get(0) + "'";
         }
         startTag += ">";
         return startTag;

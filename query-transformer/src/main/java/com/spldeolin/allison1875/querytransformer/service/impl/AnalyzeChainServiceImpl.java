@@ -40,7 +40,8 @@ import lombok.extern.log4j.Log4j2;
 public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
     @Override
-    public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta) {
+    public ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta)
+            throws IllegalChainException {
         String chainCode = chain.toString();
         String betweenCode = chainCode.substring(chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);

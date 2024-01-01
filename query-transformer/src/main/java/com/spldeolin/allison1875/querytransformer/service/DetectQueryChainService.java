@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.querytransformer.service.impl.DetectQueryChainS
 @ImplementedBy(DetectQueryChainServiceImpl.class)
 public interface DetectQueryChainService {
 
-    List<MethodCallExpr> process(Node node);
+    List<MethodCallExpr> detect(Node node);
 
 }

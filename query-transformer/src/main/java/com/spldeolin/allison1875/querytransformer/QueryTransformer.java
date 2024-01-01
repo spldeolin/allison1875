@@ -16,20 +16,21 @@ import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.IllegalDesignException;
 import com.spldeolin.allison1875.persistencegenerator.facade.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
 import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 import com.spldeolin.allison1875.querytransformer.service.DetectQueryChainService;
 import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
-import com.spldeolin.allison1875.querytransformer.service.GenerateMethodSignatureService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateMethodIntoMapperService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateParamService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateResultService;
 import com.spldeolin.allison1875.querytransformer.service.OffsetMethodNameService;
 import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
-import com.spldeolin.allison1875.querytransformer.service.TransformParameterService;
-import com.spldeolin.allison1875.querytransformer.service.TransformResultService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -49,13 +50,13 @@ public class QueryTransformer implements Allison1875MainService {
     private GenerateMethodXmlService generateMethodXmlService;
 
     @Inject
-    private GenerateMethodSignatureService generateMethodSignatureService;
+    private GenerateMethodIntoMapperService generateMethodIntoMapperService;
 
     @Inject
-    private TransformParameterService transformParameterService;
+    private GenerateParamService generateParameterService;
 
     @Inject
-    private TransformResultService transformResultService;
+    private GenerateResultService transformResultService;
 
     @Inject
     private ReplaceDesignService replaceDesignService;
@@ -75,80 +76,104 @@ public class QueryTransformer implements Allison1875MainService {
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
+
         for (CompilationUnit cu : astForest) {
-            LexicalPreservingPrinter.setup(cu);
             boolean anyTransformed = false;
+            LexicalPreservingPrinter.setup(cu);
 
             if (cu.findAll(BlockStmt.class).isEmpty()) {
                 continue;
             }
-
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {
-                for (MethodCallExpr chain : detectQueryChainService.process(directBlock)) {
+                for (MethodCallExpr queryChain : detectQueryChainService.detect(directBlock)) {
+
                     ClassOrInterfaceDeclaration design;
                     DesignMeta designMeta;
                     try {
-                        design = designService.findDesign(astForest, chain);
+                        design = designService.findDesign(astForest, queryChain);
                         designMeta = designService.parseDesignMeta(design);
+                        log.info("Design found and Design Meta parsed, designName={} designMeta={}", design.getName(),
+                                designMeta);
                     } catch (IllegalDesignException e) {
-                        log.error("illegal design: " + e.getMessage());
-                        return;
+                        log.error("fail to find Design or parse Design Meta, queryChain={}", queryChain, e);
+                        continue;
                     } catch (SameNameTerminationMethodException e) {
-                        return;
+                        continue;
                     }
 
-                    // analyze chain
-                    ChainAnalysisDto chainAnalysis = analyzeChainService.process(chain, design, designMeta);
-                    chainAnalysis.setDirectBlock(directBlock);
+                    // analyze queryChain
+                    ChainAnalysisDto analysis;
+                    try {
+                        analysis = analyzeChainService.process(queryChain, design, designMeta);
+                        log.info("Query Chain analyzed, analysis={}", analysis);
+                    } catch (IllegalChainException e) {
+                        log.error("fail to analyze Query Chain, queryChain={}", queryChain, e);
+                        continue;
+                    }
+                    analysis.setDirectBlock(directBlock);
 
                     // use offset method naming (if no specified)
-                    if (chainAnalysis.getNoSpecifiedMethodName()) {
-                        CompilationUnit designCu = offsetMethodNameService.useOffsetMethod(chainAnalysis, designMeta,
+                    if (analysis.getNoSpecifiedMethodName()) {
+                        CompilationUnit designCu = offsetMethodNameService.useOffsetMethod(analysis, designMeta,
                                 design);
                         flushes.add(FileFlush.build(designCu));
                     }
 
                     // if naming conflict, ignore this Design Chain
-                    if (findMapperService.isMapperMethodPresent(astForest, designMeta, chainAnalysis)) {
-                        log.warn("Method naming from [{}] conflict exist in Mapper [{}]", chain.toString(),
+                    if (findMapperService.isMapperMethodPresent(astForest, designMeta, analysis)) {
+                        log.warn("Method naming from [{}] conflict exist in Mapper [{}]", queryChain.toString(),
                                 designMeta.getMapperName());
-                        return;
+                        continue;
                     }
 
-                    // transform Parameter
-                    ParameterTransformationDto parameterTransformation = transformParameterService.transform(
-                            chainAnalysis,
-                            designMeta, astForest, flushes);
+                    // generate Parameter
+                    ParamGenerationDto paramGeneration;
+                    try {
+                        paramGeneration = generateParameterService.generate(analysis, designMeta, astForest);
+                        log.info("Param generated, generation={}", paramGeneration);
+                    } catch (Exception e) {
+                        log.error("fail to generate param analysis={} designMeta={}", analysis, designMeta, e);
+                        continue;
+                    }
+                    if (paramGeneration.getCondFlush() != null) {
+                        flushes.add(paramGeneration.getCondFlush());
+                    }
 
-                    // transform Result Type
-                    ResultTransformationDto resultTransformation = transformResultService.transform(chainAnalysis,
-                            designMeta, astForest, flushes);
+                    // generate Result Type
+                    ResultGenerationDto resultGeneration;
+                    try {
+                        resultGeneration = transformResultService.generate(analysis, designMeta, astForest);
+                        log.info("Result generated, generation={}", resultGeneration);
+                    } catch (Exception e) {
+                        log.error("fail to generate result analysis={} designMeta={}", analysis, designMeta, e);
+                        continue;
+                    }
+                    if (resultGeneration.getRecordFlush() != null) {
+                        flushes.add(resultGeneration.getRecordFlush());
+                    }
 
-                    // create Method in Mapper
-                    CompilationUnit mapperCu = generateMethodSignatureService.process(astForest, designMeta,
-                            chainAnalysis,
-                            parameterTransformation, resultTransformation);
+                    // generate Method into Mapper
+                    CompilationUnit mapperCu = generateMethodIntoMapperService.generate(astForest, designMeta, analysis,
+                            paramGeneration, resultGeneration);
                     if (mapperCu != null) {
+                        log.info("Method generated into Mapper, mapper={}", mapperCu.getPrimaryTypeName());
                         flushes.add(FileFlush.build(mapperCu));
                     }
 
-                    // create Method in mapper.xml
-                    List<FileFlush> xmlFlushes = generateMethodXmlService.process(astForest, designMeta,
-                            chainAnalysis,
-                            parameterTransformation, resultTransformation);
+                    // generate Method into mapper.xml
+                    List<FileFlush> xmlFlushes = generateMethodXmlService.generate(astForest, designMeta, analysis,
+                            paramGeneration, resultGeneration);
                     flushes.addAll(xmlFlushes);
 
                     // append autowired mapper
-                    appendAutowiredMapperService.append(chain, designMeta);
+                    appendAutowiredMapperService.append(queryChain, designMeta);
 
-                    // transform Method Call and replace Design
-                    replaceDesignService.process(designMeta, chainAnalysis, parameterTransformation,
-                            resultTransformation);
+                    // transform Query Design
+                    replaceDesignService.process(designMeta, analysis, paramGeneration, resultGeneration);
 
                     anyTransformed = true;
                 }
             }
-
             if (anyTransformed) {
                 flushes.add(FileFlush.buildLexicalPreserving(cu));
             }

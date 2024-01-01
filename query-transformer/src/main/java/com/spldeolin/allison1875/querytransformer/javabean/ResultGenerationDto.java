@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,9 +15,9 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ResultTransformationDto {
+public class ResultGenerationDto {
 
-    List<String> imports = Lists.newArrayList();
+    final List<String> imports = Lists.newArrayList();
 
     Type resultType;
 
@@ -31,7 +31,8 @@ public class ResultTransformationDto {
      * 对于更新或删除方法
      * 这个值是null
      */
-    @Nullable
     String elementTypeQualifier;
+
+    FileFlush recordFlush;
 
 }

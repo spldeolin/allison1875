@@ -24,7 +24,7 @@ public class DetectQueryChainServiceImpl implements DetectQueryChainService {
     private QueryTransformerConfig config;
 
     @Override
-    public List<MethodCallExpr> process(Node node) {
+    public List<MethodCallExpr> detect(Node node) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : node.findAll(MethodCallExpr.class)) {
             if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count") && mce.getParentNode()

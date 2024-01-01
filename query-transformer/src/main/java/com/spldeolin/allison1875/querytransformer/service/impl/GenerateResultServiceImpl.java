@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
@@ -8,11 +7,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.FileFlush;
 import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.base.generator.JavabeanGenerator;
@@ -29,8 +26,8 @@ import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
-import com.spldeolin.allison1875.querytransformer.service.TransformResultService;
+import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
+import com.spldeolin.allison1875.querytransformer.service.GenerateResultService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -38,16 +35,15 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class TransformResultServiceImpl implements TransformResultService {
+public class GenerateResultServiceImpl implements GenerateResultService {
 
     @Inject
     private QueryTransformerConfig config;
 
     @Override
-    public ResultTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta, AstForest astForest,
-            List<FileFlush> flushes) {
+    public ResultGenerationDto generate(ChainAnalysisDto chainAnalysis, DesignMeta designMeta, AstForest astForest) {
         boolean isAssigned = isAssigned(chainAnalysis);
-        ResultTransformationDto result = new ResultTransformationDto();
+        ResultGenerationDto result = new ResultGenerationDto();
 
         if (EqualsUtils.equalsAny(chainAnalysis.getChainMethod(), ChainMethodEnum.update, ChainMethodEnum.drop)) {
             result.setResultType(PrimitiveType.intType());
@@ -99,7 +95,7 @@ public class TransformResultServiceImpl implements TransformResultService {
             }
             javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
             JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(javabeanArg);
-            flushes.add(javabeanGeneration.getFileFlush());
+            result.setRecordFlush(javabeanGeneration.getFileFlush());
             ClassOrInterfaceDeclaration resultType = javabeanGeneration.getCoid();
             String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
             result.setElementTypeQualifier(javabeanQualifier);
@@ -117,7 +113,7 @@ public class TransformResultServiceImpl implements TransformResultService {
             String propertyName = Iterables.getOnlyElement(phrases).getSubjectPropertyName();
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
-            result.setImports(Lists.newArrayList(javaType.getQualifier()));
+            result.getImports().add(javaType.getQualifier());
             if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
                     ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
@@ -129,7 +125,7 @@ public class TransformResultServiceImpl implements TransformResultService {
         } else {
             // 没有指定属性，使用Entity作为返回值类型
             result.setElementTypeQualifier(designMeta.getEntityQualifier());
-            result.setImports(Lists.newArrayList(designMeta.getEntityQualifier()));
+            result.getImports().add(designMeta.getEntityQualifier());
             if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
                     ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));

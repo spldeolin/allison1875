@@ -17,8 +17,8 @@ import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.MapOrMultimapBuiltDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import com.spldeolin.allison1875.querytransformer.util.TokenRanges;
@@ -35,15 +35,13 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
     private TransformMethodCallService transformMethodCallService;
 
     @Override
-    public void process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation, ResultTransformationDto resultTransformation) {
+    public void process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration,
+            ResultGenerationDto resultGeneration) {
 
         // add imports to cu
         chainAnalysis.getChain().findCompilationUnit().ifPresent(cu -> {
-            if (parameterTransformation != null) {
-                parameterTransformation.getImports().forEach(cu::addImport);
-            }
-            resultTransformation.getImports().forEach(cu::addImport);
+            paramGeneration.getImports().forEach(cu::addImport);
+            resultGeneration.getImports().forEach(cu::addImport);
             cu.addImport(designMeta.getEntityQualifier());
             cu.addImport(designMeta.getMapperQualifier());
             cu.addImport(ImportConstant.SPRING_AUTOWIRED);
@@ -53,7 +51,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
 
         // build Map  build Multimap
         MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallService.mapOrMultimapBuildStmts(designMeta,
-                chainAnalysis, resultTransformation);
+                chainAnalysis, resultGeneration);
 
         Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
                 .orElseThrow(() -> new RuntimeException("cannot find Expression Stmt"));
@@ -61,13 +59,13 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
         log.info("ancestorStatement={}", ancestorStatementCode);
 
         // transform Method Call code
-        String mceCode = transformMethodCallService.methodCallExpr(designMeta, chainAnalysis, parameterTransformation);
+        String mceCode = transformMethodCallService.methodCallExpr(designMeta, chainAnalysis, paramGeneration);
 
         List<Statement> replacementStatements = Lists.newArrayList();
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
             // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
             replacementStatements.add(StaticJavaParser.parseStatement(
-                    resultTransformation.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode
+                    resultGeneration.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode
                             + ";"));
 
         } else if (chainAnalysis.getChain().getParentNode()
@@ -78,7 +76,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
             if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.each,
                     ReturnClassifyEnum.multiEach)) {
                 replacementStatements.add(StaticJavaParser.parseStatement(
-                        resultTransformation.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode
+                        resultGeneration.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode
                                 + ";"));
             } else {
                 replacementStatements.add(StaticJavaParser.parseStatement(
@@ -96,9 +94,9 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
         }
 
         // 在ancestorStatement的上方添加argument build代码块（如果需要augument build的话）
-        List<Statement> argumentBuildStmts = transformMethodCallService.argumentBuildStmts(chainAnalysis,
-                parameterTransformation);
-        if (argumentBuildStmts != null) {
+        if (paramGeneration.getIsCond()) {
+            List<Statement> argumentBuildStmts = transformMethodCallService.argumentBuildStmts(chainAnalysis,
+                    paramGeneration);
             replacementStatements.addAll(0, argumentBuildStmts);
         }
 

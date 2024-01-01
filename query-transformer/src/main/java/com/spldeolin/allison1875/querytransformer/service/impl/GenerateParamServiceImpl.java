@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.querytransformer.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nullable;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -27,9 +26,9 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDt
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.service.TransformParameterService;
+import com.spldeolin.allison1875.querytransformer.service.GenerateParamService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -37,20 +36,19 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class TransformParameterServiceImpl implements TransformParameterService {
+public class GenerateParamServiceImpl implements GenerateParamService {
 
     @Inject
     private QueryTransformerConfig config;
 
-    @Nullable
     @Override
-    public ParameterTransformationDto transform(ChainAnalysisDto chainAnalysis, DesignMeta designMeta,
-            AstForest astForest, List<FileFlush> flushes) {
+    public ParamGenerationDto generate(ChainAnalysisDto chainAnalysis, DesignMeta designMeta, AstForest astForest) {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
         List<String> imports = Lists.newArrayList();
         List<Parameter> params = Lists.newArrayList();
         boolean isJavabean = false;
+        FileFlush condFlush = null;
 
         Set<PhraseDto> phrases = Sets.newLinkedHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
@@ -86,7 +84,7 @@ public class TransformParameterServiceImpl implements TransformParameterService 
             }
             javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
             JavabeanGeneration javabeanGeneration = JavabeanGenerator.generate(javabeanArg);
-            flushes.add(javabeanGeneration.getFileFlush());
+            condFlush = javabeanGeneration.getFileFlush();
             ClassOrInterfaceDeclaration cond = javabeanGeneration.getCoid();
             Parameter param = new Parameter();
             param.setType(cond.getNameAsString());
@@ -115,10 +113,15 @@ public class TransformParameterServiceImpl implements TransformParameterService 
                 params.add(param);
             }
         } else {
-            return null;
+            return new ParamGenerationDto();
         }
 
-        return new ParameterTransformationDto().setImports(imports).setParameters(params).setIsJavabean(isJavabean);
+        ParamGenerationDto result = new ParamGenerationDto();
+        result.getImports().addAll(imports);
+        result.getParameters().addAll(params);
+        result.setIsCond(isJavabean);
+        result.setCondFlush(condFlush);
+        return result;
     }
 
 }

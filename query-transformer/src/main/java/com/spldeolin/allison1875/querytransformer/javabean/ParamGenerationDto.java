@@ -2,6 +2,8 @@ package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.List;
 import com.github.javaparser.ast.body.Parameter;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.base.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -13,12 +15,14 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ParameterTransformationDto {
+public class ParamGenerationDto {
 
-     List<String> imports;
+    final List<String> imports = Lists.newArrayList();
 
-     List<Parameter> parameters;
+    final List<Parameter> parameters = Lists.newArrayList();
 
-     Boolean isJavabean;
+    Boolean isCond;
+
+    FileFlush condFlush;
 
 }

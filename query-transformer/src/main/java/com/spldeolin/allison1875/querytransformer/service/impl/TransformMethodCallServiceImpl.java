@@ -20,9 +20,9 @@ import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.MapOrMultimapBuiltDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParameterTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultTransformationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,13 +35,12 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
 
     @Override
     public String methodCallExpr(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation) {
+            ParamGenerationDto paramGeneration) {
         String result =
                 MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
                         + "(";
-        if (parameterTransformation != null && parameterTransformation.getIsJavabean()) {
-            result += MoreStringUtils.lowerFirstLetter(
-                    parameterTransformation.getParameters().get(0).getTypeAsString());
+        if (paramGeneration.getIsCond()) {
+            result += MoreStringUtils.lowerFirstLetter(paramGeneration.getParameters().get(0).getTypeAsString());
         } else {
             Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
             phrases.addAll(chainAnalysis.getByPhrases());
@@ -56,14 +55,9 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
     }
 
     @Override
-    public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis,
-            ParameterTransformationDto parameterTransformation) {
-        if (parameterTransformation == null || !parameterTransformation.getIsJavabean()) {
-            return null;
-        }
-
+    public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
         log.info("build Javabean setter call");
-        String javabeanTypeName = parameterTransformation.getParameters().get(0).getTypeAsString();
+        String javabeanTypeName = paramGeneration.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
         List<Statement> result = Lists.newArrayList();
         result.add(StaticJavaParser.parseStatement(
@@ -86,13 +80,13 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
 
     @Override
     public MapOrMultimapBuiltDto mapOrMultimapBuildStmts(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ResultTransformationDto resultTransformation) {
+            ResultGenerationDto resultGeneration) {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils.substringAfterLast(resultTransformation.getElementTypeQualifier(),
+            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(),
                     ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode().get().getParentNode()
@@ -118,7 +112,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils.substringAfterLast(resultTransformation.getElementTypeQualifier(),
+            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(),
                     ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode()
