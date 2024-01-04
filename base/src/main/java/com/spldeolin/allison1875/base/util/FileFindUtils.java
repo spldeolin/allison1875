@@ -18,7 +18,7 @@ public class FileFindUtils {
     }
 
     public static Set<File> asFilesRecursively(Path directory, String extension) {
-        Set<File> result = Sets.newHashSet();
+        Set<File> result = Sets.newLinkedHashSet();
         FileUtils.iterateFiles(directory.toFile(), new String[]{extension}, true).forEachRemaining(file -> {
             if (extension.equals(Files.getFileExtension(file.getPath()))) {
                 result.add(file);
