@@ -39,7 +39,7 @@ public class AstForest implements Iterable<CompilationUnit> {
     /**
      * AST森林内的java文件
      */
-    private final Set<Path> javasInForest = Sets.newHashSet();
+    private final Set<Path> javasInForest = Sets.newLinkedHashSet();
 
     private AstIterator iterator;
 
