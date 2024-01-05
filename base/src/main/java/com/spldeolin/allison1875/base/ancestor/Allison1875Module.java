@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public abstract class Allison1875Module extends AbstractModule {
 
-    public abstract Class<? extends Allison1875MainService> provideMainProcessorType();
+    public abstract Class<? extends Allison1875MainService> declareMainService();
 
     @Override
     protected void configure() {

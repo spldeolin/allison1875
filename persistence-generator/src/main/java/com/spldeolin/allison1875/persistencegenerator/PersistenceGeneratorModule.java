@@ -24,7 +24,7 @@ public class PersistenceGeneratorModule extends Allison1875Module {
     }
 
     @Override
-    public Class<? extends Allison1875MainService> provideMainProcessorType() {
+    public Class<? extends Allison1875MainService> declareMainService() {
         return PersistenceGenerator.class;
     }
 

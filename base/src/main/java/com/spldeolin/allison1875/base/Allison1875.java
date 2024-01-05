@@ -44,7 +44,9 @@ public class Allison1875 {
             if (i > 0) {
                 astForest.reset();
             }
-            injector.getInstance(allison1875Module.provideMainProcessorType()).process(astForest);
+            log.info("process main service [{}], module={}", allison1875Module.declareMainService().getName(),
+                    allison1875Module);
+            injector.getInstance(allison1875Module.declareMainService()).process(astForest);
         }
     }
 
