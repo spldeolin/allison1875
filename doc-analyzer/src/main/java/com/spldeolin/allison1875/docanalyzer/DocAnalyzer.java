@@ -75,7 +75,8 @@ public class DocAnalyzer implements Allison1875MainService {
         // 重新生成astForest（将解析范围扩大到 项目根目录 + 所有用户配置的依赖项目路径）
         Set<Path> dependencyProjectPaths = config.getDependencyProjectPaths().stream().map(Paths::get)
                 .collect(Collectors.toSet());
-        astForest = new AstForest(astForest.getPrimaryClass(), true, dependencyProjectPaths);
+        astForest = new AstForest(astForest.getPrimaryClass(), true, dependencyProjectPaths,
+                astForest.getAstFilterService());
 
         // 首次遍历并解析astForest，然后构建2个jsg对象，jsg对象为后续req与resp生成JsonSchema所需，构建完毕后重置astForest游标
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = jsgBuildService.analyzeJpdvs(astForest);

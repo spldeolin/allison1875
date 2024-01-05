@@ -26,7 +26,7 @@ import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.ast.MavenPathResolver;
 import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.FileFindUtils;
+import com.spldeolin.allison1875.base.util.FileTraverseUtils;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
 import lombok.extern.log4j.Log4j2;
@@ -101,12 +101,12 @@ public class LineCounter implements Allison1875MainService {
     }
 
     private Set<File> detectXmls(AstForest astForest) {
-        Set<File> result = FileFindUtils.asFilesRecursively(
+        Set<File> result = FileTraverseUtils.listFilesRecursively(
                 MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).resolve("src/main/resources"), "xml");
         File directory = MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).resolve("src/main/resources")
                 .toFile();
         if (directory.exists()) {
-            result = FileFindUtils.asFilesRecursively(directory.toPath(), "xml");
+            result = FileTraverseUtils.listFilesRecursively(directory.toPath(), "xml");
         }
         return result;
     }
@@ -158,11 +158,11 @@ public class LineCounter implements Allison1875MainService {
         return node.getRange().map(Range::getLineCount).orElse(0);
     }
 
-    private Path calcCommonPath(Collection<Path> sourceRootPaths) {
-        List<Path> paths = Lists.newArrayList(sourceRootPaths);
+    private Path calcCommonPath(Collection<File> sourceRootPaths) {
+        List<File> paths = Lists.newArrayList(sourceRootPaths);
         String common = paths.get(0).toString();
-        for (Path path : paths) {
-            common = Strings.commonPrefix(common, path.toString());
+        for (File path : paths) {
+            common = Strings.commonPrefix(common, path.getPath());
         }
         return Paths.get(common);
     }

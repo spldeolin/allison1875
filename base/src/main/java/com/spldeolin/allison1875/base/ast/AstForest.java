@@ -6,9 +6,12 @@ import java.util.Iterator;
 import java.util.Set;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.ast.CompilationUnit;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
-import com.spldeolin.allison1875.base.util.FileFindUtils;
+import com.spldeolin.allison1875.base.service.AstFilterService;
+import com.spldeolin.allison1875.base.util.FileTraverseUtils;
 import com.spldeolin.allison1875.base.util.ast.Cus;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -17,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2021-02-02
  */
 @Log4j2
+@Getter
 public class AstForest implements Iterable<CompilationUnit> {
 
     /**
@@ -26,10 +30,7 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     private final boolean wholeProject;
 
-    /**
-     * AST森林的根目录
-     */
-    private final Path astForestRoot;
+    private final AstFilterService astFilterService;
 
     /**
      * Primary Class所在Maven Module的src/main/java的路径
@@ -37,15 +38,21 @@ public class AstForest implements Iterable<CompilationUnit> {
     private final Path primaryJavaRoot;
 
     /**
+     * AST森林的根目录
+     */
+    private final Path astForestRoot;
+
+    /**
      * AST森林内的java文件
      */
-    private final Set<Path> javasInForest = Sets.newLinkedHashSet();
+    private final Set<File> javasInForest = Sets.newLinkedHashSet();
 
     private AstIterator iterator;
 
-    public AstForest(Class<?> primaryClass, boolean wholeProject) {
+    public AstForest(Class<?> primaryClass, boolean wholeProject, AstFilterService astFilterService) {
         this.primaryClass = primaryClass;
         this.wholeProject = wholeProject;
+        this.astFilterService = astFilterService;
 
         Path mavenModule = MavenPathResolver.findMavenModule(primaryClass);
         this.primaryJavaRoot = mavenModule.resolve("src/main/java").normalize();
@@ -60,9 +67,11 @@ public class AstForest implements Iterable<CompilationUnit> {
         log.info("AST Forest built [{}]", astForestRoot);
     }
 
-    public AstForest(Class<?> primaryClass, boolean wholeProject, Set<Path> dependencyPaths) {
+    public AstForest(Class<?> primaryClass, boolean wholeProject, Set<Path> dependencyPaths,
+            AstFilterService astFilterService) {
         this.primaryClass = primaryClass;
         this.wholeProject = wholeProject;
+        this.astFilterService = astFilterService;
 
         Path mavenModule = MavenPathResolver.findMavenModule(primaryClass);
         this.primaryJavaRoot = mavenModule.resolve("src/main/java").normalize();
@@ -82,7 +91,7 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     @Override
     public Iterator<CompilationUnit> iterator() {
-        return this.iterator;
+        return Iterators.filter(iterator, astFilterService::accept);
     }
 
     public AstForest reset() {
@@ -92,29 +101,13 @@ public class AstForest implements Iterable<CompilationUnit> {
     }
 
     public AstForest clone() {
-        AstForest result = new AstForest(primaryClass, wholeProject);
+        AstForest result = new AstForest(primaryClass, wholeProject, astFilterService);
         log.info("AST Forest cloned");
         return result;
     }
 
-    public Class<?> getPrimaryClass() {
-        return primaryClass;
-    }
-
-    public Path getAstForestRoot() {
-        return astForestRoot;
-    }
-
-    public Path getPrimaryJavaRoot() {
-        return primaryJavaRoot;
-    }
-
-    public Set<Path> getJavasInForest() {
-        return javasInForest;
-    }
-
-    private Set<Path> collectJavas(Path directory) {
-        Set<Path> javaPaths = FileFindUtils.asPathsRecursively(directory, "java");
+    private Set<File> collectJavas(Path directory) {
+        Set<File> javaPaths = FileTraverseUtils.listFilesRecursively(directory, "java", astFilterService::accept);
         int javaCount = javaPaths.size();
         log.info("collect {} of {} from directory [{}]", javaCount, English.plural("java file", javaCount), directory);
         return javaPaths;

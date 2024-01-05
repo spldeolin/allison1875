@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.FileFindUtils;
+import com.spldeolin.allison1875.base.util.FileTraverseUtils;
 import com.spldeolin.allison1875.base.util.JsonUtils;
 import com.spldeolin.allison1875.inspector.InspectorConfig;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
@@ -32,7 +32,7 @@ public class DetectPardonServiceImpl implements DetectPardonService {
         Collection<PardonDto> pardons = Lists.newArrayList();
         String pardonDirectoryPath = config.getPardonDirectoryPath();
         if (StringUtils.isNotEmpty(pardonDirectoryPath)) {
-            Set<File> jsonFiles = FileFindUtils.asFilesRecursively(Paths.get(pardonDirectoryPath), "json");
+            Set<File> jsonFiles = FileTraverseUtils.listFilesRecursively(Paths.get(pardonDirectoryPath), "json");
             for (File jsonFile : jsonFiles) {
                 try {
                     String json = Files.toString(jsonFile, StandardCharsets.UTF_8);

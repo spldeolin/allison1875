@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.base.util.FileFindUtils;
+import com.spldeolin.allison1875.base.util.FileTraverseUtils;
 import com.spldeolin.allison1875.base.util.ast.Cus;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -116,10 +116,10 @@ public class FindServiceServiceImpl implements FindServiceService {
         Path serviceImplPath = Locations.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServiceImplPackage()));
         Collection<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
-        for (File java : FileFindUtils.asFilesRecursively(servicePath, "java")) {
+        for (File java : FileTraverseUtils.listFilesRecursively(servicePath, "java")) {
             serviceOrImplCu.add(Cus.parseCu(java.toPath()));
         }
-        for (File java : FileFindUtils.asFilesRecursively(serviceImplPath, "java")) {
+        for (File java : FileTraverseUtils.listFilesRecursively(serviceImplPath, "java")) {
             serviceOrImplCu.add(Cus.parseCu(java.toPath()));
         }
         return serviceOrImplCu;

@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.base.ast;
 
-import java.nio.file.Path;
+import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
@@ -19,23 +19,23 @@ public class AstIterator implements Iterator<CompilationUnit> {
 
     private final ClassLoader primaryClassLoader;
 
-    private final Iterator<Path> javaPaths;
+    private final Iterator<File> javaFiles;
 
-    public AstIterator(ClassLoader primaryClassLoader, Set<Path> javaPaths) {
+    public AstIterator(ClassLoader primaryClassLoader, Set<File> javaFiles) {
         this.primaryClassLoader = primaryClassLoader;
-        this.javaPaths = javaPaths.iterator();
+        this.javaFiles = javaFiles.iterator();
         StaticJavaParser.getConfiguration().setSymbolResolver(createSymbolSolver());
     }
 
     @Override
     public boolean hasNext() {
-        return javaPaths.hasNext();
+        return javaFiles.hasNext();
     }
 
     @Override
     public CompilationUnit next() {
-        Path javaPath = javaPaths.next();
-        return Cus.parseCu(javaPath);
+        File javaFile = javaFiles.next();
+        return Cus.parseCu(javaFile);
     }
 
     private SymbolResolver createSymbolSolver() {
