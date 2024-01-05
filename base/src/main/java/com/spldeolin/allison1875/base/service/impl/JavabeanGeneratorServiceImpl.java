@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.base.service.impl;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
@@ -101,16 +100,6 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         result.setCoid(coid);
         result.setPath(absulutePath);
         return result;
-    }
-
-    private Path rename(Path path) {
-        String extension = FilenameUtils.getExtension(path.toString());
-        Path newPath = Paths.get(FilenameUtils.removeExtension(path.toString()) + "Ex" + "." + extension);
-        if (newPath.toFile().exists()) {
-            return rename(newPath);
-        } else {
-            return newPath;
-        }
     }
 
 }
