@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.base.ast.AstForest;
 import com.spldeolin.allison1875.base.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.base.util.FileFindUtils;
 import com.spldeolin.allison1875.base.util.ast.Cus;
 import com.spldeolin.allison1875.base.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -115,12 +116,12 @@ public class FindServiceServiceImpl implements FindServiceService {
         Path serviceImplPath = Locations.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServiceImplPackage()));
         Collection<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
-        FileUtils.iterateFiles(servicePath.toFile(), new String[]{"java"}, true).forEachRemaining(java -> {
+        for (File java : FileFindUtils.asFilesRecursively(servicePath, "java")) {
             serviceOrImplCu.add(Cus.parseCu(java.toPath()));
-        });
-        FileUtils.iterateFiles(serviceImplPath.toFile(), new String[]{"java"}, true).forEachRemaining(java -> {
+        }
+        for (File java : FileFindUtils.asFilesRecursively(serviceImplPath, "java")) {
             serviceOrImplCu.add(Cus.parseCu(java.toPath()));
-        });
+        }
         return serviceOrImplCu;
     }
 
