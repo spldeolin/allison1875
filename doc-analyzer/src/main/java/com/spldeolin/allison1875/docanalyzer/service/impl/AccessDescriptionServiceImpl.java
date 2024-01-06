@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.service.impl;
 import java.util.Collection;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.AccessDescriptionService;
 

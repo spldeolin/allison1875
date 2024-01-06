@@ -5,7 +5,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.common.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.service.MethodCollectService;
 import lombok.extern.log4j.Log4j2;
 

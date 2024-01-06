@@ -4,7 +4,7 @@ import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ReqRespServiceImpl;

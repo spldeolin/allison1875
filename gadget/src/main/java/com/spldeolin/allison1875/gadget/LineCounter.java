@@ -22,13 +22,13 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
-import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.MavenPathResolver;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.FileTraverseUtils;
-import com.spldeolin.allison1875.base.util.ast.Locations;
-import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
+import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.MavenPathResolver;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.FileTraverseUtils;
+import com.spldeolin.allison1875.common.util.ast.Locations;
+import com.spldeolin.allison1875.common.util.ast.MethodQualifiers;
 import lombok.extern.log4j.Log4j2;
 
 /**

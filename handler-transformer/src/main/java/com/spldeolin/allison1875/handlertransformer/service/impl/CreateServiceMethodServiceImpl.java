@@ -5,7 +5,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.AnnotationConstant;
+import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;

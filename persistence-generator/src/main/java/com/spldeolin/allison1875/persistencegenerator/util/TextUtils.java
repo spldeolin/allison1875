@@ -4,7 +4,7 @@ import java.util.List;
 import org.codehaus.plexus.util.StringUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.base.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 
 /**
  * @author Deolin 2021-08-30

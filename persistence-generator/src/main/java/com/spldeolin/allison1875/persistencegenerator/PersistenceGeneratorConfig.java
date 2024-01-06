@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.base.enums.FileExistenceResolutionEnum;
+import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
-import static com.spldeolin.allison1875.base.constant.BaseConstant.DOUBLE_INDENT;
-import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
-import static com.spldeolin.allison1875.base.constant.BaseConstant.TREBLE_INDENT;
+import static com.spldeolin.allison1875.common.constant.BaseConstant.DOUBLE_INDENT;
+import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDENT;
+import static com.spldeolin.allison1875.common.constant.BaseConstant.TREBLE_INDENT;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,11 +17,11 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.FileFlush;
-import com.spldeolin.allison1875.base.ast.MavenPathResolver;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.ast.MavenPathResolver;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;

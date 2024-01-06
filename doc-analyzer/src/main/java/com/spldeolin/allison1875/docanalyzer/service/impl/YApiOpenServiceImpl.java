@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.exception.YapiException;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiCommonRespDto;

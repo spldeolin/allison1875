@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.base.ast.FileFlush;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperXmlFileServiceImpl;
 

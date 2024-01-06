@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import com.spldeolin.allison1875.docanalyzer.util.exception.JsonSchemaException;
 import lombok.AccessLevel;

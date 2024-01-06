@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import static com.spldeolin.allison1875.base.constant.BaseConstant.SINGLE_INDENT;
+import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDENT;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,8 +10,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;

@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer;
 
 import java.util.Collection;
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.base.valid.annotation.IsDirectory;
+import com.spldeolin.allison1875.common.valid.annotation.IsDirectory;
 import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
 import lombok.AccessLevel;
 import lombok.Data;

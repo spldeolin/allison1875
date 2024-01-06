@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>base</artifactId>
+            <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

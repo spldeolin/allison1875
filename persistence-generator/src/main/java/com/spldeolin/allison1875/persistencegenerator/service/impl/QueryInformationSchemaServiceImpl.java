@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.service.QueryInformationSchemaService;

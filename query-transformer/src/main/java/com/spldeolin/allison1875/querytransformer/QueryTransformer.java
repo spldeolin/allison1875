@@ -10,9 +10,9 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.ancestor.Allison1875MainService;
-import com.spldeolin.allison1875.base.ast.AstForest;
-import com.spldeolin.allison1875.base.ast.FileFlush;
+import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
+import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;

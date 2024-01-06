@@ -18,7 +18,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;

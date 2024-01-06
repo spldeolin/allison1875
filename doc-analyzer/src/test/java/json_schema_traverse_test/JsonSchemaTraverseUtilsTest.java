@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.exception.JsonSchemaException;

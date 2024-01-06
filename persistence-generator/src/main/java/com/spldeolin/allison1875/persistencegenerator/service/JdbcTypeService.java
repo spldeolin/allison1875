@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.service;
 
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.JdbcTypeServiceImpl;

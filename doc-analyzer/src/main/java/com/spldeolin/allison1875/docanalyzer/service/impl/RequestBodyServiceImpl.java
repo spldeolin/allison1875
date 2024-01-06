@@ -7,7 +7,7 @@ import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.ast.MethodQualifiers;
+import com.spldeolin.allison1875.common.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.javabean.BodyTypeAnalysisDto;
 import com.spldeolin.allison1875.docanalyzer.service.EnumSchemaService;
 import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;

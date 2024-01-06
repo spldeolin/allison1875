@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.inspector;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.base.valid.annotation.IsDirectory;
+import com.spldeolin.allison1875.common.valid.annotation.IsDirectory;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

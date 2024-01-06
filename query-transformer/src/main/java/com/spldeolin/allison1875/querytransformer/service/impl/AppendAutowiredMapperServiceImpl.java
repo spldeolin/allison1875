@@ -8,7 +8,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Iterables;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.MoreStringUtils;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
 

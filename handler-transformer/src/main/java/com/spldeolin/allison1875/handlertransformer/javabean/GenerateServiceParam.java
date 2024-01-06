@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
-import com.spldeolin.allison1875.base.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

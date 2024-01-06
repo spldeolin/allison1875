@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.constant.BaseConstant;
-import com.spldeolin.allison1875.base.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.persistencegenerator.service.DeleteAllison1875MethodService;
 
 /**

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.base.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.EnumCodeAndTitleDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.service.EnumSchemaService;

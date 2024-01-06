@@ -10,7 +10,7 @@
 
     <modules>
         <module>allison1875-all</module>
-        <module>base</module>
+        <module>common</module>
         <module>doc-analyzer</module>
         <module>gadget</module>
         <module>handler-transformer</module>
