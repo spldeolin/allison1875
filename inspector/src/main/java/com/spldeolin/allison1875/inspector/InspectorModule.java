@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.TypeLiteral;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidateUtils;
+import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.inspector.statute.Statute;
 import lombok.ToString;
 
@@ -24,7 +24,7 @@ public class InspectorModule extends Allison1875Module {
     @Override
     protected void configure() {
         // bind config
-        ValidateUtils.ensureValid(inspectorConfig);
+        ValidUtils.ensureValid(inspectorConfig);
         bind(InspectorConfig.class).toInstance(inspectorConfig);
         // bind statutes
         bind(new TypeLiteral<Collection<Statute>>() {

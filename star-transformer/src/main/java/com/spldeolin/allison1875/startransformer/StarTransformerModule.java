@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.startransformer;
 
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidateUtils;
+import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.ToString;
 
 /**
@@ -24,7 +24,7 @@ public class StarTransformerModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        ValidateUtils.ensureValid(starTransformerConfig);
+        ValidUtils.ensureValid(starTransformerConfig);
         bind(StarTransformerConfig.class).toInstance(starTransformerConfig);
     }
 

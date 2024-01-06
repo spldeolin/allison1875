@@ -19,7 +19,7 @@ import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.service.javabean.FieldArg;
 import com.spldeolin.allison1875.common.service.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.service.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.common.util.ValidateUtils;
+import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.common.util.ast.Javadocs;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,7 +35,7 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
 
     @Override
     public JavabeanGeneration generate(JavabeanArg arg) {
-        ValidateUtils.ensureValid(arg);
+        ValidUtils.ensureValid(arg);
 
         String className = arg.getClassName();
         Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getPrimaryJavaRoot(),

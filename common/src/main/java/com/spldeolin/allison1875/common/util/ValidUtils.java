@@ -14,7 +14,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-10-28
  */
 @Log4j2
-public class ValidateUtils {
+public class ValidUtils {
 
     private static final Validator validator;
 
@@ -25,7 +25,7 @@ public class ValidateUtils {
         }
     }
 
-    private ValidateUtils() {
+    private ValidUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

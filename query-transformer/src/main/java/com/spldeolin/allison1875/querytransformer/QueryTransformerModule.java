@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.querytransformer;
 
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidateUtils;
+import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.ToString;
 
 /**
@@ -24,7 +24,7 @@ public class QueryTransformerModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        ValidateUtils.ensureValid(queryTransformerConfig);
+        ValidUtils.ensureValid(queryTransformerConfig);
         bind(QueryTransformerConfig.class).toInstance(queryTransformerConfig);
     }
 

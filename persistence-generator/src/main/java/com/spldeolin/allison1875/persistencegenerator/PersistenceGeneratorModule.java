@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator;
 
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidateUtils;
+import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.ToString;
 
 /**
@@ -19,7 +19,7 @@ public class PersistenceGeneratorModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        ValidateUtils.ensureValid(persistenceGeneratorConfig);
+        ValidUtils.ensureValid(persistenceGeneratorConfig);
         bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
     }
 
