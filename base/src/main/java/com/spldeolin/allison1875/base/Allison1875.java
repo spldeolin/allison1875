@@ -1,8 +1,11 @@
 package com.spldeolin.allison1875.base;
 
-import java.util.Locale;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.ArrayUtils;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.spldeolin.allison1875.base.ancestor.Allison1875Module;
@@ -23,11 +26,17 @@ public class Allison1875 {
     private static final String version = "Allison 1875 10.0-SNAPSHOT";
 
     static {
-        System.out.println();
+        String banner;
+        try {
+            banner = Resources.toString(Resources.getResource("allison1875-banner.txt"), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        System.out.println(banner);
         System.out.println(version);
-        System.out.println("about Allison 1875: https://github.com/spldeolin/allison1875");
+        System.out.println("More information at: https://github.com/spldeolin/allison1875");
         System.out.println();
-        Locale.setDefault(Locale.ENGLISH);
     }
 
     public static void allison1875(Class<?> primaryClass, Allison1875Module... allison1875Modules) {
@@ -39,19 +48,15 @@ public class Allison1875 {
         // create ioc container
         Injector injector = Guice.createInjector(allison1875Modules);
 
-        // build AST forest
-        AstFilterService astFilterService = injector.getInstance(AstFilterService.class);
-        AstForest astForest = new AstForest(primaryClass, false, astFilterService);
+        for (Allison1875Module module : allison1875Modules) {
 
-        // process main services
-        for (int i = 0; i < allison1875Modules.length; i++) {
-            Allison1875Module allison1875Module = allison1875Modules[i];
-            if (i > 0) {
-                astForest.reset();
-            }
-            log.info("process main service [{}], module={}", allison1875Module.declareMainService().getName(),
-                    allison1875Module);
-            injector.getInstance(allison1875Module.declareMainService()).process(astForest);
+            // build AST forest
+            AstFilterService astFilterService = injector.getInstance(AstFilterService.class);
+            AstForest astForest = new AstForest(primaryClass, false, astFilterService);
+
+            // process main services
+            log.info("process main service [{}], module={}", module.declareMainService().getName(), module);
+            injector.getInstance(module.declareMainService()).process(astForest);
         }
     }
 

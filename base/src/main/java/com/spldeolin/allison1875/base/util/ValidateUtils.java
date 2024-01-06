@@ -1,10 +1,12 @@
 package com.spldeolin.allison1875.base.util;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import com.google.common.collect.Sets;
 import lombok.extern.log4j.Log4j2;
 
@@ -14,23 +16,37 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ValidateUtils {
 
-    public static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
+    private static final Validator validator;
+
+    static {
+        Locale.setDefault(Locale.ENGLISH);
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     private ValidateUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
     public static <T> void ensureValid(T object) {
-        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(object);
+        Set<ConstraintViolation<T>> violations = validator.validate(object);
         reportAndExit(violations);
     }
 
     public static <T> void ensureValid(Collection<T> objects) {
         Set<ConstraintViolation<T>> violations = Sets.newHashSet();
         for (T object : objects) {
-            violations.addAll(VALIDATOR.validate(object));
+            violations.addAll(validator.validate(object));
         }
         reportAndExit(violations);
+    }
+
+    private static Validator initValidator() {
+        Locale.setDefault(Locale.ENGLISH);
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            return factory.getValidator();
+        }
     }
 
     private static <T> void reportAndExit(Set<ConstraintViolation<T>> violations) {
