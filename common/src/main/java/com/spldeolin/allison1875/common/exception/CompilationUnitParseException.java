@@ -1,11 +1,11 @@
 package com.spldeolin.allison1875.common.exception;
 
-import com.spldeolin.allison1875.common.ancestor.Allison1875BaseException;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 
 /**
  * @author Deolin 2023-12-28
  */
-public class CompilationUnitParseException extends Allison1875BaseException {
+public class CompilationUnitParseException extends Allison1875Exception {
 
     private static final long serialVersionUID = -481993432355887421L;
 
