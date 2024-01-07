@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.exception;
+package com.spldeolin.allison1875.docanalyzer.exception;
 
 /**
  * 字符串中不存在符号<code>.</code>
