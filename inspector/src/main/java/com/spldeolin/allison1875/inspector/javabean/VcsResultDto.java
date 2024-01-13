@@ -15,8 +15,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VcsResultDto {
 
-     Boolean isAllTarget;
+    Boolean isAllTarget;
 
-     Set<Path> addedFiles;
+    Set<Path> addedFiles;
 
 }

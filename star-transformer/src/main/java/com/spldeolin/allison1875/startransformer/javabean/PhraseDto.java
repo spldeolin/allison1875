@@ -16,22 +16,22 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhraseDto {
 
-     Boolean isOneToOne;
+    Boolean isOneToOne;
 
-     String dtEntityQualifier;
+    String dtEntityQualifier;
 
-     String dtEntityName;
+    String dtEntityName;
 
-     String dtDesignName;
+    String dtDesignName;
 
-     String fk;
+    String fk;
 
-     String fkTypeQualifier;
+    String fkTypeQualifier;
 
-     List<String> keys;
+    List<String> keys;
 
-     List<String> mkeys;
+    List<String> mkeys;
 
-     Map<String, String> entityFieldTypesEachFieldName = Maps.newHashMap();
+    Map<String, String> entityFieldTypesEachFieldName = Maps.newHashMap();
 
 }

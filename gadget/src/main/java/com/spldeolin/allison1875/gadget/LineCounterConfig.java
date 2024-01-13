@@ -22,19 +22,16 @@ public final class LineCounterConfig {
     /**
      * 显示阈值，行数大于等于这个值时，才在排行榜中显示
      */
-    @NotNull
-    @PositiveOrZero Integer displayThreshold;
+    @NotNull @PositiveOrZero Integer displayThreshold;
 
     /**
      * 危险阈值，行数大于等于这个值时，在排行榜会被标记成 [危」
      */
-    @NotNull
-    @PositiveOrZero Integer dangerThreshold;
+    @NotNull @PositiveOrZero Integer dangerThreshold;
 
     /**
      * 排行榜尺寸（0代表不打印排行榜）
      */
-    @NotNull
-    @PositiveOrZero Integer rankListSize;
+    @NotNull @PositiveOrZero Integer rankListSize;
 
 }

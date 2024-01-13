@@ -16,8 +16,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SecondDto {
 
-    @NotNull
-    @Min(0) Integer age;
+    @NotNull @Min(0) Integer age;
 
     @NotNull BigDecimal[] salary;
 

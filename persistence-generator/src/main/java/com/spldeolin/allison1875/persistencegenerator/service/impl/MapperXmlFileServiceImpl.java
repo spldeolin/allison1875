@@ -39,8 +39,7 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
 
     @Override
     public FileFlush generateMapperXml(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
-            Path mapperXmlDirectory,
-            Collection<Collection<String>> sourceCodes) throws IOException {
+            Path mapperXmlDirectory, Collection<Collection<String>> sourceCodes) throws IOException {
         // find
         File mapperXmlFile = mapperXmlDirectory.resolve(persistence.getMapperName() + ".xml").toFile();
 

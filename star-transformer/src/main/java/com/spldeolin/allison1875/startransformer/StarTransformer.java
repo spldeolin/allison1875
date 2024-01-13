@@ -66,8 +66,8 @@ public class StarTransformer implements Allison1875MainService {
                     JavabeanGeneration wholeDtoGeneration;
                     try {
                         wholeDtoGeneration = generateWholeDtoService.generate(astForest, analysis);
-                        log.info("Whole DTO generated, qualifier={} path={}",
-                                wholeDtoGeneration.getJavabeanQualifier(), wholeDtoGeneration.getPath());
+                        log.info("Whole DTO generated, qualifier={} path={}", wholeDtoGeneration.getJavabeanQualifier(),
+                                wholeDtoGeneration.getPath());
                     } catch (Exception e) {
                         log.error("fail to generate Whole DTO, analysis={}", analysis, e);
                         continue;

@@ -11,18 +11,18 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PropertyDto {
 
-     String columnName;
+    String columnName;
 
-     String propertyName;
+    String propertyName;
 
-     JavaTypeNamingDto javaType;
+    JavaTypeNamingDto javaType;
 
-     String description;
+    String description;
 
-     Long length;
+    Long length;
 
-     Boolean notnull;
+    Boolean notnull;
 
-     String defaultV;
+    String defaultV;
 
 }

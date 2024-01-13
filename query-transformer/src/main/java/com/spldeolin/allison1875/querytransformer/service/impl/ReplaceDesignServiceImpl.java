@@ -65,8 +65,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
             // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
             replacementStatements.add(StaticJavaParser.parseStatement(
-                    resultGeneration.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode
-                            + ";"));
+                    resultGeneration.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode + ";"));
 
         } else if (chainAnalysis.getChain().getParentNode()
                 .filter(p -> p instanceof AssignExpr || p instanceof VariableDeclarator).isPresent()) {

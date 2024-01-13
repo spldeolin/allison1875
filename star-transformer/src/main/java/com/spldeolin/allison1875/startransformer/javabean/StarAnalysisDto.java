@@ -16,21 +16,21 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StarAnalysisDto {
 
-     String cftEntityQualifier;
+    String cftEntityQualifier;
 
-     String cftEntityName;
+    String cftEntityName;
 
-     String cftDesignName;
+    String cftDesignName;
 
-     String cftDesignQualifier;
+    String cftDesignQualifier;
 
-     @JsonIgnore
-     Expression cftSecondArgument;
+    @JsonIgnore
+    Expression cftSecondArgument;
 
-     List<PhraseDto> phrases;
+    List<PhraseDto> phrases;
 
-     String wholeDtoName;
+    String wholeDtoName;
 
-     String lotNo;
+    String lotNo;
 
 }

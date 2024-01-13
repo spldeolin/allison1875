@@ -86,8 +86,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(),
-                    ".");
+            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode().get().getParentNode()
                     .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
@@ -112,8 +111,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(),
-                    ".");
+            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode()
                     .orElseThrow(ParentAbsentException::new).getParentNode()
