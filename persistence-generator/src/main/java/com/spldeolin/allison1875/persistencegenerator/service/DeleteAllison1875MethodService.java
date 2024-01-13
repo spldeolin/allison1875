@@ -10,6 +10,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.DeleteAllison
 @ImplementedBy(DeleteAllison1875MethodServiceImpl.class)
 public interface DeleteAllison1875MethodService {
 
-    void process(ClassOrInterfaceDeclaration mapper);
+    void deleteMethod(ClassOrInterfaceDeclaration mapper);
 
 }

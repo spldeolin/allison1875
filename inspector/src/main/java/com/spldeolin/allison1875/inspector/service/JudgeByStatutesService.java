@@ -13,6 +13,6 @@ import com.spldeolin.allison1875.inspector.service.impl.JudgeByStatutesServiceIm
 @ImplementedBy(JudgeByStatutesServiceImpl.class)
 public interface JudgeByStatutesService {
 
-    Collection<LawlessDto> process(Collection<PardonDto> pardons, AstForest astForest);
+    Collection<LawlessDto> judge(Collection<PardonDto> pardons, AstForest astForest);
 
 }

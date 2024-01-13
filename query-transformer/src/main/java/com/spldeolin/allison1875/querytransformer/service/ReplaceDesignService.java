@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.querytransformer.service.impl.ReplaceDesignServ
 @ImplementedBy(ReplaceDesignServiceImpl.class)
 public interface ReplaceDesignService {
 
-    void process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration,
+    void replace(DesignMeta designMeta, ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration,
             ResultGenerationDto resultGeneration);
 
 }

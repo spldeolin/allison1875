@@ -100,7 +100,7 @@ public class QueryTransformer implements Allison1875MainService {
                     // analyze queryChain
                     ChainAnalysisDto analysis;
                     try {
-                        analysis = analyzeChainService.process(queryChain, design, designMeta);
+                        analysis = analyzeChainService.analyze(queryChain, design, designMeta);
                         log.info("Query Chain analyzed, analysis={}", analysis);
                     } catch (IllegalChainException e) {
                         log.error("fail to analyze Query Chain, queryChain={}", queryChain, e);
@@ -151,7 +151,7 @@ public class QueryTransformer implements Allison1875MainService {
                     appendAutowiredMapperService.append(queryChain, designMeta);
 
                     // transform Query Design
-                    replaceDesignService.process(designMeta, analysis, paramGeneration, resultGeneration);
+                    replaceDesignService.replace(designMeta, analysis, paramGeneration, resultGeneration);
 
                     anyTransformed = true;
                 }

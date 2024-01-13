@@ -115,7 +115,7 @@ public class JsgBuildServiceImpl implements JsgBuildService {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
                 List<ValidatorDto> valids;
                 if (forReqOrResp) {
-                    valids = validService.process(annotated.getAnnotated());
+                    valids = validService.analyzeValid(annotated.getAnnotated());
                 } else {
                     valids = Lists.newArrayList();
                 }
@@ -160,7 +160,8 @@ public class JsgBuildServiceImpl implements JsgBuildService {
                                 ((AnnotatedParameterizedType) at).getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            Collection<ValidatorDto> theOnlyElementValids = validService.process(theOnlyTypeArgument);
+                            Collection<ValidatorDto> theOnlyElementValids = validService.analyzeValid(
+                                    theOnlyTypeArgument);
                             theOnlyElementValids.forEach(
                                     one -> one.setValidatorType("列表内元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);

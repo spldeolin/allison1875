@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.inspector.service.impl.VcsServiceImpl;
 @ImplementedBy(VcsServiceImpl.class)
 public interface VcsService {
 
-    VcsResultDto process(Path projectPath);
+    VcsResultDto analyze(Path projectPath);
 
 }

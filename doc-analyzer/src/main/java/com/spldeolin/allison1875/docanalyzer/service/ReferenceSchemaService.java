@@ -10,6 +10,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.ReferenceSchemaService
 @ImplementedBy(ReferenceSchemaServiceImpl.class)
 public interface ReferenceSchemaService {
 
-    void process(JsonSchema rootJsonSchema);
+    void resolve(JsonSchema rootJsonSchema);
 
 }

@@ -36,7 +36,7 @@ public class VcsServiceImpl implements VcsService {
     private InspectorConfig config;
 
     @Override
-    public VcsResultDto process(Path projectPath) {
+    public VcsResultDto analyze(Path projectPath) {
         try {
             Git git = Git.open(projectPath.toFile());
             List<RevCommit> commits = Lists.newArrayList(git.log().call());

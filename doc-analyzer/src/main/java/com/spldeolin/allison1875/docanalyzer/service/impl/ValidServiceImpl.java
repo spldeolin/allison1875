@@ -40,7 +40,7 @@ public class ValidServiceImpl implements ValidService {
     private AnalyzeCustomValidationService analyzeCustomValidationService;
 
     @Override
-    public List<ValidatorDto> process(AnnotatedElement annotatedElement) {
+    public List<ValidatorDto> analyzeValid(AnnotatedElement annotatedElement) {
         List<ValidatorDto> valids = Lists.newArrayList();
         NotNull notNull = find(annotatedElement, NotNull.class);
         if (notNull != null) {

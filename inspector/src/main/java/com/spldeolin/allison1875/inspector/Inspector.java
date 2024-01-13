@@ -30,9 +30,9 @@ public class Inspector implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        Collection<PardonDto> pardons = pardonDetectProc.process();
-        Collection<LawlessDto> lawlesses = judgeByStatutesProc.process(pardons, astForest);
-        reportLawlessProc.process(lawlesses);
+        Collection<PardonDto> pardons = pardonDetectProc.detect();
+        Collection<LawlessDto> lawlesses = judgeByStatutesProc.judge(pardons, astForest);
+        reportLawlessProc.report(lawlesses);
     }
 
 }

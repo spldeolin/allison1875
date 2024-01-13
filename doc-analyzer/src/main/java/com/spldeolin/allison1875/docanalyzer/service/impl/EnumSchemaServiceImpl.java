@@ -22,7 +22,7 @@ public class EnumSchemaServiceImpl implements EnumSchemaService {
     private static final ObjectMapper om = JsonUtils.createObjectMapper();
 
     @Override
-    public void process(JsonSchema rootJsonSchema) {
+    public void resolve(JsonSchema rootJsonSchema) {
         JsonSchemaTraverseUtils.traverse(rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
             if (jsonSchema.isValueTypeSchema()) {
                 Set<String> enums = jsonSchema.asValueTypeSchema().getEnums();

@@ -29,7 +29,7 @@ public class ReportLawlessServiceImpl implements ReportLawlessService {
     private InspectorConfig config;
 
     @Override
-    public void process(Collection<LawlessDto> lawlesses) {
+    public void report(Collection<LawlessDto> lawlesses) {
         String lawlessDirectoryPath = config.getLawlessDirectoryPath();
         lawlesses.forEach(log::info);
 

@@ -35,10 +35,10 @@ public class JudgeByStatutesServiceImpl implements JudgeByStatutesService {
     private VcsServiceImpl vcsProc;
 
     @Override
-    public Collection<LawlessDto> process(Collection<PardonDto> pardons, AstForest astForest) {
+    public Collection<LawlessDto> judge(Collection<PardonDto> pardons, AstForest astForest) {
         final Collection<LawlessDto> lawlesses = Lists.newArrayList();
 
-        VcsResultDto vcsResultDto = vcsProc.process(Paths.get(config.getProjectLocalGitPath()));
+        VcsResultDto vcsResultDto = vcsProc.analyze(Paths.get(config.getProjectLocalGitPath()));
 
         astForest.forEach(cu -> {
             Path cuPath = Locations.getAbsolutePath(cu);

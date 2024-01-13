@@ -27,7 +27,7 @@ public class SimplyAnalyzeServiceImpl implements SimplyAnalyzeService {
     private MoreHandlerAnalysisService moreHandlerAnalysisService;
 
     @Override
-    public void process(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint) {
+    public void analyze(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint) {
         endpoint.setCat(handler.getCat().trim());
         endpoint.setHandlerSimpleName(controller.getName() + "_" + handler.getMd().getName());
         endpoint.setDescriptionLines(Lists.newArrayList(accessDescriptionService.accessMethod(handler)));

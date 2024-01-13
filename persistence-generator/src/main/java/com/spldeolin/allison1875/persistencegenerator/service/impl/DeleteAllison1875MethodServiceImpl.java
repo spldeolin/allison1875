@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.DeleteAllison1875M
 public class DeleteAllison1875MethodServiceImpl implements DeleteAllison1875MethodService {
 
     @Override
-    public void process(ClassOrInterfaceDeclaration mapper) {
+    public void deleteMethod(ClassOrInterfaceDeclaration mapper) {
         for (MethodDeclaration method : mapper.getMethods()) {
             boolean byAllison1875 = StringUtils.containsAny(JavadocDescriptions.getRaw(method),
                     BaseConstant.NO_MODIFY_ANNOUNCE);

@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.docanalyzer.service.CopyEndpointService;
 public class CopyEndpointServiceImpl implements CopyEndpointService {
 
     @Override
-    public Collection<EndpointDto> process(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto) {
+    public Collection<EndpointDto> copy(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto) {
         Collection<EndpointDto> copies = Lists.newArrayList();
         for (String combinedUrl : requestMappingFullDto.getCombinedUrls()) {
             for (RequestMethod combinedVerb : requestMappingFullDto.getCombinedVerbs()) {

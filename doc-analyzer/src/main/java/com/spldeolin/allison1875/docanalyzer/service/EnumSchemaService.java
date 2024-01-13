@@ -10,6 +10,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.EnumSchemaServiceImpl;
 @ImplementedBy(EnumSchemaServiceImpl.class)
 public interface EnumSchemaService {
 
-    void process(JsonSchema rootJsonSchema);
+    void resolve(JsonSchema rootJsonSchema);
 
 }

@@ -22,12 +22,12 @@ import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionVal
 import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.CopyEndpointService;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuildService;
-import com.spldeolin.allison1875.docanalyzer.service.ListHandlersService;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownOutputService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestBodyService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
 import com.spldeolin.allison1875.docanalyzer.service.SimplyAnalyzeService;
+import com.spldeolin.allison1875.docanalyzer.service.SpringMvcHandlerService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiSyncService;
 import lombok.extern.log4j.Log4j2;
 
@@ -41,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
 public class DocAnalyzer implements Allison1875MainService {
 
     @Inject
-    private ListHandlersService listHandlersService;
+    private SpringMvcHandlerService listHandlersService;
 
     @Inject
     private RequestMappingService requestMappingService;
@@ -88,7 +88,7 @@ public class DocAnalyzer implements Allison1875MainService {
         Collection<EndpointDto> endpoints = Lists.newArrayList();
 
         // 遍历controller、遍历handler
-        Collection<HandlerFullDto> handlers = listHandlersService.process(astForest);
+        Collection<HandlerFullDto> handlers = listHandlersService.listHandlers(astForest);
         if (handlers.isEmpty()) {
             log.warn("no Handler detected");
             return;
@@ -98,7 +98,7 @@ public class DocAnalyzer implements Allison1875MainService {
             EndpointDto endpoint = new EndpointDto();
 
             // 分析并保存handler的分类、代码简称、描述、是否过时、作者、源码位置 等基本信息
-            simplyAnalyzeService.process(controller.getCoid(), handler, endpoint);
+            simplyAnalyzeService.analyze(controller.getCoid(), handler, endpoint);
 
             try {
                 // 分析Request Body
@@ -117,7 +117,7 @@ public class DocAnalyzer implements Allison1875MainService {
                         handler.getReflection(), config.getGlobalUrlPrefix());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
-                Collection<EndpointDto> copies = copyEndpointService.process(endpoint, requestMappingFullDto);
+                Collection<EndpointDto> copies = copyEndpointService.copy(endpoint, requestMappingFullDto);
 
                 endpoints.addAll(copies);
             } catch (Exception e) {
@@ -128,7 +128,7 @@ public class DocAnalyzer implements Allison1875MainService {
 
         if (config.getOutputTo() == OutputToEnum.YAPI) {
             try {
-                yApiSyncService.process(endpoints);
+                yApiSyncService.outputToYApi(endpoints);
             } catch (Exception e) {
                 log.error("fail to output to YApi", e);
             }
@@ -136,7 +136,7 @@ public class DocAnalyzer implements Allison1875MainService {
 
         if (config.getOutputTo() == OutputToEnum.LOCAL_MARKDOWN) {
             try {
-                markdownOutputService.process(endpoints);
+                markdownOutputService.outputToMarkdown(endpoints);
             } catch (Exception e) {
                 log.error("fail to output to Markdown", e);
             }

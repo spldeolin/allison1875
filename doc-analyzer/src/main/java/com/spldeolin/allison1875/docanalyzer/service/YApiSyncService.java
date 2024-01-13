@@ -13,6 +13,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.YApiSyncServiceImpl;
 @ImplementedBy(YApiSyncServiceImpl.class)
 public interface YApiSyncService {
 
-    void process(Collection<EndpointDto> endpoints) throws Exception;
+    void outputToYApi(Collection<EndpointDto> endpoints) throws Exception;
 
 }

@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.SimplyAnalyzeServiceIm
 @ImplementedBy(SimplyAnalyzeServiceImpl.class)
 public interface SimplyAnalyzeService {
 
-    void process(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint);
+    void analyze(ClassOrInterfaceDeclaration controller, HandlerFullDto handler, EndpointDto endpoint);
 
 }

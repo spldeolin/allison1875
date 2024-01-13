@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.CopyEndpointServiceImp
 @ImplementedBy(CopyEndpointServiceImpl.class)
 public interface CopyEndpointService {
 
-    Collection<EndpointDto> process(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto);
+    Collection<EndpointDto> copy(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto);
 
 }

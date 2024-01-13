@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.QueryInformat
 @ImplementedBy(QueryInformationSchemaServiceImpl.class)
 public interface QueryInformationSchemaService {
 
-    Collection<InformationSchemaDto> process();
+    Collection<InformationSchemaDto> query();
 
 }

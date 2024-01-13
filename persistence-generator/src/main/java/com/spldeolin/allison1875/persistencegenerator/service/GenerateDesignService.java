@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.GenerateDesig
 @ImplementedBy(GenerateDesignServiceImpl.class)
 public interface GenerateDesignService {
 
-    CompilationUnit process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    CompilationUnit generate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest);
 
 }

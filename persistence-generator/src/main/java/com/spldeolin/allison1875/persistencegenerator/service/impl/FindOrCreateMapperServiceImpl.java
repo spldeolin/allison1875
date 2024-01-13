@@ -36,7 +36,7 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
-    public ClassOrInterfaceDeclaration process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    public ClassOrInterfaceDeclaration findOrCreate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             AstForest astForest) throws IOException {
 
         // find

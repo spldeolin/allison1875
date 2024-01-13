@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.inspector.service.impl.ReportLawlessServiceImpl
 @ImplementedBy(ReportLawlessServiceImpl.class)
 public interface ReportLawlessService {
 
-    void process(Collection<LawlessDto> lawlesses);
+    void report(Collection<LawlessDto> lawlesses);
 
 }

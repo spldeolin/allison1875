@@ -14,6 +14,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.ListControllersService
 @ImplementedBy(ListControllersServiceImpl.class)
 public interface ListControllersService {
 
-    Collection<ControllerFullDto> process(AstForest astForest);
+    Collection<ControllerFullDto> listControllers(AstForest astForest);
 
 }

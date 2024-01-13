@@ -17,7 +17,7 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 public class ReferenceSchemaServiceImpl implements ReferenceSchemaService {
 
     @Override
-    public void process(JsonSchema rootJsonSchema) {
+    public void resolve(JsonSchema rootJsonSchema) {
         Map<String, String> pathsEachId = Maps.newHashMap();
         Map<JsonSchema, String> paths = Maps.newLinkedHashMap();
         if (rootJsonSchema.isObjectSchema()) {

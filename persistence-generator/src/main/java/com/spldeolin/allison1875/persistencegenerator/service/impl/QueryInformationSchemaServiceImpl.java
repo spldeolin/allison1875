@@ -31,7 +31,7 @@ public class QueryInformationSchemaServiceImpl implements QueryInformationSchema
     private PersistenceGeneratorConfig config;
 
     @Override
-    public Collection<InformationSchemaDto> process() {
+    public Collection<InformationSchemaDto> query() {
         try (Connection conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUserName(),
                 config.getPassword())) {
             String sql = Resources.toString(Resources.getResource("information_schema.sql"), StandardCharsets.UTF_8);

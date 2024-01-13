@@ -41,7 +41,7 @@ public class MarkdownOutputServiceImpl implements MarkdownOutputService {
     private DocAnalyzerConfig config;
 
     @Override
-    public void process(Collection<EndpointDto> endpoints) throws Exception {
+    public void outputToMarkdown(Collection<EndpointDto> endpoints) throws Exception {
         Preconditions.checkNotNull(config.getMarkdownDirectoryPath(),
                 "requried 'DocAnalyzerConfig#markdownDirectoryPath' Property cannot be null");
         Preconditions.checkNotNull(config.getEnableCurl(),

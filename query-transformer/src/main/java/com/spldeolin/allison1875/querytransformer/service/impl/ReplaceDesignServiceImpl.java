@@ -35,7 +35,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
     private TransformMethodCallService transformMethodCallService;
 
     @Override
-    public void process(DesignMeta designMeta, ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration,
+    public void replace(DesignMeta designMeta, ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration,
             ResultGenerationDto resultGeneration) {
 
         // add imports to cu

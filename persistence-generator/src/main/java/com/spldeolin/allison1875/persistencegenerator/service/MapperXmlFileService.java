@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperXmlFile
 @ImplementedBy(MapperXmlFileServiceImpl.class)
 public interface MapperXmlFileService {
 
-    FileFlush process(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
+    FileFlush generateMapperXml(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
             Collection<Collection<String>> sourceCodes) throws IOException;
 
 }

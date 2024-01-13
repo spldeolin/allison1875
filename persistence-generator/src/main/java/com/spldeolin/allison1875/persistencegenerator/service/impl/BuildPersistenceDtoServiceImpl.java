@@ -43,9 +43,9 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
     private CommentService commentService;
 
     @Override
-    public Collection<PersistenceDto> process(AstForest astForest) {
+    public Collection<PersistenceDto> build(AstForest astForest) {
         // 查询information_schema.COLUMNS、information_schema.TABLES表
-        Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaService.process();
+        Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaService.query();
         String deleteFlag = getDeleteFlagName();
 
         Map<String, PersistenceDto> persistences = Maps.newHashMap();

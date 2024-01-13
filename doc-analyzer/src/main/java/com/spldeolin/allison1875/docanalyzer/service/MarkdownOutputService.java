@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.MarkdownOutputServiceI
 @ImplementedBy(MarkdownOutputServiceImpl.class)
 public interface MarkdownOutputService {
 
-    void process(Collection<EndpointDto> endpoints) throws Exception;
+    void outputToMarkdown(Collection<EndpointDto> endpoints) throws Exception;
 
 }

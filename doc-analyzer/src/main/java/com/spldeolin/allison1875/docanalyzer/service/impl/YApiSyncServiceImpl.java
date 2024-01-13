@@ -55,7 +55,7 @@ public class YApiSyncServiceImpl implements YApiSyncService {
     private YApiOpenService yApiOpenService;
 
     @Override
-    public void process(Collection<EndpointDto> endpoints) throws Exception {
+    public void outputToYApi(Collection<EndpointDto> endpoints) throws Exception {
         Preconditions.checkNotNull(config.getYapiUrl(), "requried 'DocAnalyzerConfig#yapiUrl' Property cannot be null");
         Preconditions.checkNotNull(config.getYapiToken(),
                 "requried 'DocAnalyzerConfig#yapiToken' Property cannot be null");

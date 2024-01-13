@@ -28,7 +28,7 @@ public class DetectPardonServiceImpl implements DetectPardonService {
     private InspectorConfig config;
 
     @Override
-    public Collection<PardonDto> process() {
+    public Collection<PardonDto> detect() {
         Collection<PardonDto> pardons = Lists.newArrayList();
         String pardonDirectoryPath = config.getPardonDirectoryPath();
         if (StringUtils.isNotEmpty(pardonDirectoryPath)) {

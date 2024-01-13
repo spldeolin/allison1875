@@ -16,8 +16,8 @@ import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.ListControllersService;
-import com.spldeolin.allison1875.docanalyzer.service.ListHandlersService;
 import com.spldeolin.allison1875.docanalyzer.service.MethodCollectService;
+import com.spldeolin.allison1875.docanalyzer.service.SpringMvcHandlerService;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -26,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-public class ListHandlersServiceImpl implements ListHandlersService {
+public class SpringMvcHandlerServiceImpl implements SpringMvcHandlerService {
 
     @Inject
     private MethodCollectService methodCollectService;
@@ -35,8 +35,8 @@ public class ListHandlersServiceImpl implements ListHandlersService {
     private ListControllersService listControllersService;
 
     @Override
-    public Collection<HandlerFullDto> process(AstForest astForest) {
-        Collection<ControllerFullDto> controllers = listControllersService.process(astForest);
+    public Collection<HandlerFullDto> listHandlers(AstForest astForest) {
+        Collection<ControllerFullDto> controllers = listControllersService.listControllers(astForest);
 
         Collection<HandlerFullDto> result = Lists.newArrayList();
         for (ControllerFullDto controller : controllers) {

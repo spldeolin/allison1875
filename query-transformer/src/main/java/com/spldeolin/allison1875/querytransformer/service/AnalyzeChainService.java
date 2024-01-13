@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.querytransformer.service.impl.AnalyzeChainServi
 @ImplementedBy(AnalyzeChainServiceImpl.class)
 public interface AnalyzeChainService {
 
-    ChainAnalysisDto process(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta)
+    ChainAnalysisDto analyze(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta)
             throws IllegalChainException;
 
 }

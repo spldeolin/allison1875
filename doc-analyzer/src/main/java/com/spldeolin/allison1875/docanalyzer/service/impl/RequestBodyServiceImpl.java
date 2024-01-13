@@ -47,8 +47,8 @@ public class RequestBodyServiceImpl implements RequestBodyService {
                     requestBodyDescribe = requestBody.describe();
                 }
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
-                referenceSchemaService.process(jsonSchema);
-                enumSchemaService.process(jsonSchema);
+                referenceSchemaService.resolve(jsonSchema);
+                enumSchemaService.resolve(jsonSchema);
                 return new BodyTypeAnalysisDto().setDescribe(requestBodyDescribe).setJsonSchema(jsonSchema);
             }
         } catch (JsonSchemaException ignore) {

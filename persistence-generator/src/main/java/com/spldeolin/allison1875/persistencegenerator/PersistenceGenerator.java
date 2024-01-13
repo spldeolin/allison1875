@@ -64,7 +64,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     @Override
     public void process(AstForest astForest) {
         // 构建并遍历 PersistenceDto对象
-        Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoService.process(astForest);
+        Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoService.build(astForest);
         if (persistenceDtos.size() == 0) {
             log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
@@ -80,21 +80,21 @@ public class PersistenceGenerator implements Allison1875MainService {
             // 寻找或创建Mapper
             ClassOrInterfaceDeclaration mapper;
             try {
-                mapper = findOrCreateMapperService.process(persistence, javabeanGeneration, astForest);
+                mapper = findOrCreateMapperService.findOrCreate(persistence, javabeanGeneration, astForest);
             } catch (Exception e) {
                 log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
                 continue;
             }
 
             // 重新生成Design
-            CompilationUnit designCu = generateDesignService.process(persistence, javabeanGeneration, mapper,
+            CompilationUnit designCu = generateDesignService.generate(persistence, javabeanGeneration, mapper,
                     astForest);
             if (designCu != null) {
                 flushes.add(FileFlush.build(designCu));
             }
 
             // 删除Mapper中所有声明了LotNoAnnounce或者NoModifyAnnounce的方法
-            deleteAllison1875MethodService.process(mapper);
+            deleteAllison1875MethodService.deleteMethod(mapper);
 
             // 临时删除Mapper中所有开发者自定义方法
             List<MethodDeclaration> customMethods = mapper.getMethods();
@@ -136,7 +136,7 @@ public class PersistenceGenerator implements Allison1875MainService {
             for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
                 try {
                     Path mapperXmlDirectory = astForest.getAstForestRoot().resolve(mapperXmlDirectoryPath);
-                    FileFlush xmlFlush = mapperXmlFileService.process(persistence, mapper, mapperXmlDirectory,
+                    FileFlush xmlFlush = mapperXmlFileService.generateMapperXml(persistence, mapper, mapperXmlDirectory,
                             Lists.newArrayList(mapperXmlService.resultMapXml(persistence, entityName),
                                     mapperXmlService.allCloumnSqlXml(persistence),
                                     mapperXmlService.insertXml(persistence, entityName, insertMethodName),

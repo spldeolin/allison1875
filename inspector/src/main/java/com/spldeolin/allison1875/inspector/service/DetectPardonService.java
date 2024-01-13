@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.inspector.service.impl.DetectPardonServiceImpl;
 @ImplementedBy(DetectPardonServiceImpl.class)
 public interface DetectPardonService {
 
-    Collection<PardonDto> process();
+    Collection<PardonDto> detect();
 
 }

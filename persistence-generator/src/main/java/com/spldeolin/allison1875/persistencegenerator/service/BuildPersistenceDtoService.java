@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.BuildPersiste
 @ImplementedBy(BuildPersistenceDtoServiceImpl.class)
 public interface BuildPersistenceDtoService {
 
-    Collection<PersistenceDto> process(AstForest astForest);
+    Collection<PersistenceDto> build(AstForest astForest);
 
 }

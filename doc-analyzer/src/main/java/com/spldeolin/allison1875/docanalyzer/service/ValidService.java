@@ -14,6 +14,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.ValidServiceImpl;
 @ImplementedBy(ValidServiceImpl.class)
 public interface ValidService {
 
-    List<ValidatorDto> process(AnnotatedElement annotatedElement);
+    List<ValidatorDto> analyzeValid(AnnotatedElement annotatedElement);
 
 }

@@ -47,7 +47,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
     @Override
-    public CompilationUnit process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    public CompilationUnit generate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
         if (!persistenceGeneratorConfig.getEnableGenerateDesign()) {
             return null;

@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.FindOrCreateM
 @ImplementedBy(FindOrCreateMapperServiceImpl.class)
 public interface FindOrCreateMapperService {
 
-    ClassOrInterfaceDeclaration process(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    ClassOrInterfaceDeclaration findOrCreate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             AstForest astForest) throws IOException;
 
 }

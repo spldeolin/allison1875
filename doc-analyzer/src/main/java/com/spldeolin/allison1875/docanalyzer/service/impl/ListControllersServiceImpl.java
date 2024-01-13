@@ -30,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
 public class ListControllersServiceImpl implements ListControllersService {
 
     @Override
-    public Collection<ControllerFullDto> process(AstForest astForest) {
+    public Collection<ControllerFullDto> listControllers(AstForest astForest) {
         Collection<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
             if (!Locations.getAbsolutePath(cu).startsWith(astForest.getPrimaryJavaRoot())) {
