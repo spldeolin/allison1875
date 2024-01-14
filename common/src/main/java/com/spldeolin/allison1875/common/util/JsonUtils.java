@@ -23,16 +23,11 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.json.IgnoreNullElementDeserializeModule;
 import com.spldeolin.allison1875.common.util.exception.JsonException;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * JSON工具类
- *
- * <pre>
- * 序列化与反序列化策略参考{@link ObjectMapperUtils#initDefault}
- * </pre>
  *
  * @author Deolin 2018-04-02
  */
@@ -43,9 +38,6 @@ public class JsonUtils {
 
     public static ObjectMapper createObjectMapper() {
         ObjectMapper om = new ObjectMapper();
-
-        // 反序列化时，忽略Javabean中Collection属性对应JSON Array中的为null的元素
-        om.registerModule(new IgnoreNullElementDeserializeModule());
 
         // 反序列化时，忽略Javabean中不存在的属性，而不是抛出异常
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
