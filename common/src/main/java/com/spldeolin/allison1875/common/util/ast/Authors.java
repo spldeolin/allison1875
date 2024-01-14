@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.common.util.ast;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,10 +43,10 @@ public class Authors {
      * 2. 如果1. 没有收获，则尝试获取这个Node的第一个能声明Javadoc的祖先Node
      * 3. 递归1. 和2.
      */
-    private static Collection<String> getEveryAuthor(Node node) {
+    private static List<String> getEveryAuthor(Node node) {
         // 本节点withJavadoc，并且能获取到可见的@author内容时，直接返回
         if (node instanceof NodeWithJavadoc) {
-            Collection<String> authors = JavadocTags.getEveryLineByTag((NodeWithJavadoc<?>) node, Type.AUTHOR);
+            List<String> authors = JavadocTags.getEveryLineByTag((NodeWithJavadoc<?>) node, Type.AUTHOR);
             if (authors.size() > 0) {
                 return authors;
             }
@@ -94,7 +93,7 @@ public class Authors {
         return Optional.empty();
     }
 
-    private static String distinctAndConcat(Collection<String> authors) {
+    private static String distinctAndConcat(List<String> authors) {
         if (authors.size() == 0) {
             return "";
         } else if (authors.size() == 1) {

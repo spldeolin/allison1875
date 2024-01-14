@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ public class EnumSchemaServiceImpl implements EnumSchemaService {
             if (jsonSchema.isValueTypeSchema()) {
                 Set<String> enums = jsonSchema.asValueTypeSchema().getEnums();
                 if (enums != null) {
-                    Collection<EnumCodeAndTitleDto> ecats = Lists.newArrayList();
+                    List<EnumCodeAndTitleDto> ecats = Lists.newArrayList();
                     for (String anEnum : enums) {
                         try {
                             ecats.add(om.readValue(anEnum, EnumCodeAndTitleDto.class));

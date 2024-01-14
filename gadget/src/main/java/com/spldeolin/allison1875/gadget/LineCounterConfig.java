@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.gadget;
 
-import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
@@ -18,7 +18,7 @@ public final class LineCounterConfig extends Allison1875Config {
     /**
      * 对这些指定后缀的Java类型的进行专门的统计
      */
-    @NotNull Collection<String> typePostfix;
+    @NotNull List<String> typePostfix;
 
     /**
      * 显示阈值，行数大于等于这个值时，才在排行榜中显示

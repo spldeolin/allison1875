@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
-import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -45,7 +44,7 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     /**
      * 指定table，非必填，未填写时代表schema下所有的table
      */
-    @NotNull Collection<String> tables;
+    @NotNull List<String> tables;
 
     /**
      * mapper.xml所在目录的相对路径（根据目标工程的情况填写）
@@ -95,12 +94,12 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     /**
      * 对项目隐藏，仅在数据库中可见的表字段
      */
-    @NotNull Collection<String> hiddenColumns;
+    @NotNull List<String> hiddenColumns;
 
     /**
      * 即便符合persistence-generator对外键的定义，也不会被当作外键的表字段（一般用于忽略为创建人ID和更新人ID生成query方法）
      */
-    @NotNull Collection<String> notKeyColumns;
+    @NotNull List<String> notKeyColumns;
 
     /**
      * Entity父类的全限定名
@@ -110,7 +109,7 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     /**
      * 已在Entit父类中声明，无需在具体Entity中再次声明的表字段
      */
-    @NotNull Collection<String> alreadyInSuperEntity;
+    @NotNull List<String> alreadyInSuperEntity;
 
     /**
      * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明

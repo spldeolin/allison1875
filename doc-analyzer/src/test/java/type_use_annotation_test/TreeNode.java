@@ -1,6 +1,6 @@
 package type_use_annotation_test;
 
-import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -31,7 +31,7 @@ public class TreeNode {
 
     @NotBlank String title;
 
-    Collection<@NotBlank TreeNode>[][] children;
+    List<@NotBlank TreeNode>[][] children;
 
     public static void main(String[] args) throws JsonSchemaException, JsonProcessingException {
         ObjectMapper om = JsonUtils.createObjectMapper();

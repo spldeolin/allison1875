@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -39,13 +38,13 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
 
     @Override
     public FileFlush generateMapperXml(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
-            Path mapperXmlDirectory, Collection<Collection<String>> sourceCodes) throws IOException {
+            Path mapperXmlDirectory, List<List<String>> sourceCodes) throws IOException {
         // find
         File mapperXmlFile = mapperXmlDirectory.resolve(persistence.getMapperName() + ".xml").toFile();
 
         if (!mapperXmlFile.exists()) {
             // create new File
-            Collection<String> sourceCodeLines = Lists.newArrayList();
+            List<String> sourceCodeLines = Lists.newArrayList();
             sourceCodeLines.add("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             sourceCodeLines.add("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis"
                     + ".org/dtd/mybatis-3-mapper.dtd\">");
@@ -106,11 +105,11 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
         return result;
     }
 
-    private List<String> getGeneratedLines(Collection<Collection<String>> sourceCodes, PersistenceDto persistence) {
+    private List<String> getGeneratedLines(List<List<String>> sourceCodes, PersistenceDto persistence) {
         List<String> auto = Lists.newArrayList();
         auto.add(BaseConstant.SINGLE_INDENT + concatXmlComment(persistence).replace("<!--", "<!-- " + startMark));
         auto.add("");
-        for (Collection<String> sourceCode : sourceCodes) {
+        for (List<String> sourceCode : sourceCodes) {
             if (CollectionUtils.isNotEmpty(sourceCode)) {
                 for (String line : sourceCode) {
                     if (StringUtils.isNotBlank(line)) {

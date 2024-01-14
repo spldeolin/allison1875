@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -15,8 +15,8 @@ import com.spldeolin.allison1875.handlertransformer.service.InitializerCollectSe
 public class InitializerCollectServiceImpl implements InitializerCollectService {
 
     @Override
-    public Collection<InitializerDeclaration> collectInitializer(ClassOrInterfaceDeclaration coid) {
-        Collection<InitializerDeclaration> result = Lists.newArrayList();
+    public List<InitializerDeclaration> collectInitializer(ClassOrInterfaceDeclaration coid) {
+        List<InitializerDeclaration> result = Lists.newArrayList();
         for (BodyDeclaration<?> member : coid.getMembers()) {
             if (member.isInitializerDeclaration()) {
                 result.add(member.asInitializerDeclaration());

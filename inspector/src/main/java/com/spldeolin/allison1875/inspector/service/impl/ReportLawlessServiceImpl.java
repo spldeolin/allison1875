@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.List;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,7 +28,7 @@ public class ReportLawlessServiceImpl implements ReportLawlessService {
     private InspectorConfig config;
 
     @Override
-    public void report(Collection<LawlessDto> lawlesses) {
+    public void report(List<LawlessDto> lawlesses) {
         File lawlessDirectory = config.getLawlessDirectory();
         lawlesses.forEach(log::info);
 

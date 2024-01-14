@@ -78,7 +78,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
                 if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN)) {
-                    fieldArg.setTypeName("Collection<" + javaType.getSimpleName() + ">");
+                    fieldArg.setTypeName("List<" + javaType.getSimpleName() + ">");
                 } else {
                     fieldArg.setTypeName(javaType.getSimpleName());
                 }
@@ -107,7 +107,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 param.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", varName)));
 
                 if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN)) {
-                    param.setType("Collection<" + javaType.getSimpleName() + ">");
+                    param.setType("List<" + javaType.getSimpleName() + ">");
                 } else {
                     param.setType(javaType.getSimpleName());
                 }

@@ -150,7 +150,7 @@ public class JsgBuildServiceImpl implements JsgBuildService {
 
                 /*
                     解析自Field类型的唯一一个泛型上的校验注解（如果有唯一泛型的话）
-                    e.g: private Collection<@NotBlank @Length(max = 10) String> userNames;
+                    e.g: private List<@NotBlank @Length(max = 10) String> userNames;
                  */
                 boolean isLikeCollection = Collection.class.isAssignableFrom(annotated.getType().getRawClass());
                 if (forReqOrResp && isLikeCollection) {
@@ -160,8 +160,7 @@ public class JsgBuildServiceImpl implements JsgBuildService {
                                 ((AnnotatedParameterizedType) at).getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
                             AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            Collection<ValidatorDto> theOnlyElementValids = validService.analyzeValid(
-                                    theOnlyTypeArgument);
+                            List<ValidatorDto> theOnlyElementValids = validService.analyzeValid(theOnlyTypeArgument);
                             theOnlyElementValids.forEach(
                                     one -> one.setValidatorType("列表内元素" + one.getValidatorType()));
                             jpdv.getValids().addAll(theOnlyElementValids);
@@ -213,7 +212,7 @@ public class JsgBuildServiceImpl implements JsgBuildService {
             public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
                 if (analyzeEnumConstantService.supportEnumType(enumType)) {
                     Object[] enumConstants = enumType.getEnumConstants();
-                    Collection<String> ecat = Lists.newArrayList();
+                    List<String> ecat = Lists.newArrayList();
                     for (Object enumConstant : enumConstants) {
                         ecat.add(JsonUtils.toJson(analyzeEnumConstantService.analyzeEnumConstant(enumConstant)));
                     }
@@ -249,7 +248,7 @@ public class JsgBuildServiceImpl implements JsgBuildService {
         coid.getFullyQualifiedName().ifPresent(qualifier -> {
             String javabeanQualifier = qualifier;
             for (FieldDeclaration field : coid.getFields()) {
-                Collection<String> javadocDescLines = accessDescriptionService.accessField(field);
+                List<String> javadocDescLines = accessDescriptionService.accessField(field);
                 for (VariableDeclarator var : field.getVariables()) {
                     JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
                     String varName = var.getNameAsString();
@@ -262,7 +261,7 @@ public class JsgBuildServiceImpl implements JsgBuildService {
 
     }
 
-    private boolean findIgnoreFlag(Collection<String> javadocDescLines) {
+    private boolean findIgnoreFlag(List<String> javadocDescLines) {
         for (String line : javadocDescLines) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, "doc-ignore")) {
                 return true;

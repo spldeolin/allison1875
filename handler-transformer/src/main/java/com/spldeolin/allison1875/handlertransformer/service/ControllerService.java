@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.handlertransformer.service.impl.ControllerServi
 @ImplementedBy(ControllerServiceImpl.class)
 public interface ControllerService {
 
-    Collection<ClassOrInterfaceDeclaration> collect(CompilationUnit cu);
+    List<ClassOrInterfaceDeclaration> collect(CompilationUnit cu);
 
     HandlerCreation createHandlerToController(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration controller,
             ServiceGeneration serviceGeneration, ReqDtoRespDtoInfo reqDtoRespDtoInfo);

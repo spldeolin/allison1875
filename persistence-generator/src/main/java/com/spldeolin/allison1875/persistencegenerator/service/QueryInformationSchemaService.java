@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.QueryInformationSchemaServiceImpl;
@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.QueryInformat
 @ImplementedBy(QueryInformationSchemaServiceImpl.class)
 public interface QueryInformationSchemaService {
 
-    Collection<InformationSchemaDto> query();
+    List<InformationSchemaDto> query();
 
 }

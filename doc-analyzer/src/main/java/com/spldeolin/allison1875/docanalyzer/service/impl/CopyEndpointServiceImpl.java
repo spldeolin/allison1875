@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
@@ -16,8 +16,8 @@ import com.spldeolin.allison1875.docanalyzer.service.CopyEndpointService;
 public class CopyEndpointServiceImpl implements CopyEndpointService {
 
     @Override
-    public Collection<EndpointDto> copy(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto) {
-        Collection<EndpointDto> copies = Lists.newArrayList();
+    public List<EndpointDto> copy(EndpointDto endpoint, RequestMappingFullDto requestMappingFullDto) {
+        List<EndpointDto> copies = Lists.newArrayList();
         for (String combinedUrl : requestMappingFullDto.getCombinedUrls()) {
             for (RequestMethod combinedVerb : requestMappingFullDto.getCombinedVerbs()) {
                 EndpointDto copy = endpoint.copy();

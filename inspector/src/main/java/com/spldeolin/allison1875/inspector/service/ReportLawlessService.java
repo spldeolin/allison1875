@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.inspector.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
 import com.spldeolin.allison1875.inspector.service.impl.ReportLawlessServiceImpl;
@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.inspector.service.impl.ReportLawlessServiceImpl
 @ImplementedBy(ReportLawlessServiceImpl.class)
 public interface ReportLawlessService {
 
-    void report(Collection<LawlessDto> lawlesses);
+    void report(List<LawlessDto> lawlesses);
 
 }

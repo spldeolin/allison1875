@@ -4,7 +4,6 @@ import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 import static com.github.javaparser.StaticJavaParser.parseParameter;
 import static com.github.javaparser.StaticJavaParser.parseType;
 
-import java.util.Collection;
 import java.util.List;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
@@ -53,7 +52,7 @@ public class MapperServiceImpl implements MapperService {
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
+                "@Param(\"entities\") List<" + javabeanGeneration.getJavabeanName() + "> entities"));
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return methodName;
@@ -72,7 +71,7 @@ public class MapperServiceImpl implements MapperService {
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
+                "@Param(\"entities\") List<" + javabeanGeneration.getJavabeanName() + "> entities"));
         insert.setBody(null);
         mapper.getMembers().addLast(insert);
         return methodName;
@@ -92,7 +91,7 @@ public class MapperServiceImpl implements MapperService {
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
+                "@Param(\"entities\") List<" + javabeanGeneration.getJavabeanName() + "> entities"));
         update.setBody(null);
         mapper.getMembers().addLast(update);
         return methodName;
@@ -112,7 +111,7 @@ public class MapperServiceImpl implements MapperService {
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") Collection<" + javabeanGeneration.getJavabeanName() + "> entities"));
+                "@Param(\"entities\") List<" + javabeanGeneration.getJavabeanName() + "> entities"));
         update.setBody(null);
         mapper.getMembers().addLast(update);
         return methodName;
@@ -275,7 +274,7 @@ public class MapperServiceImpl implements MapperService {
             queryByIdsEachId.setName(methodName);
             String varsName = English.plural(varName);
             queryByIdsEachId.addParameter(
-                    parseParameter("@Param(\"" + varsName + "\") Collection<" + pkTypeName + "> " + varsName));
+                    parseParameter("@Param(\"" + varsName + "\") List<" + pkTypeName + "> " + varsName));
             queryByIdsEachId.setBody(null);
             queryByIdsEachId.setJavadocComment(comment);
             mapper.getMembers().addLast(queryByIdsEachId);
@@ -302,8 +301,7 @@ public class MapperServiceImpl implements MapperService {
             queryByIds.setName(methodName);
             String varsName = English.plural(MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName()));
             Parameter parameter = parseParameter(
-                    "@Param(\"" + varsName + "\") Collection<" + onlyPk.getJavaType().getSimpleName() + "> "
-                            + varsName);
+                    "@Param(\"" + varsName + "\") List<" + onlyPk.getJavaType().getSimpleName() + "> " + varsName);
             queryByIds.addParameter(parameter);
             queryByIds.setBody(null);
             queryByIds.setJavadocComment(comment);
@@ -346,7 +344,7 @@ public class MapperServiceImpl implements MapperService {
         mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
-        String typeName = "Collection<" + key.getJavaType().getSimpleName() + ">";
+        String typeName = "List<" + key.getJavaType().getSimpleName() + ">";
         String varsName = English.plural(MoreStringUtils.lowerFirstLetter(key.getPropertyName()));
         String paramAnno = "@Param(\"" + varsName + "\")";
         Parameter parameter = parseParameter(paramAnno + " " + typeName + " " + varsName);
@@ -418,7 +416,7 @@ public class MapperServiceImpl implements MapperService {
     private boolean existDeclared(ClassOrInterfaceDeclaration mapper, String methodName) {
         List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
         for (MethodDeclaration method : methods) {
-            Collection<String> descriptionLines = JavadocDescriptions.getAsLines(method);
+            List<String> descriptionLines = JavadocDescriptions.getAsLines(method);
             if (descriptionLines.stream().anyMatch(line -> line.contains(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION))) {
                 method.remove();
             }

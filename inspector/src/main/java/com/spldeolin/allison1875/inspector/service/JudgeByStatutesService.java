@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.inspector.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.inspector.javabean.LawlessDto;
@@ -13,6 +13,6 @@ import com.spldeolin.allison1875.inspector.service.impl.JudgeByStatutesServiceIm
 @ImplementedBy(JudgeByStatutesServiceImpl.class)
 public interface JudgeByStatutesService {
 
-    Collection<LawlessDto> judge(Collection<PardonDto> pardons, AstForest astForest);
+    List<LawlessDto> judge(List<PardonDto> pardons, AstForest astForest);
 
 }

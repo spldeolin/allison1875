@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -30,8 +30,8 @@ import lombok.extern.log4j.Log4j2;
 public class ListControllersServiceImpl implements ListControllersService {
 
     @Override
-    public Collection<ControllerFullDto> listControllers(AstForest astForest) {
-        Collection<ControllerFullDto> result = Lists.newArrayList();
+    public List<ControllerFullDto> listControllers(AstForest astForest) {
+        List<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
             if (!Locations.getAbsolutePath(cu).startsWith(astForest.getPrimaryJavaRoot())) {
                 // 非宿主controller

@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.docanalyzer;
 
 
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
@@ -25,7 +24,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
      */
-    @NotNull Collection<@NotNull File> dependencyProjectDirectories;
+    @NotNull List<@NotNull File> dependencyProjectDirectories;
 
     /**
      * 全局URL前缀

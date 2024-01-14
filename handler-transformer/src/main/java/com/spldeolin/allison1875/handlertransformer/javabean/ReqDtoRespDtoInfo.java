@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
-import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
@@ -23,7 +22,7 @@ public class ReqDtoRespDtoInfo {
 
     String resultType = null;
 
-    final Collection<String> javabeanQualifiers = Lists.newArrayList();
+    final List<String> javabeanQualifiers = Lists.newArrayList();
 
     final List<CompilationUnit> javabeanCus = Lists.newArrayList();
 

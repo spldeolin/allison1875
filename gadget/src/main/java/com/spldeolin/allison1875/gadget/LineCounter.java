@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +157,7 @@ public class LineCounter implements Allison1875MainService {
         return node.getRange().map(Range::getLineCount).orElse(0);
     }
 
-    private Path calcCommonPath(Collection<File> sourceRootPaths) {
+    private Path calcCommonPath(Set<File> sourceRootPaths) {
         List<File> paths = Lists.newArrayList(sourceRootPaths);
         String common = paths.get(0).toString();
         for (File path : paths) {

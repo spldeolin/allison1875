@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
@@ -14,12 +14,12 @@ import com.spldeolin.allison1875.docanalyzer.service.AccessDescriptionService;
 public class AccessDescriptionServiceImpl implements AccessDescriptionService {
 
     @Override
-    public Collection<String> accessMethod(HandlerFullDto handlerFullDto) {
+    public List<String> accessMethod(HandlerFullDto handlerFullDto) {
         return JavadocDescriptions.getAsLines(handlerFullDto.getMd());
     }
 
     @Override
-    public Collection<String> accessField(FieldDeclaration field) {
+    public List<String> accessField(FieldDeclaration field) {
         return JavadocDescriptions.getAsLines(field);
     }
 

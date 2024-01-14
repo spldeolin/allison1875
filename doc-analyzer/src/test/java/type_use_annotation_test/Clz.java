@@ -6,7 +6,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -18,7 +18,7 @@ public class Clz {
         return null;
     }
 
-    private Collection<@NotEmpty String> strings;
+    private List<@NotEmpty String> strings;
 
     public static void main(String[] args) throws NoSuchFieldException {
         Method myMethod = Clz.class.getDeclaredMethods()[0];

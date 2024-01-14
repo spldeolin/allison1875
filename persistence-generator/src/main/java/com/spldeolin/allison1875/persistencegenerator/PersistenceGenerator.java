@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -64,7 +63,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     @Override
     public void process(AstForest astForest) {
         // 构建并遍历 PersistenceDto对象
-        Collection<PersistenceDto> persistenceDtos = buildPersistenceDtoService.build(astForest);
+        List<PersistenceDto> persistenceDtos = buildPersistenceDtoService.build(astForest);
         if (persistenceDtos.size() == 0) {
             log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
@@ -114,9 +113,9 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapper);
             String queryByIdsProcMethodName = mapperService.queryByIds(persistence, javabeanGeneration, mapper);
             String queryByIdsEachIdMethodName = mapperService.queryByIdsEachId(persistence, javabeanGeneration, mapper);
-            Collection<KeyMethodNameDto> queryByKeyDtos = Lists.newArrayList();
-            Collection<KeyMethodNameDto> deleteByKeyDtos = Lists.newArrayList();
-            Collection<QueryByKeysDto> queryByKeysDtos = Lists.newArrayList();
+            List<KeyMethodNameDto> queryByKeyDtos = Lists.newArrayList();
+            List<KeyMethodNameDto> deleteByKeyDtos = Lists.newArrayList();
+            List<QueryByKeysDto> queryByKeysDtos = Lists.newArrayList();
             for (PropertyDto key : persistence.getKeyProperties()) {
                 queryByKeyDtos.add(new KeyMethodNameDto().setKey(key)
                         .setMethodName(mapperService.queryByKey(persistence, javabeanGeneration, key, mapper)));

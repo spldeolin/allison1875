@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.inspector;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
@@ -30,8 +30,8 @@ public class Inspector implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        Collection<PardonDto> pardons = pardonDetectProc.detect();
-        Collection<LawlessDto> lawlesses = judgeByStatutesProc.judge(pardons, astForest);
+        List<PardonDto> pardons = pardonDetectProc.detect();
+        List<LawlessDto> lawlesses = judgeByStatutesProc.judge(pardons, astForest);
         reportLawlessProc.report(lawlesses);
     }
 

@@ -2,8 +2,8 @@ package com.spldeolin.allison1875.inspector.service.impl;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -26,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class JudgeByStatutesServiceImpl implements JudgeByStatutesService {
 
     @Inject
-    private Collection<Statute> statutes;
+    private List<Statute> statutes;
 
     @Inject
     private InspectorConfig config;
@@ -35,8 +35,8 @@ public class JudgeByStatutesServiceImpl implements JudgeByStatutesService {
     private VcsServiceImpl vcsProc;
 
     @Override
-    public Collection<LawlessDto> judge(Collection<PardonDto> pardons, AstForest astForest) {
-        final Collection<LawlessDto> lawlesses = Lists.newArrayList();
+    public List<LawlessDto> judge(List<PardonDto> pardons, AstForest astForest) {
+        final List<LawlessDto> lawlesses = Lists.newArrayList();
 
         VcsResultDto vcsResultDto = vcsProc.analyze(Paths.get(config.getProjectLocalGitPath()));
 
@@ -46,7 +46,7 @@ public class JudgeByStatutesServiceImpl implements JudgeByStatutesService {
                 long start = System.currentTimeMillis();
                 if (statutes != null) {
                     for (Statute statute : statutes) {
-                        Collection<LawlessDto> dtos = statute.inspect(cu);
+                        List<LawlessDto> dtos = statute.inspect(cu);
                         dtos.forEach(dto -> {
                             String statuteNo = statute.declareStatuteNo();
                             if (isNotInPublicAcks(dto, statuteNo, pardons)) {
@@ -69,7 +69,7 @@ public class JudgeByStatutesServiceImpl implements JudgeByStatutesService {
         return lawlesses;
     }
 
-    private boolean isNotInPublicAcks(LawlessDto vo, String statuteNo, Collection<PardonDto> pardons) {
+    private boolean isNotInPublicAcks(LawlessDto vo, String statuteNo, List<PardonDto> pardons) {
         String qualifier = vo.getQualifier();
         String sourceCode = vo.getSourceCode();
 

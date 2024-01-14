@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.javabean;
 
-import java.util.Collection;
+import java.util.List;
 import org.springframework.web.bind.annotation.RequestMethod;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,8 +15,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RequestMappingFullDto {
 
-    Collection<String> combinedUrls;
+    List<String> combinedUrls;
 
-    Collection<RequestMethod> combinedVerbs;
+    List<RequestMethod> combinedVerbs;
 
 }

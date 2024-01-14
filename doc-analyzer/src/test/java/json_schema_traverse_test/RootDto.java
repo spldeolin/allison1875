@@ -1,6 +1,6 @@
 package json_schema_traverse_test;
 
-import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -20,6 +20,6 @@ public class RootDto {
 
     @Size(max = 6) String name;
 
-    @NotNull Collection<SecondDto> dtos;
+    @NotNull List<SecondDto> dtos;
 
 }

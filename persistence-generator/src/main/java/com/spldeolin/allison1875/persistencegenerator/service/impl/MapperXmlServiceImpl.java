@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDENT;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.atteo.evo.inflector.English;
@@ -33,7 +32,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      * <sql id="all"></sql> 标签
      */
     @Override
-    public Collection<String> allCloumnSqlXml(PersistenceDto persistence) {
+    public List<String> allCloumnSqlXml(PersistenceDto persistence) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add("<sql id=\"all\">");
         xmlLines.addAll(TextUtils.formatLines(BaseConstant.SINGLE_INDENT,
@@ -45,7 +44,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> batchInsertEvenNullXml(PersistenceDto persistence, String methodName) {
+    public List<String> batchInsertEvenNullXml(PersistenceDto persistence, String methodName) {
         if (persistenceGeneratorConfig.getDisableBatchInsertEvenNull()) {
             return null;
         }
@@ -67,7 +66,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> batchInsertXml(PersistenceDto persistence, String methodName) {
+    public List<String> batchInsertXml(PersistenceDto persistence, String methodName) {
         if (persistenceGeneratorConfig.getDisableBatchInsert()) {
             return null;
         }
@@ -96,7 +95,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> batchUpdateEvenNullXml(PersistenceDto persistence, String methodName) {
+    public List<String> batchUpdateEvenNullXml(PersistenceDto persistence, String methodName) {
         if (persistenceGeneratorConfig.getDisableBatchUpdateEvenNull()) {
             return null;
         }
@@ -132,7 +131,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> batchUpdateXml(PersistenceDto persistence, String methodName) {
+    public List<String> batchUpdateXml(PersistenceDto persistence, String methodName) {
         if (persistenceGeneratorConfig.getDisableBatchUpdate()) {
             return null;
         }
@@ -169,12 +168,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      * 表中每有几个外键，这个Proc就生成几个方法，以_id结尾的字段算作外键
      */
     @Override
-    public Collection<String> deleteByKeyXml(PersistenceDto persistence,
-            Collection<KeyMethodNameDto> KeyAndMethodNames) {
+    public List<String> deleteByKeyXml(PersistenceDto persistence, List<KeyMethodNameDto> KeyAndMethodNames) {
         if (persistenceGeneratorConfig.getDisableDeleteByKey() || !persistence.getIsDeleteFlagExist()) {
             return Lists.newArrayList();
         }
-        Collection<String> result = Lists.newArrayList();
+        List<String> result = Lists.newArrayList();
         for (KeyMethodNameDto KeyAndMethodName : KeyAndMethodNames) {
             List<String> xmlLines = Lists.newArrayList();
             PropertyDto key = KeyAndMethodName.getKey();
@@ -193,7 +191,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> insertOrUpdateXml(PersistenceDto persistence, String entityName, String methodName) {
+    public List<String> insertOrUpdateXml(PersistenceDto persistence, String entityName, String methodName) {
         if (persistenceGeneratorConfig.getDisableInsertOrUpdate()) {
             return null;
         }
@@ -228,7 +226,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> insertXml(PersistenceDto persistence, String entityName, String methodName) {
+    public List<String> insertXml(PersistenceDto persistence, String entityName, String methodName) {
         if (persistenceGeneratorConfig.getDisableInsert()) {
             return null;
         }
@@ -256,11 +254,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> listAllXml(PersistenceDto persistence, String methodName) {
+    public List<String> listAllXml(PersistenceDto persistence, String methodName) {
         if (persistenceGeneratorConfig.getDisableListAll()) {
             return null;
         }
-        Collection<String> result = Lists.newArrayList();
+        List<String> result = Lists.newArrayList();
         String firstLine = "<select id=\"" + methodName + "\" ";
         firstLine += "resultMap=\"all\">";
         result.add(firstLine);
@@ -279,7 +277,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> queryByEntityXml(PersistenceDto persistence, String entityName, String methodName) {
+    public List<String> queryByEntityXml(PersistenceDto persistence, String entityName, String methodName) {
         if (persistenceGeneratorConfig.getDisableQueryByEntity()) {
             return null;
         }
@@ -311,7 +309,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      * 2. 根据主键列表查询，并把结果集以主键为key，映射到Map中
      */
     @Override
-    public Collection<String> queryByIdsXml(PersistenceDto persistence, String methodName) {
+    public List<String> queryByIdsXml(PersistenceDto persistence, String methodName) {
         if (methodName == null) {
             return null;
         }
@@ -339,7 +337,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> queryByIdXml(PersistenceDto persistence, String methodName) {
+    public List<String> queryByIdXml(PersistenceDto persistence, String methodName) {
         if (persistenceGeneratorConfig.getDisableQueryById()) {
             return null;
         }
@@ -375,11 +373,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      * 根据外键列表查询，表中每有几个外键，这个Proc就生成几个方法
      */
     @Override
-    public Collection<String> queryByKeysXml(PersistenceDto persistence, Collection<QueryByKeysDto> queryByKeysDtos) {
+    public List<String> queryByKeysXml(PersistenceDto persistence, List<QueryByKeysDto> queryByKeysDtos) {
         if (persistenceGeneratorConfig.getDisableQueryByKeys()) {
             return null;
         }
-        Collection<String> sourceCodeLines = Lists.newArrayList();
+        List<String> sourceCodeLines = Lists.newArrayList();
         for (QueryByKeysDto queryByKeysDto : queryByKeysDtos) {
             List<String> xmlLines = Lists.newArrayList();
             PropertyDto key = queryByKeysDto.getKey();
@@ -406,12 +404,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> queryByKeyXml(PersistenceDto persistence,
-            Collection<KeyMethodNameDto> keyAndMethodNames) {
+    public List<String> queryByKeyXml(PersistenceDto persistence, List<KeyMethodNameDto> keyAndMethodNames) {
         if (persistenceGeneratorConfig.getDisableQueryByKey()) {
             return null;
         }
-        Collection<String> result = Lists.newArrayList();
+        List<String> result = Lists.newArrayList();
         for (KeyMethodNameDto keyAndMethodName : keyAndMethodNames) {
             List<String> xmlLines = Lists.newArrayList();
             PropertyDto key = keyAndMethodName.getKey();
@@ -437,7 +434,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> resultMapXml(PersistenceDto persistence, String entityName) {
+    public List<String> resultMapXml(PersistenceDto persistence, String entityName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<resultMap id=\"all\" type=\"%s\">", entityName));
         for (PropertyDto id : persistence.getIdProperties()) {
@@ -454,7 +451,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> updateByIdEvenNullXml(PersistenceDto persistence, String entityName, String methodName) {
+    public List<String> updateByIdEvenNullXml(PersistenceDto persistence, String entityName, String methodName) {
         if (persistenceGeneratorConfig.getDisableUpdateByIdEvenNull()) {
             return null;
         }
@@ -490,7 +487,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public Collection<String> updateByIdXml(PersistenceDto persistence, String entityName, String methodName) {
+    public List<String> updateByIdXml(PersistenceDto persistence, String entityName, String methodName) {
         if (persistenceGeneratorConfig.getDisableUpdateById()) {
             return null;
         }

@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.BuildPersiste
 @ImplementedBy(BuildPersistenceDtoServiceImpl.class)
 public interface BuildPersistenceDtoService {
 
-    Collection<PersistenceDto> build(AstForest astForest);
+    List<PersistenceDto> build(AstForest astForest);
 
 }

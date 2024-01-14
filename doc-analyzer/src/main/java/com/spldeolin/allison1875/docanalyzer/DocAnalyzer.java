@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.docanalyzer;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
@@ -85,10 +85,10 @@ public class DocAnalyzer implements Allison1875MainService {
         astForest.reset();
 
         // 收集endpoint
-        Collection<EndpointDto> endpoints = Lists.newArrayList();
+        List<EndpointDto> endpoints = Lists.newArrayList();
 
         // 遍历controller、遍历handler
-        Collection<HandlerFullDto> handlers = listHandlersService.listHandlers(astForest);
+        List<HandlerFullDto> handlers = listHandlersService.listHandlers(astForest);
         if (handlers.isEmpty()) {
             log.warn("no Handler detected");
             return;
@@ -117,7 +117,7 @@ public class DocAnalyzer implements Allison1875MainService {
                         handler.getReflection(), config.getGlobalUrlPrefix());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
-                Collection<EndpointDto> copies = copyEndpointService.copy(endpoint, requestMappingFullDto);
+                List<EndpointDto> copies = copyEndpointService.copy(endpoint, requestMappingFullDto);
 
                 endpoints.addAll(copies);
             } catch (Exception e) {

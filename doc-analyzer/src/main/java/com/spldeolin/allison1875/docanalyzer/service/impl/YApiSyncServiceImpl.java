@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +53,7 @@ public class YApiSyncServiceImpl implements YApiSyncService {
     private YApiOpenService yApiOpenService;
 
     @Override
-    public void outputToYApi(Collection<EndpointDto> endpoints) throws Exception {
+    public void outputToYApi(List<EndpointDto> endpoints) throws Exception {
         YApiProjectGetRespDto project = yApiOpenService.getProject();
         Long projectId = project.getId();
 
@@ -77,7 +76,7 @@ public class YApiSyncServiceImpl implements YApiSyncService {
 
         // 新增接口
         for (EndpointDto endpoint : endpoints) {
-            Collection<String> descriptionLines = endpoint.getDescriptionLines();
+            List<String> descriptionLines = endpoint.getDescriptionLines();
             String title = Iterables.getFirst(descriptionLines, null);
             if (StringUtils.isEmpty(title)) {
                 title = endpoint.getHandlerSimpleName();
@@ -126,7 +125,7 @@ public class YApiSyncServiceImpl implements YApiSyncService {
         return result;
     }
 
-    private void createYApiCat(Collection<String> catNames, Long projectId) {
+    private void createYApiCat(Set<String> catNames, Long projectId) {
         for (String catName : catNames) {
             JsonNode responseBody = yApiOpenService.createCat("", catName, projectId);
             log.info("create yapi cat. catName={} rawRespBody={}", catName, JsonUtils.toJson(responseBody));

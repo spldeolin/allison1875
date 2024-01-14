@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.FileFlush;
@@ -16,6 +16,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperXmlFile
 public interface MapperXmlFileService {
 
     FileFlush generateMapperXml(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper, Path mapperXmlDirectory,
-            Collection<Collection<String>> sourceCodes) throws IOException;
+            List<List<String>> sourceCodes) throws IOException;
 
 }

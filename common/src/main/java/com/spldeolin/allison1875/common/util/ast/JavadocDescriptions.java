@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.common.util.ast;
 
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
@@ -41,23 +41,23 @@ public class JavadocDescriptions {
     }
 
     /**
-     * 获取description，并按行分割到Collection中
+     * 获取description，并按行分割到List中
      */
-    static Collection<String> getAsLines(JavadocDescription javadocDescription) {
+    static List<String> getAsLines(JavadocDescription javadocDescription) {
         return MoreStringUtils.splitLineByLine(getRaw(javadocDescription));
     }
 
     /**
-     * 获取description，并按行分割到Collection中
+     * 获取description，并按行分割到List中
      */
-    public static Collection<String> getAsLines(Javadoc javadoc) {
+    public static List<String> getAsLines(Javadoc javadoc) {
         return getAsLines(javadoc.getDescription());
     }
 
     /**
-     * 获取description，并按行分割到Collection中
+     * 获取description，并按行分割到List中
      */
-    public static Collection<String> getAsLines(NodeWithJavadoc<?> node) {
+    public static List<String> getAsLines(NodeWithJavadoc<?> node) {
         return node.getJavadoc().map(JavadocDescriptions::getAsLines).orElse(Lists.newArrayList());
     }
 

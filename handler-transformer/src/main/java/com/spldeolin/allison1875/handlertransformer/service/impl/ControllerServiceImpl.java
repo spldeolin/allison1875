@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.IntStream;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -35,7 +35,7 @@ public class ControllerServiceImpl implements ControllerService {
     private CreateHandlerService createHandlerService;
 
     @Override
-    public Collection<ClassOrInterfaceDeclaration> collect(CompilationUnit cu) {
+    public List<ClassOrInterfaceDeclaration> collect(CompilationUnit cu) {
         return cu.findAll(ClassOrInterfaceDeclaration.class, this::isController);
     }
 

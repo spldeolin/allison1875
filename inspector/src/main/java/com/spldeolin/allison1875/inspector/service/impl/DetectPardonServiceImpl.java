@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.inspector.service.impl;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -26,8 +26,8 @@ public class DetectPardonServiceImpl implements DetectPardonService {
     private InspectorConfig config;
 
     @Override
-    public Collection<PardonDto> detect() {
-        Collection<PardonDto> pardons = Lists.newArrayList();
+    public List<PardonDto> detect() {
+        List<PardonDto> pardons = Lists.newArrayList();
         File pardonDirectoryPath = config.getPardonDirectory();
         if (pardonDirectoryPath != null) {
             Set<File> jsonFiles = FileTraverseUtils.listFilesRecursively(pardonDirectoryPath, "json");

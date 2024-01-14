@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,7 +56,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
                 persistenceGeneratorConfig.getDesignPackage(), designName + ".java");
 
-        Collection<PropertyDto> properties = persistence.getProperties();
+        List<PropertyDto> properties = persistence.getProperties();
         properties.removeIf(
                 property -> persistenceGeneratorConfig.getHiddenColumns().contains(property.getPropertyName()));
         Map<String, PropertyDto> propertiesByName = Maps.newHashMap();

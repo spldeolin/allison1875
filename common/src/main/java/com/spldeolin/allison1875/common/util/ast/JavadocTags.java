@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.common.util.ast;
 
-import java.util.Collection;
 import java.util.List;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
@@ -25,12 +24,12 @@ public class JavadocTags {
      *
      * @return 每个String均已trim()
      */
-    public static Collection<String> getEveryLineByTag(Javadoc javadoc, Type blockTagType) {
+    public static List<String> getEveryLineByTag(Javadoc javadoc, Type blockTagType) {
         List<String> result = Lists.newArrayList();
         for (JavadocBlockTag blockTag : javadoc.getBlockTags()) {
             if (blockTag.getType() == blockTagType) {
                 JavadocDescription content = blockTag.getContent();
-                Collection<String> lines = JavadocDescriptions.getAsLines(content);
+                List<String> lines = JavadocDescriptions.getAsLines(content);
                 result.addAll(lines);
             }
         }
@@ -41,7 +40,7 @@ public class JavadocTags {
      * 重载自 {@linkplain JavadocTags#getEveryLineByTag(Javadoc,
      * Type)}
      */
-    public static Collection<String> getEveryLineByTag(NodeWithJavadoc<?> node, Type blockTagType) {
+    public static List<String> getEveryLineByTag(NodeWithJavadoc<?> node, Type blockTagType) {
         return node.getJavadoc().map(javadoc -> getEveryLineByTag(javadoc, blockTagType)).orElse(Lists.newArrayList());
     }
 

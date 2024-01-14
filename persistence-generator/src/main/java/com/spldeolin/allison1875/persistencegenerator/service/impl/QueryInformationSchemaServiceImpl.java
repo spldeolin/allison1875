@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.service.impl;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -31,12 +31,12 @@ public class QueryInformationSchemaServiceImpl implements QueryInformationSchema
     private PersistenceGeneratorConfig config;
 
     @Override
-    public Collection<InformationSchemaDto> query() {
+    public List<InformationSchemaDto> query() {
         try (Connection conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUserName(),
                 config.getPassword())) {
             String sql = Resources.toString(Resources.getResource("information_schema.sql"), StandardCharsets.UTF_8);
             String part = "IS NOT NULL";
-            Collection<String> tables = config.getTables();
+            List<String> tables = config.getTables();
             if (CollectionUtils.isNotEmpty(tables)) {
                 tables = tables.stream().map(one -> "'" + one + "'").collect(Collectors.toList());
                 part = Joiner.on(',').appendTo(new StringBuilder("IN ("), tables).append(")").toString();

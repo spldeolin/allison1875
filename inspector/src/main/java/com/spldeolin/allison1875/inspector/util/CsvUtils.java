@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -94,7 +93,7 @@ public class CsvUtils {
     /**
      * 生成csv
      */
-    public static <T> String writeCsv(Collection<T> data, Class<T> clazz) throws CsvException {
+    public static <T> String writeCsv(List<T> data, Class<T> clazz) throws CsvException {
         CsvSchema schema = cm.schemaFor(clazz).withHeader();
         ObjectWriter writer = cm.writer(schema);
 

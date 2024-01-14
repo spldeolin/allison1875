@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
-import java.util.Collection;
+import java.util.List;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -24,22 +24,22 @@ public class PersistenceDto {
     /**
      * 主键字段（存在联合主键的可能）
      */
-    Collection<PropertyDto> idProperties;
+    List<PropertyDto> idProperties;
 
     /**
      * 非主键字段
      */
-    Collection<PropertyDto> nonIdProperties;
+    List<PropertyDto> nonIdProperties;
 
     /**
      * 所有字段
      */
-    Collection<PropertyDto> properties;
+    List<PropertyDto> properties;
 
     /**
      * 逻辑外键字段（id结尾的字段算做逻辑外键）
      */
-    Collection<PropertyDto> keyProperties;
+    List<PropertyDto> keyProperties;
 
     /**
      * 存在逻辑删除标识符

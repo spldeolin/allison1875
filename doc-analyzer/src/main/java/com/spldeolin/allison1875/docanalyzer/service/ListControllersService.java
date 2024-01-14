@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
@@ -14,6 +14,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.ListControllersService
 @ImplementedBy(ListControllersServiceImpl.class)
 public interface ListControllersService {
 
-    Collection<ControllerFullDto> listControllers(AstForest astForest);
+    List<ControllerFullDto> listControllers(AstForest astForest);
 
 }

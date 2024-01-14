@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,10 +35,10 @@ public class SpringMvcHandlerServiceImpl implements SpringMvcHandlerService {
     private ListControllersService listControllersService;
 
     @Override
-    public Collection<HandlerFullDto> listHandlers(AstForest astForest) {
-        Collection<ControllerFullDto> controllers = listControllersService.listControllers(astForest);
+    public List<HandlerFullDto> listHandlers(AstForest astForest) {
+        List<ControllerFullDto> controllers = listControllersService.listControllers(astForest);
 
-        Collection<HandlerFullDto> result = Lists.newArrayList();
+        List<HandlerFullDto> result = Lists.newArrayList();
         for (ControllerFullDto controller : controllers) {
             Map<String, MethodDeclaration> methodsByShortestQualifier = methodCollectService.collectMethods(
                     controller.getCoid());

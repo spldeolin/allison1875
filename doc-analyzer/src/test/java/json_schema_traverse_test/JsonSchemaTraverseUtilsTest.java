@@ -1,6 +1,6 @@
 package json_schema_traverse_test;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
@@ -22,9 +22,9 @@ public class JsonSchemaTraverseUtilsTest {
         JsonSchema root = JsonSchemaGenerateUtils.generateSchema("json_schema_traverse_test.RootDto",
                 new JsonSchemaGenerator(JsonUtils.createObjectMapper()));
 
-        Collection<String> names = Lists.newArrayList();
+        List<String> names = Lists.newArrayList();
         Map<JsonSchema, String> pathMap = Maps.newLinkedHashMap();
-        Collection<String> paths = Lists.newArrayList();
+        List<String> paths = Lists.newArrayList();
 
         Map<String, String> id2Path = Maps.newHashMap();
         id2Path.put(root.getId(), "root");

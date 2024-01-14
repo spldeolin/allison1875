@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
@@ -14,6 +14,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.SpringMvcHandlerServic
 @ImplementedBy(SpringMvcHandlerServiceImpl.class)
 public interface SpringMvcHandlerService {
 
-    Collection<HandlerFullDto> listHandlers(AstForest astForest);
+    List<HandlerFullDto> listHandlers(AstForest astForest);
 
 }

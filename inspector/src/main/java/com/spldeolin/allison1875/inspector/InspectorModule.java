@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.inspector;
 
-import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.google.inject.TypeLiteral;
@@ -37,7 +36,7 @@ public class InspectorModule extends Allison1875Module {
         // bind config
         bind(InspectorConfig.class).toInstance(inspectorConfig);
         // bind statutes
-        bind(new TypeLiteral<Collection<Statute>>() {
+        bind(new TypeLiteral<List<Statute>>() {
         }).toInstance(Lists.newArrayList());
     }
 

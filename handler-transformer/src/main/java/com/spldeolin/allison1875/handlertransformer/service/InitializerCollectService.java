@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.inject.ImplementedBy;
@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.handlertransformer.service.impl.InitializerColl
 @ImplementedBy(InitializerCollectServiceImpl.class)
 public interface InitializerCollectService {
 
-    Collection<InitializerDeclaration> collectInitializer(ClassOrInterfaceDeclaration coid);
+    List<InitializerDeclaration> collectInitializer(ClassOrInterfaceDeclaration coid);
 
 }

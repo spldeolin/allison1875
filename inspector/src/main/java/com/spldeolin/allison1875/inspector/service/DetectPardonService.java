@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.inspector.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.inspector.javabean.PardonDto;
 import com.spldeolin.allison1875.inspector.service.impl.DetectPardonServiceImpl;
@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.inspector.service.impl.DetectPardonServiceImpl;
 @ImplementedBy(DetectPardonServiceImpl.class)
 public interface DetectPardonService {
 
-    Collection<PardonDto> detect();
+    List<PardonDto> detect();
 
 }

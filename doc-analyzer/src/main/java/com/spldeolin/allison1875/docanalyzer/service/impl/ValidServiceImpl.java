@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.docanalyzer.service.impl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -150,7 +149,7 @@ public class ValidServiceImpl implements ValidService {
         return AnnotatedElementUtils.findMergedAnnotation(field, annotationType);
     }
 
-    private void nullToEmpty(Collection<ValidatorDto> dtos) {
+    private void nullToEmpty(List<ValidatorDto> dtos) {
         dtos.forEach(one -> {
             if (one.getNote() == null) {
                 one.setNote("");

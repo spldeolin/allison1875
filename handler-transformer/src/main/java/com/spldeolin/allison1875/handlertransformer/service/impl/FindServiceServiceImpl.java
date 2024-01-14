@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -37,7 +37,7 @@ public class FindServiceServiceImpl implements FindServiceService {
         }
 
         ClassOrInterfaceDeclaration service = null;
-        Collection<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
+        List<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
         boolean caught = false;
         for (CompilationUnit cu : astForest.clone()) {
             if (cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
@@ -73,9 +73,9 @@ public class FindServiceServiceImpl implements FindServiceService {
         }
 
         ClassOrInterfaceDeclaration service = null;
-        Collection<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
+        List<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
         boolean caught = false;
-        Collection<CompilationUnit> serviceOrImplCus = getServiceOrImplCus(controllerCu);
+        List<CompilationUnit> serviceOrImplCus = getServiceOrImplCus(controllerCu);
 
         for (CompilationUnit cu : serviceOrImplCus) {
             if (cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
@@ -110,12 +110,12 @@ public class FindServiceServiceImpl implements FindServiceService {
         return result;
     }
 
-    private Collection<CompilationUnit> getServiceOrImplCus(CompilationUnit cu) {
+    private List<CompilationUnit> getServiceOrImplCus(CompilationUnit cu) {
         Path servicePath = Locations.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServicePackage()));
         Path serviceImplPath = Locations.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServiceImplPackage()));
-        Collection<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
+        List<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
         for (File java : FileTraverseUtils.listFilesRecursively(servicePath, "java")) {
             serviceOrImplCu.add(Cus.parseCu(java.toPath()));
         }

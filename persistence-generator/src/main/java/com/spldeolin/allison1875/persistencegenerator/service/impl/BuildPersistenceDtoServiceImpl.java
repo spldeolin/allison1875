@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
@@ -43,9 +43,9 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
     private CommentService commentService;
 
     @Override
-    public Collection<PersistenceDto> build(AstForest astForest) {
+    public List<PersistenceDto> build(AstForest astForest) {
         // 查询information_schema.COLUMNS、information_schema.TABLES表
-        Collection<InformationSchemaDto> infoSchemas = queryInformationSchemaService.query();
+        List<InformationSchemaDto> infoSchemas = queryInformationSchemaService.query();
         String deleteFlag = getDeleteFlagName();
 
         Map<String, PersistenceDto> persistences = Maps.newHashMap();
@@ -103,7 +103,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
 
         reportWhileNoDeleleFlag(deleteFlag, persistences);
 
-        return persistences.values();
+        return Lists.newArrayList(persistences.values());
     }
 
     private void reportWhileNoDeleleFlag(String deleteFlag, Map<String, PersistenceDto> persistences) {

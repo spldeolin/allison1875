@@ -4,7 +4,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -93,7 +92,7 @@ public class RequestMappingServiceImpl implements RequestMappingService {
             return sb.toString();
         });
 
-        Collection<RequestMethod> combinedVerbs = combineVerb(controllerVerbs, methodVerbs);
+        List<RequestMethod> combinedVerbs = combineVerb(controllerVerbs, methodVerbs);
         return new RequestMappingFullDto(combinedUrls, combinedVerbs);
     }
 
@@ -109,8 +108,8 @@ public class RequestMappingServiceImpl implements RequestMappingService {
         return controllerRequestMapping == null ? new RequestMethod[0] : controllerRequestMapping.method();
     }
 
-    private Collection<RequestMethod> combineVerb(RequestMethod[] cVerbs, RequestMethod[] mVerbs) {
-        Collection<RequestMethod> combinedVerbs = Lists.newArrayList();
+    private List<RequestMethod> combineVerb(RequestMethod[] cVerbs, RequestMethod[] mVerbs) {
+        List<RequestMethod> combinedVerbs = Lists.newArrayList();
         if (ArrayUtils.isNotEmpty(cVerbs)) {
             combinedVerbs.addAll(Arrays.asList(cVerbs));
         }
@@ -142,7 +141,7 @@ public class RequestMappingServiceImpl implements RequestMappingService {
         return combinedUrls;
     }
 
-    private List<String> ensureAllStartWithSlash(Collection<String> urls) {
+    private List<String> ensureAllStartWithSlash(List<String> urls) {
         List<String> result = Lists.newArrayList();
         for (String url : urls) {
             if (!url.startsWith("/")) {

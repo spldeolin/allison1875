@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.service.impl;
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -40,7 +40,7 @@ public class MarkdownOutputServiceImpl implements MarkdownOutputService {
     private DocAnalyzerConfig config;
 
     @Override
-    public void outputToMarkdown(Collection<EndpointDto> endpoints) throws Exception {
+    public void outputToMarkdown(List<EndpointDto> endpoints) throws Exception {
         Multimap<String/*cat*/, EndpointDto> endpointMap = ArrayListMultimap.create();
         endpoints.forEach(e -> endpointMap.put(e.getCat(), e));
 

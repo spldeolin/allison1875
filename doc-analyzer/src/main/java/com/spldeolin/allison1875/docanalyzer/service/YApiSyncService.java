@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service;
 
-import java.util.Collection;
+import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.service.impl.YApiSyncServiceImpl;
@@ -13,6 +13,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.YApiSyncServiceImpl;
 @ImplementedBy(YApiSyncServiceImpl.class)
 public interface YApiSyncService {
 
-    void outputToYApi(Collection<EndpointDto> endpoints) throws Exception;
+    void outputToYApi(List<EndpointDto> endpoints) throws Exception;
 
 }
