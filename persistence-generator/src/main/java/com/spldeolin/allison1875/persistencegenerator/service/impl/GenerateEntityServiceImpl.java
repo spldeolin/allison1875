@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
@@ -50,13 +49,13 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
                 javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
             }
-            if (BooleanUtils.isTrue(persistenceGeneratorConfig.getEnableEntityImplementSerializable())) {
+            if (persistenceGeneratorConfig.getEnableEntityImplementSerializable()) {
                 cu.addImport("java.io.Serializable");
                 javabean.addImplementedType("Serializable");
                 javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
                         "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
             }
-            if (BooleanUtils.isTrue(persistenceGeneratorConfig.getEnableEntityImplementCloneable())) {
+            if (persistenceGeneratorConfig.getEnableEntityImplementCloneable()) {
                 javabean.addImplementedType("Cloneable");
                 javabean.getMembers().addLast(StaticJavaParser.parseBodyDeclaration(
                         "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));

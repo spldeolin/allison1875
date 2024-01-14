@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.common;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
@@ -10,6 +11,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AstFilterService;
 import lombok.extern.log4j.Log4j2;
 
@@ -49,6 +51,15 @@ public class Allison1875 {
         Injector injector = Guice.createInjector(allison1875Modules);
 
         for (Allison1875Module module : allison1875Modules) {
+            // valid
+            List<InvalidDto> invalids = module.validConfigs();
+            if (!invalids.isEmpty()) {
+                for (InvalidDto invalid : invalids) {
+                    log.error("Allison 1875 fail to work cause invalid config, path={}, reason={}, value={}",
+                            invalid.getPath(), invalid.getReason(), invalid.getValue());
+                }
+                System.exit(-9);
+            }
 
             // build AST forest
             AstFilterService astFilterService = injector.getInstance(AstFilterService.class);

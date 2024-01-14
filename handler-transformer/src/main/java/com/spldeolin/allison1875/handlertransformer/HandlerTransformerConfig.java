@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +14,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class HandlerTransformerConfig {
+public final class HandlerTransformerConfig extends Allison1875Config {
 
     /**
      * 控制层 @RequestBody类型所在包的包名

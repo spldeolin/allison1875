@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.inspector;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.valid.annotation.IsDirectory;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -14,7 +15,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class InspectorConfig {
+public final class InspectorConfig extends Allison1875Config {
 
     /**
      * 工程所在的Git本地仓库的路径

@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.gadget;
 import java.util.Collection;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +13,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class LineCounterConfig {
+public final class LineCounterConfig extends Allison1875Config {
 
     /**
      * 对这些指定后缀的Java类型的进行专门的统计

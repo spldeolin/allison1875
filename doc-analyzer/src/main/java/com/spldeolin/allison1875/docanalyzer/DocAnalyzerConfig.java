@@ -2,7 +2,11 @@ package com.spldeolin.allison1875.docanalyzer;
 
 
 import java.util.Collection;
+import java.util.List;
 import javax.validation.constraints.NotNull;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
+import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.common.valid.annotation.IsDirectory;
 import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
 import lombok.AccessLevel;
@@ -16,7 +20,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class DocAnalyzerConfig {
+public final class DocAnalyzerConfig extends Allison1875Config {
 
     /**
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
@@ -67,5 +71,35 @@ public final class DocAnalyzerConfig {
      * 是否在该生成的地方生成诸如 Allison 1875 Lot No: DA1000S-967D9357 的声明
      */
     @NotNull Boolean enableLotNoAnnounce;
+
+    @Override
+    public List<InvalidDto> invalidSelf() {
+        List<InvalidDto> invalids = super.invalidSelf();
+        if (outputTo == OutputToEnum.YAPI) {
+            if (yapiUrl == null) {
+                invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
+                        .setReason("must not be null"));
+            }
+            if (yapiToken == null) {
+                invalids.add(new InvalidDto().setPath("yapiToken").setValue(ValidUtils.formatValue(yapiToken))
+                        .setReason("must not be null"));
+            }
+        }
+        if (outputTo == OutputToEnum.LOCAL_MARKDOWN) {
+            if (markdownDirectoryPath == null) {
+                invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
+                        .setValue(ValidUtils.formatValue(markdownDirectoryPath)).setReason("must not be null"));
+            }
+            if (enableCurl == null) {
+                invalids.add(new InvalidDto().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))
+                        .setReason("must not be null"));
+            }
+            if (enableResponseBodySample == null) {
+                invalids.add(new InvalidDto().setPath("enableResponseBodySample")
+                        .setValue(ValidUtils.formatValue(enableResponseBodySample)).setReason("must not be null"));
+            }
+        }
+        return invalids;
+    }
 
 }

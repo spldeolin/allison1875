@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.github.javaparser.utils.StringEscapeUtils;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -56,10 +55,6 @@ public class YApiSyncServiceImpl implements YApiSyncService {
 
     @Override
     public void outputToYApi(Collection<EndpointDto> endpoints) throws Exception {
-        Preconditions.checkNotNull(config.getYapiUrl(), "requried 'DocAnalyzerConfig#yapiUrl' Property cannot be null");
-        Preconditions.checkNotNull(config.getYapiToken(),
-                "requried 'DocAnalyzerConfig#yapiToken' Property cannot be null");
-
         YApiProjectGetRespDto project = yApiOpenService.getProject();
         Long projectId = project.getId();
 

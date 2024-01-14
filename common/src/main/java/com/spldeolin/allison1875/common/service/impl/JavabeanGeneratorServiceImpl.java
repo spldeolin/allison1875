@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -10,10 +11,12 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.service.javabean.FieldArg;
@@ -35,7 +38,10 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
 
     @Override
     public JavabeanGeneration generate(JavabeanArg arg) {
-        ValidUtils.ensureValid(arg);
+        List<InvalidDto> valid = ValidUtils.valid(arg);
+        if (!valid.isEmpty()) {
+            throw new Allison1875Exception("JavabeanArg illegal, " + arg);
+        }
 
         String className = arg.getClassName();
         Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getPrimaryJavaRoot(),

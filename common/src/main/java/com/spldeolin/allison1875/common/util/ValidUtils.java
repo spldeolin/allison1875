@@ -1,13 +1,14 @@
 package com.spldeolin.allison1875.common.util;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -29,51 +30,31 @@ public class ValidUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-    public static <T> void ensureValid(T object) {
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
-        reportAndExit(violations);
-    }
-
-    public static <T> void ensureValid(Collection<T> objects) {
-        Set<ConstraintViolation<T>> violations = Sets.newHashSet();
-        for (T object : objects) {
-            violations.addAll(validator.validate(object));
+    public static List<InvalidDto> valid(Object object) {
+        Set<ConstraintViolation<Object>> violations = validator.validate(object);
+        if (violations.isEmpty()) {
+            return Lists.newArrayList();
         }
-        reportAndExit(violations);
-    }
 
-    private static Validator initValidator() {
-        Locale.setDefault(Locale.ENGLISH);
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            return factory.getValidator();
+        List<InvalidDto> result = Lists.newArrayList();
+        for (ConstraintViolation<?> violation : violations) {
+            String path = violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath().toString()
+                    .replace(".<iterable element>", "");
+            String valueText = formatValue(violation.getInvalidValue());
+            InvalidDto invalid = new InvalidDto().setPath(path).setValue(valueText).setReason(violation.getMessage());
+            result.add(invalid);
         }
+        return result;
     }
 
-    private static <T> void reportAndExit(Set<ConstraintViolation<T>> violations) {
-        if (violations.size() > 0) {
-            log.error("Allison 1875 fail to work cause invalid config");
-            for (ConstraintViolation<?> violation : violations) {
-                String configName =
-                        violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath().toString()
-                                .replace(".<iterable element>", "");
-                String valueText = getInvalidValueText(violation);
-                log.error("{} {}, current value: {}", configName, violation.getMessage(), valueText);
-            }
-            System.exit(-1);
-        }
-    }
-
-    private static String getInvalidValueText(ConstraintViolation<?> violation) {
-        String valueText;
-        Object invalidValue = violation.getInvalidValue();
+    public static String formatValue(Object invalidValue) {
         if (invalidValue == null) {
-            valueText = "<null>";
-        } else if (invalidValue instanceof String && ((String) invalidValue).length() == 0) {
-            valueText = "<empty>";
+            return "<null>";
+        } else if (invalidValue instanceof String && ((String) invalidValue).isEmpty()) {
+            return "<empty>";
         } else {
-            valueText = invalidValue.toString();
+            return invalidValue.toString();
         }
-        return valueText;
     }
 
 }

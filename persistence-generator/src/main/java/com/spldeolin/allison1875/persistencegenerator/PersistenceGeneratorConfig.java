@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -14,7 +15,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class PersistenceGeneratorConfig {
+public final class PersistenceGeneratorConfig extends Allison1875Config {
 
     /**
      * 数据库连接
@@ -124,12 +125,12 @@ public final class PersistenceGeneratorConfig {
     /**
      * 是否为entity实现java.io.Serializable接口
      */
-    Boolean enableEntityImplementSerializable;
+    @NotNull Boolean enableEntityImplementSerializable;
 
     /**
      * 是否为entity实现java.lang.Cloneable接口
      */
-    Boolean enableEntityImplementCloneable;
+    @NotNull Boolean enableEntityImplementCloneable;
 
     /**
      * 生成Entity时，文件已存在的解决方式

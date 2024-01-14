@@ -12,7 +12,6 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -42,13 +41,6 @@ public class MarkdownOutputServiceImpl implements MarkdownOutputService {
 
     @Override
     public void outputToMarkdown(Collection<EndpointDto> endpoints) throws Exception {
-        Preconditions.checkNotNull(config.getMarkdownDirectoryPath(),
-                "requried 'DocAnalyzerConfig#markdownDirectoryPath' Property cannot be null");
-        Preconditions.checkNotNull(config.getEnableCurl(),
-                "requried 'DocAnalyzerConfig#enableCurl' Property cannot be null");
-        Preconditions.checkNotNull(config.getEnableResponseBodySample(),
-                "requried 'DocAnalyzerConfig#enableResponseBodySample' Property cannot be null");
-
         Multimap<String/*cat*/, EndpointDto> endpointMap = ArrayListMultimap.create();
         endpoints.forEach(e -> endpointMap.put(e.getCat(), e));
 

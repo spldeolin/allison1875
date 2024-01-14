@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.common.ancestor;
 /**
  * @author Deolin 2023-12-28
  */
-public abstract class Allison1875Exception extends RuntimeException {
+public class Allison1875Exception extends RuntimeException {
 
     private static final long serialVersionUID = -801498553581107750L;
 

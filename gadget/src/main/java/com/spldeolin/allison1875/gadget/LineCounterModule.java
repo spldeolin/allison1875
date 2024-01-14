@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.gadget;
 
+import java.util.List;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidUtils;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import lombok.ToString;
 
 /**
@@ -18,14 +19,18 @@ public class LineCounterModule extends Allison1875Module {
     }
 
     @Override
-    protected void configure() {
-        ValidUtils.ensureValid(lineCounterConfig);
-        bind(LineCounterConfig.class).toInstance(lineCounterConfig);
+    public Class<? extends Allison1875MainService> declareMainService() {
+        return LineCounter.class;
     }
 
     @Override
-    public Class<? extends Allison1875MainService> declareMainService() {
-        return LineCounter.class;
+    public List<InvalidDto> validConfigs() {
+        return lineCounterConfig.invalidSelf();
+    }
+
+    @Override
+    protected void configure() {
+        bind(LineCounterConfig.class).toInstance(lineCounterConfig);
     }
 
 }

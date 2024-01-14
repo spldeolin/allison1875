@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
+import java.util.List;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidUtils;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import lombok.ToString;
 
 /**
@@ -18,14 +19,18 @@ public class PersistenceGeneratorModule extends Allison1875Module {
     }
 
     @Override
-    protected void configure() {
-        ValidUtils.ensureValid(persistenceGeneratorConfig);
-        bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
+    public Class<? extends Allison1875MainService> declareMainService() {
+        return PersistenceGenerator.class;
     }
 
     @Override
-    public Class<? extends Allison1875MainService> declareMainService() {
-        return PersistenceGenerator.class;
+    public List<InvalidDto> validConfigs() {
+        return persistenceGeneratorConfig.invalidSelf();
+    }
+
+    @Override
+    protected void configure() {
+        bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
     }
 
 }

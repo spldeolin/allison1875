@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.handlertransformer;
 
+import java.util.List;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
-import com.spldeolin.allison1875.common.util.ValidUtils;
+import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import lombok.ToString;
 
 /**
@@ -23,8 +24,12 @@ public class HandlerTransformerModule extends Allison1875Module {
     }
 
     @Override
+    public List<InvalidDto> validConfigs() {
+        return handlerTransformerConfig.invalidSelf();
+    }
+
+    @Override
     protected void configure() {
-        ValidUtils.ensureValid(handlerTransformerConfig);
         bind(HandlerTransformerConfig.class).toInstance(handlerTransformerConfig);
     }
 

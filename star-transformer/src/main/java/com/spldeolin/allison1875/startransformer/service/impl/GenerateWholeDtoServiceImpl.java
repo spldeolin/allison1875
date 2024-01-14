@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.startransformer.service.impl;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
@@ -81,7 +80,7 @@ public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
             }
         }
         javabeanArg.setMore4Javabean((cu, javabean) -> {
-            if (BooleanUtils.isTrue(config.getEnableImplementSerializable())) {
+            if (config.getEnableImplementSerializable()) {
                 cu.addImport("java.io.Serializable");
                 javabean.addImplementedType("Serializable");
                 javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
