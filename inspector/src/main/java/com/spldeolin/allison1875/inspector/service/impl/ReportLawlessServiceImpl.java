@@ -1,13 +1,12 @@
 package com.spldeolin.allison1875.inspector.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,13 +29,13 @@ public class ReportLawlessServiceImpl implements ReportLawlessService {
 
     @Override
     public void report(Collection<LawlessDto> lawlesses) {
-        String lawlessDirectoryPath = config.getLawlessDirectoryPath();
+        File lawlessDirectory = config.getLawlessDirectory();
         lawlesses.forEach(log::info);
 
-        if (StringUtils.isNotEmpty(lawlessDirectoryPath)) {
+        if (lawlessDirectory != null) {
             String csvContent = CsvUtils.writeCsv(lawlesses, LawlessDto.class);
             String fileName = "lawless-" + TimeUtils.toString(LocalDateTime.now(), "yyyyMMdd");
-            Path outputDirectory = Paths.get(lawlessDirectoryPath);
+            Path outputDirectory = lawlessDirectory.toPath();
             Path csvFile = outputDirectory.resolve(fileName + ".csv");
             Path csvGbkFile = outputDirectory.resolve(fileName + "-gbk.csv");
             try {

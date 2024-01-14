@@ -1,13 +1,13 @@
 package com.spldeolin.allison1875.docanalyzer;
 
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
-import com.spldeolin.allison1875.common.valid.annotation.IsDirectory;
 import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -25,7 +25,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
      */
-    @NotNull Collection<@NotNull @IsDirectory String> dependencyProjectPaths;
+    @NotNull Collection<@NotNull File> dependencyProjectDirectories;
 
     /**
      * 全局URL前缀
@@ -75,6 +75,13 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     @Override
     public List<InvalidDto> invalidSelf() {
         List<InvalidDto> invalids = super.invalidSelf();
+        for (File dependencyProjectDirectory : dependencyProjectDirectories) {
+            if (!dependencyProjectDirectory.exists() || !dependencyProjectDirectory.isDirectory()) {
+                invalids.add(new InvalidDto().setPath("dependencyProjectDirectories")
+                        .setValue(ValidUtils.formatValue(dependencyProjectDirectory))
+                        .setReason("must exist and be a directory"));
+            }
+        }
         if (outputTo == OutputToEnum.YAPI) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))

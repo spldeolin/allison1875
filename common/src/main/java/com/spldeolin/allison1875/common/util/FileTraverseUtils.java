@@ -17,14 +17,18 @@ public class FileTraverseUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-    public static HashSet<File> listFilesRecursively(Path directory, String extension) {
+    public static HashSet<File> listFilesRecursively(File directory, String extension) {
         HashSet<File> result = Sets.newLinkedHashSet();
-        FileUtils.iterateFiles(directory.toFile(), new String[]{extension}, true).forEachRemaining(file -> {
+        FileUtils.iterateFiles(directory, new String[]{extension}, true).forEachRemaining(file -> {
             if (extension.equals(Files.getFileExtension(file.getPath()))) {
                 result.add(file);
             }
         });
         return result;
+    }
+
+    public static HashSet<File> listFilesRecursively(Path directory, String extension) {
+        return listFilesRecursively(directory.toFile(), extension);
     }
 
     public static HashSet<File> listFilesRecursively(Path directory, String extension, Predicate<File> predicate) {
