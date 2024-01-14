@@ -45,7 +45,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
     @Inject
-    private QueryTransformerConfig queryTransformerConfig;
+    private QueryTransformerConfig config;
 
     @Override
     public List<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
@@ -291,7 +291,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     }
 
     private String concatLotNoComment(ChainAnalysisDto chainAnalysis) {
-        if (queryTransformerConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
         }
         return "";

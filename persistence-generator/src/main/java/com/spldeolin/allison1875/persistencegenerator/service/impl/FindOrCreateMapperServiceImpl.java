@@ -33,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
 public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService {
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     @Override
     public ClassOrInterfaceDeclaration findOrCreate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
@@ -41,7 +41,7 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
 
         // find
         Path mapperPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
-                persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java");
+                config.getMapperPackage(), persistence.getMapperName() + ".java");
         CompilationUnit cu;
         ClassOrInterfaceDeclaration mapper;
         if (mapperPath.toFile().exists()) {
@@ -60,14 +60,14 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             log.info("Mapper文件不存在，创建它。 [{}]", mapperPath);
             cu = new CompilationUnit();
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
-                    persistenceGeneratorConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
-            cu.setPackageDeclaration(persistenceGeneratorConfig.getMapperPackage());
+                    config.getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(config.getMapperPackage());
             cu.addImport(ImportConstant.JAVA_UTIL);
             cu.addImport(javabeanGeneration.getJavabeanQualifier());
             cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
             Javadoc javadoc = Javadocs.createJavadoc(concatMapperDescription(persistence),
-                    persistenceGeneratorConfig.getAuthor() + " " + LocalDate.now());
+                    config.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
             mapper.setJavadocComment(javadoc);
             mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
@@ -79,7 +79,7 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
 
     private String concatMapperDescription(PersistenceDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }

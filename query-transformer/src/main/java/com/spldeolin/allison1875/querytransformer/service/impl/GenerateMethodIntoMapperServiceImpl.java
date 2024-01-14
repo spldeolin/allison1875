@@ -29,7 +29,7 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
     private FindMapperService findMapperService;
 
     @Inject
-    private QueryTransformerConfig queryTransformerConfig;
+    private QueryTransformerConfig config;
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
@@ -53,7 +53,7 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
         }
 
         MethodDeclaration method = new MethodDeclaration();
-        if (queryTransformerConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             method.setJavadocComment(chainAnalysis.getLotNo());
         }
         method.setType(resultGeneration.getResultType());

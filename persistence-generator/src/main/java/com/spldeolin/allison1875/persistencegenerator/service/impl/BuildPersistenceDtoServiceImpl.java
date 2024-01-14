@@ -31,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
 public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoService {
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     @Inject
     private QueryInformationSchemaService queryInformationSchemaService;
@@ -64,7 +64,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
         }
         for (InformationSchemaDto infoSchema : infoSchemas) {
             String columnName = infoSchema.getColumnName();
-            if (persistenceGeneratorConfig.getHiddenColumns().contains(columnName)) {
+            if (config.getHiddenColumns().contains(columnName)) {
                 continue;
             }
             PropertyDto property = new PropertyDto();
@@ -88,7 +88,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
                 dto.getIdProperties().add(property);
             } else {
                 dto.getNonIdProperties().add(property);
-                if (columnName.endsWith("_id") && !persistenceGeneratorConfig.getNotKeyColumns().contains(columnName)) {
+                if (columnName.endsWith("_id") && !config.getNotKeyColumns().contains(columnName)) {
                     dto.getKeyProperties().add(property);
                 }
             }
@@ -112,8 +112,8 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
     }
 
     private String getDeleteFlagName() {
-        String sql = persistenceGeneratorConfig.getNotDeletedSql();
-        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(persistenceGeneratorConfig.getDeletedSql())) {
+        String sql = config.getNotDeletedSql();
+        if (StringUtils.isEmpty(sql) || StringUtils.isEmpty(config.getDeletedSql())) {
             return null;
         }
         if (!sql.contains("=")) {
@@ -124,7 +124,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
     }
 
     private String endWith() {
-        return persistenceGeneratorConfig.getIsEntityEndWithEntity() ? "Entity" : "";
+        return config.getIsEntityEndWithEntity() ? "Entity" : "";
     }
 
 }

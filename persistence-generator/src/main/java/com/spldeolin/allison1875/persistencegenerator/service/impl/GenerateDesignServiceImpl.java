@@ -43,27 +43,26 @@ import lombok.extern.log4j.Log4j2;
 public class GenerateDesignServiceImpl implements GenerateDesignService {
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     @Override
     public CompilationUnit generate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
-        if (!persistenceGeneratorConfig.getEnableGenerateDesign()) {
+        if (!config.getEnableGenerateDesign()) {
             return null;
         }
 
         String designName = concatDesignName(persistence);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
-                persistenceGeneratorConfig.getDesignPackage(), designName + ".java");
+                config.getDesignPackage(), designName + ".java");
 
         List<PropertyDto> properties = persistence.getProperties();
-        properties.removeIf(
-                property -> persistenceGeneratorConfig.getHiddenColumns().contains(property.getPropertyName()));
+        properties.removeIf(property -> config.getHiddenColumns().contains(property.getPropertyName()));
         Map<String, PropertyDto> propertiesByName = Maps.newHashMap();
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
-        cu.setPackageDeclaration(persistenceGeneratorConfig.getDesignPackage());
+        cu.setPackageDeclaration(config.getDesignPackage());
         cu.addImport(List.class);
         cu.addImport(Map.class);
         cu.addImport(Multimap.class);
@@ -252,10 +251,10 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         meta.setEntityName(javabeanGeneration.getJavabeanName());
         meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         meta.setMapperName(mapper.getNameAsString());
-        meta.setMapperRelativePaths(persistenceGeneratorConfig.getMapperXmlDirectoryPaths().stream()
+        meta.setMapperRelativePaths(config.getMapperXmlDirectoryPaths().stream()
                 .map(one -> one + File.separator + persistence.getMapperName() + ".xml").collect(Collectors.toList()));
         if (persistence.getIsDeleteFlagExist()) {
-            meta.setNotDeletedSql(persistenceGeneratorConfig.getNotDeletedSql());
+            meta.setNotDeletedSql(config.getNotDeletedSql());
         }
         meta.setProperties(propertiesByName);
         meta.setTableName(persistence.getTableName());

@@ -26,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class GenerateEntityServiceImpl implements GenerateEntityService {
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     @Inject
     private JavabeanGeneratorService javabeanGeneratorService;
@@ -35,13 +35,13 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
     public JavabeanGeneration generate(PersistenceDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
-        arg.setPackageName(persistenceGeneratorConfig.getEntityPackage());
+        arg.setPackageName(config.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
-        arg.setAuthorName(persistenceGeneratorConfig.getAuthor());
+        arg.setAuthorName(config.getAuthor());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
-            String superEntityQualifier = persistenceGeneratorConfig.getSuperEntityQualifier();
+            String superEntityQualifier = config.getSuperEntityQualifier();
             if (StringUtils.isNotEmpty(superEntityQualifier)) {
                 cu.addImport(superEntityQualifier);
                 String superEntityName = superEntityQualifier.substring(superEntityQualifier.lastIndexOf('.') + 1);
@@ -49,21 +49,21 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
                 javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
             }
-            if (persistenceGeneratorConfig.getEnableEntityImplementSerializable()) {
+            if (config.getEnableEntityImplementSerializable()) {
                 cu.addImport("java.io.Serializable");
                 javabean.addImplementedType("Serializable");
                 javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
                         "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
             }
-            if (persistenceGeneratorConfig.getEnableEntityImplementCloneable()) {
+            if (config.getEnableEntityImplementCloneable()) {
                 javabean.addImplementedType("Cloneable");
                 javabean.getMembers().addLast(StaticJavaParser.parseBodyDeclaration(
                         "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));
             }
         });
         for (PropertyDto property : persistence.getProperties()) {
-            if (persistenceGeneratorConfig.getHiddenColumns().contains(property.getColumnName())
-                    || persistenceGeneratorConfig.getAlreadyInSuperEntity().contains(property.getColumnName())) {
+            if (config.getHiddenColumns().contains(property.getColumnName()) || config.getAlreadyInSuperEntity()
+                    .contains(property.getColumnName())) {
                 continue;
             }
             FieldArg fieldArg = new FieldArg();
@@ -73,20 +73,19 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             fieldArg.setFieldName(property.getPropertyName());
             arg.getFieldArgs().add(fieldArg);
         }
-        arg.setJavabeanExistenceResolution(persistenceGeneratorConfig.getEntityExistenceResolution());
+        arg.setJavabeanExistenceResolution(config.getEntityExistenceResolution());
         return javabeanGeneratorService.generate(arg);
     }
 
     private String concatEntityDescription(PersistenceDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()
-                || persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

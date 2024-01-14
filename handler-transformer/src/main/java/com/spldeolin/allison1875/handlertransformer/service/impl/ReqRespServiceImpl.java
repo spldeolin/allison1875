@@ -41,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
 public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
+    private HandlerTransformerConfig config;
 
     @Inject
     private FieldService fieldService;
@@ -94,7 +94,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setPackageName(packageName);
             arg.setClassName(javabeanName);
             arg.setDescription(concatDtoDescription(firstLineDto));
-            arg.setAuthorName(handlerTransformerConfig.getAuthor());
+            arg.setAuthorName(config.getAuthor());
             arg.setMore4Javabean((cu1, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
                     for (ImportDeclaration anImport : fieldService.resolveLongType(field, javabeanType)) {
@@ -143,7 +143,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             for (String javabeanQualifier : result.getJavabeanQualifiers()) {
                 javabeanCu.addImport(javabeanQualifier);
             }
-            javabeanCu.addImport(handlerTransformerConfig.getPageTypeQualifier());
+            javabeanCu.addImport(config.getPageTypeQualifier());
         }
 
         return result;
@@ -152,18 +152,18 @@ public class ReqRespServiceImpl implements ReqRespService {
     private String estimatePackageName(JavabeanTypeEnum javabeanType) {
         String packageName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-            packageName = handlerTransformerConfig.getReqDtoPackage();
+            packageName = config.getReqDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-            packageName = handlerTransformerConfig.getRespDtoPackage();
+            packageName = config.getRespDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-            packageName = handlerTransformerConfig.getReqNestDtoPackage();
+            packageName = config.getReqNestDtoPackage();
             if (packageName == null) {
-                packageName = handlerTransformerConfig.getReqDtoPackage() + ".dto";
+                packageName = config.getReqDtoPackage() + ".dto";
             }
         } else {
-            packageName = handlerTransformerConfig.getRespNestDtoPackage();
+            packageName = config.getRespNestDtoPackage();
             if (packageName == null) {
-                packageName = handlerTransformerConfig.getRespDtoPackage() + ".dto";
+                packageName = config.getRespDtoPackage() + ".dto";
             }
         }
         return packageName;
@@ -231,7 +231,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             return "List<" + dto.getNameAsString() + ">";
         }
         if (dto.getAnnotationByName("P").isPresent()) {
-            String[] split = handlerTransformerConfig.getPageTypeQualifier().split("\\.");
+            String[] split = config.getPageTypeQualifier().split("\\.");
             return split[split.length - 1] + "<" + dto.getNameAsString() + ">";
         }
         return dto.getNameAsString();
@@ -239,7 +239,7 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     private String concatDtoDescription(FirstLineDto firstLine) {
         String result = "";
-        if (handlerTransformerConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
         }
         return result;

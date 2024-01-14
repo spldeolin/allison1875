@@ -38,25 +38,25 @@ import lombok.extern.log4j.Log4j2;
 public class HandlerTransformer implements Allison1875MainService {
 
     @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
+    private HandlerTransformerConfig config;
 
     @Inject
-    private ControllerService controllerProc;
+    private ControllerService controllerService;
 
     @Inject
-    private InitializerCollectService initializerCollectProc;
+    private InitializerCollectService initializerCollectService;
 
     @Inject
-    private ReqRespService reqRespProc;
+    private ReqRespService reqRespService;
 
     @Inject
-    private DtoService dtoProc;
+    private DtoService dtoService;
 
     @Inject
-    private ParseFirstLineService parseFirstLineProc;
+    private ParseFirstLineService parseFirstLineService;
 
     @Inject
-    private GenerateServicePairService generateServicePairProc;
+    private GenerateServicePairService generateServicePairService;
 
     @Override
     public void process(AstForest astForest) {
@@ -67,10 +67,10 @@ public class HandlerTransformer implements Allison1875MainService {
         for (CompilationUnit cu : astForest) {
             boolean anyTransformed = false;
 
-            for (ClassOrInterfaceDeclaration controller : controllerProc.collect(cu)) {
-                for (InitializerDeclaration init : initializerCollectProc.collectInitializer(controller)) {
+            for (ClassOrInterfaceDeclaration controller : controllerService.collect(cu)) {
+                for (InitializerDeclaration init : initializerCollectService.collectInitializer(controller)) {
                     BlockStmt initBody = init.getBody().clone();
-                    FirstLineDto firstLineDto = parseFirstLineProc.parse(init);
+                    FirstLineDto firstLineDto = parseFirstLineService.parse(init);
                     if (firstLineDto == null) {
                         continue;
                     }
@@ -78,13 +78,13 @@ public class HandlerTransformer implements Allison1875MainService {
                             controller.getNameAsString());
 
                     // 校验init下的Req和Resp类
-                    reqRespProc.checkInitBody(initBody, firstLineDto);
+                    reqRespService.checkInitBody(initBody, firstLineDto);
 
                     // 自底向上收集（广度优先遍历收集 + 反转）
-                    List<ClassOrInterfaceDeclaration> dtos = dtoProc.collectDtosFromBottomToTop(initBody);
+                    List<ClassOrInterfaceDeclaration> dtos = dtoService.collectDtosFromBottomToTop(initBody);
 
                     // 创建所有所需的Javabean
-                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespProc.createJavabeans(astForest, firstLineDto, dtos);
+                    ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespService.createJavabeans(astForest, firstLineDto, dtos);
                     flushes.addAll(reqDtoRespDtoInfo.getJavabeanCus().stream().map(FileFlush::build)
                             .collect(Collectors.toList()));
 
@@ -96,7 +96,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     param.setAstForest(astForest);
                     param.setQualifier2Pair(qualifier2Pair);
                     param.setName2Pair(name2Pair);
-                    ServiceGeneration serviceGeneration = generateServicePairProc.generateService(param);
+                    ServiceGeneration serviceGeneration = generateServicePairService.generateService(param);
                     if (serviceGeneration == null) {
                         continue;
                     }
@@ -108,12 +108,13 @@ public class HandlerTransformer implements Allison1875MainService {
                     }
 
                     // 在controller中创建handler，并替换掉
-                    HandlerCreation handlerCreation = controllerProc.createHandlerToController(firstLineDto, controller,
+                    HandlerCreation handlerCreation = controllerService.createHandlerToController(firstLineDto,
+                            controller,
                             serviceGeneration, reqDtoRespDtoInfo);
                     log.info("replace Initializer [{}] to Handler [{}] in Controller [{}].", firstLineDto,
                             handlerCreation.getHandler().getName(), controller.getName());
 
-                    cu.addImport(handlerTransformerConfig.getPageTypeQualifier());
+                    cu.addImport(config.getPageTypeQualifier());
                     cu.addImport(ImportConstant.SPRING_REQUEST_BODY);
                     cu.addImport(ImportConstant.JAVAX_VALID);
                     cu.addImport(ImportConstant.SPRING_POST_MAPPING);

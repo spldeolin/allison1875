@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.handlertransformer.service.CreateHandlerService
 public class CreateHandlerServiceImpl implements CreateHandlerService {
 
     @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
+    private HandlerTransformerConfig config;
 
     @Override
     public HandlerCreation createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
@@ -78,7 +78,7 @@ public class CreateHandlerServiceImpl implements CreateHandlerService {
 
     private String concatHandlerDescription(FirstLineDto firstLine) {
         String result = firstLine.getHandlerDescription();
-        if (handlerTransformerConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
         }
         return result;

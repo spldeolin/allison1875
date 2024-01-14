@@ -27,7 +27,7 @@ import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
 public class FindServiceServiceImpl implements FindServiceService {
 
     @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
+    private HandlerTransformerConfig config;
 
     @Override
     public ServicePairDto findPresent(AstForest astForest, String presentServiceQualifier,
@@ -112,9 +112,9 @@ public class FindServiceServiceImpl implements FindServiceService {
 
     private List<CompilationUnit> getServiceOrImplCus(CompilationUnit cu) {
         Path servicePath = Locations.getStorage(cu).getSourceRoot()
-                .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServicePackage()));
+                .resolve(CodeGenerationUtils.packageToPath(config.getServicePackage()));
         Path serviceImplPath = Locations.getStorage(cu).getSourceRoot()
-                .resolve(CodeGenerationUtils.packageToPath(handlerTransformerConfig.getServiceImplPackage()));
+                .resolve(CodeGenerationUtils.packageToPath(config.getServiceImplPackage()));
         List<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
         for (File java : FileTraverseUtils.listFilesRecursively(servicePath, "java")) {
             serviceOrImplCu.add(Cus.parseCu(java.toPath()));

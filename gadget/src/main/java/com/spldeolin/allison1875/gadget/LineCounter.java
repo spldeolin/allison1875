@@ -40,7 +40,7 @@ import lombok.extern.log4j.Log4j2;
 public class LineCounter implements Allison1875MainService {
 
     @Inject
-    private LineCounterConfig lineCounterConfig;
+    private LineCounterConfig config;
 
     @Override
     public void process(AstForest astForest) {
@@ -61,13 +61,13 @@ public class LineCounter implements Allison1875MainService {
         }
 
         // 所有java代码
-        String rankListTitlePart = lineCounterConfig.getRankListSize() > 0 ? "，排行：" : "";
+        String rankListTitlePart = config.getRankListSize() > 0 ? "，排行：" : "";
         log.info("");
         log.info("所有java代码总行数：{}{}", valuesSum(allJavas), rankListTitlePart);
         reportRankList(allJavas);
 
         // xxx结尾的类型
-        for (String postfix : lineCounterConfig.getTypePostfix()) {
+        for (String postfix : config.getTypePostfix()) {
             Map<String, Integer> postfixTypes = Maps.newHashMap();
             allTypes.forEach((typeQualifier, count) -> {
                 if (typeQualifier.endsWith(postfix)) {
@@ -116,10 +116,10 @@ public class LineCounter implements Allison1875MainService {
 
     private void reportRankList(Map<String, Integer> lineCounts) {
         // 显示阈值
-        lineCounts.values().removeIf(count -> count < lineCounterConfig.getDisplayThreshold());
+        lineCounts.values().removeIf(count -> count < config.getDisplayThreshold());
 
         // 用户不需要打印排行榜
-        int rankListSize = lineCounterConfig.getRankListSize();
+        int rankListSize = config.getRankListSize();
         if (rankListSize == 0) {
             log.info("");
             return;
@@ -143,7 +143,7 @@ public class LineCounter implements Allison1875MainService {
         Collections.reverse(list);
         // report
         for (Entry<String, Integer> entry : list) {
-            boolean danger = entry.getValue() >= lineCounterConfig.getDangerThreshold();
+            boolean danger = entry.getValue() >= config.getDangerThreshold();
             log.info(BaseConstant.SINGLE_INDENT + (danger ? "[危] " : "") + entry.getKey() + "：" + entry.getValue());
         }
         // more...

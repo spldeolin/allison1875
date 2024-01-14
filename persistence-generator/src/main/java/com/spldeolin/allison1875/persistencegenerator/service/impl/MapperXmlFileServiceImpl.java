@@ -34,7 +34,7 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
     private static final String endMark = "[END]";
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     @Override
     public FileFlush generateMapperXml(PersistenceDto persistence, ClassOrInterfaceDeclaration mapper,
@@ -95,10 +95,10 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
 
     private String concatXmlComment(PersistenceDto persistence) {
         String result = "<!--";
-        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += " " + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += " " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         result += " -->";

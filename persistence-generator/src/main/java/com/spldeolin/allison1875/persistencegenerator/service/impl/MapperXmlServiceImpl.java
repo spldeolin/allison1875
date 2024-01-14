@@ -26,7 +26,7 @@ import com.spldeolin.allison1875.persistencegenerator.util.TextUtils;
 public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     /**
      * <sql id="all"></sql> 标签
@@ -45,7 +45,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> batchInsertEvenNullXml(PersistenceDto persistence, String methodName) {
-        if (persistenceGeneratorConfig.getDisableBatchInsertEvenNull()) {
+        if (config.getDisableBatchInsertEvenNull()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -67,7 +67,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> batchInsertXml(PersistenceDto persistence, String methodName) {
-        if (persistenceGeneratorConfig.getDisableBatchInsert()) {
+        if (config.getDisableBatchInsert()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -96,7 +96,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> batchUpdateEvenNullXml(PersistenceDto persistence, String methodName) {
-        if (persistenceGeneratorConfig.getDisableBatchUpdateEvenNull()) {
+        if (config.getDisableBatchUpdateEvenNull()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -117,7 +117,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
         for (PropertyDto idProperty : persistence.getIdProperties()) {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{one."
@@ -132,7 +132,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> batchUpdateXml(PersistenceDto persistence, String methodName) {
-        if (persistenceGeneratorConfig.getDisableBatchUpdate()) {
+        if (config.getDisableBatchUpdate()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -149,7 +149,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</set>");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
         for (PropertyDto idProperty : persistence.getIdProperties()) {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{one."
@@ -169,7 +169,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      */
     @Override
     public List<String> deleteByKeyXml(PersistenceDto persistence, List<KeyMethodNameDto> KeyAndMethodNames) {
-        if (persistenceGeneratorConfig.getDisableDeleteByKey() || !persistence.getIsDeleteFlagExist()) {
+        if (config.getDisableDeleteByKey() || !persistence.getIsDeleteFlagExist()) {
             return Lists.newArrayList();
         }
         List<String> result = Lists.newArrayList();
@@ -180,7 +180,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                     key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
-            xmlLines.add(SINGLE_INDENT + "SET " + persistenceGeneratorConfig.getDeletedSql());
+            xmlLines.add(SINGLE_INDENT + "SET " + config.getDeletedSql());
             xmlLines.add(SINGLE_INDENT + "WHERE `" + key.getColumnName() + "` = #{" + key.getPropertyName() + "}");
             xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</update>");
@@ -192,7 +192,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> insertOrUpdateXml(PersistenceDto persistence, String entityName, String methodName) {
-        if (persistenceGeneratorConfig.getDisableInsertOrUpdate()) {
+        if (config.getDisableInsertOrUpdate()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -227,7 +227,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> insertXml(PersistenceDto persistence, String entityName, String methodName) {
-        if (persistenceGeneratorConfig.getDisableInsert()) {
+        if (config.getDisableInsert()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -255,7 +255,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> listAllXml(PersistenceDto persistence, String methodName) {
-        if (persistenceGeneratorConfig.getDisableListAll()) {
+        if (config.getDisableListAll()) {
             return null;
         }
         List<String> result = Lists.newArrayList();
@@ -268,7 +268,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         result.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
         result.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            result.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+            result.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
         result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
         result.add("</select>");
@@ -278,7 +278,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> queryByEntityXml(PersistenceDto persistence, String entityName, String methodName) {
-        if (persistenceGeneratorConfig.getDisableQueryByEntity()) {
+        if (config.getDisableQueryByEntity()) {
             return null;
         }
 
@@ -291,7 +291,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
         if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
         for (PropertyDto property : persistence.getProperties()) {
             xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  <if test=\"%s!=null\"> AND `%s` = #{%s} </if>",
@@ -324,7 +324,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + onlyPk.getColumnName() + String.format(
                     "` IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
@@ -338,7 +338,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> queryByIdXml(PersistenceDto persistence, String methodName) {
-        if (persistenceGeneratorConfig.getDisableQueryById()) {
+        if (config.getDisableQueryById()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -356,7 +356,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
             for (PropertyDto idProperty : persistence.getIdProperties()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{"
@@ -374,7 +374,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      */
     @Override
     public List<String> queryByKeysXml(PersistenceDto persistence, List<QueryByKeysDto> queryByKeysDtos) {
-        if (persistenceGeneratorConfig.getDisableQueryByKeys()) {
+        if (config.getDisableQueryByKeys()) {
             return null;
         }
         List<String> sourceCodeLines = Lists.newArrayList();
@@ -390,7 +390,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + key.getColumnName() + String.format(
                     "` IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
@@ -405,7 +405,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> queryByKeyXml(PersistenceDto persistence, List<KeyMethodNameDto> keyAndMethodNames) {
-        if (persistenceGeneratorConfig.getDisableQueryByKey()) {
+        if (config.getDisableQueryByKey()) {
             return null;
         }
         List<String> result = Lists.newArrayList();
@@ -421,7 +421,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + key.getColumnName() + "` = #{" + key.getPropertyName()
                     + "}");
@@ -452,7 +452,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> updateByIdEvenNullXml(PersistenceDto persistence, String entityName, String methodName) {
-        if (persistenceGeneratorConfig.getDisableUpdateByIdEvenNull()) {
+        if (config.getDisableUpdateByIdEvenNull()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -473,7 +473,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
             for (PropertyDto idProperty : persistence.getIdProperties()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{"
@@ -488,7 +488,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> updateByIdXml(PersistenceDto persistence, String entityName, String methodName) {
-        if (persistenceGeneratorConfig.getDisableUpdateById()) {
+        if (config.getDisableUpdateById()) {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
@@ -504,7 +504,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</set>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + persistenceGeneratorConfig.getNotDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
             for (PropertyDto id : persistence.getIdProperties()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  AND `%s` = #{%s}", id.getColumnName(),

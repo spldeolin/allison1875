@@ -43,7 +43,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
     private FindServiceService findServiceProc;
 
     @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
+    private HandlerTransformerConfig config;
 
     @Inject
     private CreateServiceMethodService createServiceMethodService;
@@ -101,7 +101,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serverCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
         serverCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
         serverCu.addImport(ImportConstant.JAVA_UTIL);
-        serverCu.addImport(handlerTransformerConfig.getPageTypeQualifier());
+        serverCu.addImport(config.getPageTypeQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
 
         // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
@@ -111,7 +111,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
             serverImplCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
             serverImplCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
             serverImplCu.addImport(ImportConstant.JAVA_UTIL);
-            serverImplCu.addImport(handlerTransformerConfig.getPageTypeQualifier());
+            serverImplCu.addImport(config.getPageTypeQualifier());
             log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
         }
 
@@ -140,14 +140,14 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         Path sourceRoot = Locations.getStorage(param.getCu()).getSourceRoot();
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
-        serviceCu.setPackageDeclaration(handlerTransformerConfig.getServicePackage());
+        serviceCu.setPackageDeclaration(config.getServicePackage());
         serviceCu.setImports(param.getCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         service.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
-                handlerTransformerConfig.getAuthor()));
+                config.getAuthor()));
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
-        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
-                handlerTransformerConfig.getServicePackage(), service.getName() + ".java");
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, config.getServicePackage(),
+                service.getName() + ".java");
 
         // anti-duplication
         absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
@@ -158,22 +158,22 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(handlerTransformerConfig.getServiceImplPackage());
+        serviceImplCu.setPackageDeclaration(config.getServiceImplPackage());
         serviceImplCu.setImports(param.getCu().getImports());
         serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
         serviceImplCu.addImport(ImportConstant.SPRING_SERVICE);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         serviceImpl.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
-                handlerTransformerConfig.getAuthor()));
+                config.getAuthor()));
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
         String serviceImplName = service.getNameAsString() + "Impl";
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName)
                 .addImplementedType(service.getNameAsString());
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
-                handlerTransformerConfig.getServiceImplPackage(), serviceImpl.getName() + ".java");
+        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, config.getServiceImplPackage(),
+                serviceImpl.getName() + ".java");
 
         // anti-duplication
         absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
@@ -200,7 +200,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
     private String concatServiceDescription(FirstLineDto firstLine) {
         String result = "";
-        if (handlerTransformerConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
         }
         return result;

@@ -37,12 +37,12 @@ import lombok.extern.log4j.Log4j2;
 public class MapperServiceImpl implements MapperService {
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private PersistenceGeneratorConfig config;
 
     @Override
     public String batchInsertEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableBatchInsertEvenNull()) {
+        if (config.getDisableBatchInsertEvenNull()) {
             return null;
         }
         String methodName = this.calcMethodName(mapper, "batchInsertEvenNull");
@@ -61,7 +61,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String batchInsert(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableBatchInsert()) {
+        if (config.getDisableBatchInsert()) {
             return null;
         }
         String methodName = this.calcMethodName(mapper, "batchInsert");
@@ -80,7 +80,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String batchUpdateEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableBatchUpdateEvenNull()) {
+        if (config.getDisableBatchUpdateEvenNull()) {
             return null;
         }
 
@@ -100,7 +100,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String batchUpdate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableBatchUpdate()) {
+        if (config.getDisableBatchUpdate()) {
             return null;
         }
 
@@ -119,7 +119,7 @@ public class MapperServiceImpl implements MapperService {
 
     @Override
     public String deleteByKey(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableDeleteByKey() || !persistence.getIsDeleteFlagExist()) {
+        if (config.getDisableDeleteByKey() || !persistence.getIsDeleteFlagExist()) {
             return null;
         }
         String methodName = calcMethodName(mapper,
@@ -141,7 +141,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String insertOrUpdate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableInsertOrUpdate()) {
+        if (config.getDisableInsertOrUpdate()) {
             return null;
         }
         String methodName = this.calcMethodName(mapper, "insertOrUpdate");
@@ -160,7 +160,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String insert(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableInsert()) {
+        if (config.getDisableInsert()) {
             return null;
         }
         String methodName = this.calcMethodName(mapper, "insert");
@@ -178,7 +178,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String listAll(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableListAll()) {
+        if (config.getDisableListAll()) {
             return null;
         }
         String methodName = null;
@@ -198,7 +198,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String queryByEntity(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableQueryByEntity()) {
+        if (config.getDisableQueryByEntity()) {
             return null;
         }
 
@@ -218,7 +218,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String queryById(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableQueryById()) {
+        if (config.getDisableQueryById()) {
             return null;
         }
         String methodName = null;
@@ -254,7 +254,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String queryByIdsEachId(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableQueryByIdsEachId()) {
+        if (config.getDisableQueryByIdsEachId()) {
             return null;
         }
         String methodName = null;
@@ -285,7 +285,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String queryByIds(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableQueryByIds()) {
+        if (config.getDisableQueryByIds()) {
             return null;
         }
         String methodName = null;
@@ -313,7 +313,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String queryByKey(PersistenceDto persistence, JavabeanGeneration javabeanGeneration, PropertyDto key,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableQueryByKey()) {
+        if (config.getDisableQueryByKey()) {
             return null;
         }
         String methodName = calcMethodName(mapper, "queryBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
@@ -334,7 +334,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public QueryByKeysDto queryByKeys(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             PropertyDto key, ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableQueryByKeys()) {
+        if (config.getDisableQueryByKeys()) {
             return null;
         }
         String methodName = calcMethodName(mapper,
@@ -358,7 +358,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String updateByIdEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableUpdateByIdEvenNull()) {
+        if (config.getDisableUpdateByIdEvenNull()) {
             return null;
         }
         String methodName = null;
@@ -380,7 +380,7 @@ public class MapperServiceImpl implements MapperService {
     @Override
     public String updateById(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
             ClassOrInterfaceDeclaration mapper) {
-        if (persistenceGeneratorConfig.getDisableUpdateById()) {
+        if (config.getDisableUpdateById()) {
             return null;
         }
         String methodName = null;
@@ -426,14 +426,13 @@ public class MapperServiceImpl implements MapperService {
 
     private String concatMapperMethodComment(PersistenceDto persistence, String methodDescription) {
         String result = methodDescription;
-        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()
-                || persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (persistenceGeneratorConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (persistenceGeneratorConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

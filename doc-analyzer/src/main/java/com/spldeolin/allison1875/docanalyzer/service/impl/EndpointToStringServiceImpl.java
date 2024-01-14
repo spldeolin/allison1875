@@ -21,7 +21,7 @@ import com.spldeolin.allison1875.docanalyzer.service.MoreHandlerAnalysisService;
 public class EndpointToStringServiceImpl implements EndpointToStringService {
 
     @Inject
-    private DocAnalyzerConfig docAnalyzerConfig;
+    private DocAnalyzerConfig config;
 
     @Inject
     private MoreHandlerAnalysisService moreHandlerAnalysisService;
@@ -63,13 +63,13 @@ public class EndpointToStringServiceImpl implements EndpointToStringService {
         String moreText = moreHandlerAnalysisService.moreToString(dto.getMore());
 
         String allison1875Announce = "";
-        if (docAnalyzerConfig.getEnableNoModifyAnnounce() || docAnalyzerConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             allison1875Announce += BaseConstant.NEW_LINE + "---";
-            if (docAnalyzerConfig.getEnableNoModifyAnnounce()) {
+            if (config.getEnableNoModifyAnnounce()) {
                 allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
             }
-            if (docAnalyzerConfig.getEnableLotNoAnnounce()) {
-                if (docAnalyzerConfig.getEnableNoModifyAnnounce()) {
+            if (config.getEnableLotNoAnnounce()) {
+                if (config.getEnableNoModifyAnnounce()) {
                     allison1875Announce += " ";
                 } else {
                     allison1875Announce += BaseConstant.NEW_LINE;

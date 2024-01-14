@@ -26,7 +26,7 @@ public class JpdvToStringServiceImpl implements JpdvToStringService {
     private MoreJpdvAnalysisService moreJpdvAnalysisService;
 
     @Inject
-    private DocAnalyzerConfig docAnalyzerConfig;
+    private DocAnalyzerConfig config;
 
     @Override
     public String toString(JsonPropertyDescriptionValueDto jpdv) {
@@ -88,7 +88,7 @@ public class JpdvToStringServiceImpl implements JpdvToStringService {
                 }
                 enumInfo = sb.deleteCharAt(sb.length() - 1).toString();
             }
-            String extra = moreJpdvAnalysisService.moreJpdvToString(jpdv.getMore(), docAnalyzerConfig);
+            String extra = moreJpdvAnalysisService.moreJpdvToString(jpdv.getMore(), config);
 
             return Joiner.on("\n\n").skipNulls().join(ref, comment, validInfo, format, enumInfo, extra);
         }
