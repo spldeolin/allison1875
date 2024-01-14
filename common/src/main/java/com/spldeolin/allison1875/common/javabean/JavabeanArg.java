@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.service.javabean;
+package com.spldeolin.allison1875.common.javabean;
 
 import java.util.List;
 import java.util.function.BiConsumer;

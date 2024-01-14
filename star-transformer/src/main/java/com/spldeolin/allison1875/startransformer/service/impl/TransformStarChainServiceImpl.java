@@ -12,7 +12,7 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.service.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;

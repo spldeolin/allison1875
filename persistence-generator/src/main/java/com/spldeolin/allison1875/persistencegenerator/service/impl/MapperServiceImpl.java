@@ -20,7 +20,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
-import com.spldeolin.allison1875.common.service.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;

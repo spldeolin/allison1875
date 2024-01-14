@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.service.javabean;
+package com.spldeolin.allison1875.common.javabean;
 
 import java.util.function.BiConsumer;
 import javax.validation.constraints.NotBlank;

@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.startransformer.service;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.common.service.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
 import com.spldeolin.allison1875.startransformer.service.impl.TransformStarChainServiceImpl;
 
