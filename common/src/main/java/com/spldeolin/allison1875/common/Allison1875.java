@@ -23,9 +23,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Allison1875 {
 
-    public static final String SHORT_VERSION = "1000S";
+    public static final String SHORT_VERSION = "1000R";
 
-    private static final String version = "Allison 1875 10.0-SNAPSHOT";
+    private static final String version = "Allison 1875 10.0";
 
     static {
         String banner;
