@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -30,7 +31,7 @@ public class AntiDuplicationServiceImpl implements AntiDuplicationService {
 
     @Override
     public String getNewMethodNameIfExist(String methodName, ClassOrInterfaceDeclaration coid) {
-        if (!coid.getMethodsByName(methodName).isEmpty()) {
+        if (CollectionUtils.isNotEmpty(coid.getMethodsByName(methodName))) {
             String newMethodName = methodName + "Ex";
             log.info("Method name [{}] is duplicate in {} [{}], hence '{}' is used", methodName,
                     coid.isInterface() ? "Interface" : "Class", coid.getName(), newMethodName);

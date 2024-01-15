@@ -32,7 +32,7 @@ public class ValidUtils {
 
     public static List<InvalidDto> valid(Object object) {
         Set<ConstraintViolation<Object>> violations = validator.validate(object);
-        if (violations.isEmpty()) {
+        if (CollectionUtils.isEmpty(violations)) {
             return Lists.newArrayList();
         }
 

@@ -120,7 +120,7 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
                 }
             }
         }
-        if (auto.get(auto.size() - 1).isEmpty()) {
+        if (StringUtils.isEmpty(auto.get(auto.size() - 1))) {
             auto.remove(auto.size() - 1);
         }
         auto.add("");

@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.common.util.ast.Javadocs;
 import lombok.extern.log4j.Log4j2;
@@ -39,7 +40,7 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
     @Override
     public JavabeanGeneration generate(JavabeanArg arg) {
         List<InvalidDto> valid = ValidUtils.valid(arg);
-        if (!valid.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(valid)) {
             throw new Allison1875Exception("JavabeanArg illegal, " + arg);
         }
 

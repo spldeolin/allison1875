@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
@@ -77,7 +78,7 @@ public class QueryTransformer implements Allison1875MainService {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
 
-            if (cu.findAll(BlockStmt.class).isEmpty()) {
+            if (CollectionUtils.isEmpty(cu.findAll(BlockStmt.class))) {
                 continue;
             }
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {

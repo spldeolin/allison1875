@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
 import com.spldeolin.allison1875.docanalyzer.javabean.BodyTypeAnalysisDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
@@ -89,7 +90,7 @@ public class DocAnalyzer implements Allison1875MainService {
 
         // 遍历controller、遍历handler
         List<HandlerFullDto> handlers = listHandlersService.listHandlers(astForest);
-        if (handlers.isEmpty()) {
+        if (CollectionUtils.isEmpty(handlers)) {
             log.warn("no Handler detected");
             return;
         }

@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AstFilterService;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -53,7 +54,7 @@ public class Allison1875 {
         for (Allison1875Module module : allison1875Modules) {
             // valid
             List<InvalidDto> invalids = module.validConfigs();
-            if (!invalids.isEmpty()) {
+            if (CollectionUtils.isNotEmpty(invalids)) {
                 for (InvalidDto invalid : invalids) {
                     log.error("Allison 1875 fail to work cause invalid config, path={}, reason={}, value={}",
                             invalid.getPath(), invalid.getReason(), invalid.getValue());
