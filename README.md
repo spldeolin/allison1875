@@ -37,8 +37,6 @@ Syntax Trees (AST).
   query-transformer, transform into code, that used to query from a fact table and its dimension tables, and assemble
   data according to the one-to-one or one-to-many relationships specified by StarChain. (star-transfomer)
 
-- and other small, convenient tools. (gadget)
-
 ## Contribution
 
 Any PR, star, suggestion would be greatly appreciated.
