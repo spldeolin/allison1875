@@ -11,9 +11,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.util.ast.Annotations;
-import com.spldeolin.allison1875.common.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
 import com.spldeolin.allison1875.docanalyzer.service.ObtainConcernedResponseBodyService;
+import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -35,7 +35,7 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
     public ResolvedType getRequestBody(MethodDeclaration handler) {
         ResolvedType result = null;
 
-        String name = MethodQualifiers.getTypeQualifierWithMethodName(handler);
+        String name = MethodQualifierUtils.getTypeQualifierWithMethodName(handler);
         for (Parameter parameter : handler.getParameters()) {
             try {
                 boolean isRequestBody = false;

@@ -7,12 +7,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.ast.Annotations;
 import com.spldeolin.allison1875.common.util.ast.Authors;
-import com.spldeolin.allison1875.common.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.AccessDescriptionService;
 import com.spldeolin.allison1875.docanalyzer.service.MoreHandlerAnalysisService;
 import com.spldeolin.allison1875.docanalyzer.service.SimplyAnalyzeService;
+import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
 
 /**
  * @author Deolin 2020-12-04
@@ -33,7 +33,7 @@ public class SimplyAnalyzeServiceImpl implements SimplyAnalyzeService {
         endpoint.setDescriptionLines(Lists.newArrayList(accessDescriptionService.accessMethod(handler)));
         endpoint.setIsDeprecated(isDeprecated(controller, handler.getMd()));
         endpoint.setAuthor(Authors.getAuthor(handler.getMd()));
-        endpoint.setSourceCode(MethodQualifiers.getTypeQualifierWithMethodName(handler.getMd()));
+        endpoint.setSourceCode(MethodQualifierUtils.getTypeQualifierWithMethodName(handler.getMd()));
         endpoint.setMore(moreHandlerAnalysisService.moreAnalysisFromMethod(handler));
     }
 

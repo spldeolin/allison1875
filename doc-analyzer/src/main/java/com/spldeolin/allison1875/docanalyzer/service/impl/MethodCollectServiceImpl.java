@@ -5,8 +5,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.util.ast.MethodQualifiers;
 import com.spldeolin.allison1875.docanalyzer.service.MethodCollectService;
+import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -23,7 +23,7 @@ public class MethodCollectServiceImpl implements MethodCollectService {
         Map<String, MethodDeclaration> methods = Maps.newHashMap();
         for (MethodDeclaration method : coid.findAll(MethodDeclaration.class)) {
             try {
-                methods.put(MethodQualifiers.getShortestQualifiedSignature(method), method);
+                methods.put(MethodQualifierUtils.getShortestQualifiedSignature(method), method);
             } catch (Exception e) {
                 log.warn("fail to get shortest qualified signature [{}]", method.getNameAsString(), e);
             }

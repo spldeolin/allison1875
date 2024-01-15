@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.util.ast;
+package com.spldeolin.allison1875.docanalyzer.util;
 
 import java.lang.reflect.Method;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -8,9 +8,9 @@ import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 /**
  * @author Deolin 2019-12-29
  */
-public class MethodQualifiers {
+public class MethodQualifierUtils {
 
-    private MethodQualifiers() {
+    private MethodQualifierUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
