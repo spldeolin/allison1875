@@ -6,13 +6,12 @@
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875</artifactId>
     <packaging>pom</packaging>
-    <version>10.0</version>
+    <version>10.1-SNAPSHOT</version>
 
     <modules>
         <module>allison1875-all</module>
         <module>common</module>
         <module>doc-analyzer</module>
-        <module>gadget</module>
         <module>handler-transformer</module>
         <module>inspector</module>
         <module>persistence-generator</module>
