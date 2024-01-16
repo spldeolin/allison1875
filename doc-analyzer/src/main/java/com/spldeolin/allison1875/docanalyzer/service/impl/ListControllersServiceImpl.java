@@ -7,12 +7,13 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
-import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.ast.Locations;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
@@ -62,7 +63,7 @@ public class ListControllersServiceImpl implements ListControllersService {
     private String findControllerCat(ClassOrInterfaceDeclaration controller) {
         String controllerCat = findCat(controller);
         if (controllerCat == null) {
-            controllerCat = JavadocDescriptions.getFirstLine(controller);
+            controllerCat = Iterables.getFirst(JavadocUtils.getCommentAsLines(controller), "");
         }
         if (StringUtils.isEmpty(controllerCat)) {
             controllerCat = controller.getNameAsString();
@@ -71,7 +72,7 @@ public class ListControllersServiceImpl implements ListControllersService {
     }
 
     private String findCat(NodeWithJavadoc<?> node) {
-        for (String line : JavadocDescriptions.getAsLines(node)) {
+        for (String line : JavadocUtils.getCommentAsLines(node)) {
             if (StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_CAT)) {
                 String catContent = StringUtils.removeStartIgnoreCase(line, ControllerMarkerConstant.DOC_CAT).trim();
                 if (catContent.length() > 0) {
@@ -83,7 +84,7 @@ public class ListControllersServiceImpl implements ListControllersService {
     }
 
     private boolean findIgnoreFlag(NodeWithJavadoc<?> node) {
-        for (String line : JavadocDescriptions.getAsLines(node)) {
+        for (String line : JavadocUtils.getCommentAsLines(node)) {
             if (StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_IGNORE)) {
                 return true;
             }

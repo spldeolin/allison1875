@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
 
 /**
  * @author Deolin 2019-12-03
@@ -18,7 +19,7 @@ public class MoreStringUtils {
         if (string == null) {
             return Lists.newArrayList();
         }
-        return Lists.newArrayList(string.split("\\r?\\n"));
+        return Lists.newArrayList(string.split(BaseConstant.NEW_LINE_FOR_MATCHING));
     }
 
     /**
@@ -73,7 +74,7 @@ public class MoreStringUtils {
         if (text == null) {
             return null;
         }
-        return text.replaceAll("[\\r\\n]+", " ");
+        return text.replaceAll(BaseConstant.NEW_LINE_FOR_MATCHING, " ");
     }
 
 }

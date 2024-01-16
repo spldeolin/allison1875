@@ -23,8 +23,8 @@ import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.ValidUtils;
-import com.spldeolin.allison1875.common.util.ast.Javadocs;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -76,8 +76,8 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         coid.addAnnotation(AnnotationConstant.ACCESSORS);
         coid.addAnnotation(AnnotationConstant.FIELD_DEFAULTS_PRIVATE);
         coid.setPublic(true).setInterface(false).setName(className);
-        String description = MoreObjects.firstNonNull(arg.getDescription(), "");
-        coid.setJavadocComment(Javadocs.createJavadoc(description, arg.getAuthorName() + " " + LocalDate.now()));
+        String comment = MoreObjects.firstNonNull(arg.getDescription(), "");
+        JavadocUtils.setJavadoc(coid, comment, arg.getAuthorName() + " " + LocalDate.now());
         cu.addType(coid);
 
         for (FieldArg fieldArg : arg.getFieldArgs()) {

@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.inspector.javabean;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.javaparser.ast.Node;
-import com.spldeolin.allison1875.common.util.ast.Authors;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.ast.Locations;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -47,7 +47,7 @@ public class LawlessDto {
         this.sourceCode = Locations.getAbsolutePathWithLineNo(node);
         this.qualifier = qualifier;
         this.message = message;
-        this.author = Authors.getAuthor(node);
+        this.author = JavadocUtils.getAuthor(node);
     }
 
 }

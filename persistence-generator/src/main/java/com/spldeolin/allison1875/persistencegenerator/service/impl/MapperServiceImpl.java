@@ -20,8 +20,8 @@ import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -416,7 +416,7 @@ public class MapperServiceImpl implements MapperService {
     private boolean existDeclared(ClassOrInterfaceDeclaration mapper, String methodName) {
         List<MethodDeclaration> methods = mapper.getMethodsByName(methodName);
         for (MethodDeclaration method : methods) {
-            List<String> descriptionLines = JavadocDescriptions.getAsLines(method);
+            List<String> descriptionLines = JavadocUtils.getCommentAsLines(method);
             if (descriptionLines.stream().anyMatch(line -> line.contains(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION))) {
                 method.remove();
             }

@@ -19,7 +19,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.common.util.ast.Javadocs;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
@@ -66,10 +66,9 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             cu.addImport(javabeanGeneration.getJavabeanQualifier());
             cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
-            Javadoc javadoc = Javadocs.createJavadoc(concatMapperDescription(persistence),
-                    config.getAuthor() + " " + LocalDate.now());
+            String comment = concatMapperDescription(persistence);
+            Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment, config.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
-            mapper.setJavadocComment(javadoc);
             mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
             mapper.setInterface(true);
             cu.addType(mapper);

@@ -10,7 +10,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.util.ast.JavadocDescriptions;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
@@ -77,7 +77,7 @@ public class SpringMvcHandlerServiceImpl implements SpringMvcHandlerService {
     }
 
     private boolean findIgnoreFlag(NodeWithJavadoc<?> node) {
-        for (String line : JavadocDescriptions.getAsLines(node)) {
+        for (String line : JavadocUtils.getCommentAsLines(node)) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_IGNORE)) {
                 return true;
             }
@@ -86,7 +86,7 @@ public class SpringMvcHandlerServiceImpl implements SpringMvcHandlerService {
     }
 
     private String findCat(NodeWithJavadoc<?> node) {
-        for (String line : JavadocDescriptions.getAsLines(node)) {
+        for (String line : JavadocUtils.getCommentAsLines(node)) {
             if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, ControllerMarkerConstant.DOC_CAT)) {
                 String catContent = org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(line,
                         ControllerMarkerConstant.DOC_CAT).trim();

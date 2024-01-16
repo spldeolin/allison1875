@@ -17,6 +17,8 @@ public interface BaseConstant {
 
     String JAVA_DOC_NEW_LINE = System.lineSeparator() + "<p>";
 
+    String NEW_LINE_FOR_MATCHING = "[\\r\\n]+";
+
     String FORMATTER_OFF_MARKER = "<!-- @formatter:off -->";
 
     String FORMATTER_ON_MARKER = "<!-- @formatter:on -->";

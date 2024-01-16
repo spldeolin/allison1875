@@ -18,8 +18,8 @@ import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.common.util.ast.Javadocs;
 import com.spldeolin.allison1875.common.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
@@ -143,8 +143,8 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceCu.setPackageDeclaration(config.getServicePackage());
         serviceCu.setImports(param.getCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
-        service.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
-                config.getAuthor()));
+        String comment = concatServiceDescription(param.getFirstLineDto());
+        JavadocUtils.setJavadoc(service, comment, config.getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
         Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, config.getServicePackage(),
                 service.getName() + ".java");
@@ -164,8 +164,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
         serviceImplCu.addImport(ImportConstant.SPRING_SERVICE);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-        serviceImpl.setJavadocComment(Javadocs.createJavadoc(concatServiceDescription(param.getFirstLineDto()),
-                config.getAuthor()));
+        JavadocUtils.setJavadoc(serviceImpl, comment, config.getAuthor());
         serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
         serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
         String serviceImplName = service.getNameAsString() + "Impl";
