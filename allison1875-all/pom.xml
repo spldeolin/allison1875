@@ -23,11 +23,6 @@
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>gadget</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>handler-transformer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
