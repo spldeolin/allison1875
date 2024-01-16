@@ -18,7 +18,6 @@ import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
-import com.spldeolin.allison1875.common.util.EqualsUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
@@ -56,9 +55,8 @@ public class GenerateParamServiceImpl implements GenerateParamService {
         Set<PhraseDto> phrases = Sets.newLinkedHashSet(chainAnalysis.getUpdatePhrases());
         phrases.addAll(chainAnalysis.getByPhrases());
         log.info("phrases.size()={}", phrases.size());
-        if (phrases.stream()
-                .filter(p -> !EqualsUtils.equalsAny(p.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL))
-                .count() > 3) {
+        if (phrases.stream().filter(p -> !Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)
+                .contains(p.getPredicate())).count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getMapperConditionPackage());
@@ -68,7 +66,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
             javabeanArg.setAuthorName(config.getAuthor());
             for (PhraseDto phrase : phrases) {
-                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
+                if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(phrase.getPredicate())) {
                     continue;
                 }
                 String propertyName = phrase.getSubjectPropertyName();
@@ -77,7 +75,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
-                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN)) {
+                if (Lists.newArrayList(PredicateEnum.IN, PredicateEnum.NOT_IN).contains(phrase.getPredicate())) {
                     fieldArg.setTypeName("List<" + javaType.getSimpleName() + ">");
                 } else {
                     fieldArg.setTypeName(javaType.getSimpleName());
@@ -97,7 +95,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
             isJavabean = true;
         } else if (phrases.size() > 0) {
             for (PhraseDto phrase : phrases) {
-                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
+                if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(phrase.getPredicate())) {
                     continue;
                 }
                 String propertyName = phrase.getSubjectPropertyName();
@@ -106,7 +104,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 Parameter param = new Parameter();
                 param.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", varName)));
 
-                if (EqualsUtils.equalsAny(phrase.getPredicate(), PredicateEnum.IN, PredicateEnum.NOT_IN)) {
+                if (Lists.newArrayList(PredicateEnum.IN, PredicateEnum.NOT_IN).contains(phrase.getPredicate())) {
                     param.setType("List<" + javaType.getSimpleName() + ">");
                 } else {
                     param.setType(javaType.getSimpleName());

@@ -18,7 +18,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
-import com.spldeolin.allison1875.common.util.EqualsUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
@@ -120,7 +119,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
                     将分析过的in()和nin()中的实际参数替换为null，
                     以确保后续的in()和nin()出现在scope的mce或fae进行calculateResolvedType时，不会因无法解析泛型而抛出异常
                  */
-                if (EqualsUtils.equalsAny(predicate, PredicateEnum.IN, PredicateEnum.NOT_IN)) {
+                if (Lists.newArrayList(predicate, PredicateEnum.IN, PredicateEnum.NOT_IN).contains(predicate)) {
                     parent.setArgument(0, new NullLiteralExpr());
                 }
 

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
@@ -16,7 +17,6 @@ import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
-import com.spldeolin.allison1875.common.util.EqualsUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
@@ -48,7 +48,7 @@ public class GenerateResultServiceImpl implements GenerateResultService {
         boolean isAssigned = isAssigned(chainAnalysis);
         ResultGenerationDto result = new ResultGenerationDto();
 
-        if (EqualsUtils.equalsAny(chainAnalysis.getChainMethod(), ChainMethodEnum.update, ChainMethodEnum.drop)) {
+        if (Lists.newArrayList(ChainMethodEnum.update, ChainMethodEnum.drop).contains(chainAnalysis.getChainMethod())) {
             result.setResultType(PrimitiveType.intType());
             return result;
         }
@@ -59,8 +59,8 @@ public class GenerateResultServiceImpl implements GenerateResultService {
         }
 
         if (isAssigned) {
-            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
-                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
+            if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
+                    .contains(chainAnalysis.getReturnClassify())) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
                 result.setElementTypeQualifier(designMeta.getEntityQualifier());
             } else {
@@ -103,8 +103,8 @@ public class GenerateResultServiceImpl implements GenerateResultService {
             String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
             result.setElementTypeQualifier(javabeanQualifier);
             result.getImports().add(javabeanQualifier);
-            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
-                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
+            if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
+                    .contains(chainAnalysis.getReturnClassify())) {
                 result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
@@ -117,8 +117,8 @@ public class GenerateResultServiceImpl implements GenerateResultService {
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
             result.getImports().add(javaType.getQualifier());
-            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
-                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
+            if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
+                    .contains(chainAnalysis.getReturnClassify())) {
                 result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
@@ -129,8 +129,8 @@ public class GenerateResultServiceImpl implements GenerateResultService {
             // 没有指定属性，使用Entity作为返回值类型
             result.setElementTypeQualifier(designMeta.getEntityQualifier());
             result.getImports().add(designMeta.getEntityQualifier());
-            if (EqualsUtils.equalsAny(chainAnalysis.getReturnClassify(), ReturnClassifyEnum.many,
-                    ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)) {
+            if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
+                    .contains(chainAnalysis.getReturnClassify())) {
                 result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));

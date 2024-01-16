@@ -12,7 +12,6 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.exception.ParentAbsentException;
-import com.spldeolin.allison1875.common.util.EqualsUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -68,7 +67,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                             + updatePhrase.getObjectExpr() + ");"));
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
-            if (EqualsUtils.equalsAny(byPhrase.getPredicate(), PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL)) {
+            if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(byPhrase.getPredicate())) {
                 continue;
             }
             result.add(StaticJavaParser.parseStatement(
