@@ -7,9 +7,9 @@ import com.github.javaparser.ast.Node;
 /**
  * @author Deolin 2021-06-14
  */
-public class TokenRanges {
+public class TokenRangeUtils {
 
-    private TokenRanges() {
+    private TokenRangeUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

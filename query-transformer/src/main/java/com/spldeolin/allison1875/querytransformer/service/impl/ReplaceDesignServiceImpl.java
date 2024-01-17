@@ -20,7 +20,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
-import com.spldeolin.allison1875.querytransformer.util.TokenRanges;
+import com.spldeolin.allison1875.querytransformer.util.TokenRangeUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -54,7 +54,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
 
         Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
                 .orElseThrow(() -> new RuntimeException("cannot find Expression Stmt"));
-        String ancestorStatementCode = TokenRanges.getRawCode(ancestorStatement);
+        String ancestorStatementCode = TokenRangeUtils.getRawCode(ancestorStatement);
         log.info("ancestorStatement={}", ancestorStatementCode);
 
         // transform Method Call code
@@ -78,7 +78,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
                                 + ";"));
             } else {
                 replacementStatements.add(StaticJavaParser.parseStatement(
-                        ancestorStatementCode.replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode)));
+                        ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
             }
         } else {
             if (Lists.newArrayList(ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
@@ -88,7 +88,7 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
             }
             // 以外的情况，往往是继续调用mce返回值，例如：if (0 == Design.update("a").id(-1).over()) { }，则将chain替换成转化出的mce（chain是mce类型）
             replacementStatements.add(StaticJavaParser.parseStatement(
-                    ancestorStatementCode.replace(TokenRanges.getRawCode(chainAnalysis.getChain()), mceCode)));
+                    ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
         }
 
         // 在ancestorStatement的上方添加argument build代码块（如果需要augument build的话）

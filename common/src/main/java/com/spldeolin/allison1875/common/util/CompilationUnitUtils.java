@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.util.ast;
+package com.spldeolin.allison1875.common.util;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -11,9 +11,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2021-12-06
  */
 @Log4j2
-public class Cus {
+public class CompilationUnitUtils {
 
-    private Cus() {
+    private CompilationUnitUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
@@ -28,7 +28,7 @@ public class Cus {
         try {
             CompilationUnit cu = StaticJavaParser.parse(javaFile);
             log.debug("CompilationUnit@{} <- SourceCode {}", cu.hashCode(),
-                    Locations.getStorage(cu).getSourceRoot().relativize(Locations.getAbsolutePath(cu)));
+                    LocationUtils.getStorage(cu).getSourceRoot().relativize(LocationUtils.getAbsolutePath(cu)));
             return cu;
         } catch (Exception e) {
             throw new CompilationUnitParseException(String.format("fail to parse [%s]", javaFile), e);

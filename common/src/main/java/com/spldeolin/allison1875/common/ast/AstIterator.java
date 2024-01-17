@@ -8,7 +8,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.resolution.SymbolResolver;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
-import com.spldeolin.allison1875.common.util.ast.Cus;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -35,7 +35,7 @@ public class AstIterator implements Iterator<CompilationUnit> {
     @Override
     public CompilationUnit next() {
         File javaFile = javaFiles.next();
-        return Cus.parseCu(javaFile);
+        return CompilationUnitUtils.parseCu(javaFile);
     }
 
     private SymbolResolver createSymbolSolver() {

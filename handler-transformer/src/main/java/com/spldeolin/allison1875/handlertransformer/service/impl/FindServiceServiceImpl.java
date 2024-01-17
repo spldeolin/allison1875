@@ -13,9 +13,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.FileTraverseUtils;
-import com.spldeolin.allison1875.common.util.ast.Cus;
-import com.spldeolin.allison1875.common.util.ast.Locations;
+import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
@@ -111,16 +111,16 @@ public class FindServiceServiceImpl implements FindServiceService {
     }
 
     private List<CompilationUnit> getServiceOrImplCus(CompilationUnit cu) {
-        Path servicePath = Locations.getStorage(cu).getSourceRoot()
+        Path servicePath = LocationUtils.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(config.getServicePackage()));
-        Path serviceImplPath = Locations.getStorage(cu).getSourceRoot()
+        Path serviceImplPath = LocationUtils.getStorage(cu).getSourceRoot()
                 .resolve(CodeGenerationUtils.packageToPath(config.getServiceImplPackage()));
         List<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
         for (File java : FileTraverseUtils.listFilesRecursively(servicePath, "java")) {
-            serviceOrImplCu.add(Cus.parseCu(java.toPath()));
+            serviceOrImplCu.add(CompilationUnitUtils.parseCu(java.toPath()));
         }
         for (File java : FileTraverseUtils.listFilesRecursively(serviceImplPath, "java")) {
-            serviceOrImplCu.add(Cus.parseCu(java.toPath()));
+            serviceOrImplCu.add(CompilationUnitUtils.parseCu(java.toPath()));
         }
         return serviceOrImplCu;
     }

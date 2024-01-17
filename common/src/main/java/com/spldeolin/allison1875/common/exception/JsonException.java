@@ -1,5 +1,6 @@
-package com.spldeolin.allison1875.common.util.exception;
+package com.spldeolin.allison1875.common.exception;
 
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 
 /**
@@ -9,13 +10,9 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
  * @author Deolin 2020-03-05
  * @see JsonUtils
  */
-public class JsonException extends RuntimeException {
+public class JsonException extends Allison1875Exception {
 
     private static final long serialVersionUID = 2506389302288058433L;
-
-    public JsonException() {
-        super();
-    }
 
     public JsonException(String message) {
         super(message);
@@ -27,10 +24,6 @@ public class JsonException extends RuntimeException {
 
     public JsonException(Throwable cause) {
         super(cause);
-    }
-
-    protected JsonException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
 }

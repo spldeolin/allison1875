@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.ast.Locations;
+import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.ListControllersService;
@@ -34,7 +34,7 @@ public class ListControllersServiceImpl implements ListControllersService {
     public List<ControllerFullDto> listControllers(AstForest astForest) {
         List<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
-            if (!Locations.getAbsolutePath(cu).startsWith(astForest.getPrimaryJavaRoot())) {
+            if (!LocationUtils.getAbsolutePath(cu).startsWith(astForest.getPrimaryJavaRoot())) {
                 // 非宿主controller
                 continue;
             }

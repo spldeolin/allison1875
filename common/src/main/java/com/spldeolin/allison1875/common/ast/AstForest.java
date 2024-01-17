@@ -9,8 +9,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.common.service.AstFilterService;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.FileTraverseUtils;
-import com.spldeolin.allison1875.common.util.ast.Cus;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -121,7 +121,7 @@ public class AstForest implements Iterable<CompilationUnit> {
             log.info("impossible path, qualifier={}", primaryTypeQualifier, e);
             return null;
         }
-        CompilationUnit result = Cus.parseCu(absPath);
+        CompilationUnit result = CompilationUnitUtils.parseCu(absPath);
         return result;
     }
 

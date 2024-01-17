@@ -14,12 +14,12 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.common.util.NamingUtils;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
 import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService;
+import com.spldeolin.allison1875.startransformer.util.NamingUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**

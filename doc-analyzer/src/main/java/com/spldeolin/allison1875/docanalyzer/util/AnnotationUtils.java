@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.util.ast;
+package com.spldeolin.allison1875.docanalyzer.util;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
@@ -10,9 +10,9 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Log4j2
-public class Annotations {
+public class AnnotationUtils {
 
-    private Annotations() {
+    private AnnotationUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 

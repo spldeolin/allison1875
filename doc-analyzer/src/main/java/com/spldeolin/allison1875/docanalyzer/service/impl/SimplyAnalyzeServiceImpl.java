@@ -6,12 +6,12 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.ast.Annotations;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.HandlerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.AccessDescriptionService;
 import com.spldeolin.allison1875.docanalyzer.service.MoreHandlerAnalysisService;
 import com.spldeolin.allison1875.docanalyzer.service.SimplyAnalyzeService;
+import com.spldeolin.allison1875.docanalyzer.util.AnnotationUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
 
 /**
@@ -38,7 +38,8 @@ public class SimplyAnalyzeServiceImpl implements SimplyAnalyzeService {
     }
 
     private boolean isDeprecated(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
-        return Annotations.isAnnotationPresent(handler, Deprecated.class) || Annotations.isAnnotationPresent(controller,
+        return AnnotationUtils.isAnnotationPresent(handler, Deprecated.class) || AnnotationUtils.isAnnotationPresent(
+                controller,
                 Deprecated.class);
     }
 

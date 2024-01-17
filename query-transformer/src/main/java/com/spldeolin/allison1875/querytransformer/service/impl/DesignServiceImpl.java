@@ -13,7 +13,7 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.common.util.ast.Locations;
+import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
@@ -42,7 +42,7 @@ public class DesignServiceImpl implements DesignService {
 
         if (!designCu.getPrimaryType().isPresent()) {
             throw new IllegalDesignException(
-                    "cannot found Design Type in file [" + Locations.getStorage(designCu).getFileName()
+                    "cannot found Design Type in file [" + LocationUtils.getStorage(designCu).getFileName()
                             + "], this Design file need to regenerate");
         }
         TypeDeclaration<?> primaryType = designCu.getPrimaryType().get();

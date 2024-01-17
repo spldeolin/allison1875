@@ -23,7 +23,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.util.exception.JsonException;
+import com.spldeolin.allison1875.common.exception.JsonException;
 import lombok.extern.log4j.Log4j2;
 
 /**

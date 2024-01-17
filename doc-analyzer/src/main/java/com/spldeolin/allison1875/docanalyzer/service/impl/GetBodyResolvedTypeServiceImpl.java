@@ -10,9 +10,9 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
-import com.spldeolin.allison1875.common.util.ast.Annotations;
 import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
 import com.spldeolin.allison1875.docanalyzer.service.ObtainConcernedResponseBodyService;
+import com.spldeolin.allison1875.docanalyzer.util.AnnotationUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -75,7 +75,8 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
     @Override
     public ResolvedType getResponseBody(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         try {
-            if (Annotations.isAnnotationAbsent(controller, RestController.class) && Annotations.isAnnotationAbsent(
+            if (AnnotationUtils.isAnnotationAbsent(controller, RestController.class)
+                    && AnnotationUtils.isAnnotationAbsent(
                     handler, ResponseBody.class)) {
                 return null;
             }

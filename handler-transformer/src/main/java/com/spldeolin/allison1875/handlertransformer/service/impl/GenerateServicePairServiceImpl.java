@@ -19,8 +19,8 @@ import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
+import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.common.util.ast.Locations;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
@@ -137,7 +137,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
     private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName,
             Map<String, ServicePairDto> name2Pair) {
-        Path sourceRoot = Locations.getStorage(param.getCu()).getSourceRoot();
+        Path sourceRoot = LocationUtils.getStorage(param.getCu()).getSourceRoot();
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(config.getServicePackage());

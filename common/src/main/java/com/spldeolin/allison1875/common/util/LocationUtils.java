@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.util.ast;
+package com.spldeolin.allison1875.common.util;
 
 import java.nio.file.Path;
 import com.github.javaparser.Range;
@@ -13,9 +13,9 @@ import com.spldeolin.allison1875.common.exception.StorageAbsentException;
  *
  * @author Deolin 2020-02-09
  */
-public class Locations {
+public class LocationUtils {
 
-    private Locations() {
+    private LocationUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
