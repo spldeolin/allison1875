@@ -13,7 +13,6 @@
         <module>common</module>
         <module>doc-analyzer</module>
         <module>handler-transformer</module>
-        <module>inspector</module>
         <module>persistence-generator</module>
         <module>persistence-generator-facade</module>
         <module>query-transformer</module>
