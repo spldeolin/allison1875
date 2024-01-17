@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Singleton
 @Log4j2
-public class AntiDuplicationServiceImpl implements AntiDuplicationService {
+public class ConcatExAntiDuplicationService implements AntiDuplicationService {
 
     @Override
     public Path getNewPathIfExist(Path path) {

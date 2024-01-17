@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AstFilterService;
+import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -64,7 +65,8 @@ public class Allison1875 {
 
             // build AST forest
             AstFilterService astFilterService = injector.getInstance(AstFilterService.class);
-            AstForest astForest = new AstForest(primaryClass, false, astFilterService);
+            AstForestResidenceService astForestResidenceService = injector.getInstance(AstForestResidenceService.class);
+            AstForest astForest = new AstForest(primaryClass, astForestResidenceService, astFilterService);
 
             // process main services
             log.info("process main service [{}], module={}", module.declareMainService().getName(), module);

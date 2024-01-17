@@ -45,7 +45,7 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         }
 
         String className = arg.getClassName();
-        Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getPrimaryJavaRoot(),
+        Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getAstForestRoot(),
                 arg.getPackageName(), className + ".java");
 
         if (absulutePath.toFile().exists()) {

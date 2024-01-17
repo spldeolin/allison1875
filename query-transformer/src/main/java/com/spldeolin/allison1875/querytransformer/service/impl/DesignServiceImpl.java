@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -29,10 +30,11 @@ public class DesignServiceImpl implements DesignService {
     @Override
     public ClassOrInterfaceDeclaration findDesign(AstForest astForest, MethodCallExpr chain) {
         String designQualifier = chain.findAll(NameExpr.class).get(0).calculateResolvedType().describe();
-        CompilationUnit designCu = astForest.findCu(designQualifier);
-        if (designCu == null) {
+        Optional<CompilationUnit> opt = astForest.findCu(designQualifier);
+        if (!opt.isPresent()) {
             throw new SameNameTerminationMethodException();
         }
+        CompilationUnit designCu = opt.get();
 
         List<Comment> orphanComments = designCu.getOrphanComments();
         if (orphanComments.size() < 2 || !orphanComments.get(1).isLineComment()) {

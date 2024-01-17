@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -9,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.validation.constraints.AssertTrue;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -21,19 +23,23 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
+import com.spldeolin.allison1875.common.util.FileTraverseUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.service.AccessDescriptionService;
@@ -65,6 +71,9 @@ public class JsgBuildServiceImpl implements JsgBuildService {
 
     @Inject
     private AccessDescriptionService accessDescriptionService;
+
+    @Inject
+    private DocAnalyzerConfig config;
 
     @Override
     public JsonSchemaGenerator analyzeAstAndBuildJsg(Table<String, String, JsonPropertyDescriptionValueDto> jpdvs,
@@ -229,9 +238,18 @@ public class JsgBuildServiceImpl implements JsgBuildService {
 
     @Override
     public Table<String, String, JsonPropertyDescriptionValueDto> analyzeJpdvs(AstForest astForest) {
+        // 将解析范围扩大到 项目根目录 + 所有用户配置的依赖项目路径
+        Set<File> projectJavaFiles = FileTraverseUtils.listFilesRecursively(
+                MavenUtils.findMavenProject(astForest.getPrimaryClass()), "java");
+        Set<File> dependencyJavaFiles = Sets.newHashSet();
+        for (File dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
+            dependencyJavaFiles.addAll(FileTraverseUtils.listFilesRecursively(dependencyProjectDirectory, "java"));
+        }
+        Set<File> analyzeJavaFiles = Sets.union(projectJavaFiles, dependencyJavaFiles);
+
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
-        for (CompilationUnit cu : astForest) {
-            for (TypeDeclaration<?> td : cu.findAll(TypeDeclaration.class)) {
+        for (File javaFile : analyzeJavaFiles) {
+            for (TypeDeclaration<?> td : CompilationUnitUtils.parseJava(javaFile).findAll(TypeDeclaration.class)) {
                 td.ifClassOrInterfaceDeclaration(coid -> collectPropertyDescriptions(coid, jpdvs));
             }
         }

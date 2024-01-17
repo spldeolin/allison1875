@@ -53,7 +53,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         }
 
         String designName = concatDesignName(persistence);
-        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
+        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
                 config.getDesignPackage(), designName + ".java");
 
         List<PropertyDto> properties = persistence.getProperties();

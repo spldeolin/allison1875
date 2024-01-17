@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
@@ -39,7 +38,7 @@ public class FindServiceServiceImpl implements FindServiceService {
         ClassOrInterfaceDeclaration service = null;
         List<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
         boolean caught = false;
-        for (CompilationUnit cu : astForest.clone()) {
+        for (CompilationUnit cu : astForest.cloneWithResetting()) {
             if (cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
                 ClassOrInterfaceDeclaration coid = cu.getPrimaryType().get().asClassOrInterfaceDeclaration();
                 if (coid.getFullyQualifiedName().isPresent() && coid.isInterface()) {
@@ -111,16 +110,16 @@ public class FindServiceServiceImpl implements FindServiceService {
     }
 
     private List<CompilationUnit> getServiceOrImplCus(CompilationUnit cu) {
-        Path servicePath = LocationUtils.getStorage(cu).getSourceRoot()
-                .resolve(CodeGenerationUtils.packageToPath(config.getServicePackage()));
-        Path serviceImplPath = LocationUtils.getStorage(cu).getSourceRoot()
-                .resolve(CodeGenerationUtils.packageToPath(config.getServiceImplPackage()));
+        File servicePackage = LocationUtils.getStorage(cu).getSourceRoot()
+                .resolve(CodeGenerationUtils.packageToPath(config.getServicePackage())).toFile();
+        File serviceImplPackage = LocationUtils.getStorage(cu).getSourceRoot()
+                .resolve(CodeGenerationUtils.packageToPath(config.getServiceImplPackage())).toFile();
         List<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
-        for (File java : FileTraverseUtils.listFilesRecursively(servicePath, "java")) {
-            serviceOrImplCu.add(CompilationUnitUtils.parseCu(java.toPath()));
+        for (File java : FileTraverseUtils.listFilesRecursively(servicePackage, "java")) {
+            serviceOrImplCu.add(CompilationUnitUtils.parseJava(java));
         }
-        for (File java : FileTraverseUtils.listFilesRecursively(serviceImplPath, "java")) {
-            serviceOrImplCu.add(CompilationUnitUtils.parseCu(java.toPath()));
+        for (File java : FileTraverseUtils.listFilesRecursively(serviceImplPackage, "java")) {
+            serviceOrImplCu.add(CompilationUnitUtils.parseJava(java));
         }
         return serviceOrImplCu;
     }

@@ -1,15 +1,15 @@
 package com.spldeolin.allison1875.common.test.javadoc;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.javadoc.Javadoc;
-import com.github.javaparser.utils.CodeGenerationUtils;
-import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
+import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.service.impl.AcceptAllAstFilterService;
+import com.spldeolin.allison1875.common.service.impl.MavenAstForestResidenceService;
+import com.spldeolin.allison1875.common.test.AstForestTest;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.MavenUtils;
 
 /**
  * @author Deolin 2024-01-16
@@ -17,10 +17,9 @@ import com.spldeolin.allison1875.common.util.MavenUtils;
 public class JavadocTest {
 
     public static void main(String[] args) throws IOException {
-        Path mavenModule = MavenUtils.findMavenModule(JavadocTest.class);
-        Path path = CodeGenerationUtils.fileInPackageAbsolutePath(mavenModule + "/src/test/java",
-                "com.spldeolin.allison1875.common.test.javadoc", "TestSubject.java");
-        CompilationUnit cu = CompilationUnitUtils.parseCu(path.toFile());
+        AstForest astForest = new AstForest(AstForestTest.class, new MavenAstForestResidenceService(),
+                new AcceptAllAstFilterService());
+        CompilationUnit cu = astForest.findCu("com.spldeolin.allison1875.common.test.javadoc.TestSubject").get();
 //        LexicalPreservingPrinter.setup(cu);
 //        System.out.println(LexicalPreservingPrinter.print(cu));
 

@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
@@ -18,11 +17,9 @@ public class FindMapperServiceImpl implements FindMapperService {
 
     @Override
     public ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMeta designMeta) {
-        CompilationUnit cu = astForest.findCu(designMeta.getMapperQualifier());
-        if (cu == null) {
-            return null;
-        }
-        return cu.getPrimaryType().orElseThrow(PrimaryTypeAbsentException::new).asClassOrInterfaceDeclaration();
+        return astForest.findCu(designMeta.getMapperQualifier())
+                .map(cu -> cu.getPrimaryType().orElseThrow(PrimaryTypeAbsentException::new)
+                        .asClassOrInterfaceDeclaration()).orElse(null);
     }
 
 }

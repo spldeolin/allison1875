@@ -34,7 +34,7 @@ public class ListControllersServiceImpl implements ListControllersService {
     public List<ControllerFullDto> listControllers(AstForest astForest) {
         List<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
-            if (!LocationUtils.getAbsolutePath(cu).startsWith(astForest.getPrimaryJavaRoot())) {
+            if (!LocationUtils.getAbsolutePath(cu).startsWith(astForest.getAstForestRoot())) {
                 // 非宿主controller
                 continue;
             }

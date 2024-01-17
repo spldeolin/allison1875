@@ -1,9 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import static com.github.javaparser.StaticJavaParser.parse;
-
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
@@ -40,13 +37,11 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             AstForest astForest) throws IOException {
 
         // find
-        Path mapperPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
-                config.getMapperPackage(), persistence.getMapperName() + ".java");
-        CompilationUnit cu;
+        String mapperQualifier = config.getMapperPackage() + "." + persistence.getMapperName();
+        Optional<CompilationUnit> opt = astForest.findCu(mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
-        if (mapperPath.toFile().exists()) {
-            cu = parse(mapperPath);
-            Optional<TypeDeclaration<?>> primaryType = cu.getPrimaryType();
+        if (opt.isPresent()) {
+            Optional<TypeDeclaration<?>> primaryType = opt.get().getPrimaryType();
             if (!primaryType.isPresent()) {
                 throw new IllegalStateException("primaryType absent.");
             }
@@ -57,9 +52,9 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
         } else {
 
             // create
-            log.info("Mapper文件不存在，创建它。 [{}]", mapperPath);
-            cu = new CompilationUnit();
-            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getPrimaryJavaRoot(),
+            log.info("Mapper文件不存在，创建它。 [{}]", mapperQualifier);
+            CompilationUnit cu = new CompilationUnit();
+            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
                     config.getMapperPackage(), persistence.getMapperName() + ".java"));
             cu.setPackageDeclaration(config.getMapperPackage());
             cu.addImport(ImportConstant.JAVA_UTIL);

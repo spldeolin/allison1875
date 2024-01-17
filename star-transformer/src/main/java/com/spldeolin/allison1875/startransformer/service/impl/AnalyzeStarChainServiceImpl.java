@@ -77,10 +77,11 @@ public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
             phrase.setKeys(Lists.newArrayList(keys));
             phrase.setMkeys(Lists.newArrayList(mkeys));
             if (CollectionUtils.isNotEmpty(phrase.getKeys()) || CollectionUtils.isNotEmpty(phrase.getMkeys())) {
-                for (VariableDeclarator vd : astForest.findCu(phrase.getDtEntityQualifier())
-                        .findAll(VariableDeclarator.class)) {
-                    phrase.getEntityFieldTypesEachFieldName().put(vd.getNameAsString(), vd.getTypeAsString());
-                }
+                astForest.findCu(phrase.getDtEntityQualifier()).ifPresent(cu -> {
+                    for (VariableDeclarator vd : cu.findAll(VariableDeclarator.class)) {
+                        phrase.getEntityFieldTypesEachFieldName().put(vd.getNameAsString(), vd.getTypeAsString());
+                    }
+                });
             }
             phrases.add(phrase);
             keys.clear();

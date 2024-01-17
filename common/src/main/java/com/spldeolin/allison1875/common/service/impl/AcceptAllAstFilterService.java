@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.common.service.AstFilterService;
  * @author Deolin 2024-01-04
  */
 @Singleton
-public class AstFilterServiceImpl implements AstFilterService {
+public class AcceptAllAstFilterService implements AstFilterService {
 
     @Override
     public boolean accept(File javaFile) {

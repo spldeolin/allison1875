@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.common.util;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,8 +27,8 @@ public class MavenUtils {
     /**
      * 获取参数clazz所在的Maven Module的路径
      */
-    public static Path findMavenModule(Class<?> clazz) {
-        Path result = CodeGenerationUtils.mavenModuleRoot(clazz);
+    public static File findMavenModule(Class<?> clazz) {
+        File result = CodeGenerationUtils.mavenModuleRoot(clazz).toFile();
         log.info("find this module path [{}]", result);
         return result;
     }
@@ -35,15 +36,15 @@ public class MavenUtils {
     /**
      * 获取参数clazz所在的Maven Project的路径
      */
-    public static Path findMavenProject(Class<?> clazz) {
-        Path modulePath = findMavenModule(clazz);
-        String pomPath = modulePath.resolve("pom.xml").toString();
+    public static File findMavenProject(Class<?> clazz) {
+        File moduleRoot = findMavenModule(clazz);
+        String pomPath = moduleRoot.toPath().resolve("pom.xml").toString();
         try {
             Model thisModule = mavenXpp3Reader.read(new FileReader(pomPath));
-            return findParentPathRecursively(thisModule, modulePath);
+            return findParentPathRecursively(thisModule, moduleRoot.toPath()).toFile();
         } catch (Exception e) {
             log.error("cannot get project root path", e);
-            return modulePath;
+            return moduleRoot;
         }
     }
 

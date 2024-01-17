@@ -134,7 +134,7 @@ public class PersistenceGenerator implements Allison1875MainService {
             String entityName = getEntityNameInXml(javabeanGeneration);
             for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
                 try {
-                    Path mapperXmlDirectory = astForest.getAstForestRoot().resolve(mapperXmlDirectoryPath);
+                    Path mapperXmlDirectory = astForest.getModuleRoot().resolve(mapperXmlDirectoryPath);
                     FileFlush xmlFlush = mapperXmlFileService.generateMapperXml(persistence, mapper, mapperXmlDirectory,
                             Lists.newArrayList(mapperXmlService.resultMapXml(persistence, entityName),
                                     mapperXmlService.allCloumnSqlXml(persistence),

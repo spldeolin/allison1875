@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.common.util;
 
 import java.io.File;
-import java.nio.file.Path;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.common.exception.CompilationUnitParseException;
@@ -17,11 +16,7 @@ public class CompilationUnitUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
-    public static CompilationUnit parseCu(Path javaFilePath) throws CompilationUnitParseException {
-        return parseCu(javaFilePath.toFile());
-    }
-
-    public static CompilationUnit parseCu(File javaFile) throws CompilationUnitParseException {
+    public static CompilationUnit parseJava(File javaFile) throws CompilationUnitParseException {
         if (!javaFile.exists()) {
             throw new CompilationUnitParseException(String.format("javaFile [%s] not exists", javaFile));
         }

@@ -4,12 +4,12 @@ import java.nio.file.Path;
 import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.common.service.impl.AntiDuplicationServiceImpl;
+import com.spldeolin.allison1875.common.service.impl.ConcatExAntiDuplicationService;
 
 /**
  * @author Deolin 2024-01-01
  */
-@ImplementedBy(AntiDuplicationServiceImpl.class)
+@ImplementedBy(ConcatExAntiDuplicationService.class)
 public interface AntiDuplicationService {
 
     Path getNewPathIfExist(Path path);

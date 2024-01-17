@@ -1,10 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -73,17 +69,11 @@ public class DocAnalyzer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        // 重新生成astForest（将解析范围扩大到 项目根目录 + 所有用户配置的依赖项目路径）
-        Set<Path> dependencyProjectPaths = config.getDependencyProjectDirectories().stream().map(File::toPath)
-                .collect(Collectors.toSet());
-        astForest = new AstForest(astForest.getPrimaryClass(), true, dependencyProjectPaths,
-                astForest.getAstFilterService());
-
-        // 首次遍历并解析astForest，然后构建2个jsg对象，jsg对象为后续req与resp生成JsonSchema所需，构建完毕后重置astForest游标
-        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = jsgBuildService.analyzeJpdvs(astForest);
+        // 分析所有相关Java文件分析出jpdvs，然后构建2个jsg对象，jsg对象为后续req与resp生成JsonSchema所需
+        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = jsgBuildService.analyzeJpdvs(
+                astForest.cloneWithResetting());
         JsonSchemaGenerator jsg4req = jsgBuildService.analyzeAstAndBuildJsg(jpdvs, true);
         JsonSchemaGenerator jsg4resp = jsgBuildService.analyzeAstAndBuildJsg(jpdvs, false);
-        astForest.reset();
 
         // 收集endpoint
         List<EndpointDto> endpoints = Lists.newArrayList();
