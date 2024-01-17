@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.common.ast;
+package com.spldeolin.allison1875.common.util;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,16 +15,26 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2021-02-02
  */
 @Log4j2
-public class MavenPathResolver {
+public class MavenUtils {
 
     private static final MavenXpp3Reader mavenXpp3Reader = new MavenXpp3Reader();
 
+    private MavenUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
+    /**
+     * 获取参数clazz所在的Maven Module的路径
+     */
     public static Path findMavenModule(Class<?> clazz) {
         Path result = CodeGenerationUtils.mavenModuleRoot(clazz);
         log.info("find this module path [{}]", result);
         return result;
     }
 
+    /**
+     * 获取参数clazz所在的Maven Project的路径
+     */
     public static Path findMavenProject(Class<?> clazz) {
         Path modulePath = findMavenModule(clazz);
         String pomPath = modulePath.resolve("pom.xml").toString();

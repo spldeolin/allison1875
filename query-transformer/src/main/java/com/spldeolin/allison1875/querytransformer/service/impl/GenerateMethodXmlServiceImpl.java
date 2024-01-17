@@ -19,8 +19,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
-import com.spldeolin.allison1875.common.ast.MavenPathResolver;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -53,7 +53,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            File mapperXml = MavenPathResolver.findMavenModule(astForest.getPrimaryClass()).resolve(mapperRelativePath)
+            File mapperXml = MavenUtils.findMavenModule(astForest.getPrimaryClass()).resolve(mapperRelativePath)
                     .toFile();
 
             List<String> xmlLines = Lists.newArrayList();

@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.common.service.AstFilterService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.FileTraverseUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -54,11 +55,11 @@ public class AstForest implements Iterable<CompilationUnit> {
         this.wholeProject = wholeProject;
         this.astFilterService = astFilterService;
 
-        Path mavenModule = MavenPathResolver.findMavenModule(primaryClass);
+        Path mavenModule = MavenUtils.findMavenModule(primaryClass);
         this.primaryJavaRoot = mavenModule.resolve("src/main/java").normalize();
 
         if (wholeProject) {
-            astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
+            astForestRoot = MavenUtils.findMavenProject(primaryClass);
         } else {
             astForestRoot = mavenModule;
         }
@@ -73,13 +74,13 @@ public class AstForest implements Iterable<CompilationUnit> {
         this.wholeProject = wholeProject;
         this.astFilterService = astFilterService;
 
-        Path mavenModule = MavenPathResolver.findMavenModule(primaryClass);
+        Path mavenModule = MavenUtils.findMavenModule(primaryClass);
         this.primaryJavaRoot = mavenModule.resolve("src/main/java").normalize();
 
         if (wholeProject) {
-            astForestRoot = MavenPathResolver.findMavenProject(primaryClass);
+            astForestRoot = MavenUtils.findMavenProject(primaryClass);
         } else {
-            astForestRoot = MavenPathResolver.findMavenModule(primaryClass);
+            astForestRoot = MavenUtils.findMavenModule(primaryClass);
         }
         javasInForest.addAll(collectJavas(astForestRoot));
         for (Path dependencyPath : dependencyPaths) {
