@@ -13,8 +13,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.ListControllersService;
@@ -34,7 +34,7 @@ public class ListControllersServiceImpl implements ListControllersService {
     public List<ControllerFullDto> listControllers(AstForest astForest) {
         List<ControllerFullDto> result = Lists.newArrayList();
         for (CompilationUnit cu : astForest) {
-            if (!LocationUtils.getAbsolutePath(cu).startsWith(astForest.getAstForestRoot())) {
+            if (!CompilationUnitUtils.getCuAbsolutePath(cu).startsWith(astForest.getAstForestRoot())) {
                 // 非宿主controller
                 continue;
             }

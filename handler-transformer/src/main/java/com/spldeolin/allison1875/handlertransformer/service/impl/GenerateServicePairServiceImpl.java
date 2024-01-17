@@ -19,7 +19,6 @@ import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
@@ -71,7 +70,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         } else if (StringUtils.isNotBlank(serviceName)) {
             String standardizedServiceName = standardizeServiceName(serviceName);
             // 指定了Service的类名
-            pair = findServiceProc.findGenerated(param.getCu(), standardizedServiceName, param.getName2Pair());
+            pair = findServiceProc.findGenerated(standardizedServiceName, param.getName2Pair(), param.getAstForest());
             if (pair.getService() == null) {
                 // 生成全新的 Service 与 ServiceImpl （往往时第一次获取到ServiceName时）
                 pair = generateServicePair(param, standardizedServiceName, param.getName2Pair());
@@ -137,7 +136,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
     private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName,
             Map<String, ServicePairDto> name2Pair) {
-        Path sourceRoot = LocationUtils.getStorage(param.getCu()).getSourceRoot();
+        Path sourceRoot = param.getAstForest().getAstForestRoot();
         ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(config.getServicePackage());

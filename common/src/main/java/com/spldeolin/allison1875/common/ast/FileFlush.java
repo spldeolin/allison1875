@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.spldeolin.allison1875.common.util.LocationUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -25,14 +25,14 @@ public class FileFlush {
 
     public static FileFlush build(CompilationUnit cu) {
         FileFlush result = new FileFlush();
-        result.src = LocationUtils.getAbsolutePath(cu).toFile();
+        result.src = CompilationUnitUtils.getCuAbsolutePath(cu).toFile();
         result.newContent = cu.toString();
         return result;
     }
 
     public static FileFlush buildLexicalPreserving(CompilationUnit cu) {
         FileFlush result = new FileFlush();
-        result.src = LocationUtils.getAbsolutePath(cu).toFile();
+        result.src = CompilationUnitUtils.getCuAbsolutePath(cu).toFile();
         result.newContent = LexicalPreservingPrinter.print(cu);
         return result;
     }

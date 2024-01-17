@@ -27,4 +27,6 @@ public interface BaseConstant {
 
     String NO_MODIFY_ANNOUNCE = "Any modifications may be overwritten by future code generations.";
 
+    String[] JAVA_EXTENSIONS = new String[]{"java"};
+
 }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.validation.constraints.AssertTrue;
+import org.apache.commons.io.FileUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -34,8 +35,8 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.FileTraverseUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -238,14 +239,16 @@ public class JsgBuildServiceImpl implements JsgBuildService {
 
     @Override
     public Table<String, String, JsonPropertyDescriptionValueDto> analyzeJpdvs(AstForest astForest) {
-        // 将解析范围扩大到 项目根目录 + 所有用户配置的依赖项目路径
-        Set<File> projectJavaFiles = FileTraverseUtils.listFilesRecursively(
-                MavenUtils.findMavenProject(astForest.getPrimaryClass()), "java");
-        Set<File> dependencyJavaFiles = Sets.newHashSet();
+        // jpdvs的解析范围是astForest所在的maven project + dependent projects
+        Set<File> analyzeJavaFiles = Sets.newLinkedHashSet();
+        // maven project
+        FileUtils.iterateFiles(MavenUtils.findMavenProject(astForest.getPrimaryClass()), BaseConstant.JAVA_EXTENSIONS,
+                true).forEachRemaining(analyzeJavaFiles::add);
+        // dependent projects
         for (File dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
-            dependencyJavaFiles.addAll(FileTraverseUtils.listFilesRecursively(dependencyProjectDirectory, "java"));
+            FileUtils.iterateFiles(dependencyProjectDirectory, BaseConstant.JAVA_EXTENSIONS, true)
+                    .forEachRemaining(analyzeJavaFiles::add);
         }
-        Set<File> analyzeJavaFiles = Sets.union(projectJavaFiles, dependencyJavaFiles);
 
         Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
         for (File javaFile : analyzeJavaFiles) {

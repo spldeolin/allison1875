@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -11,10 +12,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.FileTraverseUtils;
-import com.spldeolin.allison1875.common.util.LocationUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
@@ -65,8 +65,8 @@ public class FindServiceServiceImpl implements FindServiceService {
     }
 
     @Override
-    public ServicePairDto findGenerated(CompilationUnit controllerCu, String serviceName,
-            Map<String, ServicePairDto> name2Pair) {
+    public ServicePairDto findGenerated(String serviceName, Map<String, ServicePairDto> name2Pair,
+            AstForest astForest) {
         if (name2Pair.get(serviceName) != null) {
             return name2Pair.get(serviceName);
         }
@@ -74,7 +74,7 @@ public class FindServiceServiceImpl implements FindServiceService {
         ClassOrInterfaceDeclaration service = null;
         List<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
         boolean caught = false;
-        List<CompilationUnit> serviceOrImplCus = getServiceOrImplCus(controllerCu);
+        List<CompilationUnit> serviceOrImplCus = getServiceOrImplCus(astForest);
 
         for (CompilationUnit cu : serviceOrImplCus) {
             if (cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
@@ -109,18 +109,16 @@ public class FindServiceServiceImpl implements FindServiceService {
         return result;
     }
 
-    private List<CompilationUnit> getServiceOrImplCus(CompilationUnit cu) {
-        File servicePackage = LocationUtils.getStorage(cu).getSourceRoot()
+    private List<CompilationUnit> getServiceOrImplCus(AstForest astForest) {
+        File servicePackage = astForest.getAstForestRoot()
                 .resolve(CodeGenerationUtils.packageToPath(config.getServicePackage())).toFile();
-        File serviceImplPackage = LocationUtils.getStorage(cu).getSourceRoot()
+        File serviceImplPackage = astForest.getAstForestRoot()
                 .resolve(CodeGenerationUtils.packageToPath(config.getServiceImplPackage())).toFile();
         List<CompilationUnit> serviceOrImplCu = Lists.newArrayList();
-        for (File java : FileTraverseUtils.listFilesRecursively(servicePackage, "java")) {
-            serviceOrImplCu.add(CompilationUnitUtils.parseJava(java));
-        }
-        for (File java : FileTraverseUtils.listFilesRecursively(serviceImplPackage, "java")) {
-            serviceOrImplCu.add(CompilationUnitUtils.parseJava(java));
-        }
+        FileUtils.iterateFiles(servicePackage, BaseConstant.JAVA_EXTENSIONS, true)
+                .forEachRemaining(java -> serviceOrImplCu.add(CompilationUnitUtils.parseJava(java)));
+        FileUtils.iterateFiles(serviceImplPackage, BaseConstant.JAVA_EXTENSIONS, true)
+                .forEachRemaining(java -> serviceOrImplCu.add(CompilationUnitUtils.parseJava(java)));
         return serviceOrImplCu;
     }
 
