@@ -201,11 +201,12 @@ public class MapperServiceImpl implements MapperService {
         if (config.getDisableQueryByEntity()) {
             return null;
         }
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
 
         String methodName = this.calcMethodName(mapper, "queryByEntity");
         MethodDeclaration queryByEntity = new MethodDeclaration();
         String comment = concatMapperMethodComment(persistence, "根据实体内的属性查询");
-        mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
+        mapperCu.addImport(ImportConstant.JAVA_UTIL);
         queryByEntity.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         queryByEntity.setName(methodName);
         queryByEntity.addParameter(javabeanGeneration.getJavabeanName(), "entity");
@@ -221,6 +222,8 @@ public class MapperServiceImpl implements MapperService {
         if (config.getDisableQueryById()) {
             return null;
         }
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+
         String methodName = null;
         if (persistence.getIdProperties().size() > 0) {
             methodName = this.calcMethodName(mapper, "queryById");
@@ -235,8 +238,7 @@ public class MapperServiceImpl implements MapperService {
                 Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
             } else {
-                mapper.findCompilationUnit().orElseThrow(CuAbsentException::new)
-                        .addImport(ImportConstant.APACHE_IBATIS);
+                mapperCu.addImport(ImportConstant.APACHE_IBATIS);
                 for (PropertyDto pk : persistence.getIdProperties()) {
                     String varName = MoreStringUtils.lowerFirstLetter(pk.getPropertyName());
                     Parameter parameter = parseParameter(
@@ -257,14 +259,15 @@ public class MapperServiceImpl implements MapperService {
         if (config.getDisableQueryByIdsEachId()) {
             return null;
         }
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+
         String methodName = null;
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIdsEachId");
             MethodDeclaration queryByIdsEachId = new MethodDeclaration();
             String comment = concatMapperMethodComment(persistence, "根据多个ID查询，并以ID作为key映射到Map");
-            CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
-            cu.addImport(ImportConstant.APACHE_IBATIS);
-            cu.addImport(ImportConstant.JAVA_UTIL);
+            mapperCu.addImport(ImportConstant.APACHE_IBATIS);
+            mapperCu.addImport(ImportConstant.JAVA_UTIL);
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
             String pkTypeName = onlyPk.getJavaType().getSimpleName();
@@ -288,14 +291,15 @@ public class MapperServiceImpl implements MapperService {
         if (config.getDisableQueryByIds()) {
             return null;
         }
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+
         String methodName = null;
         if (persistence.getIdProperties().size() == 1) {
             methodName = calcMethodName(mapper, "queryByIds");
             MethodDeclaration queryByIds = new MethodDeclaration();
             String comment = concatMapperMethodComment(persistence, "根据多个ID查询");
-            CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
-            cu.addImport(ImportConstant.APACHE_IBATIS);
-            cu.addImport(ImportConstant.JAVA_UTIL);
+            mapperCu.addImport(ImportConstant.APACHE_IBATIS);
+            mapperCu.addImport(ImportConstant.JAVA_UTIL);
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             queryByIds.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
             queryByIds.setName(methodName);
@@ -316,10 +320,12 @@ public class MapperServiceImpl implements MapperService {
         if (config.getDisableQueryByKey()) {
             return null;
         }
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+
         String methodName = calcMethodName(mapper, "queryBy" + MoreStringUtils.upperFirstLetter(key.getPropertyName()));
         MethodDeclaration method = new MethodDeclaration();
         String comment = concatMapperMethodComment(persistence, "根据「" + key.getDescription() + "」查询");
-        mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
+        mapperCu.addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
         String varName = MoreStringUtils.lowerFirstLetter(key.getPropertyName());
@@ -337,11 +343,13 @@ public class MapperServiceImpl implements MapperService {
         if (config.getDisableQueryByKeys()) {
             return null;
         }
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+
         String methodName = calcMethodName(mapper,
                 "queryBy" + English.plural(MoreStringUtils.upperFirstLetter(key.getPropertyName())));
         MethodDeclaration method = new MethodDeclaration();
         String comment = concatMapperMethodComment(persistence, "根据多个「" + key.getDescription() + "」查询");
-        mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(ImportConstant.JAVA_UTIL);
+        mapperCu.addImport(ImportConstant.JAVA_UTIL);
         method.setType(parseType("List<" + javabeanGeneration.getJavabeanName() + ">"));
         method.setName(methodName);
         String typeName = "List<" + key.getJavaType().getSimpleName() + ">";

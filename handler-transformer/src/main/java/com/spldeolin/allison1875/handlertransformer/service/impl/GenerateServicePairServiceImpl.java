@@ -95,18 +95,20 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         MethodDeclaration serviceMethod = new MethodDeclaration().setType(serviceMethodImpl.getType())
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
         serviceMethod.setBody(null);
-        pair.getService().addMember(serviceMethod);
-        CompilationUnit serverCu = pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new);
+        ClassOrInterfaceDeclaration service = pair.getService();
+        service.addMember(serviceMethod);
+        CompilationUnit serverCu = service.findCompilationUnit().orElseThrow(() -> new CuAbsentException(service));
         serverCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
         serverCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
         serverCu.addImport(ImportConstant.JAVA_UTIL);
         serverCu.addImport(config.getPageTypeQualifier());
-        log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), pair.getService().getName());
+        log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), service.getName());
 
         // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
         for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
             serviceImpl.addMember(serviceMethodImpl);
-            CompilationUnit serverImplCu = serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new);
+            CompilationUnit serverImplCu = serviceImpl.findCompilationUnit()
+                    .orElseThrow(() -> new CuAbsentException(serviceImpl));
             serverImplCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
             serverImplCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
             serverImplCu.addImport(ImportConstant.JAVA_UTIL);
@@ -116,20 +118,19 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
         // 将生成的方法所需的import 均添加到 Service 和 每个 ServiceImpl
         for (String appendImport : methodGeneration.getAppendImports()) {
-            CompilationUnit serviceCu = pair.getService().findCompilationUnit().orElseThrow(CuAbsentException::new);
+            CompilationUnit serviceCu = service.findCompilationUnit().orElseThrow(() -> new CuAbsentException(service));
             serviceCu.addImport(appendImport);
             serviceCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-            pair.getServiceImpls().forEach(
-                    serviceImpl -> serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new)
+            pair.getServiceImpls().forEach(serviceImpl -> serviceImpl.findCompilationUnit()
+                    .orElseThrow(() -> new CuAbsentException(serviceImpl))
                             .addImport(appendImport));
         }
 
         ServiceGeneration result = new ServiceGeneration();
-        result.setServiceVarName(MoreStringUtils.lowerFirstLetter(pair.getService().getNameAsString()));
-        result.setService(pair.getService());
+        result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
+        result.setService(service);
         result.getServiceImpls().addAll(pair.getServiceImpls());
-        result.setServiceQualifier(
-                pair.getService().getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+        result.setServiceQualifier(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
         result.setMethodName(serviceMethod.getNameAsString());
         return result;
     }

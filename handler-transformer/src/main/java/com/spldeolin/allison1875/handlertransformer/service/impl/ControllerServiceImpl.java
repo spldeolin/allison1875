@@ -87,7 +87,8 @@ public class ControllerServiceImpl implements ControllerService {
             }
         }
 
-        CompilationUnit controllerCu = controller.findCompilationUnit().orElseThrow(CuAbsentException::new);
+        CompilationUnit controllerCu = controller.findCompilationUnit()
+                .orElseThrow(() -> new CuAbsentException(controller));
         for (String appendImport : handlerCreation.getAppendImports()) {
             controllerCu.addImport(appendImport);
         }

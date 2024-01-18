@@ -4,9 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.spldeolin.allison1875.common.exception.CompilationUnitParseException;
-import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.exception.StorageAbsentException;
 import lombok.extern.log4j.Log4j2;
 
@@ -39,9 +37,8 @@ public class CompilationUnitUtils {
      * @return e.g.: /Users/deolin/Documents/allison1875/common/src/main/java/com/spldeolin/allison1875/common/util
      *         /Locations.java
      */
-    public static Path getCuAbsolutePath(Node node) throws CuAbsentException, StorageAbsentException {
-        return node.findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
-                .orElseThrow(StorageAbsentException::new).getPath();
+    public static Path getCuAbsolutePath(CompilationUnit cu) throws StorageAbsentException {
+        return cu.getStorage().orElseThrow(StorageAbsentException::new).getPath();
     }
 
 }

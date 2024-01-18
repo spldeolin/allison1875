@@ -45,11 +45,12 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
         String methodName = chainAnalysis.getMethodName();
         methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
 
+        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
         for (String anImport : resultGeneration.getImports()) {
-            mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(anImport);
+            mapperCu.addImport(anImport);
         }
         for (String anImport : paramGeneration.getImports()) {
-            mapper.findCompilationUnit().orElseThrow(CuAbsentException::new).addImport(anImport);
+            mapperCu.addImport(anImport);
         }
 
         MethodDeclaration method = new MethodDeclaration();
@@ -61,7 +62,7 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
         method.setParameters(new NodeList<>(paramGeneration.getParameters()));
         method.setBody(null);
         mapper.getMembers().add(method);
-        return mapper.findCompilationUnit().orElseThrow(CuAbsentException::new);
+        return mapperCu;
     }
 
 }

@@ -100,17 +100,16 @@ public class HandlerTransformer implements Allison1875MainService {
                     if (serviceGeneration == null) {
                         continue;
                     }
-                    flushes.add(FileFlush.build(
-                            serviceGeneration.getService().findCompilationUnit().orElseThrow(CuAbsentException::new)));
+                    flushes.add(FileFlush.build(serviceGeneration.getService().findCompilationUnit()
+                            .orElseThrow(() -> new CuAbsentException(serviceGeneration.getService()))));
                     for (ClassOrInterfaceDeclaration serviceImpl : serviceGeneration.getServiceImpls()) {
-                        flushes.add(
-                                FileFlush.build(serviceImpl.findCompilationUnit().orElseThrow(CuAbsentException::new)));
+                        flushes.add(FileFlush.build(serviceImpl.findCompilationUnit()
+                                .orElseThrow(() -> new CuAbsentException(serviceImpl))));
                     }
 
                     // 在controller中创建handler，并替换掉
                     HandlerCreation handlerCreation = controllerService.createHandlerToController(firstLineDto,
-                            controller,
-                            serviceGeneration, reqDtoRespDtoInfo);
+                            controller, serviceGeneration, reqDtoRespDtoInfo);
                     log.info("replace Initializer [{}] to Handler [{}] in Controller [{}].", firstLineDto,
                             handlerCreation.getHandler().getName(), controller.getName());
 
