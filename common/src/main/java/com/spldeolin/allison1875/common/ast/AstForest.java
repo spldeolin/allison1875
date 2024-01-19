@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2021-02-02
  */
 @Slf4j
-public class AstForest implements Iterable<CompilationUnit> {
+public final class AstForest implements Iterable<CompilationUnit> {
 
     @Getter
     private final Class<?> primaryClass;
@@ -33,15 +33,6 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     private final AstFilterService astFilterService;
 
-    /**
-     * 代表AST森林所处的Module的根目录
-     */
-    @Getter
-    private final Path moduleRoot;
-
-    /**
-     * AST森林的根目录
-     */
     @Getter
     private final Path astForestRoot;
 
@@ -59,8 +50,7 @@ public class AstForest implements Iterable<CompilationUnit> {
         this.astFilterService = astFilterService;
         this.astForestResidenceService = astForestResidenceService;
 
-        moduleRoot = astForestResidenceService.findWorkModuleRoot(primaryClass).toPath();
-        astForestRoot = astForestResidenceService.findWorkAstForestRoot(primaryClass).toPath();
+        astForestRoot = astForestResidenceService.findAstForestRoot(primaryClass).toPath();
 
         StaticJavaParser.getParserConfiguration()
                 .setSymbolResolver(new JavaSymbolSolver(new ClassLoaderTypeSolver(primaryClass.getClassLoader())));

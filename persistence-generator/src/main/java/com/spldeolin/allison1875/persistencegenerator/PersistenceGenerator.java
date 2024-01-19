@@ -12,6 +12,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
@@ -60,6 +61,9 @@ public class PersistenceGenerator implements Allison1875MainService {
 
     @Inject
     private PersistenceGeneratorConfig config;
+
+    @Inject
+    private AstForestResidenceService astForestResidenceService;
 
     @Override
     public void process(AstForest astForest) {
@@ -135,7 +139,8 @@ public class PersistenceGenerator implements Allison1875MainService {
             String entityName = getEntityNameInXml(javabeanGeneration);
             for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
                 try {
-                    Path mapperXmlDirectory = astForest.getModuleRoot().resolve(mapperXmlDirectoryPath);
+                    Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
+                            .resolve(mapperXmlDirectoryPath);
                     FileFlush xmlFlush = mapperXmlFileService.generateMapperXml(persistence, mapper, mapperXmlDirectory,
                             Lists.newArrayList(mapperXmlService.resultMapXml(persistence, entityName),
                                     mapperXmlService.allCloumnSqlXml(persistence),

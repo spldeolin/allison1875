@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.common.service;
 
 import java.io.File;
+import java.nio.file.Path;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.service.impl.MavenAstForestResidenceService;
 
@@ -10,8 +11,8 @@ import com.spldeolin.allison1875.common.service.impl.MavenAstForestResidenceServ
 @ImplementedBy(MavenAstForestResidenceService.class)
 public interface AstForestResidenceService {
 
-    File findWorkModuleRoot(Class<?> primaryClass);
+    File findAstForestRoot(Class<?> primaryClass);
 
-    File findWorkAstForestRoot(Class<?> primaryClass);
+    Path findModuleRoot(Class<?> primaryClass);
 
 }

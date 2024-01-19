@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
@@ -47,14 +48,17 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     @Inject
     private QueryTransformerConfig config;
 
+    @Inject
+    private AstForestResidenceService astForestResidenceService;
+
     @Override
     public List<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            File mapperXml = astForest.getModuleRoot().resolve(mapperRelativePath)
-                    .toFile();
+            File mapperXml = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
+                    .resolve(mapperRelativePath).toFile();
 
             List<String> xmlLines = Lists.newArrayList();
             xmlLines.add("");

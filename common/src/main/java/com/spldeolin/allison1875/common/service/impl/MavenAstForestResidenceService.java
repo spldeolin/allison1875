@@ -8,6 +8,20 @@ import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.util.MavenUtils;
 
 /**
+ * <pre>
+ *                               AstForestRoot
+ *                             /
+ *                 ModuleRoot < - other Root
+ *               /             \
+ * ProjectRoot  <                other Root
+ *               \
+ *                ModuleRoot
+ *
+ * DependencyProject Root
+ *
+ * DependencyProject Root
+ * </pre>
+ *
  * @author Deolin 2024-01-17
  */
 @Singleton
@@ -20,18 +34,18 @@ public class MavenAstForestResidenceService implements AstForestResidenceService
     private static final String testJavaRelativePath = "/src/test/java";
 
     @Override
-    public File findWorkModuleRoot(Class<?> primaryClass) {
-        return MavenUtils.findMavenModule(primaryClass);
+    public File findAstForestRoot(Class<?> primaryClass) {
+        Path classLoaderRoot = CodeGenerationUtils.classLoaderRoot(primaryClass);
+        if (testClassDirectoryName.equals(classLoaderRoot.toFile().getName())) {
+            return new File(MavenUtils.findMavenModule(primaryClass) + testJavaRelativePath);
+        } else {
+            return new File(MavenUtils.findMavenModule(primaryClass) + mainJavaRelativePath);
+        }
     }
 
     @Override
-    public File findWorkAstForestRoot(Class<?> primaryClass) {
-        Path classLoaderRoot = CodeGenerationUtils.classLoaderRoot(primaryClass);
-        if (testClassDirectoryName.equals(classLoaderRoot.toFile().getName())) {
-            return new File(this.findWorkModuleRoot(primaryClass).getPath() + testJavaRelativePath);
-        } else {
-            return new File(this.findWorkModuleRoot(primaryClass).getPath() + mainJavaRelativePath);
-        }
+    public Path findModuleRoot(Class<?> primaryClass) {
+        return MavenUtils.findMavenModule(primaryClass).toPath();
     }
 
 }
