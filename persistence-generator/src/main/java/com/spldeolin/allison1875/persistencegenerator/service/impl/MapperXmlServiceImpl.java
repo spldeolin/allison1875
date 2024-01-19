@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -111,7 +112,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                             + "},");
         }
         // 删除最后一个语句中，最后的逗号
-        if (xmlLines.size() > 0) {
+        if (CollectionUtils.isNotEmpty(xmlLines)) {
             int last = xmlLines.size() - 1;
             xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
         }
@@ -342,7 +343,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             String firstLine = "<select id=\"" + methodName + "\" ";
             if (persistence.getIdProperties().size() == 1) {
                 firstLine += "parameterType=\"" + Iterables.getOnlyElement(persistence.getIdProperties()).getJavaType()
@@ -456,7 +457,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
@@ -467,7 +468,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                                 + "},");
             }
             // 删除最后一个语句中，最后的逗号
-            if (xmlLines.size() > 0) {
+            if (CollectionUtils.isNotEmpty(xmlLines)) {
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
             }
@@ -492,7 +493,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             return null;
         }
         List<String> xmlLines = Lists.newArrayList();
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");

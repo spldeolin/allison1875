@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -34,7 +35,7 @@ public class EndpointToStringServiceImpl implements EndpointToStringService {
         }
 
         String comment = null;
-        if (dto.getDescriptionLines().size() > 0) {
+        if (CollectionUtils.isNotEmpty(dto.getDescriptionLines())) {
             StringBuilder sb = new StringBuilder();
             for (String line : dto.getDescriptionLines()) {
                 if (StringUtils.isNotBlank(line)) {

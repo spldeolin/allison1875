@@ -20,6 +20,7 @@ import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -182,7 +183,7 @@ public class MapperServiceImpl implements MapperService {
             return null;
         }
         String methodName = null;
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             methodName = this.calcMethodName(mapper, "listAll");
             MethodDeclaration listAll = new MethodDeclaration();
             String comment = concatMapperMethodComment(persistence, "获取全部");
@@ -225,7 +226,7 @@ public class MapperServiceImpl implements MapperService {
         CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
 
         String methodName = null;
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             methodName = this.calcMethodName(mapper, "queryById");
             MethodDeclaration queryById = new MethodDeclaration();
             String comment = concatMapperMethodComment(persistence, "根据ID查询");
@@ -370,7 +371,7 @@ public class MapperServiceImpl implements MapperService {
             return null;
         }
         String methodName = null;
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             methodName = calcMethodName(mapper, "updateByIdEvenNull");
             MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
             String comment = concatMapperMethodComment(persistence,
@@ -392,7 +393,7 @@ public class MapperServiceImpl implements MapperService {
             return null;
         }
         String methodName = null;
-        if (persistence.getIdProperties().size() > 0) {
+        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             methodName = calcMethodName(mapper, "updateById");
             MethodDeclaration updateById = new MethodDeclaration();
             String comment = concatMapperMethodComment(persistence, "根据ID更新数据，忽略值为null的属性");
@@ -429,7 +430,7 @@ public class MapperServiceImpl implements MapperService {
                 method.remove();
             }
         }
-        return mapper.getMethodsByName(methodName).size() > 0;
+        return CollectionUtils.isNotEmpty(mapper.getMethodsByName(methodName));
     }
 
     private String concatMapperMethodComment(PersistenceDto persistence, String methodDescription) {

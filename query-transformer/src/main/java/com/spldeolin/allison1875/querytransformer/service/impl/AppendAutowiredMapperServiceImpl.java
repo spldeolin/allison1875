@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Iterables;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
@@ -28,7 +29,7 @@ public class AppendAutowiredMapperServiceImpl implements AppendAutowiredMapperSe
                                 designMeta.getMapperName() + ";"));
 
                 List<FieldDeclaration> fields = service.getFields();
-                if (fields.size() > 0) {
+                if (CollectionUtils.isNotEmpty(fields)) {
                     service.getMembers().addAfter(autowiredField, Iterables.getLast(fields));
                 } else {
                     service.getMembers().add(0, autowiredField);

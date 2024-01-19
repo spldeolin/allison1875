@@ -16,6 +16,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
@@ -130,7 +131,7 @@ public class HandlerTransformer implements Allison1875MainService {
         }
 
         // write all to file
-        if (flushes.size() > 0) {
+        if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
             log.info("# REMEBER REFORMAT CODE #");
         } else {

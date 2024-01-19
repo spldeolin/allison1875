@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
@@ -68,7 +69,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         if (chain.getNameAsString().equals("one")) {
             returnClassify = ReturnClassifyEnum.one;
         } else if (chain.getNameAsString().equals("many")) {
-            if (chain.getArguments().size() == 0) {
+            if (CollectionUtils.isNotEmpty(chain.getArguments())) {
                 returnClassify = ReturnClassifyEnum.many;
             } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
                 returnClassify = ReturnClassifyEnum.each;
@@ -111,7 +112,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
                     String varName = antiDuplicationService.getNewElementIfExist(fae.getNameAsString(), varNames);
                     phrase.setVarName(varName);
                 }
-                if (parent.getArguments().size() > 0) {
+                if (CollectionUtils.isNotEmpty(parent.getArguments())) {
                     phrase.setObjectExpr(parent.getArgument(0));
                 }
 
@@ -136,7 +137,8 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         }
         List<String> queryPropertyNames = queryPhrases.stream().map(PhraseDto::getSubjectPropertyName)
                 .collect(Collectors.toList());
-        if (keyPropertyName != null && queryPropertyNames.size() > 0 && !queryPropertyNames.contains(keyPropertyName)) {
+        if (keyPropertyName != null && CollectionUtils.isNotEmpty(queryPropertyNames) && !queryPropertyNames.contains(
+                keyPropertyName)) {
             log.warn("Each or MultiEach Key [{}] is not declared in Query Phrases [{}], auto add in", keyPropertyName,
                     queryPropertyNames);
             queryPhrases.add(new PhraseDto().setSubjectPropertyName(keyPropertyName));
@@ -177,7 +179,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         MethodCallExpr queryMce = chain.findAll(MethodCallExpr.class,
                 mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update", "drop")).get(0);
         NodeList<Expression> arguments = queryMce.getArguments();
-        if (arguments.size() == 0) {
+        if (CollectionUtils.isEmpty(arguments)) {
             String defaultMethodName = chainMethod.name() + StringUtils.removeEnd(designMeta.getEntityName(), "Entity");
             log.info("Method name not specified in Query Chain, hence default '{}' is used", defaultMethodName);
             return defaultMethodName;

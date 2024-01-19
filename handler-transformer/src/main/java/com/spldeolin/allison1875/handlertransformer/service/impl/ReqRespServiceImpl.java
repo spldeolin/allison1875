@@ -24,6 +24,7 @@ import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
@@ -57,7 +58,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                             + initBody.findAll(LocalClassDeclarationStmt.class).stream()
                             .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
         }
-        if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 0) {
+        if (CollectionUtils.isNotEmpty(initBody.findAll(LocalClassDeclarationStmt.class))) {
             for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
                 if (!StringUtils.equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req", "Resp")) {
                     throw new IllegalArgumentException(

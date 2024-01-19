@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -67,7 +68,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
                 xmlLines.add(SINGLE_INDENT + "SELECT");
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
                     xmlLines.add(DOUBLE_INDENT + "COUNT(*)");
-                } else if (chainAnalysis.getQueryPhrases().size() == 0) {
+                } else if (CollectionUtils.isEmpty(chainAnalysis.getQueryPhrases())) {
                     xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
                 } else {
                     for (PhraseDto queryPhrase : chainAnalysis.getQueryPhrases()) {
@@ -83,7 +84,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
                 xmlLines.add(SINGLE_INDENT + "FROM");
                 xmlLines.add(DOUBLE_INDENT + "`" + designMeta.getTableName() + "`");
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
-                if (chainAnalysis.getOrderPhrases().size() > 0) {
+                if (CollectionUtils.isNotEmpty(chainAnalysis.getOrderPhrases())) {
                     xmlLines.add(SINGLE_INDENT + "ORDER BY");
                     for (PhraseDto orderPhrase : chainAnalysis.getOrderPhrases()) {
                         PropertyDto property = designMeta.getProperties().get(orderPhrase.getSubjectPropertyName());
@@ -123,12 +124,12 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
                 xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatDeleteStartTag(chainAnalysis, paramGeneration);
                 xmlLines.add(startTag);
-                if (chainAnalysis.getByPhrases().size() > 0) {
+                if (CollectionUtils.isNotEmpty(chainAnalysis.getByPhrases())) {
                     xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 }
                 xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
-                if (chainAnalysis.getByPhrases().size() > 0) {
+                if (CollectionUtils.isNotEmpty(chainAnalysis.getByPhrases())) {
                     xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
                 }
                 xmlLines.add("</delete>");

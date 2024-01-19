@@ -163,7 +163,7 @@ public class QueryTransformer implements Allison1875MainService {
         }
 
         // write all to file
-        if (flushes.size() > 0) {
+        if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
             log.info("# REMEBER REFORMAT CODE #");
         } else {

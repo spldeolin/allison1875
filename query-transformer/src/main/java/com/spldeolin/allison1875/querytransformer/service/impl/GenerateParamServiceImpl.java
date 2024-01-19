@@ -18,6 +18,7 @@ import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
@@ -93,7 +94,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
             params.add(param);
             imports.add(cond.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(cond)));
             isJavabean = true;
-        } else if (phrases.size() > 0) {
+        } else if (CollectionUtils.isNotEmpty(phrases)) {
             for (PhraseDto phrase : phrases) {
                 if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(phrase.getPredicate())) {
                     continue;

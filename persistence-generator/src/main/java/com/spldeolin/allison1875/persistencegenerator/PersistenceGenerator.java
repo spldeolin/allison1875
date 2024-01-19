@@ -12,6 +12,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
@@ -64,7 +65,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     public void process(AstForest astForest) {
         // 构建并遍历 PersistenceDto对象
         List<PersistenceDto> persistenceDtos = buildPersistenceDtoService.build(astForest);
-        if (persistenceDtos.size() == 0) {
+        if (CollectionUtils.isEmpty(persistenceDtos)) {
             log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
         }
@@ -165,7 +166,7 @@ public class PersistenceGenerator implements Allison1875MainService {
         }
 
         // write all to file
-        if (flushes.size() > 0) {
+        if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
             log.info("# REMEBER REFORMAT CODE #");
         }

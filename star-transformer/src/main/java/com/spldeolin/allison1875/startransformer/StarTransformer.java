@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
@@ -99,7 +100,7 @@ public class StarTransformer implements Allison1875MainService {
         }
 
         // flush
-        if (flushes.size() > 0) {
+        if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
             log.info("# REMEBER REFORMAT CODE #");
         } else {

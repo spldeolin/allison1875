@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 
@@ -116,7 +117,7 @@ public class RequestMappingServiceImpl implements RequestMappingService {
         if (ArrayUtils.isNotEmpty(mVerbs)) {
             combinedVerbs.addAll(Arrays.asList(mVerbs));
         }
-        if (combinedVerbs.size() == 0) {
+        if (CollectionUtils.isEmpty(combinedVerbs)) {
             combinedVerbs.addAll(Arrays.asList(RequestMethod.values()));
         }
         return combinedVerbs;
