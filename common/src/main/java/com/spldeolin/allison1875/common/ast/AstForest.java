@@ -9,6 +9,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import com.spldeolin.allison1875.common.exception.CompilationUnitParseException;
 import com.spldeolin.allison1875.common.service.AstFilterService;
@@ -44,8 +45,16 @@ public class AstForest implements Iterable<CompilationUnit> {
     @Getter
     private final Path astForestRoot;
 
+    public AstForest(Class<?> primaryClass, AstForestResidenceService astForestResidenceService) {
+        this(primaryClass, astForestResidenceService, null);
+    }
+
     public AstForest(Class<?> primaryClass, AstForestResidenceService astForestResidenceService,
             AstFilterService astFilterService) {
+        Preconditions.checkNotNull(primaryClass, "required Argument 'primaryClass' must not be null");
+        Preconditions.checkNotNull(astForestResidenceService,
+                "required Argument 'astForestResidenceService' must not be null");
+
         this.primaryClass = primaryClass;
         this.astFilterService = astFilterService;
         this.astForestResidenceService = astForestResidenceService;
@@ -60,11 +69,19 @@ public class AstForest implements Iterable<CompilationUnit> {
 
     @Override
     public Iterator<CompilationUnit> iterator() {
-        Iterator<File> javaItr = FileUtils.iterateFiles(astForestRoot.toFile(), new String[]{"java"}, true);
-        Iterator<File> filteredJavaItr = Iterators.filter(javaItr, astFilterService::accept);
-        Iterator<CompilationUnit> cuItr = Iterators.transform(filteredJavaItr, CompilationUnitUtils::parseJava);
-        Iterator<CompilationUnit> filteredCuItr = Iterators.filter(cuItr, astFilterService::accept);
-        return filteredCuItr;
+        // java files
+        Iterator<File> javaFilesItr = FileUtils.iterateFiles(astForestRoot.toFile(), new String[]{"java"}, true);
+        // filtered java files
+        if (astFilterService != null) {
+            javaFilesItr = Iterators.filter(javaFilesItr, astFilterService::accept);
+        }
+        // cus
+        Iterator<CompilationUnit> cusItr = Iterators.transform(javaFilesItr, CompilationUnitUtils::parseJava);
+        // filtered cus
+        if (astFilterService != null) {
+            cusItr = Iterators.filter(cusItr, astFilterService::accept);
+        }
+        return cusItr;
     }
 
     public AstForest cloneWithResetting() {
