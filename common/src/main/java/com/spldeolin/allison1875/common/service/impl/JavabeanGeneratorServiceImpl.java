@@ -57,7 +57,8 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
                 absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
                 className = FilenameUtils.getBaseName(absulutePath.toString());
             } else {
-                throw new RuntimeException("impossible unless bug");
+                throw new Allison1875Exception(
+                        "unknown FileExistenceResolutionEnum [" + arg.getJavabeanExistenceResolution() + "]");
             }
         }
 

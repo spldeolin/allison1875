@@ -16,6 +16,7 @@ import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
@@ -195,7 +196,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 ancestor -> ancestor.getNameAsString().equalsIgnoreCase("Resp")).isPresent()) {
             javabeanType = JavabeanTypeEnum.NEST_DTO_IN_RESP;
         } else {
-            throw new RuntimeException("impossible unless bug.");
+            throw new Allison1875Exception("unknown Name [" + dto.getNameAsString() + "]");
         }
         return javabeanType;
     }

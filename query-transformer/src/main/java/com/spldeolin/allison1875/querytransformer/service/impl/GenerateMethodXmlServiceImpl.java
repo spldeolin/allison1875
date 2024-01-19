@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
@@ -138,7 +139,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
                 }
                 xmlLines.add("</delete>");
             } else {
-                throw new RuntimeException("impossible unless bug");
+                throw new Allison1875Exception("unknown ChainMethodEnum [" + chainAnalysis.getChainMethod() + "]");
             }
 
             List<String> newLines = Lists.newArrayList();

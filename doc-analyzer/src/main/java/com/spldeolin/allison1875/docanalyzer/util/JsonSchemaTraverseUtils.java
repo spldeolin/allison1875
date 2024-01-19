@@ -4,6 +4,7 @@ import java.util.Map;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema.Items;
 import com.google.common.base.Preconditions;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,12 +55,7 @@ public class JsonSchemaTraverseUtils {
             }
             if (items.isArrayItems()) {
                 // Java没有tuple语法，所以这个情况不可能存在
-                throw new RuntimeException("impossible unless bug.");
-//            for (JsonSchema tupleElementJsonSchema : items.asArrayItems().getJsonSchemas()) {
-//                callback.callback(propName, tupleElementJsonSchema, parentJsonSchema, depth);
-//                int nextDepth = tupleElementJsonSchema.isObjectSchema() ? depth + 1 : depth;
-//                traverse(propName, tupleElementJsonSchema, callback, nextDepth);
-//            }
+                throw new Allison1875Exception("This is impossible because there is no tuple in Java");
             }
         }
     }

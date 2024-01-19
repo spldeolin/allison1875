@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.util;
 
+import java.util.Optional;
 import com.github.javaparser.JavaToken;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.Node;
@@ -14,13 +15,16 @@ public class TokenRangeUtils {
     }
 
     public static String getRawCode(Node node) {
+        Optional<TokenRange> tokenRange = node.getComment().get().getTokenRange();
+        if (!tokenRange.isPresent()) {
+            return "";
+        }
         if (node.getComment().isPresent()) {
-            JavaToken begin = node.getComment().get().getTokenRange()
-                    .orElseThrow(() -> new RuntimeException("Token Range absent")).getBegin();
-            JavaToken end = node.getTokenRange().orElseThrow(() -> new RuntimeException("Token Range absent")).getEnd();
+            JavaToken begin = tokenRange.get().getBegin();
+            JavaToken end = tokenRange.get().getEnd();
             return new TokenRange(begin, end).toString();
         } else {
-            return node.getTokenRange().orElseThrow(() -> new RuntimeException("Token Range absent")).toString();
+            return tokenRange.get().toString();
         }
     }
 

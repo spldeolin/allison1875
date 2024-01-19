@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
+import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
@@ -52,8 +53,9 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
         MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallService.mapOrMultimapBuildStmts(designMeta,
                 chainAnalysis, resultGeneration);
 
-        Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
-                .orElseThrow(() -> new RuntimeException("cannot find Expression Stmt"));
+        Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class).orElseThrow(
+                () -> new ParentAbsentException(
+                        "Node [" + chainAnalysis.getChain().getNameAsString() + "] has no Parent Statement"));
         String ancestorStatementCode = TokenRangeUtils.getRawCode(ancestorStatement);
         log.info("ancestorStatement={}", ancestorStatementCode);
 
