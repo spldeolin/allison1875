@@ -48,7 +48,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             throws IllegalChainException {
         String chainCode = chain.toString();
         String betweenCode = chainCode.substring(chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
-        String designQualifier = design.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+        String designQualifier = design.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(design));
 
         ChainMethodEnum chainMethod;
         if (betweenCode.startsWith("query(")) {

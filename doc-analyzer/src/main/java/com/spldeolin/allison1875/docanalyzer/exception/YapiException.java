@@ -1,13 +1,13 @@
 package com.spldeolin.allison1875.docanalyzer.exception;
 
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
+
 /**
  * @author Deolin 2020-08-02
  */
-public class YapiException extends RuntimeException {
+public class YapiException extends Allison1875Exception {
 
-    public YapiException() {
-        super();
-    }
+    private static final long serialVersionUID = 379804795379140990L;
 
     public YapiException(String message) {
         super(message);
@@ -17,6 +17,8 @@ public class YapiException extends RuntimeException {
         super(cause);
     }
 
-    private static final long serialVersionUID = 379804795379140990L;
+    public YapiException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

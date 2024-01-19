@@ -155,7 +155,7 @@ public class YApiOpenServiceImpl implements YApiOpenService {
 
     private static void ensureSuccess(YApiCommonRespDto<?> resp) throws YapiException {
         if (resp == null) {
-            throw new YapiException();
+            throw new YapiException("resp is null");
         }
         if (resp.getErrcode() != 0) {
             throw new YapiException(resp.getErrmsg());
@@ -164,7 +164,7 @@ public class YApiOpenServiceImpl implements YApiOpenService {
 
     private void ensureSuccess(JsonNode respNode) {
         if (respNode == null) {
-            throw new YapiException();
+            throw new YapiException("respNode is null");
         }
         if (respNode.get("errcode").asInt() != 0 || respNode.get("data") == null) {
             throw new YapiException(respNode.toString());

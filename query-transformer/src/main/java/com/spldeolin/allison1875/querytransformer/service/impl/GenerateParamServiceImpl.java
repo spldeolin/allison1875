@@ -91,7 +91,7 @@ public class GenerateParamServiceImpl implements GenerateParamService {
             param.setType(cond.getNameAsString());
             param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));
             params.add(param);
-            imports.add(cond.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+            imports.add(cond.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(cond)));
             isJavabean = true;
         } else if (phrases.size() > 0) {
             for (PhraseDto phrase : phrases) {

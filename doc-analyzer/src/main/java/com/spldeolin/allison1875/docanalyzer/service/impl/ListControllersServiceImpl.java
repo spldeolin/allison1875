@@ -109,7 +109,8 @@ public class ListControllersServiceImpl implements ListControllersService {
     }
 
     private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
-        String qualifier = controller.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+        String qualifier = controller.getFullyQualifiedName()
+                .orElseThrow(() -> new QualifierAbsentException(controller));
         try {
             return LoadClassUtils.loadClass(qualifier, this.getClass().getClassLoader());
         } catch (ClassNotFoundException e) {

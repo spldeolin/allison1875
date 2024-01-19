@@ -91,9 +91,10 @@ public class FindServiceServiceImpl implements FindServiceService {
             for (CompilationUnit cu : serviceOrImplCus) {
                 if (cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration).isPresent()) {
                     ClassOrInterfaceDeclaration coid = cu.getPrimaryType().get().asClassOrInterfaceDeclaration();
-                    ClassOrInterfaceDeclaration finalTemp = service;
+                    final ClassOrInterfaceDeclaration finalTemp = service;
                     if (coid.getImplementedTypes().stream().anyMatch(implType -> implType.resolve().describe()
-                            .equals(finalTemp.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)))) {
+                            .equals(finalTemp.getFullyQualifiedName()
+                                    .orElseThrow(() -> new QualifierAbsentException(finalTemp))))) {
                         serviceImpls.add(coid);
                     }
                 }

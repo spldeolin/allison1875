@@ -127,7 +127,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             if (Lists.newArrayList(JavabeanTypeEnum.NEST_DTO_IN_REQ, JavabeanTypeEnum.NEST_DTO_IN_RESP)
                     .contains(javabeanType)) {
                 ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode()
-                        .orElseThrow(ParentAbsentException::new);
+                        .orElseThrow(() -> new ParentAbsentException(dto));
                 FieldDeclaration field = new FieldDeclaration();
                 if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
                     field.addAnnotation(AnnotationConstant.VALID);

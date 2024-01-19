@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -60,10 +61,15 @@ public class DesignServiceImpl implements DesignService {
 
     @Override
     public DesignMeta parseDesignMeta(ClassOrInterfaceDeclaration design) {
-        FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.META_FIELD_NAME)
-                .orElseThrow(IllegalChainException::new);
-        Expression initializer = queryMetaField.getVariable(0).getInitializer()
-                .orElseThrow(IllegalDesignException::new);
+        FieldDeclaration queryMetaField = design.getFieldByName(TokenWordConstant.META_FIELD_NAME).orElseThrow(
+                () -> new IllegalChainException(
+                        "Meta Field is not exist in Design [" + design.getNameAsString() + "]"));
+        if (CollectionUtils.isEmpty(queryMetaField.getVariables())) {
+            throw new IllegalDesignException("Variable is not exist in Meta Field, metaField=" + queryMetaField);
+        }
+        Expression initializer = queryMetaField.getVariable(0).getInitializer().orElseThrow(
+                () -> new IllegalDesignException(
+                        "Initializer is not exist in Meta Field, metaField=" + queryMetaField));
         String metaJson = StringEscapeUtils.unescapeJava(initializer.asStringLiteralExpr().getValue());
         return JsonUtils.toObject(metaJson, DesignMeta.class);
     }

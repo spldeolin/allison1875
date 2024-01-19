@@ -249,7 +249,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         DesignMeta meta = new DesignMeta();
         meta.setEntityQualifier(javabeanGeneration.getJavabeanQualifier());
         meta.setEntityName(javabeanGeneration.getJavabeanName());
-        meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+        meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(mapper)));
         meta.setMapperName(mapper.getNameAsString());
         meta.setMapperRelativePaths(config.getMapperXmlDirectoryPaths().stream()
                 .map(one -> one + File.separator + persistence.getMapperName() + ".xml").collect(Collectors.toList()));

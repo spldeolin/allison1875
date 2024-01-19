@@ -122,15 +122,15 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
             serviceCu.addImport(appendImport);
             serviceCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
             pair.getServiceImpls().forEach(serviceImpl -> serviceImpl.findCompilationUnit()
-                    .orElseThrow(() -> new CuAbsentException(serviceImpl))
-                            .addImport(appendImport));
+                    .orElseThrow(() -> new CuAbsentException(serviceImpl)).addImport(appendImport));
         }
 
         ServiceGeneration result = new ServiceGeneration();
         result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
         result.setService(service);
         result.getServiceImpls().addAll(pair.getServiceImpls());
-        result.setServiceQualifier(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+        result.setServiceQualifier(
+                service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         result.setMethodName(serviceMethod.getNameAsString());
         return result;
     }
@@ -160,7 +160,8 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         CompilationUnit serviceImplCu = new CompilationUnit();
         serviceImplCu.setPackageDeclaration(config.getServiceImplPackage());
         serviceImplCu.setImports(param.getCu().getImports());
-        serviceImplCu.addImport(service.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new));
+        serviceImplCu.addImport(
+                service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
         serviceImplCu.addImport(ImportConstant.SPRING_SERVICE);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();

@@ -113,7 +113,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");
 
             boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode()
-                    .orElseThrow(ParentAbsentException::new).getParentNode()
+                    .orElseThrow(() -> new ParentAbsentException(chainAnalysis.getChain())).getParentNode()
                     .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
 
             List<Statement> statements = Lists.newArrayList();

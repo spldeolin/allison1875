@@ -38,7 +38,8 @@ public class CompilationUnitUtils {
      *         /Locations.java
      */
     public static Path getCuAbsolutePath(CompilationUnit cu) throws StorageAbsentException {
-        return cu.getStorage().orElseThrow(StorageAbsentException::new).getPath();
+        return cu.getStorage().orElseThrow(() -> new StorageAbsentException("Cu [" + cu + "has not set Storage yet"))
+                .getPath();
     }
 
 }

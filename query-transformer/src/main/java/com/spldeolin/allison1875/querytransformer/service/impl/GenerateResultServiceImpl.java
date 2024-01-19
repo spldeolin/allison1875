@@ -100,7 +100,8 @@ public class GenerateResultServiceImpl implements GenerateResultService {
             JavabeanGeneration javabeanGeneration = javabeanGeneratorService.generate(javabeanArg);
             result.setRecordFlush(javabeanGeneration.getFileFlush());
             ClassOrInterfaceDeclaration resultType = javabeanGeneration.getCoid();
-            String javabeanQualifier = resultType.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+            String javabeanQualifier = resultType.getFullyQualifiedName()
+                    .orElseThrow(() -> new QualifierAbsentException(resultType));
             result.setElementTypeQualifier(javabeanQualifier);
             result.getImports().add(javabeanQualifier);
             if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)

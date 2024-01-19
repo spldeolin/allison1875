@@ -49,7 +49,7 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
             sourceCodeLines.add("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis"
                     + ".org/dtd/mybatis-3-mapper.dtd\">");
             sourceCodeLines.add(String.format("<mapper namespace=\"%s\">",
-                    mapper.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
+                    mapper.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(mapper))));
             sourceCodeLines.add("</mapper>");
             FileUtils.writeLines(mapperXmlFile, StandardCharsets.UTF_8.name(), sourceCodeLines);
         }
