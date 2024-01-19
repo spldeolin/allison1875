@@ -8,13 +8,13 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-08-27
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class FindMapperServiceImpl implements FindMapperService {
 
     @Override

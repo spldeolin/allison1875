@@ -4,12 +4,12 @@ import java.lang.annotation.Annotation;
 import java.util.Optional;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-06-10
  */
-@Log4j2
+@Slf4j
 public class AnnotationUtils {
 
     private AnnotationUtils() {
@@ -35,7 +35,7 @@ public class AnnotationUtils {
                     return annotation.get();
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error("fail to get Annotation", e);
             }
         }
         return null;

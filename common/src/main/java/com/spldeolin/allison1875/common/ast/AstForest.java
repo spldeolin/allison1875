@@ -15,14 +15,14 @@ import com.spldeolin.allison1875.common.service.AstFilterService;
 import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 可遍历的抽象语法树森林
  *
  * @author Deolin 2021-02-02
  */
-@Log4j2
+@Slf4j
 public class AstForest implements Iterable<CompilationUnit> {
 
     @Getter

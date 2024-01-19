@@ -17,12 +17,12 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-07-25
  */
-@Log4j2
+@Slf4j
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TreeNode {

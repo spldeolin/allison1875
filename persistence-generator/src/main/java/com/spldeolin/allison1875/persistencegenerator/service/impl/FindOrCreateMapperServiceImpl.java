@@ -20,13 +20,13 @@ import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-07-18
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService {
 
     @Inject

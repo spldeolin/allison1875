@@ -10,12 +10,12 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-02-02
  */
-@Log4j2
+@Slf4j
 public class MavenUtils {
 
     private static final MavenXpp3Reader mavenXpp3Reader = new MavenXpp3Reader();

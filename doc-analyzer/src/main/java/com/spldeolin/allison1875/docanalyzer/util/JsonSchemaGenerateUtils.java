@@ -5,12 +5,12 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.spldeolin.allison1875.docanalyzer.exception.DotAbsentInStringException;
 import com.spldeolin.allison1875.docanalyzer.exception.JsonSchemaException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-03-01
  */
-@Log4j2
+@Slf4j
 public class JsonSchemaGenerateUtils {
 
     private JsonSchemaGenerateUtils() {

@@ -31,13 +31,13 @@ import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-10-10
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class AnalyzeChainServiceImpl implements AnalyzeChainService {
 
     @Inject

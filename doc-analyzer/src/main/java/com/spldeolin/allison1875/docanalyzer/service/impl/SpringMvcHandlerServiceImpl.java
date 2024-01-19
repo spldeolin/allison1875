@@ -18,14 +18,14 @@ import com.spldeolin.allison1875.docanalyzer.service.ListControllersService;
 import com.spldeolin.allison1875.docanalyzer.service.MethodCollectService;
 import com.spldeolin.allison1875.docanalyzer.service.SpringMvcHandlerService;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 内聚了 遍历Class controllerClass下handler的功能
  *
  * @author Deolin 2020-06-10
  */
-@Log4j2
+@Slf4j
 public class SpringMvcHandlerServiceImpl implements SpringMvcHandlerService {
 
     @Inject

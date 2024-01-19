@@ -24,14 +24,14 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.exception.JsonException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * JSON工具类
  *
  * @author Deolin 2018-04-02
  */
-@Log4j2
+@Slf4j
 public class JsonUtils {
 
     private static final ObjectMapper om = createObjectMapper();

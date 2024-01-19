@@ -24,13 +24,13 @@ import com.spldeolin.allison1875.persistencegenerator.service.GenerateEntityServ
 import com.spldeolin.allison1875.persistencegenerator.service.MapperService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlFileService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-07-11
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class PersistenceGenerator implements Allison1875MainService {
 
     @Inject

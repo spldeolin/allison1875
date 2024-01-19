@@ -27,12 +27,12 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDt
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-08-13
  */
-@Log4j2
+@Slf4j
 @Singleton
 public class MapperServiceImpl implements MapperService {
 

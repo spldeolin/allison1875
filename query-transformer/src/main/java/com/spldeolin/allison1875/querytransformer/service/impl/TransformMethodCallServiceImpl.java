@@ -23,12 +23,12 @@ import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-06-09
  */
-@Log4j2
+@Slf4j
 @Singleton
 public class TransformMethodCallServiceImpl implements TransformMethodCallService {
 

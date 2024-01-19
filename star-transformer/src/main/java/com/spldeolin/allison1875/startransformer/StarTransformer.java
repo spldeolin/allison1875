@@ -20,13 +20,13 @@ import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService
 import com.spldeolin.allison1875.startransformer.service.DetectStarChainService;
 import com.spldeolin.allison1875.startransformer.service.GenerateWholeDtoService;
 import com.spldeolin.allison1875.startransformer.service.TransformStarChainService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2023-05-05
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class StarTransformer implements Allison1875MainService {
 
     @Inject

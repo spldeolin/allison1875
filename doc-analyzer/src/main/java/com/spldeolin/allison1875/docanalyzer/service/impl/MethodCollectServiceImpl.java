@@ -7,7 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.service.MethodCollectService;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 内聚了 收集coid下所有method的功能
@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class MethodCollectServiceImpl implements MethodCollectService {
 
     @Override

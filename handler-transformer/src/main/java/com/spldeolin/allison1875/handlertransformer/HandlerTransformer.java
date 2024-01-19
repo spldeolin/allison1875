@@ -28,13 +28,13 @@ import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairS
 import com.spldeolin.allison1875.handlertransformer.service.InitializerCollectService;
 import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
 import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-12-22
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class HandlerTransformer implements Allison1875MainService {
 
     @Inject

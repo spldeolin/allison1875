@@ -23,10 +23,16 @@
             <artifactId>guice</artifactId>
         </dependency>
 
-        <!-- log4j2 -->
+        <!-- slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- bridge for slf4j to log4j2-core (default impl) -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
         </dependency>
 
         <!-- jackson (jsr310) -->

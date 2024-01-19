@@ -31,13 +31,13 @@ import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlServi
 import com.spldeolin.allison1875.querytransformer.service.GenerateParamService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateResultService;
 import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-10-06
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class QueryTransformer implements Allison1875MainService {
 
     @Inject

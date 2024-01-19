@@ -12,13 +12,13 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-01-23
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class ParseFirstLineServiceImpl implements ParseFirstLineService {
 
     @Override
@@ -35,10 +35,10 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
                                 if (result.getHandlerUrl() == null) {
                                     result.setHandlerUrl(i.asStringLiteralExpr().getValue());
                                 } else {
-                                    log.warn("'handler' [{}] duplicate declaration, ignore.", i.toString());
+                                    log.warn("'handler' [{}] duplicate declaration, ignore.", i);
                                 }
                             } else {
-                                log.warn("'handler' [{}] is not String Literal, ignore.", i.toString());
+                                log.warn("'handler' [{}] is not String Literal, ignore.", i);
                             }
                         }
                         if (StringUtils.equalsAny(vd.getNameAsString(), "desc", "d")) {
@@ -46,10 +46,10 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
                                 if (result.getHandlerDescription() == null) {
                                     result.setHandlerDescription(i.asStringLiteralExpr().getValue());
                                 } else {
-                                    log.warn("'handler' [{}] duplicate declaration, ignore.", i.toString());
+                                    log.warn("'handler' [{}] duplicate declaration, ignore.", i);
                                 }
                             } else {
-                                log.warn("'desc' [{}] is not String Literal, ignore.", i.toString());
+                                log.warn("'desc' [{}] is not String Literal, ignore.", i);
                             }
                         }
                         if (StringUtils.equalsAny(vd.getNameAsString(), "service", "s")) {
@@ -58,8 +58,7 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
                             } else if (i.isStringLiteralExpr()) {
                                 result.setServiceName(i.asStringLiteralExpr().getValue());
                             } else {
-                                log.warn("'service' [{}] is not String Literal nor Class Expression, ignore.",
-                                        i.toString());
+                                log.warn("'service' [{}] is not String Literal nor Class Expression, ignore.", i);
                             }
                         }
                     }

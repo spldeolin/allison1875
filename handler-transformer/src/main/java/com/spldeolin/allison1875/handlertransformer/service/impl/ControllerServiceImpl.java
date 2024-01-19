@@ -22,13 +22,13 @@ import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.service.ControllerService;
 import com.spldeolin.allison1875.handlertransformer.service.CreateHandlerService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-01-12
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class ControllerServiceImpl implements ControllerService {
 
     @Inject

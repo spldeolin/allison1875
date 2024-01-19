@@ -25,13 +25,13 @@ import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownOutputService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2023-12-11
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class MarkdownOutputServiceImpl implements MarkdownOutputService {
 
     private static final EasyRandom er = initEasyRandom();

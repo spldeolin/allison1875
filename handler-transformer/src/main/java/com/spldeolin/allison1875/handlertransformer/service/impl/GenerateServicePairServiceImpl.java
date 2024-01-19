@@ -29,12 +29,12 @@ import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;
 import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
 import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-03-05
  */
-@Log4j2
+@Slf4j
 @Singleton
 public class GenerateServicePairServiceImpl implements GenerateServicePairService {
 

@@ -33,13 +33,13 @@ import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignServ
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.EntityKey;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-10-06
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class GenerateDesignServiceImpl implements GenerateDesignService {
 
     @Inject

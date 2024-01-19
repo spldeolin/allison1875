@@ -8,13 +8,13 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2024-01-01
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class ConcatExAntiDuplicationService implements AntiDuplicationService {
 
     @Override

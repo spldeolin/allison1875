@@ -28,13 +28,13 @@ import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.GenerateResultService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-06-01
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class GenerateResultServiceImpl implements GenerateResultService {
 
     @Inject

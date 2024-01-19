@@ -15,14 +15,14 @@ import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AstFilterService;
 import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Allison1875的嵌入式启动类
  *
  * @author Deolin 2020-12-06
  */
-@Log4j2
+@Slf4j
 public class Allison1875 {
 
     public static final String SHORT_VERSION = "1001S";

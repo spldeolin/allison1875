@@ -29,7 +29,7 @@ import com.spldeolin.allison1875.docanalyzer.service.YApiOpenService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiSyncService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MarkdownUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 将endpoints同步到YApi
@@ -37,7 +37,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-07-26
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class YApiSyncServiceImpl implements YApiSyncService {
 
     @Inject

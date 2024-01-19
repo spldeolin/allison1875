@@ -8,12 +8,12 @@ import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2023-05-26
  */
-@Log4j2
+@Slf4j
 public class FileFlush {
 
     private File src;

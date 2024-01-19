@@ -4,12 +4,12 @@ import java.util.List;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-12-06
  */
-@Log4j2
+@Slf4j
 public class DocAnalyzerModule extends Allison1875Module {
 
     private final DocAnalyzerConfig docAnalyzerConfig;

@@ -18,13 +18,13 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.service.QueryInformationSchemaService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-07-12
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class QueryInformationSchemaServiceImpl implements QueryInformationSchemaService {
 
     @Inject

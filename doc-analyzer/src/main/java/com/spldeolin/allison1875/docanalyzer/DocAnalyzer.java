@@ -26,7 +26,7 @@ import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
 import com.spldeolin.allison1875.docanalyzer.service.SimplyAnalyzeService;
 import com.spldeolin.allison1875.docanalyzer.service.SpringMvcHandlerService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiSyncService;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * doc-analyzer的主流程
@@ -34,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class DocAnalyzer implements Allison1875MainService {
 
     @Inject
@@ -133,7 +133,7 @@ public class DocAnalyzer implements Allison1875MainService {
             }
         }
 
-        log.info(endpoints.size());
+        log.info("endpoints.size={}", endpoints.size());
     }
 
 }

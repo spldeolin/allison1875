@@ -14,13 +14,13 @@ import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
 import com.spldeolin.allison1875.docanalyzer.service.ObtainConcernedResponseBodyService;
 import com.spldeolin.allison1875.docanalyzer.util.AnnotationUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-06-18
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeService {
 
     @Inject
@@ -56,7 +56,7 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
                     log.warn("方法[{}]存在RequestBody以外的参数[{}]，忽略", name, parameter);
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error("fail to get Request Body, handler={}", handler.getNameAsString(), e);
             }
         }
 
@@ -76,13 +76,13 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
     public ResolvedType getResponseBody(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         try {
             if (AnnotationUtils.isAnnotationAbsent(controller, RestController.class)
-                    && AnnotationUtils.isAnnotationAbsent(
-                    handler, ResponseBody.class)) {
+                    && AnnotationUtils.isAnnotationAbsent(handler, ResponseBody.class)) {
                 return null;
             }
             return obtainConcernedResponseBodyService.findConcernedResponseBodyType(handler);
         } catch (Exception e) {
-            log.error(e);
+            log.error("fail to get Response Body, controller={} handler={}", controller.getNameAsString(),
+                    handler.getNameAsString(), e);
             return null;
         }
     }

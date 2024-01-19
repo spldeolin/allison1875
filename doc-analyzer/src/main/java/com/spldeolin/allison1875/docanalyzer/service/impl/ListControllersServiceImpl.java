@@ -19,7 +19,7 @@ import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
 import com.spldeolin.allison1875.docanalyzer.javabean.ControllerFullDto;
 import com.spldeolin.allison1875.docanalyzer.service.ListControllersService;
 import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 内聚了 遍历AstForest中每一个controller的功能
@@ -27,7 +27,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2020-06-10
  */
 @Singleton
-@Log4j2
+@Slf4j
 public class ListControllersServiceImpl implements ListControllersService {
 
     @Override

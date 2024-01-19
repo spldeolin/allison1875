@@ -6,12 +6,12 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.common.exception.CompilationUnitParseException;
 import com.spldeolin.allison1875.common.exception.StorageAbsentException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2021-12-06
  */
-@Log4j2
+@Slf4j
 public class CompilationUnitUtils {
 
     private CompilationUnitUtils() {
