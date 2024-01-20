@@ -1,21 +1,17 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.nio.file.Path;
-import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
-import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
@@ -27,7 +23,6 @@ import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServicePara
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;
-import com.spldeolin.allison1875.handlertransformer.service.FindServiceService;
 import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,9 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 public class GenerateServicePairServiceImpl implements GenerateServicePairService {
-
-    @Inject
-    private FindServiceService findServiceProc;
 
     @Inject
     private HandlerTransformerConfig config;
@@ -53,34 +45,10 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
     @Override
     public ServiceGeneration generateService(GenerateServiceParam param) {
         FirstLineDto firstLineDto = param.getFirstLineDto();
-        String presentServiceQualifier = firstLineDto.getPresentServiceQualifier();
-        String serviceName = firstLineDto.getServiceName();
 
-        ServicePairDto pair;
-
-        if (StringUtils.isNotBlank(presentServiceQualifier)) {
-            // 指定了Service全限定名
-            pair = findServiceProc.findPresent(param.getAstForest(), presentServiceQualifier,
-                    param.getQualifier2Pair());
-            if (pair.getService() == null) {
-                log.warn("cannot find Service [{}]", presentServiceQualifier);
-                return null;
-            }
-
-        } else if (StringUtils.isNotBlank(serviceName)) {
-            String standardizedServiceName = standardizeServiceName(serviceName);
-            // 指定了Service的类名
-            pair = findServiceProc.findGenerated(standardizedServiceName, param.getName2Pair(), param.getAstForest());
-            if (pair.getService() == null) {
-                // 生成全新的 Service 与 ServiceImpl （往往时第一次获取到ServiceName时）
-                pair = generateServicePair(param, standardizedServiceName, param.getName2Pair());
-            }
-
-        } else {
-            // 生成全新的 Service 与 ServiceImpl
-            serviceName = MoreStringUtils.upperFirstLetter(param.getFirstLineDto().getHandlerName()) + "Service";
-            pair = generateServicePair(param, serviceName, param.getName2Pair());
-        }
+        // 生成全新的 Service 与 ServiceImpl
+        String serviceName = MoreStringUtils.upperFirstLetter(param.getFirstLineDto().getHandlerName()) + "Service";
+        ServicePairDto pair = generateServicePair(param, serviceName);
 
         // 调用handle创建Service Method，添加到ServicePair中
         CreateServiceMethodHandleResult methodGeneration = createServiceMethodService.createMethodImpl(firstLineDto,
@@ -97,51 +65,46 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         serviceMethod.setBody(null);
         ClassOrInterfaceDeclaration service = pair.getService();
         service.addMember(serviceMethod);
-        CompilationUnit serverCu = service.findCompilationUnit().orElseThrow(() -> new CuAbsentException(service));
-        serverCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-        serverCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
-        serverCu.addImport(ImportConstant.JAVA_UTIL);
-        serverCu.addImport(config.getPageTypeQualifier());
+        pair.getServiceCu().addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+        pair.getServiceCu().addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
+        pair.getServiceCu().addImport(ImportConstant.JAVA_UTIL);
+        pair.getServiceCu().addImport(config.getPageTypeQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), service.getName());
 
         // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
-        for (ClassOrInterfaceDeclaration serviceImpl : pair.getServiceImpls()) {
-            serviceImpl.addMember(serviceMethodImpl);
-            CompilationUnit serverImplCu = serviceImpl.findCompilationUnit()
-                    .orElseThrow(() -> new CuAbsentException(serviceImpl));
-            serverImplCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-            serverImplCu.addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
-            serverImplCu.addImport(ImportConstant.JAVA_UTIL);
-            serverImplCu.addImport(config.getPageTypeQualifier());
-            log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
-        }
+
+        ClassOrInterfaceDeclaration serviceImpl = pair.getServiceImpl();
+        serviceImpl.addMember(serviceMethodImpl);
+        pair.getServiceImplCu().addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+        pair.getServiceImplCu().addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
+        pair.getServiceImplCu().addImport(ImportConstant.JAVA_UTIL);
+        pair.getServiceImplCu().addImport(config.getPageTypeQualifier());
+        log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
 
         // 将生成的方法所需的import 均添加到 Service 和 每个 ServiceImpl
         for (String appendImport : methodGeneration.getAppendImports()) {
-            CompilationUnit serviceCu = service.findCompilationUnit().orElseThrow(() -> new CuAbsentException(service));
-            serviceCu.addImport(appendImport);
-            serviceCu.addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-            pair.getServiceImpls().forEach(serviceImpl -> serviceImpl.findCompilationUnit()
-                    .orElseThrow(() -> new CuAbsentException(serviceImpl)).addImport(appendImport));
+            pair.getServiceCu().addImport(appendImport);
+            pair.getServiceCu().addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
+            pair.getServiceImplCu().addImport(appendImport);
         }
 
         ServiceGeneration result = new ServiceGeneration();
         result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
         result.setService(service);
-        result.getServiceImpls().addAll(pair.getServiceImpls());
+        result.setServiceCu(pair.getServiceCu());
+        result.setServiceImpl(serviceImpl);
+        result.setServiceImplCu(pair.getServiceImplCu());
         result.setServiceQualifier(
                 service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         result.setMethodName(serviceMethod.getNameAsString());
         return result;
     }
 
-    private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName,
-            Map<String, ServicePairDto> name2Pair) {
+    private ServicePairDto generateServicePair(GenerateServiceParam param, String serviceName) {
         Path sourceRoot = param.getAstForest().getAstForestRoot();
-        ServicePairDto pair;
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(config.getServicePackage());
-        serviceCu.setImports(param.getCu().getImports());
+        serviceCu.setImports(param.getControllerCu().getImports());
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         String comment = concatServiceDescription(param.getFirstLineDto());
         JavadocUtils.setJavadoc(service, comment, config.getAuthor());
@@ -159,7 +122,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
         CompilationUnit serviceImplCu = new CompilationUnit();
         serviceImplCu.setPackageDeclaration(config.getServiceImplPackage());
-        serviceImplCu.setImports(param.getCu().getImports());
+        serviceImplCu.setImports(param.getControllerCu().getImports());
         serviceImplCu.addImport(
                 service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
@@ -181,21 +144,12 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
         serviceImplCu.setStorage(absolutePath);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
-        pair = new ServicePairDto().setService(service).setServiceImpls(Lists.newArrayList(serviceImpl));
-        name2Pair.put(serviceName, pair);
+        ServicePairDto pair = new ServicePairDto();
+        pair.setService(service);
+        pair.setServiceCu(serviceCu);
+        pair.setServiceImpl(serviceImpl);
+        pair.setServiceImplCu(serviceImplCu);
         return pair;
-    }
-
-    private String standardizeServiceName(String serviceName) {
-        String result = MoreStringUtils.upperFirstLetter(serviceName);
-        if (!result.endsWith("Service")) {
-            result += "Service";
-        }
-        // report standardize
-        if (!result.equals(serviceName)) {
-            log.info("Service name standardize from [{}] to [{}]", serviceName, result);
-        }
-        return result;
     }
 
     private String concatServiceDescription(FirstLineDto firstLine) {

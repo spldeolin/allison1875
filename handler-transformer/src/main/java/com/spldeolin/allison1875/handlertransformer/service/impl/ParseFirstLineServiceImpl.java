@@ -52,15 +52,6 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
                                 log.warn("'desc' [{}] is not String Literal, ignore.", i);
                             }
                         }
-                        if (StringUtils.equalsAny(vd.getNameAsString(), "service", "s")) {
-                            if (i.isClassExpr()) {
-                                result.setPresentServiceQualifier(i.asClassExpr().getType().resolve().describe());
-                            } else if (i.isStringLiteralExpr()) {
-                                result.setServiceName(i.asStringLiteralExpr().getValue());
-                            } else {
-                                log.warn("'service' [{}] is not String Literal nor Class Expression, ignore.", i);
-                            }
-                        }
                     }
                 }
             }));

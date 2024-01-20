@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.handlertransformer;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -15,7 +14,6 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.ImportConstant;
-import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
@@ -86,27 +84,20 @@ public class HandlerTransformer implements Allison1875MainService {
 
                     // 创建所有所需的Javabean
                     ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespService.createJavabeans(astForest, firstLineDto, dtos);
-                    flushes.addAll(reqDtoRespDtoInfo.getJavabeanCus().stream().map(FileFlush::build)
-                            .collect(Collectors.toList()));
+                    reqDtoRespDtoInfo.getJavabeanCus().stream().map(FileFlush::build).forEach(flushes::add);
 
                     // 创建Service Pair
                     GenerateServiceParam param = new GenerateServiceParam();
-                    param.setCu(cu);
+                    param.setControllerCu(cu);
                     param.setFirstLineDto(firstLineDto);
                     param.setReqDtoRespDtoInfo(reqDtoRespDtoInfo);
                     param.setAstForest(astForest);
-                    param.setQualifier2Pair(qualifier2Pair);
-                    param.setName2Pair(name2Pair);
                     ServiceGeneration serviceGeneration = generateServicePairService.generateService(param);
                     if (serviceGeneration == null) {
                         continue;
                     }
-                    flushes.add(FileFlush.build(serviceGeneration.getService().findCompilationUnit()
-                            .orElseThrow(() -> new CuAbsentException(serviceGeneration.getService()))));
-                    for (ClassOrInterfaceDeclaration serviceImpl : serviceGeneration.getServiceImpls()) {
-                        flushes.add(FileFlush.build(serviceImpl.findCompilationUnit()
-                                .orElseThrow(() -> new CuAbsentException(serviceImpl))));
-                    }
+                    flushes.add(FileFlush.build(serviceGeneration.getServiceCu()));
+                    flushes.add(FileFlush.build(serviceGeneration.getServiceImplCu()));
 
                     // 在controller中创建handler，并替换掉
                     HandlerCreation handlerCreation = controllerService.createHandlerToController(firstLineDto,

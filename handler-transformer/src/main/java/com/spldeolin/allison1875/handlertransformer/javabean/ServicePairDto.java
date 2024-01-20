@@ -1,8 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
-import java.util.List;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.google.common.collect.Lists;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -18,6 +17,10 @@ public class ServicePairDto {
 
     ClassOrInterfaceDeclaration service;
 
-    List<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
+    CompilationUnit serviceCu;
+
+    ClassOrInterfaceDeclaration serviceImpl;
+
+    CompilationUnit serviceImplCu;
 
 }

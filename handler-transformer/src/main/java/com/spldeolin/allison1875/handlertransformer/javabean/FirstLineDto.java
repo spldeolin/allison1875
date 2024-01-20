@@ -22,10 +22,6 @@ public class FirstLineDto {
 
     String handlerDescription;
 
-    String presentServiceQualifier;
-
-    String serviceName;
-
     String lotNo;
 
     @Override

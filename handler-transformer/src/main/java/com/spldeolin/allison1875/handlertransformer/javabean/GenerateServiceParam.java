@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
-import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import lombok.AccessLevel;
@@ -14,16 +13,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateServiceParam {
 
-    CompilationUnit cu;
+    CompilationUnit controllerCu;
 
     FirstLineDto firstLineDto;
 
     ReqDtoRespDtoInfo reqDtoRespDtoInfo;
 
     AstForest astForest;
-
-    Map<String, ServicePairDto> qualifier2Pair;
-
-    Map<String, ServicePairDto> name2Pair;
 
 }
