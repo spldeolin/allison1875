@@ -13,11 +13,6 @@
     <dependencies>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>doc-analyzer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -45,6 +40,11 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>star-transformer</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>sqlapi-generator</artifactId>
+            <version>10.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
