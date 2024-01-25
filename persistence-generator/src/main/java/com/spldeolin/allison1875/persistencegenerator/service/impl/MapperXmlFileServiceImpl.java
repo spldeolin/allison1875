@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.FileFlush;
@@ -56,7 +55,7 @@ public class MapperXmlFileServiceImpl implements MapperXmlFileService {
 
         List<String> newLines = Lists.newArrayList();
 
-        String content = Files.toString(mapperXmlFile, StandardCharsets.UTF_8);
+        String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
         List<String> lines = MoreStringUtils.splitLineByLine(content);
         List<String> generatedLines = getGeneratedLines(sourceCodes, persistence);
 

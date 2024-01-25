@@ -10,11 +10,11 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
@@ -144,7 +144,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
 
             List<String> newLines = Lists.newArrayList();
             try {
-                List<String> lines = Files.readLines(mapperXml, StandardCharsets.UTF_8);
+                List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
                 Collections.reverse(lines);
                 for (String line : lines) {
                     newLines.add(line);
