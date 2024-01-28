@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.sqlapigenerator.javabean;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -12,8 +13,10 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ControllerGenerationDto {
+public class ControllerMethodGenerationDto {
 
     FileFlush flush;
+
+    MethodDeclaration method;
 
 }

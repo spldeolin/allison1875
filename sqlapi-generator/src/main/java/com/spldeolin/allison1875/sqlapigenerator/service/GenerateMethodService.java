@@ -1,24 +1,25 @@
 package com.spldeolin.allison1875.sqlapigenerator.service;
 
-import java.io.File;
 import java.util.List;
-import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.ControllerGenerationDto;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.ControllerMethodGenerationDto;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.MapperMethodGenerationDto;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.ServiceMethodGenerationDto;
+import com.spldeolin.allison1875.sqlapigenerator.service.impl.GenerateMethodServiceImpl;
 
 /**
  * @author Deolin 2024-01-21
  */
+@ImplementedBy(GenerateMethodServiceImpl.class)
 public interface GenerateMethodService {
 
-    List<FileFlush> generateMapperXmlMethod(List<File> mapperXmls);
+    List<String> generateMapperXmlMethod(MapperMethodGenerationDto mapperMethodGeneration);
 
     MapperMethodGenerationDto generateMapperMethod(CoidsOnTrackDto coidsOnTrack);
 
     ServiceMethodGenerationDto generateServiceMethod(CoidsOnTrackDto coidsOnTrack);
 
-    ControllerGenerationDto generateControllerMethod(CoidsOnTrackDto coidsOnTrack);
+    ControllerMethodGenerationDto generateControllerMethod(CoidsOnTrackDto coidsOnTrack);
 
 }

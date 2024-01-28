@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>sqlapi-generator</artifactId>
-            <version>10.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 

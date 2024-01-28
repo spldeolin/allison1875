@@ -28,9 +28,11 @@ public class CoidsOnTrackDto {
 
     final List<ClassOrInterfaceDeclaration> serviceImpls = Lists.newArrayList();
 
-    List<CompilationUnit> serviceImplCus;
+    final List<CompilationUnit> serviceImplCus = Lists.newArrayList();
 
     ClassOrInterfaceDeclaration mapper;
+
+    CompilationUnit mapperCu;
 
     final List<File> mapperXmls = Lists.newArrayList();
 
