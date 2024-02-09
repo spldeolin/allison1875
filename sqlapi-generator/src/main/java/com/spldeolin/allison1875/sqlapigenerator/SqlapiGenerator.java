@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.ControllerMethodGenerationDto;
@@ -38,6 +39,9 @@ public class SqlapiGenerator implements Allison1875MainService {
     @Inject
     private AddMethodService addMethodService;
 
+    @Inject
+    private ImportService importService;
+
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
@@ -49,12 +53,12 @@ public class SqlapiGenerator implements Allison1875MainService {
         MapperMethodGenerationDto mapperMethodGeneration = generateMethodService.generateMapperMethod(coidsOnTrack,
                 astForest);
         flushes.addAll(mapperMethodGeneration.getFlushes());
-        List<String> imports = Lists.newArrayList(mapperMethodGeneration.getParamTypeQualifier(),
-                mapperMethodGeneration.getResultTypeQualifier());
+        List<String> imports = Lists.newArrayList();
 
         // 将Mapper方法追加到Mapper
         LexicalPreservingPrinter.setup(coidsOnTrack.getMapperCu());
-        addMethodService.addMethodToCoid(imports, mapperMethodGeneration.getMethod(), coidsOnTrack.getMapper());
+        addMethodService.addMethodToCoid(imports, mapperMethodGeneration.getMethod().clone(), coidsOnTrack.getMapper());
+        importService.extractQualifiedTypeToImport(coidsOnTrack.getMapperCu());
         flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getMapperCu()));
 
         // 生成Mapper xml方法
@@ -72,7 +76,9 @@ public class SqlapiGenerator implements Allison1875MainService {
 
             // 将Service方法追加到Service
             LexicalPreservingPrinter.setup(coidsOnTrack.getServiceCu());
-            addMethodService.addMethodToCoid(imports, serviceMethodGeneration.getMethod(), coidsOnTrack.getService());
+            addMethodService.addMethodToCoid(imports, serviceMethodGeneration.getMethod().clone(),
+                    coidsOnTrack.getService());
+            importService.extractQualifiedTypeToImport(coidsOnTrack.getServiceCu());
             flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getServiceCu()));
 
             // 将Service方法追加到ServiceImpl
@@ -81,7 +87,8 @@ public class SqlapiGenerator implements Allison1875MainService {
                 ClassOrInterfaceDeclaration serviceImpl = coidsOnTrack.getServiceImpls().get(i);
                 LexicalPreservingPrinter.setup(serviceImplCu);
                 addAutowiredService.ensureAuwired(coidsOnTrack.getMapper(), serviceImpl);
-                addMethodService.addMethodToCoid(imports, serviceMethodGeneration.getMethodImpl(), serviceImpl);
+                addMethodService.addMethodToCoid(imports, serviceMethodGeneration.getMethodImpl().clone(), serviceImpl);
+                importService.extractQualifiedTypeToImport(serviceImplCu);
                 flushes.add(FileFlush.buildLexicalPreserving(serviceImplCu));
             }
             if (coidsOnTrack.getController() != null) {
@@ -95,8 +102,9 @@ public class SqlapiGenerator implements Allison1875MainService {
                 // 将Controller方法追加到Controller
                 LexicalPreservingPrinter.setup(coidsOnTrack.getControllerCu());
                 addAutowiredService.ensureAuwired(coidsOnTrack.getService(), coidsOnTrack.getController());
-                addMethodService.addMethodToCoid(imports, controllerMethodGeneration.getMethod(),
+                addMethodService.addMethodToCoid(imports, controllerMethodGeneration.getMethod().clone(),
                         coidsOnTrack.getController());
+                importService.extractQualifiedTypeToImport(coidsOnTrack.getControllerCu());
                 flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getControllerCu()));
             }
         }

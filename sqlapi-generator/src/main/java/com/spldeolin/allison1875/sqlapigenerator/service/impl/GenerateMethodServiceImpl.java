@@ -105,13 +105,13 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
             JavabeanArg arg = new JavabeanArg();
             arg.setAstForest(astForest);
             arg.setPackageName(config.getMapperConditionPackage());
-            arg.setClassName(MoreStringUtils.upperFirstLetter(config.getMethodName()) + "Coid");
+            arg.setClassName(MoreStringUtils.upperFirstLetter(config.getMethodName()) + "Cond");
             arg.setAuthorName(config.getAuthor());
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
             JavabeanGeneration generation = javabeanGeneratorService.generate(arg);
             result.setParamTypeQualifier(generation.getJavabeanQualifier());
             result.getFlushes().add(generation.getFileFlush());
-            method.addParameter(generation.getJavabeanName(), "cond");
+            method.addParameter(generation.getJavabeanQualifier(), "cond");
 
             // result
             arg = new JavabeanArg();
@@ -124,9 +124,9 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
             result.setResultTypeQualifier(generation.getJavabeanQualifier());
             result.getFlushes().add(generation.getFileFlush());
             if (config.getSelectListOrOne()) {
-                method.setType(String.format("List<%s>", generation.getJavabeanName()));
+                method.setType(String.format("List<%s>", generation.getJavabeanQualifier()));
             } else {
-                method.setType(generation.getJavabeanName());
+                method.setType(generation.getJavabeanQualifier());
             }
         } else if (stmt instanceof Update) {
             method.setType("int");
