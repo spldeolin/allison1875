@@ -12,7 +12,6 @@ import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
@@ -105,7 +104,7 @@ public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
             analysis.setPhrases(phrases);
             String wholeDtoName = this.buildWholeDtoNameFromEntityName(analysis.getCftEntityName());
             analysis.setWholeDtoName(wholeDtoName);
-            String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(analysis)));
+            String hash = StringUtils.upperCase(HashingUtils.hashString(analysis.toString()));
             analysis.setLotNo(String.format("ST%s-%s", Allison1875.SHORT_VERSION, hash));
             return analysis;
         }

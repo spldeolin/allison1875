@@ -9,7 +9,6 @@ import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.service.EndpointToStringService;
@@ -75,7 +74,7 @@ public class EndpointToStringServiceImpl implements EndpointToStringService {
                 } else {
                     allison1875Announce += BaseConstant.NEW_LINE;
                 }
-                String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(dto)));
+                String hash = StringUtils.upperCase(HashingUtils.hashString(dto.toString()));
                 allison1875Announce +=
                         BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + String.format("DA%s-%s", Allison1875.SHORT_VERSION,
                                 hash);

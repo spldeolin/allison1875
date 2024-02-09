@@ -20,7 +20,6 @@ import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
@@ -169,7 +168,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         result.setUpdatePhrases(updatePhrases);
         result.setChain(chain);
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
-        String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(result)));
+        String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
     }

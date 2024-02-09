@@ -8,7 +8,6 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.util.HashingUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
@@ -64,7 +63,7 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
             result.setHandlerDescription("未指定描述");
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
-        String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(result)));
+        String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("HT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
     }
