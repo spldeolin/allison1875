@@ -4,6 +4,7 @@ import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.JdbcTypeServiceImpl;
 
 /**
@@ -12,6 +13,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.JdbcTypeServi
 @ImplementedBy(JdbcTypeServiceImpl.class)
 public interface JdbcTypeService {
 
-    JavaTypeNamingDto jdbcType2javaType(InformationSchemaDto columnMeta, AstForest astForest);
+    JavaTypeNamingDto jdbcType2javaType(InformationSchemaDto columnMeta, AstForest astForest,
+            PersistenceDto persistenceDto);
 
 }

@@ -76,6 +76,7 @@ public class PersistenceGenerator implements Allison1875MainService {
 
         List<FileFlush> flushes = Lists.newArrayList();
         for (PersistenceDto persistence : persistenceDtos) {
+            flushes.addAll(persistence.getFileFlushes());
 
             // 生成Entity
             JavabeanGeneration javabeanGeneration = generateEntityService.generate(persistence, astForest);

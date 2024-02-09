@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.HashingUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNamingDto;
@@ -63,6 +62,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
             persistences.put(infoSchema.getTableName(), dto);
         }
         for (InformationSchemaDto infoSchema : infoSchemas) {
+            PersistenceDto persistenceDto = persistences.get(infoSchema.getTableName());
             String columnName = infoSchema.getColumnName();
             if (config.getHiddenColumns().contains(columnName)) {
                 continue;
@@ -70,7 +70,7 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
             PropertyDto property = new PropertyDto();
             property.setColumnName(columnName);
             property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
-            JavaTypeNamingDto javaType = jdbcTypeService.jdbcType2javaType(infoSchema, astForest);
+            JavaTypeNamingDto javaType = jdbcTypeService.jdbcType2javaType(infoSchema, astForest, persistenceDto);
             if (javaType == null) {
                 log.warn("出现了预想外的类型 columnName={} dataType={} columnType={}", infoSchema.getColumnName(),
                         infoSchema.getDataType(), infoSchema.getColumnType());
@@ -81,24 +81,23 @@ public class BuildPersistenceDtoServiceImpl implements BuildPersistenceDtoServic
             property.setLength(infoSchema.getCharacterMaximumLength());
             property.setNotnull("NO".equals(infoSchema.getIsNullable()));
             property.setDefaultV(infoSchema.getColumnDefault());
-            PersistenceDto dto = persistences.get(infoSchema.getTableName());
 
-            dto.getProperties().add(property);
+            persistenceDto.getProperties().add(property);
             if ("PRI".equalsIgnoreCase(infoSchema.getColumnKey())) {
-                dto.getIdProperties().add(property);
+                persistenceDto.getIdProperties().add(property);
             } else {
-                dto.getNonIdProperties().add(property);
+                persistenceDto.getNonIdProperties().add(property);
                 if (columnName.endsWith("_id") && !config.getNotKeyColumns().contains(columnName)) {
-                    dto.getKeyProperties().add(property);
+                    persistenceDto.getKeyProperties().add(property);
                 }
             }
 
             if (columnName.equals(deleteFlag)) {
-                dto.setIsDeleteFlagExist(true);
+                persistenceDto.setIsDeleteFlagExist(true);
             }
 
-            String hash = StringUtils.upperCase(HashingUtils.hashString(JsonUtils.toJson(dto)));
-            dto.setLotNo(String.format("PG%s-%s", Allison1875.SHORT_VERSION, hash));
+            String hash = StringUtils.upperCase(HashingUtils.hashString(persistenceDto.toString()));
+            persistenceDto.setLotNo(String.format("PG%s-%s", Allison1875.SHORT_VERSION, hash));
         }
 
         reportWhileNoDeleleFlag(deleteFlag, persistences);

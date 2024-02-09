@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.persistencegenerator.javabean;
 
 import java.util.List;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -45,6 +47,8 @@ public class PersistenceDto {
      * 存在逻辑删除标识符
      */
     Boolean isDeleteFlagExist = false;
+
+    final List<FileFlush> fileFlushes = Lists.newArrayList();
 
     String lotNo;
 
