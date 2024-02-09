@@ -16,6 +16,12 @@
             <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
+        <!-- jsqlparser -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

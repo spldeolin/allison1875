@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.sqlapigenerator;
 
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
@@ -15,16 +16,6 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SqlapiGeneratorConfig extends Allison1875Config {
-
-    /**
-     * 控制层 @RequestBody类型所在包的包名
-     */
-    @NotEmpty String reqDtoPackage;
-
-    /**
-     * 控制层 @ResponseBody业务数据部分类型所在包的包名
-     */
-    @NotEmpty String respDtoPackage;
 
     /**
      * Mapper方法签名中Condition类的包名
@@ -50,6 +41,11 @@ public class SqlapiGeneratorConfig extends Allison1875Config {
      * 方法名
      */
     @NotEmpty String methodName;
+
+    /**
+     * select返回List还是单个？
+     */
+    @NotNull Boolean selectListOrOne;
 
     @NotEmpty String sql;
 

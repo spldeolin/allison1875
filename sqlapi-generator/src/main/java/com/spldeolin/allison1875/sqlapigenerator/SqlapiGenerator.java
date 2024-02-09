@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.sqlapigenerator;
 
 import java.util.List;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.common.collect.Lists;
@@ -45,49 +46,57 @@ public class SqlapiGenerator implements Allison1875MainService {
         log.info("list coidsOnTrack={}", coidsOnTrack);
 
         // 生成Mapper方法，以及方法签名所需的Javabean
-        MapperMethodGenerationDto mapperMethodGeneration = generateMethodService.generateMapperMethod(coidsOnTrack);
+        MapperMethodGenerationDto mapperMethodGeneration = generateMethodService.generateMapperMethod(coidsOnTrack,
+                astForest);
         flushes.addAll(mapperMethodGeneration.getFlushes());
+        List<String> imports = Lists.newArrayList(mapperMethodGeneration.getParamTypeQualifier(),
+                mapperMethodGeneration.getResultTypeQualifier());
 
         // 将Mapper方法追加到Mapper
         LexicalPreservingPrinter.setup(coidsOnTrack.getMapperCu());
-        coidsOnTrack.getMapperCu().addImport(mapperMethodGeneration.getParamTypeQualifier());
-        coidsOnTrack.getMapperCu().addImport(mapperMethodGeneration.getResultTypeQualifier());
-        addMethodService.addMethodToCoid(mapperMethodGeneration.getMethod(), coidsOnTrack.getMapper());
+        addMethodService.addMethodToCoid(imports, mapperMethodGeneration.getMethod(), coidsOnTrack.getMapper());
         flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getMapperCu()));
 
         // 生成Mapper xml方法
         List<String> xmlMethodCodeLines = generateMethodService.generateMapperXmlMethod(mapperMethodGeneration);
 
         // 将Mapper xml方法追加到Mapper xml
-        FileFlush xmlFlush = addMethodService.addMethodToXml(xmlMethodCodeLines);
-        flushes.add(xmlFlush);
+        List<FileFlush> xmlFlushes = addMethodService.addMethodToXml(xmlMethodCodeLines, coidsOnTrack);
+        flushes.addAll(xmlFlushes);
 
         if (coidsOnTrack.getService() != null) {
             // 生成Service方法，以及方法签名所需的Javabean
             ServiceMethodGenerationDto serviceMethodGeneration = generateMethodService.generateServiceMethod(
-                    coidsOnTrack);
+                    coidsOnTrack, mapperMethodGeneration);
             flushes.addAll(serviceMethodGeneration.getFlushes());
 
             // 将Service方法追加到Service
             LexicalPreservingPrinter.setup(coidsOnTrack.getServiceCu());
-            addMethodService.addMethodToCoid(serviceMethodGeneration.getMethod(), coidsOnTrack.getService());
-            for (ClassOrInterfaceDeclaration serviceImpl : coidsOnTrack.getServiceImpls()) {
-                addAutowiredService.ensureAuwired(coidsOnTrack.getMapper(), serviceImpl);
-                addMethodService.addMethodToCoid(serviceMethodGeneration.getMethodImpl(), serviceImpl);
-            }
+            addMethodService.addMethodToCoid(imports, serviceMethodGeneration.getMethod(), coidsOnTrack.getService());
             flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getServiceCu()));
 
+            // 将Service方法追加到ServiceImpl
+            for (int i = 0; i < coidsOnTrack.getServiceImplCus().size(); i++) {
+                CompilationUnit serviceImplCu = coidsOnTrack.getServiceImplCus().get(i);
+                ClassOrInterfaceDeclaration serviceImpl = coidsOnTrack.getServiceImpls().get(i);
+                LexicalPreservingPrinter.setup(serviceImplCu);
+                addAutowiredService.ensureAuwired(coidsOnTrack.getMapper(), serviceImpl);
+                addMethodService.addMethodToCoid(imports, serviceMethodGeneration.getMethodImpl(), serviceImpl);
+                flushes.add(FileFlush.buildLexicalPreserving(serviceImplCu));
+            }
             if (coidsOnTrack.getController() != null) {
                 // 生成Controller方法，以及方法签名所需的Javabean
                 ControllerMethodGenerationDto controllerMethodGeneration =
-                        generateMethodService.generateControllerMethod(
-                        coidsOnTrack);
-                flushes.add(controllerMethodGeneration.getFlush());
+                        generateMethodService.generateControllerMethod(coidsOnTrack, serviceMethodGeneration,
+                                astForest);
+                controllerMethodGeneration.getImports().forEach(impt -> coidsOnTrack.getControllerCu().addImport(impt));
+                flushes.addAll(controllerMethodGeneration.getFlushes());
 
                 // 将Controller方法追加到Controller
                 LexicalPreservingPrinter.setup(coidsOnTrack.getControllerCu());
                 addAutowiredService.ensureAuwired(coidsOnTrack.getService(), coidsOnTrack.getController());
-                addMethodService.addMethodToCoid(controllerMethodGeneration.getMethod(), coidsOnTrack.getController());
+                addMethodService.addMethodToCoid(imports, controllerMethodGeneration.getMethod(),
+                        coidsOnTrack.getController());
                 flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getControllerCu()));
             }
         }

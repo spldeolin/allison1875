@@ -174,6 +174,13 @@
                 <version>3.8.5</version>
             </dependency>
 
+            <!-- jsqlparser -->
+            <dependency>
+                <groupId>com.github.jsqlparser</groupId>
+                <artifactId>jsqlparser</artifactId>
+                <version>4.8</version>
+            </dependency>
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>

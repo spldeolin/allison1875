@@ -50,7 +50,7 @@ public class ListCoidsOnTrackServiceImpl implements ListCoidsOnTrackService {
                                 cot.setService(coid);
                                 cot.setServiceCu(cu);
                             }
-                            if (coid.getExtendedTypes().stream()
+                            if (coid.getImplementedTypes().stream()
                                     .anyMatch(extendedType -> config.getServiceName().equals(extendedType.getNameAsString()))) {
                                 cot.getServiceImpls().add(coid);
                                 cot.getServiceImplCus().add(cu);

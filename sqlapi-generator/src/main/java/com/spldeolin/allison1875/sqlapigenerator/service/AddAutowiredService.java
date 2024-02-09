@@ -10,6 +10,6 @@ import com.spldeolin.allison1875.sqlapigenerator.service.impl.AddAutowiredServic
 @ImplementedBy(AddAutowiredServiceImpl.class)
 public interface AddAutowiredService {
 
-    void ensureAuwired(ClassOrInterfaceDeclaration mapper, ClassOrInterfaceDeclaration service);
+    void ensureAuwired(ClassOrInterfaceDeclaration toBeAutowired, ClassOrInterfaceDeclaration coid);
 
 }
