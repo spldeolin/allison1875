@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
@@ -112,7 +113,7 @@ public class SqlapiGenerator implements Allison1875MainService {
         // flush
         if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
-            log.info("# REMEBER REFORMAT CODE #");
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
         } else {
             log.warn("nothing happened");
         }

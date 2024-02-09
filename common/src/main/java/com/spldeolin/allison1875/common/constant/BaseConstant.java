@@ -29,4 +29,6 @@ public interface BaseConstant {
 
     String[] JAVA_EXTENSIONS = new String[]{"java"};
 
+    String REMEMBER_REFORMAT_CODE_ANNOUNCE = "# REMEMBER REFORMAT CODE #";
+
 }
