@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -34,19 +33,20 @@ public class ImportServiceImpl implements ImportService {
      */
     @Override
     public CompilationUnit extractQualifiedTypeToImport(CompilationUnit cu) {
-        for (ClassOrInterfaceType type : cu.findAll(ClassOrInterfaceType.class, type -> {
+        List<ClassOrInterfaceType> coits = cu.findAll(ClassOrInterfaceType.class, type -> {
             // 防止scope的scope被加入到import，所以只取用name首字母大写的type
             return MoreStringUtils.isFirstLetterUpperCase(type.getNameAsString());
-        })) {
-            type.getScope().ifPresent(scope -> {
+        });
+        for (ClassOrInterfaceType coit : coits) {
+            coit.getScope().ifPresent(scope -> {
                 // 判断scope是否为全小写，这是为了忽略Map.Entry这样的scope情况
-                if (!StringUtils.isAllLowerCase(scope.toString().replace(".", ""))) {
+                if (!scope.toString().toLowerCase().equals(scope.toString())) {
                     return;
                 }
-                log.info("Qualified Type '{}' in '{}' extract to Import", type,
+                log.info("Qualified Type '{}' in '{}' extract to Import", coit,
                         CompilationUnitUtils.getCuAbsolutePath(cu));
-                type.setScope(null);
-                cu.addImport(scope + "." + type.getNameAsString());
+                coit.setScope(null);
+                cu.addImport(scope + "." + coit.getNameAsString());
             });
         }
         for (AnnotationExpr ae : cu.findAll(AnnotationExpr.class)) {

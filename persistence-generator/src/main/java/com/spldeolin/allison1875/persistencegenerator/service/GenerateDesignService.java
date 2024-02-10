@@ -1,9 +1,10 @@
 package com.spldeolin.allison1875.persistencegenerator.service;
 
-import com.github.javaparser.ast.CompilationUnit;
+import java.util.Optional;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.GenerateDesignServiceImpl;
@@ -14,7 +15,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.GenerateDesig
 @ImplementedBy(GenerateDesignServiceImpl.class)
 public interface GenerateDesignService {
 
-    CompilationUnit generate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    Optional<FileFlush> generate(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest);
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -15,12 +16,13 @@ import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -30,9 +32,6 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
-import com.spldeolin.allison1875.support.ByChainPredicate;
-import com.spldeolin.allison1875.support.EntityKey;
-import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -45,11 +44,14 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
     @Inject
     private PersistenceGeneratorConfig config;
 
+    @Inject
+    private ImportService importService;
+
     @Override
-    public CompilationUnit generate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    public Optional<FileFlush> generate(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper, AstForest astForest) {
         if (!config.getEnableGenerateDesign()) {
-            return null;
+            return Optional.empty();
         }
 
         String designName = concatDesignName(persistence);
@@ -63,22 +65,12 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
         cu.setPackageDeclaration(config.getDesignPackage());
-        cu.addImport(List.class);
-        cu.addImport(Map.class);
-        cu.addImport(Multimap.class);
-        cu.addImport(ByChainPredicate.class);
-        cu.addImport(OrderChainPredicate.class);
-        cu.addImport(EntityKey.class);
-        cu.addImport(javabeanGeneration.getJavabeanQualifier());
         for (PropertyDto property : properties) {
-            if (!property.getJavaType().getQualifier().startsWith("java.lang")) {
-                cu.addImport(property.getJavaType().getQualifier());
-            }
             propertiesByName.put(property.getPropertyName(), property);
         }
         cu.addOrphanComment(new LineComment("@formatter:" + "off"));
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
-        Javadoc javadoc = javabeanGeneration.getCoid().getJavadoc().orElse(new Javadoc(new JavadocDescription()));
+        Javadoc javadoc = entityGeneration.getCoid().getJavadoc().orElse(new Javadoc(new JavadocDescription()));
         designCoid.setJavadocComment(javadoc);
         designCoid.addAnnotation(StaticJavaParser.parseAnnotation("@SuppressWarnings(\"all\")"));
         designCoid.setPublic(true).setInterface(false).setName(designName);
@@ -111,15 +103,15 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
                         TokenWordConstant.BY_FORCED_METHOD_NAME)));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public List<" + javabeanGeneration.getJavabeanName() + "> many() { throw e; }"));
+                "public java.util.List<" + entityGeneration.getJavabeanQualifier() + "> many() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
-                        javabeanGeneration.getJavabeanName())));
+                String.format("public <P> java.util.Map<P, %s> many(Each<P> property) { throw e; }",
+                        entityGeneration.getJavabeanName())));
+        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
+                "public <P> com.google.common.collect.Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
+                entityGeneration.getJavabeanName())));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                        javabeanGeneration.getJavabeanName())));
-        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public " + javabeanGeneration.getJavabeanName() + " one() { throw e; }"));
+                "public " + entityGeneration.getJavabeanName() + " one() { throw e; }"));
         queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         designCoid.addMember(queryChainCoid);
 
@@ -127,7 +119,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         updateChainCoid.setPublic(true).setInterface(true).setName("UpdateChain");
         for (PropertyDto property : properties) {
             updateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getSimpleName()
+                            "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getQualifier()
                                     + " " + property.getPropertyName() + ");").asMethodDeclaration()
                     .setJavadocComment(property.getDescription()));
         }
@@ -156,8 +148,8 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
                 .addTypeParameter("NEXT");
         for (PropertyDto property : properties) {
             byChainReturnCode.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public ByChainPredicate<NEXT, " + property.getJavaType().getSimpleName() + "> "
-                                    + property.getPropertyName() + ";").asFieldDeclaration()
+                            "public com.spldeolin.allison1875.support.ByChainPredicate<NEXT, " + property.getJavaType()
+                                    .getSimpleName() + "> " + property.getPropertyName() + ";").asFieldDeclaration()
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(byChainReturnCode);
@@ -171,15 +163,15 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
                     .setJavadocComment(property.getDescription()));
         }
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public List<" + javabeanGeneration.getJavabeanName() + "> many() { throw e; }"));
+                "public java.util.List<" + entityGeneration.getJavabeanQualifier() + "> many() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
-                        javabeanGeneration.getJavabeanName())));
+                String.format("public <P> java.util.Map<P, %s> many(Each<P> property) { throw e; }",
+                        entityGeneration.getJavabeanName())));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
+                "public <P> com.google.common.collect.Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
+                entityGeneration.getJavabeanName())));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                        javabeanGeneration.getJavabeanName())));
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public " + javabeanGeneration.getJavabeanName() + " one() { throw e; }"));
+                "public " + entityGeneration.getJavabeanName() + " one() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         nextableByChainReturnCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
@@ -200,8 +192,9 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         orderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("OrderChain");
         for (PropertyDto property : properties) {
             orderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public OrderChainPredicate<NextableOrderChain> " + property.getPropertyName() + ";")
-                    .asFieldDeclaration().setJavadocComment(property.getDescription()));
+                            "public com.spldeolin.allison1875.support.OrderChainPredicate<NextableOrderChain> "
+                                    + property.getPropertyName() + ";").asFieldDeclaration()
+                    .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(orderChainCoid);
 
@@ -209,15 +202,15 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
                 .addExtendedType("OrderChain");
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public List<" + javabeanGeneration.getJavabeanName() + "> many() { throw e; }"));
+                "public java.util.List<" + entityGeneration.getJavabeanQualifier() + "> many() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> Map<P, %s> many(Each<P> property) { throw e; }",
-                        javabeanGeneration.getJavabeanName())));
+                String.format("public <P> java.util.Map<P, %s> many(Each<P> property) { throw e; }",
+                        entityGeneration.getJavabeanName())));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
+                "public <P> com.google.common.collect.Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
+                entityGeneration.getJavabeanName())));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                        javabeanGeneration.getJavabeanName())));
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public " + javabeanGeneration.getJavabeanName() + " one() { throw e; }"));
+                "public " + entityGeneration.getJavabeanName() + " one() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
 
@@ -242,13 +235,13 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
 
         for (PropertyDto property : persistence.getProperties()) {
             designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    "public static EntityKey<" + javabeanGeneration.getJavabeanName() + "," + property.getJavaType()
-                            .getSimpleName() + "> " + property.getPropertyName() + ";"));
+                    "public static com.spldeolin.allison1875.support.EntityKey<" + entityGeneration.getJavabeanName()
+                            + "," + property.getJavaType().getSimpleName() + "> " + property.getPropertyName() + ";"));
         }
 
         DesignMeta meta = new DesignMeta();
-        meta.setEntityQualifier(javabeanGeneration.getJavabeanQualifier());
-        meta.setEntityName(javabeanGeneration.getJavabeanName());
+        meta.setEntityQualifier(entityGeneration.getJavabeanQualifier());
+        meta.setEntityName(entityGeneration.getJavabeanName());
         meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(mapper)));
         meta.setMapperName(mapper.getNameAsString());
         meta.setMapperRelativePaths(config.getMapperXmlDirectoryPaths().stream()
@@ -264,7 +257,9 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         cu.addType(designCoid);
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 
-        return cu;
+        importService.extractQualifiedTypeToImport(cu);
+
+        return Optional.of(FileFlush.build(cu));
     }
 
     private String concatDesignName(PersistenceDto persistence) {

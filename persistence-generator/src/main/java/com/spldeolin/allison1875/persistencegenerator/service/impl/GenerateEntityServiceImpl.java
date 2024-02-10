@@ -43,15 +43,12 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             String superEntityQualifier = config.getSuperEntityQualifier();
             if (StringUtils.isNotEmpty(superEntityQualifier)) {
-                cu.addImport(superEntityQualifier);
-                String superEntityName = superEntityQualifier.substring(superEntityQualifier.lastIndexOf('.') + 1);
-                javabean.addExtendedType(superEntityName);
+                javabean.addExtendedType(superEntityQualifier);
                 javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
             }
             if (config.getEnableEntityImplementSerializable()) {
-                cu.addImport("java.io.Serializable");
-                javabean.addImplementedType("Serializable");
+                javabean.addImplementedType("java.io.Serializable");
                 javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
                         "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
             }
@@ -67,9 +64,8 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
                 continue;
             }
             FieldArg fieldArg = new FieldArg();
-            fieldArg.setTypeQualifier(property.getJavaType().getQualifier());
             fieldArg.setDescription(cancatPropertyDescription(property));
-            fieldArg.setTypeName(property.getJavaType().getSimpleName());
+            fieldArg.setTypeName(property.getJavaType().getQualifier());
             fieldArg.setFieldName(property.getPropertyName());
             arg.getFieldArgs().add(fieldArg);
         }

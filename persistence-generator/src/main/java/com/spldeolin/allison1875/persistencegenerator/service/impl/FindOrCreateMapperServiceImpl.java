@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
@@ -57,9 +56,6 @@ public class FindOrCreateMapperServiceImpl implements FindOrCreateMapperService 
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
                     config.getMapperPackage(), persistence.getMapperName() + ".java"));
             cu.setPackageDeclaration(config.getMapperPackage());
-            cu.addImport(ImportConstant.JAVA_UTIL);
-            cu.addImport(javabeanGeneration.getJavabeanQualifier());
-            cu.addImport(ImportConstant.APACHE_IBATIS);
             mapper = new ClassOrInterfaceDeclaration();
             String comment = concatMapperDescription(persistence);
             Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment, config.getAuthor() + " " + LocalDate.now());

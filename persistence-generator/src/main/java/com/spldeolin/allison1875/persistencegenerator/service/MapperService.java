@@ -14,51 +14,49 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperService
 @ImplementedBy(MapperServiceImpl.class)
 public interface MapperService {
 
-    String batchInsertEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String batchInsertEvenNull(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String batchInsert(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String batchInsert(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String batchUpdateEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String batchUpdateEvenNull(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String batchUpdate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String batchUpdate(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
     String deleteByKey(PersistenceDto persistence, PropertyDto key, ClassOrInterfaceDeclaration mapper);
 
-    String insertOrUpdate(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String insertOrUpdate(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String insert(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String insert(PersistenceDto persistence, JavabeanGeneration entityGeneration, ClassOrInterfaceDeclaration mapper);
+
+    String listAll(PersistenceDto persistence, JavabeanGeneration entityGeneration, ClassOrInterfaceDeclaration mapper);
+
+    String queryByEntity(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String listAll(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String queryById(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String queryByEntity(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String queryByIdsEachId(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String queryById(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String queryByIds(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    String queryByIdsEachId(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String queryByKey(PersistenceDto persistence, JavabeanGeneration entityGeneration, PropertyDto key,
             ClassOrInterfaceDeclaration mapper);
 
-    String queryByIds(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    QueryByKeysDto queryByKeys(PersistenceDto persistence, JavabeanGeneration entityGeneration, PropertyDto key,
             ClassOrInterfaceDeclaration mapper);
 
-    String queryByKey(PersistenceDto persistence, JavabeanGeneration javabeanGeneration, PropertyDto key,
+    String updateByIdEvenNull(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
-    QueryByKeysDto queryByKeys(PersistenceDto persistence, JavabeanGeneration javabeanGeneration, PropertyDto key,
-            ClassOrInterfaceDeclaration mapper);
-
-    String updateByIdEvenNull(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
-            ClassOrInterfaceDeclaration mapper);
-
-    String updateById(PersistenceDto persistence, JavabeanGeneration javabeanGeneration,
+    String updateById(PersistenceDto persistence, JavabeanGeneration entityGeneration,
             ClassOrInterfaceDeclaration mapper);
 
 }
