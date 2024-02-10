@@ -44,7 +44,7 @@ public interface AnnotationConstant {
             "@FieldDefaults(level = AccessLevel.PRIVATE)");
 
     AnnotationExpr FIELD_DEFAULTS_PRIVATE_FULL = StaticJavaParser.parseAnnotation(
-            "@lombok.experimental.FieldDefaults(level = AccessLevel.PRIVATE)");
+            "@lombok.experimental.FieldDefaults(level = lombok.AccessLevel.PRIVATE)");
 
     AnnotationExpr EQUALS_AND_HASH_CODE = StaticJavaParser.parseAnnotation("@EqualsAndHashCode(callSuper = true)");
 

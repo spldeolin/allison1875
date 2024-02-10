@@ -31,7 +31,7 @@ public class AddAutowiredServiceImpl implements AddAutowiredService {
                     .orElse(-1);
             FieldDeclaration field = new ClassOrInterfaceDeclaration().addField(qualifier, fieldVarName,
                     Keyword.PRIVATE);
-            field.addAnnotation(AnnotationConstant.AUTOWIRED_FULL);
+            field.addAnnotation(AnnotationConstant.AUTOWIRED_FULL.clone());
             members.add(lastIndexOfFieldDeclaration + 1, field);
         }
     }

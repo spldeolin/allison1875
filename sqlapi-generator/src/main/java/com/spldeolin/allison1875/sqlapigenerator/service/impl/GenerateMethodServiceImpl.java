@@ -15,7 +15,6 @@ import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
-import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.sqlapigenerator.SqlapiGeneratorConfig;
@@ -47,9 +46,6 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
-
-    @Inject
-    private ImportService importService;
 
     @Override
     public List<String> generateMapperXmlMethod(MapperMethodGenerationDto mapperMethodGeneration) {
@@ -188,8 +184,8 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
         method.setType(serviceMethodGeneration.getMethod().getType());
         method.setName(methodName);
         Parameter param = serviceMethodGeneration.getMethod().getParameter(0).clone();
-        param.addAnnotation(AnnotationConstant.REQUEST_BODY_FULL);
-        param.addAnnotation(AnnotationConstant.VALID_FULL);
+        param.addAnnotation(AnnotationConstant.REQUEST_BODY_FULL.clone());
+        param.addAnnotation(AnnotationConstant.VALID_FULL.clone());
         method.addParameter(param);
         BlockStmt body = new BlockStmt();
         body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);",
