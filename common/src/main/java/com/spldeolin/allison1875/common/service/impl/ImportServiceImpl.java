@@ -3,8 +3,8 @@ package com.spldeolin.allison1875.common.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.ImportService;
@@ -39,18 +39,28 @@ public class ImportServiceImpl implements ImportService {
             return MoreStringUtils.isFirstLetterUpperCase(type.getNameAsString());
         })) {
             type.getScope().ifPresent(scope -> {
-                // 采用判断scope是否为全数字的方式，忽略Map.Entry这样的scope情况
+                // 判断scope是否为全小写，这是为了忽略Map.Entry这样的scope情况
                 if (!StringUtils.isAllLowerCase(scope.toString().replace(".", ""))) {
                     return;
                 }
                 log.info("Qualified Type '{}' in '{}' extract to Import", type,
                         CompilationUnitUtils.getCuAbsolutePath(cu));
-                cu.addImport(type.toString());
-                type.replace(StaticJavaParser.parseType(type.getNameAsString()));
-
+                type.setScope(null);
+                cu.addImport(scope + "." + type.getNameAsString());
             });
         }
+        for (AnnotationExpr ae : cu.findAll(AnnotationExpr.class)) {
+            if (ae.getNameAsString().contains(".")) {
+                cu.addImport(ae.getNameAsString());
+                ae.setName(this.getLastPart(ae));
+            }
+        }
         return cu;
+    }
+
+    private String getLastPart(AnnotationExpr ae) {
+        String[] split = ae.getNameAsString().split("\\.");
+        return split[split.length - 1];
     }
 
     /**

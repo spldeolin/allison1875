@@ -10,16 +10,12 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.FileFlush;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
-import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
 import com.spldeolin.allison1875.sqlapigenerator.service.AddMethodService;
 
@@ -30,11 +26,7 @@ import com.spldeolin.allison1875.sqlapigenerator.service.AddMethodService;
 public class AddMethodServiceImpl implements AddMethodService {
 
     @Override
-    public void addMethodToCoid(List<String> imports, MethodDeclaration method, ClassOrInterfaceDeclaration coid) {
-        CompilationUnit cu = coid.findCompilationUnit().orElseThrow(() -> new CuAbsentException(coid));
-        cu.addImport(ImportConstant.JAVA_UTIL);
-        cu.addImport(ImportConstant.JAVA_TIME);
-        imports.forEach(impt -> cu.addImport(new ImportDeclaration(impt, false, false)));
+    public void addMethodToCoid(MethodDeclaration method, ClassOrInterfaceDeclaration coid) {
         coid.addMember(method);
     }
 

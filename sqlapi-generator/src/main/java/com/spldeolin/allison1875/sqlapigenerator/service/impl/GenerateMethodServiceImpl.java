@@ -11,11 +11,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.constant.AnnotationConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.sqlapigenerator.SqlapiGeneratorConfig;
@@ -47,6 +47,9 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
+
+    @Inject
+    private ImportService importService;
 
     @Override
     public List<String> generateMapperXmlMethod(MapperMethodGenerationDto mapperMethodGeneration) {
@@ -124,7 +127,7 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
             result.setResultTypeQualifier(generation.getJavabeanQualifier());
             result.getFlushes().add(generation.getFileFlush());
             if (config.getSelectListOrOne()) {
-                method.setType(String.format("List<%s>", generation.getJavabeanQualifier()));
+                method.setType(String.format("java.util.List<%s>", generation.getJavabeanQualifier()));
             } else {
                 method.setType(generation.getJavabeanQualifier());
             }
@@ -179,23 +182,20 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
         String methodName = antiDuplicationService.getNewMethodNameIfExist(config.getMethodName(),
                 coidsOnTrack.getController());
         MethodDeclaration method = new MethodDeclaration();
-        method.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", methodName)));
+        method.addAnnotation(StaticJavaParser.parseAnnotation(
+                String.format("@org.springframework.web.bind.annotation.PostMapping(\"%s\")", methodName)));
         method.setPublic(true);
         method.setType(serviceMethodGeneration.getMethod().getType());
         method.setName(methodName);
         Parameter param = serviceMethodGeneration.getMethod().getParameter(0).clone();
-        param.addAnnotation(AnnotationConstant.REQUEST_BODY);
-        param.addAnnotation(AnnotationConstant.VALID);
+        param.addAnnotation(AnnotationConstant.REQUEST_BODY_FULL);
+        param.addAnnotation(AnnotationConstant.VALID_FULL);
         method.addParameter(param);
         BlockStmt body = new BlockStmt();
         body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);",
                 MoreStringUtils.lowerFirstLetter(coidsOnTrack.getService().getNameAsString()),
                 serviceMethodGeneration.getMethod().getNameAsString())));
         method.setBody(body);
-
-        coidsOnTrack.getControllerCu().addImport(ImportConstant.SPRING_POST_MAPPING);
-        coidsOnTrack.getControllerCu().addImport(ImportConstant.SPRING_REQUEST_BODY);
-        coidsOnTrack.getControllerCu().addImport(ImportConstant.JAVAX_VALID);
 
         ControllerMethodGenerationDto result = new ControllerMethodGenerationDto();
         result.setMethod(method);

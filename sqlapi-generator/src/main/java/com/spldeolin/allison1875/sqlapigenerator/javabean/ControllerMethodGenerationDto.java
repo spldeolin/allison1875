@@ -21,6 +21,4 @@ public class ControllerMethodGenerationDto {
 
     MethodDeclaration method;
 
-    final List<String> imports = Lists.newArrayList();
-
 }

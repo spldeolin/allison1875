@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.sqlapigenerator.service.impl.AddMethodServiceIm
 @ImplementedBy(AddMethodServiceImpl.class)
 public interface AddMethodService {
 
-    void addMethodToCoid(List<String> imports, MethodDeclaration method, ClassOrInterfaceDeclaration coid);
+    void addMethodToCoid(MethodDeclaration method, ClassOrInterfaceDeclaration coid);
 
     List<FileFlush> addMethodToXml(List<String> xmlMethodCodeLines, CoidsOnTrackDto coidsOnTrackDto);
 
