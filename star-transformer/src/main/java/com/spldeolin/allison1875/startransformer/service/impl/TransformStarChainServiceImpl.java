@@ -30,17 +30,18 @@ public class TransformStarChainServiceImpl implements TransformStarChainService 
             JavabeanGeneration javabeanGeneration) {
         int i = block.getStatements().indexOf(starChain.findAncestor(Statement.class).get());
         block.setStatement(i, StaticJavaParser.parseStatement(
-                javabeanGeneration.getJavabeanName() + " whole = new " + javabeanGeneration.getJavabeanName() + "();"));
+                javabeanGeneration.getJavabeanQualifier() + " whole = new " + javabeanGeneration.getJavabeanName()
+                        + "();"));
         block.addStatement(++i, StaticJavaParser.parseStatement(
-                analysis.getCftEntityName() + " " + entityNameToVarName(analysis.getCftEntityName()) + " = "
+                analysis.getCftEntityQualifier() + " " + entityNameToVarName(analysis.getCftEntityName()) + " = "
                         + analysis.getCftDesignName() + "." + "query().byForced().id.eq("
                         + analysis.getCftSecondArgument() + ").one();"));
         for (PhraseDto phrase : analysis.getPhrases()) {
             String code;
             if (phrase.getIsOneToOne()) {
-                code = phrase.getDtEntityName() + " " + entityNameToVarName(phrase.getDtEntityName());
+                code = phrase.getDtEntityQualifier() + " " + entityNameToVarName(phrase.getDtEntityName());
             } else {
-                code = "List<" + phrase.getDtEntityName() + "> " + English.plural(
+                code = "java.util.List<" + phrase.getDtEntityQualifier() + "> " + English.plural(
                         entityNameToVarName(phrase.getDtEntityName()));
             }
             code += " = " + phrase.getDtDesignName() + ".query().byForced()." + phrase.getFk() + ".eq("
@@ -57,8 +58,8 @@ public class TransformStarChainServiceImpl implements TransformStarChainService 
                         English.plural(entityNameToVarName(phrase.getDtEntityName())) + "Each" + StringUtils.capitalize(
                                 key);
                 block.addStatement(++i, StaticJavaParser.parseStatement(
-                        "Map<" + phrase.getEntityFieldTypesEachFieldName().get(key) + ", " + phrase.getDtEntityName()
-                                + "> " + mapVarName + " = Maps.newLinkedHashMap();"));
+                        "java.util.LinkedHashMap<" + phrase.getEntityFieldTypesEachFieldName().get(key) + ", "
+                                + phrase.getDtEntityName() + "> " + mapVarName + " = new LinkedHashMap<>();"));
                 stmtsInForBlock.add(StaticJavaParser.parseStatement(
                         mapVarName + ".put(" + entityNameToVarName(phrase.getDtEntityName()) + ".get"
                                 + StringUtils.capitalize(key) + "(), " + entityNameToVarName(phrase.getDtEntityName())
@@ -69,8 +70,9 @@ public class TransformStarChainServiceImpl implements TransformStarChainService 
                         English.plural(entityNameToVarName(phrase.getDtEntityName())) + "Each" + StringUtils.capitalize(
                                 mkey);
                 block.addStatement(++i, StaticJavaParser.parseStatement(
-                        "Multimap<" + phrase.getEntityFieldTypesEachFieldName().get(mkey) + ", "
-                                + phrase.getDtEntityName() + "> " + mapVarName + " = LinkedListMultimap.create();"));
+                        "com.google.common.collect.LinkedListMultimap<" + phrase.getEntityFieldTypesEachFieldName()
+                                .get(mkey) + ", " + phrase.getDtEntityName() + "> " + mapVarName
+                                + " = LinkedListMultimap.create();"));
                 stmtsInForBlock.add(StaticJavaParser.parseStatement(
                         mapVarName + ".put(" + entityNameToVarName(phrase.getDtEntityName()) + ".get"
                                 + StringUtils.capitalize(mkey) + "(), " + entityNameToVarName(phrase.getDtEntityName())

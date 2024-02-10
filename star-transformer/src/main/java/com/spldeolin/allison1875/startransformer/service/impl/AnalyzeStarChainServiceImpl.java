@@ -78,7 +78,8 @@ public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
             if (CollectionUtils.isNotEmpty(phrase.getKeys()) || CollectionUtils.isNotEmpty(phrase.getMkeys())) {
                 astForest.findCu(phrase.getDtEntityQualifier()).ifPresent(cu -> {
                     for (VariableDeclarator vd : cu.findAll(VariableDeclarator.class)) {
-                        phrase.getEntityFieldTypesEachFieldName().put(vd.getNameAsString(), vd.getTypeAsString());
+                        phrase.getEntityFieldTypesEachFieldName()
+                                .put(vd.getNameAsString(), vd.getType().resolve().describe());
                     }
                 });
             }

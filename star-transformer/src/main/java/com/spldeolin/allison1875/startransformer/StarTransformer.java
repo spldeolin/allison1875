@@ -12,11 +12,10 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
-import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
 import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService;
 import com.spldeolin.allison1875.startransformer.service.DetectStarChainService;
@@ -43,6 +42,9 @@ public class StarTransformer implements Allison1875MainService {
     @Inject
     private TransformStarChainService transformStarChainService;
 
+    @Inject
+    private ImportService importService;
+
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
@@ -68,7 +70,7 @@ public class StarTransformer implements Allison1875MainService {
                     JavabeanGeneration wholeDtoGeneration;
                     try {
                         wholeDtoGeneration = generateWholeDtoService.generate(astForest, analysis);
-                        log.info("Whole DTO generated, qualifier={} path={}", wholeDtoGeneration.getJavabeanQualifier(),
+                        log.info("Whole DTO generated, name={} path={}", wholeDtoGeneration.getJavabeanName(),
                                 wholeDtoGeneration.getPath());
                     } catch (Exception e) {
                         log.error("fail to generate Whole DTO, analysis={}", analysis, e);
@@ -84,14 +86,7 @@ public class StarTransformer implements Allison1875MainService {
                         log.error("fail to transformStarChain Star Chain, starAnalysis={}", analysis, e);
                     }
 
-                    // add import
-                    cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
-                    cu.addImport(ImportConstant.JAVA_UTIL);
-                    cu.addImport(wholeDtoGeneration.getJavabeanQualifier());
-                    cu.addImport(analysis.getCftEntityQualifier());
-                    for (PhraseDto phrase : analysis.getPhrases()) {
-                        cu.addImport(phrase.getDtEntityQualifier());
-                    }
+                    importService.extractQualifiedTypeToImport(cu);
                     anyTransformed = true;
                 }
             }
