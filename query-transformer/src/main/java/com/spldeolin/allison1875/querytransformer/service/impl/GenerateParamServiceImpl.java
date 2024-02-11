@@ -73,9 +73,9 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
                 if (Lists.newArrayList(PredicateEnum.IN, PredicateEnum.NOT_IN).contains(phrase.getPredicate())) {
-                    fieldArg.setTypeName("java.util.List<" + javaType.getQualifier() + ">");
+                    fieldArg.setTypeQualifier("java.util.List<" + javaType.getQualifier() + ">");
                 } else {
-                    fieldArg.setTypeName(javaType.getQualifier());
+                    fieldArg.setTypeQualifier(javaType.getQualifier());
                 }
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);

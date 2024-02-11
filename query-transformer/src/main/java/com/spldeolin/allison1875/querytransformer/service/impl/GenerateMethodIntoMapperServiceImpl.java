@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
@@ -40,7 +40,7 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
     private AntiDuplicationService antiDuplicationService;
 
     @Inject
-    private ImportService importService;
+    private ImportExprService importExprService;
 
     @Override
     public Optional<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
@@ -69,7 +69,7 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
         mapper.getMembers().add(method);
 
         CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
-        importService.extractQualifiedTypeToImport(cu);
+        importExprService.extractQualifiedTypeToImport(cu);
         return Optional.of(FileFlush.build(cu));
     }
 

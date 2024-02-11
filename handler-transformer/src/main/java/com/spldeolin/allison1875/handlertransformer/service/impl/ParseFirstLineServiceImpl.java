@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ParseFirstLineServiceImpl implements ParseFirstLineService {
 
     @Override
-    public FirstLineDto parse(InitializerDeclaration init) {
+    public FirstLineDto parse(InitializerDeclaration init, CompilationUnit controllerCu) {
         FirstLineDto result = new FirstLineDto();
         result.setInit(init);
         for (Statement stmt : init.getBody().getStatements()) {
@@ -63,6 +64,7 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
             result.setHandlerDescription("未指定描述");
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
+        result.getImportsFromController().addAll(controllerCu.getImports());
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("HT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;

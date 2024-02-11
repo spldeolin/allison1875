@@ -43,23 +43,24 @@ public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
         }
         javabeanArg.setAuthorName(config.getAuthor());
         FieldArg cftFieldArg = new FieldArg();
-        cftFieldArg.setTypeName(analysis.getCftEntityQualifier());
+        cftFieldArg.setTypeQualifier(analysis.getCftEntityQualifier());
         cftFieldArg.setFieldName(this.entityNameToVarName(analysis.getCftEntityName()));
         javabeanArg.getFieldArgs().add(cftFieldArg);
         for (PhraseDto phrase : analysis.getPhrases()) {
             FieldArg dtFieldArg = new FieldArg();
             if (phrase.getIsOneToOne()) {
-                dtFieldArg.setTypeName(phrase.getDtEntityQualifier());
+                dtFieldArg.setTypeQualifier(phrase.getDtEntityQualifier());
                 dtFieldArg.setFieldName(this.entityNameToVarName(phrase.getDtEntityName()));
             } else {
-                dtFieldArg.setTypeName("java.util.List<" + phrase.getDtEntityQualifier() + ">");
+                dtFieldArg.setTypeQualifier("java.util.List<" + phrase.getDtEntityQualifier() + ">");
                 dtFieldArg.setFieldName(English.plural(this.entityNameToVarName(phrase.getDtEntityName())));
             }
             javabeanArg.getFieldArgs().add(dtFieldArg);
             if (CollectionUtils.isNotEmpty(phrase.getKeys()) || CollectionUtils.isNotEmpty(phrase.getMkeys())) {
                 for (String key : phrase.getKeys()) {
                     FieldArg keyFieldArg = new FieldArg();
-                    keyFieldArg.setTypeName("java.util.Map<" + phrase.getEntityFieldTypesEachFieldName().get(key) + ","
+                    keyFieldArg.setTypeQualifier(
+                            "java.util.Map<" + phrase.getEntityFieldTypesEachFieldName().get(key) + ","
                             + phrase.getDtEntityName() + ">");
                     keyFieldArg.setFieldName(English.plural(this.entityNameToVarName(phrase.getDtEntityName())) + "Each"
                             + StringUtils.capitalize(key));
@@ -67,7 +68,7 @@ public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
                 }
                 for (String mkey : phrase.getMkeys()) {
                     FieldArg mkeyFieldArg = new FieldArg();
-                    mkeyFieldArg.setTypeName(
+                    mkeyFieldArg.setTypeQualifier(
                             "com.google.common.collect.Multimap<" + phrase.getEntityFieldTypesEachFieldName().get(mkey)
                                     + "," + phrase.getDtEntityName() + ">");
                     mkeyFieldArg.setFieldName(

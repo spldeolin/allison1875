@@ -17,11 +17,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FieldArg {
 
-    String typeQualifier;
-
     String description;
 
-    @NotBlank String typeName;
+    @NotBlank String typeQualifier;
 
     @NotBlank String fieldName;
 

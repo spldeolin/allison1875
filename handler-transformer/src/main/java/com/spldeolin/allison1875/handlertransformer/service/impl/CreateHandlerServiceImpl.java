@@ -7,8 +7,8 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
@@ -24,6 +24,9 @@ public class CreateHandlerServiceImpl implements CreateHandlerService {
     @Inject
     private HandlerTransformerConfig config;
 
+    @Inject
+    private AnnotationExprService annotationExprService;
+
     @Override
     public HandlerCreation createHandler(FirstLineDto firstLineDto, String serviceParamType, String serviceResultType,
             ServiceGeneration serviceGeneration) {
@@ -31,8 +34,9 @@ public class CreateHandlerServiceImpl implements CreateHandlerService {
 
         handler.setJavadocComment(concatHandlerDescription(firstLineDto));
 
-        handler.addAnnotation(
-                StaticJavaParser.parseAnnotation(String.format("@PostMapping(\"%s\")", firstLineDto.getHandlerUrl())));
+        handler.addAnnotation(StaticJavaParser.parseAnnotation(
+                String.format("@org.springframework.web.bind.annotation.PostMapping(\"%s\")",
+                        firstLineDto.getHandlerUrl())));
         handler.setPublic(true);
         if (serviceResultType != null) {
             handler.setType(serviceResultType);
@@ -42,8 +46,8 @@ public class CreateHandlerServiceImpl implements CreateHandlerService {
         handler.setName(firstLineDto.getHandlerName());
         if (serviceParamType != null) {
             Parameter parameter = new Parameter();
-            parameter.addAnnotation(AnnotationConstant.REQUEST_BODY);
-            parameter.addAnnotation(AnnotationConstant.VALID);
+            parameter.addAnnotation(annotationExprService.springRequestbody());
+            parameter.addAnnotation(annotationExprService.javaxValid());
             parameter.setType(serviceParamType);
             parameter.setName("req");
             handler.addParameter(parameter);

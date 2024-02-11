@@ -1,7 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import java.util.List;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -15,16 +16,10 @@ public class ServiceGeneration {
 
     String serviceVarName;
 
-    ClassOrInterfaceDeclaration service;
-
-    CompilationUnit serviceCu;
-
-    ClassOrInterfaceDeclaration serviceImpl;
-
-    CompilationUnit serviceImplCu;
-
     String serviceQualifier;
 
     String methodName;
+
+    final List<FileFlush> flushes = Lists.newArrayList();
 
 }

@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import java.util.List;
-import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -14,16 +14,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReqDtoRespDtoInfo {
 
-    String reqDtoQualifier = null;
-
-    String respDtoQualifier = null;
-
     String paramType = null;
 
     String resultType = null;
 
-    final List<String> javabeanQualifiers = Lists.newArrayList();
-
-    final List<CompilationUnit> javabeanCus = Lists.newArrayList();
+    final List<FileFlush> flushes = Lists.newArrayList();
 
 }

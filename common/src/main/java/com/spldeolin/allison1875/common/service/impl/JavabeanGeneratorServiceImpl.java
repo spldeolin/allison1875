@@ -13,14 +13,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.FileFlush;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
@@ -36,6 +36,12 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
+
+    @Inject
+    private ImportExprService importExprService;
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public JavabeanGeneration generate(JavabeanArg arg) {
@@ -65,27 +71,18 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(absulutePath);
         cu.setPackageDeclaration(arg.getPackageName());
-        cu.addImport(ImportConstant.LOMBOK);
-        cu.addImport(ImportConstant.LOMBOK_EXPERIMENTAL);
-        cu.addImport(ImportConstant.JAVAX_VALID);
-        cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
-        cu.addImport(ImportConstant.JAVA_UTIL);
-        cu.addImport(ImportConstant.JAVA_TIME);
 
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-        coid.addAnnotation(AnnotationConstant.DATA);
-        coid.addAnnotation(AnnotationConstant.ACCESSORS);
-        coid.addAnnotation(AnnotationConstant.FIELD_DEFAULTS_PRIVATE);
+        coid.addAnnotation(annotationExprService.lombokData());
+        coid.addAnnotation(annotationExprService.lombokAccessors());
+        coid.addAnnotation(annotationExprService.lomokFieldDefaultsPrivate());
         coid.setPublic(true).setInterface(false).setName(className);
         String comment = MoreObjects.firstNonNull(arg.getDescription(), "");
         JavadocUtils.setJavadoc(coid, comment, arg.getAuthorName() + " " + LocalDate.now());
         cu.addType(coid);
 
         for (FieldArg fieldArg : arg.getFieldArgs()) {
-            if (fieldArg.getTypeQualifier() != null) {
-                cu.addImport(fieldArg.getTypeQualifier());
-            }
-            FieldDeclaration field = coid.addField(fieldArg.getTypeName(), fieldArg.getFieldName());
+            FieldDeclaration field = coid.addField(fieldArg.getTypeQualifier(), fieldArg.getFieldName());
             if (fieldArg.getDescription() != null) {
                 field.setJavadocComment(fieldArg.getDescription());
             }
@@ -99,6 +96,8 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         if (arg.getMore4Javabean() != null) {
             arg.getMore4Javabean().accept(cu, coid);
         }
+
+        importExprService.extractQualifiedTypeToImport(cu);
 
         JavabeanGeneration result = new JavabeanGeneration();
         result.setCu(cu);

@@ -10,7 +10,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.ControllerMethodGenerationDto;
@@ -41,7 +41,7 @@ public class SqlapiGenerator implements Allison1875MainService {
     private AddMethodService addMethodService;
 
     @Inject
-    private ImportService importService;
+    private ImportExprService importExprService;
 
     @Override
     public void process(AstForest astForest) {
@@ -58,7 +58,7 @@ public class SqlapiGenerator implements Allison1875MainService {
         // 将Mapper方法追加到Mapper
         LexicalPreservingPrinter.setup(coidsOnTrack.getMapperCu());
         addMethodService.addMethodToCoid(mapperMethodGeneration.getMethod().clone(), coidsOnTrack.getMapper());
-        importService.extractQualifiedTypeToImport(coidsOnTrack.getMapperCu());
+        importExprService.extractQualifiedTypeToImport(coidsOnTrack.getMapperCu());
         flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getMapperCu()));
 
         // 生成Mapper xml方法
@@ -78,7 +78,7 @@ public class SqlapiGenerator implements Allison1875MainService {
             LexicalPreservingPrinter.setup(coidsOnTrack.getServiceCu());
             addMethodService.addMethodToCoid(serviceMethodGeneration.getMethod().clone(),
                     coidsOnTrack.getService());
-            importService.extractQualifiedTypeToImport(coidsOnTrack.getServiceCu());
+            importExprService.extractQualifiedTypeToImport(coidsOnTrack.getServiceCu());
             flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getServiceCu()));
 
             // 将Service方法追加到ServiceImpl
@@ -88,7 +88,7 @@ public class SqlapiGenerator implements Allison1875MainService {
                 LexicalPreservingPrinter.setup(serviceImplCu);
                 addAutowiredService.ensureAuwired(coidsOnTrack.getMapper(), serviceImpl);
                 addMethodService.addMethodToCoid(serviceMethodGeneration.getMethodImpl().clone(), serviceImpl);
-                importService.extractQualifiedTypeToImport(serviceImplCu);
+                importExprService.extractQualifiedTypeToImport(serviceImplCu);
                 flushes.add(FileFlush.buildLexicalPreserving(serviceImplCu));
             }
             if (coidsOnTrack.getController() != null) {
@@ -103,7 +103,7 @@ public class SqlapiGenerator implements Allison1875MainService {
                 addAutowiredService.ensureAuwired(coidsOnTrack.getService(), coidsOnTrack.getController());
                 addMethodService.addMethodToCoid(controllerMethodGeneration.getMethod().clone(),
                         coidsOnTrack.getController());
-                importService.extractQualifiedTypeToImport(coidsOnTrack.getControllerCu());
+                importExprService.extractQualifiedTypeToImport(coidsOnTrack.getControllerCu());
                 flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getControllerCu()));
             }
         }

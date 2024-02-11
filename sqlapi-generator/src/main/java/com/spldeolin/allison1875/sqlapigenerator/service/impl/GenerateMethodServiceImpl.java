@@ -10,10 +10,10 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -46,6 +46,9 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public List<String> generateMapperXmlMethod(MapperMethodGenerationDto mapperMethodGeneration) {
@@ -155,7 +158,7 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
 
         MethodDeclaration serviceImplMethod = new MethodDeclaration();
         mapperMethod.getJavadoc().ifPresent(serviceImplMethod::setJavadocComment);
-        serviceImplMethod.addAnnotation(AnnotationConstant.OVERRIDE);
+        serviceImplMethod.addAnnotation(annotationExprService.javaOverride());
         serviceImplMethod.setPublic(true);
         serviceImplMethod.setType(mapperMethod.getType());
         serviceImplMethod.setName(mapperMethod.getName());
@@ -184,8 +187,8 @@ public class GenerateMethodServiceImpl implements GenerateMethodService {
         method.setType(serviceMethodGeneration.getMethod().getType());
         method.setName(methodName);
         Parameter param = serviceMethodGeneration.getMethod().getParameter(0).clone();
-        param.addAnnotation(AnnotationConstant.REQUEST_BODY_FULL.clone());
-        param.addAnnotation(AnnotationConstant.VALID_FULL.clone());
+        param.addAnnotation(annotationExprService.springRequestbody());
+        param.addAnnotation(annotationExprService.javaxValid());
         method.addParameter(param);
         BlockStmt body = new BlockStmt();
         body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);",

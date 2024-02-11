@@ -6,7 +6,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class ImportServiceImpl implements ImportService {
+public class ImportExprServiceImpl implements ImportExprService {
 
     /**
      * 将参数cu中的所有全限定类型抽取成import声明

@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AstForestResidenceService;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
@@ -67,7 +67,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     private AstForestResidenceService astForestResidenceService;
 
     @Inject
-    private ImportService importService;
+    private ImportExprService importExprService;
 
     @Override
     public void process(AstForest astForest) {
@@ -165,7 +165,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                                             insertOrUpdateMethodName)));
                     flushes.add(xmlFlush);
                     mapper.findCompilationUnit().ifPresent(cu -> {
-                        importService.extractQualifiedTypeToImport(cu);
+                        importExprService.extractQualifiedTypeToImport(cu);
                         flushes.add(FileFlush.build(cu));
                     });
                 } catch (Exception e) {

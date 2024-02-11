@@ -4,8 +4,6 @@ import java.util.List;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
-import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
-import com.spldeolin.allison1875.common.service.impl.JavabeanGeneratorServiceQualifiedTypeImpl;
 import lombok.ToString;
 
 /**
@@ -33,7 +31,6 @@ public class PersistenceGeneratorModule extends Allison1875Module {
     @Override
     protected void configure() {
         bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
-        bind(JavabeanGeneratorService.class).toInstance(new JavabeanGeneratorServiceQualifiedTypeImpl());
     }
 
 }

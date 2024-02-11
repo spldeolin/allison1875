@@ -88,9 +88,8 @@ public class GenerateResultServiceImpl implements GenerateResultService {
                 String varName = propertyName;
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 FieldArg fieldArg = new FieldArg();
-                fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
-                fieldArg.setTypeName(javaType.getSimpleName());
+                fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
             }

@@ -6,11 +6,11 @@ import com.github.javaparser.StaticJavaParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -31,6 +31,9 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
     @Inject
     private JavabeanGeneratorService javabeanGeneratorService;
 
+    @Inject
+    private AnnotationExprService annotationExprService;
+
     @Override
     public JavabeanGeneration generate(PersistenceDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
@@ -44,7 +47,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             String superEntityQualifier = config.getSuperEntityQualifier();
             if (StringUtils.isNotEmpty(superEntityQualifier)) {
                 javabean.addExtendedType(superEntityQualifier);
-                javabean.addAnnotation(AnnotationConstant.EQUALS_AND_HASH_CODE);
+                javabean.addAnnotation(annotationExprService.lombokEqualsAndHashCode());
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
             }
             if (config.getEnableEntityImplementSerializable()) {
@@ -65,7 +68,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
             }
             FieldArg fieldArg = new FieldArg();
             fieldArg.setDescription(cancatPropertyDescription(property));
-            fieldArg.setTypeName(property.getJavaType().getQualifier());
+            fieldArg.setTypeQualifier(property.getJavaType().getQualifier());
             fieldArg.setFieldName(property.getPropertyName());
             arg.getFieldArgs().add(fieldArg);
         }

@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -18,12 +16,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -50,6 +49,9 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private JavabeanGeneratorService javabeanGeneratorService;
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
@@ -97,33 +99,26 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setClassName(javabeanName);
             arg.setDescription(concatDtoDescription(firstLineDto));
             arg.setAuthorName(config.getAuthor());
-            arg.setMore4Javabean((cu1, javabean) -> {
+            arg.setMore4Javabean((tempCu, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
-                    for (ImportDeclaration anImport : fieldService.resolveLongType(field, javabeanType)) {
-                        cu1.addImport(anImport);
-                    }
-                    for (ImportDeclaration anImport : fieldService.resolveTimeType(field, javabeanType)) {
-                        cu1.addImport(anImport);
-                    }
+                    fieldService.more4SpecialTypeField(field, javabeanType);
                 }
+                firstLineDto.getImportsFromController().forEach(tempCu::addImport);
                 javabean.setMembers(dto.getMembers());
             });
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
             JavabeanGeneration javabeanGeneration = javabeanGeneratorService.generate(arg);
-            result.getJavabeanCus().add(javabeanGeneration.getCu());
+            result.getFlushes().add(FileFlush.build(javabeanGeneration.getCu()));
 
             dto.setName(javabeanGeneration.getJavabeanName());
 
             String javabeanQualifier = javabeanGeneration.getJavabeanQualifier();
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-                result.setParamType(calcType(dto));
-                result.setReqDtoQualifier(javabeanQualifier);
+                result.setParamType(calcType(dto, javabeanQualifier));
             }
             if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-                result.setResultType(calcType(dto));
-                result.setRespDtoQualifier(javabeanQualifier);
+                result.setResultType(calcType(dto, javabeanQualifier));
             }
-            result.getJavabeanQualifiers().add(javabeanQualifier);
 
             // 遍历到NestDto时，将父节点中的自身替换为Field
             if (Lists.newArrayList(JavabeanTypeEnum.NEST_DTO_IN_REQ, JavabeanTypeEnum.NEST_DTO_IN_RESP)
@@ -132,20 +127,13 @@ public class ReqRespServiceImpl implements ReqRespService {
                         .orElseThrow(() -> new ParentAbsentException(dto));
                 FieldDeclaration field = new FieldDeclaration();
                 if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-                    field.addAnnotation(AnnotationConstant.VALID);
+                    field.addAnnotation(annotationExprService.javaxValid());
                 }
                 this.moveAnnotationsFromDtoToField(dto, field);
-                field.addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto)),
+                field.addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto, javabeanQualifier)),
                         standardizeNestDtoFieldName(dto)));
                 parentCoid.replace(dto, field);
             }
-        }
-
-        for (CompilationUnit javabeanCu : result.getJavabeanCus()) {
-            for (String javabeanQualifier : result.getJavabeanQualifiers()) {
-                javabeanCu.addImport(javabeanQualifier);
-            }
-            javabeanCu.addImport(config.getPageTypeQualifier());
         }
 
         return result;
@@ -228,15 +216,15 @@ public class ReqRespServiceImpl implements ReqRespService {
     }
 
 
-    private String calcType(ClassOrInterfaceDeclaration dto) {
+    private String calcType(ClassOrInterfaceDeclaration dto, String javabeanQualifier) {
         if (dto.getAnnotationByName("L").isPresent()) {
-            return "List<" + dto.getNameAsString() + ">";
+            return "java.util.List<" + javabeanQualifier + ">";
         }
         if (dto.getAnnotationByName("P").isPresent()) {
-            String[] split = config.getPageTypeQualifier().split("\\.");
-            return split[split.length - 1] + "<" + dto.getNameAsString() + ">";
+            return String.format("%s<%s>", MoreStringUtils.splitAndGetLastPart(config.getPageTypeQualifier(), "."),
+                    javabeanQualifier);
         }
-        return dto.getNameAsString();
+        return javabeanQualifier;
     }
 
     private String concatDtoDescription(FirstLineDto firstLine) {

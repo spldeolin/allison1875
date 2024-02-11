@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
@@ -43,7 +43,7 @@ public class StarTransformer implements Allison1875MainService {
     private TransformStarChainService transformStarChainService;
 
     @Inject
-    private ImportService importService;
+    private ImportExprService importExprService;
 
     @Override
     public void process(AstForest astForest) {
@@ -86,7 +86,7 @@ public class StarTransformer implements Allison1875MainService {
                         log.error("fail to transformStarChain Star Chain, starAnalysis={}", analysis, e);
                     }
 
-                    importService.extractQualifiedTypeToImport(cu);
+                    importExprService.extractQualifiedTypeToImport(cu);
                     anyTransformed = true;
                 }
             }

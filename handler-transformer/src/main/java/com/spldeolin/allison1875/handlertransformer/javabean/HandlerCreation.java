@@ -23,11 +23,6 @@ public class HandlerCreation {
     MethodDeclaration handler;
 
     /**
-     * 待追加的import声明
-     */
-    final List<String> appendImports = Lists.newArrayList();
-
-    /**
      * 待追加的Controller类的注解
      */
     final List<AnnotationExpr> appendAnnotations4Controller = Lists.newArrayList();

@@ -9,11 +9,12 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -42,6 +43,12 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
     @Inject
     private AntiDuplicationService antiDuplicationService;
 
+    @Inject
+    private ImportExprService importExprService;
+
+    @Inject
+    private AnnotationExprService annotationExprService;
+
     @Override
     public ServiceGeneration generateService(GenerateServiceParam param) {
         FirstLineDto firstLineDto = param.getFirstLineDto();
@@ -50,7 +57,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         String serviceName = MoreStringUtils.upperFirstLetter(param.getFirstLineDto().getHandlerName()) + "Service";
         ServicePairDto pair = generateServicePair(param, serviceName);
 
-        // 调用handle创建Service Method，添加到ServicePair中
+        // 调用handle创建Service Method
         CreateServiceMethodHandleResult methodGeneration = createServiceMethodService.createMethodImpl(firstLineDto,
                 param.getReqDtoRespDtoInfo().getParamType(), param.getReqDtoRespDtoInfo().getResultType());
         // 方法名去重
@@ -58,45 +65,30 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
                 methodGeneration.getServiceMethod().getNameAsString(), pair.getService());
         methodGeneration.getServiceMethod().setName(serviceMethodName);
 
-        // 将方法以及Req、Resp的全名 添加到 Service
+        // 将方法 添加到 Service
         MethodDeclaration serviceMethodImpl = methodGeneration.getServiceMethod();
         MethodDeclaration serviceMethod = new MethodDeclaration().setType(serviceMethodImpl.getType())
                 .setName(serviceMethodImpl.getName()).setParameters(serviceMethodImpl.getParameters());
         serviceMethod.setBody(null);
         ClassOrInterfaceDeclaration service = pair.getService();
         service.addMember(serviceMethod);
-        pair.getServiceCu().addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-        pair.getServiceCu().addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
-        pair.getServiceCu().addImport(ImportConstant.JAVA_UTIL);
-        pair.getServiceCu().addImport(config.getPageTypeQualifier());
         log.info("Method [{}] append to Service [{}]", serviceMethod.getName(), service.getName());
 
-        // 将方法以及Req、Resp的全名 均添加到 每个ServiceImpl
-
+        // 将方法 添加到 每个ServiceImpl
         ClassOrInterfaceDeclaration serviceImpl = pair.getServiceImpl();
         serviceImpl.addMember(serviceMethodImpl);
-        pair.getServiceImplCu().addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-        pair.getServiceImplCu().addImport(param.getReqDtoRespDtoInfo().getRespDtoQualifier());
-        pair.getServiceImplCu().addImport(ImportConstant.JAVA_UTIL);
-        pair.getServiceImplCu().addImport(config.getPageTypeQualifier());
         log.info("Method [{}] append to Service Impl [{}]", serviceMethodImpl.getName(), serviceImpl.getName());
 
-        // 将生成的方法所需的import 均添加到 Service 和 每个 ServiceImpl
-        for (String appendImport : methodGeneration.getAppendImports()) {
-            pair.getServiceCu().addImport(appendImport);
-            pair.getServiceCu().addImport(param.getReqDtoRespDtoInfo().getReqDtoQualifier());
-            pair.getServiceImplCu().addImport(appendImport);
-        }
+        importExprService.extractQualifiedTypeToImport(pair.getServiceCu());
+        importExprService.extractQualifiedTypeToImport(pair.getServiceImplCu());
 
         ServiceGeneration result = new ServiceGeneration();
         result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
-        result.setService(service);
-        result.setServiceCu(pair.getServiceCu());
-        result.setServiceImpl(serviceImpl);
-        result.setServiceImplCu(pair.getServiceImplCu());
         result.setServiceQualifier(
                 service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         result.setMethodName(serviceMethod.getNameAsString());
+        result.getFlushes().add(FileFlush.build(pair.getServiceCu()));
+        result.getFlushes().add(FileFlush.build(pair.getServiceImplCu()));
         return result;
     }
 
@@ -123,17 +115,13 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
         CompilationUnit serviceImplCu = new CompilationUnit();
         serviceImplCu.setPackageDeclaration(config.getServiceImplPackage());
         serviceImplCu.setImports(param.getControllerCu().getImports());
-        serviceImplCu.addImport(
-                service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
-        serviceImplCu.addImport(ImportConstant.LOMBOK_SLF4J);
-        serviceImplCu.addImport(ImportConstant.SPRING_SERVICE);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         JavadocUtils.setJavadoc(serviceImpl, comment, config.getAuthor());
-        serviceImpl.addAnnotation(AnnotationConstant.SLF4J);
-        serviceImpl.addAnnotation(AnnotationConstant.SERVICE);
+        serviceImpl.addAnnotation(annotationExprService.lombokSlf4J());
+        serviceImpl.addAnnotation(annotationExprService.springService());
         String serviceImplName = service.getNameAsString() + "Impl";
-        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName)
-                .addImplementedType(service.getNameAsString());
+        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName).addImplementedType(
+                service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
         absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, config.getServiceImplPackage(),
                 serviceImpl.getName() + ".java");
@@ -144,6 +132,7 @@ public class GenerateServicePairServiceImpl implements GenerateServicePairServic
 
         serviceImplCu.setStorage(absolutePath);
         log.info("generate ServiceImpl [{}]", serviceImpl.getName());
+
         ServicePairDto pair = new ServicePairDto();
         pair.setService(service);
         pair.setServiceCu(serviceCu);

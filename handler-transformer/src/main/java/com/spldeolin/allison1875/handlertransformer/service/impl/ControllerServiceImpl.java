@@ -13,9 +13,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
-import com.spldeolin.allison1875.common.exception.CuAbsentException;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
@@ -34,6 +32,9 @@ public class ControllerServiceImpl implements ControllerService {
     @Inject
     private CreateHandlerService createHandlerService;
 
+    @Inject
+    private AnnotationExprService annotationExprService;
+
     @Override
     public List<ClassOrInterfaceDeclaration> collect(CompilationUnit cu) {
         return cu.findAll(ClassOrInterfaceDeclaration.class, this::isController);
@@ -43,8 +44,9 @@ public class ControllerServiceImpl implements ControllerService {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_FULL.getNameAsString())
-                        || AnnotationConstant.CONTROLLER_FULL.getNameAsString().equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(annotationExprService.springController().getNameAsString())
+                        || annotationExprService.springController().getNameAsString()
+                        .equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {
@@ -63,9 +65,9 @@ public class ControllerServiceImpl implements ControllerService {
         // 确保controller有autowired 新生成的service
         if (!controller.getFieldByName(serviceGeneration.getServiceVarName()).isPresent()) {
             FieldDeclaration field = new FieldDeclaration();
-            field.addAnnotation(AnnotationConstant.AUTOWIRED);
+            field.addAnnotation(annotationExprService.springAutowired());
             field.setPrivate(true).addVariable(
-                    new VariableDeclarator(StaticJavaParser.parseType(serviceGeneration.getService().getNameAsString()),
+                    new VariableDeclarator(StaticJavaParser.parseType(serviceGeneration.getServiceQualifier()),
                             serviceGeneration.getServiceVarName()));
 
             int lastIndexOfFieldDeclaration = IntStream.range(0, members.size())
@@ -87,17 +89,6 @@ public class ControllerServiceImpl implements ControllerService {
             }
         }
 
-        CompilationUnit controllerCu = controller.findCompilationUnit()
-                .orElseThrow(() -> new CuAbsentException(controller));
-        for (String appendImport : handlerCreation.getAppendImports()) {
-            controllerCu.addImport(appendImport);
-        }
-
-        controllerCu.addImport(reqDtoRespDtoInfo.getReqDtoQualifier());
-        controllerCu.addImport(reqDtoRespDtoInfo.getRespDtoQualifier());
-        controllerCu.addImport(serviceGeneration.getServiceQualifier());
-        controllerCu.addImport(ImportConstant.JAVAX_VALID);
-        controllerCu.addImport(ImportConstant.SPRING_REQUEST_BODY);
         return handlerCreation;
     }
 

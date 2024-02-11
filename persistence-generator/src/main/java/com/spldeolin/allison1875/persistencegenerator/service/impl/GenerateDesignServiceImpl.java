@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -45,7 +45,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
     private PersistenceGeneratorConfig config;
 
     @Inject
-    private ImportService importService;
+    private ImportExprService importExprService;
 
     @Override
     public Optional<FileFlush> generate(PersistenceDto persistence, JavabeanGeneration entityGeneration,
@@ -256,7 +256,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
 
-        importService.extractQualifiedTypeToImport(cu);
+        importExprService.extractQualifiedTypeToImport(cu);
 
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 

@@ -1,27 +1,24 @@
 package com.spldeolin.allison1875.handlertransformer;
 
 import java.util.List;
-import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateServiceParam;
 import com.spldeolin.allison1875.handlertransformer.javabean.HandlerCreation;
 import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
 import com.spldeolin.allison1875.handlertransformer.javabean.ServiceGeneration;
-import com.spldeolin.allison1875.handlertransformer.javabean.ServicePairDto;
 import com.spldeolin.allison1875.handlertransformer.service.ControllerService;
 import com.spldeolin.allison1875.handlertransformer.service.DtoService;
 import com.spldeolin.allison1875.handlertransformer.service.GenerateServicePairService;
@@ -36,9 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class HandlerTransformer implements Allison1875MainService {
-
-    @Inject
-    private HandlerTransformerConfig config;
 
     @Inject
     private ControllerService controllerService;
@@ -58,11 +52,12 @@ public class HandlerTransformer implements Allison1875MainService {
     @Inject
     private GenerateServicePairService generateServicePairService;
 
+    @Inject
+    private ImportExprService importExprService;
+
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
-        Map<String, ServicePairDto> qualifier2Pair = Maps.newHashMap();
-        Map<String, ServicePairDto> name2Pair = Maps.newHashMap();
 
         for (CompilationUnit cu : astForest) {
             boolean anyTransformed = false;
@@ -70,7 +65,7 @@ public class HandlerTransformer implements Allison1875MainService {
             for (ClassOrInterfaceDeclaration controller : controllerService.collect(cu)) {
                 for (InitializerDeclaration init : initializerCollectService.collectInitializer(controller)) {
                     BlockStmt initBody = init.getBody().clone();
-                    FirstLineDto firstLineDto = parseFirstLineService.parse(init);
+                    FirstLineDto firstLineDto = parseFirstLineService.parse(init, cu);
                     if (firstLineDto == null) {
                         continue;
                     }
@@ -85,7 +80,7 @@ public class HandlerTransformer implements Allison1875MainService {
 
                     // 创建所有所需的Javabean
                     ReqDtoRespDtoInfo reqDtoRespDtoInfo = reqRespService.createJavabeans(astForest, firstLineDto, dtos);
-                    reqDtoRespDtoInfo.getJavabeanCus().stream().map(FileFlush::build).forEach(flushes::add);
+                    flushes.addAll(reqDtoRespDtoInfo.getFlushes());
 
                     // 创建Service Pair
                     GenerateServiceParam param = new GenerateServiceParam();
@@ -97,8 +92,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     if (serviceGeneration == null) {
                         continue;
                     }
-                    flushes.add(FileFlush.build(serviceGeneration.getServiceCu()));
-                    flushes.add(FileFlush.build(serviceGeneration.getServiceImplCu()));
+                    flushes.addAll(serviceGeneration.getFlushes());
 
                     // 在controller中创建handler，并替换掉
                     HandlerCreation handlerCreation = controllerService.createHandlerToController(firstLineDto,
@@ -106,18 +100,12 @@ public class HandlerTransformer implements Allison1875MainService {
                     log.info("replace Initializer [{}] to Handler [{}] in Controller [{}].", firstLineDto,
                             handlerCreation.getHandler().getName(), controller.getName());
 
-                    cu.addImport(config.getPageTypeQualifier());
-                    cu.addImport(ImportConstant.SPRING_REQUEST_BODY);
-                    cu.addImport(ImportConstant.JAVAX_VALID);
-                    cu.addImport(ImportConstant.SPRING_POST_MAPPING);
-                    cu.addImport(ImportConstant.SPRING_AUTOWIRED);
-                    cu.addImport(ImportConstant.JAVA_UTIL);
-
                     anyTransformed = true;
                 }
             }
 
             if (anyTransformed) {
+                importExprService.extractQualifiedTypeToImport(cu);
                 flushes.add(FileFlush.build(cu));
             }
         }

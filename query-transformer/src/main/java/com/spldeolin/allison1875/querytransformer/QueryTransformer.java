@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.service.ImportService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
@@ -69,7 +69,7 @@ public class QueryTransformer implements Allison1875MainService {
     private DesignService designService;
 
     @Inject
-    private ImportService importService;
+    private ImportExprService importExprService;
 
     @Override
     public void process(AstForest astForest) {
@@ -155,7 +155,7 @@ public class QueryTransformer implements Allison1875MainService {
                 }
             }
             if (anyTransformed) {
-                importService.extractQualifiedTypeToImport(cu);
+                importExprService.extractQualifiedTypeToImport(cu);
                 flushes.add(FileFlush.buildLexicalPreserving(cu));
             }
         }

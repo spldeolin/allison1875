@@ -4,8 +4,9 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.handlertransformer.javabean.CreateServiceMethodHandleResult;
 import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
 import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodService;
@@ -16,11 +17,14 @@ import com.spldeolin.allison1875.handlertransformer.service.CreateServiceMethodS
 @Singleton
 public class CreateServiceMethodServiceImpl implements CreateServiceMethodService {
 
+    @Inject
+    private AnnotationExprService annotationExprService;
+
     @Override
     public CreateServiceMethodHandleResult createMethodImpl(FirstLineDto firstLineDto, String paramType,
             String resultType) {
         MethodDeclaration method = new MethodDeclaration();
-        method.addAnnotation(AnnotationConstant.OVERRIDE);
+        method.addAnnotation(annotationExprService.javaOverride());
         method.setPublic(true);
         if (resultType != null) {
             method.setType(resultType);

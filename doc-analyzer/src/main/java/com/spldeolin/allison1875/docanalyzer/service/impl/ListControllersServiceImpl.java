@@ -9,10 +9,11 @@ import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.docanalyzer.constant.ControllerMarkerConstant;
@@ -29,6 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class ListControllersServiceImpl implements ListControllersService {
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public List<ControllerFullDto> listControllers(AstForest astForest) {
@@ -96,8 +100,9 @@ public class ListControllersServiceImpl implements ListControllersService {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_FULL.getNameAsString())
-                        || AnnotationConstant.CONTROLLER_FULL.getNameAsString().equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(annotationExprService.springController().getNameAsString())
+                        || annotationExprService.springController().getNameAsString()
+                        .equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {

@@ -9,7 +9,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
 import com.spldeolin.allison1875.docanalyzer.service.ObtainConcernedResponseBodyService;
 import com.spldeolin.allison1875.docanalyzer.util.AnnotationUtils;
@@ -26,6 +26,9 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
     @Inject
     private ObtainConcernedResponseBodyService obtainConcernedResponseBodyService;
 
+    @Inject
+    private AnnotationExprService annotationExprService;
+
     /**
      * 1. 遍历出声明了@RequestBody的参数后返回
      * 2. 发生任何异常时，都会认为没有ResponseBody
@@ -40,7 +43,7 @@ public class GetBodyResolvedTypeServiceImpl implements GetBodyResolvedTypeServic
             try {
                 boolean isRequestBody = false;
                 for (AnnotationExpr annotation : parameter.getAnnotations()) {
-                    if (AnnotationConstant.REQUEST_BODY_FULL.getNameAsString()
+                    if (annotationExprService.springRequestbody().getNameAsString()
                             .equals(annotation.resolve().getQualifiedName())) {
                         if (result == null) {
                             result = parameter.getType().resolve();

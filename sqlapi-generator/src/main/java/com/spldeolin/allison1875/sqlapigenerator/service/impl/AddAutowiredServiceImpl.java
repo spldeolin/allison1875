@@ -6,9 +6,10 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.sqlapigenerator.service.AddAutowiredService;
 
@@ -17,6 +18,9 @@ import com.spldeolin.allison1875.sqlapigenerator.service.AddAutowiredService;
  */
 @Singleton
 public class AddAutowiredServiceImpl implements AddAutowiredService {
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public void ensureAuwired(ClassOrInterfaceDeclaration toBeAutowired, ClassOrInterfaceDeclaration coid) {
@@ -31,7 +35,7 @@ public class AddAutowiredServiceImpl implements AddAutowiredService {
                     .orElse(-1);
             FieldDeclaration field = new ClassOrInterfaceDeclaration().addField(qualifier, fieldVarName,
                     Keyword.PRIVATE);
-            field.addAnnotation(AnnotationConstant.AUTOWIRED_FULL.clone());
+            field.addAnnotation(annotationExprService.springAutowired());
             members.add(lastIndexOfFieldDeclaration + 1, field);
         }
     }
