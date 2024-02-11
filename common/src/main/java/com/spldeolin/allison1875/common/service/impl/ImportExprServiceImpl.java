@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.common.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -28,11 +27,10 @@ public class ImportExprServiceImpl implements ImportExprService {
      * </pre>
      *
      * @param cu 本方法不会改变这个
-     * @return 抽取import完毕后的CU对象
      * @see ClassOrInterfaceType
      */
     @Override
-    public CompilationUnit extractQualifiedTypeToImport(CompilationUnit cu) {
+    public void extractQualifiedTypeToImport(CompilationUnit cu) {
         List<ClassOrInterfaceType> coits = cu.findAll(ClassOrInterfaceType.class, type -> {
             // 防止scope的scope被加入到import，所以只取用name首字母大写的type
             return MoreStringUtils.isFirstLetterUpperCase(type.getNameAsString());
@@ -55,14 +53,11 @@ public class ImportExprServiceImpl implements ImportExprService {
                 ae.setName(MoreStringUtils.splitAndGetLastPart(ae.getNameAsString(), "."));
             }
         }
-        return cu;
     }
 
-    /**
-     * 将参数cu中的所有全限定类型抽取成import声明
-     */
-    public List<CompilationUnit> extractQualifiedTypeToImport(List<CompilationUnit> cus) {
-        return cus.stream().map(this::extractQualifiedTypeToImport).collect(Collectors.toList());
+    @Override
+    public void copyImports(CompilationUnit from, CompilationUnit to) {
+        from.getImports().forEach(to::addImport);
     }
 
 }

@@ -23,6 +23,7 @@ import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -52,6 +53,9 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Inject
+    private ImportExprService importExprService;
 
     @Override
     public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
@@ -103,7 +107,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 for (FieldDeclaration field : dto.getFields()) {
                     fieldService.more4SpecialTypeField(field, javabeanType);
                 }
-                firstLineDto.getImportsFromController().forEach(tempCu::addImport);
+                importExprService.copyImports(firstLineDto.getControllerCu(), tempCu);
                 javabean.setMembers(dto.getMembers());
             });
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);

@@ -64,7 +64,7 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
             result.setHandlerDescription("未指定描述");
         }
         result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
-        result.getImportsFromController().addAll(controllerCu.getImports());
+        result.setControllerCu(controllerCu);
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("HT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;

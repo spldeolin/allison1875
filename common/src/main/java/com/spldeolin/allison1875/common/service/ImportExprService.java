@@ -10,6 +10,8 @@ import com.spldeolin.allison1875.common.service.impl.ImportExprServiceImpl;
 @ImplementedBy(ImportExprServiceImpl.class)
 public interface ImportExprService {
 
-    CompilationUnit extractQualifiedTypeToImport(CompilationUnit cu);
+    void extractQualifiedTypeToImport(CompilationUnit cu);
+
+    void copyImports(CompilationUnit from, CompilationUnit to);
 
 }

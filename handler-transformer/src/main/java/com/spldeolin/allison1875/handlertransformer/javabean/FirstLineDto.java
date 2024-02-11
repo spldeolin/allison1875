@@ -1,10 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.InitializerDeclaration;
-import com.google.common.collect.Lists;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +23,7 @@ public class FirstLineDto {
 
     String handlerDescription;
 
-    final List<ImportDeclaration> importsFromController = Lists.newArrayList();
+    CompilationUnit controllerCu;
 
     String lotNo;
 
