@@ -51,4 +51,6 @@ public interface AnnotationConstant {
     AnnotationExpr EQUALS_AND_HASH_CODE_FULL = StaticJavaParser.parseAnnotation(
             "@lombok.EqualsAndHashCode(callSuper = true)");
 
+    AnnotationExpr CONTROLLER_FULL = StaticJavaParser.parseAnnotation("@org.springframework.stereotype.Controller");
+
 }

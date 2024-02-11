@@ -13,8 +13,6 @@ public interface ImportConstant {
 
     ImportDeclaration GOOGLE_COMMON_COLLECTION = new ImportDeclaration("com.google.common.collect", false, true);
 
-    ImportDeclaration APACHE_IBATIS = new ImportDeclaration("org.apache.ibatis.annotations", false, true);
-
     ImportDeclaration LOMBOK = new ImportDeclaration("lombok", false, true);
 
     ImportDeclaration LOMBOK_EXPERIMENTAL = new ImportDeclaration("lombok.experimental", false, true);
@@ -33,8 +31,5 @@ public interface ImportConstant {
 
     ImportDeclaration SPRING_AUTOWIRED = new ImportDeclaration("org.springframework.beans.factory.annotation.Autowired",
             false, false);
-
-    ImportDeclaration SPRING_CONTROLLER = new ImportDeclaration("org.springframework.stereotype.Controller", false,
-            false);
 
 }

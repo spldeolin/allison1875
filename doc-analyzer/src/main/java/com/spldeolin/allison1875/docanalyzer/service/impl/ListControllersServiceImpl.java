@@ -11,7 +11,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
+import com.spldeolin.allison1875.common.constant.AnnotationConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
@@ -96,8 +96,8 @@ public class ListControllersServiceImpl implements ListControllersService {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(ImportConstant.SPRING_CONTROLLER.getNameAsString())
-                        || ImportConstant.SPRING_CONTROLLER.getNameAsString().equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_FULL.getNameAsString())
+                        || AnnotationConstant.CONTROLLER_FULL.getNameAsString().equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {

@@ -43,8 +43,8 @@ public class ControllerServiceImpl implements ControllerService {
         for (AnnotationExpr annotation : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolve = annotation.resolve();
-                if (resolve.hasAnnotation(ImportConstant.SPRING_CONTROLLER.getNameAsString())
-                        || ImportConstant.SPRING_CONTROLLER.getNameAsString().equals(resolve.getQualifiedName())) {
+                if (resolve.hasAnnotation(AnnotationConstant.CONTROLLER_FULL.getNameAsString())
+                        || AnnotationConstant.CONTROLLER_FULL.getNameAsString().equals(resolve.getQualifiedName())) {
                     return true;
                 }
             } catch (Exception e) {
