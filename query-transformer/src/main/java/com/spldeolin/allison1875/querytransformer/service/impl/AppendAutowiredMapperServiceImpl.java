@@ -25,7 +25,8 @@ public class AppendAutowiredMapperServiceImpl implements AppendAutowiredMapperSe
         chain.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
             if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(designMeta.getMapperName())).isPresent()) {
                 BodyDeclaration<?> autowiredField = StaticJavaParser.parseBodyDeclaration(
-                        "@Autowired private " + designMeta.getMapperName() + " " + MoreStringUtils.lowerFirstLetter(
+                        "@org.springframework.beans.factory.annotation.Autowired private "
+                                + designMeta.getMapperQualifier() + " " + MoreStringUtils.lowerFirstLetter(
                                 designMeta.getMapperName() + ";"));
 
                 List<FieldDeclaration> fields = service.getFields();

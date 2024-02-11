@@ -39,7 +39,8 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                 MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
                         + "(";
         if (paramGeneration.getIsCond()) {
-            result += MoreStringUtils.lowerFirstLetter(paramGeneration.getParameters().get(0).getTypeAsString());
+            String condQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
+            result += MoreStringUtils.lowerFirstLetter(MoreStringUtils.splitAndGetLastPart(condQualifier, "."));
         } else {
             Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
             phrases.addAll(chainAnalysis.getByPhrases());
@@ -56,11 +57,12 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
     @Override
     public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
         log.info("build Javabean setter call");
-        String javabeanTypeName = paramGeneration.getParameters().get(0).getTypeAsString();
-        String javabeanVarName = MoreStringUtils.lowerFirstLetter(javabeanTypeName);
+        String javabeanTypeQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
+        String javabeanVarName = MoreStringUtils.lowerFirstLetter(
+                MoreStringUtils.splitAndGetLastPart(javabeanTypeQualifier, "."));
         List<Statement> result = Lists.newArrayList();
         result.add(StaticJavaParser.parseStatement(
-                "final " + javabeanTypeName + " " + javabeanVarName + " = new " + javabeanTypeName + "();"));
+                "final " + javabeanTypeQualifier + " " + javabeanVarName + " = new " + javabeanTypeQualifier + "();"));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
             result.add(StaticJavaParser.parseStatement(
                     javabeanVarName + ".set" + MoreStringUtils.upperFirstLetter(updatePhrase.getVarName()) + "("
@@ -93,11 +95,11 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             List<Statement> statements = Lists.newArrayList();
             if (isAssignWithoutType) {
                 statements.add(
-                        StaticJavaParser.parseStatement(calcResultVarName(chainAnalysis) + " = Maps.newHashMap();"));
+                        StaticJavaParser.parseStatement(calcResultVarName(chainAnalysis) + " = new HashMap<>();"));
             } else {
                 statements.add(StaticJavaParser.parseStatement(
-                        "final Map<" + propertyTypeName + ", " + elementTypeName + "> " + calcResultVarName(
-                                chainAnalysis) + " = Maps.newHashMap();"));
+                        "final java.util.Map<" + propertyTypeName + ", " + elementTypeName + "> " + calcResultVarName(
+                                chainAnalysis) + " = new HashMap<>();"));
             }
             statements.add(StaticJavaParser.parseStatement(
                     chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
@@ -122,8 +124,8 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                         calcResultVarName(chainAnalysis) + " = ArrayListMultimap.create();"));
             } else {
                 statements.add(StaticJavaParser.parseStatement(
-                        "final Multimap<" + propertyTypeName + ", " + elementTypeName + "> " + calcResultVarName(
-                                chainAnalysis) + " = ArrayListMultimap.create();"));
+                        "final com.google.common.collect.ArrayListMultimap<" + propertyTypeName + ", " + elementTypeName
+                                + "> " + calcResultVarName(chainAnalysis) + " = ArrayListMultimap.create();"));
             }
             statements.add(StaticJavaParser.parseStatement(
                     chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)

@@ -68,7 +68,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         if (chain.getNameAsString().equals("one")) {
             returnClassify = ReturnClassifyEnum.one;
         } else if (chain.getNameAsString().equals("many")) {
-            if (CollectionUtils.isNotEmpty(chain.getArguments())) {
+            if (CollectionUtils.isEmpty(chain.getArguments())) {
                 returnClassify = ReturnClassifyEnum.many;
             } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
                 returnClassify = ReturnClassifyEnum.each;
@@ -90,7 +90,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         Set<PhraseDto> byPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
-        List<String> varNames = Lists.newArrayList();
+        List<String> varNames4AntiDupl = Lists.newArrayList();
         for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
             if (!designMeta.getProperties().containsKey(fae.getNameAsString())) {
                 // 例如：XxxxDesign.query("xx").by().privilegeCode.in(Lists.newArrayList(OneTypeEnum.FIRST.getCode()))
@@ -108,7 +108,9 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
                 phrase.setSubjectPropertyName(fae.getNameAsString());
                 phrase.setPredicate(predicate);
                 if (predicate != PredicateEnum.IS_NULL && predicate != PredicateEnum.NOT_NULL) {
-                    String varName = antiDuplicationService.getNewElementIfExist(fae.getNameAsString(), varNames);
+                    String varName = antiDuplicationService.getNewElementIfExist(fae.getNameAsString(),
+                            varNames4AntiDupl);
+                    varNames4AntiDupl.add(varName);
                     phrase.setVarName(varName);
                 }
                 if (CollectionUtils.isNotEmpty(parent.getArguments())) {
@@ -147,7 +149,8 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());
-                String varName = antiDuplicationService.getNewElementIfExist(mce.getNameAsString(), varNames);
+                String varName = antiDuplicationService.getNewElementIfExist(mce.getNameAsString(), varNames4AntiDupl);
+                varNames4AntiDupl.add(varName);
                 phrase.setVarName(varName);
                 phrase.setObjectExpr(mce.getArgument(0));
                 updatePhrases.add(phrase);

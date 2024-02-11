@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.querytransformer.service;
 
-import com.github.javaparser.ast.CompilationUnit;
+import java.util.Optional;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
@@ -15,7 +16,7 @@ import com.spldeolin.allison1875.querytransformer.service.impl.GenerateMethodInt
 @ImplementedBy(GenerateMethodIntoMapperServiceImpl.class)
 public interface GenerateMethodIntoMapperService {
 
-    CompilationUnit generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    Optional<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration);
 
 }

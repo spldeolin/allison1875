@@ -306,7 +306,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
-            startTag += " parameterType='" + paramGeneration.getImports().get(0) + "'";
+            startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
         }
         if (resultGeneration.getElementTypeQualifier() != null && !resultGeneration.getElementTypeQualifier()
                 .equals(designMeta.getEntityQualifier())) {
@@ -322,7 +322,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
         String startTag = "<update id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
-            startTag += " parameterType='" + paramGeneration.getImports().get(0) + "'";
+            startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
         }
         startTag += ">";
         return startTag;
@@ -331,7 +331,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     private String concatDeleteStartTag(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
         String startTag = "<delete id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
-            startTag += " parameterType='" + paramGeneration.getImports().get(0) + "'";
+            startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
         }
         startTag += ">";
         return startTag;

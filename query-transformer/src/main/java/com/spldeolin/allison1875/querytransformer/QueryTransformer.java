@@ -14,6 +14,7 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
@@ -26,7 +27,6 @@ import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
 import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 import com.spldeolin.allison1875.querytransformer.service.DetectQueryChainService;
-import com.spldeolin.allison1875.querytransformer.service.FindMapperService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateMethodIntoMapperService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
 import com.spldeolin.allison1875.querytransformer.service.GenerateParamService;
@@ -69,7 +69,7 @@ public class QueryTransformer implements Allison1875MainService {
     private DesignService designService;
 
     @Inject
-    private FindMapperService findMapperService;
+    private ImportService importService;
 
     @Override
     public void process(AstForest astForest) {
@@ -132,17 +132,13 @@ public class QueryTransformer implements Allison1875MainService {
                         log.error("fail to generate result analysis={} designMeta={}", analysis, designMeta, e);
                         continue;
                     }
-                    if (resultGeneration.getRecordFlush() != null) {
-                        flushes.add(resultGeneration.getRecordFlush());
+                    if (resultGeneration.getFlush() != null) {
+                        flushes.add(resultGeneration.getFlush());
                     }
 
                     // generate Method into Mapper
-                    CompilationUnit mapperCu = generateMethodIntoMapperService.generate(astForest, designMeta, analysis,
-                            paramGeneration, resultGeneration);
-                    if (mapperCu != null) {
-                        log.info("Method generated into Mapper, mapper={}", mapperCu.getPrimaryTypeName());
-                        flushes.add(FileFlush.build(mapperCu));
-                    }
+                    generateMethodIntoMapperService.generate(astForest, designMeta, analysis, paramGeneration,
+                            resultGeneration).ifPresent(flushes::add);
 
                     // generate Method into mapper.xml
                     List<FileFlush> xmlFlushes = generateMethodXmlService.generate(astForest, designMeta, analysis,
@@ -159,6 +155,7 @@ public class QueryTransformer implements Allison1875MainService {
                 }
             }
             if (anyTransformed) {
+                importService.extractQualifiedTypeToImport(cu);
                 flushes.add(FileFlush.buildLexicalPreserving(cu));
             }
         }

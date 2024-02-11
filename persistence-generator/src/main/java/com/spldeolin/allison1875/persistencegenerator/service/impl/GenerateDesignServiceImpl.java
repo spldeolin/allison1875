@@ -255,9 +255,10 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         designCoid.addFieldWithInitializer("String", TokenWordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
-        cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 
         importService.extractQualifiedTypeToImport(cu);
+
+        cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 
         return Optional.of(FileFlush.build(cu));
     }

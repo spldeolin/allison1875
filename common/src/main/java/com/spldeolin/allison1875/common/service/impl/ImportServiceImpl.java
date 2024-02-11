@@ -52,15 +52,10 @@ public class ImportServiceImpl implements ImportService {
         for (AnnotationExpr ae : cu.findAll(AnnotationExpr.class)) {
             if (ae.getNameAsString().contains(".")) {
                 cu.addImport(ae.getNameAsString());
-                ae.setName(this.getLastPart(ae));
+                ae.setName(MoreStringUtils.splitAndGetLastPart(ae.getNameAsString(), "."));
             }
         }
         return cu;
-    }
-
-    private String getLastPart(AnnotationExpr ae) {
-        String[] split = ae.getNameAsString().split("\\.");
-        return split[split.length - 1];
     }
 
     /**

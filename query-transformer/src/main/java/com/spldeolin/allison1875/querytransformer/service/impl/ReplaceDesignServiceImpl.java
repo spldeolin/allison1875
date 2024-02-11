@@ -10,7 +10,6 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.constant.ImportConstant;
 import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
@@ -37,17 +36,6 @@ public class ReplaceDesignServiceImpl implements ReplaceDesignService {
     @Override
     public void replace(DesignMeta designMeta, ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration,
             ResultGenerationDto resultGeneration) {
-
-        // add imports to cu
-        chainAnalysis.getChain().findCompilationUnit().ifPresent(cu -> {
-            paramGeneration.getImports().forEach(cu::addImport);
-            resultGeneration.getImports().forEach(cu::addImport);
-            cu.addImport(designMeta.getEntityQualifier());
-            cu.addImport(designMeta.getMapperQualifier());
-            cu.addImport(ImportConstant.SPRING_AUTOWIRED);
-            cu.addImport(ImportConstant.JAVA_UTIL);
-            cu.addImport(ImportConstant.GOOGLE_COMMON_COLLECTION);
-        });
 
         // build Map  build Multimap
         MapOrMultimapBuiltDto mapOrMultimapBuilt = transformMethodCallService.mapOrMultimapBuildStmts(designMeta,

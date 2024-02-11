@@ -85,4 +85,9 @@ public class MoreStringUtils {
         return text.replaceAll(BaseConstant.NEW_LINE_FOR_MATCHING, " ");
     }
 
+    public static String splitAndGetLastPart(String text, String separator) {
+        String[] parts = StringUtils.split(text, separator);
+        return parts[parts.length - 1];
+    }
+
 }

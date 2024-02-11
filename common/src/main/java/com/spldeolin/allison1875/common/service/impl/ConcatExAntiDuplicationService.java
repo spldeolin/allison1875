@@ -43,14 +43,9 @@ public class ConcatExAntiDuplicationService implements AntiDuplicationService {
 
     @Override
     public String getNewElementIfExist(String element, List<String> list) {
-        return getNewElementIfExist(element, list, 1);
-    }
-
-    private String getNewElementIfExist(String element, List<String> list, int n) {
         if (list.contains(element)) {
-            n += 1;
-            String newElement = element + n;
-            return getNewElementIfExist(newElement, list, n);
+            String newElement = element + "Ex";
+            return getNewElementIfExist(newElement, list);
         } else {
             return element;
         }

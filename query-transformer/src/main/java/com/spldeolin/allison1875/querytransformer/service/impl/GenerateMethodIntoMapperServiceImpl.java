@@ -1,14 +1,19 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
+import com.spldeolin.allison1875.common.service.ImportService;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
@@ -34,35 +39,38 @@ public class GenerateMethodIntoMapperServiceImpl implements GenerateMethodIntoMa
     @Inject
     private AntiDuplicationService antiDuplicationService;
 
+    @Inject
+    private ImportService importService;
+
     @Override
-    public CompilationUnit generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    public Optional<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
             ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
         ClassOrInterfaceDeclaration mapper = findMapperService.findMapper(astForest, designMeta);
         if (mapper == null) {
-            return null;
+            return Optional.empty();
         }
 
         String methodName = chainAnalysis.getMethodName();
         methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
-
-        CompilationUnit mapperCu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
-        for (String anImport : resultGeneration.getImports()) {
-            mapperCu.addImport(anImport);
-        }
-        for (String anImport : paramGeneration.getImports()) {
-            mapperCu.addImport(anImport);
-        }
+        log.info(
+                "anti duplication worked completed, new method name '{}' update to ChainAnalysisDto.methodName, old={}",
+                methodName, chainAnalysis.getMethodName());
+        chainAnalysis.setMethodName(methodName);
 
         MethodDeclaration method = new MethodDeclaration();
         if (config.getEnableLotNoAnnounce()) {
             method.setJavadocComment(chainAnalysis.getLotNo());
         }
-        method.setType(resultGeneration.getResultType());
+        method.setType(resultGeneration.getResultType().clone());
         method.setName(methodName);
-        method.setParameters(new NodeList<>(paramGeneration.getParameters()));
+        method.setParameters(new NodeList<>(
+                paramGeneration.getParameters().stream().map(Parameter::clone).collect(Collectors.toList())));
         method.setBody(null);
         mapper.getMembers().add(method);
-        return mapperCu;
+
+        CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+        importService.extractQualifiedTypeToImport(cu);
+        return Optional.of(FileFlush.build(cu));
     }
 
 }

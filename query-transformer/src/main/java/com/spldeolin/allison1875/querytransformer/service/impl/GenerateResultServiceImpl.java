@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.querytransformer.service.impl;
 import java.util.Map;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.collect.Iterables;
@@ -12,7 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
-import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
@@ -61,13 +59,13 @@ public class GenerateResultServiceImpl implements GenerateResultService {
         if (isAssigned) {
             if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
                     .contains(chainAnalysis.getReturnClassify())) {
-                result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
+                result.setResultType(
+                        StaticJavaParser.parseType("java.util.List<" + designMeta.getEntityQualifier() + ">"));
                 result.setElementTypeQualifier(designMeta.getEntityQualifier());
             } else {
-                result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
+                result.setResultType(StaticJavaParser.parseType(designMeta.getEntityQualifier()));
                 result.setElementTypeQualifier(designMeta.getEntityQualifier());
             }
-            result.getImports().add(designMeta.getEntityQualifier());
             return result;
         }
 
@@ -97,18 +95,15 @@ public class GenerateResultServiceImpl implements GenerateResultService {
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
-            JavabeanGeneration javabeanGeneration = javabeanGeneratorService.generate(javabeanArg);
-            result.setRecordFlush(javabeanGeneration.getFileFlush());
-            ClassOrInterfaceDeclaration resultType = javabeanGeneration.getCoid();
-            String javabeanQualifier = resultType.getFullyQualifiedName()
-                    .orElseThrow(() -> new QualifierAbsentException(resultType));
-            result.setElementTypeQualifier(javabeanQualifier);
-            result.getImports().add(javabeanQualifier);
+            JavabeanGeneration recordGeneration = javabeanGeneratorService.generate(javabeanArg);
+            result.setFlush(recordGeneration.getFileFlush());
+            result.setElementTypeQualifier(recordGeneration.getJavabeanQualifier());
             if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
                     .contains(chainAnalysis.getReturnClassify())) {
-                result.setResultType(StaticJavaParser.parseType("List<" + resultType.getNameAsString() + ">"));
+                result.setResultType(
+                        StaticJavaParser.parseType("java.util.List<" + recordGeneration.getJavabeanQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(resultType.getNameAsString()));
+                result.setResultType(StaticJavaParser.parseType(recordGeneration.getJavabeanQualifier()));
             }
             return result;
 
@@ -117,24 +112,23 @@ public class GenerateResultServiceImpl implements GenerateResultService {
             String propertyName = Iterables.getOnlyElement(phrases).getSubjectPropertyName();
             JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
-            result.getImports().add(javaType.getQualifier());
             if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
                     .contains(chainAnalysis.getReturnClassify())) {
-                result.setResultType(StaticJavaParser.parseType("List<" + javaType.getSimpleName() + ">"));
+                result.setResultType(StaticJavaParser.parseType("java.util.List<" + javaType.getQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(javaType.getSimpleName()));
+                result.setResultType(StaticJavaParser.parseType(javaType.getQualifier()));
             }
             return result;
 
         } else {
             // 没有指定属性，使用Entity作为返回值类型
             result.setElementTypeQualifier(designMeta.getEntityQualifier());
-            result.getImports().add(designMeta.getEntityQualifier());
             if (Lists.newArrayList(ReturnClassifyEnum.many, ReturnClassifyEnum.each, ReturnClassifyEnum.multiEach)
                     .contains(chainAnalysis.getReturnClassify())) {
-                result.setResultType(StaticJavaParser.parseType("List<" + designMeta.getEntityName() + ">"));
+                result.setResultType(
+                        StaticJavaParser.parseType("java.util.List<" + designMeta.getEntityQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(designMeta.getEntityName()));
+                result.setResultType(StaticJavaParser.parseType(designMeta.getEntityQualifier()));
             }
             return result;
         }

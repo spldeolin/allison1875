@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -13,7 +12,6 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
-import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
@@ -48,7 +46,6 @@ public class GenerateParamServiceImpl implements GenerateParamService {
     public ParamGenerationDto generate(ChainAnalysisDto chainAnalysis, DesignMeta designMeta, AstForest astForest) {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
-        List<String> imports = Lists.newArrayList();
         List<Parameter> params = Lists.newArrayList();
         boolean isJavabean = false;
         FileFlush condFlush = null;
@@ -74,25 +71,22 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 String varName = phrase.getVarName();
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 FieldArg fieldArg = new FieldArg();
-                fieldArg.setTypeQualifier(javaType.getQualifier());
                 fieldArg.setDescription(properties.get(propertyName).getDescription());
                 if (Lists.newArrayList(PredicateEnum.IN, PredicateEnum.NOT_IN).contains(phrase.getPredicate())) {
-                    fieldArg.setTypeName("List<" + javaType.getSimpleName() + ">");
+                    fieldArg.setTypeName("java.util.List<" + javaType.getQualifier() + ">");
                 } else {
-                    fieldArg.setTypeName(javaType.getSimpleName());
+                    fieldArg.setTypeName(javaType.getQualifier());
                 }
                 fieldArg.setFieldName(varName);
                 javabeanArg.getFieldArgs().add(fieldArg);
             }
             javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
-            JavabeanGeneration javabeanGeneration = javabeanGeneratorService.generate(javabeanArg);
-            condFlush = javabeanGeneration.getFileFlush();
-            ClassOrInterfaceDeclaration cond = javabeanGeneration.getCoid();
+            JavabeanGeneration condGeneration = javabeanGeneratorService.generate(javabeanArg);
+            condFlush = condGeneration.getFileFlush();
             Parameter param = new Parameter();
-            param.setType(cond.getNameAsString());
-            param.setName(MoreStringUtils.lowerFirstLetter(cond.getNameAsString()));
+            param.setType(condGeneration.getJavabeanQualifier());
+            param.setName(MoreStringUtils.lowerFirstLetter(condGeneration.getJavabeanName()));
             params.add(param);
-            imports.add(cond.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(cond)));
             isJavabean = true;
         } else if (CollectionUtils.isNotEmpty(phrases)) {
             for (PhraseDto phrase : phrases) {
@@ -103,15 +97,15 @@ public class GenerateParamServiceImpl implements GenerateParamService {
                 String varName = phrase.getVarName();
                 JavaTypeNamingDto javaType = properties.get(propertyName).getJavaType();
                 Parameter param = new Parameter();
-                param.addAnnotation(StaticJavaParser.parseAnnotation(String.format("@Param(\"%s\")", varName)));
+                param.addAnnotation(StaticJavaParser.parseAnnotation(
+                        String.format("@org.apache.ibatis.annotations.Param(\"%s\")", varName)));
 
                 if (Lists.newArrayList(PredicateEnum.IN, PredicateEnum.NOT_IN).contains(phrase.getPredicate())) {
-                    param.setType("List<" + javaType.getSimpleName() + ">");
+                    param.setType("java.util.List<" + javaType.getQualifier() + ">");
                 } else {
-                    param.setType(javaType.getSimpleName());
+                    param.setType(javaType.getQualifier());
                 }
                 param.setName(varName);
-                imports.add(javaType.getQualifier());
                 params.add(param);
             }
         } else {
@@ -119,7 +113,6 @@ public class GenerateParamServiceImpl implements GenerateParamService {
         }
 
         ParamGenerationDto result = new ParamGenerationDto();
-        result.getImports().addAll(imports);
         result.getParameters().addAll(params);
         result.setIsCond(isJavabean);
         result.setCondFlush(condFlush);
