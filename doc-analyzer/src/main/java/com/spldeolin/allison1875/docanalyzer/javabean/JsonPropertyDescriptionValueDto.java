@@ -41,11 +41,11 @@ public class JsonPropertyDescriptionValueDto {
 
     String referencePath;
 
-    List<EnumCodeAndTitleDto> ecats;
+    List<AnalyzeEnumConstantRetval> ecats;
 
     /**
      * 拓展信息
      */
-    Object more;
+    Object moreInfo;
 
 }

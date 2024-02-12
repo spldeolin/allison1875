@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.docanalyzer.service;
 
 import java.lang.reflect.Method;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeRequestMappingRetval;
 import com.spldeolin.allison1875.docanalyzer.service.impl.RequestMappingServiceImpl;
 
 /**
@@ -13,6 +13,7 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.RequestMappingServiceI
 @ImplementedBy(RequestMappingServiceImpl.class)
 public interface RequestMappingService {
 
-    RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix);
+    AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod,
+            String globalUrlPrefix);
 
 }

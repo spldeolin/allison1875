@@ -3,11 +3,12 @@ package com.spldeolin.allison1875.docanalyzer;
 
 import java.io.File;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
-import com.spldeolin.allison1875.docanalyzer.enums.OutputToEnum;
+import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -32,9 +33,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     @NotNull String globalUrlPrefix;
 
     /**
-     * 文档输出到...
+     * 文档保存到...
      */
-    @NotNull OutputToEnum outputTo;
+    @NotEmpty List<FlushToEnum> flushTo;
 
     /**
      * 文档输出到YApi时，YApi请求URL
@@ -81,7 +82,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must exist and be a directory"));
             }
         }
-        if (outputTo == OutputToEnum.YAPI) {
+        if (flushTo.contains(FlushToEnum.YAPI)) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
                         .setReason("must not be null"));
@@ -91,7 +92,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must not be null"));
             }
         }
-        if (outputTo == OutputToEnum.LOCAL_MARKDOWN) {
+        if (flushTo.contains(FlushToEnum.LOCAL_MARKDOWN)) {
             if (markdownDirectoryPath == null) {
                 invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
                         .setValue(ValidUtils.formatValue(markdownDirectoryPath)).setReason("must not be null"));

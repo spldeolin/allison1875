@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.service;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.docanalyzer.javabean.BodyTypeAnalysisDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeBodyRetval;
 import com.spldeolin.allison1875.docanalyzer.service.impl.RequestBodyServiceImpl;
 
 /**
@@ -14,6 +14,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.RequestBodyServiceImpl
 @ImplementedBy(RequestBodyServiceImpl.class)
 public interface RequestBodyService {
 
-    BodyTypeAnalysisDto analyze(JsonSchemaGenerator jsg, MethodDeclaration handler);
+    AnalyzeBodyRetval analyzeBody(JsonSchemaGenerator jsg, MethodDeclaration mvcHandlerMd);
 
 }

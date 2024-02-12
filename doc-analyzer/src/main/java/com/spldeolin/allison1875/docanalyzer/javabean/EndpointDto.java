@@ -4,12 +4,14 @@ import java.util.List;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-06-01
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EndpointDto {
 
@@ -19,11 +21,17 @@ public class EndpointDto {
 
     List<String> descriptionLines;
 
+    Boolean isDeprecated;
+
+    String author;
+
+    String sourceCode;
+
+    Object more;
+
     String url;
 
     String httpMethod;
-
-    Boolean isDeprecated;
 
     String requestBodyDescribe;
 
@@ -33,27 +41,21 @@ public class EndpointDto {
 
     JsonSchema responseBodyJsonSchema;
 
-    String author;
-
-    String sourceCode;
-
-    Object more;
-
     public EndpointDto copy() {
         EndpointDto result = new EndpointDto();
         result.setCat(cat);
         result.setHandlerSimpleName(handlerSimpleName);
         result.setDescriptionLines(descriptionLines);
+        result.setIsDeprecated(isDeprecated);
+        result.setAuthor(author);
+        result.setSourceCode(sourceCode);
+        result.setMore(more);
         result.setUrl(url);
         result.setHttpMethod(httpMethod);
-        result.setIsDeprecated(isDeprecated);
         result.setRequestBodyDescribe(requestBodyDescribe);
         result.setRequestBodyJsonSchema(requestBodyJsonSchema);
         result.setResponseBodyDescribe(responseBodyDescribe);
         result.setResponseBodyJsonSchema(responseBodyJsonSchema);
-        result.setAuthor(author);
-        result.setSourceCode(sourceCode);
-        result.setMore(more);
         return result;
     }
 

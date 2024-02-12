@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.docanalyzer.javabean.RequestMappingFullDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeRequestMappingRetval;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 
 /**
@@ -30,7 +30,8 @@ public class RequestMappingServiceImpl implements RequestMappingService {
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
-    public RequestMappingFullDto analyze(Class<?> controllerClass, Method reflectionMethod, String globalUrlPrefix) {
+    public AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod,
+            String globalUrlPrefix) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         String[] controllerPaths = findValueFromAnno(controllerRequestMapping);
         RequestMethod[] controllerVerbs = findVerbFromAnno(controllerRequestMapping);
@@ -94,7 +95,7 @@ public class RequestMappingServiceImpl implements RequestMappingService {
         });
 
         List<RequestMethod> combinedVerbs = combineVerb(controllerVerbs, methodVerbs);
-        return new RequestMappingFullDto(combinedUrls, combinedVerbs);
+        return new AnalyzeRequestMappingRetval(combinedUrls, combinedVerbs);
     }
 
     protected RequestMapping findRequestMappingAnnoOrElseNull(AnnotatedElement annotated) {

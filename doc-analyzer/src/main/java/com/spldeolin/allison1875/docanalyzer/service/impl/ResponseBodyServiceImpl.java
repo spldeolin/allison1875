@@ -9,10 +9,9 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.javabean.BodyTypeAnalysisDto;
-import com.spldeolin.allison1875.docanalyzer.service.EnumSchemaService;
-import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
-import com.spldeolin.allison1875.docanalyzer.service.ReferenceSchemaService;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeBodyRetval;
+import com.spldeolin.allison1875.docanalyzer.service.BodyResolvedTypeAnalyzerService;
+import com.spldeolin.allison1875.docanalyzer.service.JsonSchemaTransformerService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
@@ -28,20 +27,18 @@ import lombok.extern.slf4j.Slf4j;
 public class ResponseBodyServiceImpl implements ResponseBodyService {
 
     @Inject
-    private EnumSchemaService enumSchemaService;
+    private JsonSchemaTransformerService jsonSchemaTransformerService;
 
     @Inject
-    private ReferenceSchemaService referenceSchemaService;
-
-    @Inject
-    private GetBodyResolvedTypeService getBodyResolvedTypeService;
+    private BodyResolvedTypeAnalyzerService bodyResolvedTypeAnalyzerService;
 
     @Override
-    public BodyTypeAnalysisDto analyze(JsonSchemaGenerator jsg, ClassOrInterfaceDeclaration controller,
-            MethodDeclaration handler) {
+    public AnalyzeBodyRetval analyzeBody(JsonSchemaGenerator jsg, ClassOrInterfaceDeclaration mvcControllerCoid,
+            MethodDeclaration mvcHandlerMd) {
         String responseBodyDescribe = null;
         try {
-            ResolvedType responseBody = getBodyResolvedTypeService.getResponseBody(controller, handler);
+            ResolvedType responseBody = bodyResolvedTypeAnalyzerService.analyzeResponseBody(mvcControllerCoid,
+                    mvcHandlerMd);
             if (responseBody != null) {
                 if (responseBody.isPrimitive()) {
                     responseBodyDescribe = ((ResolvedPrimitiveType) responseBody).getBoxTypeQName();
@@ -49,16 +46,16 @@ public class ResponseBodyServiceImpl implements ResponseBodyService {
                     responseBodyDescribe = responseBody.describe();
                 }
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
-                referenceSchemaService.resolve(jsonSchema);
-                enumSchemaService.resolve(jsonSchema);
-                return new BodyTypeAnalysisDto().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema);
+                jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
+                jsonSchemaTransformerService.transformForEnum(jsonSchema);
+                return new AnalyzeBodyRetval().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema);
             }
         } catch (JsonSchemaException ignore) {
         } catch (Exception e) {
             log.error("BodySituation.FAIL method={} describe={}",
-                    MethodQualifierUtils.getTypeQualifierWithMethodName(handler), responseBodyDescribe, e);
+                    MethodQualifierUtils.getTypeQualifierWithMethodName(mvcHandlerMd), responseBodyDescribe, e);
         }
-        return new BodyTypeAnalysisDto();
+        return new AnalyzeBodyRetval();
     }
 
 }

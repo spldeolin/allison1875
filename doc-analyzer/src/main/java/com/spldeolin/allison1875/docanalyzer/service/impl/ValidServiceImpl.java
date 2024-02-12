@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
-import com.spldeolin.allison1875.docanalyzer.service.AnalyzeCustomValidationService;
+import com.spldeolin.allison1875.docanalyzer.service.CustomValidAnalyzerService;
 import com.spldeolin.allison1875.docanalyzer.service.ValidService;
 
 /**
@@ -36,7 +36,7 @@ import com.spldeolin.allison1875.docanalyzer.service.ValidService;
 public class ValidServiceImpl implements ValidService {
 
     @Inject
-    private AnalyzeCustomValidationService analyzeCustomValidationService;
+    private CustomValidAnalyzerService customValidAnalyzerService;
 
     @Override
     public List<ValidatorDto> analyzeValid(AnnotatedElement annotatedElement) {
@@ -140,7 +140,7 @@ public class ValidServiceImpl implements ValidService {
                     new ValidatorDto().setValidatorType(ValidatorTypeEnum.REGEX.getValue()).setNote(pattern.regexp()));
         }
 
-        valids.addAll(analyzeCustomValidationService.analyzeCustomValidation(annotatedElement));
+        valids.addAll(customValidAnalyzerService.analyzeCustomValid(annotatedElement));
         nullToEmpty(valids);
         return valids;
     }

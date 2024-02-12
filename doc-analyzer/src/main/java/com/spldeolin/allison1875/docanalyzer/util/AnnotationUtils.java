@@ -26,7 +26,7 @@ public class AnnotationUtils {
         return !isAnnotationPresent(node, annotationClass);
     }
 
-    public static <A extends Annotation> AnnotationExpr getAnnotation(NodeWithAnnotations<?> node,
+    private static <A extends Annotation> AnnotationExpr getAnnotation(NodeWithAnnotations<?> node,
             Class<A> annotationClass) {
         Optional<AnnotationExpr> annotation = node.getAnnotationByName(annotationClass.getSimpleName());
         if (annotation.isPresent()) {

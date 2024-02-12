@@ -8,10 +8,9 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.docanalyzer.exception.JsonSchemaException;
-import com.spldeolin.allison1875.docanalyzer.javabean.BodyTypeAnalysisDto;
-import com.spldeolin.allison1875.docanalyzer.service.EnumSchemaService;
-import com.spldeolin.allison1875.docanalyzer.service.GetBodyResolvedTypeService;
-import com.spldeolin.allison1875.docanalyzer.service.ReferenceSchemaService;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeBodyRetval;
+import com.spldeolin.allison1875.docanalyzer.service.BodyResolvedTypeAnalyzerService;
+import com.spldeolin.allison1875.docanalyzer.service.JsonSchemaTransformerService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestBodyService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
 import com.spldeolin.allison1875.docanalyzer.util.MethodQualifierUtils;
@@ -27,19 +26,16 @@ import lombok.extern.slf4j.Slf4j;
 public class RequestBodyServiceImpl implements RequestBodyService {
 
     @Inject
-    private GetBodyResolvedTypeService getBodyResolvedTypeService;
+    private BodyResolvedTypeAnalyzerService bodyResolvedTypeAnalyzerService;
 
     @Inject
-    private EnumSchemaService enumSchemaService;
-
-    @Inject
-    private ReferenceSchemaService referenceSchemaService;
+    private JsonSchemaTransformerService jsonSchemaTransformerService;
 
     @Override
-    public BodyTypeAnalysisDto analyze(JsonSchemaGenerator jsg, MethodDeclaration handler) {
+    public AnalyzeBodyRetval analyzeBody(JsonSchemaGenerator jsg, MethodDeclaration mvcHandlerMd) {
         String requestBodyDescribe = null;
         try {
-            ResolvedType requestBody = getBodyResolvedTypeService.getRequestBody(handler);
+            ResolvedType requestBody = bodyResolvedTypeAnalyzerService.analyzeRequestBody(mvcHandlerMd);
             if (requestBody != null) {
                 if (requestBody.isPrimitive()) {
                     requestBodyDescribe = ((ResolvedPrimitiveType) requestBody).getBoxTypeQName();
@@ -47,16 +43,16 @@ public class RequestBodyServiceImpl implements RequestBodyService {
                     requestBodyDescribe = requestBody.describe();
                 }
                 JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(requestBodyDescribe, jsg);
-                referenceSchemaService.resolve(jsonSchema);
-                enumSchemaService.resolve(jsonSchema);
-                return new BodyTypeAnalysisDto().setDescribe(requestBodyDescribe).setJsonSchema(jsonSchema);
+                jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
+                jsonSchemaTransformerService.transformForEnum(jsonSchema);
+                return new AnalyzeBodyRetval().setDescribe(requestBodyDescribe).setJsonSchema(jsonSchema);
             }
         } catch (JsonSchemaException ignore) {
         } catch (Exception e) {
             log.error("BodySituation.FAIL method={} describe={}",
-                    MethodQualifierUtils.getTypeQualifierWithMethodName(handler), requestBodyDescribe, e);
+                    MethodQualifierUtils.getTypeQualifierWithMethodName(mvcHandlerMd), requestBodyDescribe, e);
         }
-        return new BodyTypeAnalysisDto();
+        return new AnalyzeBodyRetval();
     }
 
 }

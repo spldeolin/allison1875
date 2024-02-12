@@ -1,8 +1,13 @@
 package com.spldeolin.allison1875.docanalyzer.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * @author Deolin 2019-12-03
  */
+@Getter
+@AllArgsConstructor
 public enum ValidatorTypeEnum {
 
     NOT_NULL("不能为null"),
@@ -41,11 +46,4 @@ public enum ValidatorTypeEnum {
 
     private final String value;
 
-    ValidatorTypeEnum(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return this.value;
-    }
 }
