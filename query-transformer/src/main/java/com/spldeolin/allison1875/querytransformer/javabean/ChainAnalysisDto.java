@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Sets;
@@ -20,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChainAnalysisDto {
 
-    @JsonIgnore
     MethodCallExpr chain;
 
     String methodName;

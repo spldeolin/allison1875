@@ -12,19 +12,19 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
-import com.spldeolin.allison1875.querytransformer.service.DetectQueryChainService;
+import com.spldeolin.allison1875.querytransformer.service.QueryChainDetectorService;
 
 /**
  * @author Deolin 2020-10-10
  */
 @Singleton
-public class DetectQueryChainServiceImpl implements DetectQueryChainService {
+public class QueryChainDetectorServiceImpl implements QueryChainDetectorService {
 
     @Inject
     private QueryTransformerConfig config;
 
     @Override
-    public List<MethodCallExpr> detect(Node node) {
+    public List<MethodCallExpr> detectQueryChains(Node node) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : node.findAll(MethodCallExpr.class)) {
             if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count") && mce.getParentNode()

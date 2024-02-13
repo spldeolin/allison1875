@@ -27,7 +27,7 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.javabean.TableStructureAnalysisDto;
@@ -241,7 +241,7 @@ public class GenerateDesignServiceImpl implements DesignGeneratorService {
                             + "," + property.getJavaType().getSimpleName() + "> " + property.getPropertyName() + ";"));
         }
 
-        DesignMeta meta = new DesignMeta();
+        DesignMetaDto meta = new DesignMetaDto();
         meta.setEntityQualifier(entityGeneration.getJavabeanQualifier());
         meta.setEntityName(entityGeneration.getJavabeanName());
         meta.setMapperQualifier(args.getMapper().getFullyQualifiedName()

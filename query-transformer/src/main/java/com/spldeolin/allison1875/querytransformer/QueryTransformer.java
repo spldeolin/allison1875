@@ -1,9 +1,11 @@
 package com.spldeolin.allison1875.querytransformer;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
@@ -16,22 +18,22 @@ import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
 import com.spldeolin.allison1875.querytransformer.exception.SameNameTerminationMethodException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
-import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
-import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMapperArgs;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMapperXmlArgs;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
+import com.spldeolin.allison1875.querytransformer.javabean.ReplaceDesignArgs;
+import com.spldeolin.allison1875.querytransformer.service.AutowiredMapperAdderService;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
-import com.spldeolin.allison1875.querytransformer.service.DetectQueryChainService;
-import com.spldeolin.allison1875.querytransformer.service.GenerateMethodIntoMapperService;
-import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
-import com.spldeolin.allison1875.querytransformer.service.GenerateParamService;
-import com.spldeolin.allison1875.querytransformer.service.GenerateResultService;
-import com.spldeolin.allison1875.querytransformer.service.ReplaceDesignService;
+import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
+import com.spldeolin.allison1875.querytransformer.service.MethodGeneratorService;
+import com.spldeolin.allison1875.querytransformer.service.QueryChainAnalyzerService;
+import com.spldeolin.allison1875.querytransformer.service.QueryChainDetectorService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,28 +44,19 @@ import lombok.extern.slf4j.Slf4j;
 public class QueryTransformer implements Allison1875MainService {
 
     @Inject
-    private DetectQueryChainService detectQueryChainService;
+    private QueryChainDetectorService queryChainDetectorService;
 
     @Inject
-    private AnalyzeChainService analyzeChainService;
+    private QueryChainAnalyzerService queryChainAnalyzerService;
 
     @Inject
-    private GenerateMethodXmlService generateMethodXmlService;
+    private MapperLayerService mapperLayerService;
 
     @Inject
-    private GenerateMethodIntoMapperService generateMethodIntoMapperService;
+    private MethodGeneratorService methodGeneratorService;
 
     @Inject
-    private GenerateParamService generateParameterService;
-
-    @Inject
-    private GenerateResultService transformResultService;
-
-    @Inject
-    private ReplaceDesignService replaceDesignService;
-
-    @Inject
-    private AppendAutowiredMapperService appendAutowiredMapperService;
+    private AutowiredMapperAdderService autowiredMapperAdderService;
 
     @Inject
     private DesignService designService;
@@ -83,13 +76,13 @@ public class QueryTransformer implements Allison1875MainService {
                 continue;
             }
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {
-                for (MethodCallExpr queryChain : detectQueryChainService.detect(directBlock)) {
+                for (MethodCallExpr queryChain : queryChainDetectorService.detectQueryChains(directBlock)) {
 
                     ClassOrInterfaceDeclaration design;
-                    DesignMeta designMeta;
+                    DesignMetaDto designMeta;
                     try {
-                        design = designService.findDesign(astForest, queryChain);
-                        designMeta = designService.parseDesignMeta(design);
+                        design = designService.detectDesign(astForest, queryChain);
+                        designMeta = designService.analyzeDesignMeta(design);
                         log.info("Design found and Design Meta parsed, designName={} designMeta={}", design.getName(),
                                 designMeta);
                     } catch (IllegalDesignException e) {
@@ -100,56 +93,77 @@ public class QueryTransformer implements Allison1875MainService {
                     }
 
                     // analyze queryChain
-                    ChainAnalysisDto analysis;
+                    ChainAnalysisDto chainAnalysis;
                     try {
-                        analysis = analyzeChainService.analyze(queryChain, design, designMeta);
-                        log.info("Query Chain analyzed, analysis={}", analysis);
+                        chainAnalysis = queryChainAnalyzerService.analyzeQueryChain(queryChain, design, designMeta);
+                        log.info("Query Chain analyzed, chainAnalysis={}", chainAnalysis);
                     } catch (IllegalChainException e) {
                         log.error("fail to analyze Query Chain, queryChain={}", queryChain, e);
                         continue;
                     }
-                    analysis.setDirectBlock(directBlock);
+                    chainAnalysis.setDirectBlock(directBlock);
 
                     // generate Parameter
-                    ParamGenerationDto paramGeneration;
+                    GenerateParamRetval generateParamRetval;
                     try {
-                        paramGeneration = generateParameterService.generate(analysis, designMeta, astForest);
-                        log.info("Param generated, generation={}", paramGeneration);
+                        generateParamRetval = methodGeneratorService.generateParam(chainAnalysis, designMeta,
+                                astForest);
+                        log.info("Param generated, retval={}", generateParamRetval);
                     } catch (Exception e) {
-                        log.error("fail to generate param analysis={} designMeta={}", analysis, designMeta, e);
+                        log.error("fail to generate param chainAnalysis={} designMeta={}", chainAnalysis, designMeta,
+                                e);
                         continue;
                     }
-                    if (paramGeneration.getCondFlush() != null) {
-                        flushes.add(paramGeneration.getCondFlush());
+
+                    if (generateParamRetval.getCondFlush() != null) {
+                        flushes.add(generateParamRetval.getCondFlush());
                     }
 
                     // generate Result Type
-                    ResultGenerationDto resultGeneration;
+                    GenerateReturnTypeRetval generateReturnTypeRetval;
                     try {
-                        resultGeneration = transformResultService.generate(analysis, designMeta, astForest);
-                        log.info("Result generated, generation={}", resultGeneration);
+                        generateReturnTypeRetval = methodGeneratorService.generateReturnType(chainAnalysis, designMeta,
+                                astForest);
+                        log.info("Result generated, generation={}", generateReturnTypeRetval);
                     } catch (Exception e) {
-                        log.error("fail to generate result analysis={} designMeta={}", analysis, designMeta, e);
+                        log.error("fail to generate result chainAnalysis={} designMeta={}", chainAnalysis, designMeta,
+                                e);
                         continue;
                     }
-                    if (resultGeneration.getFlush() != null) {
-                        flushes.add(resultGeneration.getFlush());
+                    if (generateReturnTypeRetval.getFlush() != null) {
+                        flushes.add(generateReturnTypeRetval.getFlush());
                     }
 
-                    // generate Method into Mapper
-                    generateMethodIntoMapperService.generate(astForest, designMeta, analysis, paramGeneration,
-                            resultGeneration).ifPresent(flushes::add);
+                    // generate Method to Mapper
+                    GenerateMethodToMapperArgs gmtmArgs = new GenerateMethodToMapperArgs();
+                    gmtmArgs.setAstForest(astForest);
+                    gmtmArgs.setDesignMeta(designMeta);
+                    gmtmArgs.setChainAnalysis(chainAnalysis);
+                    gmtmArgs.setCloneParameters(generateParamRetval.getParameters().stream().map(Parameter::clone)
+                            .collect(Collectors.toList()));
+                    gmtmArgs.setClonedReturnType(generateReturnTypeRetval.getResultType().clone());
+                    mapperLayerService.generateMethodToMapper(gmtmArgs).ifPresent(flushes::add);
 
                     // generate Method into mapper.xml
-                    List<FileFlush> xmlFlushes = generateMethodXmlService.generate(astForest, designMeta, analysis,
-                            paramGeneration, resultGeneration);
+                    GenerateMethodToMapperXmlArgs gmtmxArgs = new GenerateMethodToMapperXmlArgs();
+                    gmtmxArgs.setAstForest(astForest);
+                    gmtmxArgs.setDesignMeta(designMeta);
+                    gmtmxArgs.setChainAnalysis(chainAnalysis);
+                    gmtmxArgs.setGenerateParamRetval(generateParamRetval);
+                    gmtmxArgs.setGenerateReturnTypeRetval(generateReturnTypeRetval);
+                    List<FileFlush> xmlFlushes = mapperLayerService.generateMethodToMapperXml(gmtmxArgs);
                     flushes.addAll(xmlFlushes);
 
                     // append autowired mapper
-                    appendAutowiredMapperService.append(queryChain, designMeta);
+                    autowiredMapperAdderService.addAutowiredMapper(queryChain, designMeta);
 
                     // transform Query Design
-                    replaceDesignService.replace(designMeta, analysis, paramGeneration, resultGeneration);
+                    ReplaceDesignArgs args = new ReplaceDesignArgs();
+                    args.setDesignMeta(designMeta);
+                    args.setChainAnalysis(chainAnalysis);
+                    args.setGenerateParamRetval(generateParamRetval);
+                    args.setGenerateReturnTypeRetval(generateReturnTypeRetval);
+                    designService.replaceDesign(args);
 
                     anyTransformed = true;
                 }

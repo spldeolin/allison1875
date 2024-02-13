@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ParamGenerationDto {
+public class GenerateParamRetval {
 
     final List<Parameter> parameters = Lists.newArrayList();
 

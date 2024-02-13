@@ -13,15 +13,14 @@ import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.MapOrMultimapBuiltDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,8 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TransformMethodCallServiceImpl implements TransformMethodCallService {
 
     @Override
-    public String methodCallExpr(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParamGenerationDto paramGeneration) {
+    public String methodCallExpr(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
+            GenerateParamRetval paramGeneration) {
         String result =
                 MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
                         + "(";
@@ -55,7 +54,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
     }
 
     @Override
-    public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
+    public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis, GenerateParamRetval paramGeneration) {
         log.info("build Javabean setter call");
         String javabeanTypeQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
         String javabeanVarName = MoreStringUtils.lowerFirstLetter(
@@ -80,8 +79,8 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
     }
 
     @Override
-    public MapOrMultimapBuiltDto mapOrMultimapBuildStmts(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ResultGenerationDto resultGeneration) {
+    public List<Statement> mapOrMultimapBuildStmts(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
+            GenerateReturnTypeRetval resultGeneration) {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
@@ -104,9 +103,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             statements.add(StaticJavaParser.parseStatement(
                     chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
                             + ".put(one.get" + MoreStringUtils.upperFirstLetter(propertyName) + "(), one));"));
-            MapOrMultimapBuiltDto result = new MapOrMultimapBuiltDto();
-            result.setStatements(statements);
-            return result;
+            return statements;
         }
 
         if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
@@ -130,9 +127,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             statements.add(StaticJavaParser.parseStatement(
                     chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
                             + ".put(one.get" + MoreStringUtils.upperFirstLetter(propertyName) + "(), one));"));
-            MapOrMultimapBuiltDto result = new MapOrMultimapBuiltDto();
-            result.setStatements(statements);
-            return result;
+            return statements;
         }
 
         return null;

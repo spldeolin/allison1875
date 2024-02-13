@@ -10,8 +10,14 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -21,28 +27,33 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.exception.CuAbsentException;
+import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.AstForestResidenceService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ParamGenerationDto;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMapperArgs;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMapperXmlArgs;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
+import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.javabean.ResultGenerationDto;
-import com.spldeolin.allison1875.querytransformer.service.GenerateMethodXmlService;
+import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author Deolin 2020-10-11
+ * @author Deolin 2020-10-10
  */
 @Singleton
 @Slf4j
-public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
+public class MapperLayerServiceImpl implements MapperLayerService {
 
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
@@ -50,15 +61,70 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
     private QueryTransformerConfig config;
 
     @Inject
+    private AntiDuplicationService antiDuplicationService;
+
+    @Inject
+    private ImportExprService importExprService;
+
+    @Inject
     private AstForestResidenceService astForestResidenceService;
 
     @Override
-    public List<FileFlush> generate(AstForest astForest, DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
+    public Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args) {
+        ClassOrInterfaceDeclaration mapper = this.findMapper(args.getAstForest(), args.getDesignMeta());
+        if (mapper == null) {
+            return Optional.empty();
+        }
+
+        ChainAnalysisDto chainAnalysis = args.getChainAnalysis();
+        String methodName = chainAnalysis.getMethodName();
+        methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
+        log.info(
+                "anti duplication worked completed, new method name '{}' update to ChainAnalysisDto.methodName, old={}",
+                methodName, chainAnalysis.getMethodName());
+        chainAnalysis.setMethodName(methodName);
+
+        MethodDeclaration method = new MethodDeclaration();
+        if (config.getEnableLotNoAnnounce()) {
+            method.setJavadocComment(chainAnalysis.getLotNo());
+        }
+        method.setType(args.getClonedReturnType());
+        method.setName(methodName);
+        method.setParameters(new NodeList<>(args.getCloneParameters()));
+        method.setBody(null);
+        mapper.getMembers().add(method);
+
+        CompilationUnit cu = mapper.findCompilationUnit().orElseThrow(() -> new CuAbsentException(mapper));
+        importExprService.extractQualifiedTypeToImport(cu);
+        return Optional.of(FileFlush.build(cu));
+    }
+
+    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMetaDto designMeta) {
+        Optional<CompilationUnit> cu = astForest.findCu(designMeta.getMapperQualifier());
+        if (!cu.isPresent()) {
+            return null;
+        }
+        Optional<TypeDeclaration<?>> pt = cu.get().getPrimaryType();
+        if (!pt.isPresent()) {
+            return null;
+        }
+        if (!pt.get().isClassOrInterfaceDeclaration()) {
+            return null;
+        }
+        return pt.get().asClassOrInterfaceDeclaration();
+    }
+
+    @Override
+    public List<FileFlush> generateMethodToMapperXml(GenerateMethodToMapperXmlArgs args) {
+        ChainAnalysisDto chainAnalysis = args.getChainAnalysis();
+        DesignMetaDto designMeta = args.getDesignMeta();
+        GenerateParamRetval generateParamRetval = args.getGenerateParamRetval();
+        GenerateReturnTypeRetval generateReturnTypeRetval = args.getGenerateReturnTypeRetval();
+
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            File mapperXml = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
+            File mapperXml = astForestResidenceService.findModuleRoot(args.getAstForest().getPrimaryClass())
                     .resolve(mapperRelativePath).toFile();
 
             List<String> xmlLines = Lists.newArrayList();
@@ -66,8 +132,8 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             if (chainAnalysis.getChainMethod() == ChainMethodEnum.query) {
                 // QUERY
                 xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, paramGeneration,
-                        resultGeneration);
+                String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, generateParamRetval,
+                        generateReturnTypeRetval);
                 xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "SELECT");
@@ -108,7 +174,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
                 // UPDATE
                 xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = concatUpdateStartTag(chainAnalysis, paramGeneration);
+                String startTag = concatUpdateStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
@@ -127,7 +193,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
             } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
                 // DROP
                 xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = concatDeleteStartTag(chainAnalysis, paramGeneration);
+                String startTag = concatDeleteStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
                 if (CollectionUtils.isNotEmpty(chainAnalysis.getByPhrases())) {
                     xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -168,7 +234,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
         return result;
     }
 
-    private List<String> concatWhereSection(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
+    private List<String> concatWhereSection(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
             boolean needNotDeletedSql) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
@@ -302,8 +368,8 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
         return "";
     }
 
-    private String concatSelectStartTag(DesignMeta designMeta, ChainAnalysisDto chainAnalysis,
-            ParamGenerationDto paramGeneration, ResultGenerationDto resultGeneration) {
+    private String concatSelectStartTag(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
+            GenerateParamRetval paramGeneration, GenerateReturnTypeRetval resultGeneration) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
             startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
@@ -319,7 +385,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
         return startTag;
     }
 
-    private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
+    private String concatUpdateStartTag(ChainAnalysisDto chainAnalysis, GenerateParamRetval paramGeneration) {
         String startTag = "<update id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
             startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
@@ -328,7 +394,7 @@ public class GenerateMethodXmlServiceImpl implements GenerateMethodXmlService {
         return startTag;
     }
 
-    private String concatDeleteStartTag(ChainAnalysisDto chainAnalysis, ParamGenerationDto paramGeneration) {
+    private String concatDeleteStartTag(ChainAnalysisDto chainAnalysis, GenerateParamRetval paramGeneration) {
         String startTag = "<delete id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
             startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";

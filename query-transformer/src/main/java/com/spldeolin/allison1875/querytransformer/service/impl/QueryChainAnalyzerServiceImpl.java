@@ -21,14 +21,14 @@ import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.querytransformer.service.AnalyzeChainService;
+import com.spldeolin.allison1875.querytransformer.service.QueryChainAnalyzerService;
 import com.spldeolin.allison1875.support.ByChainPredicate;
 import com.spldeolin.allison1875.support.OrderChainPredicate;
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +38,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class AnalyzeChainServiceImpl implements AnalyzeChainService {
+public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService {
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
 
     @Override
-    public ChainAnalysisDto analyze(MethodCallExpr chain, ClassOrInterfaceDeclaration design, DesignMeta designMeta)
+    public ChainAnalysisDto analyzeQueryChain(MethodCallExpr queryChain, ClassOrInterfaceDeclaration design,
+            DesignMetaDto designMeta)
             throws IllegalChainException {
-        String chainCode = chain.toString();
+        String chainCode = queryChain.toString();
         String betweenCode = chainCode.substring(chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = design.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(design));
 
@@ -61,25 +62,25 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
             throw new IllegalChainException("chainMethod is none of query, update or drop");
         }
 
-        String methodName = this.analyzeSpecifiedMethodName(chainMethod, chain, designMeta);
+        String methodName = this.analyzeSpecifiedMethodName(chainMethod, queryChain, designMeta);
 
         ReturnClassifyEnum returnClassify;
         String keyPropertyName = null;
-        if (chain.getNameAsString().equals("one")) {
+        if (queryChain.getNameAsString().equals("one")) {
             returnClassify = ReturnClassifyEnum.one;
-        } else if (chain.getNameAsString().equals("many")) {
-            if (CollectionUtils.isEmpty(chain.getArguments())) {
+        } else if (queryChain.getNameAsString().equals("many")) {
+            if (CollectionUtils.isEmpty(queryChain.getArguments())) {
                 returnClassify = ReturnClassifyEnum.many;
-            } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
+            } else if (queryChain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
                 returnClassify = ReturnClassifyEnum.each;
-                keyPropertyName = chain.getArgument(0).asFieldAccessExpr().getNameAsString();
-            } else if (chain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("MultiEach")) {
+                keyPropertyName = queryChain.getArgument(0).asFieldAccessExpr().getNameAsString();
+            } else if (queryChain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("MultiEach")) {
                 returnClassify = ReturnClassifyEnum.multiEach;
-                keyPropertyName = chain.getArgument(0).asFieldAccessExpr().getNameAsString();
+                keyPropertyName = queryChain.getArgument(0).asFieldAccessExpr().getNameAsString();
             } else {
                 throw new IllegalChainException("many() argument is none of each nor multiEach");
             }
-        } else if (chain.getNameAsString().equals("count")) {
+        } else if (queryChain.getNameAsString().equals("count")) {
             returnClassify = ReturnClassifyEnum.count;
         } else {
             returnClassify = null;
@@ -91,7 +92,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         Set<PhraseDto> orderPhrases = Sets.newLinkedHashSet();
         Set<PhraseDto> updatePhrases = Sets.newLinkedHashSet();
         List<String> varNames4AntiDupl = Lists.newArrayList();
-        for (FieldAccessExpr fae : chain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
+        for (FieldAccessExpr fae : queryChain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
             if (!designMeta.getProperties().containsKey(fae.getNameAsString())) {
                 // 例如：XxxxDesign.query("xx").by().privilegeCode.in(Lists.newArrayList(OneTypeEnum.FIRST.getCode()))
                 // .many();，其中的OneTypeEnum.FIRST应当被跳过
@@ -144,7 +145,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
                     queryPropertyNames);
             queryPhrases.add(new PhraseDto().setSubjectPropertyName(keyPropertyName));
         }
-        for (MethodCallExpr mce : chain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
+        for (MethodCallExpr mce : queryChain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
             String describe = mce.calculateResolvedType().describe();
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
@@ -169,7 +170,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
         result.setByPhrases(byPhrases);
         result.setOrderPhrases(orderPhrases);
         result.setUpdatePhrases(updatePhrases);
-        result.setChain(chain);
+        result.setChain(queryChain);
         result.setIsByForced(chainCode.contains("." + TokenWordConstant.BY_FORCED_METHOD_NAME + "()"));
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));
@@ -177,7 +178,7 @@ public class AnalyzeChainServiceImpl implements AnalyzeChainService {
     }
 
     private String analyzeSpecifiedMethodName(ChainMethodEnum chainMethod, MethodCallExpr chain,
-            DesignMeta designMeta) {
+            DesignMetaDto designMeta) {
         MethodCallExpr queryMce = chain.findAll(MethodCallExpr.class,
                 mce -> StringUtils.equalsAny(mce.getNameAsString(), "query", "update", "drop")).get(0);
         NodeList<Expression> arguments = queryMce.getArguments();

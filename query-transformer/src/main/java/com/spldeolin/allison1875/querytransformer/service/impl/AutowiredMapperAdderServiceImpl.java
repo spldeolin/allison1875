@@ -10,17 +10,17 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
-import com.spldeolin.allison1875.querytransformer.service.AppendAutowiredMapperService;
+import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
+import com.spldeolin.allison1875.querytransformer.service.AutowiredMapperAdderService;
 
 /**
  * @author Deolin 2021-06-30
  */
 @Singleton
-public class AppendAutowiredMapperServiceImpl implements AppendAutowiredMapperService {
+public class AutowiredMapperAdderServiceImpl implements AutowiredMapperAdderService {
 
     @Override
-    public void append(MethodCallExpr chain, DesignMeta designMeta) {
+    public void addAutowiredMapper(MethodCallExpr chain, DesignMetaDto designMeta) {
         // ensure mapper autowired
         chain.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(service -> {
             if (!service.getFieldByName(MoreStringUtils.lowerFirstLetter(designMeta.getMapperName())).isPresent()) {
