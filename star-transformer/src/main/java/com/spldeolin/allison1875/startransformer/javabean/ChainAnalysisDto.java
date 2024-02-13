@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StarAnalysisDto {
+public class ChainAnalysisDto {
 
     String cftEntityQualifier;
 

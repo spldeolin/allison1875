@@ -15,22 +15,27 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
+import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
-import com.spldeolin.allison1875.startransformer.service.TransformStarChainService;
+import com.spldeolin.allison1875.startransformer.javabean.TransformStarChainArgs;
+import com.spldeolin.allison1875.startransformer.service.StarChainTransformerService;
 
 /**
  * @author Deolin 2023-05-22
  */
 @Singleton
-public class TransformStarChainServiceImpl implements TransformStarChainService {
+public class TransformStarChainServiceImpl implements StarChainTransformerService {
 
     @Override
-    public void transformStarChain(BlockStmt block, StarAnalysisDto analysis, MethodCallExpr starChain,
-            JavabeanGeneration javabeanGeneration) {
+    public void transformStarChain(TransformStarChainArgs args) {
+        BlockStmt block = args.getBlock();
+        JavabeanGeneration wholeDtoGeneration = args.getWholeDtoGeneration();
+        MethodCallExpr starChain = args.getStarChain();
+        ChainAnalysisDto analysis = args.getAnalysis();
+
         int i = block.getStatements().indexOf(starChain.findAncestor(Statement.class).get());
         block.setStatement(i, StaticJavaParser.parseStatement(
-                javabeanGeneration.getJavabeanQualifier() + " whole = new " + javabeanGeneration.getJavabeanName()
+                wholeDtoGeneration.getJavabeanQualifier() + " whole = new " + wholeDtoGeneration.getJavabeanName()
                         + "();"));
         block.addStatement(++i, StaticJavaParser.parseStatement(
                 analysis.getCftEntityQualifier() + " " + entityNameToVarName(analysis.getCftEntityName()) + " = "

@@ -39,4 +39,9 @@ public final class StarTransformerConfig extends Allison1875Config {
      */
     @NotNull Boolean enableLotNoAnnounce;
 
+    /**
+     * Whole DTO的后缀
+     */
+    @NotNull String wholeDtoNamePostfix;
+
 }

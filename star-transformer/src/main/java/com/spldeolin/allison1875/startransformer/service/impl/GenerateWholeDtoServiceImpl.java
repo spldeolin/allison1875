@@ -16,15 +16,15 @@ import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
+import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
-import com.spldeolin.allison1875.startransformer.service.GenerateWholeDtoService;
+import com.spldeolin.allison1875.startransformer.service.WholeDtoService;
 
 /**
  * @author Deolin 2023-05-22
  */
 @Singleton
-public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
+public class GenerateWholeDtoServiceImpl implements WholeDtoService {
 
     @Inject
     private StarTransformerConfig config;
@@ -33,7 +33,7 @@ public class GenerateWholeDtoServiceImpl implements GenerateWholeDtoService {
     private JavabeanGeneratorService javabeanGeneratorService;
 
     @Override
-    public JavabeanGeneration generate(AstForest astForest, StarAnalysisDto analysis) {
+    public JavabeanGeneration generateWholeDto(AstForest astForest, ChainAnalysisDto analysis) {
         JavabeanArg javabeanArg = new JavabeanArg();
         javabeanArg.setAstForest(astForest);
         javabeanArg.setPackageName(config.getWholeDtoPackge());

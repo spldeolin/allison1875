@@ -16,11 +16,11 @@ import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
-import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
-import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService;
-import com.spldeolin.allison1875.startransformer.service.DetectStarChainService;
-import com.spldeolin.allison1875.startransformer.service.GenerateWholeDtoService;
-import com.spldeolin.allison1875.startransformer.service.TransformStarChainService;
+import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
+import com.spldeolin.allison1875.startransformer.javabean.TransformStarChainArgs;
+import com.spldeolin.allison1875.startransformer.service.StarChainService;
+import com.spldeolin.allison1875.startransformer.service.StarChainTransformerService;
+import com.spldeolin.allison1875.startransformer.service.WholeDtoService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,16 +31,13 @@ import lombok.extern.slf4j.Slf4j;
 public class StarTransformer implements Allison1875MainService {
 
     @Inject
-    private DetectStarChainService detectStarChainService;
+    private StarChainService starChainService;
 
     @Inject
-    private AnalyzeStarChainService analyzeStarChainService;
+    private WholeDtoService generateWholeDtoService;
 
     @Inject
-    private GenerateWholeDtoService generateWholeDtoService;
-
-    @Inject
-    private TransformStarChainService transformStarChainService;
+    private StarChainTransformerService starChainTransformerService;
 
     @Inject
     private ImportExprService importExprService;
@@ -54,22 +51,22 @@ public class StarTransformer implements Allison1875MainService {
             LexicalPreservingPrinter.setup(cu);
 
             for (BlockStmt block : cu.findAll(BlockStmt.class)) {
-                for (MethodCallExpr starChain : detectStarChainService.detect(block)) {
+                for (MethodCallExpr starChain : starChainService.detectStarChains(block)) {
 
                     // analyze chain
-                    StarAnalysisDto analysis;
+                    ChainAnalysisDto analysis;
                     try {
-                        analysis = analyzeStarChainService.analyze(starChain, astForest);
+                        analysis = starChainService.analyzeStarChain(starChain, astForest);
                         log.info("Star Chain analyzed, analysis={}", analysis);
                     } catch (IllegalChainException e) {
                         log.error("fail to analyze Star Chain, starChain={}", starChain, e);
                         continue;
                     }
 
-                    // generate 'XxxWholeDto' Javabean
+                    // generate WholeDto
                     JavabeanGeneration wholeDtoGeneration;
                     try {
-                        wholeDtoGeneration = generateWholeDtoService.generate(astForest, analysis);
+                        wholeDtoGeneration = generateWholeDtoService.generateWholeDto(astForest, analysis);
                         log.info("Whole DTO generated, name={} path={}", wholeDtoGeneration.getJavabeanName(),
                                 wholeDtoGeneration.getPath());
                     } catch (Exception e) {
@@ -79,8 +76,13 @@ public class StarTransformer implements Allison1875MainService {
                     flushes.add(wholeDtoGeneration.getFileFlush());
 
                     // transform Query Chain and replace Star Chain
+                    TransformStarChainArgs args = new TransformStarChainArgs();
+                    args.setBlock(block);
+                    args.setAnalysis(analysis);
+                    args.setStarChain(starChain);
+                    args.setWholeDtoGeneration(wholeDtoGeneration);
                     try {
-                        transformStarChainService.transformStarChain(block, analysis, starChain, wholeDtoGeneration);
+                        starChainTransformerService.transformStarChain(args);
                         log.info("Star Chain transformed");
                     } catch (Exception e) {
                         log.error("fail to transformStarChain Star Chain, starAnalysis={}", analysis, e);

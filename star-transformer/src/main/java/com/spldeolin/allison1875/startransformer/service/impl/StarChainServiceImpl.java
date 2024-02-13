@@ -1,24 +1,30 @@
 package com.spldeolin.allison1875.startransformer.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
+import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.startransformer.exception.IllegalChainException;
+import com.spldeolin.allison1875.startransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.startransformer.javabean.PhraseDto;
-import com.spldeolin.allison1875.startransformer.javabean.StarAnalysisDto;
-import com.spldeolin.allison1875.startransformer.service.AnalyzeStarChainService;
+import com.spldeolin.allison1875.startransformer.service.StarChainService;
 import com.spldeolin.allison1875.startransformer.util.NamingUtils;
+import com.spldeolin.allison1875.support.StarSchema;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,24 +32,54 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
+public class StarChainServiceImpl implements StarChainService {
+
+    @Inject
+    private StarTransformerConfig config;
 
     @Override
-    public StarAnalysisDto analyze(MethodCallExpr starChain, AstForest astForest) throws IllegalChainException {
+    public List<MethodCallExpr> detectStarChains(BlockStmt block) {
+        List<MethodCallExpr> mces = Lists.newArrayList();
+        for (MethodCallExpr mce : block.findAll(MethodCallExpr.class)) {
+            if ("over".equals(mce.getNameAsString()) && mce.getParentNode().isPresent()) {
+                if (this.finalNameExprRecursively(mce, StarSchema.class.getName())) {
+                    mces.add(mce);
+                }
+            }
+        }
+        return mces;
+    }
+
+    private boolean finalNameExprRecursively(MethodCallExpr mce, String untilNameExprMatchedQualifier) {
+        Optional<Expression> scope = mce.getScope();
+        if (scope.isPresent()) {
+            if (scope.get().isMethodCallExpr()) {
+                return finalNameExprRecursively(scope.get().asMethodCallExpr(), untilNameExprMatchedQualifier);
+            }
+            if (scope.get().isNameExpr()) {
+                NameExpr nameExpr = scope.get().asNameExpr();
+                try {
+                    String describe = nameExpr.calculateResolvedType().describe();
+                    if (untilNameExprMatchedQualifier.equals(describe)) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public ChainAnalysisDto analyzeStarChain(MethodCallExpr starChain, AstForest astForest)
+            throws IllegalChainException {
         return this.analyzeRecursively(starChain, astForest, Lists.newArrayList(), Lists.newArrayList(),
                 Lists.newArrayList());
     }
 
-    @Override
-    public String buildWholeDtoNameFromEntityName(String entityName) {
-        if (entityName.endsWith("Entity")) {
-            return MoreStringUtils.replaceLast(entityName, "Entity", "WholeDto");
-        } else {
-            return entityName + "WholeDto";
-        }
-    }
-
-    private StarAnalysisDto analyzeRecursively(MethodCallExpr mce, AstForest astForest, List<PhraseDto> phrases,
+    private ChainAnalysisDto analyzeRecursively(MethodCallExpr mce, AstForest astForest, List<PhraseDto> phrases,
             List<String> keys, List<String> mkeys) throws IllegalChainException {
         if (ChainMethodEnum.oo.toString().equals(mce.getNameAsString())) {
             PhraseDto phrase = new PhraseDto();
@@ -95,7 +131,7 @@ public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
         }
         if (ChainMethodEnum.cft.toString().equals(mce.getNameAsString())) {
             FieldAccessExpr fae = mce.getArgument(0).asFieldAccessExpr();
-            StarAnalysisDto analysis = new StarAnalysisDto();
+            ChainAnalysisDto analysis = new ChainAnalysisDto();
             analysis.setCftEntityQualifier(
                     fae.resolve().getType().asReferenceType().getGenericParameterByName("E").get().describe());
             analysis.setCftEntityName(NamingUtils.qualifierToTypeName(analysis.getCftEntityQualifier()));
@@ -103,7 +139,7 @@ public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
             analysis.setCftDesignQualifier(fae.getScope().calculateResolvedType().describe());
             analysis.setCftSecondArgument(mce.getArgument(1));
             analysis.setPhrases(phrases);
-            String wholeDtoName = this.buildWholeDtoNameFromEntityName(analysis.getCftEntityName());
+            String wholeDtoName = this.buildWholeDtoName(analysis.getCftEntityName());
             analysis.setWholeDtoName(wholeDtoName);
             String hash = StringUtils.upperCase(HashingUtils.hashString(analysis.toString()));
             analysis.setLotNo(String.format("ST%s-%s", Allison1875.SHORT_VERSION, hash));
@@ -113,6 +149,14 @@ public class AnalyzeStarChainServiceImpl implements AnalyzeStarChainService {
             return this.analyzeRecursively(mce.getScope().get().asMethodCallExpr(), astForest, phrases, keys, mkeys);
         }
         throw new IllegalChainException("impossible unless bug.");
+    }
+
+    private String buildWholeDtoName(String entityName) {
+        if (entityName.endsWith("Entity")) {
+            return MoreStringUtils.replaceLast(entityName, "Entity", config.getWholeDtoNamePostfix());
+        } else {
+            return entityName + config.getWholeDtoNamePostfix();
+        }
     }
 
 }
