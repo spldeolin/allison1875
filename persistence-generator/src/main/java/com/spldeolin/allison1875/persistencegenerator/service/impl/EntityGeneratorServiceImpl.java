@@ -14,8 +14,8 @@ import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.service.GenerateEntityService;
+import com.spldeolin.allison1875.persistencegenerator.javabean.TableStructureAnalysisDto;
+import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class GenerateEntityServiceImpl implements GenerateEntityService {
+public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     @Inject
     private PersistenceGeneratorConfig config;
@@ -35,7 +35,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
     private AnnotationExprService annotationExprService;
 
     @Override
-    public JavabeanGeneration generate(PersistenceDto persistence, AstForest astForest) {
+    public JavabeanGeneration generateEntity(TableStructureAnalysisDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
         arg.setPackageName(config.getEntityPackage());
@@ -76,7 +76,7 @@ public class GenerateEntityServiceImpl implements GenerateEntityService {
         return javabeanGeneratorService.generate(arg);
     }
 
-    private String concatEntityDescription(PersistenceDto persistence) {
+    private String concatEntityDescription(TableStructureAnalysisDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
         if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;

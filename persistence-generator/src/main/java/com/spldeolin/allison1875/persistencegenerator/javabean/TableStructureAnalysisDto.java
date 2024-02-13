@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PersistenceDto {
+public class TableStructureAnalysisDto {
 
     String tableName;
 
@@ -48,7 +48,10 @@ public class PersistenceDto {
      */
     Boolean isDeleteFlagExist = false;
 
-    final List<FileFlush> fileFlushes = Lists.newArrayList();
+    /**
+     * 如果分析表结构时需要生成源码，使用这个属性传递
+     */
+    final List<FileFlush> flushes = Lists.newArrayList();
 
     String lotNo;
 

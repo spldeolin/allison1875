@@ -2,8 +2,8 @@ package com.spldeolin.allison1875.persistencegenerator;
 
 import java.nio.file.Path;
 import java.util.List;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,17 +16,18 @@ import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
+import com.spldeolin.allison1875.persistencegenerator.javabean.DetectOrGenerateMapperRetval;
+import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateDesignArgs;
+import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateMethodToMapperArgs;
 import com.spldeolin.allison1875.persistencegenerator.javabean.KeyMethodNameDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.QueryByKeysDto;
-import com.spldeolin.allison1875.persistencegenerator.service.BuildPersistenceDtoService;
-import com.spldeolin.allison1875.persistencegenerator.service.DeleteAllison1875MethodService;
-import com.spldeolin.allison1875.persistencegenerator.service.FindOrCreateMapperService;
-import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
-import com.spldeolin.allison1875.persistencegenerator.service.GenerateEntityService;
-import com.spldeolin.allison1875.persistencegenerator.service.MapperService;
-import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlFileService;
+import com.spldeolin.allison1875.persistencegenerator.javabean.ReplaceMapperXmlMethodsArgs;
+import com.spldeolin.allison1875.persistencegenerator.javabean.TableStructureAnalysisDto;
+import com.spldeolin.allison1875.persistencegenerator.service.DesignGeneratorService;
+import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;
+import com.spldeolin.allison1875.persistencegenerator.service.MapperCoidService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlService;
+import com.spldeolin.allison1875.persistencegenerator.service.TableStructureAnalyzerService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,28 +38,19 @@ import lombok.extern.slf4j.Slf4j;
 public class PersistenceGenerator implements Allison1875MainService {
 
     @Inject
-    private MapperService mapperService;
+    private MapperCoidService mapperCoidService;
 
     @Inject
-    private BuildPersistenceDtoService buildPersistenceDtoService;
+    private TableStructureAnalyzerService tableStructureAnalyzerService;
 
     @Inject
-    private DeleteAllison1875MethodService deleteAllison1875MethodService;
-
-    @Inject
-    private FindOrCreateMapperService findOrCreateMapperService;
-
-    @Inject
-    private GenerateEntityService generateEntityService;
+    private EntityGeneratorService entityGeneratorService;
 
     @Inject
     private MapperXmlService mapperXmlService;
 
     @Inject
-    private MapperXmlFileService mapperXmlFileService;
-
-    @Inject
-    private GenerateDesignService generateDesignService;
+    private DesignGeneratorService designGeneratorService;
 
     @Inject
     private PersistenceGeneratorConfig config;
@@ -71,105 +63,122 @@ public class PersistenceGenerator implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        // 构建并遍历 PersistenceDto对象
-        List<PersistenceDto> persistenceDtos = buildPersistenceDtoService.build(astForest);
-        if (CollectionUtils.isEmpty(persistenceDtos)) {
+        // 分析表结构
+        List<TableStructureAnalysisDto> tableStructureAnalysisList =
+                tableStructureAnalyzerService.analyzeTableStructure(
+                astForest);
+        if (CollectionUtils.isEmpty(tableStructureAnalysisList)) {
             log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
         }
 
         List<FileFlush> flushes = Lists.newArrayList();
-        for (PersistenceDto persistence : persistenceDtos) {
-            flushes.addAll(persistence.getFileFlushes());
+        for (TableStructureAnalysisDto tableStructureAnalysis : tableStructureAnalysisList) {
+            flushes.addAll(tableStructureAnalysis.getFlushes());
 
             // 生成Entity
-            JavabeanGeneration entityGeneration = generateEntityService.generate(persistence, astForest);
+            JavabeanGeneration entityGeneration = entityGeneratorService.generateEntity(tableStructureAnalysis,
+                    astForest);
             flushes.add(entityGeneration.getFileFlush());
 
             // 寻找或创建Mapper
-            ClassOrInterfaceDeclaration mapper;
+            DetectOrGenerateMapperRetval detectOrGenerateMapperRetval;
             try {
-                mapper = findOrCreateMapperService.findOrCreate(persistence, entityGeneration, astForest);
+                detectOrGenerateMapperRetval = mapperCoidService.detectOrGenerateMapper(tableStructureAnalysis,
+                        entityGeneration, astForest);
             } catch (Exception e) {
-                log.error("寻找或创建Mapper时发生异常 persistence={}", persistence, e);
+                log.error("寻找或创建Mapper时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
                 continue;
             }
+            ClassOrInterfaceDeclaration mapper = detectOrGenerateMapperRetval.getMapper();
 
             // 重新生成Design
-            generateDesignService.generate(persistence, entityGeneration, mapper, astForest).ifPresent(flushes::add);
-
-            // 删除Mapper中所有声明了LotNoAnnounce或者NoModifyAnnounce的方法
-            deleteAllison1875MethodService.deleteMethod(mapper);
-
-            // 临时删除Mapper中所有开发者自定义方法
-            List<MethodDeclaration> customMethods = mapper.getMethods();
-            customMethods.forEach(MethodDeclaration::remove);
+            GenerateDesignArgs gdArgs = new GenerateDesignArgs();
+            gdArgs.setTableStructureAnalysis(tableStructureAnalysis);
+            gdArgs.setEntityGeneration(entityGeneration);
+            gdArgs.setMapper(mapper);
+            gdArgs.setAstForest(astForest);
+            designGeneratorService.generateDesign(gdArgs).ifPresent(flushes::add);
 
             // 在Mapper中生成基础方法
-            String insertMethodName = mapperService.insert(persistence, entityGeneration, mapper);
-            String batchInsertMethodName = mapperService.batchInsert(persistence, entityGeneration, mapper);
-            String batchInsertEvenNullMethodName = mapperService.batchInsertEvenNull(persistence, entityGeneration,
-                    mapper);
-            String batchUpdateMethodName = mapperService.batchUpdate(persistence, entityGeneration, mapper);
-            String batchUpdateEvenNullMethodName = mapperService.batchUpdateEvenNull(persistence, entityGeneration,
-                    mapper);
-            String queryByIdMethodName = mapperService.queryById(persistence, entityGeneration, mapper);
-            String updateByIdMethodName = mapperService.updateById(persistence, entityGeneration, mapper);
-            String updateByIdEvenNullMethodName = mapperService.updateByIdEvenNull(persistence, entityGeneration,
-                    mapper);
-            String queryByIdsProcMethodName = mapperService.queryByIds(persistence, entityGeneration, mapper);
-            String queryByIdsEachIdMethodName = mapperService.queryByIdsEachId(persistence, entityGeneration, mapper);
+            GenerateMethodToMapperArgs gmtmArgs = new GenerateMethodToMapperArgs();
+            gmtmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
+            gmtmArgs.setEntityGeneration(entityGeneration);
+            gmtmArgs.setMapper(mapper);
+            String insertMethodName = mapperCoidService.generateInsertMethodToMapper(gmtmArgs);
+            String batchInsertMethodName = mapperCoidService.generateBatchInsertMethodToMapper(gmtmArgs);
+            String batchInsertEvenNullMethodName = mapperCoidService.generateBatchInsertEvenNullMethodToMapper(
+                    gmtmArgs);
+            String batchUpdateMethodName = mapperCoidService.generateBatchUpdateMethodToMapper(gmtmArgs);
+            String batchUpdateEvenNullMethodName = mapperCoidService.generateBatchUpdateEvenNullMethodToMapper(
+                    gmtmArgs);
+            String queryByIdMethodName = mapperCoidService.generateQueryByIdMethodToMapper(gmtmArgs);
+            String updateByIdMethodName = mapperCoidService.generateUpdateByIdMethodToMapper(gmtmArgs);
+            String updateByIdEvenNullMethodName = mapperCoidService.generateUpdateByIdEvenNullMethodToMapper(gmtmArgs);
+            String queryByIdsProcMethodName = mapperCoidService.generateQueryByIdsMethodToMapper(gmtmArgs);
+            String queryByIdsEachIdMethodName = mapperCoidService.generateQueryByIdsEachIdMethodToMapper(gmtmArgs);
             List<KeyMethodNameDto> queryByKeyDtos = Lists.newArrayList();
             List<KeyMethodNameDto> deleteByKeyDtos = Lists.newArrayList();
             List<QueryByKeysDto> queryByKeysDtos = Lists.newArrayList();
-            for (PropertyDto key : persistence.getKeyProperties()) {
+            for (PropertyDto key : tableStructureAnalysis.getKeyProperties()) {
                 queryByKeyDtos.add(new KeyMethodNameDto().setKey(key)
-                        .setMethodName(mapperService.queryByKey(persistence, entityGeneration, key, mapper)));
+                        .setMethodName(mapperCoidService.generateQueryByKeyMethodToMapper(gmtmArgs.setKey(key))));
                 deleteByKeyDtos.add(new KeyMethodNameDto().setKey(key)
-                        .setMethodName(mapperService.deleteByKey(persistence, key, mapper)));
-                queryByKeysDtos.add(mapperService.queryByKeys(persistence, entityGeneration, key, mapper));
+                        .setMethodName(mapperCoidService.generateDeleteByKeyMethodToMapper(gmtmArgs.setKey(key))));
+                queryByKeysDtos.add(mapperCoidService.generateQueryByKeysMethodToMapper(gmtmArgs.setKey(key)));
             }
-            String queryByEntityMethodName = mapperService.queryByEntity(persistence, entityGeneration, mapper);
-            String listAllMethodName = mapperService.listAll(persistence, entityGeneration, mapper);
-            String insertOrUpdateMethodName = mapperService.insertOrUpdate(persistence, entityGeneration, mapper);
+            String queryByEntityMethodName = mapperCoidService.generateQueryByEntityMethodToMapper(gmtmArgs);
+            String listAllMethodName = mapperCoidService.generateListAllMethodToMapper(gmtmArgs);
+            String insertOrUpdateMethodName = mapperCoidService.generateInsertOrUpdateMethodToMapper(gmtmArgs);
 
             // 将临时删除的开发者自定义方法添加到Mapper的最后
-            customMethods.forEach(one -> mapper.getMembers().addLast(one));
+            detectOrGenerateMapperRetval.getCustomMethods().forEach(one -> mapper.getMembers().addLast(one));
 
-            // 在Mapper.xml中覆盖生成基础方法
+            CompilationUnit mapperCu = detectOrGenerateMapperRetval.getMapperCu();
+            importExprService.extractQualifiedTypeToImport(mapperCu);
+            flushes.add(FileFlush.build(mapperCu));
+
+            // 生成MapperXml的基础方法
             String entityName = getEntityNameInXml(entityGeneration);
+            List<List<String>> generateMapperXmlCodes = Lists.newArrayList(
+                    mapperXmlService.generateResultMap(tableStructureAnalysis, entityName),
+                    mapperXmlService.generateAllCloumnSql(tableStructureAnalysis),
+                    mapperXmlService.generateInsertMethod(tableStructureAnalysis, entityName, insertMethodName),
+                    mapperXmlService.generateBatchInsertMethod(tableStructureAnalysis, batchInsertMethodName),
+                    mapperXmlService.generateBatchInsertEvenNullMethod(tableStructureAnalysis,
+                            batchInsertEvenNullMethodName),
+                    mapperXmlService.generateBatchUpdateMethod(tableStructureAnalysis, batchUpdateMethodName),
+                    mapperXmlService.generateBatchUpdateEvenNullMethod(tableStructureAnalysis,
+                            batchUpdateEvenNullMethodName),
+                    mapperXmlService.generateQueryByIdMethod(tableStructureAnalysis, queryByIdMethodName),
+                    mapperXmlService.generateUpdateByIdMethod(tableStructureAnalysis, entityName, updateByIdMethodName),
+                    mapperXmlService.generateUpdateByIdEvenNullMethod(tableStructureAnalysis, entityName,
+                            updateByIdEvenNullMethodName),
+                    mapperXmlService.generateQueryByIdsMethod(tableStructureAnalysis, queryByIdsProcMethodName),
+                    mapperXmlService.generateQueryByIdsMethod(tableStructureAnalysis, queryByIdsEachIdMethodName),
+                    mapperXmlService.generateQueryByKeyMethod(tableStructureAnalysis, queryByKeyDtos),
+                    mapperXmlService.generateDeleteByKeyMethod(tableStructureAnalysis, deleteByKeyDtos),
+                    mapperXmlService.generateQueryByKeysMethod(tableStructureAnalysis, queryByKeysDtos),
+                    mapperXmlService.generateQueryByEntityMethod(tableStructureAnalysis, entityName,
+                            queryByEntityMethodName),
+                    mapperXmlService.generateListAllMethod(tableStructureAnalysis, listAllMethodName),
+                    mapperXmlService.generateInsertOrUpdateMethod(tableStructureAnalysis, entityName,
+                            insertOrUpdateMethodName));
+
+            // 基础方法替换到MapperXml中
             for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
                 try {
                     Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
                             .resolve(mapperXmlDirectoryPath);
-                    FileFlush xmlFlush = mapperXmlFileService.generateMapperXml(persistence, mapper, mapperXmlDirectory,
-                            Lists.newArrayList(mapperXmlService.resultMapXml(persistence, entityName),
-                                    mapperXmlService.allCloumnSqlXml(persistence),
-                                    mapperXmlService.insertXml(persistence, entityName, insertMethodName),
-                                    mapperXmlService.batchInsertXml(persistence, batchInsertMethodName),
-                                    mapperXmlService.batchInsertEvenNullXml(persistence, batchInsertEvenNullMethodName),
-                                    mapperXmlService.batchUpdateXml(persistence, batchUpdateMethodName),
-                                    mapperXmlService.batchUpdateEvenNullXml(persistence, batchUpdateEvenNullMethodName),
-                                    mapperXmlService.queryByIdXml(persistence, queryByIdMethodName),
-                                    mapperXmlService.updateByIdXml(persistence, entityName, updateByIdMethodName),
-                                    mapperXmlService.updateByIdEvenNullXml(persistence, entityName,
-                                            updateByIdEvenNullMethodName),
-                                    mapperXmlService.queryByIdsXml(persistence, queryByIdsProcMethodName),
-                                    mapperXmlService.queryByIdsXml(persistence, queryByIdsEachIdMethodName),
-                                    mapperXmlService.queryByKeyXml(persistence, queryByKeyDtos),
-                                    mapperXmlService.deleteByKeyXml(persistence, deleteByKeyDtos),
-                                    mapperXmlService.queryByKeysXml(persistence, queryByKeysDtos),
-                                    mapperXmlService.queryByEntityXml(persistence, entityName, queryByEntityMethodName),
-                                    mapperXmlService.listAllXml(persistence, listAllMethodName),
-                                    mapperXmlService.insertOrUpdateXml(persistence, entityName,
-                                            insertOrUpdateMethodName)));
+                    ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
+                    rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
+                    rmxmmArgs.setMapper(mapper);
+                    rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory);
+                    rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
+                    FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
                     flushes.add(xmlFlush);
-                    mapper.findCompilationUnit().ifPresent(cu -> {
-                        importExprService.extractQualifiedTypeToImport(cu);
-                        flushes.add(FileFlush.build(cu));
-                    });
                 } catch (Exception e) {
-                    log.error("写入Mapper.xml时发生异常 persistence={}", persistence, e);
+                    log.error("写入Mapper.xml时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
                 }
             }
         }

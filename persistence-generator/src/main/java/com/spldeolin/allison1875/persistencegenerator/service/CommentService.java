@@ -10,8 +10,8 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.CommentServic
 @ImplementedBy(CommentServiceImpl.class)
 public interface CommentService {
 
-    String resolveColumnComment(InformationSchemaDto infoSchema);
+    String analyzeColumnComment(InformationSchemaDto infoSchema);
 
-    String resolveTableComment(InformationSchemaDto infoSchema);
+    String analyzeTableComment(InformationSchemaDto infoSchema);
 
 }

@@ -11,12 +11,12 @@ import com.spldeolin.allison1875.persistencegenerator.service.CommentService;
 public class CommentServiceImpl implements CommentService {
 
     @Override
-    public String resolveColumnComment(InformationSchemaDto infoSchema) {
+    public String analyzeColumnComment(InformationSchemaDto infoSchema) {
         return infoSchema.getColumnComment();
     }
 
     @Override
-    public String resolveTableComment(InformationSchemaDto infoSchema) {
+    public String analyzeTableComment(InformationSchemaDto infoSchema) {
         return infoSchema.getTableComment();
     }
 

@@ -18,7 +18,6 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
@@ -30,8 +29,9 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.TokenWordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMeta;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.persistencegenerator.javabean.PersistenceDto;
-import com.spldeolin.allison1875.persistencegenerator.service.GenerateDesignService;
+import com.spldeolin.allison1875.persistencegenerator.javabean.GenerateDesignArgs;
+import com.spldeolin.allison1875.persistencegenerator.javabean.TableStructureAnalysisDto;
+import com.spldeolin.allison1875.persistencegenerator.service.DesignGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class GenerateDesignServiceImpl implements GenerateDesignService {
+public class GenerateDesignServiceImpl implements DesignGeneratorService {
 
     @Inject
     private PersistenceGeneratorConfig config;
@@ -48,17 +48,19 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
     private ImportExprService importExprService;
 
     @Override
-    public Optional<FileFlush> generate(PersistenceDto persistence, JavabeanGeneration entityGeneration,
-            ClassOrInterfaceDeclaration mapper, AstForest astForest) {
+    public Optional<FileFlush> generateDesign(GenerateDesignArgs args) {
+        TableStructureAnalysisDto tableStructureAnalysis = args.getTableStructureAnalysis();
+        JavabeanGeneration entityGeneration = args.getEntityGeneration();
+
         if (!config.getEnableGenerateDesign()) {
             return Optional.empty();
         }
 
-        String designName = concatDesignName(persistence);
-        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
+        String designName = concatDesignName(tableStructureAnalysis);
+        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(args.getAstForest().getAstForestRoot(),
                 config.getDesignPackage(), designName + ".java");
 
-        List<PropertyDto> properties = persistence.getProperties();
+        List<PropertyDto> properties = tableStructureAnalysis.getProperties();
         properties.removeIf(property -> config.getHiddenColumns().contains(property.getPropertyName()));
         Map<String, PropertyDto> propertiesByName = Maps.newHashMap();
 
@@ -216,7 +218,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
 
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
         eachCoid.setPublic(true).setStatic(false).setInterface(true).setName("Each").addTypeParameter("P");
-        for (PropertyDto property : persistence.getProperties()) {
+        for (PropertyDto property : tableStructureAnalysis.getProperties()) {
             eachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     String.format("Each<%s> %s = (Each<%s>) new Object();", property.getJavaType().getSimpleName(),
                             property.getPropertyName(), property.getJavaType().getSimpleName())));
@@ -225,7 +227,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
 
         ClassOrInterfaceDeclaration multiEachCoid = new ClassOrInterfaceDeclaration();
         multiEachCoid.setPublic(true).setStatic(false).setInterface(true).setName("MultiEach").addTypeParameter("P");
-        for (PropertyDto property : persistence.getProperties()) {
+        for (PropertyDto property : tableStructureAnalysis.getProperties()) {
             multiEachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     String.format("MultiEach<%s> %s = (MultiEach<%s>) new Object();",
                             property.getJavaType().getSimpleName(), property.getPropertyName(),
@@ -233,7 +235,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         }
         designCoid.addMember(multiEachCoid);
 
-        for (PropertyDto property : persistence.getProperties()) {
+        for (PropertyDto property : tableStructureAnalysis.getProperties()) {
             designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     "public static com.spldeolin.allison1875.support.EntityKey<" + entityGeneration.getJavabeanName()
                             + "," + property.getJavaType().getSimpleName() + "> " + property.getPropertyName() + ";"));
@@ -242,15 +244,17 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         DesignMeta meta = new DesignMeta();
         meta.setEntityQualifier(entityGeneration.getJavabeanQualifier());
         meta.setEntityName(entityGeneration.getJavabeanName());
-        meta.setMapperQualifier(mapper.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(mapper)));
-        meta.setMapperName(mapper.getNameAsString());
+        meta.setMapperQualifier(args.getMapper().getFullyQualifiedName()
+                .orElseThrow(() -> new QualifierAbsentException(args.getMapper())));
+        meta.setMapperName(args.getMapper().getNameAsString());
         meta.setMapperRelativePaths(config.getMapperXmlDirectoryPaths().stream()
-                .map(one -> one + File.separator + persistence.getMapperName() + ".xml").collect(Collectors.toList()));
-        if (persistence.getIsDeleteFlagExist()) {
+                .map(one -> one + File.separator + tableStructureAnalysis.getMapperName() + ".xml")
+                .collect(Collectors.toList()));
+        if (tableStructureAnalysis.getIsDeleteFlagExist()) {
             meta.setNotDeletedSql(config.getNotDeletedSql());
         }
         meta.setProperties(propertiesByName);
-        meta.setTableName(persistence.getTableName());
+        meta.setTableName(tableStructureAnalysis.getTableName());
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", TokenWordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
@@ -263,7 +267,7 @@ public class GenerateDesignServiceImpl implements GenerateDesignService {
         return Optional.of(FileFlush.build(cu));
     }
 
-    private String concatDesignName(PersistenceDto persistence) {
+    private String concatDesignName(TableStructureAnalysisDto persistence) {
         return MoreStringUtils.underscoreToUpperCamel(persistence.getTableName()) + "Design";
     }
 
