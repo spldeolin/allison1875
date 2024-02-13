@@ -4,14 +4,14 @@ import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.handlertransformer.service.impl.InitializerCollectServiceImpl;
+import com.spldeolin.allison1875.handlertransformer.service.impl.InitDecDetectorServiceImpl;
 
 /**
  * @author Deolin 2023-12-23
  */
-@ImplementedBy(InitializerCollectServiceImpl.class)
-public interface InitializerCollectService {
+@ImplementedBy(InitDecDetectorServiceImpl.class)
+public interface InitDecDetectorService {
 
-    List<InitializerDeclaration> collectInitializer(ClassOrInterfaceDeclaration coid);
+    List<InitializerDeclaration> detectInitDecs(ClassOrInterfaceDeclaration mvcController);
 
 }

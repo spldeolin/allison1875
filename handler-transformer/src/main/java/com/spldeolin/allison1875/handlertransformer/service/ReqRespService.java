@@ -5,8 +5,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
-import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.GenerateDtoJavabeansRetval;
+import com.spldeolin.allison1875.handlertransformer.javabean.InitDecAnalysisDto;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ReqRespServiceImpl;
 
 /**
@@ -15,9 +15,9 @@ import com.spldeolin.allison1875.handlertransformer.service.impl.ReqRespServiceI
 @ImplementedBy(ReqRespServiceImpl.class)
 public interface ReqRespService {
 
-    void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto);
+    void validInitBody(BlockStmt initBody, InitDecAnalysisDto initDecAnalysis);
 
-    ReqDtoRespDtoInfo createJavabeans(AstForest astForest, FirstLineDto firstLineDto,
+    GenerateDtoJavabeansRetval generateDtoJavabeans(AstForest astForest, InitDecAnalysisDto initDecAnalysis,
             List<ClassOrInterfaceDeclaration> dtos);
 
 }

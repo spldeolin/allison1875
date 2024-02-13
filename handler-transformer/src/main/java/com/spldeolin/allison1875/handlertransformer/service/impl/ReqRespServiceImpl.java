@@ -29,8 +29,8 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.enums.JavabeanTypeEnum;
-import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
-import com.spldeolin.allison1875.handlertransformer.javabean.ReqDtoRespDtoInfo;
+import com.spldeolin.allison1875.handlertransformer.javabean.GenerateDtoJavabeansRetval;
+import com.spldeolin.allison1875.handlertransformer.javabean.InitDecAnalysisDto;
 import com.spldeolin.allison1875.handlertransformer.service.FieldService;
 import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
 import lombok.extern.slf4j.Slf4j;
@@ -58,10 +58,10 @@ public class ReqRespServiceImpl implements ReqRespService {
     private ImportExprService importExprService;
 
     @Override
-    public void checkInitBody(BlockStmt initBody, FirstLineDto firstLineDto) {
+    public void validInitBody(BlockStmt initBody, InitDecAnalysisDto initDecAnalysis) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
             throw new IllegalArgumentException(
-                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDto和RespDto。[" + firstLineDto + "] 当前："
+                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDto和RespDto。[" + initDecAnalysis + "] 当前："
                             + initBody.findAll(LocalClassDeclarationStmt.class).stream()
                             .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
         }
@@ -69,7 +69,8 @@ public class ReqRespServiceImpl implements ReqRespService {
             for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
                 if (!StringUtils.equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req", "Resp")) {
                     throw new IllegalArgumentException(
-                            "构造代码块下类的命名只能是「Req」或者「Resp」。[" + firstLineDto + "] 当前：" + initBody.findAll(
+                            "构造代码块下类的命名只能是「Req」或者「Resp」。[" + initDecAnalysis + "] 当前："
+                                    + initBody.findAll(
                                             LocalClassDeclarationStmt.class).stream()
                                     .map(one -> one.getClassDeclaration().getNameAsString())
                                     .collect(Collectors.joining("、")));
@@ -78,36 +79,36 @@ public class ReqRespServiceImpl implements ReqRespService {
         }
         if (initBody.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getNameAsString().equals("Req")).size()
                 > 1) {
-            throw new IllegalArgumentException("构造代码块下不能重复声明Req类。[" + firstLineDto + "]");
+            throw new IllegalArgumentException("构造代码块下不能重复声明Req类。[" + initDecAnalysis + "]");
         }
         if (initBody.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getNameAsString().equals("Resp")).size()
                 > 1) {
-            throw new IllegalArgumentException("构造代码块下不能重复声明Resp类。[" + firstLineDto + "]");
+            throw new IllegalArgumentException("构造代码块下不能重复声明Resp类。[" + initDecAnalysis + "]");
         }
     }
 
     @Override
-    public ReqDtoRespDtoInfo createJavabeans(AstForest astForest, FirstLineDto firstLineDto,
+    public GenerateDtoJavabeansRetval generateDtoJavabeans(AstForest astForest, InitDecAnalysisDto initDecAnalysis,
             List<ClassOrInterfaceDeclaration> dtos) {
-        ReqDtoRespDtoInfo result = new ReqDtoRespDtoInfo();
+        GenerateDtoJavabeansRetval result = new GenerateDtoJavabeansRetval();
 
         // 生成ReqDto、RespDto、NestDto
         for (ClassOrInterfaceDeclaration dto : dtos) {
             JavabeanTypeEnum javabeanType = estimateJavabeanType(dto);
             String packageName = estimatePackageName(javabeanType);
-            String javabeanName = standardizeJavabeanName(firstLineDto, dto, javabeanType);
+            String javabeanName = standardizeJavabeanName(initDecAnalysis, dto, javabeanType);
 
             JavabeanArg arg = new JavabeanArg();
             arg.setAstForest(astForest);
             arg.setPackageName(packageName);
             arg.setClassName(javabeanName);
-            arg.setDescription(concatDtoDescription(firstLineDto));
+            arg.setDescription(concatDtoDescription(initDecAnalysis));
             arg.setAuthorName(config.getAuthor());
             arg.setMore4Javabean((tempCu, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
                     fieldService.more4SpecialTypeField(field, javabeanType);
                 }
-                importExprService.copyImports(firstLineDto.getControllerCu(), tempCu);
+                importExprService.copyImports(initDecAnalysis.getMvcControllerCu(), tempCu);
                 javabean.setMembers(dto.getMembers());
             });
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
@@ -201,13 +202,13 @@ public class ReqRespServiceImpl implements ReqRespService {
         }
     }
 
-    private String standardizeJavabeanName(FirstLineDto firstLineDto, ClassOrInterfaceDeclaration dto,
+    private String standardizeJavabeanName(InitDecAnalysisDto initDecAnalysis, ClassOrInterfaceDeclaration dto,
             JavabeanTypeEnum javabeanType) {
         String javaBeanName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-            javaBeanName = MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "ReqDto";
+            javaBeanName = MoreStringUtils.upperFirstLetter(initDecAnalysis.getMvcHandlerMethodName()) + "ReqDto";
         } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-            javaBeanName = MoreStringUtils.upperFirstLetter(firstLineDto.getHandlerName()) + "RespDto";
+            javaBeanName = MoreStringUtils.upperFirstLetter(initDecAnalysis.getMvcHandlerMethodName()) + "RespDto";
         } else {
             String originName = dto.getNameAsString();
             if (!MoreStringUtils.endsWithIgnoreCase(originName, "dto")) {
@@ -231,10 +232,11 @@ public class ReqRespServiceImpl implements ReqRespService {
         return javabeanQualifier;
     }
 
-    private String concatDtoDescription(FirstLineDto firstLine) {
+    private String concatDtoDescription(InitDecAnalysisDto initDecAnalysis) {
         String result = "";
         if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + firstLine.getLotNo();
+            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
+                    + initDecAnalysis.getLotNo();
         }
         return result;
     }

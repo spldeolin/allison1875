@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.javabean;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -11,14 +12,16 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GenerateServiceParam {
+public class AddMethodToServiceArgs {
 
     CompilationUnit controllerCu;
 
-    FirstLineDto firstLineDto;
+    InitDecAnalysisDto initDecAnalysisDto;
 
-    ReqDtoRespDtoInfo reqDtoRespDtoInfo;
+    MethodDeclaration serviceMethod;
 
     AstForest astForest;
+
+    GenerateServiceAndImplRetval generateServiceAndImplRetval;
 
 }

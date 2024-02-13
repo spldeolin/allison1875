@@ -12,11 +12,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ServiceGeneration {
-
-    String serviceVarName;
-
-    String serviceQualifier;
+public class AddMethodToServiceRetval {
 
     String methodName;
 

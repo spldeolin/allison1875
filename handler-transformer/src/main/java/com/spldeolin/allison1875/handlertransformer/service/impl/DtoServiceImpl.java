@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.handlertransformer.service.DtoService;
 public class DtoServiceImpl implements DtoService {
 
     @Override
-    public List<ClassOrInterfaceDeclaration> collectDtosFromBottomToTop(BlockStmt initBody) {
+    public List<ClassOrInterfaceDeclaration> detectDtosBottomTop(BlockStmt initBody) {
         List<ClassOrInterfaceDeclaration> dtos = Lists.newArrayList();
         initBody.walk(TreeTraversal.BREADTHFIRST, node -> {
             if (node instanceof ClassOrInterfaceDeclaration) {

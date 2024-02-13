@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.handlertransformer.service.impl.DtoServiceImpl;
 @ImplementedBy(DtoServiceImpl.class)
 public interface DtoService {
 
-    List<ClassOrInterfaceDeclaration> collectDtosFromBottomToTop(BlockStmt initBody);
+    List<ClassOrInterfaceDeclaration> detectDtosBottomTop(BlockStmt initBody);
 
 }

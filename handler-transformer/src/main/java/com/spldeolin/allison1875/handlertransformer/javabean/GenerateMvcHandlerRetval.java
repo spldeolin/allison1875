@@ -10,17 +10,17 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
- * @author Deolin 2021-01-22
+ * @author Deolin 2024-02-13
  */
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class HandlerCreation {
+public class GenerateMvcHandlerRetval {
 
     /**
-     * handler方法
+     * mvcHandler方法
      */
-    MethodDeclaration handler;
+    MethodDeclaration mvcHandler;
 
     /**
      * 待追加的Controller类的注解

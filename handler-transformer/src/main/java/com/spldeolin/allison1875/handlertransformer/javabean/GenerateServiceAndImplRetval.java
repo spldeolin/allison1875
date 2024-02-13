@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ServicePairDto {
+public class GenerateServiceAndImplRetval {
 
     ClassOrInterfaceDeclaration service;
 
@@ -22,5 +22,9 @@ public class ServicePairDto {
     ClassOrInterfaceDeclaration serviceImpl;
 
     CompilationUnit serviceImplCu;
+
+    String serviceVarName;
+
+    String serviceQualifier;
 
 }

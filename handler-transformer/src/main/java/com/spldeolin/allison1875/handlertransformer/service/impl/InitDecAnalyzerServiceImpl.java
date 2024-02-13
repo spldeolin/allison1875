@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
@@ -10,8 +11,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.handlertransformer.javabean.FirstLineDto;
-import com.spldeolin.allison1875.handlertransformer.service.ParseFirstLineService;
+import com.spldeolin.allison1875.handlertransformer.javabean.InitDecAnalysisDto;
+import com.spldeolin.allison1875.handlertransformer.service.InitDecAnalyzerService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,21 +20,22 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class ParseFirstLineServiceImpl implements ParseFirstLineService {
+public class InitDecAnalyzerServiceImpl implements InitDecAnalyzerService {
 
     @Override
-    public FirstLineDto parse(InitializerDeclaration init, CompilationUnit controllerCu) {
-        FirstLineDto result = new FirstLineDto();
-        result.setInit(init);
-        for (Statement stmt : init.getBody().getStatements()) {
+    public InitDecAnalysisDto analyzeInitDec(CompilationUnit mvcControllerCu, ClassOrInterfaceDeclaration mvcController,
+            InitializerDeclaration initDec) {
+        InitDecAnalysisDto result = new InitDecAnalysisDto();
+        result.setInitDec(initDec);
+        for (Statement stmt : initDec.getBody().getStatements()) {
             stmt.ifExpressionStmt(exprStmt -> exprStmt.getExpression().ifVariableDeclarationExpr(vde -> {
                 for (VariableDeclarator vd : vde.getVariables()) {
                     if (vd.getInitializer().isPresent()) {
                         Expression i = vd.getInitializer().get();
                         if (StringUtils.equalsAny(vd.getNameAsString(), "handler", "h")) {
                             if (i.isStringLiteralExpr()) {
-                                if (result.getHandlerUrl() == null) {
-                                    result.setHandlerUrl(i.asStringLiteralExpr().getValue());
+                                if (result.getMvcHandlerUrl() == null) {
+                                    result.setMvcHandlerUrl(i.asStringLiteralExpr().getValue());
                                 } else {
                                     log.warn("'handler' [{}] duplicate declaration, ignore.", i);
                                 }
@@ -43,8 +45,8 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
                         }
                         if (StringUtils.equalsAny(vd.getNameAsString(), "desc", "d")) {
                             if (i.isStringLiteralExpr()) {
-                                if (result.getHandlerDescription() == null) {
-                                    result.setHandlerDescription(i.asStringLiteralExpr().getValue());
+                                if (result.getMvcHandlerDescription() == null) {
+                                    result.setMvcHandlerDescription(i.asStringLiteralExpr().getValue());
                                 } else {
                                     log.warn("'handler' [{}] duplicate declaration, ignore.", i);
                                 }
@@ -56,15 +58,16 @@ public class ParseFirstLineServiceImpl implements ParseFirstLineService {
                 }
             }));
         }
-        if (StringUtils.isBlank(result.getHandlerUrl())) {
-            log.warn("'handler' [{}] is blank, ignore", result.getHandlerUrl());
+        if (StringUtils.isBlank(result.getMvcHandlerUrl())) {
+            log.warn("'handler' [{}] is blank, ignore", result.getMvcHandlerUrl());
             return null;
         }
-        if (StringUtils.isBlank(result.getHandlerDescription())) {
-            result.setHandlerDescription("未指定描述");
+        if (StringUtils.isBlank(result.getMvcHandlerDescription())) {
+            result.setMvcHandlerDescription("未指定描述");
         }
-        result.setHandlerName(MoreStringUtils.slashToLowerCamel(result.getHandlerUrl()));
-        result.setControllerCu(controllerCu);
+        result.setMvcHandlerMethodName(MoreStringUtils.slashToLowerCamel(result.getMvcHandlerUrl()));
+        result.setMvcControllerCu(mvcControllerCu);
+        result.setMvcController(mvcController);
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("HT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
