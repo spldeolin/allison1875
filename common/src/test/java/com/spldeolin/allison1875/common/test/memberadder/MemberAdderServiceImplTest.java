@@ -2,13 +2,12 @@ package com.spldeolin.allison1875.common.test.memberadder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.spldeolin.allison1875.common.Allison1875;
+import com.spldeolin.allison1875.common.javabean.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.service.impl.MemberAdderServiceImpl;
 
@@ -30,24 +29,24 @@ public class MemberAdderServiceImplTest {
 
 
         System.out.println("不同名");
-        Optional<FieldDeclaration> fd = memberAdderService.addField(
+        AddInjectFieldRetval retval = memberAdderService.addInjectField(
                 "com.spldeolin.allison1875.common.javabean.FieldArg", "d", coid);
-        System.out.println(fd);
+        System.out.println(retval);
         System.out.println(coid);
 
         System.out.println("同名同类型");
-        fd = memberAdderService.addField("com.spldeolin.allison1875.common.javabean.InvalidDto", "b", coid);
-        System.out.println(fd);
+        retval = memberAdderService.addInjectField("com.spldeolin.allison1875.common.javabean.InvalidDto", "b", coid);
+        System.out.println(retval);
         System.out.println(coid);
 
         System.out.println("同名不同类型");
-        fd = memberAdderService.addField("com.spldeolin.allison1875.common.javabean.InvalidDto", "c", coid);
-        System.out.println(fd);
+        retval = memberAdderService.addInjectField("com.spldeolin.allison1875.common.javabean.InvalidDto", "c", coid);
+        System.out.println(retval);
         System.out.println(coid);
 
         System.out.println("resolve and describe失败");
-        fd = memberAdderService.addField("com.X", "x", coid);
-        fd = memberAdderService.addField("com.Y", "x", coid);
+        retval = memberAdderService.addInjectField("com.X", "x", coid);
+        retval = memberAdderService.addInjectField("com.Y", "x", coid);
 
     }
 

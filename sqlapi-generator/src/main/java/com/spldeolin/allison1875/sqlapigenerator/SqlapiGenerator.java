@@ -10,13 +10,16 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.javabean.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateControllerMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMapperMethodRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMvcHandlerRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceImplMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.TrackCoidDto;
-import com.spldeolin.allison1875.sqlapigenerator.service.MemberAdderService;
+import com.spldeolin.allison1875.sqlapigenerator.service.MethodAdderService;
 import com.spldeolin.allison1875.sqlapigenerator.service.MethodGeneratorService;
 import com.spldeolin.allison1875.sqlapigenerator.service.TrackCoidDetectorService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,9 @@ public class SqlapiGenerator implements Allison1875MainService {
     private MethodGeneratorService methodGeneratorService;
 
     @Inject
+    private MethodAdderService methodAdderService;
+
+    @Inject
     private MemberAdderService memberAdderService;
 
     @Inject
@@ -46,57 +52,73 @@ public class SqlapiGenerator implements Allison1875MainService {
         TrackCoidDto trackCoid = trackCoidDetectorService.detectTrackCoids(astForest);
         log.info("list trackCoid={}", trackCoid);
 
-        // 生成Mapper方法，以及方法签名所需的Javabean
+        // generate Mapper方法
         GenerateMapperMethodRetval generateMapperMethodRetval = methodGeneratorService.generateMapperMethod(trackCoid,
                 astForest);
         flushes.addAll(generateMapperMethodRetval.getFlushes());
 
-        // 将Mapper方法追加到Mapper
+        // add Mapper方法
         LexicalPreservingPrinter.setup(trackCoid.getMapperCu());
-        memberAdderService.addMethodToCoid(generateMapperMethodRetval.getMethod().clone(), trackCoid.getMapper());
+        methodAdderService.addMethodToCoid(generateMapperMethodRetval.getMethod().clone(), trackCoid.getMapper());
         importExprService.extractQualifiedTypeToImport(trackCoid.getMapperCu());
         flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getMapperCu()));
 
-        // 生成Mapper xml方法
+        // generate MapperXml方法
         List<String> xmlMethodCodeLines = methodGeneratorService.generateMapperXmlMethod(generateMapperMethodRetval);
 
-        // 将Mapper xml方法追加到Mapper xml
-        List<FileFlush> xmlFlushes = memberAdderService.addMethodToXml(xmlMethodCodeLines, trackCoid);
+        // add MapperXml方法
+        List<FileFlush> xmlFlushes = methodAdderService.addMethodToXml(xmlMethodCodeLines, trackCoid);
         flushes.addAll(xmlFlushes);
 
+        /*
+            Service层
+         */
         if (trackCoid.getService() != null) {
-            // 生成Service方法，以及方法签名所需的Javabean
+            // generate Service方法
             GenerateServiceMethodRetval generateServiceMethodRetval = methodGeneratorService.generateServiceMethod(
-                    trackCoid, generateMapperMethodRetval);
+                    trackCoid, generateMapperMethodRetval.getMethod());
             flushes.addAll(generateServiceMethodRetval.getFlushes());
-
-            // 将Service方法追加到Service
+            // add Service方法，然后extractImports
             LexicalPreservingPrinter.setup(trackCoid.getServiceCu());
-            memberAdderService.addMethodToCoid(generateServiceMethodRetval.getMethod().clone(), trackCoid.getService());
+            methodAdderService.addMethodToCoid(generateServiceMethodRetval.getMethod().clone(), trackCoid.getService());
             importExprService.extractQualifiedTypeToImport(trackCoid.getServiceCu());
             flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getServiceCu()));
 
-            // 将Service方法追加到ServiceImpl
             for (int i = 0; i < trackCoid.getServiceImplCus().size(); i++) {
                 CompilationUnit serviceImplCu = trackCoid.getServiceImplCus().get(i);
                 ClassOrInterfaceDeclaration serviceImpl = trackCoid.getServiceImpls().get(i);
                 LexicalPreservingPrinter.setup(serviceImplCu);
-                memberAdderService.ensureAuwired(trackCoid.getMapper(), serviceImpl);
-                memberAdderService.addMethodToCoid(generateServiceMethodRetval.getMethodImpl().clone(), serviceImpl);
+                // add inject Mapper
+                AddInjectFieldRetval addInjectMapperFieldRetval = memberAdderService.addInjectField(
+                        trackCoid.getMapper(), serviceImpl);
+                String mapperVarName = addInjectMapperFieldRetval.getFieldVarName();
+                // generate ServiceImpl方法
+                GenerateServiceImplMethodRetval generateServiceImplMethodRetval =
+                        methodGeneratorService.generateServiceImplMethod(
+                        mapperVarName, generateServiceMethodRetval.getMethod().clone(),
+                        generateMapperMethodRetval.getMethod());
+                flushes.addAll(generateServiceMethodRetval.getFlushes());
+                // add ServiceImpl方法，然后extractImports
+                methodAdderService.addMethodToCoid(generateServiceImplMethodRetval.getMethodImpl().clone(),
+                        serviceImpl);
                 importExprService.extractQualifiedTypeToImport(serviceImplCu);
                 flushes.add(FileFlush.buildLexicalPreserving(serviceImplCu));
             }
-            if (trackCoid.getController() != null) {
-                // 生成Controller方法，以及方法签名所需的Javabean
-                GenerateControllerMethodRetval generateControllerMethodRetval =
-                        methodGeneratorService.generateControllerMethod(
-                        trackCoid, generateServiceMethodRetval, astForest);
-                flushes.addAll(generateControllerMethodRetval.getFlushes());
 
-                // 将Controller方法追加到Controller
+            /*
+                Controller层
+             */
+            if (trackCoid.getController() != null) {
                 LexicalPreservingPrinter.setup(trackCoid.getControllerCu());
-                memberAdderService.ensureAuwired(trackCoid.getService(), trackCoid.getController());
-                memberAdderService.addMethodToCoid(generateControllerMethodRetval.getMethod().clone(),
+                // add inject Service
+                AddInjectFieldRetval addInjectServiceFieldRetval = memberAdderService.addInjectField(
+                        trackCoid.getService(), trackCoid.getController());
+                // generate MvcHandler
+                GenerateMvcHandlerRetval generateMvcHandlerRetval = methodGeneratorService.generateMvcHandler(trackCoid,
+                        addInjectServiceFieldRetval.getFieldVarName(), generateServiceMethodRetval, astForest);
+                flushes.addAll(generateMvcHandlerRetval.getFlushes());
+                // add MvcHandler，然后extractImports
+                methodAdderService.addMethodToCoid(generateMvcHandlerRetval.getMethod().clone(),
                         trackCoid.getController());
                 importExprService.extractQualifiedTypeToImport(trackCoid.getControllerCu());
                 flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getControllerCu()));

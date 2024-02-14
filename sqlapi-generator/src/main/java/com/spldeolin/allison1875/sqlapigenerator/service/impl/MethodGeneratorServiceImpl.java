@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.sqlapigenerator.service.impl;
 
 import java.util.List;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -19,8 +21,9 @@ import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.sqlapigenerator.SqlapiGeneratorConfig;
 import com.spldeolin.allison1875.sqlapigenerator.exception.AnalyzeSqlException;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateControllerMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMapperMethodRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMvcHandlerRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceImplMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.TrackCoidDto;
 import com.spldeolin.allison1875.sqlapigenerator.service.MethodGeneratorService;
@@ -36,7 +39,7 @@ import net.sf.jsqlparser.statement.update.Update;
  * @author Deolin 2024-01-22
  */
 @Singleton
-public class MethodLayerServiceImpl implements MethodGeneratorService {
+public class MethodGeneratorServiceImpl implements MethodGeneratorService {
 
     @Inject
     private SqlapiGeneratorConfig config;
@@ -145,38 +148,41 @@ public class MethodLayerServiceImpl implements MethodGeneratorService {
     }
 
     @Override
-    public GenerateServiceMethodRetval generateServiceMethod(TrackCoidDto trackCoid,
-            GenerateMapperMethodRetval generateMapperMethodRetval) {
-        MethodDeclaration mapperMethod = generateMapperMethodRetval.getMethod();
-
+    public GenerateServiceMethodRetval generateServiceMethod(TrackCoidDto trackCoid, MethodDeclaration mapperMethod) {
+        String methodName = antiDuplicationService.getNewMethodNameIfExist(mapperMethod.getNameAsString(),
+                ArrayUtils.add(trackCoid.getServiceImpls().toArray(new ClassOrInterfaceDeclaration[0]),
+                        trackCoid.getService()));
         MethodDeclaration serviceMethod = new MethodDeclaration();
         mapperMethod.getJavadoc().ifPresent(serviceMethod::setJavadocComment);
         serviceMethod.setType(mapperMethod.getType());
-        serviceMethod.setName(mapperMethod.getName());
+        serviceMethod.setName(methodName);
         serviceMethod.setParameters(mapperMethod.getParameters());
         serviceMethod.setBody(null);
 
-        MethodDeclaration serviceImplMethod = new MethodDeclaration();
-        mapperMethod.getJavadoc().ifPresent(serviceImplMethod::setJavadocComment);
-        serviceImplMethod.addAnnotation(annotationExprService.javaOverride());
-        serviceImplMethod.setPublic(true);
-        serviceImplMethod.setType(mapperMethod.getType());
-        serviceImplMethod.setName(mapperMethod.getName());
-        serviceImplMethod.setParameters(mapperMethod.getParameters());
-        BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);",
-                MoreStringUtils.lowerFirstLetter(trackCoid.getMapper().getNameAsString()),
-                generateMapperMethodRetval.getMethod().getNameAsString())));
-        serviceImplMethod.setBody(body);
-
         GenerateServiceMethodRetval result = new GenerateServiceMethodRetval();
         result.setMethod(serviceMethod);
+        return result;
+    }
+
+    @Override
+    public GenerateServiceImplMethodRetval generateServiceImplMethod(String mapperVarName,
+            MethodDeclaration clonedServiceMethod, MethodDeclaration mapperMethod) {
+
+        MethodDeclaration serviceImplMethod = clonedServiceMethod;
+        serviceImplMethod.addAnnotation(annotationExprService.javaOverride());
+        serviceImplMethod.setPublic(true);
+        BlockStmt body = new BlockStmt();
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("return %s.%s(cond);", mapperVarName, mapperMethod.getNameAsString())));
+        serviceImplMethod.setBody(body);
+
+        GenerateServiceImplMethodRetval result = new GenerateServiceImplMethodRetval();
         result.setMethodImpl(serviceImplMethod);
         return result;
     }
 
     @Override
-    public GenerateControllerMethodRetval generateControllerMethod(TrackCoidDto trackCoid,
+    public GenerateMvcHandlerRetval generateMvcHandler(TrackCoidDto trackCoid, String serviceVarName,
             GenerateServiceMethodRetval generateServiceMethodRetval, AstForest astForest) {
         String methodName = antiDuplicationService.getNewMethodNameIfExist(config.getMethodName(),
                 trackCoid.getController());
@@ -191,12 +197,11 @@ public class MethodLayerServiceImpl implements MethodGeneratorService {
         param.addAnnotation(annotationExprService.javaxValid());
         method.addParameter(param);
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);",
-                MoreStringUtils.lowerFirstLetter(trackCoid.getService().getNameAsString()),
+        body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);", serviceVarName,
                 generateServiceMethodRetval.getMethod().getNameAsString())));
         method.setBody(body);
 
-        GenerateControllerMethodRetval result = new GenerateControllerMethodRetval();
+        GenerateMvcHandlerRetval result = new GenerateMvcHandlerRetval();
         result.setMethod(method);
         return result;
     }

@@ -114,8 +114,8 @@ public class DesignServiceImpl implements DesignService {
         log.info("ancestorStatement={}", ancestorStatementCode);
 
         // transform Method Call code
-
-        String mceCode = transformMethodCallService.methodCallExpr(designMeta, chainAnalysis, generateParamRetval);
+        String mceCode = transformMethodCallService.methodCallExpr(args.getMapperVarName(), chainAnalysis,
+                generateParamRetval);
 
         List<Statement> replacementStatements = Lists.newArrayList();
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
@@ -157,7 +157,9 @@ public class DesignServiceImpl implements DesignService {
         }
 
         // 在ancestorStatement的下方添加map or multimap build代码块（如果需要mapOrMultimapBuilt的话）
-        replacementStatements.addAll(mapOrMultimapBuilt);
+        if (mapOrMultimapBuilt != null) {
+            replacementStatements.addAll(mapOrMultimapBuilt);
+        }
 
         // replace ancestorStatement to replacementStatements
         NodeList<Statement> directBloackStmts = chainAnalysis.getDirectBlock().getStatements();

@@ -16,8 +16,11 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.javabean.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalChainException;
 import com.spldeolin.allison1875.querytransformer.exception.IllegalDesignException;
@@ -28,7 +31,6 @@ import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMappe
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.ReplaceDesignArgs;
-import com.spldeolin.allison1875.querytransformer.service.AutowiredMapperAdderService;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
 import com.spldeolin.allison1875.querytransformer.service.MethodGeneratorService;
@@ -56,13 +58,13 @@ public class QueryTransformer implements Allison1875MainService {
     private MethodGeneratorService methodGeneratorService;
 
     @Inject
-    private AutowiredMapperAdderService autowiredMapperAdderService;
-
-    @Inject
     private DesignService designService;
 
     @Inject
     private ImportExprService importExprService;
+
+    @Inject
+    private MemberAdderService memberAdderService;
 
     @Override
     public void process(AstForest astForest) {
@@ -77,6 +79,13 @@ public class QueryTransformer implements Allison1875MainService {
             }
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {
                 for (MethodCallExpr queryChain : queryChainDetectorService.detectQueryChains(directBlock)) {
+
+                    if (!queryChain.findAncestor(ClassOrInterfaceDeclaration.class).isPresent()) {
+                        log.warn("Query Chain is not in a Coid, ignore, queryChain={}", queryChain);
+                        continue;
+                    }
+                    ClassOrInterfaceDeclaration directCoid = queryChain.findAncestor(ClassOrInterfaceDeclaration.class)
+                            .get();
 
                     ClassOrInterfaceDeclaration design;
                     DesignMetaDto designMeta;
@@ -155,7 +164,9 @@ public class QueryTransformer implements Allison1875MainService {
                     flushes.addAll(xmlFlushes);
 
                     // append autowired mapper
-                    autowiredMapperAdderService.addAutowiredMapper(queryChain, designMeta);
+                    AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(
+                            designMeta.getMapperQualifier(),
+                            MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()), directCoid);
 
                     // transform Query Design
                     ReplaceDesignArgs args = new ReplaceDesignArgs();
@@ -163,6 +174,7 @@ public class QueryTransformer implements Allison1875MainService {
                     args.setChainAnalysis(chainAnalysis);
                     args.setGenerateParamRetval(generateParamRetval);
                     args.setGenerateReturnTypeRetval(generateReturnTypeRetval);
+                    args.setMapperVarName(addInjectFieldRetval.getFieldVarName());
                     designService.replaceDesign(args);
 
                     anyTransformed = true;

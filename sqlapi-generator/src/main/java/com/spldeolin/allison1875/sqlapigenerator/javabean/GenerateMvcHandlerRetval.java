@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GenerateControllerMethodRetval {
+public class GenerateMvcHandlerRetval {
 
     final List<FileFlush> flushes = Lists.newArrayList();
 

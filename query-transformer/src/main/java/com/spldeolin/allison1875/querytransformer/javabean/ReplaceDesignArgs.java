@@ -22,4 +22,6 @@ public class ReplaceDesignArgs {
 
     GenerateReturnTypeRetval generateReturnTypeRetval;
 
+    String mapperVarName;
+
 }

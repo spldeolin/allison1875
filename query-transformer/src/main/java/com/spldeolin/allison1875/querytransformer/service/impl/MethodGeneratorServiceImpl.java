@@ -116,7 +116,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 params.add(param);
             }
         } else {
-            return new GenerateParamRetval();
+            return new GenerateParamRetval().setIsCond(false);
         }
 
         GenerateParamRetval result = new GenerateParamRetval();

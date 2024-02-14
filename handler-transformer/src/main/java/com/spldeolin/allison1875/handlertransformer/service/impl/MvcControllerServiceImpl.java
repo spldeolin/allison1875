@@ -1,16 +1,11 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.util.List;
-import java.util.stream.IntStream;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
@@ -19,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateMvcHandlerArgs;
 import com.spldeolin.allison1875.handlertransformer.javabean.GenerateMvcHandlerRetval;
@@ -39,6 +35,9 @@ public class MvcControllerServiceImpl implements MvcControllerService {
 
     @Inject
     private HandlerTransformerConfig config;
+
+    @Inject
+    private MemberAdderService memberAdderService;
 
     @Override
     public List<ClassOrInterfaceDeclaration> detectMvcControllers(CompilationUnit cu) {
@@ -68,26 +67,8 @@ public class MvcControllerServiceImpl implements MvcControllerService {
             GenerateMvcHandlerRetval generateMvcHandlerRetval) {
         ClassOrInterfaceDeclaration mvcController = initDecAnalysisDto.getMvcController();
 
-        NodeList<BodyDeclaration<?>> members = mvcController.getMembers();
-
-        // 确保controller有autowired 新生成的service
-        if (!mvcController.getFieldByName(generateServiceAndImplRetval.getServiceVarName()).isPresent()) {
-            FieldDeclaration field = new FieldDeclaration();
-            field.addAnnotation(annotationExprService.springAutowired());
-            field.setPrivate(true).addVariable(new VariableDeclarator(
-                    StaticJavaParser.parseType(generateServiceAndImplRetval.getServiceQualifier()),
-                    generateServiceAndImplRetval.getServiceVarName()));
-
-            int lastIndexOfFieldDeclaration = IntStream.range(0, members.size())
-                    .filter(i -> members.get(i) instanceof FieldDeclaration).reduce((first, second) -> second)
-                    .orElse(-1);
-            members.add(lastIndexOfFieldDeclaration + 1, field);
-        }
-        log.info("append @Autowired Field [{}] into Controller [{}].", generateServiceAndImplRetval.getServiceVarName(),
-                mvcController.getNameAsString());
-
         // 使用handle创建Handler方法，并追加到controller中
-        members.replace(initDecAnalysisDto.getInitDec(), generateMvcHandlerRetval.getMvcHandler());
+        initDecAnalysisDto.getInitDec().replace(generateMvcHandlerRetval.getMvcHandler());
 
         for (AnnotationExpr annotationExpr : generateMvcHandlerRetval.getAppendAnnotations4Controller()) {
             if (!mvcController.getAnnotations().contains(annotationExpr)) {

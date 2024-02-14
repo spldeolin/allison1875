@@ -32,11 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 public class TransformMethodCallServiceImpl implements TransformMethodCallService {
 
     @Override
-    public String methodCallExpr(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
+    public String methodCallExpr(String mapperVarName, ChainAnalysisDto chainAnalysis,
             GenerateParamRetval paramGeneration) {
-        String result =
-                MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()) + "." + chainAnalysis.getMethodName()
-                        + "(";
+        String result = mapperVarName + "." + chainAnalysis.getMethodName() + "(";
         if (paramGeneration.getIsCond()) {
             String condQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
             result += MoreStringUtils.lowerFirstLetter(MoreStringUtils.splitAndGetLastPart(condQualifier, "."));

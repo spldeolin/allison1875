@@ -14,7 +14,7 @@ public interface AntiDuplicationService {
 
     Path getNewPathIfExist(Path path);
 
-    String getNewMethodNameIfExist(String methodName, ClassOrInterfaceDeclaration coid);
+    String getNewMethodNameIfExist(String methodName, ClassOrInterfaceDeclaration... coids);
 
     String getNewElementIfExist(String element, List<String> list);
 

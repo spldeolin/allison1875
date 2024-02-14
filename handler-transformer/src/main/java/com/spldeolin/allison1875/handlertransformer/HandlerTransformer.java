@@ -13,7 +13,9 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.javabean.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.handlertransformer.javabean.AddMethodToServiceArgs;
 import com.spldeolin.allison1875.handlertransformer.javabean.AddMethodToServiceRetval;
@@ -58,6 +60,9 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Inject
     private ServiceLayerService serviceLayerService;
+
+    @Inject
+    private MemberAdderService memberAdderService;
 
     @Override
     public void process(AstForest astForest) {
@@ -114,12 +119,17 @@ public class HandlerTransformer implements Allison1875MainService {
                     }
                     flushes.addAll(generateServiceLayerRetval.getFlushes());
 
+                    // 确保mvcController有autowired 新生成的service（由于Service/Impl是新生成的，生成时已AntiDupl了，所以这个方法不会发挥作用）
+                    AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(
+                            generateServiceAndImplRetval.getServiceQualifier(),
+                            generateServiceAndImplRetval.getServiceVarName(), mvcController);
+
                     // 创建mvcHandler
                     GenerateMvcHandlerArgs gmhArgs = new GenerateMvcHandlerArgs();
                     gmhArgs.setInitDecAnalysis(initDecAnalysis);
                     gmhArgs.setServiceParamType(generateDtoJavabeansRetval.getParamType());
                     gmhArgs.setServiceResultType(generateDtoJavabeansRetval.getResultType());
-                    gmhArgs.setServiceVarName(generateServiceAndImplRetval.getServiceVarName());
+                    gmhArgs.setServiceVarName(addInjectFieldRetval.getFieldVarName());
                     gmhArgs.setServiceMethodName(generateServiceLayerRetval.getMethodName());
                     GenerateMvcHandlerRetval generateMvcHandlerRetval = mvcControllerService.generateMvcHandler(
                             gmhArgs);

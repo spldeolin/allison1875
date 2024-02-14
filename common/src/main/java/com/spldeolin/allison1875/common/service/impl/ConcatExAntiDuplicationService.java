@@ -2,7 +2,9 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.inject.Singleton;
@@ -30,12 +32,13 @@ public class ConcatExAntiDuplicationService implements AntiDuplicationService {
     }
 
     @Override
-    public String getNewMethodNameIfExist(String methodName, ClassOrInterfaceDeclaration coid) {
-        if (CollectionUtils.isNotEmpty(coid.getMethodsByName(methodName))) {
+    public String getNewMethodNameIfExist(String methodName, ClassOrInterfaceDeclaration... coids) {
+        if (Arrays.stream(coids).anyMatch(coid -> CollectionUtils.isNotEmpty(coid.getMethodsByName(methodName)))) {
             String newMethodName = methodName + "Ex";
-            log.info("Method name [{}] is duplicate in {} [{}], hence '{}' is used", methodName,
-                    coid.isInterface() ? "Interface" : "Class", coid.getName(), newMethodName);
-            return getNewMethodNameIfExist(newMethodName, coid);
+            log.info("Method name [{}] is duplicate in {}, hence '{}' is used", methodName,
+                    Arrays.stream(coids).map(coid -> "'" + coid.getNameAsString() + "'")
+                            .collect(Collectors.joining(", ")), newMethodName);
+            return getNewMethodNameIfExist(newMethodName, coids);
         } else {
             return methodName;
         }

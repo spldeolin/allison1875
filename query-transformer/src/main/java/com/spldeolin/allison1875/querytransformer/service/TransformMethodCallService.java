@@ -15,8 +15,7 @@ import com.spldeolin.allison1875.querytransformer.service.impl.TransformMethodCa
 @ImplementedBy(TransformMethodCallServiceImpl.class)
 public interface TransformMethodCallService {
 
-    String methodCallExpr(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
-            GenerateParamRetval paramGeneration);
+    String methodCallExpr(String mapperVarName, ChainAnalysisDto chainAnalysis, GenerateParamRetval paramGeneration);
 
     List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis, GenerateParamRetval paramGeneration);
 
