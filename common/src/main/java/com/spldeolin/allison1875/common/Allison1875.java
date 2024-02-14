@@ -6,11 +6,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.interceptor.ValidInterceptor;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AstFilterService;
 import com.spldeolin.allison1875.common.service.AstForestResidenceService;
@@ -49,8 +52,13 @@ public class Allison1875 {
         Preconditions.checkArgument(ArrayUtils.isNotEmpty(allison1875Modules),
                 "requried 'allison1875Modules' Parameter cannot be empty");
 
+
+        // register interceptor
+        List<Module> guiceModules = Lists.newArrayList(allison1875Modules);
+        guiceModules.add(new ValidInterceptor().toGuiceModule());
+
         // create ioc container
-        Injector injector = Guice.createInjector(allison1875Modules);
+        Injector injector = Guice.createInjector(guiceModules);
 
         for (Allison1875Module module : allison1875Modules) {
             // valid

@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -15,16 +14,13 @@ import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
-import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.JavabeanGeneratorService;
-import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -45,11 +41,6 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
 
     @Override
     public JavabeanGeneration generate(JavabeanArg arg) {
-        List<InvalidDto> valid = ValidUtils.valid(arg);
-        if (CollectionUtils.isNotEmpty(valid)) {
-            throw new Allison1875Exception("JavabeanArg illegal, " + arg);
-        }
-
         String className = arg.getClassName();
         Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getAstForestRoot(),
                 arg.getPackageName(), className + ".java");
