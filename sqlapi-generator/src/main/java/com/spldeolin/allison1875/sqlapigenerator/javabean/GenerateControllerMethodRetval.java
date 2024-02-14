@@ -15,14 +15,10 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MapperMethodGenerationDto {
+public class GenerateControllerMethodRetval {
 
     final List<FileFlush> flushes = Lists.newArrayList();
 
     MethodDeclaration method;
-
-    String paramTypeQualifier;
-
-    String resultTypeQualifier;
 
 }

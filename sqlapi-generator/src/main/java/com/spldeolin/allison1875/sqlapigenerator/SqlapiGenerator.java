@@ -12,14 +12,13 @@ import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.ControllerMethodGenerationDto;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.MapperMethodGenerationDto;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.ServiceMethodGenerationDto;
-import com.spldeolin.allison1875.sqlapigenerator.service.AddAutowiredService;
-import com.spldeolin.allison1875.sqlapigenerator.service.AddMethodService;
-import com.spldeolin.allison1875.sqlapigenerator.service.GenerateMethodService;
-import com.spldeolin.allison1875.sqlapigenerator.service.ListCoidsOnTrackService;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateControllerMethodRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMapperMethodRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceMethodRetval;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.TrackCoidDto;
+import com.spldeolin.allison1875.sqlapigenerator.service.MemberAdderService;
+import com.spldeolin.allison1875.sqlapigenerator.service.MethodGeneratorService;
+import com.spldeolin.allison1875.sqlapigenerator.service.TrackCoidDetectorService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,16 +28,13 @@ import lombok.extern.slf4j.Slf4j;
 public class SqlapiGenerator implements Allison1875MainService {
 
     @Inject
-    private ListCoidsOnTrackService listCoidsOnTrackService;
+    private TrackCoidDetectorService trackCoidDetectorService;
 
     @Inject
-    private GenerateMethodService generateMethodService;
+    private MethodGeneratorService methodGeneratorService;
 
     @Inject
-    private AddAutowiredService addAutowiredService;
-
-    @Inject
-    private AddMethodService addMethodService;
+    private MemberAdderService memberAdderService;
 
     @Inject
     private ImportExprService importExprService;
@@ -47,64 +43,63 @@ public class SqlapiGenerator implements Allison1875MainService {
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
 
-        CoidsOnTrackDto coidsOnTrack = listCoidsOnTrackService.listCoidsOnTrack(astForest);
-        log.info("list coidsOnTrack={}", coidsOnTrack);
+        TrackCoidDto trackCoid = trackCoidDetectorService.detectTrackCoids(astForest);
+        log.info("list trackCoid={}", trackCoid);
 
         // 生成Mapper方法，以及方法签名所需的Javabean
-        MapperMethodGenerationDto mapperMethodGeneration = generateMethodService.generateMapperMethod(coidsOnTrack,
+        GenerateMapperMethodRetval generateMapperMethodRetval = methodGeneratorService.generateMapperMethod(trackCoid,
                 astForest);
-        flushes.addAll(mapperMethodGeneration.getFlushes());
+        flushes.addAll(generateMapperMethodRetval.getFlushes());
 
         // 将Mapper方法追加到Mapper
-        LexicalPreservingPrinter.setup(coidsOnTrack.getMapperCu());
-        addMethodService.addMethodToCoid(mapperMethodGeneration.getMethod().clone(), coidsOnTrack.getMapper());
-        importExprService.extractQualifiedTypeToImport(coidsOnTrack.getMapperCu());
-        flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getMapperCu()));
+        LexicalPreservingPrinter.setup(trackCoid.getMapperCu());
+        memberAdderService.addMethodToCoid(generateMapperMethodRetval.getMethod().clone(), trackCoid.getMapper());
+        importExprService.extractQualifiedTypeToImport(trackCoid.getMapperCu());
+        flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getMapperCu()));
 
         // 生成Mapper xml方法
-        List<String> xmlMethodCodeLines = generateMethodService.generateMapperXmlMethod(mapperMethodGeneration);
+        List<String> xmlMethodCodeLines = methodGeneratorService.generateMapperXmlMethod(generateMapperMethodRetval);
 
         // 将Mapper xml方法追加到Mapper xml
-        List<FileFlush> xmlFlushes = addMethodService.addMethodToXml(xmlMethodCodeLines, coidsOnTrack);
+        List<FileFlush> xmlFlushes = memberAdderService.addMethodToXml(xmlMethodCodeLines, trackCoid);
         flushes.addAll(xmlFlushes);
 
-        if (coidsOnTrack.getService() != null) {
+        if (trackCoid.getService() != null) {
             // 生成Service方法，以及方法签名所需的Javabean
-            ServiceMethodGenerationDto serviceMethodGeneration = generateMethodService.generateServiceMethod(
-                    coidsOnTrack, mapperMethodGeneration);
-            flushes.addAll(serviceMethodGeneration.getFlushes());
+            GenerateServiceMethodRetval generateServiceMethodRetval = methodGeneratorService.generateServiceMethod(
+                    trackCoid, generateMapperMethodRetval);
+            flushes.addAll(generateServiceMethodRetval.getFlushes());
 
             // 将Service方法追加到Service
-            LexicalPreservingPrinter.setup(coidsOnTrack.getServiceCu());
-            addMethodService.addMethodToCoid(serviceMethodGeneration.getMethod().clone(),
-                    coidsOnTrack.getService());
-            importExprService.extractQualifiedTypeToImport(coidsOnTrack.getServiceCu());
-            flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getServiceCu()));
+            LexicalPreservingPrinter.setup(trackCoid.getServiceCu());
+            memberAdderService.addMethodToCoid(generateServiceMethodRetval.getMethod().clone(), trackCoid.getService());
+            importExprService.extractQualifiedTypeToImport(trackCoid.getServiceCu());
+            flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getServiceCu()));
 
             // 将Service方法追加到ServiceImpl
-            for (int i = 0; i < coidsOnTrack.getServiceImplCus().size(); i++) {
-                CompilationUnit serviceImplCu = coidsOnTrack.getServiceImplCus().get(i);
-                ClassOrInterfaceDeclaration serviceImpl = coidsOnTrack.getServiceImpls().get(i);
+            for (int i = 0; i < trackCoid.getServiceImplCus().size(); i++) {
+                CompilationUnit serviceImplCu = trackCoid.getServiceImplCus().get(i);
+                ClassOrInterfaceDeclaration serviceImpl = trackCoid.getServiceImpls().get(i);
                 LexicalPreservingPrinter.setup(serviceImplCu);
-                addAutowiredService.ensureAuwired(coidsOnTrack.getMapper(), serviceImpl);
-                addMethodService.addMethodToCoid(serviceMethodGeneration.getMethodImpl().clone(), serviceImpl);
+                memberAdderService.ensureAuwired(trackCoid.getMapper(), serviceImpl);
+                memberAdderService.addMethodToCoid(generateServiceMethodRetval.getMethodImpl().clone(), serviceImpl);
                 importExprService.extractQualifiedTypeToImport(serviceImplCu);
                 flushes.add(FileFlush.buildLexicalPreserving(serviceImplCu));
             }
-            if (coidsOnTrack.getController() != null) {
+            if (trackCoid.getController() != null) {
                 // 生成Controller方法，以及方法签名所需的Javabean
-                ControllerMethodGenerationDto controllerMethodGeneration =
-                        generateMethodService.generateControllerMethod(coidsOnTrack, serviceMethodGeneration,
-                                astForest);
-                flushes.addAll(controllerMethodGeneration.getFlushes());
+                GenerateControllerMethodRetval generateControllerMethodRetval =
+                        methodGeneratorService.generateControllerMethod(
+                        trackCoid, generateServiceMethodRetval, astForest);
+                flushes.addAll(generateControllerMethodRetval.getFlushes());
 
                 // 将Controller方法追加到Controller
-                LexicalPreservingPrinter.setup(coidsOnTrack.getControllerCu());
-                addAutowiredService.ensureAuwired(coidsOnTrack.getService(), coidsOnTrack.getController());
-                addMethodService.addMethodToCoid(controllerMethodGeneration.getMethod().clone(),
-                        coidsOnTrack.getController());
-                importExprService.extractQualifiedTypeToImport(coidsOnTrack.getControllerCu());
-                flushes.add(FileFlush.buildLexicalPreserving(coidsOnTrack.getControllerCu()));
+                LexicalPreservingPrinter.setup(trackCoid.getControllerCu());
+                memberAdderService.ensureAuwired(trackCoid.getService(), trackCoid.getController());
+                memberAdderService.addMethodToCoid(generateControllerMethodRetval.getMethod().clone(),
+                        trackCoid.getController());
+                importExprService.extractQualifiedTypeToImport(trackCoid.getControllerCu());
+                flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getControllerCu()));
             }
         }
 

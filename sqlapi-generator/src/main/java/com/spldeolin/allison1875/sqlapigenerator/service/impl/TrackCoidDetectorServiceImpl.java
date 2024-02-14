@@ -10,14 +10,14 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.sqlapigenerator.SqlapiGeneratorConfig;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.CoidsOnTrackDto;
-import com.spldeolin.allison1875.sqlapigenerator.service.ListCoidsOnTrackService;
+import com.spldeolin.allison1875.sqlapigenerator.javabean.TrackCoidDto;
+import com.spldeolin.allison1875.sqlapigenerator.service.TrackCoidDetectorService;
 
 /**
  * @author Deolin 2024-01-22
  */
 @Singleton
-public class ListCoidsOnTrackServiceImpl implements ListCoidsOnTrackService {
+public class TrackCoidDetectorServiceImpl implements TrackCoidDetectorService {
 
     @Inject
     private AstForestResidenceService astForestResidenceService;
@@ -26,15 +26,15 @@ public class ListCoidsOnTrackServiceImpl implements ListCoidsOnTrackService {
     private SqlapiGeneratorConfig config;
 
     @Override
-    public CoidsOnTrackDto listCoidsOnTrack(AstForest astForest) {
-        CoidsOnTrackDto cot = new CoidsOnTrackDto();
+    public TrackCoidDto detectTrackCoids(AstForest astForest) {
+        TrackCoidDto result = new TrackCoidDto();
 
         for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
             Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
                     .resolve(mapperXmlDirectoryPath);
             FileUtils.iterateFiles(mapperXmlDirectory.toFile(), new String[]{"xml"}, true).forEachRemaining(xmlFile -> {
                 if (config.getMapperName().equals(FilenameUtils.getBaseName(xmlFile.getName()))) {
-                    cot.getMapperXmls().add(xmlFile);
+                    result.getMapperXmls().add(xmlFile);
                 }
             });
         }
@@ -42,29 +42,29 @@ public class ListCoidsOnTrackServiceImpl implements ListCoidsOnTrackService {
             cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
                     .map(TypeDeclaration::asClassOrInterfaceDeclaration).ifPresent(coid -> {
                         if (config.getMapperName().equals(coid.getNameAsString())) {
-                            cot.setMapper(coid);
-                            cot.setMapperCu(cu);
+                            result.setMapper(coid);
+                            result.setMapperCu(cu);
                         }
                         if (config.getServiceName() != null) {
                             if (config.getServiceName().equals(coid.getNameAsString())) {
-                                cot.setService(coid);
-                                cot.setServiceCu(cu);
+                                result.setService(coid);
+                                result.setServiceCu(cu);
                             }
                             if (coid.getImplementedTypes().stream()
                                     .anyMatch(extendedType -> config.getServiceName().equals(extendedType.getNameAsString()))) {
-                                cot.getServiceImpls().add(coid);
-                                cot.getServiceImplCus().add(cu);
+                                result.getServiceImpls().add(coid);
+                                result.getServiceImplCus().add(cu);
                             }
                         }
                         if (config.getControllerName() != null) {
                             if (config.getControllerName().equals(coid.getNameAsString())) {
-                                cot.setController(coid);
-                                cot.setControllerCu(cu);
+                                result.setController(coid);
+                                result.setControllerCu(cu);
                             }
                         }
                     });
         }
-        return cot;
+        return result;
     }
 
 }
