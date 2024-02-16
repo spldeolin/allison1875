@@ -82,7 +82,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must exist and be a directory"));
             }
         }
-        if (flushTo.contains(FlushToEnum.YAPI)) {
+        if (flushTo != null && flushTo.contains(FlushToEnum.YAPI)) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
                         .setReason("must not be null"));
@@ -92,7 +92,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must not be null"));
             }
         }
-        if (flushTo.contains(FlushToEnum.LOCAL_MARKDOWN)) {
+        if (flushTo != null && flushTo.contains(FlushToEnum.LOCAL_MARKDOWN)) {
             if (markdownDirectoryPath == null) {
                 invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
                         .setValue(ValidUtils.formatValue(markdownDirectoryPath)).setReason("must not be null"));
