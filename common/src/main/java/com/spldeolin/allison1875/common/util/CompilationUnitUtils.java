@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.common.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.common.exception.CompilationUnitParseException;
@@ -19,14 +21,13 @@ public class CompilationUnitUtils {
     }
 
     public static CompilationUnit parseJava(File javaFile) throws CompilationUnitParseException {
-        if (!javaFile.exists()) {
-            throw new CompilationUnitParseException(String.format("javaFile [%s] not exists", javaFile));
-        }
         try {
             CompilationUnit cu = StaticJavaParser.parse(javaFile);
             log.debug("SourceCode parsed {}", getCuAbsolutePath(cu));
             return cu;
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            throw new CompilationUnitParseException(String.format("javaFile '%s' not exists", javaFile));
+        } catch (ParseProblemException e) {
             throw new CompilationUnitParseException(String.format("fail to parse [%s]", javaFile), e);
         }
     }

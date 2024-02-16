@@ -88,11 +88,14 @@ public final class AstForest implements Iterable<CompilationUnit> {
             log.warn("impossible path, qualifier={}", primaryTypeQualifier, e);
             return Optional.empty();
         }
+        if (!absPath.toFile().exists()) {
+            return Optional.empty();
+        }
         CompilationUnit cu;
         try {
             cu = CompilationUnitUtils.parseJava(absPath.toFile());
         } catch (CompilationUnitParseException e) {
-            log.warn("fail to find cu, qualifier={}", primaryTypeQualifier, e);
+            log.warn("fail to parse cu, qualifier={}", primaryTypeQualifier, e);
             return Optional.empty();
         }
         if (!astFilterService.accept(cu)) {
