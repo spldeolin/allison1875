@@ -63,40 +63,4 @@ public final class HandlerTransformerConfig extends Allison1875Config {
      */
     @NotNull Boolean enableLotNoAnnounce;
 
-    /**
-     * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
-     *
-     * <pre>
-     * e.g.1:
-     * input:
-     *  com.company.orginization.project.-
-     *
-     * output:
-     *  com.company.orginization.project.javabean.req
-     *  com.company.orginization.project.javabean.resp
-     *  com.company.orginization.project.service
-     *  com.company.orginization.project.serviceimpl
-     *
-     *
-     * e.g.2:
-     * input:
-     *  com.company.orginization.project.-.module.sub
-     *
-     * output:
-     *  com.company.orginization.project.javabean.req.module.sub
-     *  com.company.orginization.project.javabean.resp.module.sub
-     *  com.company.orginization.project.service.module.sub
-     *  com.company.orginization.project.serviceimpl.module.sub
-     *
-     * </pre>
-     */
-    public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
-        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
-            this.reqDtoPackage = packageNameWithWildcard.replace(".-", ".javabean.req");
-            this.respDtoPackage = packageNameWithWildcard.replace(".-", ".javabean.resp");
-            this.servicePackage = packageNameWithWildcard.replace(".-", ".service");
-            this.serviceImplPackage = packageNameWithWildcard.replace(".-", ".serviceimpl");
-        }
-    }
-
 }

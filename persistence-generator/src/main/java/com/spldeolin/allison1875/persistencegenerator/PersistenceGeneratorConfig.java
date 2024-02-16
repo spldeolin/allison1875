@@ -168,37 +168,4 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
 
     @NotNull Boolean disableInsertOrUpdate;
 
-    /**
-     * 使用通配符的方式设置所有包名，通配符是<code>.-</code>
-     *
-     * <pre>
-     * e.g.1:
-     * input:
-     *  com.company.orginization.project.-
-     *
-     * output:
-     *  com.company.orginization.project.mapper
-     *  com.company.orginization.project.entity
-     *  com.company.orginization.project.design
-     *
-     *
-     * e.g.2:
-     * input:
-     *  com.company.orginization.project.-.module.sub
-     *
-     * output:
-     *  com.company.orginization.project.mapper.module.sub
-     *  com.company.orginization.project.entity.module.sub
-     *  com.company.orginization.project.design.module.sub
-     *
-     * </pre>
-     */
-    public void batchSetAllPackagesByWildcard(String packageNameWithWildcard) {
-        if (packageNameWithWildcard != null && packageNameWithWildcard.contains(".-")) {
-            this.mapperPackage = packageNameWithWildcard.replace(".-", ".mapper");
-            this.entityPackage = packageNameWithWildcard.replace(".-", ".entity");
-            this.designPackage = packageNameWithWildcard.replace(".-", ".design");
-        }
-    }
-
 }
