@@ -17,7 +17,7 @@ public class SqlapiGeneratorModule extends Allison1875Module {
     }
 
     @Override
-    public Class<? extends Allison1875MainService> declareMainService() {
+    public final Class<? extends Allison1875MainService> declareMainService() {
         return SqlapiGenerator.class;
     }
 
