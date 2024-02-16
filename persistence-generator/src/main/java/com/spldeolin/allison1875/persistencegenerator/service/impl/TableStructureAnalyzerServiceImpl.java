@@ -113,7 +113,7 @@ public class TableStructureAnalyzerServiceImpl implements TableStructureAnalyzer
         return Lists.newArrayList(persistences.values());
     }
 
-    private List<InformationSchemaDto> queryInformationSchema() {
+    protected List<InformationSchemaDto> queryInformationSchema() {
         try (Connection conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUserName(),
                 config.getPassword())) {
             String sql = Resources.toString(Resources.getResource("information_schema.sql"), StandardCharsets.UTF_8);
