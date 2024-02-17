@@ -11,11 +11,13 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.AddInjectFieldRetval;
+import com.spldeolin.allison1875.common.javabean.GenerateMvcHandlerArgs;
+import com.spldeolin.allison1875.common.javabean.GenerateMvcHandlerRetval;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
+import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMapperMethodRetval;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMvcHandlerRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceImplMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.TrackCoidDto;
@@ -44,6 +46,12 @@ public class SqlapiGenerator implements Allison1875MainService {
 
     @Inject
     private ImportExprService importExprService;
+
+    @Inject
+    private MvcHandlerGeneratorService mvcHandlerGeneratorService;
+
+    @Inject
+    private SqlapiGeneratorConfig config;
 
     @Override
     public void process(AstForest astForest) {
@@ -114,11 +122,16 @@ public class SqlapiGenerator implements Allison1875MainService {
                 AddInjectFieldRetval addInjectServiceFieldRetval = memberAdderService.addInjectField(
                         trackCoid.getService(), trackCoid.getController());
                 // generate MvcHandler
-                GenerateMvcHandlerRetval generateMvcHandlerRetval = methodGeneratorService.generateMvcHandler(trackCoid,
-                        addInjectServiceFieldRetval.getFieldVarName(), generateServiceMethodRetval, astForest);
-                flushes.addAll(generateMvcHandlerRetval.getFlushes());
+                GenerateMvcHandlerArgs args = new GenerateMvcHandlerArgs();
+                args.setMvcHandlerUrl(config.getMethodName());
+                args.setServiceParamType(generateServiceMethodRetval.getMethod().getParameter(0).getTypeAsString());
+                args.setServiceResultType(generateServiceMethodRetval.getMethod().getTypeAsString());
+                args.setInjectedServiceVarName(addInjectServiceFieldRetval.getFieldVarName());
+                args.setServiceMethodName(generateServiceMethodRetval.getMethod().getNameAsString());
+                args.setMvcController(trackCoid.getController());
+                GenerateMvcHandlerRetval generateMvcHandlerRetval = mvcHandlerGeneratorService.generateMvcHandler(args);
                 // add MvcHandler，然后extractImports
-                methodAdderService.addMethodToCoid(generateMvcHandlerRetval.getMethod().clone(),
+                methodAdderService.addMethodToCoid(generateMvcHandlerRetval.getMvcHandler().clone(),
                         trackCoid.getController());
                 importExprService.extractQualifiedTypeToImport(trackCoid.getControllerCu());
                 flushes.add(FileFlush.buildLexicalPreserving(trackCoid.getControllerCu()));

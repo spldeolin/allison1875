@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -22,7 +21,6 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.sqlapigenerator.SqlapiGeneratorConfig;
 import com.spldeolin.allison1875.sqlapigenerator.exception.AnalyzeSqlException;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMapperMethodRetval;
-import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateMvcHandlerRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceImplMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.GenerateServiceMethodRetval;
 import com.spldeolin.allison1875.sqlapigenerator.javabean.TrackCoidDto;
@@ -178,31 +176,6 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
 
         GenerateServiceImplMethodRetval result = new GenerateServiceImplMethodRetval();
         result.setMethodImpl(serviceImplMethod);
-        return result;
-    }
-
-    @Override
-    public GenerateMvcHandlerRetval generateMvcHandler(TrackCoidDto trackCoid, String serviceVarName,
-            GenerateServiceMethodRetval generateServiceMethodRetval, AstForest astForest) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist(config.getMethodName(),
-                trackCoid.getController());
-        MethodDeclaration method = new MethodDeclaration();
-        method.addAnnotation(StaticJavaParser.parseAnnotation(
-                String.format("@org.springframework.web.bind.annotation.PostMapping(\"%s\")", methodName)));
-        method.setPublic(true);
-        method.setType(generateServiceMethodRetval.getMethod().getType());
-        method.setName(methodName);
-        Parameter param = generateServiceMethodRetval.getMethod().getParameter(0).clone();
-        param.addAnnotation(annotationExprService.springRequestbody());
-        param.addAnnotation(annotationExprService.javaxValid());
-        method.addParameter(param);
-        BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(String.format("return %s.%s(cond);", serviceVarName,
-                generateServiceMethodRetval.getMethod().getNameAsString())));
-        method.setBody(body);
-
-        GenerateMvcHandlerRetval result = new GenerateMvcHandlerRetval();
-        result.setMethod(method);
         return result;
     }
 

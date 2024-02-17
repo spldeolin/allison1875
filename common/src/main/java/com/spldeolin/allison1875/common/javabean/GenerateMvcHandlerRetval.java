@@ -1,24 +1,24 @@
-package com.spldeolin.allison1875.sqlapigenerator.javabean;
+package com.spldeolin.allison1875.common.javabean;
 
 import java.util.List;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
- * @author Deolin 2024-01-21
+ * @author Deolin 2024-02-17
  */
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateMvcHandlerRetval {
 
-    final List<FileFlush> flushes = Lists.newArrayList();
+    MethodDeclaration mvcHandler;
 
-    MethodDeclaration method;
+    final List<AnnotationExpr> annotationsAddingToMvcController = Lists.newArrayList();
 
 }
