@@ -15,11 +15,13 @@ public class DescAnalyzerServiceImpl implements DescAnalyzerService {
 
     @Override
     public List<String> ananlyzeMethodDesc(MvcHandlerDto mvcHandler) {
+        // 可拓展为分析Swagger注解等
         return JavadocUtils.getCommentAsLines(mvcHandler.getMethodDec());
     }
 
     @Override
     public List<String> ananlyzeFieldDesc(FieldDeclaration fd) {
+        // 可拓展为分析Swagger注解等
         return JavadocUtils.getCommentAsLines(fd);
     }
 

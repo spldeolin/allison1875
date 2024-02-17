@@ -15,6 +15,7 @@ public class CustomValidAnalyzerServiceImpl implements CustomValidAnalyzerServic
 
     @Override
     public List<ValidatorDto> analyzeCustomValid(AnnotatedElement annotatedElement) {
+        // 可拓展为分析自定义校验注解
         return Lists.newArrayList();
     }
 

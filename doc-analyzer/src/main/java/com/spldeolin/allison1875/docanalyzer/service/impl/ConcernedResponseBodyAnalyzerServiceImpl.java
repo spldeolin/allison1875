@@ -13,6 +13,7 @@ public class ConcernedResponseBodyAnalyzerServiceImpl implements ConcernedRespon
 
     @Override
     public ResolvedType analyzeConcernedResponseBodyType(MethodDeclaration mvcHandlerMd) {
+        // 可拓展为分析出统一返回类型中的data部分类型等
         return mvcHandlerMd.getType().resolve();
     }
 

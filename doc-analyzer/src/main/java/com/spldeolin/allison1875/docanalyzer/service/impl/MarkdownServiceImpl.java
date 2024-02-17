@@ -200,6 +200,7 @@ public class MarkdownServiceImpl implements MarkdownService {
                     }
                 }
             }
+            // TODO 暂不支持显示枚举项、格式
             content.append("|");
             content.append(jpdv.getJsonFormatPattern()).append("|\n");
         });

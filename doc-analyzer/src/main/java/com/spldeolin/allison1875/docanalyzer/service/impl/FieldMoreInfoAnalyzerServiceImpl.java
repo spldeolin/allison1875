@@ -12,11 +12,13 @@ public class FieldMoreInfoAnalyzerServiceImpl implements FieldMoreInfoAnalyzerSe
 
     @Override
     public Object moreAnalyzerField(Field field) {
+        // 可拓展为对field的额外信息进行分析
         return null;
     }
 
     @Override
     public String formatMoreInfo(Object moreInfo) {
+        // 可拓展为对field的额外信息进行格式化
         return null;
     }
 

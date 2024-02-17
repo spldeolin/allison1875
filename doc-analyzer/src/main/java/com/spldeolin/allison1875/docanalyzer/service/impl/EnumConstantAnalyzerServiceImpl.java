@@ -12,12 +12,13 @@ public class EnumConstantAnalyzerServiceImpl implements EnumConstantAnalyzerServ
 
     @Override
     public boolean isSupport(Class<?> enumType) {
+        // 可拓展为自定义分析枚举项
         return false;
     }
 
     @Override
     public AnalyzeEnumConstantRetval analyzeEnumConstant(Object enumConstant) {
-        // what ever
+        // 可拓展为自定义分析枚举项
         return null;
     }
 
