@@ -22,7 +22,7 @@ public final class StarTransformerConfig extends Allison1875Config {
     /**
      * WholeDto类的包名（根据目标工程的情况填写）
      */
-    @NotEmpty String wholeDtoPackge;
+    @NotEmpty String wholeDtoPackage;
 
     /**
      * 是否为WholeDto类实现java.io.Serializable接口

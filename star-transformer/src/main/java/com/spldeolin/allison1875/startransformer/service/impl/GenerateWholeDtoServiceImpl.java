@@ -36,7 +36,7 @@ public class GenerateWholeDtoServiceImpl implements WholeDtoService {
     public JavabeanGeneration generateWholeDto(AstForest astForest, ChainAnalysisDto analysis) {
         JavabeanArg javabeanArg = new JavabeanArg();
         javabeanArg.setAstForest(astForest);
-        javabeanArg.setPackageName(config.getWholeDtoPackge());
+        javabeanArg.setPackageName(config.getWholeDtoPackage());
         javabeanArg.setClassName(analysis.getWholeDtoName());
         if (config.getEnableLotNoAnnounce()) {
             javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
