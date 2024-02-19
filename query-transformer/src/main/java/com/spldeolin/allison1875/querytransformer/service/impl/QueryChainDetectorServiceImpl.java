@@ -29,7 +29,7 @@ public class QueryChainDetectorServiceImpl implements QueryChainDetectorService 
         for (MethodCallExpr mce : node.findAll(MethodCallExpr.class)) {
             if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count") && mce.getParentNode()
                     .isPresent()) {
-                if (this.finalNameExprRecursively(mce, config.getPackageConfig().getDesignPackage())) {
+                if (this.finalNameExprRecursively(mce, config.getCommonConfig().getDesignPackage())) {
                     mces.add(mce);
                 }
             }

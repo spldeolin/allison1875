@@ -113,14 +113,14 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
         Path sourceRoot = args.getAstForest().getAstForestRoot();
         CompilationUnit serviceCu = new CompilationUnit();
-        serviceCu.setPackageDeclaration(config.getPackageConfig().getServicePackage());
+        serviceCu.setPackageDeclaration(config.getCommonConfig().getServicePackage());
         importExprService.copyImports(args.getControllerCu(), serviceCu);
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         String comment = concatServiceDescription(args.getInitDecAnalysisDto());
-        JavadocUtils.setJavadoc(service, comment, config.getAuthor());
+        JavadocUtils.setJavadoc(service, comment, config.getCommonConfig().getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
         Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
-                config.getPackageConfig().getServicePackage(),
+                config.getCommonConfig().getServicePackage(),
                 service.getName() + ".java");
 
         // anti-duplication
@@ -133,10 +133,10 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(config.getPackageConfig().getServiceImplPackage());
+        serviceImplCu.setPackageDeclaration(config.getCommonConfig().getServiceImplPackage());
         importExprService.copyImports(args.getControllerCu(), serviceImplCu);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-        JavadocUtils.setJavadoc(serviceImpl, comment, config.getAuthor());
+        JavadocUtils.setJavadoc(serviceImpl, comment, config.getCommonConfig().getAuthor());
         serviceImpl.addAnnotation(annotationExprService.lombokSlf4J());
         serviceImpl.addAnnotation(annotationExprService.springService());
         String serviceImplName = service.getNameAsString() + "Impl";
@@ -144,7 +144,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
                 service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
         absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
-                config.getPackageConfig().getServiceImplPackage(),
+                config.getCommonConfig().getServiceImplPackage(),
                 serviceImpl.getName() + ".java");
 
         // anti-duplication
@@ -160,7 +160,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         result.setServiceImpl(serviceImpl);
         result.setServiceImplCu(serviceImplCu);
         result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
-        result.setServiceQualifier(config.getPackageConfig().getServicePackage() + "." + serviceName);
+        result.setServiceQualifier(config.getCommonConfig().getServicePackage() + "." + serviceName);
         return result;
     }
 

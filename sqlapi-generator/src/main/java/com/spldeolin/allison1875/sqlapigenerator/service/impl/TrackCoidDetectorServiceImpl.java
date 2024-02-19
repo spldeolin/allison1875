@@ -29,7 +29,7 @@ public class TrackCoidDetectorServiceImpl implements TrackCoidDetectorService {
     public TrackCoidDto detectTrackCoids(AstForest astForest) {
         TrackCoidDto result = new TrackCoidDto();
 
-        for (String mapperXmlDirectoryPath : config.getPackageConfig().getMapperXmlDirectoryPaths()) {
+        for (String mapperXmlDirectoryPath : config.getCommonConfig().getMapperXmlDirectoryPaths()) {
             Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
                     .resolve(mapperXmlDirectoryPath);
             FileUtils.iterateFiles(mapperXmlDirectory.toFile(), new String[]{"xml"}, true).forEachRemaining(xmlFile -> {

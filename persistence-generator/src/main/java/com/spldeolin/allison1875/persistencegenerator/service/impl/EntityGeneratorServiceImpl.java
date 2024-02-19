@@ -38,10 +38,10 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     public JavabeanGeneration generateEntity(TableStructureAnalysisDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
-        arg.setPackageName(config.getPackageConfig().getEntityPackage());
+        arg.setPackageName(config.getCommonConfig().getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
-        arg.setAuthorName(config.getAuthor());
+        arg.setAuthorName(config.getCommonConfig().getAuthor());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             String superEntityQualifier = config.getSuperEntityQualifier();

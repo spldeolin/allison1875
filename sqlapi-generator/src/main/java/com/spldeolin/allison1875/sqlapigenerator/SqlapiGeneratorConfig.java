@@ -5,7 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
-import com.spldeolin.allison1875.common.config.PackageConfig;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.AccessLevel;
@@ -22,14 +22,9 @@ import lombok.experimental.FieldDefaults;
 public class SqlapiGeneratorConfig extends Allison1875Config {
 
     /**
-     * 包配置
+     * 共用配置
      */
-    @NotNull @Valid PackageConfig packageConfig;
-
-    /**
-     * 为生成的代码指定作者
-     */
-    @NotEmpty String author;
+    @NotNull @Valid CommonConfig commonConfig;
 
     /**
      * 方法名

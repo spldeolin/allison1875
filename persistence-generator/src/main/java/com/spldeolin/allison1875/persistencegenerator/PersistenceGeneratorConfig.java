@@ -5,7 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
-import com.spldeolin.allison1875.common.config.PackageConfig;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -21,9 +21,9 @@ import lombok.experimental.FieldDefaults;
 public final class PersistenceGeneratorConfig extends Allison1875Config {
 
     /**
-     * 包配置
+     * 共用配置
      */
-    @NotNull @Valid PackageConfig packageConfig;
+    @NotNull @Valid CommonConfig commonConfig;
 
     /**
      * 数据库连接
@@ -39,11 +39,6 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
      * 数据库密码
      */
     @NotEmpty String password;
-
-    /**
-     * 为生成的代码指定作者
-     */
-    @NotEmpty String author;
 
     /**
      * 指定schema

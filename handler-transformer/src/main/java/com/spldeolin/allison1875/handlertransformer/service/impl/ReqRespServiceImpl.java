@@ -103,7 +103,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setPackageName(packageName);
             arg.setClassName(javabeanName);
             arg.setDescription(concatDtoDescription(initDecAnalysis));
-            arg.setAuthorName(config.getAuthor());
+            arg.setAuthorName(config.getCommonConfig().getAuthor());
             arg.setMore4Javabean((tempCu, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
                     fieldService.more4SpecialTypeField(field, javabeanType);
@@ -147,13 +147,13 @@ public class ReqRespServiceImpl implements ReqRespService {
     private String estimatePackageName(JavabeanTypeEnum javabeanType) {
         String packageName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-            packageName = config.getPackageConfig().getReqDtoPackage();
+            packageName = config.getCommonConfig().getReqDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-            packageName = config.getPackageConfig().getRespDtoPackage();
+            packageName = config.getCommonConfig().getRespDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-            packageName = config.getPackageConfig().getReqDtoPackage();
+            packageName = config.getCommonConfig().getReqDtoPackage();
         } else {
-            packageName = config.getPackageConfig().getRespDtoPackage();
+            packageName = config.getCommonConfig().getRespDtoPackage();
         }
         return packageName;
     }

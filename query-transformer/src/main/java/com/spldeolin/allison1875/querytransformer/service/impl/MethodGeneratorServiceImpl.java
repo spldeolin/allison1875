@@ -64,12 +64,12 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 .contains(p.getPredicate())).count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getPackageConfig().getCondPackage());
+            javabeanArg.setPackageName(config.getCommonConfig().getCondPackage());
             if (config.getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
-            javabeanArg.setAuthorName(config.getAuthor());
+            javabeanArg.setAuthorName(config.getCommonConfig().getAuthor());
             for (PhraseDto phrase : phrases) {
                 if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(phrase.getPredicate())) {
                     continue;
@@ -163,12 +163,12 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             // 指定了2个及以上属性，生成一个Javabean作为返回值类型
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getPackageConfig().getRecordPackage());
+            javabeanArg.setPackageName(config.getCommonConfig().getRecordPackage());
             if (config.getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
-            javabeanArg.setAuthorName(config.getAuthor());
+            javabeanArg.setAuthorName(config.getCommonConfig().getAuthor());
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
                 String varName = propertyName;
