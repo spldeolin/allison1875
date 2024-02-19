@@ -61,7 +61,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
         // find
         List<MethodDeclaration> customMethods = Lists.newArrayList();
-        String mapperQualifier = config.getMapperPackage() + "." + persistence.getMapperName();
+        String mapperQualifier = config.getPackageConfig().getMapperPackage() + "." + persistence.getMapperName();
         Optional<CompilationUnit> opt = astForest.findCu(mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
         if (opt.isPresent()) {
@@ -91,8 +91,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             log.info("Mapper文件不存在，创建它。 [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
-                    config.getMapperPackage(), persistence.getMapperName() + ".java"));
-            cu.setPackageDeclaration(config.getMapperPackage());
+                    config.getPackageConfig().getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(config.getPackageConfig().getMapperPackage());
             mapper = new ClassOrInterfaceDeclaration();
             String comment = concatMapperDescription(persistence);
             Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment, config.getAuthor() + " " + LocalDate.now());

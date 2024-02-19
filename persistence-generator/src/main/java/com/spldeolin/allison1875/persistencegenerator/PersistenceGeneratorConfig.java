@@ -1,20 +1,29 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
+import com.spldeolin.allison1875.common.config.PackageConfig;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-07-11
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class PersistenceGeneratorConfig extends Allison1875Config {
+
+    /**
+     * 包配置
+     */
+    @NotNull @Valid PackageConfig packageConfig;
 
     /**
      * 数据库连接
@@ -47,29 +56,9 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     @NotNull List<String> tables;
 
     /**
-     * mapper.xml所在目录的相对路径（相对于Module Root）
-     */
-    @NotEmpty List<String> mapperXmlDirectoryPaths;
-
-    /**
-     * mapper接口的包名（根据目标工程的情况填写）
-     */
-    @NotEmpty String mapperPackage;
-
-    /**
-     * Entity类的包名（根据目标工程的情况填写）
-     */
-    @NotEmpty String entityPackage;
-
-    /**
      * 是否为[query-transformer]生成Design类
      */
     @NotNull Boolean enableGenerateDesign;
-
-    /**
-     * QueryDesign类的包名（根据目标工程的情况填写）
-     */
-    @NotEmpty String designPackage;
 
     /**
      * mapper.xml的标签中，是否使用别名来引用Entity类

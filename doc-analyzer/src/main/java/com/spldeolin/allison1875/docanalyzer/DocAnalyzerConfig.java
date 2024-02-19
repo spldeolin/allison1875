@@ -11,6 +11,7 @@ import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -19,6 +20,7 @@ import lombok.experimental.FieldDefaults;
  * @author Deolin 2020-02-18
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class DocAnalyzerConfig extends Allison1875Config {
 

@@ -1,36 +1,30 @@
 package com.spldeolin.allison1875.sqlapigenerator;
 
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
+import com.spldeolin.allison1875.common.config.PackageConfig;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2024-01-20
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SqlapiGeneratorConfig extends Allison1875Config {
 
     /**
-     * Mapper方法签名中Condition类的包名
+     * 包配置
      */
-    @NotEmpty String mapperConditionPackage;
-
-    /**
-     * Mapper方法签名中Record类的包名
-     */
-    @NotEmpty String mapperRecordPackage;
-
-    /**
-     * mapper.xml所在目录的相对路径（相对于Module Root）
-     */
-    @NotEmpty List<String> mapperXmlDirectoryPaths;
+    @NotNull @Valid PackageConfig packageConfig;
 
     /**
      * 为生成的代码指定作者

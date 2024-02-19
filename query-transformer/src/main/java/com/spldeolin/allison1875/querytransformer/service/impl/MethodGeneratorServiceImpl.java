@@ -64,7 +64,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 .contains(p.getPredicate())).count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getMapperConditionPackage());
+            javabeanArg.setPackageName(config.getPackageConfig().getCondPackage());
             if (config.getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
@@ -163,7 +163,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             // 指定了2个及以上属性，生成一个Javabean作为返回值类型
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getMapperRecordPackage());
+            javabeanArg.setPackageName(config.getPackageConfig().getRecordPackage());
             if (config.getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }

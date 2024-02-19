@@ -113,13 +113,14 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
         Path sourceRoot = args.getAstForest().getAstForestRoot();
         CompilationUnit serviceCu = new CompilationUnit();
-        serviceCu.setPackageDeclaration(config.getServicePackage());
+        serviceCu.setPackageDeclaration(config.getPackageConfig().getServicePackage());
         importExprService.copyImports(args.getControllerCu(), serviceCu);
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         String comment = concatServiceDescription(args.getInitDecAnalysisDto());
         JavadocUtils.setJavadoc(service, comment, config.getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
-        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, config.getServicePackage(),
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
+                config.getPackageConfig().getServicePackage(),
                 service.getName() + ".java");
 
         // anti-duplication
@@ -132,7 +133,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(config.getServiceImplPackage());
+        serviceImplCu.setPackageDeclaration(config.getPackageConfig().getServiceImplPackage());
         importExprService.copyImports(args.getControllerCu(), serviceImplCu);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         JavadocUtils.setJavadoc(serviceImpl, comment, config.getAuthor());
@@ -142,7 +143,8 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName).addImplementedType(
                 service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, config.getServiceImplPackage(),
+        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
+                config.getPackageConfig().getServiceImplPackage(),
                 serviceImpl.getName() + ".java");
 
         // anti-duplication
@@ -158,7 +160,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         result.setServiceImpl(serviceImpl);
         result.setServiceImplCu(serviceImplCu);
         result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
-        result.setServiceQualifier(config.getServicePackage() + "." + serviceName);
+        result.setServiceQualifier(config.getPackageConfig().getServicePackage() + "." + serviceName);
         return result;
     }
 

@@ -1,28 +1,27 @@
 package com.spldeolin.allison1875.startransformer;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
+import com.spldeolin.allison1875.common.config.PackageConfig;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2023-05-05
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class StarTransformerConfig extends Allison1875Config {
 
     /**
-     * QueryDesign类的包名（根据目标工程的情况填写）
+     * 包配置
      */
-    @NotEmpty String designPackage;
-
-    /**
-     * WholeDto类的包名（根据目标工程的情况填写）
-     */
-    @NotEmpty String wholeDtoPackage;
+    @NotNull @Valid PackageConfig packageConfig;
 
     /**
      * 是否为WholeDto类实现java.io.Serializable接口

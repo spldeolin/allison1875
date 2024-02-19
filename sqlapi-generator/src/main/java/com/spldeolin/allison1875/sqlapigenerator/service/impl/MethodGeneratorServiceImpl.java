@@ -107,7 +107,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             // param
             JavabeanArg arg = new JavabeanArg();
             arg.setAstForest(astForest);
-            arg.setPackageName(config.getMapperConditionPackage());
+            arg.setPackageName(config.getPackageConfig().getCondPackage());
             arg.setClassName(MoreStringUtils.upperFirstLetter(config.getMethodName()) + "Cond");
             arg.setAuthorName(config.getAuthor());
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
@@ -119,7 +119,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             // result
             arg = new JavabeanArg();
             arg.setAstForest(astForest);
-            arg.setPackageName(config.getMapperRecordPackage());
+            arg.setPackageName(config.getPackageConfig().getRecordPackage());
             arg.setClassName(MoreStringUtils.upperFirstLetter(config.getMethodName()) + "Record");
             arg.setAuthorName(config.getAuthor());
             arg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);

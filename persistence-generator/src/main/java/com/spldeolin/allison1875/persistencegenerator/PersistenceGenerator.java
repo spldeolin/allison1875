@@ -166,7 +166,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                             insertOrUpdateMethodName));
 
             // 基础方法替换到MapperXml中
-            for (String mapperXmlDirectoryPath : config.getMapperXmlDirectoryPaths()) {
+            for (String mapperXmlDirectoryPath : config.getPackageConfig().getMapperXmlDirectoryPaths()) {
                 try {
                     Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
                             .resolve(mapperXmlDirectoryPath);

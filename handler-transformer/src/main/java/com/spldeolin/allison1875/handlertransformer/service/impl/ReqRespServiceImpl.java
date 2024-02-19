@@ -147,19 +147,13 @@ public class ReqRespServiceImpl implements ReqRespService {
     private String estimatePackageName(JavabeanTypeEnum javabeanType) {
         String packageName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-            packageName = config.getReqDtoPackage();
+            packageName = config.getPackageConfig().getReqDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-            packageName = config.getRespDtoPackage();
+            packageName = config.getPackageConfig().getRespDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-            packageName = config.getReqNestDtoPackage();
-            if (packageName == null) {
-                packageName = config.getReqDtoPackage() + ".dto";
-            }
+            packageName = config.getPackageConfig().getReqDtoPackage();
         } else {
-            packageName = config.getRespNestDtoPackage();
-            if (packageName == null) {
-                packageName = config.getRespDtoPackage() + ".dto";
-            }
+            packageName = config.getPackageConfig().getRespDtoPackage();
         }
         return packageName;
     }

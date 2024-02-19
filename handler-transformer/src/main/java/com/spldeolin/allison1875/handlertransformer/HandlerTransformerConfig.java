@@ -1,10 +1,13 @@
 package com.spldeolin.allison1875.handlertransformer;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
+import com.spldeolin.allison1875.common.config.PackageConfig;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -13,40 +16,14 @@ import lombok.experimental.FieldDefaults;
  * @author Deolin 2020-08-25
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class HandlerTransformerConfig extends Allison1875Config {
 
     /**
-     * 控制层 @RequestBody类型所在包的包名
+     * 包配置
      */
-    @NotEmpty String reqDtoPackage;
-
-    /**
-     * 控制层 ReqDto中的NestDto所在的包的报名，
-     * null代表包名缺省为 ${reqDtoPackage}.dto
-     */
-    String reqNestDtoPackage;
-
-    /**
-     * 控制层 @ResponseBody业务数据部分类型所在包的包名
-     */
-    @NotEmpty String respDtoPackage;
-
-    /**
-     * 控制层 RespDto中的NestDto所在的包的报名，
-     * null代表包名缺省为 ${respDtoPackage}.dto
-     */
-    String respNestDtoPackage;
-
-    /**
-     * 业务层 Service接口所在包的包名
-     */
-    @NotEmpty String servicePackage;
-
-    /**
-     * 业务 ServiceImpl类所在包的包名
-     */
-    @NotEmpty String serviceImplPackage;
+    @NotNull @Valid PackageConfig packageConfig;
 
     /**
      * 为生成的代码指定作者

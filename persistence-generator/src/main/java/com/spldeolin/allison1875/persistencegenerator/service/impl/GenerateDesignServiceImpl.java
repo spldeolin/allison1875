@@ -58,7 +58,7 @@ public class GenerateDesignServiceImpl implements DesignGeneratorService {
 
         String designName = concatDesignName(tableStructureAnalysis);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(args.getAstForest().getAstForestRoot(),
-                config.getDesignPackage(), designName + ".java");
+                config.getPackageConfig().getDesignPackage(), designName + ".java");
 
         List<PropertyDto> properties = tableStructureAnalysis.getProperties();
         properties.removeIf(property -> config.getHiddenColumns().contains(property.getPropertyName()));
@@ -66,7 +66,7 @@ public class GenerateDesignServiceImpl implements DesignGeneratorService {
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
-        cu.setPackageDeclaration(config.getDesignPackage());
+        cu.setPackageDeclaration(config.getPackageConfig().getDesignPackage());
         for (PropertyDto property : properties) {
             propertiesByName.put(property.getPropertyName(), property);
         }
@@ -247,7 +247,7 @@ public class GenerateDesignServiceImpl implements DesignGeneratorService {
         meta.setMapperQualifier(args.getMapper().getFullyQualifiedName()
                 .orElseThrow(() -> new QualifierAbsentException(args.getMapper())));
         meta.setMapperName(args.getMapper().getNameAsString());
-        meta.setMapperRelativePaths(config.getMapperXmlDirectoryPaths().stream()
+        meta.setMapperRelativePaths(config.getPackageConfig().getMapperXmlDirectoryPaths().stream()
                 .map(one -> one + File.separator + tableStructureAnalysis.getMapperName() + ".xml")
                 .collect(Collectors.toList()));
         if (tableStructureAnalysis.getIsDeleteFlagExist()) {

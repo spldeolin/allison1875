@@ -38,7 +38,7 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     public JavabeanGeneration generateEntity(TableStructureAnalysisDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
-        arg.setPackageName(config.getEntityPackage());
+        arg.setPackageName(config.getPackageConfig().getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthorName(config.getAuthor());
