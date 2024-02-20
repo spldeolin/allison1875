@@ -162,7 +162,7 @@ public class ReqRespServiceImpl implements ReqRespService {
         boolean isCollectionOrPage =
                 dto.getAnnotationByName("L").isPresent() || dto.getAnnotationByName("P").isPresent();
         String typeName = dto.getNameAsString();
-        String fieldName = MoreStringUtils.lowerFirstLetter(typeName);
+        String fieldName = MoreStringUtils.toLowerCamel(typeName);
         fieldName = StringUtils.removeEndIgnoreCase(fieldName, "dto");
         if (isCollectionOrPage) {
             fieldName = English.plural(fieldName);

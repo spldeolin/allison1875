@@ -90,7 +90,7 @@ public class GenerateWholeDtoServiceImpl implements WholeDtoService {
     }
 
     private String entityNameToVarName(String entityName) {
-        return MoreStringUtils.lowerFirstLetter(StringUtils.removeEnd(entityName, "Entity"));
+        return MoreStringUtils.toLowerCamel(StringUtils.removeEnd(entityName, "Entity"));
     }
 
 }

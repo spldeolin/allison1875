@@ -165,8 +165,8 @@ public class QueryTransformer implements Allison1875MainService {
 
                     // append autowired mapper
                     AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(
-                            designMeta.getMapperQualifier(),
-                            MoreStringUtils.lowerFirstLetter(designMeta.getMapperName()), directCoid);
+                            designMeta.getMapperQualifier(), MoreStringUtils.toLowerCamel(designMeta.getMapperName()),
+                            directCoid);
 
                     // transform Query Design
                     ReplaceDesignArgs args = new ReplaceDesignArgs();

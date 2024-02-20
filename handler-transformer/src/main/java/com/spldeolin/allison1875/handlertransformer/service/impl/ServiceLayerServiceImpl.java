@@ -159,7 +159,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         result.setServiceCu(serviceCu);
         result.setServiceImpl(serviceImpl);
         result.setServiceImplCu(serviceImplCu);
-        result.setServiceVarName(MoreStringUtils.lowerFirstLetter(service.getNameAsString()));
+        result.setServiceVarName(MoreStringUtils.toLowerCamel(service.getNameAsString()));
         result.setServiceQualifier(config.getCommonConfig().getServicePackage() + "." + serviceName);
         return result;
     }

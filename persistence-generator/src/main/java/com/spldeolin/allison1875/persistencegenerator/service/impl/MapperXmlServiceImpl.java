@@ -348,7 +348,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + onlyPk.getColumnName() + String.format(
                     "` IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
-                    English.plural(MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName()))));
+                    English.plural(MoreStringUtils.toLowerCamel(onlyPk.getPropertyName()))));
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             xmlLines.add("</select>");
             xmlLines.add("");

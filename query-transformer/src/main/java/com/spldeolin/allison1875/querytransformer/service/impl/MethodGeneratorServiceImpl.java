@@ -92,7 +92,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             condFlush = condGeneration.getFileFlush();
             Parameter param = new Parameter();
             param.setType(condGeneration.getJavabeanQualifier());
-            param.setName(MoreStringUtils.lowerFirstLetter(condGeneration.getJavabeanName()));
+            param.setName(MoreStringUtils.toLowerCamel(condGeneration.getJavabeanName()));
             params.add(param);
             isJavabean = true;
         } else if (CollectionUtils.isNotEmpty(phrases)) {

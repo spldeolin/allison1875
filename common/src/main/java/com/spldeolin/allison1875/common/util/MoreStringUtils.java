@@ -46,10 +46,6 @@ public class MoreStringUtils {
         return Character.isLowerCase(s.charAt(0));
     }
 
-    public static String lowerFirstLetter(String s) {
-        return s.substring(0, 1).toLowerCase() + s.substring(1);
-    }
-
     /**
      * 任何分隔形式转化为UpperCamel形式
      */

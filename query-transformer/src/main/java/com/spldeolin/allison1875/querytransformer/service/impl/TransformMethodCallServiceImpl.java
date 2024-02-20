@@ -37,7 +37,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         String result = mapperVarName + "." + chainAnalysis.getMethodName() + "(";
         if (paramGeneration.getIsCond()) {
             String condQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
-            result += MoreStringUtils.lowerFirstLetter(MoreStringUtils.splitAndGetLastPart(condQualifier, "."));
+            result += MoreStringUtils.toLowerCamel(MoreStringUtils.splitAndGetLastPart(condQualifier, "."));
         } else {
             Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
             phrases.addAll(chainAnalysis.getByPhrases());
@@ -55,7 +55,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
     public List<Statement> argumentBuildStmts(ChainAnalysisDto chainAnalysis, GenerateParamRetval paramGeneration) {
         log.info("build Javabean setter call");
         String javabeanTypeQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
-        String javabeanVarName = MoreStringUtils.lowerFirstLetter(
+        String javabeanVarName = MoreStringUtils.toLowerCamel(
                 MoreStringUtils.splitAndGetLastPart(javabeanTypeQualifier, "."));
         List<Statement> result = Lists.newArrayList();
         result.add(StaticJavaParser.parseStatement(

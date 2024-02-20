@@ -83,7 +83,7 @@ public class MemberAdderServiceImpl implements MemberAdderService {
     @Override
     public AddInjectFieldRetval addInjectField(ClassOrInterfaceDeclaration toBeAdd, ClassOrInterfaceDeclaration coid) {
         String typeQualifier = toBeAdd.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(toBeAdd));
-        String varName = MoreStringUtils.lowerFirstLetter(toBeAdd.getNameAsString());
+        String varName = MoreStringUtils.toLowerCamel(toBeAdd.getNameAsString());
         return this.addInjectField(typeQualifier, varName, coid);
     }
 

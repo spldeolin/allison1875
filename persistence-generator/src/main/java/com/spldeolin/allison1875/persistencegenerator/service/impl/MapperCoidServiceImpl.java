@@ -203,7 +203,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
                 "deleteBy" + MoreStringUtils.upperFirstLetter(args.getKey().getPropertyName()), args.getMapper());
         MethodDeclaration method = new MethodDeclaration();
-        String varName = MoreStringUtils.lowerFirstLetter(args.getKey().getPropertyName());
+        String varName = MoreStringUtils.toLowerCamel(args.getKey().getPropertyName());
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),
                 "根据「" + args.getKey().getDescription() + "」删除");
         method.setJavadocComment(comment);
@@ -306,12 +306,12 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
             if (args.getTableStructureAnalysisDto().getIdProperties().size() == 1) {
                 PropertyDto onlyPk = Iterables.getOnlyElement(args.getTableStructureAnalysisDto().getIdProperties());
-                String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
+                String varName = MoreStringUtils.toLowerCamel(onlyPk.getPropertyName());
                 Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
                 queryById.addParameter(parameter);
             } else {
                 for (PropertyDto pk : args.getTableStructureAnalysisDto().getIdProperties()) {
-                    String varName = MoreStringUtils.lowerFirstLetter(pk.getPropertyName());
+                    String varName = MoreStringUtils.toLowerCamel(pk.getPropertyName());
                     Parameter parameter = parseParameter(
                             "@org.apache.ibatis.annotations.Param(\"" + varName + "\")" + pk.getJavaType()
                                     .getSimpleName() + " " + varName);
@@ -338,7 +338,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),
                     "根据多个ID查询，并以ID作为key映射到Map");
             PropertyDto onlyPk = Iterables.getOnlyElement(args.getTableStructureAnalysisDto().getIdProperties());
-            String varName = MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName());
+            String varName = MoreStringUtils.toLowerCamel(onlyPk.getPropertyName());
             String pkTypeName = onlyPk.getJavaType().getSimpleName();
             queryByIdsEachId.addAnnotation(
                     parseAnnotation("@org.apache.ibatis.annotations.MapKey(\"" + varName + "\")"));
@@ -369,7 +369,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             PropertyDto onlyPk = Iterables.getOnlyElement(args.getTableStructureAnalysisDto().getIdProperties());
             queryByIds.setType(parseType("java.util.List<" + args.getEntityGeneration().getJavabeanQualifier() + ">"));
             queryByIds.setName(methodName);
-            String varsName = English.plural(MoreStringUtils.lowerFirstLetter(onlyPk.getPropertyName()));
+            String varsName = English.plural(MoreStringUtils.toLowerCamel(onlyPk.getPropertyName()));
             Parameter parameter = parseParameter(
                     "@org.apache.ibatis.annotations.Param(\"" + varsName + "\") java.util.List<" + onlyPk.getJavaType()
                             .getSimpleName() + "> " + varsName);
@@ -396,7 +396,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         method.setType(parseType(
                 "java.util.List<" + generateMethodToMapper.getEntityGeneration().getJavabeanQualifier() + ">"));
         method.setName(methodName);
-        String varName = MoreStringUtils.lowerFirstLetter(generateMethodToMapper.getKey().getPropertyName());
+        String varName = MoreStringUtils.toLowerCamel(generateMethodToMapper.getKey().getPropertyName());
         Parameter parameter = parseParameter(
                 generateMethodToMapper.getKey().getJavaType().getSimpleName() + " " + varName);
         method.addParameter(parameter);
@@ -421,7 +421,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         method.setType(parseType("java.util.List<" + args.getEntityGeneration().getJavabeanQualifier() + ">"));
         method.setName(methodName);
         String typeName = "java.util.List<" + args.getKey().getJavaType().getSimpleName() + ">";
-        String varsName = English.plural(MoreStringUtils.lowerFirstLetter(args.getKey().getPropertyName()));
+        String varsName = English.plural(MoreStringUtils.toLowerCamel(args.getKey().getPropertyName()));
         String paramAnno = "@org.apache.ibatis.annotations.Param(\"" + varsName + "\")";
         Parameter parameter = parseParameter(paramAnno + " " + typeName + " " + varsName);
         method.addParameter(parameter);
