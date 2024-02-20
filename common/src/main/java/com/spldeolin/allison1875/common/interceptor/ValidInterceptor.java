@@ -22,6 +22,9 @@ public class ValidInterceptor extends Allison1875Interceptor {
 
         for (int i = 0; i < methodInvocation.getArguments().length; i++) {
             Object args = methodInvocation.getArguments()[i];
+            if (args == null) {
+                continue;
+            }
             List<InvalidDto> valid = ValidUtils.valid(args);
             if (CollectionUtils.isNotEmpty(valid)) {
                 log.error("invalid arguments, method={}, index={}, invalids={}, args={}", method.getName(), i, valid,
