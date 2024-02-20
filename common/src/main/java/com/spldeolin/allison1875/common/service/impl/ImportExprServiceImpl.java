@@ -41,7 +41,7 @@ public class ImportExprServiceImpl implements ImportExprService {
                 if (!scope.toString().toLowerCase().equals(scope.toString())) {
                     return;
                 }
-                log.info("Qualified Type '{}' in '{}' extract to Import", coit,
+                log.debug("Qualified Type '{}' in '{}' extract to Import", coit,
                         CompilationUnitUtils.getCuAbsolutePath(cu));
                 coit.setScope(null);
                 cu.addImport(scope + "." + coit.getNameAsString());
