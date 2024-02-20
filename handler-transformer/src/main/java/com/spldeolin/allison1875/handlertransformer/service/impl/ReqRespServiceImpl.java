@@ -70,8 +70,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 if (!StringUtils.equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req", "Resp")) {
                     throw new IllegalArgumentException(
                             "构造代码块下类的命名只能是「Req」或者「Resp」。[" + initDecAnalysis + "] 当前："
-                                    + initBody.findAll(
-                                            LocalClassDeclarationStmt.class).stream()
+                                    + initBody.findAll(LocalClassDeclarationStmt.class).stream()
                                     .map(one -> one.getClassDeclaration().getNameAsString())
                                     .collect(Collectors.joining("、")));
                 }
@@ -220,8 +219,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             return "java.util.List<" + javabeanQualifier + ">";
         }
         if (dto.getAnnotationByName("P").isPresent()) {
-            return String.format("%s<%s>", MoreStringUtils.splitAndGetLastPart(config.getPageTypeQualifier(), "."),
-                    javabeanQualifier);
+            return String.format("%s<%s>", config.getPageTypeQualifier(), javabeanQualifier);
         }
         return javabeanQualifier;
     }
