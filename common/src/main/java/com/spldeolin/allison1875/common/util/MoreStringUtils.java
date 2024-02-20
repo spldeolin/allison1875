@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.common.util;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 
@@ -51,24 +50,45 @@ public class MoreStringUtils {
         return s.substring(0, 1).toLowerCase() + s.substring(1);
     }
 
-    public static String underscoreToUpperCamel(String string) {
-        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, string);
+    /**
+     * 任何分隔形式转化为UpperCamel形式
+     */
+    public static String toUpperCamel(String string) {
+        String lowerCamel = toLowerCamel(string);
+        String upperCamel = lowerCamel.substring(0, 1).toUpperCase() + lowerCamel.substring(1);
+        return upperCamel;
     }
 
-    public static String underscoreToLowerCamel(String string) {
-        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, string);
-    }
-
-    public static String slashToLowerCamel(String string) {
-        StringBuilder sb = new StringBuilder(64);
-        for (String part : string.split("/")) {
-            sb.append(StringUtils.capitalize(part));
+    /**
+     * 任何分隔形式转化为lowerCamel形式
+     *
+     * @param string 参数字符串中只支持含有数字+字母字符
+     */
+    public static String toLowerCamel(String string) {
+        if (string == null || string.trim().isEmpty()) {
+            return string;
         }
-        return lowerFirstLetter(sb.toString());
-    }
-
-    public static boolean endsWithIgnoreCase(String string, String suffix) {
-        return string.toUpperCase().endsWith(suffix.toUpperCase());
+        StringBuilder sb = new StringBuilder(64);
+        boolean firstNotEmptyPart = true;
+        for (String part : string.split("[^a-zA-Z0-9]+")) {
+            if ("".equals(part)) {
+                // e.g.: /user/create
+                continue;
+            }
+            if (part.toUpperCase().equals(part)) {
+                // e.g.: AAAA_BBB
+                part = part.toLowerCase();
+            }
+            if (firstNotEmptyPart) {
+                // e.g.: AaaaBbb
+                part = part.substring(0, 1).toLowerCase() + part.substring(1);
+                firstNotEmptyPart = false;
+            } else {
+                part = part.substring(0, 1).toUpperCase() + part.substring(1);
+            }
+            sb.append(part);
+        }
+        return sb.toString();
     }
 
     public static String compressConsecutiveSpaces(String text) {

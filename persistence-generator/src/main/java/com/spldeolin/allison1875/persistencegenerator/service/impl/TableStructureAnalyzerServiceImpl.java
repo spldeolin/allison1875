@@ -57,7 +57,7 @@ public class TableStructureAnalyzerServiceImpl implements TableStructureAnalyzer
         Map<String, TableStructureAnalysisDto> persistences = Maps.newHashMap();
         for (InformationSchemaDto infoSchema : infoSchemas) {
             TableStructureAnalysisDto dto = new TableStructureAnalysisDto();
-            String domainName = MoreStringUtils.underscoreToUpperCamel(infoSchema.getTableName());
+            String domainName = MoreStringUtils.toUpperCamel(infoSchema.getTableName());
             dto.setTableName(infoSchema.getTableName());
             dto.setEntityName(domainName + endWith());
             dto.setMapperName(domainName + "Mapper");
@@ -76,7 +76,7 @@ public class TableStructureAnalyzerServiceImpl implements TableStructureAnalyzer
             }
             PropertyDto property = new PropertyDto();
             property.setColumnName(columnName);
-            property.setPropertyName(MoreStringUtils.underscoreToLowerCamel(columnName));
+            property.setPropertyName(MoreStringUtils.toLowerCamel(columnName));
             JavaTypeNamingDto javaType = jdbcTypeService.jdbcType2javaType(infoSchema, astForest,
                     tableStructureAnalysis);
             if (javaType == null) {

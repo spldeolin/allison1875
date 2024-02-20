@@ -205,7 +205,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             javaBeanName = MoreStringUtils.upperFirstLetter(initDecAnalysis.getMvcHandlerMethodName()) + "RespDto";
         } else {
             String originName = dto.getNameAsString();
-            if (!MoreStringUtils.endsWithIgnoreCase(originName, "dto")) {
+            if (!StringUtils.endsWithIgnoreCase(originName, "dto")) {
                 javaBeanName = MoreStringUtils.upperFirstLetter(originName) + "Dto";
             } else {
                 javaBeanName = originName;

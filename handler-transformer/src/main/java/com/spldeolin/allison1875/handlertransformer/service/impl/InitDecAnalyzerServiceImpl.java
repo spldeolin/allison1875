@@ -65,7 +65,7 @@ public class InitDecAnalyzerServiceImpl implements InitDecAnalyzerService {
         if (StringUtils.isBlank(result.getMvcHandlerDescription())) {
             result.setMvcHandlerDescription("未指定描述");
         }
-        result.setMvcHandlerMethodName(MoreStringUtils.slashToLowerCamel(result.getMvcHandlerUrl()));
+        result.setMvcHandlerMethodName(MoreStringUtils.toLowerCamel(result.getMvcHandlerUrl()));
         result.setMvcControllerCu(mvcControllerCu);
         result.setMvcController(mvcController);
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));

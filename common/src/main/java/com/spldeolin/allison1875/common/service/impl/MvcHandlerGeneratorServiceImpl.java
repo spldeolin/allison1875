@@ -51,7 +51,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
             mvcHandler.setType(new VoidType());
         }
 
-        String methodName = MoreStringUtils.slashToLowerCamel(args.getMvcHandlerUrl());
+        String methodName = MoreStringUtils.toLowerCamel(args.getMvcHandlerUrl());
         if (args.getMvcController() != null) {
             methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, args.getMvcController());
         }

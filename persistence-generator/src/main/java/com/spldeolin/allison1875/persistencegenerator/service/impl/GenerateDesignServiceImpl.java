@@ -268,7 +268,7 @@ public class GenerateDesignServiceImpl implements DesignGeneratorService {
     }
 
     private String concatDesignName(TableStructureAnalysisDto persistence) {
-        return MoreStringUtils.underscoreToUpperCamel(persistence.getTableName()) + "Design";
+        return MoreStringUtils.toUpperCamel(persistence.getTableName()) + "Design";
     }
 
 }
