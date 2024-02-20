@@ -201,7 +201,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             return null;
         }
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
-                "deleteBy" + MoreStringUtils.upperFirstLetter(args.getKey().getPropertyName()), args.getMapper());
+                "deleteBy" + MoreStringUtils.toUpperCamel(args.getKey().getPropertyName()), args.getMapper());
         MethodDeclaration method = new MethodDeclaration();
         String varName = MoreStringUtils.toLowerCamel(args.getKey().getPropertyName());
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),
@@ -388,7 +388,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         }
 
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
-                "queryBy" + MoreStringUtils.upperFirstLetter(generateMethodToMapper.getKey().getPropertyName()),
+                "queryBy" + MoreStringUtils.toUpperCamel(generateMethodToMapper.getKey().getPropertyName()),
                 generateMethodToMapper.getMapper());
         MethodDeclaration method = new MethodDeclaration();
         String comment = concatMapperMethodComment(generateMethodToMapper.getTableStructureAnalysisDto(),
@@ -413,7 +413,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         }
 
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
-                "queryBy" + English.plural(MoreStringUtils.upperFirstLetter(args.getKey().getPropertyName())),
+                "queryBy" + English.plural(MoreStringUtils.toUpperCamel(args.getKey().getPropertyName())),
                 args.getMapper());
         MethodDeclaration method = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),

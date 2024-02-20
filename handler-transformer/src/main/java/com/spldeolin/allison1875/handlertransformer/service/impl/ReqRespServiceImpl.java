@@ -200,13 +200,13 @@ public class ReqRespServiceImpl implements ReqRespService {
             JavabeanTypeEnum javabeanType) {
         String javaBeanName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-            javaBeanName = MoreStringUtils.upperFirstLetter(initDecAnalysis.getMvcHandlerMethodName()) + "ReqDto";
+            javaBeanName = MoreStringUtils.toUpperCamel(initDecAnalysis.getMvcHandlerMethodName()) + "ReqDto";
         } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-            javaBeanName = MoreStringUtils.upperFirstLetter(initDecAnalysis.getMvcHandlerMethodName()) + "RespDto";
+            javaBeanName = MoreStringUtils.toUpperCamel(initDecAnalysis.getMvcHandlerMethodName()) + "RespDto";
         } else {
             String originName = dto.getNameAsString();
             if (!StringUtils.endsWithIgnoreCase(originName, "dto")) {
-                javaBeanName = MoreStringUtils.upperFirstLetter(originName) + "Dto";
+                javaBeanName = MoreStringUtils.toUpperCamel(originName) + "Dto";
             } else {
                 javaBeanName = originName;
             }

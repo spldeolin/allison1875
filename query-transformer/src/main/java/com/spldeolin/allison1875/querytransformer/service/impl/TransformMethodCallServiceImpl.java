@@ -62,7 +62,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                 "final " + javabeanTypeQualifier + " " + javabeanVarName + " = new " + javabeanTypeQualifier + "();"));
         for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
             result.add(StaticJavaParser.parseStatement(
-                    javabeanVarName + ".set" + MoreStringUtils.upperFirstLetter(updatePhrase.getVarName()) + "("
+                    javabeanVarName + ".set" + MoreStringUtils.toUpperCamel(updatePhrase.getVarName()) + "("
                             + updatePhrase.getObjectExpr() + ");"));
         }
         for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
@@ -70,7 +70,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                 continue;
             }
             result.add(StaticJavaParser.parseStatement(
-                    javabeanVarName + ".set" + MoreStringUtils.upperFirstLetter(byPhrase.getVarName()) + "("
+                    javabeanVarName + ".set" + MoreStringUtils.toUpperCamel(byPhrase.getVarName()) + "("
                             + byPhrase.getObjectExpr() + ");"));
         }
         return result;
@@ -100,7 +100,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             }
             statements.add(StaticJavaParser.parseStatement(
                     chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
-                            + ".put(one.get" + MoreStringUtils.upperFirstLetter(propertyName) + "(), one));"));
+                            + ".put(one.get" + MoreStringUtils.toUpperCamel(propertyName) + "(), one));"));
             return statements;
         }
 
@@ -124,7 +124,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             }
             statements.add(StaticJavaParser.parseStatement(
                     chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
-                            + ".put(one.get" + MoreStringUtils.upperFirstLetter(propertyName) + "(), one));"));
+                            + ".put(one.get" + MoreStringUtils.toUpperCamel(propertyName) + "(), one));"));
             return statements;
         }
 

@@ -109,7 +109,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     @Override
     public GenerateServiceAndImplRetval generateServiceAndImpl(GenerateServiceAndImplArgs args) {
         String serviceName =
-                MoreStringUtils.upperFirstLetter(args.getInitDecAnalysisDto().getMvcHandlerMethodName()) + "Service";
+                MoreStringUtils.toUpperCamel(args.getInitDecAnalysisDto().getMvcHandlerMethodName()) + "Service";
 
         Path sourceRoot = args.getAstForest().getAstForestRoot();
         CompilationUnit serviceCu = new CompilationUnit();

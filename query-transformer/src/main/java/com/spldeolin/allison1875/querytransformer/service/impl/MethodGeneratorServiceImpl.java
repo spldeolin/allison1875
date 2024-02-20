@@ -68,7 +68,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             if (config.getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
-            javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Cond");
+            javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Cond");
             javabeanArg.setAuthorName(config.getCommonConfig().getAuthor());
             for (PhraseDto phrase : phrases) {
                 if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(phrase.getPredicate())) {
@@ -167,7 +167,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             if (config.getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
-            javabeanArg.setClassName(MoreStringUtils.upperFirstLetter(chainAnalysis.getMethodName()) + "Record");
+            javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Record");
             javabeanArg.setAuthorName(config.getCommonConfig().getAuthor());
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();

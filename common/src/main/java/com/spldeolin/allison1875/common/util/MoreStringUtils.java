@@ -38,10 +38,6 @@ public class MoreStringUtils {
         return Character.isUpperCase(s.charAt(0));
     }
 
-    public static String upperFirstLetter(String s) {
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
     public static boolean isFirstLetterLowerCase(String s) {
         return Character.isLowerCase(s.charAt(0));
     }
