@@ -38,7 +38,6 @@ public class JsonPropertyDescriptionValueDto {
 
     Boolean isFieldCrossingValids = false;
 
-    Boolean docIgnore = false;
 
     String referencePath;
 

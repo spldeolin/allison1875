@@ -20,6 +20,7 @@ import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.MvcControllerDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.MvcHandlerDto;
+import com.spldeolin.allison1875.docanalyzer.service.FieldService;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownService;
 import com.spldeolin.allison1875.docanalyzer.service.MvcHandlerAnalyzerService;
@@ -55,6 +56,9 @@ public class DocAnalyzer implements Allison1875MainService {
     private MarkdownService markdownService;
 
     @Inject
+    private FieldService fieldService;
+
+    @Inject
     private JsgBuilderService jsgBuilderService;
 
     @Inject
@@ -69,7 +73,7 @@ public class DocAnalyzer implements Allison1875MainService {
     @Override
     public void process(AstForest astForest) {
         // 分析所有相关Java文件分析出jpdvs，然后构建2个jsg对象，jsg对象为后续req与resp生成JsonSchema所需
-        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = jsgBuilderService.analyzeAstForestAsJpdvs(
+        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = fieldService.analyzeFieldVars(
                 astForest.cloneWithResetting());
         JsonSchemaGenerator jsg4req = jsgBuilderService.buildJsgByJpdvs(jpdvs, true);
         JsonSchemaGenerator jsg4resp = jsgBuilderService.buildJsgByJpdvs(jpdvs, false);

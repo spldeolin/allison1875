@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -10,9 +9,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import javax.annotation.Nullable;
 import javax.validation.constraints.AssertTrue;
-import org.apache.commons.io.FileUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -24,21 +22,11 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
@@ -94,17 +82,6 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
 
             @Override
             public boolean hasIgnoreMarker(AnnotatedMember m) {
-                String className = m.getDeclaringClass().getName().replace('$', '.');
-                String fieldNameMight = m.getName();
-                JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
-
-                // 当开发者指定了doc-ignore时，算作ignore
-                if (jpdv != null) {
-                    if (jpdv.getDocIgnore()) {
-                        return true;
-                    }
-                }
-
                 // 当开发者指定了Access.READ_ONLY时，如果是reqDto，则算作ignore
                 Access propertyAccess = super.findPropertyAccess(m);
                 if (forReqOrResp && propertyAccess == Access.READ_ONLY) {
@@ -116,7 +93,14 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                     return true;
                 }
 
-                // 没有特殊情况，仍需要考虑是否有@JsonIgnore注解
+                // 拓展分析
+                String className = m.getDeclaringClass().getName().replace('$', '.');
+                String fieldNameMight = m.getName();
+                JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
+                if (isIgnored(m, jpdv, forReqOrResp)) {
+                    return true;
+                }
+
                 return super.hasIgnoreMarker(m);
             }
 
@@ -237,57 +221,8 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
         return jsg;
     }
 
-    @Override
-    public Table<String, String, JsonPropertyDescriptionValueDto> analyzeAstForestAsJpdvs(AstForest astForest) {
-        // jpdvs的解析范围是astForest所在的maven project + dependent projects
-        Set<File> analyzeJavaFiles = Sets.newLinkedHashSet();
-        // maven project
-        FileUtils.iterateFiles(MavenUtils.findMavenProject(astForest.getPrimaryClass()), BaseConstant.JAVA_EXTENSIONS,
-                true).forEachRemaining(analyzeJavaFiles::add);
-        // dependent projects
-        for (File dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
-            FileUtils.iterateFiles(dependencyProjectDirectory, BaseConstant.JAVA_EXTENSIONS, true)
-                    .forEachRemaining(analyzeJavaFiles::add);
-        }
-
-        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = HashBasedTable.create();
-        for (File javaFile : analyzeJavaFiles) {
-            for (TypeDeclaration<?> td : CompilationUnitUtils.parseJava(javaFile).findAll(TypeDeclaration.class)) {
-                td.ifClassOrInterfaceDeclaration(coid -> collectPropertyDescriptions(coid, jpdvs));
-            }
-        }
-        return jpdvs;
-    }
-
-    private void collectPropertyDescriptions(ClassOrInterfaceDeclaration coid,
-            Table<String, String, JsonPropertyDescriptionValueDto> table) {
-        /*
-        这里不存在coid不应算作非法，而应忽略。
-        因为coid可能是一个声明在class内部的class（比如handler-transformer转化前的block）
-        这样的coid是符合Java语法的，会被扫描到的，但确实是没有qualifier的
-         */
-        coid.getFullyQualifiedName().ifPresent(qualifier -> {
-            String javabeanQualifier = qualifier;
-            for (FieldDeclaration field : coid.getFields()) {
-                List<String> javadocDescLines = descAnalyzerService.ananlyzeFieldDesc(field);
-                for (VariableDeclarator var : field.getVariables()) {
-                    JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
-                    String varName = var.getNameAsString();
-                    jpdv.setDescriptionLines(javadocDescLines);
-                    jpdv.setDocIgnore(findIgnoreFlag(javadocDescLines));
-                    table.put(javabeanQualifier, varName, jpdv);
-                }
-            }
-        });
-
-    }
-
-    private boolean findIgnoreFlag(List<String> javadocDescLines) {
-        for (String line : javadocDescLines) {
-            if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(line, "doc-ignore")) {
-                return true;
-            }
-        }
+    protected boolean isIgnored(AnnotatedMember m, @Nullable JsonPropertyDescriptionValueDto jpdv,
+            boolean forReqOrResp) {
         return false;
     }
 
