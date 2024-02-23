@@ -1,21 +1,22 @@
 package com.spldeolin.allison1875.docanalyzer.javabean;
 
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2020-04-27
  */
-@JsonInclude(Include.NON_NULL)
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Slf4j
 public class JsonPropertyDescriptionValueDto {
 
     public static final JsonPropertyDescriptionValueDto EMPTY =
@@ -47,5 +48,22 @@ public class JsonPropertyDescriptionValueDto {
      * 拓展信息
      */
     Object moreInfo;
+
+    public String serialize() {
+        return JsonUtils.toJson(this);
+    }
+
+    public static JsonPropertyDescriptionValueDto deserialize(String json) {
+        if (json == null) {
+            return null;
+        }
+        try {
+            return JsonUtils.toObject(json, JsonPropertyDescriptionValueDto.class);
+        } catch (Exception e) {
+            log.info("jpdv has been pretty [{}]", StringEscapeUtils.escapeJava(json));
+            return null;
+        }
+
+    }
 
 }

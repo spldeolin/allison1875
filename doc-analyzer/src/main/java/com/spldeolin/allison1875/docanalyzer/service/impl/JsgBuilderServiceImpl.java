@@ -137,7 +137,7 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                         jpdv.setIsFieldCrossingValids(true);
                         jpdv.setValids(valids);
                     }
-                    return JsonUtils.toJson(jpdv);
+                    return jpdv.serialize();
                 }
 
                 Class<?> clazz = field.getDeclaringClass();
@@ -183,7 +183,7 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
 
                 jpdv.setMoreInfo(fieldMoreInfoAnalyzerService.moreAnalyzerField(field));
 
-                return JsonUtils.toJson(jpdv);
+                return jpdv.serialize();
             }
 
             private Field findFieldEvenIfAnnotatedMethod(AnnotatedElement annotated) {

@@ -163,9 +163,9 @@ public class MarkdownServiceImpl implements MarkdownService {
             // 如果parent是arrayNode，从parrent获取jpdv，否则从自身node获取jpdv
             JsonPropertyDescriptionValueDto jpdv;
             if (parentJsonSchema.isArraySchema()) {
-                jpdv = toJpdv(parentJsonSchema.getDescription());
+                jpdv = JsonPropertyDescriptionValueDto.deserialize(parentJsonSchema.getDescription());
             } else {
-                jpdv = toJpdv(jsonSchema.getDescription());
+                jpdv = JsonPropertyDescriptionValueDto.deserialize(jsonSchema.getDescription());
             }
             // 字段名
             content.append("|").append(StringUtils.repeat("- ", depth)).append("`").append(propertyName).append("`|");
@@ -205,13 +205,6 @@ public class MarkdownServiceImpl implements MarkdownService {
             content.append(jpdv.getJsonFormatPattern()).append("|\n");
         });
         return content.toString();
-    }
-
-    private JsonPropertyDescriptionValueDto toJpdv(String nullableJson) {
-        if (nullableJson == null) {
-            return JsonPropertyDescriptionValueDto.EMPTY;
-        }
-        return JsonUtils.toObject(nullableJson, JsonPropertyDescriptionValueDto.class);
     }
 
     private static EasyRandom initEasyRandom() {

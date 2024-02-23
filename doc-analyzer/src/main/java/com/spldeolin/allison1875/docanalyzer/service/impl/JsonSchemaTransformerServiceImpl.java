@@ -39,21 +39,21 @@ public class JsonSchemaTransformerServiceImpl implements JsonSchemaTransformerSe
                         }
                     }
 
-                    String jpd = jsonSchema.getDescription();
-                    if (jpd != null) {
-                        JsonPropertyDescriptionValueDto jpdv = JsonUtils.toObject(jpd,
-                                JsonPropertyDescriptionValueDto.class);
+                    JsonPropertyDescriptionValueDto jpdv = JsonPropertyDescriptionValueDto.deserialize(
+                            jsonSchema.getDescription());
+                    if (jpdv != null) {
                         jpdv.setEcats(ecats);
-                        jsonSchema.setDescription(JsonUtils.toJson(jpdv));
+                        jsonSchema.setDescription(jpdv.serialize());
                     }
 
                     if (parentJsonSchema.isArraySchema()) {
-                        JsonPropertyDescriptionValueDto parentJpdv = toJpdvSkipNull(parentJsonSchema.getDescription());
+                        JsonPropertyDescriptionValueDto parentJpdv = JsonPropertyDescriptionValueDto.deserialize(
+                                parentJsonSchema.getDescription());
                         if (parentJpdv == null) {
                             parentJpdv = new JsonPropertyDescriptionValueDto();
                         }
                         parentJpdv.setEcats(ecats);
-                        parentJsonSchema.setDescription(JsonUtils.toJson(parentJpdv));
+                        parentJsonSchema.setDescription(parentJpdv.serialize());
                     }
 
                     enums.clear();
@@ -72,7 +72,8 @@ public class JsonSchemaTransformerServiceImpl implements JsonSchemaTransformerSe
 
         // 处理ReferenceSchema
         JsonSchemaTraverseUtils.traverse(rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
-            JsonPropertyDescriptionValueDto jpdv = toJpdvSkipNull(jsonSchema.getDescription());
+            JsonPropertyDescriptionValueDto jpdv = JsonPropertyDescriptionValueDto.deserialize(
+                    jsonSchema.getDescription());
             String path = paths.get(parentJsonSchema);
             if (path == null) {
                 path = "";
@@ -105,26 +106,20 @@ public class JsonSchemaTransformerServiceImpl implements JsonSchemaTransformerSe
                     jpdv.setReferencePath(referencePath);
                 }
                 if (parentJsonSchema.isArraySchema()) {
-                    JsonPropertyDescriptionValueDto parentJpdv = toJpdvSkipNull(parentJsonSchema.getDescription());
+                    JsonPropertyDescriptionValueDto parentJpdv = JsonPropertyDescriptionValueDto.deserialize(
+                            parentJsonSchema.getDescription());
                     if (parentJpdv == null) {
                         parentJpdv = new JsonPropertyDescriptionValueDto();
                     }
                     parentJpdv.setReferencePath(referencePath);
-                    parentJsonSchema.setDescription(JsonUtils.toJson(parentJpdv));
+                    parentJsonSchema.setDescription(parentJpdv.serialize());
                 }
             }
 
             if (jpdv != null) {
-                jsonSchema.setDescription(JsonUtils.toJson(jpdv));
+                jsonSchema.setDescription(jpdv.serialize());
             }
         });
-    }
-
-    private JsonPropertyDescriptionValueDto toJpdvSkipNull(String nullableJson) {
-        if (nullableJson == null) {
-            return null;
-        }
-        return JsonUtils.toObject(nullableJson, JsonPropertyDescriptionValueDto.class);
     }
 
 }
