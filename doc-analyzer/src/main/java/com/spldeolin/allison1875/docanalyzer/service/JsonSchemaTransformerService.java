@@ -10,8 +10,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.JsonSchemaTransformerS
 @ImplementedBy(JsonSchemaTransformerServiceImpl.class)
 public interface JsonSchemaTransformerService {
 
-    void transformForEnum(JsonSchema rootJsonSchema);
-
     void transformReferenceSchema(JsonSchema rootJsonSchema);
 
 }

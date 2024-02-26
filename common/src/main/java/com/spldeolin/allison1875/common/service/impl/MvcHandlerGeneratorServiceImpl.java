@@ -60,7 +60,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
         String serviceParamType = args.getServiceParamType();
         if (serviceParamType != null) {
             Parameter param = new Parameter();
-            param.addAnnotation(annotationExprService.springRequestbody());
+            param.addAnnotation(annotationExprService.springRequestBody());
             param.addAnnotation(annotationExprService.javaxValid());
             param.setType(serviceParamType);
             param.setName("req");

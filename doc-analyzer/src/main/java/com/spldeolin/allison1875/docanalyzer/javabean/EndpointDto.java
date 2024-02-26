@@ -27,8 +27,6 @@ public class EndpointDto {
 
     String sourceCode;
 
-    Object more;
-
     String url;
 
     String httpMethod;
@@ -49,7 +47,6 @@ public class EndpointDto {
         result.setIsDeprecated(isDeprecated);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
-        result.setMore(more);
         result.setUrl(url);
         result.setHttpMethod(httpMethod);
         result.setRequestBodyDescribe(requestBodyDescribe);

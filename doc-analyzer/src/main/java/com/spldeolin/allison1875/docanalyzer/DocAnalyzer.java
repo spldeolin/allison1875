@@ -14,10 +14,10 @@ import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
 import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeBodyRetval;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeMvcHandlerRetval;
 import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeRequestMappingRetval;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
-import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.MvcControllerDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.MvcHandlerDto;
 import com.spldeolin.allison1875.docanalyzer.service.FieldService;
@@ -72,11 +72,13 @@ public class DocAnalyzer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        // 分析所有相关Java文件分析出jpdvs，然后构建2个jsg对象，jsg对象为后续req与resp生成JsonSchema所需
-        Table<String, String, JsonPropertyDescriptionValueDto> jpdvs = fieldService.analyzeFieldVars(
+        // 分析所有fieldVars
+        Table<String, String, AnalyzeFieldVarsRetval> analyzeFieldVarsRetvals = fieldService.analyzeFieldVars(
                 astForest.cloneWithResetting());
-        JsonSchemaGenerator jsg4req = jsgBuilderService.buildJsgByJpdvs(jpdvs, true);
-        JsonSchemaGenerator jsg4resp = jsgBuilderService.buildJsgByJpdvs(jpdvs, false);
+
+        // 基于注释和枚举项分析结果，构建jsg
+        JsonSchemaGenerator jsg4req = jsgBuilderService.buildJsg(analyzeFieldVarsRetvals, true);
+        JsonSchemaGenerator jsg4resp = jsgBuilderService.buildJsg(analyzeFieldVarsRetvals, false);
 
         // 收集endpoint
         List<EndpointDto> endpoints = Lists.newArrayList();
@@ -99,20 +101,19 @@ public class DocAnalyzer implements Allison1875MainService {
             // 分析
             try {
                 // 分析Request Body
-                AnalyzeBodyRetval analyzeBodyRetval = requestBodyService.analyzeBody(jsg4req,
-                        mvcHandler.getMethodDec());
+                AnalyzeBodyRetval analyzeBodyRetval = requestBodyService.analyzeBody(jsg4req, mvcHandler.getMd());
                 endpoint.setRequestBodyDescribe(analyzeBodyRetval.getDescribe());
                 endpoint.setRequestBodyJsonSchema(analyzeBodyRetval.getJsonSchema());
 
                 // 分析Response Body
                 analyzeBodyRetval = responseBodyService.analyzeBody(jsg4resp, mvcController.getCoid(),
-                        mvcHandler.getMethodDec());
+                        mvcHandler.getMd());
                 endpoint.setResponseBodyDescribe(analyzeBodyRetval.getDescribe());
                 endpoint.setResponseBodyJsonSchema(analyzeBodyRetval.getJsonSchema());
 
                 // 分析controller级与handler级的@RequestMapping
                 AnalyzeRequestMappingRetval analyzeRequestMappingRetval = requestMappingService.analyzeRequestMapping(
-                        mvcController.getReflection(), mvcHandler.getReflection(), config.getGlobalUrlPrefix());
+                        mvcController.getReflection(), mvcHandler.getReflection());
 
                 // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
                 List<EndpointDto> divides = setToAndDivide(analyzeRequestMappingRetval, endpoint);
@@ -125,7 +126,7 @@ public class DocAnalyzer implements Allison1875MainService {
         }
 
         // 保存到YAPI
-        if (config.getFlushTo().contains(FlushToEnum.YAPI)) {
+        if (config.getFlushTo().equals(FlushToEnum.YAPI)) {
             try {
                 yapiService.flushToYApi(endpoints);
             } catch (Exception e) {
@@ -134,7 +135,7 @@ public class DocAnalyzer implements Allison1875MainService {
         }
 
         // 保存到本地Markdwon
-        if (config.getFlushTo().contains(FlushToEnum.LOCAL_MARKDOWN)) {
+        if (config.getFlushTo().equals(FlushToEnum.LOCAL_MARKDOWN)) {
             try {
                 markdownService.flushToMarkdown(endpoints);
             } catch (Exception e) {
@@ -152,7 +153,6 @@ public class DocAnalyzer implements Allison1875MainService {
         endpoint.setIsDeprecated(analyzeMvcHandlerRetval.getIsDeprecated());
         endpoint.setAuthor(analyzeMvcHandlerRetval.getAuthor());
         endpoint.setSourceCode(analyzeMvcHandlerRetval.getSourceCode());
-        endpoint.setMore(analyzeMvcHandlerRetval.getMoreInfo());
     }
 
     private List<EndpointDto> setToAndDivide(AnalyzeRequestMappingRetval analyzeRequestMappingRetval,

@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeRequestMappingRetval;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 
@@ -29,9 +31,11 @@ public class RequestMappingServiceImpl implements RequestMappingService {
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    @Inject
+    private DocAnalyzerConfig config;
+
     @Override
-    public AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod,
-            String globalUrlPrefix) {
+    public AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod) {
         RequestMapping controllerRequestMapping = findRequestMappingAnnoOrElseNull(controllerClass);
         String[] controllerPaths = findValueFromAnno(controllerRequestMapping);
         RequestMethod[] controllerVerbs = findVerbFromAnno(controllerRequestMapping);
@@ -44,8 +48,13 @@ public class RequestMappingServiceImpl implements RequestMappingService {
         List<String> combinedUrls = combineUrl(controllerPaths, methodPaths);
 
         // 为组合后的url添加全局前缀
+        String globalUrlPrefix = config.getGlobalUrlPrefix();
         if (StringUtils.isNotBlank(globalUrlPrefix)) {
-            combinedUrls.replaceAll(combineUrl -> globalUrlPrefix + combineUrl);
+            if (globalUrlPrefix.startsWith("/")) {
+                combinedUrls.replaceAll(combineUrl -> globalUrlPrefix + combineUrl);
+            } else {
+                combinedUrls.replaceAll(combineUrl -> "/" + globalUrlPrefix + combineUrl);
+            }
         }
 
         final MutableBoolean questionMark = new MutableBoolean(false);

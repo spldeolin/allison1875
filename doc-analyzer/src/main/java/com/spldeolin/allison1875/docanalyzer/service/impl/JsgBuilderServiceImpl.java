@@ -10,12 +10,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Negative;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
@@ -24,19 +37,14 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeFieldVarsRetval;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
-import com.spldeolin.allison1875.docanalyzer.service.DescAnalyzerService;
-import com.spldeolin.allison1875.docanalyzer.service.EnumConstantAnalyzerService;
-import com.spldeolin.allison1875.docanalyzer.service.FieldMoreInfoAnalyzerService;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
-import com.spldeolin.allison1875.docanalyzer.service.SpecificFieldDescriptionsService;
-import com.spldeolin.allison1875.docanalyzer.service.ValidService;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
@@ -46,26 +54,8 @@ import com.spldeolin.allison1875.docanalyzer.service.ValidService;
 @Singleton
 public class JsgBuilderServiceImpl implements JsgBuilderService {
 
-    @Inject
-    private SpecificFieldDescriptionsService specificFieldDescriptionsService;
-
-    @Inject
-    private EnumConstantAnalyzerService enumConstantAnalyzerService;
-
-    @Inject
-    private FieldMoreInfoAnalyzerService fieldMoreInfoAnalyzerService;
-
-    @Inject
-    private ValidService validService;
-
-    @Inject
-    private DescAnalyzerService descAnalyzerService;
-
-    @Inject
-    private DocAnalyzerConfig config;
-
     @Override
-    public JsonSchemaGenerator buildJsgByJpdvs(Table<String, String, JsonPropertyDescriptionValueDto> jpdvs,
+    public JsonSchemaGenerator buildJsg(Table<String, String, AnalyzeFieldVarsRetval> afvRetvals,
             boolean forReqOrResp) {
         // 缺省配置
         ObjectMapper customOm = JsonUtils.createObjectMapper();
@@ -96,8 +86,8 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                 // 拓展分析
                 String className = m.getDeclaringClass().getName().replace('$', '.');
                 String fieldNameMight = m.getName();
-                JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
-                if (isIgnored(m, jpdv, forReqOrResp)) {
+                AnalyzeFieldVarsRetval afvRetval = afvRetvals.get(className, fieldNameMight);
+                if (isIgnored(m, afvRetval, forReqOrResp)) {
                     return true;
                 }
 
@@ -107,41 +97,27 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
-                List<ValidatorDto> valids;
-                if (forReqOrResp) {
-                    valids = validService.analyzeValid(annotated.getAnnotated());
-                } else {
-                    valids = Lists.newArrayList();
-                }
 
-                if (field == null) {
-                    JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
-                    if (annotated.getAnnotated() instanceof Method
-                            && annotated.getAnnotation(AssertTrue.class) != null) {
-                        jpdv.setIsFieldCrossingValids(true);
-                        jpdv.setValids(valids);
-                    }
-                    return jpdv.serialize();
-                }
-
-                Class<?> clazz = field.getDeclaringClass();
-                String className = clazz.getName().replace('$', '.');
+                String className = field.getDeclaringClass().getName().replace('$', '.');
                 String fieldNameMight = field.getName();
 
-                JsonPropertyDescriptionValueDto jpdv = jpdvs.get(className, fieldNameMight);
-                if (jpdv == null) {
-                    jpdv = new JsonPropertyDescriptionValueDto();
-                    String specificDesc = specificFieldDescriptionsService.provideSpecificFieldDescriptions()
-                            .get(className, fieldNameMight);
-                    if (specificDesc != null) {
-                        jpdv.setDescriptionLines(Lists.newArrayList(specificDesc));
-                    }
+                JsonPropertyDescriptionValueDto jpdv = new JsonPropertyDescriptionValueDto();
+
+                // jpdv 注释
+                AnalyzeFieldVarsRetval afvRetval = afvRetvals.get(className, fieldNameMight);
+                if (afvRetval != null) {
+                    jpdv.getCommentLines().addAll(afvRetval.getCommentLines());
                 }
 
-                jpdv.setAnnotatedName(annotated.toString());
+                // jpdv 枚举项
+                if (afvRetval != null) {
+                    jpdv.getAnalyzeEnumConstantsRetvals().addAll(afvRetval.getAnalyzeEnumConstantsRetvals());
+                }
 
-                jpdv.setValids(valids);
-
+                // jpdv 校验项
+                if (forReqOrResp) {
+                    jpdv.getValids().addAll(analyzeValid(annotated.getAnnotated()));
+                }
                 /*
                     解析自Field类型的唯一一个泛型上的校验注解（如果有唯一泛型的话）
                     e.g: private List<@NotBlank @Length(max = 10) String> userNames;
@@ -153,19 +129,23 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                         AnnotatedType[] fieldTypeArguments =
                                 ((AnnotatedParameterizedType) at).getAnnotatedActualTypeArguments();
                         if (fieldTypeArguments.length == 1) {
-                            AnnotatedType theOnlyTypeArgument = fieldTypeArguments[0];
-                            List<ValidatorDto> theOnlyElementValids = validService.analyzeValid(theOnlyTypeArgument);
-                            theOnlyElementValids.forEach(
+                            AnnotatedType collectionParamType = fieldTypeArguments[0];
+                            List<AnalyzeValidRetval> collectonParamTypeValids = analyzeValid(collectionParamType);
+                            collectonParamTypeValids.forEach(
                                     one -> one.setValidatorType("列表内元素" + one.getValidatorType()));
-                            jpdv.getValids().addAll(theOnlyElementValids);
+                            jpdv.getValids().addAll(collectonParamTypeValids);
                         }
                     }
                 }
 
+                // jpdv 格式
                 JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(field, JsonFormat.class);
-                jpdv.setJsonFormatPattern(Optional.ofNullable(jsonFormat).map(JsonFormat::pattern).orElse(""));
+                jpdv.setFormatPattern(Optional.ofNullable(jsonFormat).map(JsonFormat::pattern).orElse(""));
 
-                jpdv.setMoreInfo(fieldMoreInfoAnalyzerService.moreAnalyzerField(field));
+                // jpdv 更多分析后生成的文档
+                if (afvRetval != null) {
+                    jpdv.getMoreDocLines().addAll(afvRetval.getMoreDocLines());
+                }
 
                 return jpdv.serialize();
             }
@@ -191,39 +171,128 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                 if (annoClass == JsonSerialize.class) {
                     return null;
                 }
-                if (annoClass == JsonValue.class) {
-                    if (annotated instanceof AnnotatedMember) {
-                        Class<?> enumTypeMight = ((AnnotatedMember) annotated).getDeclaringClass();
-                        if (enumTypeMight.isEnum() && enumConstantAnalyzerService.isSupport(enumTypeMight)) {
-                            return null;
-                        }
-                    }
-                }
                 return super._findAnnotation(annotated, annoClass);
             }
 
-            @Override
-            public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-                if (enumConstantAnalyzerService.isSupport(enumType)) {
-                    Object[] enumConstants = enumType.getEnumConstants();
-                    List<String> ecat = Lists.newArrayList();
-                    for (Object enumConstant : enumConstants) {
-                        ecat.add(JsonUtils.toJson(enumConstantAnalyzerService.analyzeEnumConstant(enumConstant)));
-                    }
-                    return ecat.toArray(new String[0]);
-                }
-                return super.findEnumValues(enumType, enumValues, names);
-            }
         });
-
-        JsonSchemaGenerator jsg = new JsonSchemaGenerator(customOm);
-
-        return jsg;
+        return new JsonSchemaGenerator(customOm);
     }
 
-    protected boolean isIgnored(AnnotatedMember m, @Nullable JsonPropertyDescriptionValueDto jpdv,
-            boolean forReqOrResp) {
+    protected boolean isIgnored(AnnotatedMember m, @Nullable AnalyzeFieldVarsRetval afvRetval, boolean forReqOrResp) {
         return false;
+    }
+
+    protected List<AnalyzeValidRetval> analyzeValid(AnnotatedElement annotatedElement) {
+        List<AnalyzeValidRetval> valids = Lists.newArrayList();
+        NotNull notNull = find(annotatedElement, NotNull.class);
+        if (notNull != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));
+        }
+
+        if (find(annotatedElement, javax.validation.constraints.NotEmpty.class) != null
+                || find(annotatedElement, org.hibernate.validator.constraints.NotEmpty.class) != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_EMPTY.getValue()));
+        }
+
+        if (find(annotatedElement, javax.validation.constraints.NotBlank.class) != null
+                || find(annotatedElement, org.hibernate.validator.constraints.NotBlank.class) != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_BLANK.getValue()));
+        }
+
+        Size size = find(annotatedElement, Size.class);
+        if (size != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue())
+                    .setNote(String.valueOf(size.min())));
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
+                    .setNote(String.valueOf(size.max())));
+        }
+
+        Length length = find(annotatedElement, Length.class);
+        if (length != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue())
+                    .setNote(String.valueOf(length.min())));
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
+                    .setNote(String.valueOf(length.max())));
+        }
+
+        Min min = find(annotatedElement, Min.class);
+        if (min != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
+                    .setNote(String.valueOf(min.value())));
+        }
+
+        DecimalMin decimalMin = find(annotatedElement, DecimalMin.class);
+        if (decimalMin != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
+                    .setNote(decimalMin.value()));
+        }
+
+        Max max = find(annotatedElement, Max.class);
+        if (max != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
+                    .setNote(String.valueOf(max.value())));
+        }
+
+        DecimalMax decimalMax = find(annotatedElement, DecimalMax.class);
+        if (decimalMax != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
+                    .setNote(decimalMax.value()));
+        }
+
+        Future future = find(annotatedElement, Future.class);
+        if (future != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.FUTURE.getValue()));
+        }
+
+        FutureOrPresent futureOrPresent = find(annotatedElement, FutureOrPresent.class);
+        if (futureOrPresent != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.FUTURE_OR_PRESENT.getValue()));
+        }
+
+        Past past = find(annotatedElement, Past.class);
+        if (past != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.PAST.getValue()));
+        }
+
+        PastOrPresent pastOrPresent = find(annotatedElement, PastOrPresent.class);
+        if (pastOrPresent != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.PAST_OR_PRESENT.getValue()));
+        }
+
+        Digits digits = find(annotatedElement, Digits.class);
+        if (digits != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_INTEGRAL_DIGITS.getValue())
+                    .setNote(String.valueOf(digits.integer())));
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_FRACTIONAL_DIGITS.getValue())
+                    .setNote(String.valueOf(digits.fraction())));
+        }
+
+        Positive positive = find(annotatedElement, Positive.class);
+        if (positive != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.POSITIVE.getValue()));
+        }
+
+        Negative negative = find(annotatedElement, Negative.class);
+        if (negative != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NEGATIVE.getValue()));
+        }
+
+        Pattern pattern = find(annotatedElement, Pattern.class);
+        if (pattern != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.REGEX.getValue())
+                    .setNote(pattern.regexp()));
+        }
+
+        valids.forEach(valid -> {
+            if (valid.getNote() == null) {
+                valid.setNote("");
+            }
+        });
+        return valids;
+    }
+
+    private <A extends Annotation> A find(AnnotatedElement field, Class<A> annotationType) {
+        return AnnotatedElementUtils.findMergedAnnotation(field, annotationType);
     }
 
 }

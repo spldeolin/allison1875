@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.common.service;
 
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.service.impl.AnnotationExprServiceImpl;
 
@@ -9,6 +10,8 @@ import com.spldeolin.allison1875.common.service.impl.AnnotationExprServiceImpl;
  */
 @ImplementedBy(AnnotationExprServiceImpl.class)
 public interface AnnotationExprService {
+
+    boolean isAnnotated(String annoationQualifier, NodeWithAnnotations<?> node);
 
     AnnotationExpr lombokData();
 
@@ -22,7 +25,13 @@ public interface AnnotationExprService {
 
     AnnotationExpr javaOverride();
 
-    AnnotationExpr springRequestbody();
+    AnnotationExpr springRestController();
+
+    AnnotationExpr springRequestMapping();
+
+    AnnotationExpr springRequestBody();
+
+    AnnotationExpr springResponseBody();
 
     AnnotationExpr javaxValid();
 

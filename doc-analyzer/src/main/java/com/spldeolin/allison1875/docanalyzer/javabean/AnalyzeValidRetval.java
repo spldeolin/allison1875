@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ValidatorDto {
+public class AnalyzeValidRetval {
 
     /**
      * @see ValidatorTypeEnum

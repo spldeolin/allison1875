@@ -19,11 +19,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeEnumConstantsRetval;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
-import com.spldeolin.allison1875.docanalyzer.javabean.ValidatorDto;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
@@ -49,66 +52,7 @@ public class MarkdownServiceImpl implements MarkdownService {
         for (String cat : endpointMap.keySet()) {
             StringBuilder content = new StringBuilder();
             for (EndpointDto endpoint : endpointMap.get(cat)) {
-                try {
-                    String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
-                    if (StringUtils.isEmpty(title)) {
-                        title = endpoint.getHandlerSimpleName();
-                    }
-                    content.append("## ").append(title).append("\n");
-
-                    if (endpoint.getDescriptionLines().size() > 1) {
-                        endpoint.getDescriptionLines().stream().skip(1)
-                                .forEach(line -> content.append(line).append("\n\n"));
-                    }
-
-                    content.append("### 请求方法与URL" + "\n");
-                    content.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl())
-                            .append("`\n");
-
-                    content.append("### Request Body的数据结构（application/json）\n");
-                    if (endpoint.getRequestBodyJsonSchema() != null) {
-                        content.append(this.buildReqOrRespBodyPart(endpoint, true));
-                    } else {
-                        content.append("无需Request Body\n");
-                    }
-
-                    content.append("### Response Body的数据结构（application/json）\n");
-                    if (endpoint.getResponseBodyJsonSchema() != null) {
-                        content.append(this.buildReqOrRespBodyPart(endpoint, false));
-                    } else {
-                        content.append("没有Response Body\n");
-                    }
-
-                    // 生成cURL
-                    if (config.getEnableCurl() && endpoint.getRequestBodyDescribe() != null) {
-                        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe());
-                        if (fakeReqJson != null) {
-                            content.append("### cURL\n");
-                            content.append("```shell\n");
-                            content.append(String.format("curl --request %s --url 'http://localhost:8080%s' --header "
-                                            + "'content-type:application/json' " + "--data '",
-                                    endpoint.getHttpMethod().toUpperCase(), endpoint.getUrl()));
-                            content.append(fakeReqJson);
-                            content.append("'\n```\n");
-                        }
-                    }
-
-                    // 生成返回值示例
-                    if (config.getEnableResponseBodySample() && endpoint.getResponseBodyDescribe() != null) {
-                        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe());
-                        if (fakeRespJson != null) {
-                            content.append("### Response Body的示例\n");
-                            content.append("```json\n");
-                            content.append(fakeRespJson);
-                            content.append("\n```\n");
-                        }
-                    }
-
-                    // markdown语法的分隔线
-                    content.append("\n---\n");
-                } catch (Exception e) {
-                    log.error("fail to output to markdown, endpoint={}", endpoint, e);
-                }
+                content.append(this.generateEndpointDoc(endpoint));
             }
 
             File md = new File(config.getMarkdownDirectoryPath() + File.separator + cat + ".md");
@@ -121,35 +65,98 @@ public class MarkdownServiceImpl implements MarkdownService {
         }
     }
 
-    private String fakeJsonByDescribe(String describe) throws Exception {
+    protected String generateEndpointDoc(EndpointDto endpoint) {
+        StringBuilder result = new StringBuilder(64);
+        String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
+        if (StringUtils.isEmpty(title)) {
+            title = endpoint.getHandlerSimpleName();
+        }
+        result.append("## ").append(title).append("\n");
+
+        if (endpoint.getDescriptionLines().size() > 1) {
+            endpoint.getDescriptionLines().stream().skip(1).forEach(line -> result.append(line).append("\n\n"));
+        }
+
+        result.append("### 请求方法与URL\n");
+        result.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl()).append("`\n");
+
+        result.append("### Request Body的数据结构（application/json）\n");
+        result.append(this.generateReqOrRespDoc(endpoint, true));
+
+        result.append("### Response Body的数据结构（application/json）\n");
+        result.append(this.generateReqOrRespDoc(endpoint, false));
+
+        // 生成cURL
+        result.append(this.generateCurl(endpoint));
+
+        // 生成返回值示例
+        result.append(this.generateRespSample(endpoint));
+
+        result.append(this.generateMoreDoc(endpoint));
+
+        // markdown语法的分隔线
+        result.append("\n---\n");
+        return result.toString();
+    }
+
+    private String generateRespSample(EndpointDto endpoint) {
+        if (config.getEnableResponseBodySample() && endpoint.getResponseBodyDescribe() != null) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe());
+        if (fakeRespJson != null) {
+            result.append("### Response Body的示例\n");
+            result.append("```json\n");
+            result.append(fakeRespJson);
+            result.append("\n```\n");
+        }
+        return result.toString();
+    }
+
+    private String generateCurl(EndpointDto endpoint) {
+        if (config.getEnableCurl() && endpoint.getRequestBodyDescribe() != null) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder(64);
+        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe());
+        if (fakeReqJson != null) {
+            result.append("### cURL\n");
+            result.append("```shell\n");
+            result.append(String.format(
+                    "curl --request %s --url 'http://localhost:8080%s' --header " + "'content-type:application/json' "
+                            + "--data '", endpoint.getHttpMethod().toUpperCase(), endpoint.getUrl()));
+            result.append(fakeReqJson);
+            result.append("'\n```\n");
+        }
+        return result.toString();
+    }
+
+    private String fakeJsonByDescribe(String describe) {
         try {
             Object fakeDto = er.nextObject(LoadClassUtils.loadClass(describe, this.getClass().getClassLoader()));
             return JsonUtils.toJsonPrettily(fakeDto);
         } catch (Exception e) {
             log.error("fail to fake json, describe={}", describe, e);
-            throw e;
+            throw new Allison1875Exception(e);
         }
     }
 
-    private String buildReqOrRespBodyPart(EndpointDto endpoint, boolean isReqBody) {
-        StringBuilder content = new StringBuilder(64);
-        content.append("| 字段名 | JSON类型 | 注释 |");
-        if (isReqBody) {
-            content.append(" 校验项 |");
-        }
-        content.append(" 格式 |\n");
-        content.append("| --- | --- | --- | --- |");
-        if (isReqBody) {
-            content.append(" --- |");
-        }
-        content.append("\n");
-
+    protected String generateReqOrRespDoc(EndpointDto endpoint, boolean isReqBody) {
         JsonSchema rootJsonSchema;
         if (isReqBody) {
+            if (endpoint.getRequestBodyJsonSchema() == null) {
+                return "无需Request Body\n";
+            }
             rootJsonSchema = endpoint.getRequestBodyJsonSchema();
         } else {
+            if (endpoint.getResponseBodyJsonSchema() == null) {
+                return "没有Response Body\n";
+            }
             rootJsonSchema = endpoint.getResponseBodyJsonSchema();
         }
+
+        StringBuilder content = new StringBuilder(64);
 
         if (!rootJsonSchema.isObjectSchema() && !rootJsonSchema.isArraySchema()) {
             // TODO 解析javadoc中的@return，作为它的注释。优先级低，这样的写法非常少
@@ -167,8 +174,10 @@ public class MarkdownServiceImpl implements MarkdownService {
             } else {
                 jpdv = JsonPropertyDescriptionValueDto.deserialize(jsonSchema.getDescription());
             }
+            content.append("|");
             // 字段名
-            content.append("|").append(StringUtils.repeat("- ", depth)).append("`").append(propertyName).append("`|");
+            content.append(StringUtils.repeat("- ", depth)).append(propertyName);
+            content.append("|");
             // JSON类型
             if (jpdv.getReferencePath() != null) {
                 content.append("object");
@@ -183,27 +192,53 @@ public class MarkdownServiceImpl implements MarkdownService {
             }
             content.append("|");
             // 注释
-            if (jpdv.getDescriptionLines() != null) { // 目前已知类似“返回值是List<String>”的情况会导致这个属性为null
-                content.append(Joiner.on("<br>").join(jpdv.getDescriptionLines())).append("|");
-            }
-            if (isReqBody) {
-                // 校验项
+            content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
+            content.append("|");
+            // 校验项
+            if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
                 if (jpdv.getValids().size() == 1) {
                     content.append(jpdv.getValids().get(0).getValidatorType())
                             .append(jpdv.getValids().get(0).getNote());
-                }
-                if (jpdv.getValids().size() > 1) {
+                } else {
                     for (int i = 0; i < jpdv.getValids().size(); i++) {
-                        ValidatorDto validator = jpdv.getValids().get(i);
+                        AnalyzeValidRetval validator = jpdv.getValids().get(i);
                         content.append(i + 1).append(". ").append(validator.getValidatorType())
                                 .append(validator.getNote()).append("<br>");
                     }
                 }
             }
-            // TODO 暂不支持显示枚举项、格式
             content.append("|");
-            content.append(jpdv.getJsonFormatPattern()).append("|\n");
+            // 枚举项
+            if (CollectionUtils.isNotEmpty(jpdv.getAnalyzeEnumConstantsRetvals())) {
+                for (AnalyzeEnumConstantsRetval enumConstant : jpdv.getAnalyzeEnumConstantsRetvals()) {
+                    content.append(enumConstant.getCode()).append(" : ").append(enumConstant.getTitle()).append("<br>");
+                }
+            }
+            content.append("|");
+            // 格式
+            if (jpdv.getFormatPattern() != null) {
+                content.append(jpdv.getFormatPattern());
+            }
+            content.append("|");
+            // 其他
+            if (CollectionUtils.isNotEmpty(jpdv.getMoreDocLines())) {
+                content.append(Joiner.on("<br>").join(jpdv.getMoreDocLines()));
+            }
+            content.append("|");
+            content.append("\n");
         });
+
+        content.insert(0, "\n");
+        content.insert(0, " --- |");
+        content.insert(0, " --- |");
+        content.insert(0, " --- |");
+        content.insert(0, " --- |");
+        content.insert(0, "\n| --- | --- | --- |");
+        content.insert(0, " 其他 |");
+        content.insert(0, " 格式 |");
+        content.insert(0, " 枚举项 |");
+        content.insert(0, " 校验项 |");
+        content.insert(0, "| 字段名 | JSON类型 | 注释 |");
         return content.toString();
     }
 
@@ -220,6 +255,10 @@ public class MarkdownServiceImpl implements MarkdownService {
                 () -> new BigDecimal(RandomStringUtils.randomNumeric(5) + "." + RandomStringUtils.randomNumeric(2)));
         erp.randomize(Object.class, () -> "x");
         return new EasyRandom(erp);
+    }
+
+    protected String generateMoreDoc(EndpointDto endpoint) {
+        return "";
     }
 
 }

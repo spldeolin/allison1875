@@ -8,9 +8,9 @@ import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.docanalyzer.exception.JsonSchemaException;
 import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeBodyRetval;
-import com.spldeolin.allison1875.docanalyzer.service.BodyResolvedTypeAnalyzerService;
 import com.spldeolin.allison1875.docanalyzer.service.JsonSchemaTransformerService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaGenerateUtils;
@@ -30,32 +30,64 @@ public class ResponseBodyServiceImpl implements ResponseBodyService {
     private JsonSchemaTransformerService jsonSchemaTransformerService;
 
     @Inject
-    private BodyResolvedTypeAnalyzerService bodyResolvedTypeAnalyzerService;
+    private AnnotationExprService annotationExprService;
 
     @Override
     public AnalyzeBodyRetval analyzeBody(JsonSchemaGenerator jsg, ClassOrInterfaceDeclaration mvcControllerCoid,
             MethodDeclaration mvcHandlerMd) {
-        String responseBodyDescribe = null;
-        try {
-            ResolvedType responseBody = bodyResolvedTypeAnalyzerService.analyzeResponseBody(mvcControllerCoid,
-                    mvcHandlerMd);
-            if (responseBody != null) {
-                if (responseBody.isPrimitive()) {
-                    responseBodyDescribe = ((ResolvedPrimitiveType) responseBody).getBoxTypeQName();
-                } else {
-                    responseBodyDescribe = responseBody.describe();
-                }
-                JsonSchema jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
-                jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
-                jsonSchemaTransformerService.transformForEnum(jsonSchema);
-                return new AnalyzeBodyRetval().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema);
-            }
-        } catch (JsonSchemaException ignore) {
-        } catch (Exception e) {
-            log.error("BodySituation.FAIL method={} describe={}",
-                    MethodQualifierUtils.getTypeQualifierWithMethodName(mvcHandlerMd), responseBodyDescribe, e);
+        ResolvedType responseBodyType = getResponseBodyType(mvcControllerCoid, mvcHandlerMd);
+        if (responseBodyType == null) {
+            return new AnalyzeBodyRetval();
         }
-        return new AnalyzeBodyRetval();
+
+        String responseBodyDescribe;
+        if (responseBodyType.isPrimitive()) {
+            responseBodyDescribe = ((ResolvedPrimitiveType) responseBodyType).getBoxTypeQName();
+        } else {
+            responseBodyDescribe = responseBodyType.describe();
+        }
+
+        JsonSchema jsonSchema;
+        try {
+            jsonSchema = JsonSchemaGenerateUtils.generateSchema(responseBodyDescribe, jsg);
+        } catch (JsonSchemaException e) {
+            log.error("fail to generateSchema, responseBodyDescribe={}", responseBodyDescribe);
+            throw e;
+        }
+        jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
+
+        return new AnalyzeBodyRetval().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema);
+    }
+
+    private ResolvedType getResponseBodyType(ClassOrInterfaceDeclaration mvcControllerCoid,
+            MethodDeclaration mvcHandlerMd) {
+        String name = MethodQualifierUtils.getTypeQualifierWithMethodName(mvcHandlerMd);
+
+        if (isNotRestController(mvcControllerCoid) && isNotResponseBody(mvcHandlerMd)) {
+            log.info("mvcHandler '{}' is neither a @ResponseBody nor in a @RestController", name);
+            return null;
+        }
+
+        try {
+            return this.getConcernedResponseBodyType(mvcHandlerMd);
+        } catch (Exception e) {
+            log.error("fail to get concerned ResponseBody Type, mvcHandler={}", name);
+            throw e;
+        }
+    }
+
+    private boolean isNotRestController(ClassOrInterfaceDeclaration coid) {
+        String qualifier = annotationExprService.springRestController().getNameAsString();
+        return !annotationExprService.isAnnotated(qualifier, coid);
+    }
+
+    private boolean isNotResponseBody(MethodDeclaration md) {
+        String qualifier = annotationExprService.springResponseBody().getNameAsString();
+        return !annotationExprService.isAnnotated(qualifier, md);
+    }
+
+    protected ResolvedType getConcernedResponseBodyType(MethodDeclaration mvcHandlerMd) {
+        return mvcHandlerMd.getType().resolve();
     }
 
 }

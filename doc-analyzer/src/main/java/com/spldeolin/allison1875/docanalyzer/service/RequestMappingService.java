@@ -13,7 +13,6 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.RequestMappingServiceI
 @ImplementedBy(RequestMappingServiceImpl.class)
 public interface RequestMappingService {
 
-    AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod,
-            String globalUrlPrefix);
+    AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod);
 
 }

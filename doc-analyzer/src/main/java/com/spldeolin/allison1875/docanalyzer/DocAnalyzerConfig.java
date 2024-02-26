@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.docanalyzer;
 
 import java.io.File;
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
@@ -37,7 +36,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 文档保存到...
      */
-    @NotEmpty List<FlushToEnum> flushTo;
+    @NotNull FlushToEnum flushTo;
 
     /**
      * 文档输出到YApi时，YApi请求URL
@@ -84,7 +83,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must exist and be a directory"));
             }
         }
-        if (flushTo != null && flushTo.contains(FlushToEnum.YAPI)) {
+        if (FlushToEnum.YAPI.equals(flushTo)) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
                         .setReason("must not be null"));
@@ -94,7 +93,7 @@ public final class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must not be null"));
             }
         }
-        if (flushTo != null && flushTo.contains(FlushToEnum.LOCAL_MARKDOWN)) {
+        if (FlushToEnum.LOCAL_MARKDOWN.equals(flushTo)) {
             if (markdownDirectoryPath == null) {
                 invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
                         .setValue(ValidUtils.formatValue(markdownDirectoryPath)).setReason("must not be null"));

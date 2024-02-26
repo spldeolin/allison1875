@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.docanalyzer.service;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.collect.Table;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.service.impl.JsgBuilderServiceImpl;
 
 /**
@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.docanalyzer.service.impl.JsgBuilderServiceImpl;
 @ImplementedBy(JsgBuilderServiceImpl.class)
 public interface JsgBuilderService {
 
-    JsonSchemaGenerator buildJsgByJpdvs(Table<String, String, JsonPropertyDescriptionValueDto> jpdvs,
+    JsonSchemaGenerator buildJsg(Table<String, String, AnalyzeFieldVarsRetval> analyzeFieldVarsRetvals,
             boolean forReqOrResp);
 
 }

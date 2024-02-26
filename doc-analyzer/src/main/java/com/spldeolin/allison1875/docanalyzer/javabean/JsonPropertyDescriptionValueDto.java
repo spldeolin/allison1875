@@ -19,34 +19,35 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JsonPropertyDescriptionValueDto {
 
-    public static final JsonPropertyDescriptionValueDto EMPTY =
-            new JsonPropertyDescriptionValueDto().setDescriptionLines(
-            Lists.newArrayList()).setJsonFormatPattern("");
-
-    String annotatedName;
-
-    List<String> descriptionLines;
+    /**
+     * 注释
+     */
+    final List<String> commentLines = Lists.newArrayList();
 
     /**
-     * 解析自声明在Field上的校验注解
-     *
-     * e.g: @NotEmpty private List<String> userNames;
+     * 枚举项
      */
-    List<ValidatorDto> valids = Lists.newArrayList();
+    final List<AnalyzeEnumConstantsRetval> analyzeEnumConstantsRetvals = Lists.newArrayList();
 
-    String jsonFormatPattern;
+    /**
+     * 校验项
+     */
+    final List<AnalyzeValidRetval> valids = Lists.newArrayList();
 
-    Boolean isFieldCrossingValids = false;
+    /**
+     * 格式
+     */
+    String formatPattern;
 
+    /**
+     * 可拓展地对FieldVar进行更多分析，并生成文档。每个元素代表文档的每一行
+     */
+    final List<String> moreDocLines = Lists.newArrayList();
 
+    /**
+     * 所用复用类型的第一次出现在的JsonSchemaNode的path
+     */
     String referencePath;
-
-    List<AnalyzeEnumConstantRetval> ecats;
-
-    /**
-     * 拓展信息
-     */
-    Object moreInfo;
 
     public String serialize() {
         return JsonUtils.toJson(this);

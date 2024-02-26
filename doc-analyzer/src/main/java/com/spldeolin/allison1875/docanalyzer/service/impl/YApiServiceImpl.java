@@ -4,26 +4,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.Allison1875;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeEnumConstantsRetval;
+import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.javabean.EndpointDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.JsonPropertyDescriptionValueDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiInterfaceListMenuRespDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.YApiProjectGetRespDto;
-import com.spldeolin.allison1875.docanalyzer.service.EndpointDocGeneratorService;
-import com.spldeolin.allison1875.docanalyzer.service.JpdvDocGeneratorService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiOpenApiService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
@@ -38,12 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class YApiServiceImpl implements YApiService {
-
-    @Inject
-    private JpdvDocGeneratorService jpdvDocGeneratorService;
-
-    @Inject
-    private EndpointDocGeneratorService endpointDocGeneratorService;
 
     @Inject
     private DocAnalyzerConfig config;
@@ -80,10 +80,10 @@ public class YApiServiceImpl implements YApiService {
             if (StringUtils.isEmpty(title)) {
                 title = endpoint.getHandlerSimpleName();
             }
-            String yapiDesc = endpointDocGeneratorService.generateDocForYApi(endpoint);
+            String yapiDesc = this.generateEndpointDoc(endpoint);
 
-            String reqJs = toJson(endpoint.getRequestBodyJsonSchema());
-            String respJs = toJson(endpoint.getResponseBodyJsonSchema());
+            String reqJs = this.generateReqOrRespDoc(endpoint.getRequestBodyJsonSchema());
+            String respJs = this.generateReqOrRespDoc(endpoint.getResponseBodyJsonSchema());
 
             JsonNode yapiInterface = this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
                     endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
@@ -93,7 +93,7 @@ public class YApiServiceImpl implements YApiService {
         }
     }
 
-    private String toJson(JsonSchema bodyJsonSchema) {
+    private String generateReqOrRespDoc(JsonSchema bodyJsonSchema) {
         if (bodyJsonSchema == null) {
             return "";
         }
@@ -110,7 +110,64 @@ public class YApiServiceImpl implements YApiService {
             JsonPropertyDescriptionValueDto jpdv = JsonPropertyDescriptionValueDto.deserialize(
                     jsonSchema.getDescription());
             if (jpdv != null) {
-                jsonSchema.setDescription(jpdvDocGeneratorService.generateJpdvDoc(jpdv));
+
+                String refTypeDoc = null;
+                if (jpdv.getReferencePath() != null) {
+                    refTypeDoc = "复用类型\n" + "\t数据结构同：" + jpdv.getReferencePath();
+                }
+                String commentDoc = null;
+                if (CollectionUtils.isNotEmpty(jpdv.getCommentLines())) {
+                    StringBuilder sb = new StringBuilder();
+                    for (String line : jpdv.getCommentLines()) {
+                        if (StringUtils.isNotBlank(line)) {
+                            sb.append("\t").append(line).append("\n");
+                        } else {
+                            sb.append("\n");
+                        }
+                    }
+                    // sb并不是只有换号符时
+                    if (StringUtils.isNotBlank(sb)) {
+                        sb.insert(0, "注释\n");
+                        commentDoc = sb.deleteCharAt(sb.length() - 1).toString();
+                    }
+                }
+                String validDoc = null;
+                if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
+                    StringBuilder sb = new StringBuilder("校验项\n");
+                    for (AnalyzeValidRetval valid : jpdv.getValids()) {
+                        sb.append("\t").append(valid.getValidatorType()).append(valid.getNote()).append("\n");
+                    }
+                    validDoc = sb.deleteCharAt(sb.length() - 1).toString();
+                }
+                String dataFormatDoc = null;
+                if (StringUtils.isNotEmpty(jpdv.getFormatPattern())) {
+                    dataFormatDoc = "格式\n";
+                    dataFormatDoc += "\t" + jpdv.getFormatPattern();
+                }
+                String enumDoc = null;
+                if (CollectionUtils.isNotEmpty(jpdv.getAnalyzeEnumConstantsRetvals())) {
+                    StringBuilder sb = new StringBuilder("枚举项\n");
+                    Map<String, String> catsMap = Maps.newHashMap();
+                    for (AnalyzeEnumConstantsRetval ecat : jpdv.getAnalyzeEnumConstantsRetvals()) {
+                        catsMap.put(ecat.getCode(), ecat.getTitle());
+                    }
+                    for (String line : MoreStringUtils.splitLineByLine(JsonUtils.toJsonPrettily(catsMap))) {
+                        sb.append("\t").append(line).append("\n");
+                    }
+                    enumDoc = sb.deleteCharAt(sb.length() - 1).toString();
+                }
+
+                String moreDoc = null;
+                if (CollectionUtils.isNotEmpty(jpdv.getMoreDocLines())) {
+                    StringBuilder sb = new StringBuilder("其他\n");
+                    for (String moreDocLine : jpdv.getMoreDocLines()) {
+                        sb.append("\t").append(moreDocLine).append("\n");
+                    }
+                    moreDoc = sb.deleteCharAt(sb.length() - 1).toString();
+                }
+
+                jsonSchema.setDescription(Joiner.on("\n\n").skipNulls()
+                        .join(refTypeDoc, commentDoc, validDoc, dataFormatDoc, enumDoc, moreDoc));
             }
         });
         return JsonUtils.toJson(bodyJsonSchema);
@@ -199,6 +256,66 @@ public class YApiServiceImpl implements YApiService {
         form.put("token", config.getYapiToken());
         JsonNode responseBody = yapiOpenApiService.createOrUpdateEndpoint(form);
         return responseBody;
+    }
+
+    protected String generateEndpointDoc(EndpointDto endpoint) {
+        String deprecatedNode = null;
+        if (endpoint.getIsDeprecated()) {
+            deprecatedNode = "> 该接口已被开发者标记为**已废弃**，不建议调用";
+        }
+
+        String comment = null;
+        if (CollectionUtils.isNotEmpty(endpoint.getDescriptionLines())) {
+            StringBuilder sb = new StringBuilder();
+            for (String line : endpoint.getDescriptionLines()) {
+                if (StringUtils.isNotBlank(line)) {
+                    sb.append(line).append("\n");
+                } else {
+                    sb.append("\n");
+                }
+            }
+            // sb并不是只有换号符时
+            if (StringUtils.isNotBlank(sb)) {
+                sb.insert(0, "##### 注释\n");
+                comment = StringEscapeUtils.escapeHtml4(sb.deleteCharAt(sb.length() - 1).toString());
+            }
+        }
+
+        String developer = "##### 开发者\n";
+        if (StringUtils.isNotBlank(endpoint.getAuthor())) {
+            developer += endpoint.getAuthor();
+        } else {
+            developer += "未知的开发者";
+        }
+
+        String code = "##### 源码\n";
+        code += endpoint.getSourceCode();
+
+        String allison1875Announce = "";
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
+            allison1875Announce += BaseConstant.NEW_LINE + "---";
+            if (config.getEnableNoModifyAnnounce()) {
+                allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
+            }
+            if (config.getEnableLotNoAnnounce()) {
+                if (config.getEnableNoModifyAnnounce()) {
+                    allison1875Announce += " ";
+                } else {
+                    allison1875Announce += BaseConstant.NEW_LINE;
+                }
+                String hash = StringUtils.upperCase(HashingUtils.hashString(endpoint.toString()));
+                allison1875Announce +=
+                        BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + String.format("DA%s-%s", Allison1875.SHORT_VERSION,
+                                hash);
+            }
+        }
+
+        return Joiner.on('\n').skipNulls().join(deprecatedNode, comment, developer, code, allison1875Announce)
+                + generateMoreDoc(endpoint);
+    }
+
+    protected String generateMoreDoc(EndpointDto endpoint) {
+        return "";
     }
 
 }

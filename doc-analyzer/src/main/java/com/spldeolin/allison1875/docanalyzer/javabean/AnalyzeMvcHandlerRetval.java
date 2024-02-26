@@ -26,6 +26,4 @@ public class AnalyzeMvcHandlerRetval {
 
     String sourceCode;
 
-    Object moreInfo;
-
 }
