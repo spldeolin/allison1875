@@ -76,4 +76,14 @@ public final class CommonConfig {
      */
     @NotEmpty String author;
 
+    /**
+     * 生成的Javabean是否实现java.io.Serializable接口
+     */
+    @NotNull Boolean isJavabeanSerializable;
+
+    /**
+     * 生成的Javabean是否实现java.lang.Cloneable接口
+     */
+    @NotNull Boolean isJavabeanCloneable;
+
 }

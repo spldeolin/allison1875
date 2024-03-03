@@ -121,9 +121,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchInsertEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableBatchInsertEvenNull()) {
-            return null;
-        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchInsertEvenNull", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),
@@ -140,9 +137,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchInsertMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableBatchInsert()) {
-            return null;
-        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchInsert", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(), "批量插入");
@@ -158,10 +152,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchUpdateEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableBatchUpdateEvenNull()) {
-            return null;
-        }
-
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchUpdateEvenNull", args.getMapper());
         MethodDeclaration update = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),
@@ -178,10 +168,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchUpdateMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableBatchUpdate()) {
-            return null;
-        }
-
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchUpdate", args.getMapper());
         MethodDeclaration update = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(), "批量根据ID更新数据");
@@ -197,9 +183,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateDeleteByKeyMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableDeleteByKey() || !args.getTableStructureAnalysisDto().getIsDeleteFlagExist()) {
-            return null;
-        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
                 "deleteBy" + MoreStringUtils.toUpperCamel(args.getKey().getPropertyName()), args.getMapper());
         MethodDeclaration method = new MethodDeclaration();
@@ -219,9 +202,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateInsertOrUpdateMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableInsertOrUpdate()) {
-            return null;
-        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("insertOrUpdate", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(),
@@ -237,9 +217,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateInsertMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableInsert()) {
-            return null;
-        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("insert", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(), "插入");
@@ -254,9 +231,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateListAllMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableListAll()) {
-            return null;
-        }
         String methodName = null;
         if (CollectionUtils.isNotEmpty(args.getTableStructureAnalysisDto().getIdProperties())) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("listAll", args.getMapper());
@@ -274,10 +248,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateQueryByEntityMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableQueryByEntity()) {
-            return null;
-        }
-
         String methodName = antiDuplicationService.getNewMethodNameIfExist("queryByEntity", args.getMapper());
         MethodDeclaration queryByEntity = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableStructureAnalysisDto(), "根据实体内的属性查询");
@@ -292,10 +262,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateQueryByIdMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableQueryById()) {
-            return null;
-        }
-
         String methodName = null;
         if (CollectionUtils.isNotEmpty(args.getTableStructureAnalysisDto().getIdProperties())) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("queryById", args.getMapper());
@@ -327,10 +293,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateQueryByIdsEachIdMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableQueryByIdsEachId()) {
-            return null;
-        }
-
         String methodName = null;
         if (args.getTableStructureAnalysisDto().getIdProperties().size() == 1) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("queryByIdsEachId", args.getMapper());
@@ -357,10 +319,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateQueryByIdsMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableQueryByIds()) {
-            return null;
-        }
-
         String methodName = null;
         if (args.getTableStructureAnalysisDto().getIdProperties().size() == 1) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("queryByIds", args.getMapper());
@@ -383,10 +341,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateQueryByKeyMethodToMapper(GenerateMethodToMapperArgs generateMethodToMapper) {
-        if (config.getDisableQueryByKey()) {
-            return null;
-        }
-
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
                 "queryBy" + MoreStringUtils.toUpperCamel(generateMethodToMapper.getKey().getPropertyName()),
                 generateMethodToMapper.getMapper());
@@ -408,10 +362,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public QueryByKeysDto generateQueryByKeysMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableQueryByKeys()) {
-            return null;
-        }
-
         String methodName = antiDuplicationService.getNewMethodNameIfExist(
                 "queryBy" + English.plural(MoreStringUtils.toUpperCamel(args.getKey().getPropertyName())),
                 args.getMapper());
@@ -433,9 +383,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateUpdateByIdEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableUpdateByIdEvenNull()) {
-            return null;
-        }
         String methodName = null;
         if (CollectionUtils.isNotEmpty(args.getTableStructureAnalysisDto().getIdProperties())) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("updateByIdEvenNull", args.getMapper());
@@ -454,9 +401,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateUpdateByIdMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (config.getDisableUpdateById()) {
-            return null;
-        }
         String methodName = null;
         if (CollectionUtils.isNotEmpty(args.getTableStructureAnalysisDto().getIdProperties())) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("updateById", args.getMapper());

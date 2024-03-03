@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
@@ -41,29 +43,19 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         arg.setPackageName(config.getCommonConfig().getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
-        arg.setAuthorName(config.getCommonConfig().getAuthor());
+        arg.setAuthor(config.getCommonConfig().getAuthor());
+        arg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
+        arg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
-            String superEntityQualifier = config.getSuperEntityQualifier();
-            if (StringUtils.isNotEmpty(superEntityQualifier)) {
-                javabean.addExtendedType(superEntityQualifier);
+            if (config.getSuperEntity() != null) {
+                javabean.addExtendedType(config.getSuperEntity().getName());
                 javabean.addAnnotation(annotationExprService.lombokEqualsAndHashCode());
                 javabean.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
             }
-            if (config.getEnableEntityImplementSerializable()) {
-                javabean.addImplementedType("java.io.Serializable");
-                javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
-                        "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
-            }
-            if (config.getEnableEntityImplementCloneable()) {
-                javabean.addImplementedType("Cloneable");
-                javabean.getMembers().addLast(StaticJavaParser.parseBodyDeclaration(
-                        "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));
-            }
         });
         for (PropertyDto property : persistence.getProperties()) {
-            if (config.getHiddenColumns().contains(property.getColumnName()) || config.getAlreadyInSuperEntity()
-                    .contains(property.getColumnName())) {
+            if (getSuperEntityFieldNames().contains(property.getColumnName())) {
                 continue;
             }
             FieldArg fieldArg = new FieldArg();
@@ -74,6 +66,14 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         }
         arg.setJavabeanExistenceResolution(config.getEntityExistenceResolution());
         return javabeanGeneratorService.generate(arg);
+    }
+
+    private List<String> getSuperEntityFieldNames() {
+        if (config.getSuperEntity() == null) {
+            return Lists.newArrayList();
+        }
+        return Arrays.stream(config.getSuperEntity().getDeclaredFields()).map(Field::getName)
+                .collect(Collectors.toList());
     }
 
     private String concatEntityDescription(TableStructureAnalysisDto persistence) {

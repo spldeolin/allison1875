@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.common.service.impl;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -68,8 +70,14 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         coid.addAnnotation(annotationExprService.lombokAccessors());
         coid.addAnnotation(annotationExprService.lomokFieldDefaultsPrivate());
         coid.setPublic(true).setInterface(false).setName(className);
+        if (arg.getIsJavabeanSerializable()) {
+            coid.addImplementedType("java.io.Serializable");
+        }
+        if (arg.getIsJavabeanCloneable()) {
+            coid.addImplementedType("Cloneable");
+        }
         String comment = MoreObjects.firstNonNull(arg.getDescription(), "");
-        JavadocUtils.setJavadoc(coid, comment, arg.getAuthorName() + " " + LocalDate.now());
+        JavadocUtils.setJavadoc(coid, comment, arg.getAuthor() + " " + LocalDate.now());
         cu.addType(coid);
 
         for (FieldArg fieldArg : arg.getFieldArgs()) {
@@ -86,6 +94,15 @@ public class JavabeanGeneratorServiceImpl implements JavabeanGeneratorService {
         // more for javabean
         if (arg.getMore4Javabean() != null) {
             arg.getMore4Javabean().accept(cu, coid);
+        }
+
+        if (arg.getIsJavabeanSerializable()) {
+            coid.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
+                    "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
+        }
+        if (arg.getIsJavabeanCloneable()) {
+            coid.getMembers().addLast(StaticJavaParser.parseBodyDeclaration(
+                    "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));
         }
 
         importExprService.extractQualifiedTypeToImport(cu);

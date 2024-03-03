@@ -61,7 +61,6 @@ public class GenerateDesignServiceImpl implements DesignGeneratorService {
                 config.getCommonConfig().getDesignPackage(), designName + ".java");
 
         List<PropertyDto> properties = tableStructureAnalysis.getProperties();
-        properties.removeIf(property -> config.getHiddenColumns().contains(property.getPropertyName()));
         Map<String, PropertyDto> propertiesByName = Maps.newHashMap();
 
         CompilationUnit cu = new CompilationUnit();

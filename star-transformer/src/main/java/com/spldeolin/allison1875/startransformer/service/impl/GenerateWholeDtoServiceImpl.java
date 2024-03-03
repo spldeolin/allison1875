@@ -1,9 +1,7 @@
 package com.spldeolin.allison1875.startransformer.service.impl;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
-import com.github.javaparser.StaticJavaParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
@@ -41,7 +39,9 @@ public class GenerateWholeDtoServiceImpl implements WholeDtoService {
         if (config.getEnableLotNoAnnounce()) {
             javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
         }
-        javabeanArg.setAuthorName(config.getCommonConfig().getAuthor());
+        javabeanArg.setAuthor(config.getCommonConfig().getAuthor());
+        javabeanArg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
+        javabeanArg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
         FieldArg cftFieldArg = new FieldArg();
         cftFieldArg.setTypeQualifier(analysis.getCftEntityQualifier());
         cftFieldArg.setFieldName(this.entityNameToVarName(analysis.getCftEntityName()));
@@ -78,13 +78,6 @@ public class GenerateWholeDtoServiceImpl implements WholeDtoService {
                 }
             }
         }
-        javabeanArg.setMore4Javabean((cu, javabean) -> {
-            if (config.getEnableImplementSerializable()) {
-                javabean.addImplementedType("java.io.Serializable");
-                javabean.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
-                        "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
-            }
-        });
         javabeanArg.setJavabeanExistenceResolution(FileExistenceResolutionEnum.RENAME);
         return javabeanGeneratorService.generate(javabeanArg);
     }

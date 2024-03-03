@@ -71,9 +71,6 @@ public class TableStructureAnalyzerServiceImpl implements TableStructureAnalyzer
         for (InformationSchemaDto infoSchema : infoSchemas) {
             TableStructureAnalysisDto tableStructureAnalysis = persistences.get(infoSchema.getTableName());
             String columnName = infoSchema.getColumnName();
-            if (config.getHiddenColumns().contains(columnName)) {
-                continue;
-            }
             PropertyDto property = new PropertyDto();
             property.setColumnName(columnName);
             property.setPropertyName(MoreStringUtils.toLowerCamel(columnName));
@@ -95,7 +92,7 @@ public class TableStructureAnalyzerServiceImpl implements TableStructureAnalyzer
                 tableStructureAnalysis.getIdProperties().add(property);
             } else {
                 tableStructureAnalysis.getNonIdProperties().add(property);
-                if (columnName.endsWith("_id") && !config.getNotKeyColumns().contains(columnName)) {
+                if (columnName.endsWith("_id")) {
                     tableStructureAnalysis.getKeyProperties().add(property);
                 }
             }

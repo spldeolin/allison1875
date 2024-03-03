@@ -56,12 +56,7 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     @NotNull Boolean enableGenerateDesign;
 
     /**
-     * mapper.xml的标签中，是否使用别名来引用Entity类
-     */
-    @NotNull Boolean isEntityUsingAlias;
-
-    /**
-     * # 生成出的Entity类是否以Entity作为类名的结尾
+     * 生成出的Entity类是否以Entity作为类名的结尾
      */
     @NotNull Boolean isEntityEndWithEntity;
 
@@ -76,24 +71,9 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     String notDeletedSql;
 
     /**
-     * 对项目隐藏，仅在数据库中可见的表字段
+     * 如果生成的Entity需要指定父类，指定父类的Class对象
      */
-    @NotNull List<String> hiddenColumns;
-
-    /**
-     * 即便符合persistence-generator对外键的定义，也不会被当作外键的表字段（一般用于忽略为创建人ID和更新人ID生成query方法）
-     */
-    @NotNull List<String> notKeyColumns;
-
-    /**
-     * Entity父类的全限定名
-     */
-    String superEntityQualifier;
-
-    /**
-     * 已在Entit父类中声明，无需在具体Entity中再次声明的表字段
-     */
-    @NotNull List<String> alreadyInSuperEntity;
+    Class<?> superEntity;
 
     /**
      * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
@@ -106,50 +86,8 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     @NotNull Boolean enableLotNoAnnounce;
 
     /**
-     * 是否为entity实现java.io.Serializable接口
-     */
-    @NotNull Boolean enableEntityImplementSerializable;
-
-    /**
-     * 是否为entity实现java.lang.Cloneable接口
-     */
-    @NotNull Boolean enableEntityImplementCloneable;
-
-    /**
      * 生成Entity时，文件已存在的解决方式
      */
     @NotNull FileExistenceResolutionEnum entityExistenceResolution;
-
-    @NotNull Boolean disableInsert;
-
-    @NotNull Boolean disableBatchInsert;
-
-    @NotNull Boolean disableBatchInsertEvenNull;
-
-    @NotNull Boolean disableBatchUpdate;
-
-    @NotNull Boolean disableBatchUpdateEvenNull;
-
-    @NotNull Boolean disableQueryById;
-
-    @NotNull Boolean disableUpdateById;
-
-    @NotNull Boolean disableUpdateByIdEvenNull;
-
-    @NotNull Boolean disableQueryByIds;
-
-    @NotNull Boolean disableQueryByIdsEachId;
-
-    @NotNull Boolean disableQueryByKey;
-
-    @NotNull Boolean disableDeleteByKey;
-
-    @NotNull Boolean disableQueryByKeys;
-
-    @NotNull Boolean disableQueryByEntity;
-
-    @NotNull Boolean disableListAll;
-
-    @NotNull Boolean disableInsertOrUpdate;
 
 }

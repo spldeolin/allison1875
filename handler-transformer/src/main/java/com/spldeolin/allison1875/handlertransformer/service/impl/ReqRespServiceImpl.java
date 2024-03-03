@@ -102,7 +102,9 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setPackageName(packageName);
             arg.setClassName(javabeanName);
             arg.setDescription(concatDtoDescription(initDecAnalysis));
-            arg.setAuthorName(config.getCommonConfig().getAuthor());
+            arg.setAuthor(config.getCommonConfig().getAuthor());
+            arg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
+            arg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
             arg.setMore4Javabean((tempCu, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
                     fieldService.more4SpecialTypeField(field, javabeanType);

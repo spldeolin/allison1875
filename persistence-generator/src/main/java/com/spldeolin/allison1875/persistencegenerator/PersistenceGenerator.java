@@ -190,12 +190,8 @@ public class PersistenceGenerator implements Allison1875MainService {
         }
     }
 
-    private String getEntityNameInXml(JavabeanGeneration javabeanGeneration) {
-        if (config.getIsEntityUsingAlias()) {
-            return javabeanGeneration.getJavabeanName();
-        } else {
+    protected String getEntityNameInXml(JavabeanGeneration javabeanGeneration) {
             return javabeanGeneration.getJavabeanQualifier();
-        }
     }
 
 }

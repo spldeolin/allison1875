@@ -23,11 +23,6 @@ public final class StarTransformerConfig extends Allison1875Config {
     @NotNull @Valid CommonConfig commonConfig;
 
     /**
-     * 是否为WholeDto类实现java.io.Serializable接口
-     */
-    @NotNull Boolean enableImplementSerializable;
-
-    /**
      * 是否在该生成的地方生成诸如 Allison 1875 Lot No: ST1000S-967D9357 的声明
      */
     @NotNull Boolean enableLotNoAnnounce;

@@ -61,9 +61,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateBatchInsertEvenNullMethod(TableStructureAnalysisDto persistence, String methodName) {
-        if (config.getDisableBatchInsertEvenNull()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -83,9 +80,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateBatchInsertMethod(TableStructureAnalysisDto persistence, String methodName) {
-        if (config.getDisableBatchInsert()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -112,9 +106,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateBatchUpdateEvenNullMethod(TableStructureAnalysisDto persistence, String methodName) {
-        if (config.getDisableBatchUpdateEvenNull()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
@@ -148,9 +139,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateBatchUpdateMethod(TableStructureAnalysisDto persistence, String methodName) {
-        if (config.getDisableBatchUpdate()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
@@ -186,9 +174,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateDeleteByKeyMethod(TableStructureAnalysisDto persistence,
             List<KeyMethodNameDto> KeyAndMethodNames) {
-        if (config.getDisableDeleteByKey() || !persistence.getIsDeleteFlagExist()) {
-            return Lists.newArrayList();
-        }
         List<String> result = Lists.newArrayList();
         for (KeyMethodNameDto KeyAndMethodName : KeyAndMethodNames) {
             List<String> xmlLines = Lists.newArrayList();
@@ -210,9 +195,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateInsertOrUpdateMethod(TableStructureAnalysisDto persistence, String entityName,
             String methodName) {
-        if (config.getDisableInsertOrUpdate()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -246,9 +228,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateInsertMethod(TableStructureAnalysisDto persistence, String entityName,
             String methodName) {
-        if (config.getDisableInsert()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
@@ -274,9 +253,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateListAllMethod(TableStructureAnalysisDto persistence, String methodName) {
-        if (config.getDisableListAll()) {
-            return null;
-        }
         List<String> result = Lists.newArrayList();
         String firstLine = "<select id=\"" + methodName + "\" ";
         firstLine += "resultMap=\"all\">";
@@ -298,10 +274,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateQueryByEntityMethod(TableStructureAnalysisDto persistence, String entityName,
             String methodName) {
-        if (config.getDisableQueryByEntity()) {
-            return null;
-        }
-
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(
                 String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName, entityName));
@@ -358,9 +330,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateQueryByIdMethod(TableStructureAnalysisDto persistence, String methodName) {
-        if (config.getDisableQueryById()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             String firstLine = "<select id=\"" + methodName + "\" ";
@@ -395,9 +364,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateQueryByKeysMethod(TableStructureAnalysisDto persistence,
             List<QueryByKeysDto> queryByKeysDtos) {
-        if (config.getDisableQueryByKeys()) {
-            return null;
-        }
         List<String> sourceCodeLines = Lists.newArrayList();
         for (QueryByKeysDto queryByKeysDto : queryByKeysDtos) {
             List<String> xmlLines = Lists.newArrayList();
@@ -427,9 +393,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateQueryByKeyMethod(TableStructureAnalysisDto persistence,
             List<KeyMethodNameDto> keyAndMethodNames) {
-        if (config.getDisableQueryByKey()) {
-            return null;
-        }
         List<String> result = Lists.newArrayList();
         for (KeyMethodNameDto keyAndMethodName : keyAndMethodNames) {
             List<String> xmlLines = Lists.newArrayList();
@@ -475,9 +438,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateUpdateByIdEvenNullMethod(TableStructureAnalysisDto persistence, String entityName,
             String methodName) {
-        if (config.getDisableUpdateByIdEvenNull()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
@@ -512,9 +472,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateUpdateByIdMethod(TableStructureAnalysisDto persistence, String entityName,
             String methodName) {
-        if (config.getDisableUpdateById()) {
-            return null;
-        }
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
