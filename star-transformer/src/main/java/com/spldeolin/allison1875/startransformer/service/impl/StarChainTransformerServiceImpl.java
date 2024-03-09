@@ -24,7 +24,7 @@ import com.spldeolin.allison1875.startransformer.service.StarChainTransformerSer
  * @author Deolin 2023-05-22
  */
 @Singleton
-public class TransformStarChainServiceImpl implements StarChainTransformerService {
+public class StarChainTransformerServiceImpl implements StarChainTransformerService {
 
     @Override
     public void transformStarChain(TransformStarChainArgs args) {

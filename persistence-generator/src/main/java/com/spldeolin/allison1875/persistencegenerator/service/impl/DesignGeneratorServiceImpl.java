@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class GenerateDesignServiceImpl implements DesignGeneratorService {
+public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
     @Inject
     private PersistenceGeneratorConfig config;

@@ -2,12 +2,12 @@ package com.spldeolin.allison1875.startransformer.service;
 
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.startransformer.javabean.TransformStarChainArgs;
-import com.spldeolin.allison1875.startransformer.service.impl.TransformStarChainServiceImpl;
+import com.spldeolin.allison1875.startransformer.service.impl.StarChainTransformerServiceImpl;
 
 /**
  * @author Deolin 2023-12-28
  */
-@ImplementedBy(TransformStarChainServiceImpl.class)
+@ImplementedBy(StarChainTransformerServiceImpl.class)
 public interface StarChainTransformerService {
 
     void transformStarChain(TransformStarChainArgs args);

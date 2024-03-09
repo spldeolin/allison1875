@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.startransformer.service.WholeDtoService;
  * @author Deolin 2023-05-22
  */
 @Singleton
-public class GenerateWholeDtoServiceImpl implements WholeDtoService {
+public class WholeDtoServiceImpl implements WholeDtoService {
 
     @Inject
     private StarTransformerConfig config;
