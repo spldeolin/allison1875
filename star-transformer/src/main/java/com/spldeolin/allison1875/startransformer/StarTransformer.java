@@ -34,7 +34,7 @@ public class StarTransformer implements Allison1875MainService {
     private StarChainService starChainService;
 
     @Inject
-    private WholeDtoService generateWholeDtoService;
+    private WholeDtoService wholeDtoService;
 
     @Inject
     private StarChainTransformerService starChainTransformerService;
@@ -66,7 +66,7 @@ public class StarTransformer implements Allison1875MainService {
                     // generate WholeDto
                     JavabeanGeneration wholeDtoGeneration;
                     try {
-                        wholeDtoGeneration = generateWholeDtoService.generateWholeDto(astForest, analysis);
+                        wholeDtoGeneration = wholeDtoService.generateWholeDto(astForest, analysis);
                         log.info("Whole DTO generated, name={} path={}", wholeDtoGeneration.getJavabeanName(),
                                 wholeDtoGeneration.getPath());
                     } catch (Exception e) {
