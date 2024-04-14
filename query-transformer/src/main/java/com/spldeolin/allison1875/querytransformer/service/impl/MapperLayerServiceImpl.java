@@ -17,6 +17,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.common.base.Joiner;
@@ -372,7 +373,11 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             GenerateParamRetval paramGeneration, GenerateReturnTypeRetval resultGeneration) {
         String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
-            startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
+            Parameter onlyParam = paramGeneration.getParameters().get(0);
+            if (onlyParam.getAnnotations().stream()
+                    .noneMatch(a -> a.getNameAsString().equals("org.apache.ibatis.annotations.Param"))) {
+                startTag += " parameterType='" + onlyParam.getTypeAsString() + "'";
+            }
         }
         if (resultGeneration.getElementTypeQualifier() != null && !resultGeneration.getElementTypeQualifier()
                 .equals(designMeta.getEntityQualifier())) {
