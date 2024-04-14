@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -22,7 +23,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.exception.JsonException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +36,13 @@ public class JsonUtils {
 
     private static final ObjectMapper om = createObjectMapper();
 
+    private JsonUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
+    /**
+     * 创建一个基础ObjectMapper对象
+     */
     public static ObjectMapper createObjectMapper() {
         ObjectMapper om = new ObjectMapper();
 
@@ -45,43 +52,19 @@ public class JsonUtils {
         // 使用所在操作系统的时区
         om.setTimeZone(TimeZone.getDefault());
 
-        // 配置Java8的LocalDateTime、LocalDate、LocalTime的pattern（yyyy-MM-dd HH:mm:ss、yyyy-MM-dd、HH:mm:ss）
+        // Java8 LocalDateTime、LocalDate、LocalTime的pattern（yyyy-MM-dd HH:mm:ss、yyyy-MM-dd、HH:mm:ss）
         om.registerModule(java8timeSimplePattern());
 
-        // 配置java.util.Date的pattern
+        // Java1 java.util.Date的pattern（yyyy-MM-dd HH:mm:ss）
         om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
         return om;
     }
 
-    private static SimpleModule java8timeSimplePattern() {
-        SimpleModule module = new JavaTimeModule();
-        DateTimeFormatter ldtFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter ldFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter ltFormattter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(ldtFormatter))
-                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(ldtFormatter))
-                .addSerializer(LocalDate.class, new LocalDateSerializer(ldFormatter))
-                .addDeserializer(LocalDate.class, new LocalDateDeserializer(ldFormatter))
-                .addSerializer(LocalTime.class, new LocalTimeSerializer(ltFormattter))
-                .addDeserializer(LocalTime.class, new LocalTimeDeserializer(ltFormattter));
-        return module;
-    }
-
-    private JsonUtils() {
-        throw new UnsupportedOperationException("Never instantiate me.");
-    }
-
-    /**
-     * 将对象转化为JSON
-     */
     public static String toJson(Object object) {
         return toJson(object, om);
     }
 
-    /**
-     * 将对象转化为JSON
-     */
     public static String toJson(Object object, ObjectMapper om) {
         try {
             return om.writeValueAsString(object);
@@ -91,16 +74,10 @@ public class JsonUtils {
         }
     }
 
-    /**
-     * 将对象转化为美化后的JSON
-     */
     public static String toJsonPrettily(Object object) {
         return toJsonPrettily(object, om);
     }
 
-    /**
-     * 将对象转化为美化后的JSON
-     */
     public static String toJsonPrettily(Object object, ObjectMapper om) {
         try {
             return om.writerWithDefaultPrettyPrinter().writeValueAsString(object);
@@ -123,16 +100,10 @@ public class JsonUtils {
         }
     }
 
-    /**
-     * 将JSON转化为对象
-     */
     public static <T> T toObject(String json, Class<T> clazz) throws JsonException {
         return toObject(json, clazz, om);
     }
 
-    /**
-     * 将JSON转化为对象
-     */
     public static <T> T toObject(String json, Class<T> clazz, ObjectMapper om) throws JsonException {
         try {
             return om.readValue(json, clazz);
@@ -142,37 +113,24 @@ public class JsonUtils {
         }
     }
 
-    /**
-     * 将JSON转化为对象列表
-     */
     public static <T> List<T> toListOfObject(String json, Class<T> clazz) throws JsonException {
         return toListOfObject(json, clazz, om);
     }
 
-    /**
-     * 将JSON转化为对象列表
-     */
     public static <T> List<T> toListOfObject(String json, Class<T> clazz, ObjectMapper om) throws JsonException {
         try {
-            @SuppressWarnings("unchecked") Class<T[]> arrayClass = (Class<T[]>) Class.forName(
-                    "[L" + clazz.getName() + ";");
-            return Lists.newArrayList(om.readValue(json, arrayClass));
-        } catch (IOException | ClassNotFoundException e) {
+            CollectionType collectionType = om.getTypeFactory().constructCollectionType(List.class, clazz);
+            return om.readValue(json, collectionType);
+        } catch (IOException e) {
             log.error("json={}, clazz={}", json, clazz, e);
             throw new JsonException(e);
         }
     }
 
-    /**
-     * JSON -> 参数化的对象
-     */
     public static <T> T toParameterizedObject(String json, TypeReference<T> typeReference) throws JsonException {
         return toParameterizedObject(json, typeReference, om);
     }
 
-    /**
-     * JSON -> 参数化的对象
-     */
     public static <T> T toParameterizedObject(String json, TypeReference<T> typeReference, ObjectMapper om)
             throws JsonException {
         try {
@@ -183,20 +141,10 @@ public class JsonUtils {
         }
     }
 
-    /**
-     * JSON -> JsonNode对象
-     *
-     * <strong>除非JSON对应数据结构在运行时是变化的，否则不建议使这个方法</strong>
-     */
     public static JsonNode toTree(String json) throws JsonException {
         return toTree(json, om);
     }
 
-    /**
-     * JSON -> JsonNode对象
-     *
-     * <strong>除非JSON对应数据结构在运行时是变化的，否则不建议使这个方法</strong>
-     */
     public static JsonNode toTree(String json, ObjectMapper om) throws JsonException {
         try {
             return om.readTree(json);
@@ -204,6 +152,20 @@ public class JsonUtils {
             log.error("json={}", json, e);
             throw new JsonException(e);
         }
+    }
+
+    private static SimpleModule java8timeSimplePattern() {
+        SimpleModule module = new JavaTimeModule();
+        DateTimeFormatter ldtFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter ldFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter ltFormattter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(ldtFormatter))
+                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(ldtFormatter))
+                .addSerializer(LocalDate.class, new LocalDateSerializer(ldFormatter))
+                .addDeserializer(LocalDate.class, new LocalDateDeserializer(ldFormatter))
+                .addSerializer(LocalTime.class, new LocalTimeSerializer(ltFormattter))
+                .addDeserializer(LocalTime.class, new LocalTimeDeserializer(ltFormattter));
+        return module;
     }
 
 }
