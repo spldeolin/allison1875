@@ -19,7 +19,7 @@ Loggers:
   Logger:
     name: com.spldeolin
     additivity: false
-    level: debug # com.spldeolin的类只打印debug及以上级别
+    level: info # com.spldeolin的类只打印debug及以上级别
     includeLocation: true
     AppenderRef:
       - ref: console
