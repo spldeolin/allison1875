@@ -19,7 +19,7 @@ import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 public class JsonSchemaTraverseUtilsTest {
 
     public static void main(String[] args) throws JsonSchemaException {
-        JsonSchema root = JsonSchemaGenerateUtils.generateSchema("json_schema_traverse_test.RootDto",
+        JsonSchema root = JsonSchemaGenerateUtils.generateSchema("json_schema_traverse_test.StudentDTO",
                 new JsonSchemaGenerator(JsonUtils.createObjectMapper()));
 
         List<String> names = Lists.newArrayList();
