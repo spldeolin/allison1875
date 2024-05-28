@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- You can override this to have a custom pattern -->
+    <property name="LOG_PATTERN"
+        value="%d{HH:mm:ss.SSS} [%level] [%thread] %logger{0}:%line - %m%n"/>
+
+    <!-- Appender to log to console -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+    </root>
+
+    <logger name="com.spldeolin.allison1875" level="DEBUG" additivity="false">
+        <appender-ref ref="console"/>
+    </logger>
+</configuration>

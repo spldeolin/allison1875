@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.common.util;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -7,6 +8,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +22,11 @@ public class ValidUtils {
     private static final Validator validator;
 
     static {
-        Locale.setDefault(Locale.ENGLISH);
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            validator = factory.getValidator();
-        }
+        ValidatorFactory validatorFactory = Validation.byDefaultProvider().configure().messageInterpolator(
+                new ResourceBundleMessageInterpolator(Collections.emptySet(), Locale.getDefault(),
+                        context -> Locale.ENGLISH, false)).buildValidatorFactory();
+        validator = validatorFactory.getValidator();
+        validatorFactory.close();
     }
 
     private ValidUtils() {
