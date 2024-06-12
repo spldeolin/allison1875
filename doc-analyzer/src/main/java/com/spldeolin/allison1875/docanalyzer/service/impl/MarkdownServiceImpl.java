@@ -20,6 +20,7 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -45,14 +46,14 @@ public class MarkdownServiceImpl implements MarkdownService {
     private DocAnalyzerConfig config;
 
     @Override
-    public void flushToMarkdown(List<EndpointDto> endpoints) {
+    public void flushToMarkdown(List<EndpointDto> endpoints, AstForest astForest) {
         Multimap<String/*cat*/, EndpointDto> endpointMap = ArrayListMultimap.create();
         endpoints.forEach(e -> endpointMap.put(e.getCat(), e));
 
         for (String cat : endpointMap.keySet()) {
             StringBuilder content = new StringBuilder();
             for (EndpointDto endpoint : endpointMap.get(cat)) {
-                content.append(this.generateEndpointDoc(endpoint));
+                content.append(this.generateEndpointDoc(endpoint, astForest));
             }
 
             File md = new File(config.getMarkdownDirectoryPath() + File.separator + cat + ".md");
@@ -65,7 +66,7 @@ public class MarkdownServiceImpl implements MarkdownService {
         }
     }
 
-    protected String generateEndpointDoc(EndpointDto endpoint) {
+    protected String generateEndpointDoc(EndpointDto endpoint, AstForest astForest) {
         StringBuilder result = new StringBuilder(64);
         String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
         if (StringUtils.isEmpty(title)) {
@@ -87,10 +88,10 @@ public class MarkdownServiceImpl implements MarkdownService {
         result.append(this.generateReqOrRespDoc(endpoint, false));
 
         // 生成cURL
-        result.append(this.generateCurl(endpoint));
+//        result.append(this.generateCurl(endpoint, astForest));
 
         // 生成返回值示例
-        result.append(this.generateRespSample(endpoint));
+//        result.append(this.generateRespSample(endpoint, astForest));
 
         result.append(this.generateMoreDoc(endpoint));
 
@@ -99,12 +100,12 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result.toString();
     }
 
-    private String generateRespSample(EndpointDto endpoint) {
+    private String generateRespSample(EndpointDto endpoint, AstForest astForest) {
         if (config.getEnableResponseBodySample() && endpoint.getResponseBodyDescribe() != null) {
             return "";
         }
         StringBuilder result = new StringBuilder();
-        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe());
+        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe(), astForest);
         if (fakeRespJson != null) {
             result.append("### Response Body的示例\n");
             result.append("```json\n");
@@ -114,12 +115,12 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result.toString();
     }
 
-    private String generateCurl(EndpointDto endpoint) {
+    private String generateCurl(EndpointDto endpoint, AstForest astForest) {
         if (config.getEnableCurl() && endpoint.getRequestBodyDescribe() != null) {
             return "";
         }
         StringBuilder result = new StringBuilder(64);
-        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe());
+        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe(), astForest);
         if (fakeReqJson != null) {
             result.append("### cURL\n");
             result.append("```shell\n");
@@ -132,9 +133,9 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result.toString();
     }
 
-    private String fakeJsonByDescribe(String describe) {
+    private String fakeJsonByDescribe(String describe, AstForest astForest) {
         try {
-            Object fakeDto = er.nextObject(LoadClassUtils.loadClass(describe, this.getClass().getClassLoader()));
+            Object fakeDto = er.nextObject(LoadClassUtils.loadClass(describe, astForest.getClassLoader()));
             return JsonUtils.toJsonPrettily(fakeDto);
         } catch (Exception e) {
             log.error("fail to fake json, describe={}", describe, e);

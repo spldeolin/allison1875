@@ -19,7 +19,6 @@ import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.service.EnumService;
@@ -58,7 +57,8 @@ public class FieldServiceImpl implements FieldService {
                         AnalyzeFieldVarsRetval dto = new AnalyzeFieldVarsRetval();
                         String fieldVarName = fieldVar.getNameAsString();
                         dto.getCommentLines().addAll(fieldCommentLines);
-                        dto.getAnalyzeEnumConstantsRetvals().addAll(enumService.analyzeEnumConstants(fieldVar));
+                        dto.getAnalyzeEnumConstantsRetvals()
+                                .addAll(enumService.analyzeEnumConstants(fieldVar, astForest));
                         dto.getMoreDocLines().addAll(this.analyzeMoreAndGenerateDoc(field, fieldVar));
                         result.put(coidQualifier, fieldVarName, dto);
                     }
@@ -73,9 +73,10 @@ public class FieldServiceImpl implements FieldService {
 
     protected Set<File> buildAnalysisScope(AstForest astForest) {
         Set<File> result = Sets.newLinkedHashSet();
-        // maven project
-        FileUtils.iterateFiles(MavenUtils.findMavenProject(astForest.getPrimaryClass()), BaseConstant.JAVA_EXTENSIONS,
-                true).forEachRemaining(result::add);
+        // TODO ， root project只有docanalyzer用，写进配置算了
+        astForest.findResourceFile(".").ifPresent(moduleRoot -> {
+            FileUtils.iterateFiles(moduleRoot, BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(result::add);
+        });
         // dependent projects
         for (File dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
             FileUtils.iterateFiles(dependencyProjectDirectory, BaseConstant.JAVA_EXTENSIONS, true)

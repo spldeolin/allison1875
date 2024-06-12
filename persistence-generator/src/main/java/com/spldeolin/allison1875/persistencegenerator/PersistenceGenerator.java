@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
-import java.nio.file.Path;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -168,15 +167,15 @@ public class PersistenceGenerator implements Allison1875MainService {
             // 基础方法替换到MapperXml中
             for (String mapperXmlDirectoryPath : config.getCommonConfig().getMapperXmlDirectoryPaths()) {
                 try {
-                    Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
-                            .resolve(mapperXmlDirectoryPath);
-                    ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
-                    rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
-                    rmxmmArgs.setMapper(mapper);
-                    rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory);
-                    rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
-                    FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
-                    flushes.add(xmlFlush);
+                    astForest.findResourceFile(mapperXmlDirectoryPath).ifPresent(mapperXmlDirectory -> {
+                        ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
+                        rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
+                        rmxmmArgs.setMapper(mapper);
+                        rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
+                        rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
+                        FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
+                        flushes.add(xmlFlush);
+                    });
                 } catch (Exception e) {
                     log.error("写入Mapper.xml时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
                 }

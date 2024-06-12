@@ -9,7 +9,7 @@ import com.spldeolin.allison1875.common.util.MavenUtils;
 
 /**
  * <pre>
- *                               AstForestRoot
+ *                               SourceRoot
  *                             /
  *                 ModuleRoot < - other Root
  *               /             \

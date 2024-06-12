@@ -13,6 +13,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.PrimaryClassBuiltAstForest;
 import com.spldeolin.allison1875.common.interceptor.ValidInterceptor;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.service.AstFilterService;
@@ -74,7 +75,8 @@ public class Allison1875 {
             // build AST forest
             AstFilterService astFilterService = injector.getInstance(AstFilterService.class);
             AstForestResidenceService astForestResidenceService = injector.getInstance(AstForestResidenceService.class);
-            AstForest astForest = new AstForest(primaryClass, astForestResidenceService, astFilterService);
+            AstForest astForest = new PrimaryClassBuiltAstForest(primaryClass, astForestResidenceService,
+                    astFilterService);
 
             // process main services
             log.info("process main service [{}], module={}", module.declareMainService().getName(), module);

@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.sqlapigenerator.service.impl;
 
-import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
@@ -30,13 +29,13 @@ public class TrackCoidDetectorServiceImpl implements TrackCoidDetectorService {
         TrackCoidDto result = new TrackCoidDto();
 
         for (String mapperXmlDirectoryPath : config.getCommonConfig().getMapperXmlDirectoryPaths()) {
-            Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
-                    .resolve(mapperXmlDirectoryPath);
-            FileUtils.iterateFiles(mapperXmlDirectory.toFile(), new String[]{"xml"}, true).forEachRemaining(xmlFile -> {
-                if (config.getMapperName().equals(FilenameUtils.getBaseName(xmlFile.getName()))) {
-                    result.getMapperXmls().add(xmlFile);
-                }
-            });
+            astForest.findResourceFile(mapperXmlDirectoryPath).ifPresent(
+                    mapperXmlDirectory -> FileUtils.iterateFiles(mapperXmlDirectory, new String[]{"xml"}, true)
+                            .forEachRemaining(xmlFile -> {
+                                if (config.getMapperName().equals(FilenameUtils.getBaseName(xmlFile.getName()))) {
+                                    result.getMapperXmls().add(xmlFile);
+                                }
+                            }));
         }
         for (CompilationUnit cu : astForest) {
             cu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)

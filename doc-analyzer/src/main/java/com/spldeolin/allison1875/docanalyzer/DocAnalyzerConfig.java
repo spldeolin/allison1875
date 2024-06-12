@@ -36,7 +36,8 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 文档保存到...
      */
-    @NotNull FlushToEnum flushTo;
+    @NotNull(message = "must be 'LOCAL_MARKDOWN' or 'YAPI'")
+    FlushToEnum flushTo;
 
     /**
      * 文档输出到YApi时，YApi请求URL

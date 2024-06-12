@@ -111,7 +111,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         String serviceName =
                 MoreStringUtils.toUpperCamel(args.getInitDecAnalysisDto().getMvcHandlerMethodName()) + "Service";
 
-        Path sourceRoot = args.getAstForest().getAstForestRoot();
+        Path sourceRoot = args.getAstForest().getSourceRoot();
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(config.getCommonConfig().getServicePackage());
         importExprService.copyImports(args.getControllerCu(), serviceCu);

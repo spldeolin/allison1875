@@ -90,7 +90,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             // create
             log.info("Mapper文件不存在，创建它。 [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
-            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
+            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
                     config.getCommonConfig().getMapperPackage(), persistence.getMapperName() + ".java"));
             cu.setPackageDeclaration(config.getCommonConfig().getMapperPackage());
             mapper = new ClassOrInterfaceDeclaration();

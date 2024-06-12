@@ -125,8 +125,11 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            File mapperXml = astForestResidenceService.findModuleRoot(args.getAstForest().getPrimaryClass())
-                    .resolve(mapperRelativePath).toFile();
+            Optional<File> mapperXmlOpt = args.getAstForest().findResourceFile(mapperRelativePath);
+            if (!mapperXmlOpt.isPresent()) {
+                continue;
+            }
+            File mapperXml = mapperXmlOpt.get();
 
             List<String> xmlLines = Lists.newArrayList();
             xmlLines.add("");

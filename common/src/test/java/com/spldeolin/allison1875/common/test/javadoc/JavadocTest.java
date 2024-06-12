@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.PrimaryClassBuiltAstForest;
 import com.spldeolin.allison1875.common.service.impl.AcceptAllAstFilterService;
 import com.spldeolin.allison1875.common.service.impl.MavenAstForestResidenceService;
 import com.spldeolin.allison1875.common.test.AstForestTest;
@@ -17,7 +18,7 @@ import com.spldeolin.allison1875.common.util.JavadocUtils;
 public class JavadocTest {
 
     public static void main(String[] args) throws IOException {
-        AstForest astForest = new AstForest(AstForestTest.class, new MavenAstForestResidenceService(),
+        AstForest astForest = new PrimaryClassBuiltAstForest(AstForestTest.class, new MavenAstForestResidenceService(),
                 new AcceptAllAstFilterService());
         CompilationUnit cu = astForest.findCu("com.spldeolin.allison1875.common.test.javadoc.TestSubject").get();
 //        LexicalPreservingPrinter.setup(cu);

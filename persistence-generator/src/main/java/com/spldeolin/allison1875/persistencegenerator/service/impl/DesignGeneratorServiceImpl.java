@@ -57,7 +57,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
 
         String designName = concatDesignName(tableStructureAnalysis);
-        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(args.getAstForest().getAstForestRoot(),
+        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(args.getAstForest().getSourceRoot(),
                 config.getCommonConfig().getDesignPackage(), designName + ".java");
 
         List<PropertyDto> properties = tableStructureAnalysis.getProperties();
