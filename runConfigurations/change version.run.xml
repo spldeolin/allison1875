@@ -13,7 +13,7 @@
             <list>
               <option value="versions:set"/>
               <option value="-DgenerateBackupPoms=false"/>
-              <option value="-DnewVersion=10.1-SNAPSHOT"/>
+                <option value="-DnewVersion=10.1"/>
             </list>
           </option>
           <option name="multimoduleDir"/>
