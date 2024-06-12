@@ -1,0 +1,5 @@
+# change version
+mvn versions:set -DgenerateBackupPoms=false -DnewVersion=1001.0-SNAPSHOT
+
+# install
+mvn clean source:jar install -Dmaven.test.skip=true
