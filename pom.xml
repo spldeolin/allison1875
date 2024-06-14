@@ -9,7 +9,6 @@
     <version>11.0-SNAPSHOT</version>
 
     <modules>
-        <module>allison1875-all</module>
         <module>common</module>
         <module>doc-analyzer</module>
         <module>handler-transformer</module>
@@ -17,7 +16,6 @@
         <module>persistence-generator-facade</module>
         <module>query-transformer</module>
         <module>star-transformer</module>
-        <module>sqlapi-generator</module>
         <module>allison1875-maven-plugin</module>
     </modules>
 
