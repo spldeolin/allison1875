@@ -246,7 +246,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         meta.setMapperQualifier(args.getMapper().getFullyQualifiedName()
                 .orElseThrow(() -> new QualifierAbsentException(args.getMapper())));
         meta.setMapperName(args.getMapper().getNameAsString());
-        meta.setMapperRelativePaths(config.getCommonConfig().getMapperXmlDirectoryPaths().stream()
+        meta.setMapperRelativePaths(config.getCommonConfig().getMapperXmlDirectories().stream()
                 .map(one -> one + File.separator + tableStructureAnalysis.getMapperName() + ".xml")
                 .collect(Collectors.toList()));
         if (tableStructureAnalysis.getIsDeleteFlagExist()) {

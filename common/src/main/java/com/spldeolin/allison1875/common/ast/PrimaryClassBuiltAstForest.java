@@ -105,15 +105,15 @@ public final class PrimaryClassBuiltAstForest implements AstForest {
             log.warn("fail to parse cu, qualifier={}", primaryTypeQualifier, e);
             return Optional.empty();
         }
-        if (!astFilterService.accept(cu)) {
+        if (astFilterService != null && !astFilterService.accept(cu)) {
             return Optional.empty();
         }
         return Optional.of(cu);
     }
 
     @Override
-    public Optional<File> findResourceFile(String relativePath) {
-        File file = astForestResidenceService.findModuleRoot(primaryClass).resolve(relativePath).toFile();
+    public Optional<File> resolve(String relativePathOrAbsolutePath) {
+        File file = sourceRoot.resolve(relativePathOrAbsolutePath).toFile();
         if (file.exists()) {
             return Optional.of(file);
         }

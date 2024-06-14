@@ -1,10 +1,10 @@
 package com.spldeolin.allison1875.docanalyzer;
 
-
-import java.io.File;
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
@@ -24,14 +24,29 @@ import lombok.experimental.FieldDefaults;
 public final class DocAnalyzerConfig extends Allison1875Config {
 
     /**
-     * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
+     * 共用配置
      */
-    @NotNull List<@NotNull File> dependencyProjectDirectories;
+    @NotNull
+    @Valid
+    CommonConfig commonConfig;
+
+    /**
+     * Maven根项目（相对于SourceRoot的路径 或 绝对路径 皆可）
+     */
+    @NotNull
+    String rootProjectDirectory;
+
+    /**
+     * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于SourceRoot的路径 或 绝对路径 皆可）
+     */
+    @NotNull
+    List<String> dependencyProjectDirectories;
 
     /**
      * 全局URL前缀
      */
-    @NotNull String globalUrlPrefix;
+    @NotNull
+    String globalUrlPrefix;
 
     /**
      * 文档保存到...
@@ -64,26 +79,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
      */
     Boolean enableResponseBodySample;
 
-    /**
-     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
-     */
-    @NotNull Boolean enableNoModifyAnnounce;
-
-    /**
-     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: DA1000S-967D9357 的声明
-     */
-    @NotNull Boolean enableLotNoAnnounce;
-
     @Override
     public List<InvalidDto> invalidSelf() {
         List<InvalidDto> invalids = super.invalidSelf();
-        for (File dependencyProjectDirectory : dependencyProjectDirectories) {
-            if (!dependencyProjectDirectory.exists() || !dependencyProjectDirectory.isDirectory()) {
-                invalids.add(new InvalidDto().setPath("dependencyProjectDirectories")
-                        .setValue(ValidUtils.formatValue(dependencyProjectDirectory))
-                        .setReason("must exist and be a directory"));
-            }
-        }
         if (FlushToEnum.YAPI.equals(flushTo)) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))

@@ -292,13 +292,13 @@ public class YApiServiceImpl implements YApiService {
         code += endpoint.getSourceCode();
 
         String allison1875Announce = "";
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableNoModifyAnnounce() || config.getCommonConfig().getEnableLotNoAnnounce()) {
             allison1875Announce += BaseConstant.NEW_LINE + "---";
-            if (config.getEnableNoModifyAnnounce()) {
+            if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
                 allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
             }
-            if (config.getEnableLotNoAnnounce()) {
-                if (config.getEnableNoModifyAnnounce()) {
+            if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+                if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
                     allison1875Announce += " ";
                 } else {
                     allison1875Announce += BaseConstant.NEW_LINE;

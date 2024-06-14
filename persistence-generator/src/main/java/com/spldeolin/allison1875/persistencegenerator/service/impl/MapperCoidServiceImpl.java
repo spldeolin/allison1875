@@ -112,7 +112,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperDescription(TableStructureAnalysisDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
@@ -419,13 +419,13 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperMethodComment(TableStructureAnalysisDto persistence, String methodDescription) {
         String result = methodDescription;
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableNoModifyAnnounce() || config.getCommonConfig().getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (config.getEnableNoModifyAnnounce()) {
+        if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

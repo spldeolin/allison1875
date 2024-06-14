@@ -101,14 +101,18 @@ public class MavenProjectBuiltAstForest implements AstForest {
             log.warn("fail to parse cu, qualifier={}", primaryTypeQualifier, e);
             return Optional.empty();
         }
-        if (!astFilterService.accept(cu)) {
+        if (astFilterService != null && !astFilterService.accept(cu)) {
             return Optional.empty();
         }
         return Optional.of(cu);
     }
 
     @Override
-    public Optional<File> findResourceFile(String relativePath) {
+    public Optional<File> resolve(String relativePathOrAbsolutePath) {
+        File sourceFile = sourceRoot.toPath().resolve(relativePathOrAbsolutePath).toFile();
+        if (sourceFile.exists()) {
+            return Optional.of(sourceFile);
+        }
         return Optional.empty();
     }
 

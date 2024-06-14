@@ -86,7 +86,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         chainAnalysis.setMethodName(methodName);
 
         MethodDeclaration method = new MethodDeclaration();
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             method.setJavadocComment(chainAnalysis.getLotNo());
         }
         method.setType(args.getClonedReturnType());
@@ -125,7 +125,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            Optional<File> mapperXmlOpt = args.getAstForest().findResourceFile(mapperRelativePath);
+            Optional<File> mapperXmlOpt = args.getAstForest().resolve(mapperRelativePath);
             if (!mapperXmlOpt.isPresent()) {
                 continue;
             }
@@ -366,7 +366,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     }
 
     private String concatLotNoComment(ChainAnalysisDto chainAnalysis) {
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
         }
         return "";

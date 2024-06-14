@@ -31,8 +31,6 @@ public class Allison1875 {
 
     public static final String SHORT_VERSION = "1001S";
 
-    private static final String version = "Allison 1875 10.1-SNAPSHOT";
-
     static {
         String banner;
         try {
@@ -41,10 +39,10 @@ public class Allison1875 {
             throw new UncheckedIOException(e);
         }
 
-        System.out.println(banner);
-        System.out.println(version);
-        System.out.println("More information at: https://github.com/spldeolin/allison1875");
-        System.out.println();
+        log.info(banner);
+    }
+
+    public static void allison1875() {
     }
 
     public static void allison1875(Class<?> primaryClass, Allison1875Module... allison1875Modules) {

@@ -561,10 +561,10 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     private String concatXmlComment(TableStructureAnalysisDto persistence) {
         String result = "<!--";
-        if (config.getEnableNoModifyAnnounce()) {
+        if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
             result += " " + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             result += " " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         result += " -->";

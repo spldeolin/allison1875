@@ -65,7 +65,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getCommonConfig().getCondPackage());
-            if (config.getEnableLotNoAnnounce()) {
+            if (config.getCommonConfig().getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Cond");
@@ -166,7 +166,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(config.getCommonConfig().getRecordPackage());
-            if (config.getEnableLotNoAnnounce()) {
+            if (config.getCommonConfig().getEnableLotNoAnnounce()) {
                 javabeanArg.setDescription(chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Record");

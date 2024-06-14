@@ -135,7 +135,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     GenerateMvcHandlerArgs gmhArgs = new GenerateMvcHandlerArgs();
                     gmhArgs.setMvcHandlerUrl(initDecAnalysis.getMvcHandlerUrl());
                     String description = initDecAnalysis.getMvcHandlerDescription();
-                    if (config.getEnableLotNoAnnounce()) {
+                    if (config.getCommonConfig().getEnableLotNoAnnounce()) {
                         description += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                                 + initDecAnalysis.getLotNo();
                     }

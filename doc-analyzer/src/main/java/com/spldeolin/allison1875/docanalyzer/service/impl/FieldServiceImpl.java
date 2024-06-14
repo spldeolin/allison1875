@@ -73,14 +73,14 @@ public class FieldServiceImpl implements FieldService {
 
     protected Set<File> buildAnalysisScope(AstForest astForest) {
         Set<File> result = Sets.newLinkedHashSet();
-        // TODO ， root project只有docanalyzer用，写进配置算了
-        astForest.findResourceFile(".").ifPresent(moduleRoot -> {
-            FileUtils.iterateFiles(moduleRoot, BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(result::add);
-        });
+        astForest.resolve(config.getRootProjectDirectory()).ifPresent(
+                rootProject -> FileUtils.iterateFiles(rootProject, BaseConstant.JAVA_EXTENSIONS, true)
+                        .forEachRemaining(result::add));
         // dependent projects
-        for (File dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
-            FileUtils.iterateFiles(dependencyProjectDirectory, BaseConstant.JAVA_EXTENSIONS, true)
-                    .forEachRemaining(result::add);
+        for (String dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
+            astForest.resolve(dependencyProjectDirectory).ifPresent(
+                    dependencyProject -> FileUtils.iterateFiles(dependencyProject, BaseConstant.JAVA_EXTENSIONS, true)
+                            .forEachRemaining(result::add));
         }
         return result;
     }

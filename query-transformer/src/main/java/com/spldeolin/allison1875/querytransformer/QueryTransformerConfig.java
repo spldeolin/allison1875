@@ -22,9 +22,4 @@ public final class QueryTransformerConfig extends Allison1875Config {
      */
     @NotNull @Valid CommonConfig commonConfig;
 
-    /**
-     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: QT1000S-967D9357 的声明
-     */
-    @NotNull Boolean enableLotNoAnnounce;
-
 }

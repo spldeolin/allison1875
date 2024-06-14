@@ -76,16 +76,6 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
     Class<?> superEntity;
 
     /**
-     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
-     */
-    @NotNull Boolean enableNoModifyAnnounce;
-
-    /**
-     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: PG1000S-967D9357 的声明
-     */
-    @NotNull Boolean enableLotNoAnnounce;
-
-    /**
      * 生成Entity时，文件已存在的解决方式
      */
     @NotNull FileExistenceResolutionEnum entityExistenceResolution;

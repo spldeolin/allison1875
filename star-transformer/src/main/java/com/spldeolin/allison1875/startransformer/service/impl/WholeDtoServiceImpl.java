@@ -36,7 +36,7 @@ public class WholeDtoServiceImpl implements WholeDtoService {
         javabeanArg.setAstForest(astForest);
         javabeanArg.setPackageName(config.getCommonConfig().getWholeDtoPackage());
         javabeanArg.setClassName(analysis.getWholeDtoName());
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
         }
         javabeanArg.setAuthor(config.getCommonConfig().getAuthor());

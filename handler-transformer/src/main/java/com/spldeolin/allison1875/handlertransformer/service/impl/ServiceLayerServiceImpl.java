@@ -166,7 +166,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
     private String concatServiceDescription(InitDecAnalysisDto initDecAnalysis) {
         String result = "";
-        if (config.getEnableLotNoAnnounce()) {
+        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                     + initDecAnalysis.getLotNo();
         }
