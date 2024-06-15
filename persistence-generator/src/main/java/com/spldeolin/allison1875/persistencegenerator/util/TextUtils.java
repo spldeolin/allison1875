@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.util;
 
 import java.util.List;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.util.CollectionUtils;

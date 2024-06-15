@@ -13,6 +13,7 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
@@ -39,6 +40,9 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     @Inject
     private AnnotationExprService annotationExprService;
 
+    @Inject
+    private CommonConfig commonConfig;
+    
     @Inject
     private HandlerTransformerConfig config;
 
@@ -113,14 +117,13 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
         Path sourceRoot = args.getAstForest().getSourceRoot();
         CompilationUnit serviceCu = new CompilationUnit();
-        serviceCu.setPackageDeclaration(config.getCommonConfig().getServicePackage());
+        serviceCu.setPackageDeclaration(commonConfig.getServicePackage());
         importExprService.copyImports(args.getControllerCu(), serviceCu);
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         String comment = concatServiceDescription(args.getInitDecAnalysisDto());
-        JavadocUtils.setJavadoc(service, comment, config.getCommonConfig().getAuthor());
+        JavadocUtils.setJavadoc(service, comment, commonConfig.getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
-        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
-                config.getCommonConfig().getServicePackage(),
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServicePackage(),
                 service.getName() + ".java");
 
         // anti-duplication
@@ -133,18 +136,17 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         log.info("generate Service [{}]", service.getName());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(config.getCommonConfig().getServiceImplPackage());
+        serviceImplCu.setPackageDeclaration(commonConfig.getServiceImplPackage());
         importExprService.copyImports(args.getControllerCu(), serviceImplCu);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-        JavadocUtils.setJavadoc(serviceImpl, comment, config.getCommonConfig().getAuthor());
+        JavadocUtils.setJavadoc(serviceImpl, comment, commonConfig.getAuthor());
         serviceImpl.addAnnotation(annotationExprService.lombokSlf4J());
         serviceImpl.addAnnotation(annotationExprService.springService());
         String serviceImplName = service.getNameAsString() + "Impl";
         serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName).addImplementedType(
                 service.getFullyQualifiedName().orElseThrow(() -> new QualifierAbsentException(service)));
         serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot,
-                config.getCommonConfig().getServiceImplPackage(),
+        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServiceImplPackage(),
                 serviceImpl.getName() + ".java");
 
         // anti-duplication
@@ -160,13 +162,13 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         result.setServiceImpl(serviceImpl);
         result.setServiceImplCu(serviceImplCu);
         result.setServiceVarName(MoreStringUtils.toLowerCamel(service.getNameAsString()));
-        result.setServiceQualifier(config.getCommonConfig().getServicePackage() + "." + serviceName);
+        result.setServiceQualifier(commonConfig.getServicePackage() + "." + serviceName);
         return result;
     }
 
     private String concatServiceDescription(InitDecAnalysisDto initDecAnalysis) {
         String result = "";
-        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                     + initDecAnalysis.getLotNo();
         }

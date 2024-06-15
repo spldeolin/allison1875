@@ -9,9 +9,9 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -52,10 +52,10 @@ public class PersistenceGenerator implements Allison1875MainService {
     private DesignGeneratorService designGeneratorService;
 
     @Inject
-    private PersistenceGeneratorConfig config;
+    private CommonConfig commonConfig;
 
     @Inject
-    private AstForestResidenceService astForestResidenceService;
+    private PersistenceGeneratorConfig config;
 
     @Inject
     private ImportExprService importExprService;
@@ -165,7 +165,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                             insertOrUpdateMethodName));
 
             // 基础方法替换到MapperXml中
-            for (String relativePath : config.getCommonConfig().getMapperXmlDirectories()) {
+            for (String relativePath : commonConfig.getMapperXmlDirectories()) {
                 try {
                     astForest.resolve(relativePath).ifPresent(mapperXmlDirectory -> {
                         ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
@@ -190,7 +190,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     }
 
     protected String getEntityNameInXml(JavabeanGeneration javabeanGeneration) {
-            return javabeanGeneration.getJavabeanQualifier();
+        return javabeanGeneration.getJavabeanQualifier();
     }
 
 }

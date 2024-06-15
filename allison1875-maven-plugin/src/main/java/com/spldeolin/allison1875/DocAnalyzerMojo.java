@@ -45,7 +45,8 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
         log.info("docAnalyzerConfig={}", JsonUtils.toJsonPrettily(docAnalyzerConfig));
 
         return (Allison1875Module) classLoader.loadClass(docAnalyzerModuleQualifier)
-                .getConstructor(DocAnalyzerConfig.class).newInstance(docAnalyzerConfig);
+                .getConstructor(CommonConfig.class, DocAnalyzerConfig.class)
+                .newInstance(commonConfig, docAnalyzerConfig);
     }
 
     private File findRootProject(MavenProject project) {

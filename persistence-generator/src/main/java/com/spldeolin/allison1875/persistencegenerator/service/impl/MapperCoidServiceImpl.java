@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
@@ -50,6 +51,9 @@ import lombok.extern.slf4j.Slf4j;
 public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Inject
+    private CommonConfig commonConfig;
+    
+    @Inject
     private PersistenceGeneratorConfig config;
 
     @Inject
@@ -61,7 +65,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
         // find
         List<MethodDeclaration> customMethods = Lists.newArrayList();
-        String mapperQualifier = config.getCommonConfig().getMapperPackage() + "." + persistence.getMapperName();
+        String mapperQualifier = commonConfig.getMapperPackage() + "." + persistence.getMapperName();
         Optional<CompilationUnit> opt = astForest.findCu(mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
         if (opt.isPresent()) {
@@ -91,12 +95,12 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             log.info("Mapper文件不存在，创建它。 [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
-                    config.getCommonConfig().getMapperPackage(), persistence.getMapperName() + ".java"));
-            cu.setPackageDeclaration(config.getCommonConfig().getMapperPackage());
+                    commonConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(commonConfig.getMapperPackage());
             mapper = new ClassOrInterfaceDeclaration();
             String comment = concatMapperDescription(persistence);
             Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment,
-                    config.getCommonConfig().getAuthor() + " " + LocalDate.now());
+                    commonConfig.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
             mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
             mapper.setInterface(true);
@@ -112,7 +116,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperDescription(TableStructureAnalysisDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
@@ -419,13 +423,13 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperMethodComment(TableStructureAnalysisDto persistence, String methodDescription) {
         String result = methodDescription;
-        if (config.getCommonConfig().getEnableNoModifyAnnounce() || config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

@@ -42,7 +42,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        Allison1875.allison1875();
+        Allison1875.hello();
         initParam();
 
         ClassLoader classLoader;
@@ -69,12 +69,9 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
         List<File> sourceRoots = project.getCompileSourceRoots().stream().map(File::new).collect(Collectors.toList());
         log.info("sourceRoots={}", sourceRoots);
-        List<File> resourceRoots = project.getResources().stream().map(r -> new File(r.getDirectory()))
-                .collect(Collectors.toList());
-        log.info("resourceRoots={}", resourceRoots);
 
         for (File sourceRoot : sourceRoots) {
-            AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot, resourceRoots);
+            AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot);
             injector.getInstance(allison1875Module.declareMainService()).process(astForest);
         }
     }

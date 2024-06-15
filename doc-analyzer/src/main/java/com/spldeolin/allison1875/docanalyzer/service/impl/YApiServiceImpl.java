@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
@@ -44,6 +45,9 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class YApiServiceImpl implements YApiService {
+
+    @Inject
+    private CommonConfig commonConfig;
 
     @Inject
     private DocAnalyzerConfig config;
@@ -292,13 +296,13 @@ public class YApiServiceImpl implements YApiService {
         code += endpoint.getSourceCode();
 
         String allison1875Announce = "";
-        if (config.getCommonConfig().getEnableNoModifyAnnounce() || config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
             allison1875Announce += BaseConstant.NEW_LINE + "---";
-            if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
+            if (commonConfig.getEnableNoModifyAnnounce()) {
                 allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
             }
-            if (config.getCommonConfig().getEnableLotNoAnnounce()) {
-                if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
+            if (commonConfig.getEnableLotNoAnnounce()) {
+                if (commonConfig.getEnableNoModifyAnnounce()) {
                     allison1875Announce += " ";
                 } else {
                     allison1875Announce += BaseConstant.NEW_LINE;

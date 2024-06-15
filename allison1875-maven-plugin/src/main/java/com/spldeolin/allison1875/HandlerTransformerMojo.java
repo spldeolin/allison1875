@@ -26,11 +26,11 @@ public class HandlerTransformerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         handlerTransformerConfig = MoreObjects.firstNonNull(handlerTransformerConfig, new HandlerTransformerConfig());
-        handlerTransformerConfig.setCommonConfig(commonConfig);
         log.info("handlerTransformerConfig={}", JsonUtils.toJsonPrettily(handlerTransformerConfig));
 
         return (Allison1875Module) classLoader.loadClass(handlerTransformerModuleQualifier)
-                .getConstructor(HandlerTransformerConfig.class).newInstance(handlerTransformerConfig);
+                .getConstructor(CommonConfig.class, HandlerTransformerConfig.class)
+                .newInstance(commonConfig, handlerTransformerConfig);
     }
 
 }

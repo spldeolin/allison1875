@@ -29,7 +29,6 @@ public class PersistenceGeneratorMojo extends Allison1875Mojo {
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         persistenceGeneratorConfig = MoreObjects.firstNonNull(persistenceGeneratorConfig,
                 new PersistenceGeneratorConfig());
-        persistenceGeneratorConfig.setCommonConfig(commonConfig);
         persistenceGeneratorConfig.setTables(
                 MoreObjects.firstNonNull(persistenceGeneratorConfig.getTables(), Lists.newArrayList()));
         persistenceGeneratorConfig.setEnableGenerateDesign(
@@ -42,7 +41,8 @@ public class PersistenceGeneratorMojo extends Allison1875Mojo {
         log.info("persistenceGeneratorConfig={}", JsonUtils.toJsonPrettily(persistenceGeneratorConfig));
 
         return (Allison1875Module) classLoader.loadClass(persistenceGeneratorModuleQualifier)
-                .getConstructor(PersistenceGeneratorConfig.class).newInstance(persistenceGeneratorConfig);
+                .getConstructor(CommonConfig.class, PersistenceGeneratorConfig.class)
+                .newInstance(commonConfig, persistenceGeneratorConfig);
     }
 
 }

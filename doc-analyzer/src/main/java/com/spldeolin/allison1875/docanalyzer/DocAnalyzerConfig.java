@@ -1,10 +1,8 @@
 package com.spldeolin.allison1875.docanalyzer;
 
 import java.util.List;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
-import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
@@ -22,13 +20,6 @@ import lombok.experimental.FieldDefaults;
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class DocAnalyzerConfig extends Allison1875Config {
-
-    /**
-     * 共用配置
-     */
-    @NotNull
-    @Valid
-    CommonConfig commonConfig;
 
     /**
      * Maven根项目（相对于SourceRoot的路径 或 绝对路径 皆可）

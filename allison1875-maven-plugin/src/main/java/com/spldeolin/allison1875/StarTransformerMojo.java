@@ -26,13 +26,13 @@ public class StarTransformerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         starTransformerConfig = MoreObjects.firstNonNull(starTransformerConfig, new StarTransformerConfig());
-        starTransformerConfig.setCommonConfig(commonConfig);
         starTransformerConfig.setWholeDtoNamePostfix(
                 MoreObjects.firstNonNull(starTransformerConfig.getWholeDtoNamePostfix(), "WholeDto"));
         log.info("starTransformerConfig={}", JsonUtils.toJsonPrettily(starTransformerConfig));
 
         return (Allison1875Module) classLoader.loadClass(starTransformerModuleQualifier)
-                .getConstructor(StarTransformerConfig.class).newInstance(starTransformerConfig);
+                .getConstructor(CommonConfig.class, StarTransformerConfig.class)
+                .newInstance(commonConfig, starTransformerConfig);
     }
 
 }

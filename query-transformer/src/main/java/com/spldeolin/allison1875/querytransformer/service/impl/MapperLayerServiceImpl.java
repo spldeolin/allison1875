@@ -27,10 +27,10 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
-import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -59,6 +59,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
     @Inject
+    private CommonConfig commonConfig;
+    
+    @Inject
     private QueryTransformerConfig config;
 
     @Inject
@@ -66,9 +69,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
     @Inject
     private ImportExprService importExprService;
-
-    @Inject
-    private AstForestResidenceService astForestResidenceService;
 
     @Override
     public Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args) {
@@ -86,7 +86,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         chainAnalysis.setMethodName(methodName);
 
         MethodDeclaration method = new MethodDeclaration();
-        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             method.setJavadocComment(chainAnalysis.getLotNo());
         }
         method.setType(args.getClonedReturnType());
@@ -366,7 +366,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     }
 
     private String concatLotNoComment(ChainAnalysisDto chainAnalysis) {
-        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
         }
         return "";

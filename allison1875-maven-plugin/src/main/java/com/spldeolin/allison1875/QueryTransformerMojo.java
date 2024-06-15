@@ -26,11 +26,11 @@ public class QueryTransformerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         queryTransformerConfig = MoreObjects.firstNonNull(queryTransformerConfig, new QueryTransformerConfig());
-        queryTransformerConfig.setCommonConfig(commonConfig);
         log.info("queryTransformerConfig={}", JsonUtils.toJsonPrettily(queryTransformerConfig));
 
         return (Allison1875Module) classLoader.loadClass(queryTransformerModuleQualifier)
-                .getConstructor(QueryTransformerConfig.class).newInstance(queryTransformerConfig);
+                .getConstructor(CommonConfig.class, QueryTransformerConfig.class)
+                .newInstance(commonConfig, queryTransformerConfig);
     }
 
 }

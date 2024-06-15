@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
@@ -40,6 +41,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     private static final String startMark = "[START]";
 
     private static final String endMark = "[END]";
+
+    @Inject
+    private CommonConfig commonConfig;
 
     @Inject
     private PersistenceGeneratorConfig config;
@@ -561,10 +565,10 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     private String concatXmlComment(TableStructureAnalysisDto persistence) {
         String result = "<!--";
-        if (config.getCommonConfig().getEnableNoModifyAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce()) {
             result += " " + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getCommonConfig().getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += " " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         result += " -->";

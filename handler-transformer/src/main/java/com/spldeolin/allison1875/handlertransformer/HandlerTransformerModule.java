@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.handlertransformer;
 import java.util.List;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import lombok.ToString;
 
@@ -12,9 +13,12 @@ import lombok.ToString;
 @ToString
 public class HandlerTransformerModule extends Allison1875Module {
 
+    private final CommonConfig commonConfig;
+
     private final HandlerTransformerConfig handlerTransformerConfig;
 
-    public HandlerTransformerModule(HandlerTransformerConfig handlerTransformerConfig) {
+    public HandlerTransformerModule(CommonConfig commonConfig, HandlerTransformerConfig handlerTransformerConfig) {
+        this.commonConfig = commonConfig;
         this.handlerTransformerConfig = handlerTransformerConfig;
     }
 
@@ -25,11 +29,14 @@ public class HandlerTransformerModule extends Allison1875Module {
 
     @Override
     public List<InvalidDto> validConfigs() {
-        return handlerTransformerConfig.invalidSelf();
+        List<InvalidDto> invalids = commonConfig.invalidSelf();
+        invalids.addAll(handlerTransformerConfig.invalidSelf());
+        return invalids;
     }
 
     @Override
     protected void configure() {
+        bind(CommonConfig.class).toInstance(commonConfig);
         bind(HandlerTransformerConfig.class).toInstance(handlerTransformerConfig);
     }
 
