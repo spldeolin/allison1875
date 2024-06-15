@@ -18,6 +18,12 @@ import lombok.experimental.FieldDefaults;
 public final class CommonConfig extends Allison1875Config {
 
     /**
+     * 基础包名
+     */
+    @NotEmpty
+    String basePackage;
+
+    /**
      * 控制层@RequestBody类型所在包的包名
      */
     @NotEmpty

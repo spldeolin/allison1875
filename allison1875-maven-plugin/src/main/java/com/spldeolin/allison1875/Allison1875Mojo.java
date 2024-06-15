@@ -80,6 +80,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         log.info("project={}", project);
         log.info("basePackage={}", basePackage);
         commonConfig = MoreObjects.firstNonNull(commonConfig, new CommonConfig());
+        commonConfig.setBasePackage(basePackage);
         commonConfig.setReqDtoPackage(
                 MoreObjects.firstNonNull(commonConfig.getReqDtoPackage(), basePackage + ".javabean.req"));
         commonConfig.setRespDtoPackage(
@@ -117,7 +118,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
     private ClassLoader getClassLoader(MavenProject project) throws Exception {
         List<String> classpathElements = project.getCompileClasspathElements();
-        log.info("classpathElements={}", JsonUtils.toJson(classpathElements));
+        log.debug("classpathElements={}", JsonUtils.toJson(classpathElements));
         classpathElements.add(project.getBuild().getOutputDirectory());
         classpathElements.add(project.getBuild().getTestOutputDirectory());
         URL[] urls = new URL[classpathElements.size()];

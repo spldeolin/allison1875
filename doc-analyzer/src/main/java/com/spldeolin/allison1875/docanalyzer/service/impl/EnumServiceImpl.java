@@ -27,7 +27,7 @@ public class EnumServiceImpl implements EnumService {
         try {
             resolvedType = fieldVar.getType().resolve();
         } catch (Exception e) {
-            log.warn("Type of FieldVar '{}' cannot resolve", fieldVar, e);
+            log.info("Type of FieldVar '{}' cannot resolve", fieldVar);
             return Lists.newArrayList();
         }
 

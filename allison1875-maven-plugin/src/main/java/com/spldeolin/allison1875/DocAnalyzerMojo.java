@@ -37,13 +37,14 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
         docAnalyzerConfig.setGlobalUrlPrefix(MoreObjects.firstNonNull(docAnalyzerConfig.getGlobalUrlPrefix(), ""));
         docAnalyzerConfig.setFlushTo(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getFlushTo(), FlushToEnum.LOCAL_MARKDOWN));
-        docAnalyzerConfig.setMarkdownDirectoryPath(
-                MoreObjects.firstNonNull(docAnalyzerConfig.getMarkdownDirectoryPath(), "../api-docs"));
+        docAnalyzerConfig.setMarkdownDirectory(MoreObjects.firstNonNull(docAnalyzerConfig.getMarkdownDirectory(),
+                project.getBasedir().toPath().resolve("api-docs").toString()));
         docAnalyzerConfig.setEnableCurl(MoreObjects.firstNonNull(docAnalyzerConfig.getEnableCurl(), false));
         docAnalyzerConfig.setEnableResponseBodySample(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getEnableResponseBodySample(), false));
         log.info("docAnalyzerConfig={}", JsonUtils.toJsonPrettily(docAnalyzerConfig));
 
+        log.info("new instance for {}", docAnalyzerModuleQualifier);
         return (Allison1875Module) classLoader.loadClass(docAnalyzerModuleQualifier)
                 .getConstructor(CommonConfig.class, DocAnalyzerConfig.class)
                 .newInstance(commonConfig, docAnalyzerConfig);

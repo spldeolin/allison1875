@@ -56,7 +56,11 @@ public class MarkdownServiceImpl implements MarkdownService {
                 content.append(this.generateEndpointDoc(endpoint, astForest));
             }
 
-            File md = new File(config.getMarkdownDirectoryPath() + File.separator + cat + ".md");
+            File dir = astForest.getSourceRoot().resolve(config.getMarkdownDirectory()).toFile();
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File md = new File(dir.getPath() + File.separator + cat + ".md");
             try {
                 FileUtils.writeStringToFile(md, content.toString(), StandardCharsets.UTF_8);
             } catch (IOException e) {

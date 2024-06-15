@@ -9,7 +9,6 @@
 
     <artifactId>allison1875-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>11.0.7-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -42,32 +41,22 @@
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>doc-analyzer</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>handler-transformer</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>persistence-generator</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>query-transformer</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>star-transformer</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>allison1875-support</artifactId>
-            <version>5.0</version>
         </dependency>
     </dependencies>
 

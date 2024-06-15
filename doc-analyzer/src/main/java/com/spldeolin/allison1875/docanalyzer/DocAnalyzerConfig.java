@@ -56,9 +56,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     String yapiToken;
 
     /**
-     * 文档输出到markdown时，Markdown文件的目录的路径
+     * 文档输出到markdown时，Markdown文件的目录的路径（相对于SourceRoot的路径 或 绝对路径 皆可）
      */
-    String markdownDirectoryPath;
+    String markdownDirectory;
 
     /**
      * 文档输出到markdown时，是否启用cURL命令的输出
@@ -84,9 +84,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
             }
         }
         if (FlushToEnum.LOCAL_MARKDOWN.equals(flushTo)) {
-            if (markdownDirectoryPath == null) {
+            if (markdownDirectory == null) {
                 invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
-                        .setValue(ValidUtils.formatValue(markdownDirectoryPath)).setReason("must not be null"));
+                        .setValue(ValidUtils.formatValue(markdownDirectory)).setReason("must not be null"));
             }
             if (enableCurl == null) {
                 invalids.add(new InvalidDto().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))
