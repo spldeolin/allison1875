@@ -34,6 +34,64 @@ Transform convenient-to-code expressions in the source code adhering to *Allison
 
 Generate Data Access Layer Exposed APIs by simply specifying SQL statements and the class names for the *Spring Web MVC* control layer, service layer, and *Mabatis* persistence layer.
 
+## Quick Start
+
+### Install
+
+```shell
+git clone git@github.com:spldeolin/allison1875.git
+mvn install -f allison1875/pom.xml
+```
+
+### Setup
+
+```xml
+<dependency>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-support</artifactId>
+    <version>THE-LATEST</version>
+</dependency>
+```
+
+```xml
+<!-- if this project base on Spring Boot -->
+<plugin>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-maven-plugin</artifactId>
+    <version>THE-LATEST</version>
+    <configuration>
+        <basePackage>com.corp.proj.service</basePackage>
+    </configuration>
+</plugin>
+
+<!-- if this project base on Satisficing -->
+<plugin>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-maven-plugin</artifactId>
+    <version>THE-LATEST</version>
+    <dependencies>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>allison1875-satisficing</artifactId>
+            <version>THE-LATEST</version>
+        </dependency>
+    </dependencies>
+    <configuration>
+        <basePackage>com.corp.proj.service</basePackage>
+    </configuration>
+</plugin>
+```
+
+### Execute
+
+```shell
+mvn allison1875-maven-plugin:doc-analyzer
+mvn allison1875-maven-plugin:handler-transformer
+mvn allison1875-maven-plugin:persistence-generator
+mvn allison1875-maven-plugin:query-transformer
+mvn allison1875-maven-plugin:star-transformer
+```
+
 ## Contribution
 
 Any PR, star, suggestion would be greatly appreciated.
