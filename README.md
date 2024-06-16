@@ -85,11 +85,11 @@ mvn install -f allison1875/pom.xml
 ### Execute
 
 ```shell
-mvn allison1875-maven-plugin:doc-analyzer
-mvn allison1875-maven-plugin:handler-transformer
-mvn allison1875-maven-plugin:persistence-generator
-mvn allison1875-maven-plugin:query-transformer
-mvn allison1875-maven-plugin:star-transformer
+mvn allison1875:doc-analyzer
+mvn allison1875:handler-transformer
+mvn allison1875:persistence-generator
+mvn allison1875:query-transformer
+mvn allison1875:star-transformer
 ```
 
 ## Contribution
