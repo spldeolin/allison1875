@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -48,6 +49,9 @@ public class JsonUtils {
 
         // 反序列化时，忽略Javabean中不存在的属性，而不是抛出异常
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // 序列化没有property的Javabean时，当作{ }，而不是抛出异常
+        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         // 使用所在操作系统的时区
         om.setTimeZone(TimeZone.getDefault());
