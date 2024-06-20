@@ -126,7 +126,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             int last = xmlLines.size() - 1;
             xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
         }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE TRUE");
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE 1 = 1");
         if (persistence.getIsDeleteFlagExist()) {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
@@ -155,7 +155,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                             nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</set>");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE TRUE");
+        xmlLines.add(BaseConstant.DOUBLE_INDENT + "WHERE 1 = 1");
         if (persistence.getIsDeleteFlagExist()) {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
@@ -265,7 +265,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         result.add(BaseConstant.SINGLE_INDENT + "SELECT");
         result.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
         result.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
-        result.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+        result.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
         if (persistence.getIsDeleteFlagExist()) {
             result.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
@@ -285,7 +285,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
         if (persistence.getIsDeleteFlagExist()) {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
@@ -318,7 +318,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
@@ -347,7 +347,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
@@ -379,7 +379,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
@@ -408,7 +408,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
@@ -458,7 +458,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
@@ -487,7 +487,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                         nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</set>");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE TRUE");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "WHERE 1 = 1");
             if (persistence.getIsDeleteFlagExist()) {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
             }
