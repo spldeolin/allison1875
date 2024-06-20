@@ -17,13 +17,12 @@ public class MvcHandlerGeneratorServiceImpl2 extends MvcHandlerGeneratorServiceI
         GenerateMvcHandlerRetval result = super.generateMvcHandler(args);
         Type returnType = result.getMvcHandler().getType();
         if (returnType.isVoidType()) {
-            returnType.replace(
-                    StaticJavaParser.parseType("com.spldeolin.satisficing.client.javabean.RequestResult<Void>"));
+            returnType.replace(StaticJavaParser.parseType("com.spldeolin.satisficing.client.RequestResult<Void>"));
             result.getMvcHandler().getBody().get().getStatements()
                     .add(StaticJavaParser.parseStatement("return RequestResult.success();"));
         } else {
             returnType.replace(StaticJavaParser.parseType(
-                    String.format("com.spldeolin.satisficing.client.javabean.RequestResult<%s>", returnType)));
+                    String.format("com.spldeolin.satisficing.client.RequestResult<%s>", returnType)));
             Expression returnExpr = result.getMvcHandler().getBody().get().getStatements().get(0).asReturnStmt()
                     .getExpression().get();
             returnExpr.replace(

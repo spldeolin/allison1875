@@ -241,7 +241,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     private List<String> concatWhereSection(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
             boolean needNotDeletedSql) {
         List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
+        xmlLines.add(SINGLE_INDENT + "WHERE 1 = 1");
         if (needNotDeletedSql && designMeta.getNotDeletedSql() != null) {
             xmlLines.add(SINGLE_INDENT + "  AND " + designMeta.getNotDeletedSql());
         }
