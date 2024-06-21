@@ -36,7 +36,6 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
@@ -60,9 +59,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
     @Inject
     private CommonConfig commonConfig;
-    
-    @Inject
-    private QueryTransformerConfig config;
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
@@ -87,7 +83,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
         MethodDeclaration method = new MethodDeclaration();
         if (commonConfig.getEnableLotNoAnnounce()) {
-            method.setJavadocComment(chainAnalysis.getLotNo());
+            method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
         }
         method.setType(args.getClonedReturnType());
         method.setName(methodName);
@@ -286,7 +282,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                                 + varName + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
-                        xmlLines.add(TREBLE_INDENT + "AND FALSE");
+                        xmlLines.add(TREBLE_INDENT + "AND 1 != 1");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }

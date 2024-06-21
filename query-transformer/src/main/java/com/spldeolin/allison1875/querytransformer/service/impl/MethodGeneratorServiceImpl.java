@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
@@ -70,7 +71,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(commonConfig.getCondPackage());
             if (commonConfig.getEnableLotNoAnnounce()) {
-                javabeanArg.setDescription(chainAnalysis.getLotNo());
+                javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Cond");
             javabeanArg.setAuthor(commonConfig.getAuthor());
@@ -171,7 +172,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             javabeanArg.setAstForest(astForest);
             javabeanArg.setPackageName(commonConfig.getRecordPackage());
             if (commonConfig.getEnableLotNoAnnounce()) {
-                javabeanArg.setDescription(chainAnalysis.getLotNo());
+                javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Record");
             javabeanArg.setAuthor(commonConfig.getAuthor());
