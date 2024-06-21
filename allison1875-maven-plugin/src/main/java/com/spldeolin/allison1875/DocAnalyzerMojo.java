@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875;
 
 import java.io.File;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2024-06-10
  */
 @Mojo(name = "doc-analyzer", requiresDependencyResolution = ResolutionScope.TEST)
+@Execute(phase = LifecyclePhase.COMPILE)
 @Slf4j
 public class DocAnalyzerMojo extends Allison1875Mojo {
 
