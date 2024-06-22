@@ -7,7 +7,6 @@ import static com.github.javaparser.StaticJavaParser.parseType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -78,16 +77,14 @@ public class MapperCoidServiceImpl implements MapperCoidService {
                 throw new IllegalStateException("primaryType is not a interface.");
             }
 
-            // 删除Mapper中所有声明了LotNoAnnounce或者NoModifyAnnounce的方法
+            // 删除Mapper中所有声明了NoModifyAnnounce的方法
             for (MethodDeclaration method : mapper.getMethods()) {
-                boolean byAllison1875 = StringUtils.containsAny(JavadocUtils.getComment(method),
-                        BaseConstant.NO_MODIFY_ANNOUNCE);
-                if (byAllison1875) {
+                if (JavadocUtils.getComment(method).contains(BaseConstant.NO_MODIFY_ANNOUNCE)) {
                     method.remove();
                 }
             }
 
-            customMethods = mapper.getMethods();
+            customMethods = Lists.newArrayList(mapper.getMethods());
             customMethods.forEach(MethodDeclaration::remove);
         } else {
 
