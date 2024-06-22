@@ -16,7 +16,6 @@
             <groupId>com.spldeolin.satisficing</groupId>
             <artifactId>satisficing-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
