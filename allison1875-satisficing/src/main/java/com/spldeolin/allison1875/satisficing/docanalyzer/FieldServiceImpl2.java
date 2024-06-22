@@ -49,7 +49,7 @@ public class FieldServiceImpl2 extends FieldServiceImpl {
 
     @Override
     protected List<String> analyzeMoreAndGenerateDoc(FieldDeclaration field, VariableDeclarator fieldVar) {
-        return Lists.newArrayList("测试用" + field.toString().replace('\n', ' '));
+        return Lists.newArrayList();
     }
 
 }

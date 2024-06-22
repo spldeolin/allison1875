@@ -27,7 +27,10 @@ public class ResponseBodyServiceImpl2 extends ResponseBodyServiceImpl {
                     if (types.size() == 1) {
                         Type typeArgument = types.get(0);
                         if (typeArgument.isClassOrInterfaceType()) {
-                            if (!typeArgument.toString().equals("Object") && !typeArgument.toString().equals("Void")) {
+                            if (typeArgument.toString().equals("Void")) {
+                                return null;
+                            }
+                            if (!typeArgument.toString().equals("Object")) {
                                 try {
                                     return typeArgument.resolve();
                                 } catch (Exception e) {
