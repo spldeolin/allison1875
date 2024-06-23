@@ -179,6 +179,12 @@ public class MarkdownServiceImpl implements MarkdownService {
             } else {
                 jpdv = JsonPropertyDescriptionValueDto.deserialize(jsonSchema.getDescription());
             }
+
+            if (jpdv == null) {
+                // root schema 为 object arrary
+                jpdv = new JsonPropertyDescriptionValueDto();
+            }
+
             content.append("|");
             // 字段名
             content.append(StringUtils.repeat("- ", depth)).append(propertyName);
@@ -200,19 +206,21 @@ public class MarkdownServiceImpl implements MarkdownService {
             content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
             content.append("|");
             // 校验项
-            if (isReqBody && CollectionUtils.isNotEmpty(jpdv.getValids())) {
-                if (jpdv.getValids().size() == 1) {
-                    content.append(jpdv.getValids().get(0).getValidatorType())
-                            .append(jpdv.getValids().get(0).getNote());
-                } else {
-                    for (int i = 0; i < jpdv.getValids().size(); i++) {
-                        AnalyzeValidRetval validator = jpdv.getValids().get(i);
-                        content.append(i + 1).append(". ").append(validator.getValidatorType())
-                                .append(validator.getNote()).append("<br>");
+            if (isReqBody) {
+                if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
+                    if (jpdv.getValids().size() == 1) {
+                        content.append(jpdv.getValids().get(0).getValidatorType())
+                                .append(jpdv.getValids().get(0).getNote());
+                    } else {
+                        for (int i = 0; i < jpdv.getValids().size(); i++) {
+                            AnalyzeValidRetval validator = jpdv.getValids().get(i);
+                            content.append(i + 1).append(". ").append(validator.getValidatorType())
+                                    .append(validator.getNote()).append("<br>");
+                        }
                     }
                 }
+                content.append("|");
             }
-            content.append("|");
             // 枚举项
             if (CollectionUtils.isNotEmpty(jpdv.getAnalyzeEnumConstantsRetvals())) {
                 for (AnalyzeEnumConstantsRetval enumConstant : jpdv.getAnalyzeEnumConstantsRetvals()) {
@@ -237,7 +245,9 @@ public class MarkdownServiceImpl implements MarkdownService {
         content.insert(0, " --- |");
         content.insert(0, " --- |");
         content.insert(0, " --- |");
-        content.insert(0, " --- |");
+        if (isReqBody) {
+            content.insert(0, " --- |");
+        }
         content.insert(0, "\n| --- | --- | --- |");
         content.insert(0, " 其他 |");
         content.insert(0, " 格式 |");
