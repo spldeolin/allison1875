@@ -22,12 +22,6 @@ import lombok.experimental.FieldDefaults;
 public final class DocAnalyzerConfig extends Allison1875Config {
 
     /**
-     * Maven根项目（相对于SourceRoot的路径 或 绝对路径 皆可）
-     */
-    @NotNull
-    String rootProjectDirectory;
-
-    /**
      * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于SourceRoot的路径 或 绝对路径 皆可）
      */
     @NotNull

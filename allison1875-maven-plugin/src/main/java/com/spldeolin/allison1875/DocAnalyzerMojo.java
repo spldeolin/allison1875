@@ -33,8 +33,6 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         docAnalyzerConfig = MoreObjects.firstNonNull(docAnalyzerConfig, new DocAnalyzerConfig());
-        docAnalyzerConfig.setRootProjectDirectory(MoreObjects.firstNonNull(docAnalyzerConfig.getRootProjectDirectory(),
-                findRootProject(project).getPath()));
         docAnalyzerConfig.setDependencyProjectDirectories(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getDependencyProjectDirectories(), Lists.newArrayList()));
         docAnalyzerConfig.setGlobalUrlPrefix(MoreObjects.firstNonNull(docAnalyzerConfig.getGlobalUrlPrefix(), ""));

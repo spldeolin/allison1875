@@ -82,13 +82,13 @@ public class MarkdownServiceImpl implements MarkdownService {
             endpoint.getDescriptionLines().stream().skip(1).forEach(line -> result.append(line).append("\n\n"));
         }
 
-        result.append("### 请求方法与URL\n");
+        result.append("### URL\n");
         result.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl()).append("`\n");
 
-        result.append("### Request Body的数据结构（application/json）\n");
+        result.append("### Request Body（application/json）\n");
         result.append(this.generateReqOrRespDoc(endpoint, true));
 
-        result.append("### Response Body的数据结构（application/json）\n");
+        result.append("### Response Body（application/json）\n");
         result.append(this.generateReqOrRespDoc(endpoint, false));
 
         // 生成cURL
@@ -200,7 +200,7 @@ public class MarkdownServiceImpl implements MarkdownService {
             content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
             content.append("|");
             // 校验项
-            if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
+            if (isReqBody && CollectionUtils.isNotEmpty(jpdv.getValids())) {
                 if (jpdv.getValids().size() == 1) {
                     content.append(jpdv.getValids().get(0).getValidatorType())
                             .append(jpdv.getValids().get(0).getNote());
@@ -242,7 +242,9 @@ public class MarkdownServiceImpl implements MarkdownService {
         content.insert(0, " 其他 |");
         content.insert(0, " 格式 |");
         content.insert(0, " 枚举项 |");
-        content.insert(0, " 校验项 |");
+        if (isReqBody) {
+            content.insert(0, " 校验项 |");
+        }
         content.insert(0, "| 字段名 | JSON类型 | 注释 |");
         return content.toString();
     }
