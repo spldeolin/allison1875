@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.satisficing.persistencegenerator;
+package com.spldeolin.allison1875.extension.satisficing.persistencegenerator;
 
 import java.util.regex.Pattern;
 import com.google.inject.Singleton;

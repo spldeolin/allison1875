@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.satisficing.common;
+package com.spldeolin.allison1875.extension.satisficing.common;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.expr.Expression;

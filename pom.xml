@@ -10,7 +10,6 @@
 
     <modules>
         <module>allison1875-maven-plugin</module>
-        <module>allison1875-satisficing</module>
         <module>allison1875-support</module>
         <module>common</module>
         <module>doc-analyzer</module>

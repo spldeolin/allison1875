@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.satisficing.handlertransformer;
+package com.spldeolin.allison1875.extension.satisficing.handlertransformer;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.FieldDeclaration;

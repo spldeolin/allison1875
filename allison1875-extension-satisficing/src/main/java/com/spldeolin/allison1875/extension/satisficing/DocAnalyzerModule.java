@@ -1,13 +1,13 @@
-package com.spldeolin.allison1875.satisficing;
+package com.spldeolin.allison1875.extension.satisficing;
 
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.service.EnumService;
 import com.spldeolin.allison1875.docanalyzer.service.FieldService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
-import com.spldeolin.allison1875.satisficing.docanalyzer.EnumServiceImpl2;
-import com.spldeolin.allison1875.satisficing.docanalyzer.FieldServiceImpl2;
-import com.spldeolin.allison1875.satisficing.docanalyzer.ResponseBodyServiceImpl2;
+import com.spldeolin.allison1875.extension.satisficing.docanalyzer.EnumServiceImpl2;
+import com.spldeolin.allison1875.extension.satisficing.docanalyzer.FieldServiceImpl2;
+import com.spldeolin.allison1875.extension.satisficing.docanalyzer.ResponseBodyServiceImpl2;
 
 /**
  * @author Deolin 2024-06-15

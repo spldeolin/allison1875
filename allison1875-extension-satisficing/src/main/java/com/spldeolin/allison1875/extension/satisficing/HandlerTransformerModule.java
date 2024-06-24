@@ -1,11 +1,11 @@
-package com.spldeolin.allison1875.satisficing;
+package com.spldeolin.allison1875.extension.satisficing;
 
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
+import com.spldeolin.allison1875.extension.satisficing.common.MvcHandlerGeneratorServiceImpl2;
+import com.spldeolin.allison1875.extension.satisficing.handlertransformer.FieldServiceImpl2;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.FieldService;
-import com.spldeolin.allison1875.satisficing.common.MvcHandlerGeneratorServiceImpl2;
-import com.spldeolin.allison1875.satisficing.handlertransformer.FieldServiceImpl2;
 
 /**
  * @author Deolin 2024-06-15

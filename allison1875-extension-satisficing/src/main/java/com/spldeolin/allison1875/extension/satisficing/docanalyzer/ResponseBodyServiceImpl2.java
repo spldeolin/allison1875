@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.satisficing.docanalyzer;
+package com.spldeolin.allison1875.extension.satisficing.docanalyzer;
 
 import java.util.Optional;
 import com.github.javaparser.ast.NodeList;

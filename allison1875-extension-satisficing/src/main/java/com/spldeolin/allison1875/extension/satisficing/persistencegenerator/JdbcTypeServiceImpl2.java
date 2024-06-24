@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.satisficing.persistencegenerator;
+package com.spldeolin.allison1875.extension.satisficing.persistencegenerator;
 
 import static com.github.javaparser.StaticJavaParser.parseAnnotation;
 import static com.github.javaparser.utils.CodeGenerationUtils.f;

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.satisficing.docanalyzer;
+package com.spldeolin.allison1875.extension.satisficing.docanalyzer;
 
 import java.util.List;
 import com.github.javaparser.ast.body.FieldDeclaration;
