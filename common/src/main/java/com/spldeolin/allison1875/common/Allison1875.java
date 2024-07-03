@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Allison1875 {
 
-    public static final String SHORT_VERSION = "1001S";
+    public static final String SHORT_VERSION = "1100R";
 
     public static void hello() {
         String banner;
