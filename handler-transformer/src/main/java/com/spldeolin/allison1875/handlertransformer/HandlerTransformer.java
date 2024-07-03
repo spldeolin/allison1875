@@ -12,6 +12,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.javabean.GenerateMvcHandlerArgs;
@@ -67,6 +68,9 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Inject
     private MvcHandlerGeneratorService mvcHandlerGeneratorService;
+
+    @Inject
+    private CommonConfig commonConfig;
 
     @Inject
     private HandlerTransformerConfig config;
@@ -135,7 +139,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     GenerateMvcHandlerArgs gmhArgs = new GenerateMvcHandlerArgs();
                     gmhArgs.setMvcHandlerUrl(initDecAnalysis.getMvcHandlerUrl());
                     String description = initDecAnalysis.getMvcHandlerDescription();
-                    if (config.getEnableLotNoAnnounce()) {
+                    if (commonConfig.getEnableLotNoAnnounce()) {
                         description += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                                 + initDecAnalysis.getLotNo();
                     }

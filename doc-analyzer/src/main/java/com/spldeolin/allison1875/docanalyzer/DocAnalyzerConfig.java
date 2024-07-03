@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.docanalyzer;
 
-
-import java.io.File;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
@@ -24,19 +22,22 @@ import lombok.experimental.FieldDefaults;
 public final class DocAnalyzerConfig extends Allison1875Config {
 
     /**
-     * 目标项目handler方法签名所依赖的项目的源码路径，相对路径、绝对路径皆可
+     * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于SourceRoot的路径 或 绝对路径 皆可）
      */
-    @NotNull List<@NotNull File> dependencyProjectDirectories;
+    @NotNull
+    List<String> dependencyProjectDirectories;
 
     /**
      * 全局URL前缀
      */
-    @NotNull String globalUrlPrefix;
+    @NotNull
+    String globalUrlPrefix;
 
     /**
      * 文档保存到...
      */
-    @NotNull FlushToEnum flushTo;
+    @NotNull(message = "must be 'LOCAL_MARKDOWN' or 'YAPI'")
+    FlushToEnum flushTo;
 
     /**
      * 文档输出到YApi时，YApi请求URL
@@ -49,9 +50,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
     String yapiToken;
 
     /**
-     * 文档输出到markdown时，Markdown文件的目录的路径
+     * 文档输出到markdown时，Markdown文件的目录的路径（相对于SourceRoot的路径 或 绝对路径 皆可）
      */
-    String markdownDirectoryPath;
+    String markdownDirectory;
 
     /**
      * 文档输出到markdown时，是否启用cURL命令的输出
@@ -63,26 +64,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
      */
     Boolean enableResponseBodySample;
 
-    /**
-     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
-     */
-    @NotNull Boolean enableNoModifyAnnounce;
-
-    /**
-     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: DA1000S-967D9357 的声明
-     */
-    @NotNull Boolean enableLotNoAnnounce;
-
     @Override
     public List<InvalidDto> invalidSelf() {
         List<InvalidDto> invalids = super.invalidSelf();
-        for (File dependencyProjectDirectory : dependencyProjectDirectories) {
-            if (!dependencyProjectDirectory.exists() || !dependencyProjectDirectory.isDirectory()) {
-                invalids.add(new InvalidDto().setPath("dependencyProjectDirectories")
-                        .setValue(ValidUtils.formatValue(dependencyProjectDirectory))
-                        .setReason("must exist and be a directory"));
-            }
-        }
         if (FlushToEnum.YAPI.equals(flushTo)) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDto().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
@@ -94,9 +78,9 @@ public final class DocAnalyzerConfig extends Allison1875Config {
             }
         }
         if (FlushToEnum.LOCAL_MARKDOWN.equals(flushTo)) {
-            if (markdownDirectoryPath == null) {
+            if (markdownDirectory == null) {
                 invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
-                        .setValue(ValidUtils.formatValue(markdownDirectoryPath)).setReason("must not be null"));
+                        .setValue(ValidUtils.formatValue(markdownDirectory)).setReason("must not be null"));
             }
             if (enableCurl == null) {
                 invalids.add(new InvalidDto().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))

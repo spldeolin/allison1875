@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.spldeolin.allison1875</groupId>
         <artifactId>allison1875</artifactId>
-        <version>10.1</version>
+        <version>11.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,6 +29,7 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <!-- logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -71,17 +72,15 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+        </dependency>
 
         <!-- evo inflector -->
         <dependency>
             <groupId>org.atteo</groupId>
             <artifactId>evo-inflector</artifactId>
-        </dependency>
-
-        <!-- maven model -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
         </dependency>
 
         <!-- lombok -->

@@ -5,6 +5,7 @@ import org.atteo.evo.inflector.English;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
@@ -25,6 +26,9 @@ import com.spldeolin.allison1875.startransformer.service.WholeDtoService;
 public class WholeDtoServiceImpl implements WholeDtoService {
 
     @Inject
+    private CommonConfig commonConfig;
+
+    @Inject
     private StarTransformerConfig config;
 
     @Inject
@@ -34,14 +38,14 @@ public class WholeDtoServiceImpl implements WholeDtoService {
     public JavabeanGeneration generateWholeDto(AstForest astForest, ChainAnalysisDto analysis) {
         JavabeanArg javabeanArg = new JavabeanArg();
         javabeanArg.setAstForest(astForest);
-        javabeanArg.setPackageName(config.getCommonConfig().getWholeDtoPackage());
+        javabeanArg.setPackageName(commonConfig.getWholeDtoPackage());
         javabeanArg.setClassName(analysis.getWholeDtoName());
-        if (config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
         }
-        javabeanArg.setAuthor(config.getCommonConfig().getAuthor());
-        javabeanArg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
-        javabeanArg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
+        javabeanArg.setAuthor(commonConfig.getAuthor());
+        javabeanArg.setIsJavabeanSerializable(commonConfig.getIsJavabeanSerializable());
+        javabeanArg.setIsJavabeanCloneable(commonConfig.getIsJavabeanCloneable());
         FieldArg cftFieldArg = new FieldArg();
         cftFieldArg.setTypeQualifier(analysis.getCftEntityQualifier());
         cftFieldArg.setFieldName(this.entityNameToVarName(analysis.getCftEntityName()));

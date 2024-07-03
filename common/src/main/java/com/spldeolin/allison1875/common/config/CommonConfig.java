@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.common.config;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -14,76 +15,108 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class CommonConfig {
+public final class CommonConfig extends Allison1875Config {
+
+    /**
+     * 基础包名
+     */
+    @NotEmpty
+    String basePackage;
 
     /**
      * 控制层@RequestBody类型所在包的包名
      */
-    @NotEmpty String reqDtoPackage;
+    @NotEmpty
+    String reqDtoPackage;
 
     /**
      * 控制层@ResponseBody业务数据部分类型所在包的包名
      */
-    @NotEmpty String respDtoPackage;
+    @NotEmpty
+    String respDtoPackage;
 
     /**
      * 业务层Service接口所在包的包名
      */
-    @NotEmpty String servicePackage;
+    @NotEmpty
+    String servicePackage;
 
     /**
      * 业务层ServiceImpl类所在包的包名
      */
-    @NotEmpty String serviceImplPackage;
+    @NotEmpty
+    String serviceImplPackage;
 
     /**
      * 持久层mapper接口所在包的包名
      */
-    @NotEmpty String mapperPackage;
+    @NotEmpty
+    String mapperPackage;
 
     /**
      * 持久层Entity类所在包的包名
      */
-    @NotEmpty String entityPackage;
+    @NotEmpty
+    String entityPackage;
 
     /**
      * Design类所在包的包名
      */
-    @NotEmpty String designPackage;
+    @NotEmpty
+    String designPackage;
 
     /**
      * 持久层Mapper方法签名中Cond类所在包的包名
      */
-    @NotEmpty String condPackage;
+    @NotEmpty
+    String condPackage;
 
     /**
      * 持久层Mapper方法签名中Record类所在包的包名
      */
-    @NotEmpty String recordPackage;
+    @NotEmpty
+    String recordPackage;
 
     /**
      * WholeDto类所在包的包名
      */
-    @NotEmpty String wholeDtoPackage;
+    @NotEmpty
+    String wholeDtoPackage;
 
     /**
-     * mapper.xml所在目录的相对路径（相对于Module Root）
+     * mapper.xml所在目录（相对于SourceRoot的路径 或 绝对路径 皆可）
      */
-    @NotEmpty List<@NotNull String> mapperXmlDirectoryPaths;
+    @NotEmpty
+    List<String> mapperXmlDirectories;
 
     /**
      * 为生成的代码指定作者
      */
-    @NotEmpty String author;
+    @NotEmpty
+    String author;
 
     /**
      * 生成的Javabean是否实现java.io.Serializable接口
      */
-    @NotNull Boolean isJavabeanSerializable;
+    @NotNull
+    Boolean isJavabeanSerializable;
 
     /**
      * 生成的Javabean是否实现java.lang.Cloneable接口
      */
-    @NotNull Boolean isJavabeanCloneable;
+    @NotNull
+    Boolean isJavabeanCloneable;
+
+    /**
+     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
+     */
+    @NotNull
+    Boolean enableNoModifyAnnounce;
+
+    /**
+     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: DA1000S-967D9357 的声明
+     */
+    @NotNull
+    Boolean enableLotNoAnnounce;
 
 }

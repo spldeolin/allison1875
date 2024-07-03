@@ -20,6 +20,7 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
@@ -45,17 +46,21 @@ public class MarkdownServiceImpl implements MarkdownService {
     private DocAnalyzerConfig config;
 
     @Override
-    public void flushToMarkdown(List<EndpointDto> endpoints) {
+    public void flushToMarkdown(List<EndpointDto> endpoints, AstForest astForest) {
         Multimap<String/*cat*/, EndpointDto> endpointMap = ArrayListMultimap.create();
         endpoints.forEach(e -> endpointMap.put(e.getCat(), e));
 
         for (String cat : endpointMap.keySet()) {
             StringBuilder content = new StringBuilder();
             for (EndpointDto endpoint : endpointMap.get(cat)) {
-                content.append(this.generateEndpointDoc(endpoint));
+                content.append(this.generateEndpointDoc(endpoint, astForest));
             }
 
-            File md = new File(config.getMarkdownDirectoryPath() + File.separator + cat + ".md");
+            File dir = astForest.getSourceRoot().resolve(config.getMarkdownDirectory()).toFile();
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File md = new File(dir.getPath() + File.separator + cat + ".md");
             try {
                 FileUtils.writeStringToFile(md, content.toString(), StandardCharsets.UTF_8);
             } catch (IOException e) {
@@ -65,7 +70,7 @@ public class MarkdownServiceImpl implements MarkdownService {
         }
     }
 
-    protected String generateEndpointDoc(EndpointDto endpoint) {
+    protected String generateEndpointDoc(EndpointDto endpoint, AstForest astForest) {
         StringBuilder result = new StringBuilder(64);
         String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
         if (StringUtils.isEmpty(title)) {
@@ -77,20 +82,20 @@ public class MarkdownServiceImpl implements MarkdownService {
             endpoint.getDescriptionLines().stream().skip(1).forEach(line -> result.append(line).append("\n\n"));
         }
 
-        result.append("### 请求方法与URL\n");
+        result.append("### URL\n");
         result.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl()).append("`\n");
 
-        result.append("### Request Body的数据结构（application/json）\n");
+        result.append("### Request Body（application/json）\n");
         result.append(this.generateReqOrRespDoc(endpoint, true));
 
-        result.append("### Response Body的数据结构（application/json）\n");
+        result.append("### Response Body（application/json）\n");
         result.append(this.generateReqOrRespDoc(endpoint, false));
 
         // 生成cURL
-        result.append(this.generateCurl(endpoint));
+//        result.append(this.generateCurl(endpoint, astForest));
 
         // 生成返回值示例
-        result.append(this.generateRespSample(endpoint));
+//        result.append(this.generateRespSample(endpoint, astForest));
 
         result.append(this.generateMoreDoc(endpoint));
 
@@ -99,12 +104,12 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result.toString();
     }
 
-    private String generateRespSample(EndpointDto endpoint) {
+    private String generateRespSample(EndpointDto endpoint, AstForest astForest) {
         if (config.getEnableResponseBodySample() && endpoint.getResponseBodyDescribe() != null) {
             return "";
         }
         StringBuilder result = new StringBuilder();
-        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe());
+        String fakeRespJson = fakeJsonByDescribe(endpoint.getResponseBodyDescribe(), astForest);
         if (fakeRespJson != null) {
             result.append("### Response Body的示例\n");
             result.append("```json\n");
@@ -114,12 +119,12 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result.toString();
     }
 
-    private String generateCurl(EndpointDto endpoint) {
+    private String generateCurl(EndpointDto endpoint, AstForest astForest) {
         if (config.getEnableCurl() && endpoint.getRequestBodyDescribe() != null) {
             return "";
         }
         StringBuilder result = new StringBuilder(64);
-        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe());
+        String fakeReqJson = fakeJsonByDescribe(endpoint.getRequestBodyDescribe(), astForest);
         if (fakeReqJson != null) {
             result.append("### cURL\n");
             result.append("```shell\n");
@@ -132,9 +137,9 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result.toString();
     }
 
-    private String fakeJsonByDescribe(String describe) {
+    private String fakeJsonByDescribe(String describe, AstForest astForest) {
         try {
-            Object fakeDto = er.nextObject(LoadClassUtils.loadClass(describe, this.getClass().getClassLoader()));
+            Object fakeDto = er.nextObject(LoadClassUtils.loadClass(describe, astForest.getClassLoader()));
             return JsonUtils.toJsonPrettily(fakeDto);
         } catch (Exception e) {
             log.error("fail to fake json, describe={}", describe, e);
@@ -174,6 +179,12 @@ public class MarkdownServiceImpl implements MarkdownService {
             } else {
                 jpdv = JsonPropertyDescriptionValueDto.deserialize(jsonSchema.getDescription());
             }
+
+            if (jpdv == null) {
+                // root schema 为 object arrary
+                jpdv = new JsonPropertyDescriptionValueDto();
+            }
+
             content.append("|");
             // 字段名
             content.append(StringUtils.repeat("- ", depth)).append(propertyName);
@@ -195,19 +206,21 @@ public class MarkdownServiceImpl implements MarkdownService {
             content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
             content.append("|");
             // 校验项
-            if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
-                if (jpdv.getValids().size() == 1) {
-                    content.append(jpdv.getValids().get(0).getValidatorType())
-                            .append(jpdv.getValids().get(0).getNote());
-                } else {
-                    for (int i = 0; i < jpdv.getValids().size(); i++) {
-                        AnalyzeValidRetval validator = jpdv.getValids().get(i);
-                        content.append(i + 1).append(". ").append(validator.getValidatorType())
-                                .append(validator.getNote()).append("<br>");
+            if (isReqBody) {
+                if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
+                    if (jpdv.getValids().size() == 1) {
+                        content.append(jpdv.getValids().get(0).getValidatorType())
+                                .append(jpdv.getValids().get(0).getNote());
+                    } else {
+                        for (int i = 0; i < jpdv.getValids().size(); i++) {
+                            AnalyzeValidRetval validator = jpdv.getValids().get(i);
+                            content.append(i + 1).append(". ").append(validator.getValidatorType())
+                                    .append(validator.getNote()).append("<br>");
+                        }
                     }
                 }
+                content.append("|");
             }
-            content.append("|");
             // 枚举项
             if (CollectionUtils.isNotEmpty(jpdv.getAnalyzeEnumConstantsRetvals())) {
                 for (AnalyzeEnumConstantsRetval enumConstant : jpdv.getAnalyzeEnumConstantsRetvals()) {
@@ -232,12 +245,16 @@ public class MarkdownServiceImpl implements MarkdownService {
         content.insert(0, " --- |");
         content.insert(0, " --- |");
         content.insert(0, " --- |");
-        content.insert(0, " --- |");
+        if (isReqBody) {
+            content.insert(0, " --- |");
+        }
         content.insert(0, "\n| --- | --- | --- |");
         content.insert(0, " 其他 |");
         content.insert(0, " 格式 |");
         content.insert(0, " 枚举项 |");
-        content.insert(0, " 校验项 |");
+        if (isReqBody) {
+            content.insert(0, " 校验项 |");
+        }
         content.insert(0, "| 字段名 | JSON类型 | 注释 |");
         return content.toString();
     }

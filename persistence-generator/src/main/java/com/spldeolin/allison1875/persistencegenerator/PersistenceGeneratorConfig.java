@@ -1,11 +1,9 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
 import java.util.List;
-import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
-import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -19,11 +17,6 @@ import lombok.experimental.FieldDefaults;
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class PersistenceGeneratorConfig extends Allison1875Config {
-
-    /**
-     * 共用配置
-     */
-    @NotNull @Valid CommonConfig commonConfig;
 
     /**
      * 数据库连接
@@ -74,16 +67,6 @@ public final class PersistenceGeneratorConfig extends Allison1875Config {
      * 如果生成的Entity需要指定父类，指定父类的Class对象
      */
     Class<?> superEntity;
-
-    /**
-     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
-     */
-    @NotNull Boolean enableNoModifyAnnounce;
-
-    /**
-     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: PG1000S-967D9357 的声明
-     */
-    @NotNull Boolean enableLotNoAnnounce;
 
     /**
      * 生成Entity时，文件已存在的解决方式

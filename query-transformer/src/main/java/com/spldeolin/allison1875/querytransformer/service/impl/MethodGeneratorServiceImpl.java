@@ -14,6 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
@@ -43,6 +45,9 @@ import lombok.extern.slf4j.Slf4j;
 public class MethodGeneratorServiceImpl implements MethodGeneratorService {
 
     @Inject
+    private CommonConfig commonConfig;
+
+    @Inject
     private QueryTransformerConfig config;
 
     @Inject
@@ -64,14 +69,14 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 .contains(p.getPredicate())).count() > 3) {
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getCommonConfig().getCondPackage());
-            if (config.getEnableLotNoAnnounce()) {
-                javabeanArg.setDescription(chainAnalysis.getLotNo());
+            javabeanArg.setPackageName(commonConfig.getCondPackage());
+            if (commonConfig.getEnableLotNoAnnounce()) {
+                javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Cond");
-            javabeanArg.setAuthor(config.getCommonConfig().getAuthor());
-            javabeanArg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
-            javabeanArg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
+            javabeanArg.setAuthor(commonConfig.getAuthor());
+            javabeanArg.setIsJavabeanSerializable(commonConfig.getIsJavabeanSerializable());
+            javabeanArg.setIsJavabeanCloneable(commonConfig.getIsJavabeanCloneable());
             for (PhraseDto phrase : phrases) {
                 if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(phrase.getPredicate())) {
                     continue;
@@ -165,14 +170,14 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             // 指定了2个及以上属性，生成一个Javabean作为返回值类型
             JavabeanArg javabeanArg = new JavabeanArg();
             javabeanArg.setAstForest(astForest);
-            javabeanArg.setPackageName(config.getCommonConfig().getRecordPackage());
-            if (config.getEnableLotNoAnnounce()) {
-                javabeanArg.setDescription(chainAnalysis.getLotNo());
+            javabeanArg.setPackageName(commonConfig.getRecordPackage());
+            if (commonConfig.getEnableLotNoAnnounce()) {
+                javabeanArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             javabeanArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Record");
-            javabeanArg.setAuthor(config.getCommonConfig().getAuthor());
-            javabeanArg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
-            javabeanArg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
+            javabeanArg.setAuthor(commonConfig.getAuthor());
+            javabeanArg.setIsJavabeanSerializable(commonConfig.getIsJavabeanSerializable());
+            javabeanArg.setIsJavabeanCloneable(commonConfig.getIsJavabeanCloneable());
             for (PhraseDto phrase : phrases) {
                 String propertyName = phrase.getSubjectPropertyName();
                 String varName = propertyName;

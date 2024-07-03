@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.exception.ParentAbsentException;
@@ -42,6 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReqRespServiceImpl implements ReqRespService {
 
+    @Inject
+    private CommonConfig commonConfig;
+    
     @Inject
     private HandlerTransformerConfig config;
 
@@ -102,9 +106,9 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setPackageName(packageName);
             arg.setClassName(javabeanName);
             arg.setDescription(concatDtoDescription(initDecAnalysis));
-            arg.setAuthor(config.getCommonConfig().getAuthor());
-            arg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
-            arg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
+            arg.setAuthor(commonConfig.getAuthor());
+            arg.setIsJavabeanSerializable(commonConfig.getIsJavabeanSerializable());
+            arg.setIsJavabeanCloneable(commonConfig.getIsJavabeanCloneable());
             arg.setMore4Javabean((tempCu, javabean) -> {
                 for (FieldDeclaration field : dto.getFields()) {
                     fieldService.more4SpecialTypeField(field, javabeanType);
@@ -148,13 +152,13 @@ public class ReqRespServiceImpl implements ReqRespService {
     private String estimatePackageName(JavabeanTypeEnum javabeanType) {
         String packageName;
         if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-            packageName = config.getCommonConfig().getReqDtoPackage();
+            packageName = commonConfig.getReqDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-            packageName = config.getCommonConfig().getRespDtoPackage();
+            packageName = commonConfig.getRespDtoPackage();
         } else if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
-            packageName = config.getCommonConfig().getReqDtoPackage();
+            packageName = commonConfig.getReqDtoPackage();
         } else {
-            packageName = config.getCommonConfig().getRespDtoPackage();
+            packageName = commonConfig.getRespDtoPackage();
         }
         return packageName;
     }
@@ -228,7 +232,7 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     private String concatDtoDescription(InitDecAnalysisDto initDecAnalysis) {
         String result = "";
-        if (config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                     + initDecAnalysis.getLotNo();
         }

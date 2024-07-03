@@ -30,9 +30,67 @@ Transform fluent-style expressions in the source code adhering to *Allison 1875*
 
 Transform convenient-to-code expressions in the source code adhering to *Allison 1875* conventions (referred to as StarChain) into source code composed of QueryChains and data assembly logic. After a subsequent transformation through query-transformer, transform into code, that used to query from a fact table and its dimension tables, and assemble data according to the one-to-one or one-to-many relationships specified by StarChain.
 
-### sqlapi-generator
+## Quick Start
 
-Generate Data Access Layer Exposed APIs by simply specifying SQL statements and the class names for the *Spring Web MVC* control layer, service layer, and *Mabatis* persistence layer.
+### Install
+
+```shell
+git clone git@github.com:spldeolin/allison1875.git
+mvn install -f allison1875/pom.xml
+
+# if this project base on Satisficing, install the extension also
+mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
+```
+
+### Setup
+
+```xml
+<dependency>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-support</artifactId>
+    <version>11.0</version>
+</dependency>
+```
+
+```xml
+<!-- if this project base on Spring Boot -->
+<plugin>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-maven-plugin</artifactId>
+    <version>11.0</version>
+    <configuration>
+        <basePackage>com.your.base.package</basePackage>
+    </configuration>
+</plugin>
+
+<!-- if this project base on Satisficing -->
+<plugin>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-maven-plugin</artifactId>
+    <version>11.0</version>
+    <dependencies>
+        <!-- setup extension -->
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>allison1875-extension-satisficing</artifactId>
+            <version>11.0</version>
+        </dependency>
+    </dependencies>
+    <configuration>
+        <basePackage>com.your.base.package</basePackage>
+    </configuration>
+</plugin>
+```
+
+### Execute
+
+```shell
+mvn allison1875:doc-analyzer          -f your-project/pom.xml
+mvn allison1875:handler-transformer   -f your-project/pom.xml
+mvn allison1875:persistence-generator -f your-project/pom.xml
+mvn allison1875:query-transformer     -f your-project/pom.xml
+mvn allison1875:star-transformer      -f your-project/pom.xml
+```
 
 ## Contribution
 

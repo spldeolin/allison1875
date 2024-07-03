@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.FieldArg;
 import com.spldeolin.allison1875.common.javabean.JavabeanArg;
@@ -28,6 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     @Inject
+    private CommonConfig commonConfig;
+    
+    @Inject
     private PersistenceGeneratorConfig config;
 
     @Inject
@@ -40,12 +44,12 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     public JavabeanGeneration generateEntity(TableStructureAnalysisDto persistence, AstForest astForest) {
         JavabeanArg arg = new JavabeanArg();
         arg.setAstForest(astForest);
-        arg.setPackageName(config.getCommonConfig().getEntityPackage());
+        arg.setPackageName(commonConfig.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
-        arg.setAuthor(config.getCommonConfig().getAuthor());
-        arg.setIsJavabeanSerializable(config.getCommonConfig().getIsJavabeanSerializable());
-        arg.setIsJavabeanCloneable(config.getCommonConfig().getIsJavabeanCloneable());
+        arg.setAuthor(commonConfig.getAuthor());
+        arg.setIsJavabeanSerializable(commonConfig.getIsJavabeanSerializable());
+        arg.setIsJavabeanCloneable(commonConfig.getIsJavabeanCloneable());
         arg.setMore4Javabean((cu, javabean) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             if (config.getSuperEntity() != null) {
@@ -78,13 +82,13 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     private String concatEntityDescription(TableStructureAnalysisDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (config.getEnableNoModifyAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

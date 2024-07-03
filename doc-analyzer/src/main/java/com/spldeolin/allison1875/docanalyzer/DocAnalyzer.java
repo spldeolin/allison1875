@@ -137,7 +137,7 @@ public class DocAnalyzer implements Allison1875MainService {
         // 保存到本地Markdwon
         if (config.getFlushTo().equals(FlushToEnum.LOCAL_MARKDOWN)) {
             try {
-                markdownService.flushToMarkdown(endpoints);
+                markdownService.flushToMarkdown(endpoints, astForest);
             } catch (Exception e) {
                 log.error("fail to flush to Markdown", e);
             }

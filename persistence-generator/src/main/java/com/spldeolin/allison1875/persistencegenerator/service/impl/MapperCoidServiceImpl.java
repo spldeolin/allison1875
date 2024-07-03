@@ -7,7 +7,6 @@ import static com.github.javaparser.StaticJavaParser.parseType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -26,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
@@ -50,6 +50,9 @@ import lombok.extern.slf4j.Slf4j;
 public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Inject
+    private CommonConfig commonConfig;
+    
+    @Inject
     private PersistenceGeneratorConfig config;
 
     @Inject
@@ -61,7 +64,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
         // find
         List<MethodDeclaration> customMethods = Lists.newArrayList();
-        String mapperQualifier = config.getCommonConfig().getMapperPackage() + "." + persistence.getMapperName();
+        String mapperQualifier = commonConfig.getMapperPackage() + "." + persistence.getMapperName();
         Optional<CompilationUnit> opt = astForest.findCu(mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
         if (opt.isPresent()) {
@@ -74,29 +77,27 @@ public class MapperCoidServiceImpl implements MapperCoidService {
                 throw new IllegalStateException("primaryType is not a interface.");
             }
 
-            // 删除Mapper中所有声明了LotNoAnnounce或者NoModifyAnnounce的方法
+            // 删除Mapper中所有声明了NoModifyAnnounce的方法
             for (MethodDeclaration method : mapper.getMethods()) {
-                boolean byAllison1875 = StringUtils.containsAny(JavadocUtils.getComment(method),
-                        BaseConstant.NO_MODIFY_ANNOUNCE);
-                if (byAllison1875) {
+                if (JavadocUtils.getComment(method).contains(BaseConstant.NO_MODIFY_ANNOUNCE)) {
                     method.remove();
                 }
             }
 
-            customMethods = mapper.getMethods();
+            customMethods = Lists.newArrayList(mapper.getMethods());
             customMethods.forEach(MethodDeclaration::remove);
         } else {
 
             // create
             log.info("Mapper文件不存在，创建它。 [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
-            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getAstForestRoot(),
-                    config.getCommonConfig().getMapperPackage(), persistence.getMapperName() + ".java"));
-            cu.setPackageDeclaration(config.getCommonConfig().getMapperPackage());
+            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
+                    commonConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(commonConfig.getMapperPackage());
             mapper = new ClassOrInterfaceDeclaration();
             String comment = concatMapperDescription(persistence);
             Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment,
-                    config.getCommonConfig().getAuthor() + " " + LocalDate.now());
+                    commonConfig.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, javabeanGeneration.getJavabeanName()));
             mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
             mapper.setInterface(true);
@@ -112,7 +113,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperDescription(TableStructureAnalysisDto persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
@@ -419,13 +420,13 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperMethodComment(TableStructureAnalysisDto persistence, String methodDescription) {
         String result = methodDescription;
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (config.getEnableNoModifyAnnounce()) {
+        if (commonConfig.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

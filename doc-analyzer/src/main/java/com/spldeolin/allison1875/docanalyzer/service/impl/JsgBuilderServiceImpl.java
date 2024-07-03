@@ -97,6 +97,9 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
             @Override
             public String findPropertyDescription(Annotated annotated) {
                 Field field = findFieldEvenIfAnnotatedMethod(annotated.getAnnotated());
+                if (field == null) {
+                    return null;
+                }
 
                 String className = field.getDeclaringClass().getName().replace('$', '.');
                 String fieldNameMight = field.getName();

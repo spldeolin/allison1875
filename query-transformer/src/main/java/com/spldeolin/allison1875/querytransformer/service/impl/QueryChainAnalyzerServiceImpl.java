@@ -146,7 +146,13 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
             queryPhrases.add(new PhraseDto().setSubjectPropertyName(keyPropertyName));
         }
         for (MethodCallExpr mce : queryChain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
-            String describe = mce.calculateResolvedType().describe();
+            String describe;
+            try {
+                describe = mce.calculateResolvedType().describe();
+            } catch (Exception e) {
+                log.warn("fail to resolve, mce={}", mce);
+                continue;
+            }
             if (describe.startsWith(designQualifier + ".NextableUpdateChain")) {
                 PhraseDto phrase = new PhraseDto();
                 phrase.setSubjectPropertyName(mce.getNameAsString());

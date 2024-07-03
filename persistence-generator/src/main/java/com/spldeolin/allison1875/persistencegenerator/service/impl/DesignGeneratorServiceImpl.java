@@ -19,6 +19,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
 import com.spldeolin.allison1875.common.service.ImportExprService;
@@ -42,6 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
     @Inject
+    private CommonConfig commonConfig;
+
+    @Inject
     private PersistenceGeneratorConfig config;
 
     @Inject
@@ -57,15 +61,15 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
 
         String designName = concatDesignName(tableStructureAnalysis);
-        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(args.getAstForest().getAstForestRoot(),
-                config.getCommonConfig().getDesignPackage(), designName + ".java");
+        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(args.getAstForest().getSourceRoot(),
+                commonConfig.getDesignPackage(), designName + ".java");
 
         List<PropertyDto> properties = tableStructureAnalysis.getProperties();
         Map<String, PropertyDto> propertiesByName = Maps.newHashMap();
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
-        cu.setPackageDeclaration(config.getCommonConfig().getDesignPackage());
+        cu.setPackageDeclaration(commonConfig.getDesignPackage());
         for (PropertyDto property : properties) {
             propertiesByName.put(property.getPropertyName(), property);
         }
@@ -246,7 +250,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         meta.setMapperQualifier(args.getMapper().getFullyQualifiedName()
                 .orElseThrow(() -> new QualifierAbsentException(args.getMapper())));
         meta.setMapperName(args.getMapper().getNameAsString());
-        meta.setMapperRelativePaths(config.getCommonConfig().getMapperXmlDirectoryPaths().stream()
+        meta.setMapperRelativePaths(commonConfig.getMapperXmlDirectories().stream()
                 .map(one -> one + File.separator + tableStructureAnalysis.getMapperName() + ".xml")
                 .collect(Collectors.toList()));
         if (tableStructureAnalysis.getIsDeleteFlagExist()) {

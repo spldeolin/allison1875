@@ -27,16 +27,15 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Exception;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.CuAbsentException;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
-import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
@@ -59,16 +58,13 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
     @Inject
-    private QueryTransformerConfig config;
+    private CommonConfig commonConfig;
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
 
     @Inject
     private ImportExprService importExprService;
-
-    @Inject
-    private AstForestResidenceService astForestResidenceService;
 
     @Override
     public Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args) {
@@ -86,8 +82,8 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         chainAnalysis.setMethodName(methodName);
 
         MethodDeclaration method = new MethodDeclaration();
-        if (config.getEnableLotNoAnnounce()) {
-            method.setJavadocComment(chainAnalysis.getLotNo());
+        if (commonConfig.getEnableLotNoAnnounce()) {
+            method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
         }
         method.setType(args.getClonedReturnType());
         method.setName(methodName);
@@ -125,8 +121,11 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            File mapperXml = astForestResidenceService.findModuleRoot(args.getAstForest().getPrimaryClass())
-                    .resolve(mapperRelativePath).toFile();
+            Optional<File> mapperXmlOpt = args.getAstForest().resolve(mapperRelativePath);
+            if (!mapperXmlOpt.isPresent()) {
+                continue;
+            }
+            File mapperXml = mapperXmlOpt.get();
 
             List<String> xmlLines = Lists.newArrayList();
             xmlLines.add("");
@@ -238,7 +237,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     private List<String> concatWhereSection(DesignMetaDto designMeta, ChainAnalysisDto chainAnalysis,
             boolean needNotDeletedSql) {
         List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(SINGLE_INDENT + "WHERE TRUE");
+        xmlLines.add(SINGLE_INDENT + "WHERE 1 = 1");
         if (needNotDeletedSql && designMeta.getNotDeletedSql() != null) {
             xmlLines.add(SINGLE_INDENT + "  AND " + designMeta.getNotDeletedSql());
         }
@@ -283,7 +282,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                                 + varName + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
-                        xmlLines.add(TREBLE_INDENT + "AND FALSE");
+                        xmlLines.add(TREBLE_INDENT + "AND 1 != 1");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
@@ -363,7 +362,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     }
 
     private String concatLotNoComment(ChainAnalysisDto chainAnalysis) {
-        if (config.getEnableLotNoAnnounce()) {
+        if (commonConfig.getEnableLotNoAnnounce()) {
             return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
         }
         return "";

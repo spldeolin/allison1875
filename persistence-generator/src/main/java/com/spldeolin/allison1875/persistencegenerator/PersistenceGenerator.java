@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
-import java.nio.file.Path;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -10,9 +9,9 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.javabean.JavabeanGeneration;
-import com.spldeolin.allison1875.common.service.AstForestResidenceService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
@@ -53,10 +52,10 @@ public class PersistenceGenerator implements Allison1875MainService {
     private DesignGeneratorService designGeneratorService;
 
     @Inject
-    private PersistenceGeneratorConfig config;
+    private CommonConfig commonConfig;
 
     @Inject
-    private AstForestResidenceService astForestResidenceService;
+    private PersistenceGeneratorConfig config;
 
     @Inject
     private ImportExprService importExprService;
@@ -166,17 +165,17 @@ public class PersistenceGenerator implements Allison1875MainService {
                             insertOrUpdateMethodName));
 
             // 基础方法替换到MapperXml中
-            for (String mapperXmlDirectoryPath : config.getCommonConfig().getMapperXmlDirectoryPaths()) {
+            for (String relativePath : commonConfig.getMapperXmlDirectories()) {
                 try {
-                    Path mapperXmlDirectory = astForestResidenceService.findModuleRoot(astForest.getPrimaryClass())
-                            .resolve(mapperXmlDirectoryPath);
-                    ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
-                    rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
-                    rmxmmArgs.setMapper(mapper);
-                    rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory);
-                    rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
-                    FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
-                    flushes.add(xmlFlush);
+                    astForest.resolve(relativePath).ifPresent(mapperXmlDirectory -> {
+                        ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
+                        rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
+                        rmxmmArgs.setMapper(mapper);
+                        rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
+                        rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
+                        FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
+                        flushes.add(xmlFlush);
+                    });
                 } catch (Exception e) {
                     log.error("写入Mapper.xml时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
                 }
@@ -191,7 +190,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     }
 
     protected String getEntityNameInXml(JavabeanGeneration javabeanGeneration) {
-            return javabeanGeneration.getJavabeanQualifier();
+        return javabeanGeneration.getJavabeanQualifier();
     }
 
 }

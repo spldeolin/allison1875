@@ -43,7 +43,7 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
         List<MvcHandlerDto> result = Lists.newArrayList();
 
         for (CompilationUnit cu : astForest) {
-            if (!CompilationUnitUtils.getCuAbsolutePath(cu).startsWith(astForest.getAstForestRoot())) {
+            if (!CompilationUnitUtils.getCuAbsolutePath(cu).startsWith(astForest.getSourceRoot())) {
                 // 非宿主controller
                 continue;
             }
@@ -58,7 +58,7 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                 // 反射controller，如果失败那么这个controller就没有继续处理的必要了
                 Class<?> mvcControllerReflection;
                 try {
-                    mvcControllerReflection = tryReflectController(coid);
+                    mvcControllerReflection = tryReflectController(coid, astForest);
                 } catch (ClassNotFoundException e) {
                     continue;
                 }
@@ -132,13 +132,14 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
         return false;
     }
 
-    private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller) throws ClassNotFoundException {
+    private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)
+            throws ClassNotFoundException {
         String qualifier = controller.getFullyQualifiedName()
                 .orElseThrow(() -> new QualifierAbsentException(controller));
         try {
-            return LoadClassUtils.loadClass(qualifier, this.getClass().getClassLoader());
+            return LoadClassUtils.loadClass(qualifier, astForest.getClassLoader());
         } catch (ClassNotFoundException e) {
-            log.error("cannot load class [{}]", qualifier);
+            log.error("cannot load class [{}]", qualifier, e);
             throw e;
         }
     }
