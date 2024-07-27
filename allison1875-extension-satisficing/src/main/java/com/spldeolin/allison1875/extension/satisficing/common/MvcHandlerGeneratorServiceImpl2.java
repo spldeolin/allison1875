@@ -6,6 +6,7 @@ import com.github.javaparser.ast.type.Type;
 import com.spldeolin.allison1875.common.javabean.GenerateMvcHandlerArgs;
 import com.spldeolin.allison1875.common.javabean.GenerateMvcHandlerRetval;
 import com.spldeolin.allison1875.common.service.impl.MvcHandlerGeneratorServiceImpl;
+import com.spldeolin.satisficing.api.RequestResult;
 
 /**
  * @author Deolin 2024-02-17
@@ -17,12 +18,13 @@ public class MvcHandlerGeneratorServiceImpl2 extends MvcHandlerGeneratorServiceI
         GenerateMvcHandlerRetval result = super.generateMvcHandler(args);
         Type returnType = result.getMvcHandler().getType();
         if (returnType.isVoidType()) {
-            returnType.replace(StaticJavaParser.parseType("com.spldeolin.satisficing.client.RequestResult<Void>"));
+
+            returnType.replace(StaticJavaParser.parseType(RequestResult.class.getName() + "<Void>"));
             result.getMvcHandler().getBody().get().getStatements()
                     .add(StaticJavaParser.parseStatement("return RequestResult.success();"));
         } else {
             returnType.replace(StaticJavaParser.parseType(
-                    String.format("com.spldeolin.satisficing.client.RequestResult<%s>", returnType)));
+                    String.format(RequestResult.class.getName() + "<%s>", returnType)));
             Expression returnExpr = result.getMvcHandler().getBody().get().getStatements().get(0).asReturnStmt()
                     .getExpression().get();
             returnExpr.replace(

@@ -30,6 +30,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.javabean.JavaTypeNa
 import com.spldeolin.allison1875.persistencegenerator.javabean.InformationSchemaDto;
 import com.spldeolin.allison1875.persistencegenerator.javabean.TableStructureAnalysisDto;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.JdbcTypeServiceImpl;
+import com.spldeolin.satisficing.api.EnumAncestor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -90,7 +91,8 @@ public class JdbcTypeServiceImpl2 extends JdbcTypeServiceImpl {
             ed.addAnnotation(parseAnnotation("@lombok.AllArgsConstructor"));
             ed.setPublic(true);
             ed.setName(enumName);
-            ed.addImplementedType("com.spldeolin.satisficing.client.EnumAncestor<String>");
+
+            ed.addImplementedType(EnumAncestor.class.getName() + "<String>");
             for (String part : enumMatcher.group(1).split(" ")) {
                 String[] split = part.split("=");
                 String enumConstantName = split[0].replaceAll("[^a-zA-Z0-9]", "");
