@@ -15,7 +15,7 @@ public class AstForestTest {
 
     public static void main(String[] args) {
         AstForest astForest = new MavenProjectBuiltAstForest(AstForestTest.class.getClassLoader(), new File("common/"));
-        log.info("resources={}", astForest.resolve("src/main/resources").get().getAbsolutePath());
+        log.info("resources={}", astForest.resolve("src/main/resources", false).get().getAbsolutePath());
         for (CompilationUnit compilationUnit : astForest) {
             log.info(CompilationUnitUtils.getCuAbsolutePath(compilationUnit).toString());
         }

@@ -100,9 +100,13 @@ public class MavenProjectBuiltAstForest implements AstForest {
     }
 
     @Override
-    public Optional<File> resolve(String relativePathOrAbsolutePath) {
+    public Optional<File> resolve(String relativePathOrAbsolutePath, boolean mkdirs) {
         File sourceFile = sourceRoot.toPath().resolve(relativePathOrAbsolutePath).toFile();
         if (sourceFile.exists()) {
+            return Optional.of(sourceFile);
+        }
+        if (mkdirs) {
+            sourceFile.mkdirs();
             return Optional.of(sourceFile);
         }
         log.info("file not exist, path={}", sourceFile.getAbsolutePath());

@@ -167,7 +167,7 @@ public class PersistenceGenerator implements Allison1875MainService {
             // 基础方法替换到MapperXml中
             for (String relativePath : commonConfig.getMapperXmlDirectories()) {
                 try {
-                    astForest.resolve(relativePath).ifPresent(mapperXmlDirectory -> {
+                    astForest.resolve(relativePath, true).ifPresent(mapperXmlDirectory -> {
                         ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
                         rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
                         rmxmmArgs.setMapper(mapper);

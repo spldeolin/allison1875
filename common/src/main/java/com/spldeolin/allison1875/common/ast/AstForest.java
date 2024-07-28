@@ -18,6 +18,6 @@ public interface AstForest extends Iterable<CompilationUnit> {
 
     Optional<CompilationUnit> findCu(String primaryTypeQualifier);
 
-    Optional<File> resolve(String relativePathOrAbsolutePath);
+    Optional<File> resolve(String relativePathOrAbsolutePath, boolean mkdirs);
 
 }

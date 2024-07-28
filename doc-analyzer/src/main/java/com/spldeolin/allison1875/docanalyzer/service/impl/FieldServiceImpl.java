@@ -77,7 +77,7 @@ public class FieldServiceImpl implements FieldService {
                 .forEachRemaining(result::add);
         // dependent projects
         for (String dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
-            astForest.resolve(dependencyProjectDirectory).ifPresent(
+            astForest.resolve(dependencyProjectDirectory, false).ifPresent(
                     dependencyProject -> FileUtils.iterateFiles(dependencyProject, BaseConstant.JAVA_EXTENSIONS, true)
                             .forEachRemaining(result::add));
         }

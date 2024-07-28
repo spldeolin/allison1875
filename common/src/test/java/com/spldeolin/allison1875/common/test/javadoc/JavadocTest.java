@@ -21,7 +21,7 @@ public class JavadocTest {
     public static void main(String[] args) throws IOException {
         AstForest astForest = new MavenProjectBuiltAstForest(AstForestTest.class.getClassLoader(), new File("common/"));
         Optional<File> resolve = astForest.resolve(
-                "src/test/java/com/spldeolin/allison1875/common/test/javadoc/TestSubject.java");
+                "src/test/java/com/spldeolin/allison1875/common/test/javadoc/TestSubject.java", false);
         CompilationUnit cu = CompilationUnitUtils.parseJava(resolve.get());
 //        LexicalPreservingPrinter.setup(cu);
 //        System.out.println(LexicalPreservingPrinter.print(cu));

@@ -121,7 +121,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         List<FileFlush> result = Lists.newArrayList();
 
         for (String mapperRelativePath : designMeta.getMapperRelativePaths()) {
-            Optional<File> mapperXmlOpt = args.getAstForest().resolve(mapperRelativePath);
+            Optional<File> mapperXmlOpt = args.getAstForest().resolve(mapperRelativePath, false);
             if (!mapperXmlOpt.isPresent()) {
                 continue;
             }
