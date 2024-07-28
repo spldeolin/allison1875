@@ -1,9 +1,12 @@
 package com.spldeolin.allison1875.common.service.impl;
 
 import java.util.List;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -31,6 +34,7 @@ public class ImportExprServiceImpl implements ImportExprService {
      */
     @Override
     public void extractQualifiedTypeToImport(CompilationUnit cu) {
+        // coit
         List<ClassOrInterfaceType> coits = cu.findAll(ClassOrInterfaceType.class, type -> {
             // 防止scope的scope被加入到import，所以只取用name首字母大写的type
             return MoreStringUtils.isFirstLetterUpperCase(type.getNameAsString());
@@ -47,6 +51,19 @@ public class ImportExprServiceImpl implements ImportExprService {
                 cu.addImport(scope + "." + coit.getNameAsString());
             });
         }
+
+        // 2024-07-28：methodDec的Type不同于其他Coit，需要特殊处理
+        for (MethodDeclaration md : cu.findAll(MethodDeclaration.class)) {
+            Type type = md.getType();
+            if (type.toString().contains(".")) {
+                log.debug("Qualified Type '{}' in '{}' extract to Import", type,
+                        CompilationUnitUtils.getCuAbsolutePath(cu));
+                cu.addImport(type.toString());
+                type.replace(StaticJavaParser.parseType(MoreStringUtils.splitAndGetLastPart(type.toString(), ".")));
+            }
+        }
+
+        // 注解
         for (AnnotationExpr ae : cu.findAll(AnnotationExpr.class)) {
             if (ae.getNameAsString().contains(".")) {
                 cu.addImport(ae.getNameAsString());
