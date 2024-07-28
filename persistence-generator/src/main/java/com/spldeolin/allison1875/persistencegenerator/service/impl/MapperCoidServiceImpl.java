@@ -130,7 +130,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") List<" + args.getEntityGeneration().getJavabeanQualifier() + "> entities"));
+                "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
+                        .getJavabeanQualifier() + "> entities"));
         insert.setBody(null);
         args.getMapper().getMembers().addLast(insert);
         return methodName;
@@ -145,7 +146,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
         insert.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") List<" + args.getEntityGeneration().getJavabeanQualifier() + "> entities"));
+                "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
+                        .getJavabeanQualifier() + "> entities"));
         insert.setBody(null);
         args.getMapper().getMembers().addLast(insert);
         return methodName;
@@ -161,7 +163,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") List<" + args.getEntityGeneration().getJavabeanQualifier() + "> entities"));
+                "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
+                        .getJavabeanQualifier() + "> entities"));
         update.setBody(null);
         args.getMapper().getMembers().addLast(update);
         return methodName;
@@ -176,7 +179,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         update.setType(PrimitiveType.intType());
         update.setName(methodName);
         update.addParameter(StaticJavaParser.parseParameter(
-                "@Param(\"entities\") List<" + args.getEntityGeneration().getJavabeanQualifier() + "> entities"));
+                "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
+                        .getJavabeanQualifier() + "> entities"));
         update.setBody(null);
         args.getMapper().getMembers().addLast(update);
         return methodName;
