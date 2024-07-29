@@ -22,16 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PersistenceGeneratorMojo extends Allison1875Mojo {
 
-    @Parameter(defaultValue = "com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule")
-    private String persistenceGeneratorModuleQualifier;
-
-    @Parameter
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    @Parameter(alias = "persistenceGenerator")
+    private PersistenceGeneratorMojoConfig persistenceGeneratorConfig;
 
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         persistenceGeneratorConfig = MoreObjects.firstNonNull(persistenceGeneratorConfig,
-                new PersistenceGeneratorConfig());
+                new PersistenceGeneratorMojoConfig());
         persistenceGeneratorConfig.setTables(
                 MoreObjects.firstNonNull(persistenceGeneratorConfig.getTables(), Lists.newArrayList()));
         persistenceGeneratorConfig.setEnableGenerateDesign(
@@ -43,7 +40,7 @@ public class PersistenceGeneratorMojo extends Allison1875Mojo {
                         FileExistenceResolutionEnum.OVERWRITE));
         log.info("persistenceGeneratorConfig={}", JsonUtils.toJsonPrettily(persistenceGeneratorConfig));
 
-        return (Allison1875Module) classLoader.loadClass(persistenceGeneratorModuleQualifier)
+        return (Allison1875Module) classLoader.loadClass(persistenceGeneratorConfig.getModule())
                 .getConstructor(CommonConfig.class, PersistenceGeneratorConfig.class)
                 .newInstance(commonConfig, persistenceGeneratorConfig);
     }

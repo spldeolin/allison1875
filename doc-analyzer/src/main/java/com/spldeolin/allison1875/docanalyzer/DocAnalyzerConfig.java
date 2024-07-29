@@ -19,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class DocAnalyzerConfig extends Allison1875Config {
+public class DocAnalyzerConfig extends Allison1875Config {
 
     /**
      * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于SourceRoot的路径 或 绝对路径 皆可）

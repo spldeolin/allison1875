@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class PersistenceGeneratorConfig extends Allison1875Config {
+public class PersistenceGeneratorConfig extends Allison1875Config {
 
     /**
      * 数据库连接

@@ -34,10 +34,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
-    @Parameter(defaultValue = "${project.groupId}", required = true)
-    protected String basePackage;
-
-    @Parameter
+    @Parameter(alias = "common")
     private CommonConfig commonConfig;
 
     @Override
@@ -78,9 +75,9 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
     private void initParam() {
         log.info("project={}", project);
-        log.info("basePackage={}", basePackage);
         commonConfig = MoreObjects.firstNonNull(commonConfig, new CommonConfig());
-        commonConfig.setBasePackage(basePackage);
+        String basePackage = commonConfig.getBasePackage();
+        commonConfig.setBasePackage(MoreObjects.firstNonNull(basePackage, project.getGroupId()));
         commonConfig.setReqDtoPackage(
                 MoreObjects.firstNonNull(commonConfig.getReqDtoPackage(), basePackage + ".javabean.req"));
         commonConfig.setRespDtoPackage(

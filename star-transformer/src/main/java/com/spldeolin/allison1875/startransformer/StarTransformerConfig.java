@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class StarTransformerConfig extends Allison1875Config {
+public class StarTransformerConfig extends Allison1875Config {
 
     /**
      * Whole DTO的后缀

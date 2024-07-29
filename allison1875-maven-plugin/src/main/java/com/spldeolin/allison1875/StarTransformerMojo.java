@@ -20,20 +20,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StarTransformerMojo extends Allison1875Mojo {
 
-    @Parameter(defaultValue = "com.spldeolin.allison1875.startransformer.StarTransformerModule")
-    private String starTransformerModuleQualifier;
-
-    @Parameter
-    private StarTransformerConfig starTransformerConfig;
+    @Parameter(alias = "starTransformer")
+    private StarTransformerMojoConfig starTransformerConfig;
 
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
-        starTransformerConfig = MoreObjects.firstNonNull(starTransformerConfig, new StarTransformerConfig());
+        starTransformerConfig = MoreObjects.firstNonNull(starTransformerConfig, new StarTransformerMojoConfig());
         starTransformerConfig.setWholeDtoNamePostfix(
                 MoreObjects.firstNonNull(starTransformerConfig.getWholeDtoNamePostfix(), "WholeDto"));
         log.info("starTransformerConfig={}", JsonUtils.toJsonPrettily(starTransformerConfig));
 
-        return (Allison1875Module) classLoader.loadClass(starTransformerModuleQualifier)
+        return (Allison1875Module) classLoader.loadClass(starTransformerConfig.getModule())
                 .getConstructor(CommonConfig.class, StarTransformerConfig.class)
                 .newInstance(commonConfig, starTransformerConfig);
     }

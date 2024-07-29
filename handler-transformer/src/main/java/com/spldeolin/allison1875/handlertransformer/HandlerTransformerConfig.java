@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class HandlerTransformerConfig extends Allison1875Config {
+public class HandlerTransformerConfig extends Allison1875Config {
 
     /**
      * 分页对象的全限定名

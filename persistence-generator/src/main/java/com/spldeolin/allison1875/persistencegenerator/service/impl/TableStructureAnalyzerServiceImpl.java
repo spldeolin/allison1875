@@ -123,6 +123,7 @@ public class TableStructureAnalyzerServiceImpl implements TableStructureAnalyzer
             sql = sql.replace("${tableNames}", part);
             sql = sql.replace("${tableSchema}", "'" + config.getSchema() + "'");
 
+            System.setProperty("org.jooq.no-logo", "true");
             Result<Record> records = DSL.using(conn, SQLDialect.MYSQL).fetch(sql);
             return records.into(InformationSchemaDto.class);
         } catch (Exception e) {

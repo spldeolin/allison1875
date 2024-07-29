@@ -20,18 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HandlerTransformerMojo extends Allison1875Mojo {
 
-    @Parameter(defaultValue = "com.spldeolin.allison1875.handlertransformer.HandlerTransformerModule")
-    private String handlerTransformerModuleQualifier;
-
-    @Parameter
-    private HandlerTransformerConfig handlerTransformerConfig;
+    @Parameter(alias = "handlerTransformer")
+    private HandlerTransformerMojoConfig handlerTransformerConfig;
 
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
-        handlerTransformerConfig = MoreObjects.firstNonNull(handlerTransformerConfig, new HandlerTransformerConfig());
+        handlerTransformerConfig = MoreObjects.firstNonNull(handlerTransformerConfig,
+                new HandlerTransformerMojoConfig());
         log.info("handlerTransformerConfig={}", JsonUtils.toJsonPrettily(handlerTransformerConfig));
 
-        return (Allison1875Module) classLoader.loadClass(handlerTransformerModuleQualifier)
+        return (Allison1875Module) classLoader.loadClass(handlerTransformerConfig.getModule())
                 .getConstructor(CommonConfig.class, HandlerTransformerConfig.class)
                 .newInstance(commonConfig, handlerTransformerConfig);
     }
