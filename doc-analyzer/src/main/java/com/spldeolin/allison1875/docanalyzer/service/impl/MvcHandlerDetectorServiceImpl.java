@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
 import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,8 +67,9 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                 // 分类
                 String mvcControllerCat = getControllerCat(coid);
 
-                Map<String/*shortestQualifiedSignature*/, MethodDeclaration> mds = this.listMethods(coid);
+                LinkedHashMap<String/*shortestQualifiedSignature*/, MethodDeclaration> mds = this.listMethods(coid);
 
+                List<MvcHandlerDto> mvcHandlers = Lists.newArrayList();
                 for (Method methodReflection : mvcControllerReflection.getDeclaredMethods()) {
                     if (isNotMvcHandler(methodReflection)) {
                         continue;
@@ -95,8 +97,12 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                     mvcHandler.setCat(mvcControllerCat);
                     mvcHandler.setMd(mvcHandlerMd);
                     mvcHandler.setReflection(methodReflection);
-                    result.add(mvcHandler);
+                    mvcHandlers.add(mvcHandler);
                 }
+
+                mvcHandlers.sort(Comparator.comparingInt(student -> Lists.newArrayList(mds.keySet())
+                        .indexOf(MethodQualifierUtils.getShortestQualifiedSignature(student.getMd()))));
+                result.addAll(mvcHandlers);
             }
         }
         return result;
@@ -106,8 +112,8 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
         return AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class) == null;
     }
 
-    private Map<String, MethodDeclaration> listMethods(ClassOrInterfaceDeclaration mvcControllerCoid) {
-        Map<String, MethodDeclaration> methods = Maps.newHashMap();
+    private LinkedHashMap<String, MethodDeclaration> listMethods(ClassOrInterfaceDeclaration mvcControllerCoid) {
+        LinkedHashMap<String, MethodDeclaration> methods = Maps.newLinkedHashMap();
         for (MethodDeclaration method : mvcControllerCoid.findAll(MethodDeclaration.class)) {
             try {
                 methods.put(MethodQualifierUtils.getShortestQualifiedSignature(method), method);
