@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer;
 
+import java.io.File;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
@@ -22,10 +23,10 @@ import lombok.experimental.FieldDefaults;
 public class DocAnalyzerConfig extends Allison1875Config {
 
     /**
-     * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于SourceRoot的路径 或 绝对路径 皆可）
+     * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于basedir的相对路径 或 绝对路径 皆可）
      */
     @NotNull
-    List<String> dependencyProjectDirectories;
+    List<File> dependencyProjectDirs;
 
     /**
      * 全局URL前缀
@@ -50,9 +51,9 @@ public class DocAnalyzerConfig extends Allison1875Config {
     String yapiToken;
 
     /**
-     * 文档输出到markdown时，Markdown文件的目录的路径（相对于SourceRoot的路径 或 绝对路径 皆可）
+     * 文档输出到markdown时，Markdown文件的目录的路径（相对于basedir的相对路径 或 绝对路径 皆可）
      */
-    String markdownDirectory;
+    File markdownDir;
 
     /**
      * 文档输出到markdown时，是否启用cURL命令的输出
@@ -78,9 +79,9 @@ public class DocAnalyzerConfig extends Allison1875Config {
             }
         }
         if (FlushToEnum.LOCAL_MARKDOWN.equals(flushTo)) {
-            if (markdownDirectory == null) {
+            if (markdownDir == null) {
                 invalids.add(new InvalidDto().setPath("markdownDirectoryPath")
-                        .setValue(ValidUtils.formatValue(markdownDirectory)).setReason("must not be null"));
+                        .setValue(ValidUtils.formatValue(markdownDir)).setReason("must not be null"));
             }
             if (enableCurl == null) {
                 invalids.add(new InvalidDto().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))

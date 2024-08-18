@@ -76,10 +76,11 @@ public class FieldServiceImpl implements FieldService {
         FileUtils.iterateFiles(astForest.getSourceRoot().toFile(), BaseConstant.JAVA_EXTENSIONS, true)
                 .forEachRemaining(result::add);
         // dependent projects
-        for (String dependencyProjectDirectory : config.getDependencyProjectDirectories()) {
-            astForest.resolve(dependencyProjectDirectory, false).ifPresent(
-                    dependencyProject -> FileUtils.iterateFiles(dependencyProject, BaseConstant.JAVA_EXTENSIONS, true)
-                            .forEachRemaining(result::add));
+        for (File dependencyProjectDir : config.getDependencyProjectDirs()) {
+            if (dependencyProjectDir.exists()) {
+                FileUtils.iterateFiles(dependencyProjectDir, BaseConstant.JAVA_EXTENSIONS, true)
+                        .forEachRemaining(result::add);
+            }
         }
         return result;
     }

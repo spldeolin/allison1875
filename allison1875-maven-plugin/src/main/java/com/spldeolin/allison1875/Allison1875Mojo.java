@@ -75,6 +75,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
     private void initParam() {
         log.info("project={}", project);
+        log.info("basedir={}", project.getBasedir());
         commonConfig = MoreObjects.firstNonNull(commonConfig, new CommonConfig());
         String basePackage = commonConfig.getBasePackage();
         commonConfig.setBasePackage(MoreObjects.firstNonNull(basePackage, project.getGroupId()));
@@ -98,8 +99,9 @@ public abstract class Allison1875Mojo extends AbstractMojo {
                 MoreObjects.firstNonNull(commonConfig.getRecordPackage(), basePackage + ".javabean.record"));
         commonConfig.setWholeDtoPackage(
                 MoreObjects.firstNonNull(commonConfig.getWholeDtoPackage(), basePackage + ".javabean"));
-        commonConfig.setMapperXmlDirectories(MoreObjects.firstNonNull(commonConfig.getMapperXmlDirectories(),
-                Lists.newArrayList("../resources/mapper")));
+        commonConfig.setMapperXmlDirs(MoreObjects.firstNonNull(commonConfig.getMapperXmlDirs(),
+                        Lists.newArrayList(new File("src/main/resources/mapper"))).stream()
+                .map(p -> project.getBasedir().toPath().resolve(p.toPath()).toFile()).collect(Collectors.toList()));
         commonConfig.setAuthor(MoreObjects.firstNonNull(commonConfig.getAuthor(), "Allison 1875"));
         commonConfig.setIsJavabeanSerializable(
                 MoreObjects.firstNonNull(commonConfig.getIsJavabeanSerializable(), false));

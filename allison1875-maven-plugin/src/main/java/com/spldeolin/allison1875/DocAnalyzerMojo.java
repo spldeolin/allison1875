@@ -1,5 +1,8 @@
 package com.spldeolin.allison1875;
 
+import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -28,13 +31,16 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         docAnalyzerConfig = MoreObjects.firstNonNull(docAnalyzerConfig, new DocAnalyzerMojoConfig());
-        docAnalyzerConfig.setDependencyProjectDirectories(
-                MoreObjects.firstNonNull(docAnalyzerConfig.getDependencyProjectDirectories(), Lists.newArrayList()));
+        List<File> dependencyProjectDirectories = MoreObjects.firstNonNull(docAnalyzerConfig.getDependencyProjectDirs(),
+                Lists.newArrayList());
+        docAnalyzerConfig.setDependencyProjectDirs(dependencyProjectDirectories.stream()
+                .map(f -> project.getBasedir().toPath().resolve(f.toPath()).toFile()).collect(Collectors.toList()));
         docAnalyzerConfig.setGlobalUrlPrefix(MoreObjects.firstNonNull(docAnalyzerConfig.getGlobalUrlPrefix(), ""));
         docAnalyzerConfig.setFlushTo(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getFlushTo(), FlushToEnum.LOCAL_MARKDOWN));
-        docAnalyzerConfig.setMarkdownDirectory(MoreObjects.firstNonNull(docAnalyzerConfig.getMarkdownDirectory(),
-                project.getBasedir().toPath().resolve("api-docs").toString()));
+        docAnalyzerConfig.setMarkdownDir(project.getBasedir().toPath()
+                .resolve(MoreObjects.firstNonNull(docAnalyzerConfig.getMarkdownDir(), new File("api-docs")).toPath())
+                .toFile());
         docAnalyzerConfig.setEnableCurl(MoreObjects.firstNonNull(docAnalyzerConfig.getEnableCurl(), false));
         docAnalyzerConfig.setEnableResponseBodySample(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getEnableResponseBodySample(), false));

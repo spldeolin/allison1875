@@ -57,7 +57,7 @@ public class MarkdownServiceImpl implements MarkdownService {
                 content.append(this.generateEndpointDoc(endpoint, astForest));
             }
 
-            File dir = astForest.getSourceRoot().resolve(config.getMarkdownDirectory()).toFile();
+            File dir = config.getMarkdownDir();
             if (!dir.exists()) {
                 dir.mkdirs();
             }

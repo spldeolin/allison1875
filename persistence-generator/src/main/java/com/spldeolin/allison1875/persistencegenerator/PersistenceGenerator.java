@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
+import java.io.File;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -165,17 +166,18 @@ public class PersistenceGenerator implements Allison1875MainService {
                             insertOrUpdateMethodName));
 
             // 基础方法替换到MapperXml中
-            for (String relativePath : commonConfig.getMapperXmlDirectories()) {
+            for (File mapperXmlDirectory : commonConfig.getMapperXmlDirs()) {
+                if (!mapperXmlDirectory.exists()) {
+                    log.debug("mapperXmlDirectory.mkdirs()={}", mapperXmlDirectory.mkdirs());
+                }
                 try {
-                    astForest.resolve(relativePath, true).ifPresent(mapperXmlDirectory -> {
-                        ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
-                        rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
-                        rmxmmArgs.setMapper(mapper);
-                        rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
-                        rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
-                        FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
-                        flushes.add(xmlFlush);
-                    });
+                    ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
+                    rmxmmArgs.setTableStructureAnalysisDto(tableStructureAnalysis);
+                    rmxmmArgs.setMapper(mapper);
+                    rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
+                    rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
+                    FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
+                    flushes.add(xmlFlush);
                 } catch (Exception e) {
                     log.error("写入Mapper.xml时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
                 }

@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.common.config;
 
+import java.io.File;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -84,10 +85,10 @@ public class CommonConfig extends Allison1875Config {
     String wholeDtoPackage;
 
     /**
-     * mapper.xml所在目录（相对于SourceRoot的路径 或 绝对路径 皆可）
+     * mapper.xml所在目录（相对于basedir的相对路径 或 绝对路径 皆可）
      */
     @NotEmpty
-    List<String> mapperXmlDirectories;
+    List<File> mapperXmlDirs;
 
     /**
      * 为生成的代码指定作者

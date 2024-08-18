@@ -23,7 +23,7 @@ public class DesignMetaDto {
 
     String mapperName;
 
-    List<String> mapperRelativePaths;
+    List<String> mapperPaths;
 
     Map<String, PropertyDto> properties;
 
