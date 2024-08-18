@@ -115,10 +115,11 @@ public class DocAnalyzer implements Allison1875MainService {
                 AnalyzeRequestMappingRetval analyzeRequestMappingRetval = requestMappingService.analyzeRequestMapping(
                         mvcController.getReflection(), mvcHandler.getReflection());
 
-                // 如果handler能通过多种url+Http动词请求的话，分裂成多个Endpoint
-                List<EndpointDto> divides = setToAndDivide(analyzeRequestMappingRetval, endpoint);
+                // 如果handler能通过多种url+Http动词进行请求，HTTP动词只使用其中之一
+                endpoint.setHttpMethod(getMoreAcceptableOnes(analyzeRequestMappingRetval.getCombinedVerbs()));
+                endpoint.setUrls(analyzeRequestMappingRetval.getCombinedUrls());
 
-                endpoints.addAll(divides);
+                endpoints.add(endpoint);
             } catch (Exception e) {
                 log.info("description={} author={} sourceCode={}", Joiner.on(" ").join(endpoint.getDescriptionLines()),
                         endpoint.getSourceCode(), endpoint.getAuthor(), e);
@@ -155,18 +156,14 @@ public class DocAnalyzer implements Allison1875MainService {
         endpoint.setSourceCode(analyzeMvcHandlerRetval.getSourceCode());
     }
 
-    private List<EndpointDto> setToAndDivide(AnalyzeRequestMappingRetval analyzeRequestMappingRetval,
-            EndpointDto endpoint) {
-        List<EndpointDto> copies = Lists.newArrayList();
-        for (String combinedUrl : analyzeRequestMappingRetval.getCombinedUrls()) {
-            for (RequestMethod combinedVerb : analyzeRequestMappingRetval.getCombinedVerbs()) {
-                EndpointDto copy = endpoint.copy();
-                copy.setUrl(combinedUrl);
-                copy.setHttpMethod(StringUtils.lowerCase(combinedVerb.toString()));
-                copies.add(copy);
-            }
+    private String getMoreAcceptableOnes(List<RequestMethod> combinedVerbs) {
+        if (combinedVerbs.stream().anyMatch(v -> v.equals(RequestMethod.POST))) {
+            return "post";
         }
-        return copies;
+        if (combinedVerbs.stream().anyMatch(v -> v.equals(RequestMethod.GET))) {
+            return "get";
+        }
+        return StringUtils.lowerCase(combinedVerbs.get(0).toString());
     }
 
 }

@@ -27,7 +27,7 @@ public class EndpointDto {
 
     String sourceCode;
 
-    String url;
+    List<String> urls;
 
     String httpMethod;
 
@@ -47,7 +47,7 @@ public class EndpointDto {
         result.setIsDeprecated(isDeprecated);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
-        result.setUrl(url);
+        result.setUrls(urls);
         result.setHttpMethod(httpMethod);
         result.setRequestBodyDescribe(requestBodyDescribe);
         result.setRequestBodyJsonSchema(requestBodyJsonSchema);

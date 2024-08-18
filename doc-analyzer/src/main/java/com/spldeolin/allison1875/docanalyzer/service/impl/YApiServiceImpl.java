@@ -68,7 +68,8 @@ public class YApiServiceImpl implements YApiService {
         Map<String, Long> catName2catId = this.getYapiCatIdsEachName(projectId);
 
         Map<String, JsonNode> yapiUrls = this.listAutoInterfaces(projectId);
-        Set<String> analysisUrls = endpoints.stream().map(EndpointDto::getUrl).collect(Collectors.toSet());
+        Set<String> analysisUrls = endpoints.stream().map(e -> Joiner.on(" 或 ").join(e.getUrls()))
+                .collect(Collectors.toSet());
 
         // yapi中，在解析出endpoint中找不到url的接口，移动到回收站
         for (String yapiUrl : yapiUrls.keySet()) {
@@ -89,9 +90,10 @@ public class YApiServiceImpl implements YApiService {
             String reqJs = this.generateReqOrRespDoc(endpoint.getRequestBodyJsonSchema());
             String respJs = this.generateReqOrRespDoc(endpoint.getResponseBodyJsonSchema());
 
-            JsonNode yapiInterface = this.createYApiInterface(title, endpoint.getUrl(), reqJs, respJs, yapiDesc,
+            JsonNode yapiInterface = this.createYApiInterface(title, Joiner.on(" 或 ").join(endpoint.getUrls()), reqJs,
+                    respJs, yapiDesc,
                     endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
-            log.info("Endpoint [{}] output to YApi Project [{}]({}...{}), response: {}", endpoint.getUrl(),
+            log.info("Endpoint [{}] output to YApi Project [{}]({}...{}), response: {}", endpoint.getUrls(),
                     project.getName(), StringUtils.left(config.getYapiToken(), 6),
                     StringUtils.right(config.getYapiToken(), 6), JsonUtils.toJson(yapiInterface));
         }

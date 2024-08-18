@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -83,7 +84,8 @@ public class MarkdownServiceImpl implements MarkdownService {
         }
 
         result.append("### URL\n");
-        result.append(endpoint.getHttpMethod().toUpperCase()).append(" `").append(endpoint.getUrl()).append("`\n");
+        String urlsText = endpoint.getUrls().stream().map(e -> "`" + e + "`").collect(Collectors.joining(" 或 "));
+        result.append(endpoint.getHttpMethod().toUpperCase()).append(urlsText).append("\n");
 
         result.append("### Request Body（application/json）\n");
         result.append(this.generateReqOrRespDoc(endpoint, true));
@@ -130,7 +132,7 @@ public class MarkdownServiceImpl implements MarkdownService {
             result.append("```shell\n");
             result.append(String.format(
                     "curl --request %s --url 'http://localhost:8080%s' --header " + "'content-type:application/json' "
-                            + "--data '", endpoint.getHttpMethod().toUpperCase(), endpoint.getUrl()));
+                            + "--data '", endpoint.getHttpMethod().toUpperCase(), endpoint.getUrls().get(0)));
             result.append(fakeReqJson);
             result.append("'\n```\n");
         }
