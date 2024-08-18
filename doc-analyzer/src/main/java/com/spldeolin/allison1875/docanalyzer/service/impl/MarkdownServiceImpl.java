@@ -207,57 +207,51 @@ public class MarkdownServiceImpl implements MarkdownService {
             // 注释
             content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
             content.append("|");
-            // 校验项
+            // 其他 - 校验项
+            StringBuilder validDoc = null;
             if (isReqBody) {
+                validDoc = new StringBuilder();
                 if (CollectionUtils.isNotEmpty(jpdv.getValids())) {
                     if (jpdv.getValids().size() == 1) {
-                        content.append(jpdv.getValids().get(0).getValidatorType())
+                        validDoc.append(jpdv.getValids().get(0).getValidatorType())
                                 .append(jpdv.getValids().get(0).getNote());
                     } else {
                         for (int i = 0; i < jpdv.getValids().size(); i++) {
                             AnalyzeValidRetval validator = jpdv.getValids().get(i);
-                            content.append(i + 1).append(". ").append(validator.getValidatorType())
+                            validDoc.append(i + 1).append(". ").append(validator.getValidatorType())
                                     .append(validator.getNote()).append("<br>");
                         }
+                        validDoc.delete(validDoc.length() - 4, validDoc.length());
                     }
                 }
-                content.append("|");
             }
-            // 枚举项
+
+            // 其他 - 枚举项
+            StringBuilder enumDoc = null;
             if (CollectionUtils.isNotEmpty(jpdv.getAnalyzeEnumConstantsRetvals())) {
+                enumDoc = new StringBuilder();
                 for (AnalyzeEnumConstantsRetval enumConstant : jpdv.getAnalyzeEnumConstantsRetvals()) {
-                    content.append(enumConstant.getCode()).append(" : ").append(enumConstant.getTitle()).append("<br>");
+                    enumDoc.append(enumConstant.getCode()).append(" : ").append(enumConstant.getTitle()).append("<br>");
                 }
+                enumDoc.delete(enumDoc.length() - 4, enumDoc.length());
             }
-            content.append("|");
-            // 格式
-            if (jpdv.getFormatPattern() != null) {
-                content.append(jpdv.getFormatPattern());
+            // 其他 - 格式
+            String formatDoc = null;
+            if (StringUtils.isNotEmpty(jpdv.getFormatPattern())) {
+                formatDoc = "格式：" + jpdv.getFormatPattern();
             }
-            content.append("|");
-            // 其他
+            // 其他 - 更多
+            String moreDoc = null;
             if (CollectionUtils.isNotEmpty(jpdv.getMoreDocLines())) {
-                content.append(Joiner.on("<br>").join(jpdv.getMoreDocLines()));
+                moreDoc = Joiner.on("<br>").join(jpdv.getMoreDocLines());
             }
+            content.append(Joiner.on("<br><br>").skipNulls().join(validDoc, enumDoc, formatDoc, moreDoc));
             content.append("|");
             content.append("\n");
         });
 
-        content.insert(0, "\n");
-        content.insert(0, " --- |");
-        content.insert(0, " --- |");
-        content.insert(0, " --- |");
-        if (isReqBody) {
-            content.insert(0, " --- |");
-        }
-        content.insert(0, "\n| --- | --- | --- |");
-        content.insert(0, " 其他 |");
-        content.insert(0, " 格式 |");
-        content.insert(0, " 枚举项 |");
-        if (isReqBody) {
-            content.insert(0, " 校验项 |");
-        }
-        content.insert(0, "| 字段名 | JSON类型 | 注释 |");
+        content.insert(0, "| --- | --- | --- | --- |\n");
+        content.insert(0, "| 字段名 | JSON类型 | 注释 | 其他 |\n");
         return content.toString();
     }
 
