@@ -48,7 +48,7 @@ mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
 <dependency>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-support</artifactId>
-    <version>11.0</version>
+    <version>12.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -57,7 +57,7 @@ mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
 <plugin>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-maven-plugin</artifactId>
-    <version>11.0</version>
+    <version>12.0-SNAPSHOT</version>
     <configuration>
         <basePackage>com.your.base.package</basePackage>
     </configuration>
@@ -67,13 +67,13 @@ mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
 <plugin>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-maven-plugin</artifactId>
-    <version>11.0</version>
+    <version>12.0-SNAPSHOT</version>
     <dependencies>
         <!-- setup extension -->
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>allison1875-extension-satisficing</artifactId>
-            <version>11.0</version>
+            <version>12.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <configuration>

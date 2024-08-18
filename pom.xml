@@ -6,7 +6,7 @@
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875</artifactId>
     <packaging>pom</packaging>
-    <version>11.0</version>
+    <version>12.0-SNAPSHOT</version>
 
     <modules>
         <module>allison1875-maven-plugin</module>
@@ -27,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <allison1875.version>11.0</allison1875.version>
+        <allison1875.version>12.0-SNAPSHOT</allison1875.version>
     </properties>
 
     <dependencyManagement>
