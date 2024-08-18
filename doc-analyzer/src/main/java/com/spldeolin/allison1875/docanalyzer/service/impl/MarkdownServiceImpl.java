@@ -193,12 +193,12 @@ public class MarkdownServiceImpl implements MarkdownService {
             content.append("|");
             // JSON类型
             if (jpdv.getReferencePath() != null) {
-                content.append("object");
+                content.append("Object");
             } else {
-                content.append(jsonSchema.getType().value());
+                content.append(StringUtils.capitalize(jsonSchema.getType().value()));
             }
             if (parentJsonSchema.isArraySchema()) {
-                content.append(" array");
+                content.append(" Array");
             }
             if (jpdv.getReferencePath() != null) {
                 content.append("<br>数据结构同：").append(jpdv.getReferencePath());
