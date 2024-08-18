@@ -36,6 +36,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.enums.ChainMethodEnum;
 import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
@@ -59,6 +60,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
     @Inject
     private CommonConfig commonConfig;
+
+    @Inject
+    private QueryTransformerConfig queryTransformerConfig;
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
@@ -136,7 +140,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                         generateReturnTypeRetval);
                 xmlLines.add(startTag);
 
-                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
+                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                }
                 xmlLines.add(SINGLE_INDENT + "SELECT");
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
                     xmlLines.add(DOUBLE_INDENT + "COUNT(*)");
@@ -170,14 +176,19 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.one) {
                     xmlLines.add(SINGLE_INDENT + "LIMIT 1");
                 }
-                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+
+                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
+                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                }
                 xmlLines.add("</select>");
             } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.update) {
                 // UPDATE
                 xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatUpdateStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
-                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
+                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                }
                 xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
                 xmlLines.add(SINGLE_INDENT + "SET");
                 for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
@@ -189,7 +200,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
-                xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
+                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                }
                 xmlLines.add("</update>");
             } else if (chainAnalysis.getChainMethod() == ChainMethodEnum.drop) {
                 // DROP
@@ -197,12 +210,16 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 String startTag = concatDeleteStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
                 if (CollectionUtils.isNotEmpty(chainAnalysis.getByPhrases())) {
-                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                    if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
+                        xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+                    }
                 }
                 xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
                 if (CollectionUtils.isNotEmpty(chainAnalysis.getByPhrases())) {
-                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                    if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
+                        xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+                    }
                 }
                 xmlLines.add("</delete>");
             } else {
