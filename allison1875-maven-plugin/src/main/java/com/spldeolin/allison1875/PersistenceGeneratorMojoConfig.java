@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PersistenceGeneratorMojoConfig extends PersistenceGeneratorConfig {
 
-    @Parameter(defaultValue = "com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule")
-    private String module;
+    @Parameter
+    private String module = "com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule";
 
 }

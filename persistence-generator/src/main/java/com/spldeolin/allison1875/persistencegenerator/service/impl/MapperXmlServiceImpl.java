@@ -67,7 +67,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     public List<String> generateBatchInsertEvenNullMethod(TableStructureAnalysisDto persistence, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO `%s`", persistence.getTableName()));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <include refid=\"all\"/> )");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
@@ -76,7 +78,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 persistence.getProperties().stream().map(p -> "#{one." + p.getPropertyName() + "}")
                         .collect(Collectors.toList()), 120));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + ")</foreach>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add("</insert>");
         xmlLines.add("");
         return xmlLines;
@@ -86,7 +90,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     public List<String> generateBatchInsertMethod(TableStructureAnalysisDto persistence, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "INSERT INTO `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
@@ -102,7 +108,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>;");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add("</insert>");
         xmlLines.add("");
         return xmlLines;
@@ -113,7 +121,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "SET");
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
@@ -134,7 +144,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{one."
                     + idProperty.getPropertyName() + "}");
         }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add("</update>");
         xmlLines.add("");
@@ -146,7 +158,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<set>");
         for (PropertyDto nonId : persistence.getNonIdProperties()) {
@@ -163,7 +177,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{one."
                     + idProperty.getPropertyName() + "}");
         }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add("</update>");
         xmlLines.add("");
@@ -201,7 +217,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
@@ -222,7 +240,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                     nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add("</insert>");
 
         xmlLines.add("");
@@ -234,7 +254,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO `" + persistence.getTableName() + "`");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDto property : persistence.getProperties()) {
@@ -248,7 +270,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                     property.getPropertyName(), property.getPropertyName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add("</insert>");
 
         xmlLines.add("");
@@ -261,7 +285,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         String firstLine = "<select id=\"" + methodName + "\" ";
         firstLine += "resultMap=\"all\">";
         result.add(firstLine);
-        result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         result.add(BaseConstant.SINGLE_INDENT + "SELECT");
         result.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
         result.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
@@ -269,7 +295,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         if (persistence.getIsDeleteFlagExist()) {
             result.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
         }
-        result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         result.add("</select>");
         result.add("");
         return result;
@@ -281,7 +309,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(
                 String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName, entityName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
@@ -293,7 +323,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  <if test=\"%s!=null\"> AND `%s` = #{%s} </if>",
                     property.getPropertyName(), property.getColumnName(), property.getPropertyName()));
         }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        if (config.getEnableGenerateFormatterMarker()) {
+            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+        }
         xmlLines.add("</select>");
         xmlLines.add("");
         return xmlLines;
@@ -314,7 +346,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             PropertyDto onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName,
                     onlyPk.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
@@ -325,7 +359,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + onlyPk.getColumnName() + String.format(
                     "` IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
                     English.plural(MoreStringUtils.toLowerCamel(onlyPk.getPropertyName()))));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
             xmlLines.add("</select>");
             xmlLines.add("");
         }
@@ -343,7 +379,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             firstLine += "resultMap=\"all\">";
             xmlLines.add(firstLine);
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
@@ -355,7 +393,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{"
                         + idProperty.getPropertyName() + "}");
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
             xmlLines.add("</select>");
             xmlLines.add("");
         }
@@ -375,7 +415,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
                     queryByKeysDto.getMethodName(),
                     key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
@@ -386,7 +428,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + key.getColumnName() + String.format(
                     "` IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
                     queryByKeysDto.getVarsName()));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
             xmlLines.add("</select>");
             sourceCodeLines.addAll(xmlLines);
             sourceCodeLines.add("");
@@ -404,7 +448,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
                     keyAndMethodName.getMethodName(),
                     key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
             xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM `" + persistence.getTableName() + "`");
@@ -414,7 +460,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + key.getColumnName() + "` = #{" + key.getPropertyName()
                     + "}");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
             xmlLines.add("</select>");
             result.addAll(xmlLines);
             result.add("");
@@ -445,7 +493,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
             for (PropertyDto nonId : persistence.getNonIdProperties()) {
@@ -466,7 +516,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND `" + idProperty.getColumnName() + "` = #{"
                         + idProperty.getPropertyName() + "}");
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
             xmlLines.add("</update>");
             xmlLines.add("");
         }
@@ -479,7 +531,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE `" + persistence.getTableName() + "`");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<set>");
             for (PropertyDto nonId : persistence.getNonIdProperties()) {
@@ -495,7 +549,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  AND `%s` = #{%s}", id.getColumnName(),
                         id.getPropertyName()));
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            if (config.getEnableGenerateFormatterMarker()) {
+                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
+            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</update>");
             xmlLines.add("");
         }

@@ -38,6 +38,8 @@ public class PersistenceGeneratorMojo extends Allison1875Mojo {
         persistenceGeneratorConfig.setEntityExistenceResolution(
                 MoreObjects.firstNonNull(persistenceGeneratorConfig.getEntityExistenceResolution(),
                         FileExistenceResolutionEnum.OVERWRITE));
+        persistenceGeneratorConfig.setEnableGenerateFormatterMarker(
+                MoreObjects.firstNonNull(persistenceGeneratorConfig.getEnableGenerateFormatterMarker(), true));
         log.info("persistenceGeneratorConfig={}", JsonUtils.toJsonPrettily(persistenceGeneratorConfig));
 
         return (Allison1875Module) classLoader.loadClass(persistenceGeneratorConfig.getModule())

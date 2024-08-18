@@ -21,37 +21,44 @@ public class PersistenceGeneratorConfig extends Allison1875Config {
     /**
      * 数据库连接
      */
-    @NotEmpty String jdbcUrl;
+    @NotEmpty
+    String jdbcUrl;
 
     /**
      * 数据库用户名
      */
-    @NotEmpty String userName;
+    @NotEmpty
+    String userName;
 
     /**
      * 数据库密码
      */
-    @NotEmpty String password;
+    @NotEmpty
+    String password;
 
     /**
      * 指定schema
      */
-    @NotEmpty String schema;
+    @NotEmpty
+    String schema;
 
     /**
      * 指定table，非必填，未填写时代表schema下所有的table
      */
-    @NotNull List<String> tables;
+    @NotNull
+    List<String> tables;
 
     /**
      * 是否为[query-transformer]生成Design类
      */
-    @NotNull Boolean enableGenerateDesign;
+    @NotNull
+    Boolean enableGenerateDesign;
 
     /**
      * 生成出的Entity类是否以Entity作为类名的结尾
      */
-    @NotNull Boolean isEntityEndWithEntity;
+    @NotNull
+    Boolean isEntityEndWithEntity;
 
     /**
      * 如果有逻辑删除，怎么样算作“数据被删”，非必填，只支持等式SQL
@@ -71,6 +78,13 @@ public class PersistenceGeneratorConfig extends Allison1875Config {
     /**
      * 生成Entity时，文件已存在的解决方式
      */
-    @NotNull FileExistenceResolutionEnum entityExistenceResolution;
+    @NotNull
+    FileExistenceResolutionEnum entityExistenceResolution;
+
+    /**
+     * 是否生成Intell IDEA的“Turn formatter on/off with makers in code comments”
+     */
+    @NotNull
+    Boolean enableGenerateFormatterMarker;
 
 }

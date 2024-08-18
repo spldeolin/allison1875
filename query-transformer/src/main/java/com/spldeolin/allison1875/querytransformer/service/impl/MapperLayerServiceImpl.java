@@ -135,6 +135,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, generateParamRetval,
                         generateReturnTypeRetval);
                 xmlLines.add(startTag);
+
                 xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 xmlLines.add(SINGLE_INDENT + "SELECT");
                 if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.count) {
