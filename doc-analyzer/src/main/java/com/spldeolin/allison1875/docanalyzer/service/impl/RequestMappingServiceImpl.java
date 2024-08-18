@@ -13,6 +13,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -90,7 +91,7 @@ public class RequestMappingServiceImpl implements RequestMappingService {
             StringBuilder sb = new StringBuilder(combinedUrl);
             for (Parameter parameter : reflectionMethod.getParameters()) {
                 RequestParam requestParam = AnnotatedElementUtils.findMergedAnnotation(parameter, RequestParam.class);
-                if (requestParam != null) {
+                if (requestParam != null && !MultipartFile.class.isAssignableFrom(parameter.getType())) {
                     if (questionMark.isFalse()) {
                         questionMark.setTrue();
                         sb.append("?");
