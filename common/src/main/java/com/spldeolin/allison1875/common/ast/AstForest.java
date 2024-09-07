@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.common.ast;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
@@ -17,7 +16,5 @@ public interface AstForest extends Iterable<CompilationUnit> {
     Path getSourceRoot();
 
     Optional<CompilationUnit> findCu(String primaryTypeQualifier);
-
-    Optional<File> resolve(String relativePathOrAbsolutePath, boolean mkdirs);
 
 }

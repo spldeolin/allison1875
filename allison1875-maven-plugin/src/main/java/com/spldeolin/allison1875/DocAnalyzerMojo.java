@@ -31,16 +31,16 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         docAnalyzerConfig = MoreObjects.firstNonNull(docAnalyzerConfig, new DocAnalyzerMojoConfig());
-        List<File> dependencyProjectDirectories = MoreObjects.firstNonNull(docAnalyzerConfig.getDependencyProjectDirs(),
+        List<File> dependencyProjectDirs = MoreObjects.firstNonNull(docAnalyzerConfig.getDependencyProjectDirs(),
                 Lists.newArrayList());
-        docAnalyzerConfig.setDependencyProjectDirs(dependencyProjectDirectories.stream()
-                .map(f -> project.getBasedir().toPath().resolve(f.toPath()).toFile()).collect(Collectors.toList()));
+        dependencyProjectDirs = dependencyProjectDirs.stream().map(super::getCanonicalFileRelativeToBasedir)
+                .collect(Collectors.toList());
+        docAnalyzerConfig.setDependencyProjectDirs(dependencyProjectDirs);
         docAnalyzerConfig.setGlobalUrlPrefix(MoreObjects.firstNonNull(docAnalyzerConfig.getGlobalUrlPrefix(), ""));
         docAnalyzerConfig.setFlushTo(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getFlushTo(), FlushToEnum.LOCAL_MARKDOWN));
-        docAnalyzerConfig.setMarkdownDir(project.getBasedir().toPath()
-                .resolve(MoreObjects.firstNonNull(docAnalyzerConfig.getMarkdownDir(), new File("api-docs")).toPath())
-                .toFile());
+        File markdownDir = MoreObjects.firstNonNull(docAnalyzerConfig.getMarkdownDir(), new File("api-docs"));
+        docAnalyzerConfig.setMarkdownDir(getCanonicalFileRelativeToBasedir(markdownDir));
         docAnalyzerConfig.setEnableCurl(MoreObjects.firstNonNull(docAnalyzerConfig.getEnableCurl(), false));
         docAnalyzerConfig.setEnableResponseBodySample(
                 MoreObjects.firstNonNull(docAnalyzerConfig.getEnableResponseBodySample(), false));

@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -99,9 +100,6 @@ public abstract class Allison1875Mojo extends AbstractMojo {
                 MoreObjects.firstNonNull(commonConfig.getRecordPackage(), basePackage + ".javabean.record"));
         commonConfig.setWholeDtoPackage(
                 MoreObjects.firstNonNull(commonConfig.getWholeDtoPackage(), basePackage + ".javabean"));
-        commonConfig.setMapperXmlDirs(MoreObjects.firstNonNull(commonConfig.getMapperXmlDirs(),
-                        Lists.newArrayList(new File("src/main/resources/mapper"))).stream()
-                .map(p -> project.getBasedir().toPath().resolve(p.toPath()).toFile()).collect(Collectors.toList()));
         commonConfig.setAuthor(MoreObjects.firstNonNull(commonConfig.getAuthor(), "Allison 1875"));
         commonConfig.setIsJavabeanSerializable(
                 MoreObjects.firstNonNull(commonConfig.getIsJavabeanSerializable(), false));
@@ -109,6 +107,13 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         commonConfig.setEnableNoModifyAnnounce(
                 MoreObjects.firstNonNull(commonConfig.getEnableNoModifyAnnounce(), true));
         commonConfig.setEnableLotNoAnnounce(MoreObjects.firstNonNull(commonConfig.getEnableLotNoAnnounce(), true));
+
+        List<File> mapperXmlDirs = MoreObjects.firstNonNull(commonConfig.getMapperXmlDirs(),
+                Lists.newArrayList(new File("src/main/resources/mapper")));
+        mapperXmlDirs = mapperXmlDirs.stream().map(this::getCanonicalFileRelativeToBasedir)
+                .collect(Collectors.toList());
+        commonConfig.setMapperXmlDirs(mapperXmlDirs);
+
         log.info("commonConfig={}", JsonUtils.toJsonPrettily(commonConfig));
     }
 
@@ -125,6 +130,15 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             urls[i] = new File(classpathElements.get(i)).toURL();
         }
         return new URLClassLoader(urls, this.getClass().getClassLoader());
+    }
+
+    protected File getCanonicalFileRelativeToBasedir(File file) {
+        try {
+            return project.getBasedir().toPath().resolve(file.toPath()).toFile().getCanonicalFile();
+        } catch (IOException e) {
+            log.warn("fail to getCanonicalFile, basedir={} file={}", project.getBasedir(), file, e);
+            return file;
+        }
     }
 
 }

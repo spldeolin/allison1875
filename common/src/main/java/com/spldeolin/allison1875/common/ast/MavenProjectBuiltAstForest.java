@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.common.ast;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Optional;
@@ -38,12 +40,18 @@ public class MavenProjectBuiltAstForest implements AstForest {
             AstFilterService astFilterService) {
         Preconditions.checkNotNull(classLoader, "required Argument 'classLoader' must not be null");
         Preconditions.checkNotNull(sourceRoot, "required Argument 'sourceRoot' must not be null");
+        try {
+            sourceRoot = sourceRoot.getCanonicalFile();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         this.classLoader = classLoader;
         this.sourceRoot = sourceRoot;
         this.astFilterService = MoreObjects.firstNonNull(astFilterService, new AcceptAllAstFilterService());
         StaticJavaParser.getParserConfiguration()
                 .setSymbolResolver(new JavaSymbolSolver(new ClassLoaderTypeSolver(classLoader)));
         Thread.currentThread().setContextClassLoader(classLoader);
+        log.info("AstForest created, sourceRoot={}", sourceRoot);
     }
 
     @Override
@@ -97,20 +105,6 @@ public class MavenProjectBuiltAstForest implements AstForest {
             return Optional.empty();
         }
         return Optional.of(cu);
-    }
-
-    @Override
-    public Optional<File> resolve(String relativePathOrAbsolutePath, boolean mkdirs) {
-        File sourceFile = sourceRoot.toPath().resolve(relativePathOrAbsolutePath).toFile();
-        if (sourceFile.exists()) {
-            return Optional.of(sourceFile);
-        }
-        if (mkdirs) {
-            sourceFile.mkdirs();
-            return Optional.of(sourceFile);
-        }
-        log.info("file not exist, path={}", sourceFile.getAbsolutePath());
-        return Optional.empty();
     }
 
     private String qualifierToRelativePath(String qualifier) {
