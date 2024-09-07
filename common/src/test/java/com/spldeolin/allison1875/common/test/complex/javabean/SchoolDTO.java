@@ -11,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
+import org.apache.commons.lang3.tuple.Triple;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -102,5 +103,7 @@ public class SchoolDTO {
      * 班级
      */
     private List<ClassroomDTO> classrooms;
+
+    private Triple<A1<B1>, A2<B2>, A3<B3>> xx;
 
 }

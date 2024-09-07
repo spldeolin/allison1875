@@ -1,0 +1,25 @@
+package com.spldeolin.allison1875.common.test.complex.javabean;
+
+import java.io.File;
+import com.github.javaparser.ast.CompilationUnit;
+import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.MavenProjectBuiltAstForest;
+import com.spldeolin.allison1875.common.ast.NestJavabeanCollector;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class FieldTypeCollectorTest {
+
+    public static void main(String[] args) {
+        AstForest astForest = new MavenProjectBuiltAstForest(FieldTypeCollectorTest.class.getClassLoader(),
+                new File("common/src/test/java"));
+        astForest.findCu(SchoolDTO.class.getName()).flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
+
+            NestJavabeanCollector fieldTypeCollector = new NestJavabeanCollector(astForest, pt);
+            fieldTypeCollector.collect();
+            fieldTypeCollector.getTypeQualfiers().forEach(log::info);
+
+        });
+    }
+
+}
