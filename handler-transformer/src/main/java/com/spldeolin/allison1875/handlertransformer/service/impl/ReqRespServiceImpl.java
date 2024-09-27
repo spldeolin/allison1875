@@ -136,6 +136,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 ClassOrInterfaceDeclaration parentCoid = (ClassOrInterfaceDeclaration) dto.getParentNode()
                         .orElseThrow(() -> new ParentAbsentException(dto));
                 FieldDeclaration field = new FieldDeclaration();
+                dto.getJavadoc().ifPresent(field::setJavadocComment);
                 if (javabeanType == JavabeanTypeEnum.NEST_DTO_IN_REQ) {
                     field.addAnnotation(annotationExprService.javaxValid());
                 }
