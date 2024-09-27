@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875;
 
-import org.apache.maven.plugins.annotations.Parameter;
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
+import com.spldeolin.allison1875.startransformer.StarTransformerModule;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,7 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StarTransformerMojoConfig extends StarTransformerConfig {
 
-    @Parameter(defaultValue = "com.spldeolin.allison1875.startransformer.StarTransformerModule")
-    private String module;
+    private String module = StarTransformerModule.class.getName();
 
 }

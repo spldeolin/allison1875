@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875;
 
-import org.apache.maven.plugins.annotations.Parameter;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerModule;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,7 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QueryTransformerMojoConfig extends QueryTransformerConfig {
 
-    @Parameter(defaultValue = "com.spldeolin.allison1875.querytransformer.QueryTransformerModule")
-    private String module;
+    private String module = QueryTransformerModule.class.getName();
 
 }
