@@ -5,7 +5,9 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Inject;
@@ -51,7 +53,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
 
         mvcHandler.setPublic(true);
 
-        String serviceResultType = args.getServiceResultType();
+        String serviceResultType = args.getRespBodyDtoType();
         if (serviceResultType != null) {
             mvcHandler.setType(serviceResultType);
         } else {
@@ -64,7 +66,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
         }
         mvcHandler.setName(methodName);
 
-        String serviceParamType = args.getServiceParamType();
+        String serviceParamType = args.getReqBodyDtoType();
         if (serviceParamType != null) {
             Parameter param = new Parameter();
             param.addAnnotation(annotationExprService.springRequestBody());
@@ -73,9 +75,18 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
             param.setName("req");
             mvcHandler.addParameter(param);
         }
-        for (VariableDeclarator vd : args.getRequestParams()) {
+        for (VariableDeclarator vd : args.getReqParams()) {
             Parameter param = new Parameter(vd.getType(), vd.getName());
-            AnnotationExpr anno = annotationExprService.springRequestParam();
+            NormalAnnotationExpr anno = annotationExprService.springRequestParam();
+            vd.getInitializer().filter(Expression::isLiteralExpr).map(Expression::asLiteralExpr).ifPresent(init -> {
+                if (init.isLiteralStringValueExpr()) {
+                    anno.addPair("defaultValue", new StringLiteralExpr(init.asLiteralStringValueExpr().getValue()));
+                }
+                if (init.isBooleanLiteralExpr()) {
+                    anno.addPair("defaultValue",
+                            new StringLiteralExpr(String.valueOf(init.asBooleanLiteralExpr().getValue())));
+                }
+            });
             param.addAnnotation(anno);
             mvcHandler.addParameter(param);
         }
@@ -85,7 +96,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
         String serviceVarName = args.getInjectedServiceVarName();
         String serviceMethodName = args.getServiceMethodName();
         StringBuilder argNames = new StringBuilder(serviceParamType != null ? "req" : "");
-        for (VariableDeclarator requestParam : args.getRequestParams()) {
+        for (VariableDeclarator requestParam : args.getReqParams()) {
             if (argNames.length() > 0) {
                 argNames.append(",");
             }

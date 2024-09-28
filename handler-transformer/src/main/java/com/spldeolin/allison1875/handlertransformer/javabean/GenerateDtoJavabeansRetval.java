@@ -15,14 +15,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateDtoJavabeansRetval {
 
-    String paramType = null;
+    String reqBodyDtoType = null;
 
-    String resultType = null;
+    String respBodyDtoType = null;
 
     final List<FileFlush> flushes = Lists.newArrayList();
 
     Boolean isHttpGet;
 
-    final List<VariableDeclarator> requestParams = Lists.newArrayList();
+    final List<VariableDeclarator> reqParams = Lists.newArrayList();
 
 }

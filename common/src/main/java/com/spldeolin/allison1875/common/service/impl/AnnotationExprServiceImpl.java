@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
@@ -76,8 +77,9 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
-    public AnnotationExpr springRequestParam() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam").clone();
+    public NormalAnnotationExpr springRequestParam() {
+        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam()")
+                .asNormalAnnotationExpr().clone();
     }
 
     @Override

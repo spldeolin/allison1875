@@ -109,7 +109,7 @@ public class ReqRespServiceImpl implements ReqRespService {
 
             if (javabeanType == JavabeanTypeEnum.REQ_PARAMS) {
                 for (FieldDeclaration fd : dto.getFields()) {
-                    result.getRequestParams().addAll(fd.getVariables());
+                    result.getReqParams().addAll(fd.getVariables());
                 }
                 continue;
             }
@@ -137,10 +137,10 @@ public class ReqRespServiceImpl implements ReqRespService {
 
             String javabeanQualifier = javabeanGeneration.getJavabeanQualifier();
             if (javabeanType == JavabeanTypeEnum.REQ_DTO) {
-                result.setParamType(calcType(dto, javabeanQualifier));
+                result.setReqBodyDtoType(calcType(dto, javabeanQualifier));
             }
             if (javabeanType == JavabeanTypeEnum.RESP_DTO) {
-                result.setResultType(calcType(dto, javabeanQualifier));
+                result.setRespBodyDtoType(calcType(dto, javabeanQualifier));
             }
 
             // 遍历到NestDto时，将父节点中的自身替换为Field

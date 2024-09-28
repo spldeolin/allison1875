@@ -21,9 +21,9 @@ public class GenerateMvcHandlerArgs {
 
     String description;
 
-    String serviceParamType;
+    String reqBodyDtoType;
 
-    String serviceResultType;
+    String respBodyDtoType;
 
     @NotEmpty String injectedServiceVarName;
 
@@ -33,6 +33,6 @@ public class GenerateMvcHandlerArgs {
 
     Boolean isHttpGet;
 
-    List<VariableDeclarator> requestParams;
+    List<VariableDeclarator> reqParams;
 
 }

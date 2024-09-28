@@ -72,9 +72,6 @@ public class HandlerTransformer implements Allison1875MainService {
     @Inject
     private CommonConfig commonConfig;
 
-    @Inject
-    private HandlerTransformerConfig config;
-
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
@@ -106,8 +103,8 @@ public class HandlerTransformer implements Allison1875MainService {
 
                     // 生成Service方法
                     MethodDeclaration serviceMethod = serviceLayerService.generateServiceMethod(initDecAnalysis,
-                            generateDtoJavabeansRetval.getParamType(), generateDtoJavabeansRetval.getRequestParams(),
-                            generateDtoJavabeansRetval.getResultType());
+                            generateDtoJavabeansRetval.getReqBodyDtoType(), generateDtoJavabeansRetval.getReqParams(),
+                            generateDtoJavabeansRetval.getRespBodyDtoType());
 
                     // 生成Service / ServiceImpl
                     GenerateServiceAndImplArgs gsaiArgs = new GenerateServiceAndImplArgs();
@@ -145,13 +142,13 @@ public class HandlerTransformer implements Allison1875MainService {
                                 + initDecAnalysis.getLotNo();
                     }
                     gmhArgs.setDescription(description);
-                    gmhArgs.setServiceParamType(generateDtoJavabeansRetval.getParamType());
-                    gmhArgs.setServiceResultType(generateDtoJavabeansRetval.getResultType());
+                    gmhArgs.setReqBodyDtoType(generateDtoJavabeansRetval.getReqBodyDtoType());
+                    gmhArgs.setRespBodyDtoType(generateDtoJavabeansRetval.getRespBodyDtoType());
                     gmhArgs.setInjectedServiceVarName(addInjectFieldRetval.getFieldVarName());
                     gmhArgs.setServiceMethodName(addMethodToServiceRetval.getMethodName());
                     gmhArgs.setMvcController(mvcController);
                     gmhArgs.setIsHttpGet(generateDtoJavabeansRetval.getIsHttpGet());
-                    gmhArgs.setRequestParams(generateDtoJavabeansRetval.getRequestParams());
+                    gmhArgs.setReqParams(generateDtoJavabeansRetval.getReqParams());
                     GenerateMvcHandlerRetval generateMvcHandlerRetval = mvcHandlerGeneratorService.generateMvcHandler(
                             gmhArgs);
 

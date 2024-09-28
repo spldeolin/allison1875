@@ -17,8 +17,8 @@ import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerSer
 @ImplementedBy(ServiceLayerServiceImpl.class)
 public interface ServiceLayerService {
 
-    MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String paramType,
-            List<VariableDeclarator> requestParams, String resultType);
+    MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String reqBodyDtoType,
+            List<VariableDeclarator> reqParams, String respBodyDtoType);
 
     AddMethodToServiceRetval addMethodToService(AddMethodToServiceArgs args);
 

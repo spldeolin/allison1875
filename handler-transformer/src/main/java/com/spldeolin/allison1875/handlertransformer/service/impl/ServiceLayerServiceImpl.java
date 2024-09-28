@@ -56,26 +56,26 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     private ImportExprService importExprService;
 
     @Override
-    public MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String paramType,
-            List<VariableDeclarator> requestParams, String resultType) {
+    public MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String reqBodyDtoType,
+            List<VariableDeclarator> reqParams, String respBodyDtoType) {
         MethodDeclaration method = new MethodDeclaration();
         method.addAnnotation(annotationExprService.javaOverride());
         method.setPublic(true);
-        if (resultType != null) {
-            method.setType(resultType);
+        if (respBodyDtoType != null) {
+            method.setType(respBodyDtoType);
         } else {
             method.setType(new VoidType());
         }
         method.setName(initDecAnalysisDto.getMvcHandlerMethodName());
-        if (paramType != null) {
-            method.addParameter(paramType, "req");
+        if (reqBodyDtoType != null) {
+            method.addParameter(reqBodyDtoType, "req");
         }
-        for (VariableDeclarator vd : requestParams) {
+        for (VariableDeclarator vd : reqParams) {
             method.addParameter(new Parameter(vd.getType(), vd.getName()));
         }
 
         BlockStmt body = new BlockStmt();
-        if (resultType != null) {
+        if (respBodyDtoType != null) {
             body.addStatement(StaticJavaParser.parseStatement("return null;"));
         }
         method.setBody(body);
