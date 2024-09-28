@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
 import java.util.List;
+import java.util.Map;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
 import com.spldeolin.allison1875.common.ast.AstForest;
@@ -27,5 +29,7 @@ public class GenerateMethodToMapperArgs {
     List<Parameter> cloneParameters;
 
     Type clonedReturnType;
+
+    Map<String, ClassOrInterfaceDeclaration> methodAddedMappers;
 
 }

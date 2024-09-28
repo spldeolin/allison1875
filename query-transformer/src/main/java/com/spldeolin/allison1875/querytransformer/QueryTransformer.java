@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.querytransformer;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node.TreeTraversal;
@@ -9,7 +10,9 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ancestor.Allison1875MainService;
@@ -31,6 +34,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMappe
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.ReplaceDesignArgs;
+import com.spldeolin.allison1875.querytransformer.javabean.XmlSourceFile;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
 import com.spldeolin.allison1875.querytransformer.service.MethodGeneratorService;
@@ -69,6 +73,10 @@ public class QueryTransformer implements Allison1875MainService {
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
+
+        // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml
+        Map<String, ClassOrInterfaceDeclaration> methodAddedMappers = Maps.newHashMap();
+        Map<String, XmlSourceFile> methodAddedMapperXmls = Maps.newHashMap();
 
         for (CompilationUnit cu : astForest) {
             boolean anyTransformed = false;
@@ -151,6 +159,7 @@ public class QueryTransformer implements Allison1875MainService {
                     gmtmArgs.setCloneParameters(generateParamRetval.getParameters().stream().map(Parameter::clone)
                             .collect(Collectors.toList()));
                     gmtmArgs.setClonedReturnType(generateReturnTypeRetval.getResultType().clone());
+                    gmtmArgs.setMethodAddedMappers(methodAddedMappers);
                     mapperLayerService.generateMethodToMapper(gmtmArgs).ifPresent(flushes::add);
 
                     // generate Method into mapper.xml
@@ -160,8 +169,10 @@ public class QueryTransformer implements Allison1875MainService {
                     gmtmxArgs.setChainAnalysis(chainAnalysis);
                     gmtmxArgs.setGenerateParamRetval(generateParamRetval);
                     gmtmxArgs.setGenerateReturnTypeRetval(generateReturnTypeRetval);
-                    List<FileFlush> xmlFlushes = mapperLayerService.generateMethodToMapperXml(gmtmxArgs);
-                    flushes.addAll(xmlFlushes);
+                    gmtmxArgs.setMethodAddedMapperXmls(methodAddedMapperXmls);
+                    mapperLayerService.generateMethodToMapperXml(gmtmxArgs);
+                    methodAddedMapperXmls.values().stream().map(o -> FileFlush.build(o.getFile(),
+                            Joiner.on(BaseConstant.NEW_LINE).join(o.getContentLines()))).forEach(flushes::add);
 
                     // append autowired mapper
                     AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(

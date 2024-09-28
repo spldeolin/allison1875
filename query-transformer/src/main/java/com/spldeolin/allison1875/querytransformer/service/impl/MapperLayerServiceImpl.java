@@ -5,13 +5,10 @@ import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDE
 import static com.spldeolin.allison1875.common.constant.BaseConstant.TREBLE_INDENT;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -20,7 +17,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.type.PrimitiveType;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -46,6 +42,7 @@ import com.spldeolin.allison1875.querytransformer.javabean.GenerateMethodToMappe
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
+import com.spldeolin.allison1875.querytransformer.javabean.XmlSourceFile;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,7 +69,8 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
     @Override
     public Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args) {
-        ClassOrInterfaceDeclaration mapper = this.findMapper(args.getAstForest(), args.getDesignMeta());
+        ClassOrInterfaceDeclaration mapper = this.findMapper(args.getAstForest(), args.getDesignMeta(),
+                args.getMethodAddedMappers());
         if (mapper == null) {
             return Optional.empty();
         }
@@ -100,33 +98,16 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         return Optional.of(FileFlush.build(cu));
     }
 
-    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMetaDto designMeta) {
-        Optional<CompilationUnit> cu = astForest.findCu(designMeta.getMapperQualifier());
-        if (!cu.isPresent()) {
-            return null;
-        }
-        Optional<TypeDeclaration<?>> pt = cu.get().getPrimaryType();
-        if (!pt.isPresent()) {
-            return null;
-        }
-        if (!pt.get().isClassOrInterfaceDeclaration()) {
-            return null;
-        }
-        return pt.get().asClassOrInterfaceDeclaration();
-    }
-
     @Override
-    public List<FileFlush> generateMethodToMapperXml(GenerateMethodToMapperXmlArgs args) {
+    public void generateMethodToMapperXml(GenerateMethodToMapperXmlArgs args) {
         ChainAnalysisDto chainAnalysis = args.getChainAnalysis();
         DesignMetaDto designMeta = args.getDesignMeta();
         GenerateParamRetval generateParamRetval = args.getGenerateParamRetval();
         GenerateReturnTypeRetval generateReturnTypeRetval = args.getGenerateReturnTypeRetval();
 
-        List<FileFlush> result = Lists.newArrayList();
-
         for (String mapperPath : designMeta.getMapperPaths()) {
-            File mapperXml = new File(mapperPath);
-            if (!mapperXml.exists()) {
+            XmlSourceFile mapperXml = this.findMapperXml(mapperPath, args.getMethodAddedMapperXmls());
+            if (mapperXml == null) {
                 continue;
             }
 
@@ -226,28 +207,69 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             }
 
             List<String> newLines = Lists.newArrayList();
-            try {
-                List<String> lines = FileUtils.readLines(mapperXml, StandardCharsets.UTF_8);
-                Collections.reverse(lines);
-                for (String line : lines) {
-                    newLines.add(line);
-                    if (line.contains("</mapper>")) {
-                        Collections.reverse(xmlLines);
-                        for (String xmlLine : xmlLines) {
-                            if (StringUtils.isNotBlank(xmlLine)) {
-                                newLines.add(SINGLE_INDENT + xmlLine);
-                            }
+            List<String> lines = mapperXml.getContentLines();
+            Collections.reverse(lines);
+            for (String line : lines) {
+                newLines.add(line);
+                if (line.contains("</mapper>")) {
+                    Collections.reverse(xmlLines);
+                    for (String xmlLine : xmlLines) {
+                        if (StringUtils.isNotBlank(xmlLine)) {
+                            newLines.add(SINGLE_INDENT + xmlLine);
                         }
-                        newLines.add("");
                     }
+                    newLines.add("");
                 }
-                Collections.reverse(newLines);
-
-                result.add(FileFlush.build(mapperXml, Joiner.on('\n').join(newLines)));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
             }
+            Collections.reverse(newLines);
+
+            // 作为本次queryChain的处理结果记录到map
+            mapperXml.setContentLines(newLines);
         }
+    }
+
+
+    private ClassOrInterfaceDeclaration findMapper(AstForest astForest, DesignMetaDto designMeta,
+            Map<String, ClassOrInterfaceDeclaration> methodAddedMappers) {
+        String mapperQualifier = designMeta.getMapperQualifier();
+        // 尝试先从其他queryChain的处理结果中获取mapper
+        if (methodAddedMappers.containsKey(mapperQualifier)) {
+            return methodAddedMappers.get(mapperQualifier);
+        }
+        Optional<CompilationUnit> cu = astForest.findCu(mapperQualifier);
+        if (!cu.isPresent()) {
+            return null;
+        }
+        Optional<TypeDeclaration<?>> pt = cu.get().getPrimaryType();
+        if (!pt.isPresent()) {
+            return null;
+        }
+        if (!pt.get().isClassOrInterfaceDeclaration()) {
+            return null;
+        }
+        ClassOrInterfaceDeclaration mapper = pt.get().asClassOrInterfaceDeclaration();
+
+        // 作为本次queryChain的处理结果记录到map
+        methodAddedMappers.put(mapperQualifier, mapper);
+
+        return mapper;
+    }
+
+    private XmlSourceFile findMapperXml(String mapperPath, Map<String, XmlSourceFile> methodAddedMapperXmls) {
+        // 尝试先从其他queryChain的处理结果中获取mapperXml
+        if (methodAddedMapperXmls.containsKey(mapperPath)) {
+            return methodAddedMapperXmls.get(mapperPath);
+        }
+
+        File mapperXml = new File(mapperPath);
+        if (!mapperXml.exists()) {
+            return null;
+        }
+        XmlSourceFile result = new XmlSourceFile(mapperXml);
+
+        // 作为本次queryChain的处理结果记录到map
+        methodAddedMapperXmls.put(mapperPath, result);
+
         return result;
     }
 

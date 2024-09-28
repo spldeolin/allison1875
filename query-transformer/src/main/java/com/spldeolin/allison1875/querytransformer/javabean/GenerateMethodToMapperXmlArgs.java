@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.javabean;
 
+import java.util.Map;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import lombok.AccessLevel;
@@ -24,5 +25,7 @@ public class GenerateMethodToMapperXmlArgs {
     GenerateParamRetval generateParamRetval;
 
     GenerateReturnTypeRetval generateReturnTypeRetval;
+
+    Map<String, XmlSourceFile> methodAddedMapperXmls;
 
 }
