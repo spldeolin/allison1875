@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.handlertransformer.service;
 
+import java.util.List;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.handlertransformer.javabean.AddMethodToServiceArgs;
 import com.spldeolin.allison1875.handlertransformer.javabean.AddMethodToServiceRetval;
@@ -15,7 +17,8 @@ import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerSer
 @ImplementedBy(ServiceLayerServiceImpl.class)
 public interface ServiceLayerService {
 
-    MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String paramType, String resultType);
+    MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String paramType,
+            List<VariableDeclarator> requestParams, String resultType);
 
     AddMethodToServiceRetval addMethodToService(AddMethodToServiceArgs args);
 

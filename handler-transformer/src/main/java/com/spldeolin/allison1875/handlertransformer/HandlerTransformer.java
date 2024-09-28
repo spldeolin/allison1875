@@ -106,7 +106,8 @@ public class HandlerTransformer implements Allison1875MainService {
 
                     // 生成Service方法
                     MethodDeclaration serviceMethod = serviceLayerService.generateServiceMethod(initDecAnalysis,
-                            generateDtoJavabeansRetval.getParamType(), generateDtoJavabeansRetval.getResultType());
+                            generateDtoJavabeansRetval.getParamType(), generateDtoJavabeansRetval.getRequestParams(),
+                            generateDtoJavabeansRetval.getResultType());
 
                     // 生成Service / ServiceImpl
                     GenerateServiceAndImplArgs gsaiArgs = new GenerateServiceAndImplArgs();
@@ -149,6 +150,8 @@ public class HandlerTransformer implements Allison1875MainService {
                     gmhArgs.setInjectedServiceVarName(addInjectFieldRetval.getFieldVarName());
                     gmhArgs.setServiceMethodName(addMethodToServiceRetval.getMethodName());
                     gmhArgs.setMvcController(mvcController);
+                    gmhArgs.setIsHttpGet(generateDtoJavabeansRetval.getIsHttpGet());
+                    gmhArgs.setRequestParams(generateDtoJavabeansRetval.getRequestParams());
                     GenerateMvcHandlerRetval generateMvcHandlerRetval = mvcHandlerGeneratorService.generateMvcHandler(
                             gmhArgs);
 

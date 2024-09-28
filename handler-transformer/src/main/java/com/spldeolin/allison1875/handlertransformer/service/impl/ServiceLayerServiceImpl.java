@@ -1,12 +1,15 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.utils.CodeGenerationUtils;
@@ -42,7 +45,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
     @Inject
     private CommonConfig commonConfig;
-    
+
     @Inject
     private HandlerTransformerConfig config;
 
@@ -54,7 +57,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
     @Override
     public MethodDeclaration generateServiceMethod(InitDecAnalysisDto initDecAnalysisDto, String paramType,
-            String resultType) {
+            List<VariableDeclarator> requestParams, String resultType) {
         MethodDeclaration method = new MethodDeclaration();
         method.addAnnotation(annotationExprService.javaOverride());
         method.setPublic(true);
@@ -66,6 +69,9 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         method.setName(initDecAnalysisDto.getMvcHandlerMethodName());
         if (paramType != null) {
             method.addParameter(paramType, "req");
+        }
+        for (VariableDeclarator vd : requestParams) {
+            method.addParameter(new Parameter(vd.getType(), vd.getName()));
         }
 
         BlockStmt body = new BlockStmt();

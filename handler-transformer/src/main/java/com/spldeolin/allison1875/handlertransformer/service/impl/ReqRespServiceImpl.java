@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
@@ -34,6 +35,7 @@ import com.spldeolin.allison1875.handlertransformer.javabean.GenerateDtoJavabean
 import com.spldeolin.allison1875.handlertransformer.javabean.InitDecAnalysisDto;
 import com.spldeolin.allison1875.handlertransformer.service.FieldService;
 import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
+import com.spldeolin.allison1875.support.GetUrlQuery;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -100,6 +102,17 @@ public class ReqRespServiceImpl implements ReqRespService {
             JavabeanTypeEnum javabeanType = estimateJavabeanType(dto);
             String packageName = estimatePackageName(javabeanType);
             String javabeanName = standardizeJavabeanName(initDecAnalysis, dto, javabeanType);
+
+            if (BooleanUtils.isNotTrue(result.getIsHttpGet())) {
+                result.setIsHttpGet(javabeanType == JavabeanTypeEnum.REQ_PARAMS);
+            }
+
+            if (javabeanType == JavabeanTypeEnum.REQ_PARAMS) {
+                for (FieldDeclaration fd : dto.getFields()) {
+                    result.getRequestParams().addAll(fd.getVariables());
+                }
+                continue;
+            }
 
             JavabeanArg arg = new JavabeanArg();
             arg.setAstForest(astForest);
@@ -179,7 +192,11 @@ public class ReqRespServiceImpl implements ReqRespService {
     private JavabeanTypeEnum estimateJavabeanType(ClassOrInterfaceDeclaration dto) {
         JavabeanTypeEnum javabeanType;
         if (dto.getNameAsString().equalsIgnoreCase("Req")) {
-            javabeanType = JavabeanTypeEnum.REQ_DTO;
+            if (dto.getAnnotationByName(GetUrlQuery.class.getSimpleName()).isPresent()) {
+                javabeanType = JavabeanTypeEnum.REQ_PARAMS;
+            } else {
+                javabeanType = JavabeanTypeEnum.REQ_DTO;
+            }
         } else if (dto.getNameAsString().equalsIgnoreCase("Resp")) {
             javabeanType = JavabeanTypeEnum.RESP_DTO;
         } else if (dto.findAncestor(ClassOrInterfaceDeclaration.class,

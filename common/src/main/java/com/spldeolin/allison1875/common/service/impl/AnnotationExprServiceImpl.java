@@ -76,6 +76,11 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
+    public AnnotationExpr springRequestParam() {
+        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam").clone();
+    }
+
+    @Override
     public AnnotationExpr springResponseBody() {
         return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.ResponseBody").clone();
     }

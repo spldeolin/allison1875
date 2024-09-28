@@ -31,6 +31,8 @@ public interface AnnotationExprService {
 
     AnnotationExpr springRequestBody();
 
+    AnnotationExpr springRequestParam();
+
     AnnotationExpr springResponseBody();
 
     AnnotationExpr javaxValid();

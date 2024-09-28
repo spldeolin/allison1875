@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.common.javabean;
 
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -28,5 +30,9 @@ public class GenerateMvcHandlerArgs {
     @NotEmpty String serviceMethodName;
 
     ClassOrInterfaceDeclaration mvcController;
+
+    Boolean isHttpGet;
+
+    List<VariableDeclarator> requestParams;
 
 }

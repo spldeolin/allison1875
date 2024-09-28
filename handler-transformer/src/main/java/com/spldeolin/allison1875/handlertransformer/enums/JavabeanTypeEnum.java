@@ -5,6 +5,8 @@ package com.spldeolin.allison1875.handlertransformer.enums;
  */
 public enum JavabeanTypeEnum {
 
+    REQ_PARAMS,
+
     REQ_DTO,
 
     RESP_DTO,

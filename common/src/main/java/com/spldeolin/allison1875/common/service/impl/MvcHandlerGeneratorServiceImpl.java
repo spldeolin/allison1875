@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.inject.Inject;
@@ -31,16 +33,21 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
 
     @Override
     public GenerateMvcHandlerRetval generateMvcHandler(GenerateMvcHandlerArgs args) {
-
         MethodDeclaration mvcHandler = new MethodDeclaration();
 
         if (StringUtils.isNotEmpty(args.getDescription())) {
             mvcHandler.setJavadocComment(args.getDescription());
         }
 
-        mvcHandler.addAnnotation(StaticJavaParser.parseAnnotation(
-                String.format("@org.springframework.web.bind.annotation.PostMapping(\"%s\")",
-                        args.getMvcHandlerUrl())));
+        String requestMapping;
+        if (args.getIsHttpGet()) {
+            requestMapping = "@org.springframework.web.bind.annotation.GetMapping(\"%s\")";
+        } else {
+            requestMapping = "@org.springframework.web.bind.annotation.PostMapping(\"%s\")";
+        }
+
+        mvcHandler.addAnnotation(
+                StaticJavaParser.parseAnnotation(String.format(requestMapping, args.getMvcHandlerUrl())));
 
         mvcHandler.setPublic(true);
 
@@ -66,27 +73,46 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
             param.setName("req");
             mvcHandler.addParameter(param);
         }
+        for (VariableDeclarator vd : args.getRequestParams()) {
+            Parameter param = new Parameter(vd.getType(), vd.getName());
+            AnnotationExpr anno = annotationExprService.springRequestParam();
+            param.addAnnotation(anno);
+            mvcHandler.addParameter(param);
+        }
 
         BlockStmt body = new BlockStmt();
+        String returnOrNot = serviceResultType != null ? "return" : "";
         String serviceVarName = args.getInjectedServiceVarName();
         String serviceMethodName = args.getServiceMethodName();
-        if (serviceResultType != null) {
-            if (serviceParamType != null) {
-                body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("return %s.%s(req);", serviceVarName, serviceMethodName)));
-            } else {
-                body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("return %s.%s();", serviceVarName, serviceMethodName)));
+        StringBuilder argNames = new StringBuilder(serviceParamType != null ? "req" : "");
+        for (VariableDeclarator requestParam : args.getRequestParams()) {
+            if (argNames.length() > 0) {
+                argNames.append(",");
             }
-        } else {
-            if (serviceParamType != null) {
-                body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s.%s(req);", serviceVarName, serviceMethodName)));
-            } else {
-                body.addStatement(
-                        StaticJavaParser.parseStatement(String.format("%s.%s();", serviceVarName, serviceMethodName)));
-            }
+            argNames.append(requestParam.getName());
         }
+
+        String statement = String.format("%s %s.%s(%s);", returnOrNot, serviceVarName, serviceMethodName, argNames);
+        body.addStatement(StaticJavaParser.parseStatement(statement));
+
+//        if (serviceResultType != null) {
+//            if (serviceParamType != null) {
+//                body.addStatement(StaticJavaParser.parseStatement(
+//                        String.format("return %s.%s(req);", serviceVarName, serviceMethodName)));
+//            } else {
+//                body.addStatement(StaticJavaParser.parseStatement(
+//                        String.format("return %s.%s();", serviceVarName, serviceMethodName)));
+//            }
+//        } else {
+//            if (serviceParamType != null) {
+//                body.addStatement(StaticJavaParser.parseStatement(
+//                        String.format("%s.%s(req);", serviceVarName, serviceMethodName)));
+//            } else {
+//                body.addStatement(
+//                        StaticJavaParser.parseStatement(String.format("%s.%s();", serviceVarName,
+//                        serviceMethodName)));
+//            }
+//        }
         mvcHandler.setBody(body);
 
         return new GenerateMvcHandlerRetval().setMvcHandler(mvcHandler);
