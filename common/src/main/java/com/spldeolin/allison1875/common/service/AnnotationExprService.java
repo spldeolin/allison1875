@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.common.service;
 
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.inject.ImplementedBy;
@@ -32,9 +33,13 @@ public interface AnnotationExprService {
 
     AnnotationExpr springRequestBody();
 
-    NormalAnnotationExpr springRequestParam();
+    MarkerAnnotationExpr springRequestParamWithoutProperty();
+
+    NormalAnnotationExpr springRequestParamWithProperty();
 
     AnnotationExpr springResponseBody();
+
+    AnnotationExpr springDateTimeFormat();
 
     AnnotationExpr javaxValid();
 

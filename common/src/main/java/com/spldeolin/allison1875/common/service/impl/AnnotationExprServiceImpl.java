@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.inject.Singleton;
@@ -77,7 +78,13 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
-    public NormalAnnotationExpr springRequestParam() {
+    public MarkerAnnotationExpr springRequestParamWithoutProperty() {
+        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam")
+                .asMarkerAnnotationExpr().clone();
+    }
+
+    @Override
+    public NormalAnnotationExpr springRequestParamWithProperty() {
         return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam()")
                 .asNormalAnnotationExpr().clone();
     }
@@ -85,6 +92,12 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     @Override
     public AnnotationExpr springResponseBody() {
         return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.ResponseBody").clone();
+    }
+
+    @Override
+    public AnnotationExpr springDateTimeFormat() {
+        return StaticJavaParser.parseAnnotation(
+                "@org.springframework.format.annotation.DateTimeFormat(pattern=\"yyyy-MM-dd HH:mm:ss\")").clone();
     }
 
     @Override

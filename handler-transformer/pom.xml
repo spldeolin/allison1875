@@ -15,6 +15,12 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>common</artifactId>
         </dependency>
+
+        <!-- spring mvc -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
