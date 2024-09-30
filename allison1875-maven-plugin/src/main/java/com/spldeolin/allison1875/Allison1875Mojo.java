@@ -11,18 +11,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.spldeolin.allison1875.ast.MavenProjectBuiltAstForest;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.ast.MavenProjectBuiltAstForest;
 import com.spldeolin.allison1875.common.config.CommonConfig;
-import com.spldeolin.allison1875.common.interceptor.ValidInterceptor;
-import com.spldeolin.allison1875.common.javabean.InvalidDto;
-import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,7 +29,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
     protected MavenProject project;
 
     @Parameter(alias = "common")
-    private CommonConfig commonConfig;
+    private CommonConfig commonConfig = new CommonConfig();
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -52,25 +45,15 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             throw new MojoExecutionException(e);
         }
 
-        // valid config
-        List<InvalidDto> invalids = allison1875Module.validConfigs();
-        if (CollectionUtils.isNotEmpty(invalids)) {
-            throw new MojoExecutionException(
-                    "Allison 1875 fail to work cause invalid config\ninvalids=" + JsonUtils.toJsonPrettily(invalids));
-        }
-
-        // register interceptor
-        List<Module> guiceModules = Lists.newArrayList(allison1875Module, new ValidInterceptor().toGuiceModule());
-
-        // create ioc container
-        Injector injector = Guice.createInjector(guiceModules);
-
         List<File> sourceRoots = project.getCompileSourceRoots().stream().map(File::new).collect(Collectors.toList());
         log.info("sourceRoots={}", sourceRoots);
-
-        for (File sourceRoot : sourceRoots) {
-            AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot);
-            injector.getInstance(allison1875Module.declareMainService()).process(astForest);
+        try {
+            for (File sourceRoot : sourceRoots) {
+                AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot);
+                Allison1875.letsGo(allison1875Module, astForest);
+            }
+        } catch (Exception e) {
+            throw new MojoExecutionException(e);
         }
     }
 
@@ -100,20 +83,9 @@ public abstract class Allison1875Mojo extends AbstractMojo {
                 MoreObjects.firstNonNull(commonConfig.getRecordPackage(), basePackage + ".javabean.record"));
         commonConfig.setWholeDtoPackage(
                 MoreObjects.firstNonNull(commonConfig.getWholeDtoPackage(), basePackage + ".javabean"));
-        commonConfig.setAuthor(MoreObjects.firstNonNull(commonConfig.getAuthor(), "Allison 1875"));
-        commonConfig.setIsJavabeanSerializable(
-                MoreObjects.firstNonNull(commonConfig.getIsJavabeanSerializable(), false));
-        commonConfig.setIsJavabeanCloneable(MoreObjects.firstNonNull(commonConfig.getIsJavabeanCloneable(), false));
-        commonConfig.setEnableNoModifyAnnounce(
-                MoreObjects.firstNonNull(commonConfig.getEnableNoModifyAnnounce(), true));
-        commonConfig.setEnableLotNoAnnounce(MoreObjects.firstNonNull(commonConfig.getEnableLotNoAnnounce(), true));
-
-        List<File> mapperXmlDirs = MoreObjects.firstNonNull(commonConfig.getMapperXmlDirs(),
-                Lists.newArrayList(new File("src/main/resources/mapper")));
-        mapperXmlDirs = mapperXmlDirs.stream().map(this::getCanonicalFileRelativeToBasedir)
-                .collect(Collectors.toList());
-        commonConfig.setMapperXmlDirs(mapperXmlDirs);
-
+        commonConfig.setMapperXmlDirs(
+                commonConfig.getMapperXmlDirs().stream().map(this::getCanonicalFileRelativeToBasedir)
+                        .collect(Collectors.toList()));
         log.info("commonConfig={}", JsonUtils.toJsonPrettily(commonConfig));
     }
 

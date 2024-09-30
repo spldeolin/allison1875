@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StarTransformerMojoConfig extends StarTransformerConfig {
 
-    private String module = StarTransformerModule.class.getName();
+    String module = StarTransformerModule.class.getName();
 
 }

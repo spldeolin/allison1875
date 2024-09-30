@@ -19,6 +19,6 @@ public class QueryTransformerConfig extends Allison1875Config {
      * 是否生成Intell IDEA的“Turn formatter on/off with makers in code comments”
      */
     @NotNull
-    Boolean enableGenerateFormatterMarker;
+    Boolean enableGenerateFormatterMarker = true;
 
 }

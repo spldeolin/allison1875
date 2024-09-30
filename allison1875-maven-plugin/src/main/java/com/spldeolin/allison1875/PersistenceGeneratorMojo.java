@@ -5,11 +5,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Module;
 import com.spldeolin.allison1875.common.config.CommonConfig;
-import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -23,25 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 public class PersistenceGeneratorMojo extends Allison1875Mojo {
 
     @Parameter(alias = "persistenceGenerator")
-    private PersistenceGeneratorMojoConfig persistenceGeneratorConfig;
+    private final PersistenceGeneratorMojoConfig persistenceGeneratorConfig = new PersistenceGeneratorMojoConfig();
 
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
-        persistenceGeneratorConfig = MoreObjects.firstNonNull(persistenceGeneratorConfig,
-                new PersistenceGeneratorMojoConfig());
-        persistenceGeneratorConfig.setTables(
-                MoreObjects.firstNonNull(persistenceGeneratorConfig.getTables(), Lists.newArrayList()));
-        persistenceGeneratorConfig.setEnableGenerateDesign(
-                MoreObjects.firstNonNull(persistenceGeneratorConfig.getEnableGenerateDesign(), true));
-        persistenceGeneratorConfig.setIsEntityEndWithEntity(
-                MoreObjects.firstNonNull(persistenceGeneratorConfig.getIsEntityEndWithEntity(), true));
-        persistenceGeneratorConfig.setEntityExistenceResolution(
-                MoreObjects.firstNonNull(persistenceGeneratorConfig.getEntityExistenceResolution(),
-                        FileExistenceResolutionEnum.OVERWRITE));
-        persistenceGeneratorConfig.setEnableGenerateFormatterMarker(
-                MoreObjects.firstNonNull(persistenceGeneratorConfig.getEnableGenerateFormatterMarker(), true));
         log.info("persistenceGeneratorConfig={}", JsonUtils.toJsonPrettily(persistenceGeneratorConfig));
-
+        log.info("new module instance for {}", persistenceGeneratorConfig.getModule());
         return (Allison1875Module) classLoader.loadClass(persistenceGeneratorConfig.getModule())
                 .getConstructor(CommonConfig.class, PersistenceGeneratorConfig.class)
                 .newInstance(commonConfig, persistenceGeneratorConfig);

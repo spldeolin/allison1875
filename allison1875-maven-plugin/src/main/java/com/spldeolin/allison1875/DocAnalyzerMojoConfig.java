@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocAnalyzerMojoConfig extends DocAnalyzerConfig {
 
-    private String module = DocAnalyzerModule.class.getName();
+    String module = DocAnalyzerModule.class.getName();
 
 }

@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.docanalyzer;
 import java.io.File;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import com.spldeolin.allison1875.common.javabean.InvalidDto;
 import com.spldeolin.allison1875.common.util.ValidUtils;
@@ -26,19 +27,19 @@ public class DocAnalyzerConfig extends Allison1875Config {
      * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于basedir的相对路径 或 绝对路径 皆可）
      */
     @NotNull
-    List<File> dependencyProjectDirs;
+    List<File> dependencyProjectDirs = Lists.newArrayList();
 
     /**
      * 全局URL前缀
      */
     @NotNull
-    String globalUrlPrefix;
+    String globalUrlPrefix = "";
 
     /**
      * 文档保存到...
      */
     @NotNull(message = "must be 'LOCAL_MARKDOWN' or 'YAPI'")
-    FlushToEnum flushTo;
+    FlushToEnum flushTo = FlushToEnum.LOCAL_MARKDOWN;
 
     /**
      * 文档输出到YApi时，YApi请求URL
@@ -53,17 +54,17 @@ public class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 文档输出到markdown时，Markdown文件的目录的路径（相对于basedir的相对路径 或 绝对路径 皆可）
      */
-    File markdownDir;
+    File markdownDir = new File("api-docs");
 
     /**
      * 文档输出到markdown时，是否启用cURL命令的输出
      */
-    Boolean enableCurl;
+    Boolean enableCurl = false;
 
     /**
      * 文档输出到markdown时，是否启用Response Body示例的输出
      */
-    Boolean enableResponseBodySample;
+    Boolean enableResponseBodySample = false;
 
     @Override
     public List<InvalidDto> invalidSelf() {

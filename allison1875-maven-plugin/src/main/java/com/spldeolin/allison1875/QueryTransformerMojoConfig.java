@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QueryTransformerMojoConfig extends QueryTransformerConfig {
 
-    private String module = QueryTransformerModule.class.getName();
+    String module = QueryTransformerModule.class.getName();
 
 }

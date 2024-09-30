@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PersistenceGeneratorMojoConfig extends PersistenceGeneratorConfig {
 
-    private String module = PersistenceGeneratorModule.class.getName();
+    String module = PersistenceGeneratorModule.class.getName();
 
 }

@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class HandlerTransformerMojoConfig extends HandlerTransformerConfig {
 
-    private String module = HandlerTransformerModule.class.getName();
+    String module = HandlerTransformerModule.class.getName();
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.ancestor.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -88,36 +89,36 @@ public class CommonConfig extends Allison1875Config {
      * mapper.xml所在目录（相对于basedir的相对路径 或 绝对路径 皆可）
      */
     @NotEmpty
-    List<File> mapperXmlDirs;
+    List<File> mapperXmlDirs = Lists.newArrayList(new File("src/main/resources/mapper"));
 
     /**
      * 为生成的代码指定作者
      */
     @NotEmpty
-    String author;
+    String author = "Allison 1875";
 
     /**
      * 生成的Javabean是否实现java.io.Serializable接口
      */
     @NotNull
-    Boolean isJavabeanSerializable;
+    Boolean isJavabeanSerializable = false;
 
     /**
      * 生成的Javabean是否实现java.lang.Cloneable接口
      */
     @NotNull
-    Boolean isJavabeanCloneable;
+    Boolean isJavabeanCloneable = false;
 
     /**
      * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
      */
     @NotNull
-    Boolean enableNoModifyAnnounce;
+    Boolean enableNoModifyAnnounce = true;
 
     /**
      * 是否在该生成的地方生成诸如 Allison 1875 Lot No: DA1000S-967D9357 的声明
      */
     @NotNull
-    Boolean enableLotNoAnnounce;
+    Boolean enableLotNoAnnounce = true;
 
 }

@@ -18,6 +18,7 @@ public class StarTransformerConfig extends Allison1875Config {
     /**
      * Whole DTO的后缀
      */
-    @NotNull String wholeDtoNamePostfix;
+    @NotNull
+    String wholeDtoNamePostfix = "WholeDto";
 
 }
