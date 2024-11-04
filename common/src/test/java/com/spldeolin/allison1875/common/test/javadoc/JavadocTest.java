@@ -4,7 +4,7 @@ import java.io.File;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.javadoc.Javadoc;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.ast.MavenProjectBuiltAstForest;
+import com.spldeolin.allison1875.common.test.AstForestTestImpl;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 
 /**
@@ -13,8 +13,7 @@ import com.spldeolin.allison1875.common.util.JavadocUtils;
 public class JavadocTest {
 
     public static void main(String[] args) {
-        AstForest astForest = new MavenProjectBuiltAstForest(JavadocTest.class.getClassLoader(),
-                new File("src/test/java"));
+        AstForest astForest = new AstForestTestImpl(new File("common/src/test/java"));
 
         astForest.findCu("com.spldeolin.allison1875.common.test.javadoc.TestSubject").ifPresent(cu -> {
             cu.getPrimaryType().ifPresent(primaryType -> {
