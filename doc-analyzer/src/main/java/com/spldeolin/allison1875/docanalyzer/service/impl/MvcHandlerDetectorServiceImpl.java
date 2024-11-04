@@ -20,6 +20,7 @@ import com.spldeolin.allison1875.common.exception.QualifierAbsentException;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.javabean.MvcControllerDto;
 import com.spldeolin.allison1875.docanalyzer.javabean.MvcHandlerDto;
 import com.spldeolin.allison1875.docanalyzer.service.MvcHandlerDetectorService;
@@ -39,6 +40,9 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
     @Inject
     private AnnotationExprService annotationExprService;
 
+    @Inject
+    private DocAnalyzerConfig config;
+
     @Override
     public List<MvcHandlerDto> detectMvcHandler(AstForest astForest) {
         List<MvcHandlerDto> result = Lists.newArrayList();
@@ -50,9 +54,6 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
             }
             for (ClassOrInterfaceDeclaration coid : cu.findAll(ClassOrInterfaceDeclaration.class)) {
                 if (isNotController(coid)) {
-                    continue;
-                }
-                if (isIgnore(coid)) {
                     continue;
                 }
 
@@ -84,7 +85,9 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                         continue;
                     }
 
-                    if (isIgnore(mvcHandlerMd)) {
+                    if (config.getMvcHandlerQualifierWildcards().stream().noneMatch(
+                            wildcard -> MethodQualifierUtils.getTypeQualifierWithMethodName(mvcHandlerMd)
+                                    .matches(convertGlobToRegex(wildcard)))) {
                         continue;
                     }
 
@@ -130,14 +133,6 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                 coid);
     }
 
-    protected boolean isIgnore(ClassOrInterfaceDeclaration coid) {
-        return false;
-    }
-
-    protected boolean isIgnore(MethodDeclaration coid) {
-        return false;
-    }
-
     private Class<?> tryReflectController(ClassOrInterfaceDeclaration controller, AstForest astForest)
             throws ClassNotFoundException {
         String qualifier = controller.getFullyQualifiedName()
@@ -156,6 +151,95 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
             controllerCat = controller.getNameAsString();
         }
         return controllerCat;
+    }
+
+    private String convertGlobToRegex(String glob) {
+        int length = glob.length();
+        StringBuilder sb = new StringBuilder(length + 12);
+        // Remove beginning and ending * globs because they're useless
+//        if (glob.startsWith("*")) {
+//            glob = glob.substring(1);
+//            length--;
+//        }
+//        if (glob.endsWith("*")) {
+//            glob = glob.substring(0, length - 1);
+//        }
+        boolean escaping = false;
+        int inCurlies = 0;
+        for (char currentChar : glob.toCharArray()) {
+            switch (currentChar) {
+                case '*':
+                    if (escaping) {
+                        sb.append("\\*");
+                    } else {
+                        sb.append(".*");
+                    }
+                    escaping = false;
+                    break;
+                case '?':
+                    if (escaping) {
+                        sb.append("\\?");
+                    } else {
+                        sb.append('.');
+                    }
+                    escaping = false;
+                    break;
+                case '.':
+                case '(':
+                case ')':
+                case '+':
+                case '|':
+                case '^':
+                case '$':
+                case '@':
+                case '%':
+                    sb.append('\\');
+                    sb.append(currentChar);
+                    escaping = false;
+                    break;
+                case '\\':
+                    if (escaping) {
+                        sb.append("\\\\");
+                        escaping = false;
+                    } else {
+                        escaping = true;
+                    }
+                    break;
+                case '{':
+                    if (escaping) {
+                        sb.append("\\{");
+                    } else {
+                        sb.append('(');
+                        inCurlies++;
+                    }
+                    escaping = false;
+                    break;
+                case '}':
+                    if (inCurlies > 0 && !escaping) {
+                        sb.append(')');
+                        inCurlies--;
+                    } else if (escaping) {
+                        sb.append("\\}");
+                    } else {
+                        sb.append("}");
+                    }
+                    escaping = false;
+                    break;
+                case ',':
+                    if (inCurlies > 0 && !escaping) {
+                        sb.append('|');
+                    } else if (escaping) {
+                        sb.append("\\,");
+                    } else {
+                        sb.append(",");
+                    }
+                    break;
+                default:
+                    escaping = false;
+                    sb.append(currentChar);
+            }
+        }
+        return "^" + sb + "$";
     }
 
 }

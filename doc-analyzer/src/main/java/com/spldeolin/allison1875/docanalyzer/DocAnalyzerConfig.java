@@ -66,6 +66,11 @@ public class DocAnalyzerConfig extends Allison1875Config {
      */
     Boolean enableResponseBodySample = false;
 
+    /**
+     * 多个方法全限定名，只有能够匹配这些的MVC Handler方法才会被分析并输出文档，支持*和?通配符的
+     */
+    List<String> mvcHandlerQualifierWildcards;
+
     @Override
     public List<InvalidDto> invalidSelf() {
         List<InvalidDto> invalids = super.invalidSelf();
