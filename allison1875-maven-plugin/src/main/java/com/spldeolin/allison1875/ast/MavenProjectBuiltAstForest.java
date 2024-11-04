@@ -11,13 +11,10 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.exception.CompilationUnitParseException;
-import com.spldeolin.allison1875.common.service.AstFilterService;
-import com.spldeolin.allison1875.common.service.impl.AcceptAllAstFilterService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,14 +28,7 @@ public class MavenProjectBuiltAstForest implements AstForest {
 
     private final File sourceRoot;
 
-    private final AstFilterService astFilterService;
-
     public MavenProjectBuiltAstForest(ClassLoader classLoader, File sourceRoot) {
-        this(classLoader, sourceRoot, null);
-    }
-
-    public MavenProjectBuiltAstForest(ClassLoader classLoader, File sourceRoot,
-            AstFilterService astFilterService) {
         Preconditions.checkNotNull(classLoader, "required Argument 'classLoader' must not be null");
         Preconditions.checkNotNull(sourceRoot, "required Argument 'sourceRoot' must not be null");
         try {
@@ -48,7 +38,6 @@ public class MavenProjectBuiltAstForest implements AstForest {
         }
         this.classLoader = classLoader;
         this.sourceRoot = sourceRoot;
-        this.astFilterService = MoreObjects.firstNonNull(astFilterService, new AcceptAllAstFilterService());
         StaticJavaParser.getParserConfiguration()
                 .setSymbolResolver(new JavaSymbolSolver(new ClassLoaderTypeSolver(classLoader)));
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -59,18 +48,14 @@ public class MavenProjectBuiltAstForest implements AstForest {
     public Iterator<CompilationUnit> iterator() {
         // java files
         Iterator<File> javaFilesItr = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
-        // filtered java files
-        javaFilesItr = Iterators.filter(javaFilesItr, astFilterService::accept);
         // cus
         Iterator<CompilationUnit> cusItr = Iterators.transform(javaFilesItr, CompilationUnitUtils::parseJava);
-        // filtered cus
-        cusItr = Iterators.filter(cusItr, astFilterService::accept);
         return cusItr;
     }
 
     @Override
     public AstForest cloneWithResetting() {
-        return new MavenProjectBuiltAstForest(classLoader, sourceRoot, astFilterService);
+        return new MavenProjectBuiltAstForest(classLoader, sourceRoot);
     }
 
     @Override
@@ -100,9 +85,6 @@ public class MavenProjectBuiltAstForest implements AstForest {
             cu = CompilationUnitUtils.parseJava(absPath.toFile());
         } catch (CompilationUnitParseException e) {
             log.warn("fail to parse cu, qualifier={}", primaryTypeQualifier, e);
-            return Optional.empty();
-        }
-        if (!astFilterService.accept(cu)) {
             return Optional.empty();
         }
         return Optional.of(cu);
