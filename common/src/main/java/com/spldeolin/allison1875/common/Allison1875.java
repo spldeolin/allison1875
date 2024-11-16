@@ -1,9 +1,11 @@
 package com.spldeolin.allison1875.common;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Properties;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.google.inject.Guice;
@@ -26,17 +28,36 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Allison1875 {
 
-    public static final String SHORT_VERSION = "1100R";
+    public static String SHORT_VERSION;
 
     public static void hello() {
-        String banner;
-        try {
-            banner = Resources.toString(Resources.getResource("allison1875-banner.txt"), StandardCharsets.UTF_8);
+        try (Reader reader = Resources.asCharSource(Resources.getResource("allison1875-git.properties"),
+                StandardCharsets.UTF_8).openStream()) {
+
+            // read allison1875-banner.txt
+            String banner = Resources.toString(Resources.getResource("allison1875-banner.txt"), StandardCharsets.UTF_8);
+
+            // read allison1875-git.properties
+            Properties properties = new Properties();
+            properties.load(reader);
+            banner = banner.replace("${commitId}", properties.getProperty("git.commit.id.abbrev"));
+
+            // replace placeholders
+            String version = properties.getProperty("git.build.version");
+            banner = banner.replace("${buildVersion}", version);
+
+            // abbreviate version
+            String[] components = version.split("-")[0].split("\\.");
+            String prefix = String.format("%02d", Integer.parseInt(components[0]));
+            String suffix = String.format("%02d", Integer.parseInt(components.length > 1 ? components[1] : "0"));
+            SHORT_VERSION = prefix + suffix + (version.endsWith("-SNAPSHOT") ? "S" : "R");
+
+            // print banner
+            log.info(banner);
+
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-
-        log.info(banner);
     }
 
     public static void letsGo(Allison1875Module allison1875Module, AstForest astForest) {
