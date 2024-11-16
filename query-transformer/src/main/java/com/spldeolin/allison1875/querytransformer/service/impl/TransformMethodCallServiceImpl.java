@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
@@ -15,12 +14,11 @@ import com.spldeolin.allison1875.common.exception.ParentAbsentException;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.DesignMetaDto;
 import com.spldeolin.allison1875.persistencegenerator.facade.javabean.PropertyDto;
-import com.spldeolin.allison1875.querytransformer.enums.PredicateEnum;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnClassifyEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.javabean.Binary;
 import com.spldeolin.allison1875.querytransformer.javabean.ChainAnalysisDto;
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.javabean.GenerateReturnTypeRetval;
-import com.spldeolin.allison1875.querytransformer.javabean.PhraseDto;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,10 +37,8 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             String condQualifier = paramGeneration.getParameters().get(0).getTypeAsString();
             result += MoreStringUtils.toLowerCamel(MoreStringUtils.splitAndGetLastPart(condQualifier, "."));
         } else {
-            Set<PhraseDto> phrases = chainAnalysis.getUpdatePhrases();
-            phrases.addAll(chainAnalysis.getByPhrases());
-            result += phrases.stream().filter(p -> p.getPredicate() != PredicateEnum.IS_NULL
-                            && p.getPredicate() != PredicateEnum.NOT_NULL).map(p -> p.getObjectExpr().toString())
+            result += chainAnalysis.getBinariesAsArgs().stream().filter(b -> b.getArgument() != null)
+                    .map(p -> p.getArgument().toString())
                     .collect(Collectors.joining(", "));
         }
         result += ")";
@@ -60,18 +56,10 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         List<Statement> result = Lists.newArrayList();
         result.add(StaticJavaParser.parseStatement(
                 "final " + javabeanTypeQualifier + " " + javabeanVarName + " = new " + javabeanTypeQualifier + "();"));
-        for (PhraseDto updatePhrase : chainAnalysis.getUpdatePhrases()) {
+        for (Binary binariesAsArg : chainAnalysis.getBinariesAsArgs()) {
             result.add(StaticJavaParser.parseStatement(
-                    javabeanVarName + ".set" + MoreStringUtils.toUpperCamel(updatePhrase.getVarName()) + "("
-                            + updatePhrase.getObjectExpr() + ");"));
-        }
-        for (PhraseDto byPhrase : chainAnalysis.getByPhrases()) {
-            if (Lists.newArrayList(PredicateEnum.IS_NULL, PredicateEnum.NOT_NULL).contains(byPhrase.getPredicate())) {
-                continue;
-            }
-            result.add(StaticJavaParser.parseStatement(
-                    javabeanVarName + ".set" + MoreStringUtils.toUpperCamel(byPhrase.getVarName()) + "("
-                            + byPhrase.getObjectExpr() + ");"));
+                    javabeanVarName + ".set" + MoreStringUtils.toUpperCamel(binariesAsArg.getVarName()) + "("
+                            + binariesAsArg.getArgument() + ");"));
         }
         return result;
     }
@@ -81,7 +69,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             GenerateReturnTypeRetval resultGeneration) {
         Map<String, PropertyDto> properties = designMeta.getProperties();
 
-        if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.each) {
+        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.each) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
             String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");
@@ -104,7 +92,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             return statements;
         }
 
-        if (chainAnalysis.getReturnClassify() == ReturnClassifyEnum.multiEach) {
+        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.multiEach) {
             String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
             String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
             String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");

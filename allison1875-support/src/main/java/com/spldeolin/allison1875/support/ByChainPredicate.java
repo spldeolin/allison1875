@@ -3,7 +3,7 @@ package com.spldeolin.allison1875.support;
 import java.util.Collection;
 
 /**
- * by()调用链的谓语
+ * 链环：where子句中的逻辑比较符
  *
  * 适配Allison 1875 query-transformer
  *
@@ -12,57 +12,57 @@ import java.util.Collection;
 public interface ByChainPredicate<RT, ARG> {
 
     /**
-     * EQual
+     * <strong>=</strong>
      */
     RT eq(ARG value);
 
     /**
-     * Not Equal
+     * <strong>!=</strong>
      */
     RT ne(ARG value);
 
     /**
-     * IN
+     * <strong>IN</strong>
      */
     RT in(Collection<ARG> values);
 
     /**
-     * Not IN
+     * <strong>NOT IN</strong>
      */
     RT nin(Collection<ARG> values);
 
     /**
-     * Greater Than
+     * <strong>></strong>
      */
     RT gt(ARG value);
 
     /**
-     * Greater or Equals
+     * <strong>>=</strong>
      */
     RT ge(ARG value);
 
     /**
-     * Lesser Than
+     * <strong><</strong>
      */
     RT lt(ARG value);
 
     /**
-     * Lesser or Equal
+     * <strong><=</strong>
      */
     RT le(ARG value);
 
     /**
-     * NOT NULL
+     * <strong>IS NOT NULL</strong>
      */
     RT notnull();
 
     /**
-     * IS NULL
+     * <strong>IS NULL</strong>
      */
     RT isnull();
 
     /**
-     * LIKE
+     * <strong>LIKE</strong>
      */
     RT like(ARG value);
 
