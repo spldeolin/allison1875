@@ -230,7 +230,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             return null;
         }
         if (!sql.contains("=")) {
-            log.warn("notDeletedSql非法，不是等式，认为没有删除标识符 [{}]", sql);
+            log.warn("notDeletedSql is not a equation, ignore,  '{}'", sql);
             return null;
         }
         return sql.split("=")[0].trim();

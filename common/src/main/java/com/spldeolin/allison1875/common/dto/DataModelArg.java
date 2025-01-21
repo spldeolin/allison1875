@@ -23,15 +23,19 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DataModelArg {
 
-    @NotNull AstForest astForest;
+    @NotNull
+    AstForest astForest;
 
-    @NotBlank String packageName;
+    @NotBlank
+    String packageName;
 
-    @NotBlank String className;
+    @NotBlank
+    String className;
 
     String description;
 
-    @NotBlank String author;
+    @NotBlank
+    String author;
 
     @Valid
     final List<FieldArg> fieldArgs = Lists.newArrayList();

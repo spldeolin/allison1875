@@ -20,7 +20,7 @@ public class JsonSchemaTransformerServiceImpl implements JsonSchemaTransformerSe
         Map<String, String> pathsEachId = Maps.newHashMap();
         Map<JsonSchema, String> paths = Maps.newLinkedHashMap();
         if (rootJsonSchema.isObjectSchema()) {
-            pathsEachId.put(rootJsonSchema.getId(), "根节点");
+            pathsEachId.put(rootJsonSchema.getId(), "root");
         }
 
         // 处理ReferenceSchema
@@ -53,7 +53,7 @@ public class JsonSchemaTransformerServiceImpl implements JsonSchemaTransformerSe
             if (jsonSchema instanceof ReferenceSchema) {
                 String referencePath = pathsEachId.get(jsonSchema.get$ref());
                 if (rootJsonSchema.isArraySchema()) {
-                    referencePath = "根节点[]" + referencePath;
+                    referencePath = "root[]" + referencePath;
                 }
                 if (jpdv != null) {
                     jpdv.setReferencePath(referencePath);

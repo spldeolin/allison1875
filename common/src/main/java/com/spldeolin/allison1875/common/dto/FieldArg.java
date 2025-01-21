@@ -19,9 +19,11 @@ public class FieldArg {
 
     String description;
 
-    @NotBlank String typeQualifier;
+    @NotBlank
+    String typeQualifier;
 
-    @NotBlank String fieldName;
+    @NotBlank
+    String fieldName;
 
     BiConsumer<ClassOrInterfaceDeclaration, FieldDeclaration> moreOperation;
 

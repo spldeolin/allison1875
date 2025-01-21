@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875;
+package com.spldeolin.allison1875.mojo;
 
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;

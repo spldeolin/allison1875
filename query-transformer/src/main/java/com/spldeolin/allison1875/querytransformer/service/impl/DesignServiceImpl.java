@@ -86,14 +86,12 @@ public class DesignServiceImpl implements DesignService {
     @Override
     public DesignMetaDTO findDesignMeta(ClassOrInterfaceDeclaration design) {
         FieldDeclaration queryMetaField = design.getFieldByName(KeywordConstant.META_FIELD_NAME).orElseThrow(
-                () -> new Allison1875Exception(
-                        "Meta Field is not exist in Design [" + design.getNameAsString() + "]"));
+                () -> new Allison1875Exception("Meta Field is not exist in Design [" + design.getNameAsString() + "]"));
         if (CollectionUtils.isEmpty(queryMetaField.getVariables())) {
             throw new Allison1875Exception("Variable is not exist in Meta Field, metaField=" + queryMetaField);
         }
         Expression initializer = queryMetaField.getVariable(0).getInitializer().orElseThrow(
-                () -> new Allison1875Exception(
-                        "Initializer is not exist in Meta Field, metaField=" + queryMetaField));
+                () -> new Allison1875Exception("Initializer is not exist in Meta Field, metaField=" + queryMetaField));
         String metaJson = StringEscapeUtils.unescapeJava(initializer.asStringLiteralExpr().getValue());
         return JsonUtils.toObject(metaJson, DesignMetaDTO.class);
     }
@@ -109,8 +107,8 @@ public class DesignServiceImpl implements DesignService {
         List<Statement> mapOrMultimapBuilt = transformMethodCallService.mapOrMultimapBuildStmts(designMeta,
                 chainAnalysis, generateReturnTypeRetval);
 
-        Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class).orElseThrow(
-                () -> new Allison1875Exception("cannot find parent for" + chainAnalysis.getChain()));
+        Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
+                .orElseThrow(() -> new Allison1875Exception("cannot find parent for" + chainAnalysis.getChain()));
         String ancestorStatementCode = TokenRangeUtils.getRawCode(ancestorStatement);
         log.info("ancestorStatement={}", ancestorStatementCode);
 
@@ -143,7 +141,8 @@ public class DesignServiceImpl implements DesignService {
             if (Lists.newArrayList(ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
                     .contains(chainAnalysis.getReturnShape())) {
                 throw new UnsupportedOperationException(
-                        "以 each 或 multiEach 为返回值的chain表达式，目前只支持定义在赋值语句中或是单独作为一个表达式的情况，不支持其位于其他表达式中的情况");
+                        "chain that return 'each' or 'multiEach' are currently supported only when they are defined "
+                                + "within an assignment statement or as a single expression");
             }
             // 以外的情况，往往是继续调用mce返回值，例如：if (0 == Design.update("a").id(-1).over()) { }，则将chain替换成转化出的mce（chain是mce类型）
             replacementStatements.add(StaticJavaParser.parseStatement(

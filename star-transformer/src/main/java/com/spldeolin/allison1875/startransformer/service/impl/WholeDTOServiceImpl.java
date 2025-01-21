@@ -65,7 +65,7 @@ public class WholeDTOServiceImpl implements WholeDTOService {
                     FieldArg keyFieldArg = new FieldArg();
                     keyFieldArg.setTypeQualifier(
                             "java.util.Map<" + phrase.getEntityFieldTypesEachFieldName().get(key) + ","
-                            + phrase.getDtEntityName() + ">");
+                                    + phrase.getDtEntityName() + ">");
                     keyFieldArg.setFieldName(English.plural(this.entityNameToVarName(phrase.getDtEntityName())) + "Each"
                             + StringUtils.capitalize(key));
                     dataModelArg.getFieldArgs().add(keyFieldArg);

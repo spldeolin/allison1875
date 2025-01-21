@@ -71,10 +71,8 @@ public class Allison1875 {
         }
 
         // register interceptor
-        ValidInterceptor validInterceptor = new ValidInterceptor();
         List<Module> guiceModules = Lists.newArrayList(allison1875Module,
-                binder -> binder.bindInterceptor(Matchers.any(), Matchers.any(), validInterceptor));
-
+                binder -> binder.bindInterceptor(Matchers.any(), Matchers.any(), new ValidInterceptor()));
 
         // create ioc container
         Injector injector = Guice.createInjector(guiceModules);

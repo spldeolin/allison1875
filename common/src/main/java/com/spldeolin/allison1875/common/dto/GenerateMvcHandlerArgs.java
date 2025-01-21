@@ -17,7 +17,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateMvcHandlerArgs {
 
-    @NotEmpty String mvcHandlerUrl;
+    @NotEmpty
+    String mvcHandlerUrl;
 
     String description;
 
@@ -25,9 +26,11 @@ public class GenerateMvcHandlerArgs {
 
     String respBodyDTOType;
 
-    @NotEmpty String injectedServiceVarName;
+    @NotEmpty
+    String injectedServiceVarName;
 
-    @NotEmpty String serviceMethodName;
+    @NotEmpty
+    String serviceMethodName;
 
     ClassOrInterfaceDeclaration mvcController;
 

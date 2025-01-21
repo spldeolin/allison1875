@@ -46,7 +46,7 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private CommonConfig commonConfig;
-    
+
     @Inject
     private HandlerTransformerConfig config;
 
@@ -65,35 +65,27 @@ public class ReqRespServiceImpl implements ReqRespService {
     @Override
     public void validInitBody(BlockStmt initBody, InitDecAnalysisDTO initDecAnalysis) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
-            throw new IllegalArgumentException(
-                    "构造代码块下最多只能有2个类声明，分别用于代表ReqDTO和RespDTO。[" + initDecAnalysis + "] 当前："
-                            + initBody.findAll(LocalClassDeclarationStmt.class).stream()
-                            .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining("、")));
+            throw buildException(initBody);
         }
         if (CollectionUtils.isNotEmpty(initBody.findAll(LocalClassDeclarationStmt.class))) {
             for (LocalClassDeclarationStmt lcds : initBody.findAll(LocalClassDeclarationStmt.class)) {
                 if (!StringUtils.equalsAnyIgnoreCase(lcds.getClassDeclaration().getNameAsString(), "Req", "Resp")) {
-                    throw new IllegalArgumentException(
-                            "构造代码块下类的命名只能是「Req」或者「Resp」。[" + initDecAnalysis + "] 当前："
-                                    + initBody.findAll(LocalClassDeclarationStmt.class).stream()
-                                    .map(one -> one.getClassDeclaration().getNameAsString())
-                                    .collect(Collectors.joining("、")));
+                    throw buildException(initBody);
                 }
             }
         }
         if (initBody.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getNameAsString().equals("Req")).size()
                 > 1) {
-            throw new IllegalArgumentException("构造代码块下不能重复声明Req类。[" + initDecAnalysis + "]");
+            throw buildException(initBody);
         }
         if (initBody.findAll(ClassOrInterfaceDeclaration.class, coid -> coid.getNameAsString().equals("Resp")).size()
                 > 1) {
-            throw new IllegalArgumentException("构造代码块下不能重复声明Resp类。[" + initDecAnalysis + "]");
+            throw buildException(initBody);
         }
     }
 
     @Override
-    public GenerateDTOsRetval generateDTOs(InitDecAnalysisDTO initDecAnalysis,
-            List<ClassOrInterfaceDeclaration> dtos) {
+    public GenerateDTOsRetval generateDTOs(InitDecAnalysisDTO initDecAnalysis, List<ClassOrInterfaceDeclaration> dtos) {
         GenerateDTOsRetval result = new GenerateDTOsRetval();
 
         // 生成ReqDTO、RespDTO、NestDTO
@@ -253,6 +245,13 @@ public class ReqRespServiceImpl implements ReqRespService {
                     + initDecAnalysis.getLotNo();
         }
         return result;
+    }
+
+    private static IllegalArgumentException buildException(BlockStmt initBody) {
+        String actual = initBody.findAll(LocalClassDeclarationStmt.class).stream()
+                .map(one -> one.getClassDeclaration().getNameAsString()).collect(Collectors.joining(", "));
+        return new IllegalArgumentException(
+                "only 2 Coid, 'Req' and 'Resp', are allowed in Initializer, actual=" + actual);
     }
 
 }

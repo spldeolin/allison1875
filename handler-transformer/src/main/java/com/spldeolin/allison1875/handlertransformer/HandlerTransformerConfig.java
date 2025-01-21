@@ -20,6 +20,7 @@ public class HandlerTransformerConfig extends Allison1875Config {
     /**
      * 分页对象的全限定名
      */
-    @NotEmpty String pageTypeQualifier;
+    @NotEmpty
+    String pageTypeQualifier;
 
 }

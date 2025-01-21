@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875;
+package com.spldeolin.allison1875.mojo;
 
 import java.util.stream.Collectors;
 import org.apache.maven.plugins.annotations.Execute;

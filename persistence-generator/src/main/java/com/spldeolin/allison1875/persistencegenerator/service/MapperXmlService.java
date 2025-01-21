@@ -29,18 +29,15 @@ public interface MapperXmlService {
      * 根据外键删除
      * 表中每有几个外键，这个方法就生成几个method，以_id结尾的字段算作外键
      */
-    List<String> generateDeleteByKeyMethod(TableAnalysisDTO persistence,
-            List<KeyMethodNameDTO> KeyAndMethodNames);
+    List<String> generateDeleteByKeyMethod(TableAnalysisDTO persistence, List<KeyMethodNameDTO> KeyAndMethodNames);
 
-    List<String> generateInsertOrUpdateMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName);
+    List<String> generateInsertOrUpdateMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
     List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
     List<String> generateListAllMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateQueryByEntityMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName);
+    List<String> generateQueryByEntityMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
     /**
      * 这个Proc生成2种方法：
@@ -56,13 +53,11 @@ public interface MapperXmlService {
      */
     List<String> generateQueryByKeysMethod(TableAnalysisDTO persistence, List<QueryByKeysDTO> queryByKeysDTOs);
 
-    List<String> generateQueryByKeyMethod(TableAnalysisDTO persistence,
-            List<KeyMethodNameDTO> keyAndMethodNames);
+    List<String> generateQueryByKeyMethod(TableAnalysisDTO persistence, List<KeyMethodNameDTO> keyAndMethodNames);
 
     List<String> generateResultMap(TableAnalysisDTO persistence, String entityName);
 
-    List<String> generateUpdateByIdEvenNullMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName);
+    List<String> generateUpdateByIdEvenNullMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
     List<String> generateUpdateByIdMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 

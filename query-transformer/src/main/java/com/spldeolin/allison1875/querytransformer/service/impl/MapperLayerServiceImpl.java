@@ -75,8 +75,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
     @Override
     public Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args) {
-        ClassOrInterfaceDeclaration mapper = this.findMapper(args.getMapperQualifier(),
-                args.getMethodAddedMappers());
+        ClassOrInterfaceDeclaration mapper = this.findMapper(args.getMapperQualifier(), args.getMethodAddedMappers());
         if (mapper == null) {
             return Optional.empty();
         }

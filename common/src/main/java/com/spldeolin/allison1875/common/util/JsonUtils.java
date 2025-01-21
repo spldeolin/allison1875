@@ -87,7 +87,7 @@ public class JsonUtils {
             return om.writerWithDefaultPrettyPrinter().writeValueAsString(object);
         } catch (JsonProcessingException e) {
             log.error("object={}", object, e);
-            throw new Allison1875Exception("转化JSON失败");
+            throw new Allison1875Exception("fail to toJsonPrettily", e);
         }
     }
 

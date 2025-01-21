@@ -23,8 +23,8 @@ public class MvcHandlerGeneratorServiceImpl2 extends MvcHandlerGeneratorServiceI
             result.getMvcHandler().getBody().get().getStatements()
                     .add(StaticJavaParser.parseStatement("return RequestResult.success();"));
         } else {
-            returnType.replace(StaticJavaParser.parseType(
-                    String.format(RequestResult.class.getName() + "<%s>", returnType)));
+            returnType.replace(
+                    StaticJavaParser.parseType(String.format(RequestResult.class.getName() + "<%s>", returnType)));
             Expression returnExpr = result.getMvcHandler().getBody().get().getStatements().get(0).asReturnStmt()
                     .getExpression().get();
             returnExpr.replace(

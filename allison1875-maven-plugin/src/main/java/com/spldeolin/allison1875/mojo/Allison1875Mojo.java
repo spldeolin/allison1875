@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875;
+package com.spldeolin.allison1875.mojo;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,12 +11,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import com.google.common.base.MoreObjects;
-import com.spldeolin.allison1875.ast.MavenProjectBuiltAstForest;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.mojo.ast.MavenProjectBuiltAstForest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,21 +33,16 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        Allison1875.hello();
-        initParam();
-
-        ClassLoader classLoader;
-        Allison1875Module allison1875Module;
         try {
-            classLoader = getClassLoader(project);
-            allison1875Module = newAllison1875Module(commonConfig, classLoader);
-        } catch (Exception e) {
-            throw new MojoExecutionException(e);
-        }
+            Allison1875.hello();
 
-        List<File> sourceRoots = project.getCompileSourceRoots().stream().map(File::new).collect(Collectors.toList());
-        log.info("sourceRoots={}", sourceRoots);
-        try {
+            initParam();
+            ClassLoader classLoader = getClassLoader(project);
+            Allison1875Module allison1875Module = newAllison1875Module(commonConfig, classLoader);
+
+            List<File> sourceRoots = project.getCompileSourceRoots().stream().map(File::new)
+                    .collect(Collectors.toList());
+            log.info("sourceRoots={}", sourceRoots);
             for (File sourceRoot : sourceRoots) {
                 AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot);
                 Allison1875.letsGo(allison1875Module, astForest);

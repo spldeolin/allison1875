@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.ast;
+package com.spldeolin.allison1875.mojo.ast;
 
 import java.io.File;
 import java.io.IOException;

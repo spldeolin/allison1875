@@ -151,11 +151,9 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateAllCloumnSql(tableAnalysis),
                     mapperXmlService.generateInsertMethod(tableAnalysis, entityName, insertMethodName),
                     mapperXmlService.generateBatchInsertMethod(tableAnalysis, batchInsertMethodName),
-                    mapperXmlService.generateBatchInsertEvenNullMethod(tableAnalysis,
-                            batchInsertEvenNullMethodName),
+                    mapperXmlService.generateBatchInsertEvenNullMethod(tableAnalysis, batchInsertEvenNullMethodName),
                     mapperXmlService.generateBatchUpdateMethod(tableAnalysis, batchUpdateMethodName),
-                    mapperXmlService.generateBatchUpdateEvenNullMethod(tableAnalysis,
-                            batchUpdateEvenNullMethodName),
+                    mapperXmlService.generateBatchUpdateEvenNullMethod(tableAnalysis, batchUpdateEvenNullMethodName),
                     mapperXmlService.generateQueryByIdMethod(tableAnalysis, queryByIdMethodName),
                     mapperXmlService.generateUpdateByIdMethod(tableAnalysis, entityName, updateByIdMethodName),
                     mapperXmlService.generateUpdateByIdEvenNullMethod(tableAnalysis, entityName,
@@ -165,27 +163,26 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateQueryByKeyMethod(tableAnalysis, queryByKeyDTOs),
                     mapperXmlService.generateDeleteByKeyMethod(tableAnalysis, deleteByKeyDTOs),
                     mapperXmlService.generateQueryByKeysMethod(tableAnalysis, queryByKeysDTOs),
-                    mapperXmlService.generateQueryByEntityMethod(tableAnalysis, entityName,
-                            queryByEntityMethodName),
+                    mapperXmlService.generateQueryByEntityMethod(tableAnalysis, entityName, queryByEntityMethodName),
                     mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName),
-                    mapperXmlService.generateInsertOrUpdateMethod(tableAnalysis, entityName,
-                            insertOrUpdateMethodName));
+                    mapperXmlService.generateInsertOrUpdateMethod(tableAnalysis, entityName, insertOrUpdateMethodName));
 
             // 基础方法替换到MapperXml中
             for (File mapperXmlDirectory : commonConfig.getMapperXmlDirs()) {
                 if (!mapperXmlDirectory.exists()) {
                     log.debug("mapperXmlDirectory.mkdirs()={}", mapperXmlDirectory.mkdirs());
                 }
+                ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
+                rmxmmArgs.setTableAnalysis(tableAnalysis);
+                rmxmmArgs.setMapper(mapper);
+                rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
+                rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
                 try {
-                    ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
-                    rmxmmArgs.setTableAnalysis(tableAnalysis);
-                    rmxmmArgs.setMapper(mapper);
-                    rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
-                    rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
                     FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
                     flushes.add(xmlFlush);
                 } catch (Exception e) {
-                    log.error("写入Mapper.xml时发生异常 tableAnalysis={}", tableAnalysis, e);
+                    log.error("fail to replaceMapperXmlMethods, rmxmmArgs={}", rmxmmArgs, e);
+                    throw e;
                 }
             }
         }

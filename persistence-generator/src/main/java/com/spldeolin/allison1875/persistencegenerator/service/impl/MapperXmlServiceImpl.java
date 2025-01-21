@@ -250,8 +250,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName) {
+    public List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
         if (config.getEnableGenerateFormatterMarker()) {
@@ -406,8 +405,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
      * 根据外键列表查询，表中每有几个外键，这个Proc就生成几个方法
      */
     @Override
-    public List<String> generateQueryByKeysMethod(TableAnalysisDTO persistence,
-            List<QueryByKeysDTO> queryByKeysDTOs) {
+    public List<String> generateQueryByKeysMethod(TableAnalysisDTO persistence, List<QueryByKeysDTO> queryByKeysDTOs) {
         List<String> sourceCodeLines = Lists.newArrayList();
         for (QueryByKeysDTO queryByKeysDTO : queryByKeysDTOs) {
             List<String> xmlLines = Lists.newArrayList();
@@ -526,8 +524,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public List<String> generateUpdateByIdMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName) {
+    public List<String> generateUpdateByIdMethod(TableAnalysisDTO persistence, String entityName, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));

@@ -30,7 +30,7 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     @Inject
     private CommonConfig commonConfig;
-    
+
     @Inject
     private PersistenceGeneratorConfig config;
 

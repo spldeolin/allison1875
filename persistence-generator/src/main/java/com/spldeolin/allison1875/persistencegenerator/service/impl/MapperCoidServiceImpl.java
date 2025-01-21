@@ -51,7 +51,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Inject
     private CommonConfig commonConfig;
-    
+
     @Inject
     private PersistenceGeneratorConfig config;
 
@@ -89,7 +89,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         } else {
 
             // create
-            log.info("Mapper文件不存在，创建它。 [{}]", mapperQualifier);
+            log.info("mapper is absent, create it, [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
                     commonConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
@@ -125,8 +125,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     public String generateBatchInsertEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchInsertEvenNull", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                "批量插入，为null的属性会被作为null插入");
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "批量插入，为null的属性会被作为null插入");
         insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
@@ -352,8 +351,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         MethodDeclaration method = new MethodDeclaration();
         String comment = concatMapperMethodComment(generateMethodToMapper.getTableAnalysisDTO(),
                 "根据「" + generateMethodToMapper.getKey().getDescription() + "」查询");
-        method.setType(parseType(
-                "java.util.List<" + generateMethodToMapper.getEntityGeneration().getDtoQualifier() + ">"));
+        method.setType(
+                parseType("java.util.List<" + generateMethodToMapper.getEntityGeneration().getDtoQualifier() + ">"));
         method.setName(methodName);
         String varName = MoreStringUtils.toLowerCamel(generateMethodToMapper.getKey().getPropertyName());
         Parameter parameter = parseParameter(
@@ -410,8 +409,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         if (CollectionUtils.isNotEmpty(args.getTableAnalysisDTO().getIdProperties())) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("updateById", args.getMapper());
             MethodDeclaration updateById = new MethodDeclaration();
-            String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                    "根据ID更新数据，忽略值为null的属性");
+            String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据ID更新数据，忽略值为null的属性");
             updateById.setJavadocComment(comment);
             updateById.setType(PrimitiveType.intType());
             updateById.setName(methodName);

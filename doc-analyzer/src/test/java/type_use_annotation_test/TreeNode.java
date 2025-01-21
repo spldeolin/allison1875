@@ -26,9 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TreeNode {
 
-    @NotNull Long id;
+    @NotNull
+    Long id;
 
-    @NotBlank String title;
+    @NotBlank
+    String title;
 
     List<@NotBlank TreeNode>[][] children;
 

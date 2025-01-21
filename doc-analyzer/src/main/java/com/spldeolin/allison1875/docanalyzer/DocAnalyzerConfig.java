@@ -86,8 +86,9 @@ public class DocAnalyzerConfig extends Allison1875Config {
         }
         if (FlushToEnum.MARKDOWN.equals(flushTo)) {
             if (markdownDir == null) {
-                invalids.add(new InvalidDTO().setPath("markdownDirectoryPath")
-                        .setValue(ValidUtils.formatValue(markdownDir)).setReason("must not be null"));
+                invalids.add(
+                        new InvalidDTO().setPath("markdownDirectoryPath").setValue(ValidUtils.formatValue(markdownDir))
+                                .setReason("must not be null"));
             }
             if (enableCurl == null) {
                 invalids.add(new InvalidDTO().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875;
+package com.spldeolin.allison1875.mojo;
 
 import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.QueryTransformerModule;

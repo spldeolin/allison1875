@@ -35,8 +35,7 @@ public class StarChainTransformerServiceImpl implements StarChainTransformerServ
 
         int i = block.getStatements().indexOf(starChain.findAncestor(Statement.class).get());
         block.setStatement(i, StaticJavaParser.parseStatement(
-                wholeDTOGeneration.getDtoQualifier() + " whole = new " + wholeDTOGeneration.getDtoName()
-                        + "();"));
+                wholeDTOGeneration.getDtoQualifier() + " whole = new " + wholeDTOGeneration.getDtoName() + "();"));
         block.addStatement(++i, StaticJavaParser.parseStatement(
                 analysis.getCftEntityQualifier() + " " + entityNameToVarName(analysis.getCftEntityName()) + " = "
                         + analysis.getCftDesignName() + "." + "query().byForced().id.eq("

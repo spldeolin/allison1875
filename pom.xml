@@ -27,7 +27,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <allison1875.version>12.0-SNAPSHOT</allison1875.version>
     </properties>
 
     <dependencyManagement>
@@ -127,42 +126,42 @@
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>allison1875-support</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>common</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>doc-analyzer</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>handler-transformer</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>persistence-generator</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>persistence-generator-facade</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>query-transformer</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>star-transformer</artifactId>
-                <version>${allison1875.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

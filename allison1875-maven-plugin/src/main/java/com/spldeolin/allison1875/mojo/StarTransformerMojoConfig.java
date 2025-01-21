@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875;
+package com.spldeolin.allison1875.mojo;
 
 import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.StarTransformerModule;

@@ -73,8 +73,7 @@ public class FieldServiceImpl implements FieldService {
     protected Set<File> buildAnalysisScope() {
         Set<File> result = Sets.newLinkedHashSet();
         FileUtils.iterateFiles(AstForestContext.get().cloneWithResetting().getSourceRoot().toFile(),
-                        BaseConstant.JAVA_EXTENSIONS, true)
-                .forEachRemaining(result::add);
+                BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(result::add);
         // dependent projects
         for (File dependencyProjectDir : config.getDependencyProjectDirs()) {
             if (dependencyProjectDir.exists()) {

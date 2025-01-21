@@ -97,8 +97,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     List<ClassOrInterfaceDeclaration> dtoCoids = dtoService.detectDTOBottomTop(initBody);
 
                     // 生成DTO
-                    GenerateDTOsRetval generateDTOsRetval = reqRespService.generateDTOs(
-                            initDecAnalysis, dtoCoids);
+                    GenerateDTOsRetval generateDTOsRetval = reqRespService.generateDTOs(initDecAnalysis, dtoCoids);
                     flushes.addAll(generateDTOsRetval.getFlushes());
 
                     // 生成Service方法
