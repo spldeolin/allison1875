@@ -16,7 +16,7 @@ import com.spldeolin.allison1875.common.dto.FieldArg;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.dto.TableStructureAnalysisDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     private AnnotationExprService annotationExprService;
 
     @Override
-    public DataModelGeneration generateEntity(TableStructureAnalysisDTO persistence) {
+    public DataModelGeneration generateEntity(TableAnalysisDTO persistence) {
         DataModelArg arg = new DataModelArg();
         arg.setAstForest(AstForestContext.get());
         arg.setPackageName(commonConfig.getEntityPackage());
@@ -80,7 +80,7 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
                 .collect(Collectors.toList());
     }
 
-    private String concatEntityDescription(TableStructureAnalysisDTO persistence) {
+    private String concatEntityDescription(TableAnalysisDTO persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
         if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
@@ -103,8 +103,8 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         if (property.getNotnull()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + "不能为null";
         }
-        if (property.getDefaultV() != null) {
-            String defaultV = property.getDefaultV();
+        if (property.getDefaultValue() != null) {
+            String defaultV = property.getDefaultValue();
             if (!"CURRENT_TIMESTAMP".equals(defaultV)) {
                 defaultV = "'" + defaultV + "'";
             }

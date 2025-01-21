@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
-import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeNamingDTO;
+import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.CompareableBinary;
@@ -67,7 +67,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             dataModelArg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
             for (Binary binary : binaries) {
                 String varName = binary.getVarName();
-                JavaTypeNamingDTO javaType = binary.getProperty().getJavaType();
+                JavaTypeDTO javaType = binary.getProperty().getJavaType();
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setDescription(binary.getProperty().getDescription());
                 if (binary instanceof CompareableBinary && Lists.newArrayList(ComparisonOperatorEnum.IN,
@@ -90,7 +90,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         } else if (CollectionUtils.isNotEmpty(binaries)) {
             for (Binary binary : binaries) {
                 String varName = binary.getVarName();
-                JavaTypeNamingDTO javaType = binary.getProperty().getJavaType();
+                JavaTypeDTO javaType = binary.getProperty().getJavaType();
                 Parameter param = new Parameter();
                 param.addAnnotation(StaticJavaParser.parseAnnotation(
                         String.format("@org.apache.ibatis.annotations.Param(\"%s\")", varName)));
@@ -157,7 +157,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             dataModelArg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
             dataModelArg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
             for (VariableProperty returnProp : returnProps) {
-                JavaTypeNamingDTO javaType = returnProp.getProperty().getJavaType();
+                JavaTypeDTO javaType = returnProp.getProperty().getJavaType();
                 FieldArg fieldArg = new FieldArg();
                 fieldArg.setDescription(returnProp.getProperty().getDescription());
                 fieldArg.setTypeQualifier(javaType.getQualifier());
@@ -180,7 +180,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         } else if (returnProps.size() == 1) {
             // 指定了1个属性，使用该属性类型作为返回值类型
             VariableProperty returnProp = Iterables.getOnlyElement(returnProps);
-            JavaTypeNamingDTO javaType = returnProp.getProperty().getJavaType();
+            JavaTypeDTO javaType = returnProp.getProperty().getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
             if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
                     .contains(chainAnalysis.getReturnShape())) {

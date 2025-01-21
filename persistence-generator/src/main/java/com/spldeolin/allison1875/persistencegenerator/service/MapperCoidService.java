@@ -5,7 +5,7 @@ import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
-import com.spldeolin.allison1875.persistencegenerator.dto.TableStructureAnalysisDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperCoidServiceImpl;
 
 /**
@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperCoidSer
 @ImplementedBy(MapperCoidServiceImpl.class)
 public interface MapperCoidService {
 
-    DetectOrGenerateMapperRetval detectOrGenerateMapper(TableStructureAnalysisDTO persistence,
+    DetectOrGenerateMapperRetval detectOrGenerateMapper(TableAnalysisDTO persistence,
             DataModelGeneration dataModelGeneration);
 
     String generateInsertMethodToMapper(GenerateMethodToMapperArgs args);

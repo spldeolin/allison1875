@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateMethodToMapperArgs {
 
-    TableStructureAnalysisDTO tableStructureAnalysisDTO;
+    TableAnalysisDTO tableAnalysisDTO;
 
     DataModelGeneration entityGeneration;
 

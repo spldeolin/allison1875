@@ -6,7 +6,7 @@ import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateJoinChainArgs;
-import com.spldeolin.allison1875.persistencegenerator.dto.TableStructureAnalysisDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.DesignGeneratorServiceImpl;
 
 /**
@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.DesignGenerat
 @ImplementedBy(DesignGeneratorServiceImpl.class)
 public interface DesignGeneratorService {
 
-    String concatDesignName(TableStructureAnalysisDTO persistence);
+    String concatDesignName(TableAnalysisDTO persistence);
 
     GenerateDesignRetval generateDesign(GenerateDesignArgs args);
 

@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateDesignArgs {
 
-    TableStructureAnalysisDTO tableStructureAnalysis;
+    TableAnalysisDTO tableAnalysis;
 
     DataModelGeneration entityGeneration;
 

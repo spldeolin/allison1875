@@ -6,7 +6,7 @@ import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.dto.KeyMethodNameDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
-import com.spldeolin.allison1875.persistencegenerator.dto.TableStructureAnalysisDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperXmlServiceImpl;
 
 /**
@@ -15,31 +15,31 @@ import com.spldeolin.allison1875.persistencegenerator.service.impl.MapperXmlServ
 @ImplementedBy(MapperXmlServiceImpl.class)
 public interface MapperXmlService {
 
-    List<String> generateAllCloumnSql(TableStructureAnalysisDTO persistence);
+    List<String> generateAllCloumnSql(TableAnalysisDTO persistence);
 
-    List<String> generateBatchInsertEvenNullMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateBatchInsertEvenNullMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateBatchInsertMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateBatchInsertMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateBatchUpdateEvenNullMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateBatchUpdateEvenNullMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateBatchUpdateMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateBatchUpdateMethod(TableAnalysisDTO persistence, String methodName);
 
     /**
      * 根据外键删除
      * 表中每有几个外键，这个方法就生成几个method，以_id结尾的字段算作外键
      */
-    List<String> generateDeleteByKeyMethod(TableStructureAnalysisDTO persistence,
+    List<String> generateDeleteByKeyMethod(TableAnalysisDTO persistence,
             List<KeyMethodNameDTO> KeyAndMethodNames);
 
-    List<String> generateInsertOrUpdateMethod(TableStructureAnalysisDTO persistence, String entityName,
+    List<String> generateInsertOrUpdateMethod(TableAnalysisDTO persistence, String entityName,
             String methodName);
 
-    List<String> generateInsertMethod(TableStructureAnalysisDTO persistence, String entityName, String methodName);
+    List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
-    List<String> generateListAllMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateListAllMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateQueryByEntityMethod(TableStructureAnalysisDTO persistence, String entityName,
+    List<String> generateQueryByEntityMethod(TableAnalysisDTO persistence, String entityName,
             String methodName);
 
     /**
@@ -47,24 +47,24 @@ public interface MapperXmlService {
      * 1. 根据主键列表查询
      * 2. 根据主键列表查询，并把结果集以主键为key，映射到Map中
      */
-    List<String> generateQueryByIdsMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateQueryByIdsMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateQueryByIdMethod(TableStructureAnalysisDTO persistence, String methodName);
+    List<String> generateQueryByIdMethod(TableAnalysisDTO persistence, String methodName);
 
     /**
      * 根据外键列表查询，表中每有几个外键，这个Proc就生成几个方法
      */
-    List<String> generateQueryByKeysMethod(TableStructureAnalysisDTO persistence, List<QueryByKeysDTO> queryByKeysDTOs);
+    List<String> generateQueryByKeysMethod(TableAnalysisDTO persistence, List<QueryByKeysDTO> queryByKeysDTOs);
 
-    List<String> generateQueryByKeyMethod(TableStructureAnalysisDTO persistence,
+    List<String> generateQueryByKeyMethod(TableAnalysisDTO persistence,
             List<KeyMethodNameDTO> keyAndMethodNames);
 
-    List<String> generateResultMap(TableStructureAnalysisDTO persistence, String entityName);
+    List<String> generateResultMap(TableAnalysisDTO persistence, String entityName);
 
-    List<String> generateUpdateByIdEvenNullMethod(TableStructureAnalysisDTO persistence, String entityName,
+    List<String> generateUpdateByIdEvenNullMethod(TableAnalysisDTO persistence, String entityName,
             String methodName);
 
-    List<String> generateUpdateByIdMethod(TableStructureAnalysisDTO persistence, String entityName, String methodName);
+    List<String> generateUpdateByIdMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
     FileFlush replaceMapperXmlMethods(ReplaceMapperXmlMethodsArgs args);
 

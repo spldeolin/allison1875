@@ -25,13 +25,13 @@ import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapper
 import com.spldeolin.allison1875.persistencegenerator.dto.KeyMethodNameDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
-import com.spldeolin.allison1875.persistencegenerator.dto.TableStructureAnalysisDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.DesignGeneratorService;
 import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperCoidService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlService;
-import com.spldeolin.allison1875.persistencegenerator.service.TableStructureAnalyzerService;
+import com.spldeolin.allison1875.persistencegenerator.service.TableAnalyzerService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -45,7 +45,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     private MapperCoidService mapperCoidService;
 
     @Inject
-    private TableStructureAnalyzerService tableStructureAnalyzerService;
+    private TableAnalyzerService tableAnalyzerService;
 
     @Inject
     private EntityGeneratorService entityGeneratorService;
@@ -68,36 +68,29 @@ public class PersistenceGenerator implements Allison1875MainService {
     @Override
     public void process(AstForest astForest) {
         // 分析表结构
-        List<TableStructureAnalysisDTO> tableStructureAnalysisList =
-                tableStructureAnalyzerService.analyzeTableStructure();
-        if (CollectionUtils.isEmpty(tableStructureAnalysisList)) {
+        List<TableAnalysisDTO> tableAnalyses = tableAnalyzerService.analyzeTable();
+        if (CollectionUtils.isEmpty(tableAnalyses)) {
             log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
             return;
         }
 
         List<FileFlush> flushes = Lists.newArrayList();
         Mutable<CompilationUnit> joinChainCu = new MutableObject<>();
-        for (TableStructureAnalysisDTO tableStructureAnalysis : tableStructureAnalysisList) {
-            flushes.addAll(tableStructureAnalysis.getFlushes());
+        for (TableAnalysisDTO tableAnalysis : tableAnalyses) {
+            flushes.addAll(tableAnalysis.getFlushes());
 
             // 生成Entity
-            DataModelGeneration entityGeneration = entityGeneratorService.generateEntity(tableStructureAnalysis);
+            DataModelGeneration entityGeneration = entityGeneratorService.generateEntity(tableAnalysis);
             flushes.add(entityGeneration.getFileFlush());
 
             // 寻找或创建Mapper
-            DetectOrGenerateMapperRetval detectOrGenerateMapperRetval;
-            try {
-                detectOrGenerateMapperRetval = mapperCoidService.detectOrGenerateMapper(tableStructureAnalysis,
-                        entityGeneration);
-            } catch (Exception e) {
-                log.error("寻找或创建Mapper时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
-                continue;
-            }
+            DetectOrGenerateMapperRetval detectOrGenerateMapperRetval = mapperCoidService.detectOrGenerateMapper(
+                    tableAnalysis, entityGeneration);
             ClassOrInterfaceDeclaration mapper = detectOrGenerateMapperRetval.getMapper();
 
             // 重新生成Design
             GenerateDesignArgs gdArgs = new GenerateDesignArgs();
-            gdArgs.setTableStructureAnalysis(tableStructureAnalysis);
+            gdArgs.setTableAnalysis(tableAnalysis);
             gdArgs.setEntityGeneration(entityGeneration);
             gdArgs.setMapper(mapper);
             GenerateDesignRetval gdRetval = designGeneratorService.generateDesign(gdArgs);
@@ -107,7 +100,7 @@ public class PersistenceGenerator implements Allison1875MainService {
 
             // 生成JoinChain
             GenerateJoinChainArgs gjcArgs = new GenerateJoinChainArgs();
-            gjcArgs.setTableStructureAnalysis(tableStructureAnalysis);
+            gjcArgs.setTableAnalysis(tableAnalysis);
             gjcArgs.setEntityGeneration(entityGeneration);
             gjcArgs.setJoinChainCu(joinChainCu.getValue());
             gjcArgs.setDesignQualifier(gdRetval.getDesignQualifer());
@@ -115,7 +108,7 @@ public class PersistenceGenerator implements Allison1875MainService {
 
             // 在Mapper中生成基础方法
             GenerateMethodToMapperArgs gmtmArgs = new GenerateMethodToMapperArgs();
-            gmtmArgs.setTableStructureAnalysisDTO(tableStructureAnalysis);
+            gmtmArgs.setTableAnalysisDTO(tableAnalysis);
             gmtmArgs.setEntityGeneration(entityGeneration);
             gmtmArgs.setMapper(mapper);
             String insertMethodName = mapperCoidService.generateInsertMethodToMapper(gmtmArgs);
@@ -133,7 +126,7 @@ public class PersistenceGenerator implements Allison1875MainService {
             List<KeyMethodNameDTO> queryByKeyDTOs = Lists.newArrayList();
             List<KeyMethodNameDTO> deleteByKeyDTOs = Lists.newArrayList();
             List<QueryByKeysDTO> queryByKeysDTOs = Lists.newArrayList();
-            for (PropertyDTO key : tableStructureAnalysis.getKeyProperties()) {
+            for (PropertyDTO key : tableAnalysis.getKeyProperties()) {
                 queryByKeyDTOs.add(new KeyMethodNameDTO().setKey(key)
                         .setMethodName(mapperCoidService.generateQueryByKeyMethodToMapper(gmtmArgs.setKey(key))));
                 deleteByKeyDTOs.add(new KeyMethodNameDTO().setKey(key)
@@ -154,28 +147,28 @@ public class PersistenceGenerator implements Allison1875MainService {
             // 生成MapperXml的基础方法
             String entityName = getEntityNameInXml(entityGeneration);
             List<List<String>> generateMapperXmlCodes = Lists.newArrayList(
-                    mapperXmlService.generateResultMap(tableStructureAnalysis, entityName),
-                    mapperXmlService.generateAllCloumnSql(tableStructureAnalysis),
-                    mapperXmlService.generateInsertMethod(tableStructureAnalysis, entityName, insertMethodName),
-                    mapperXmlService.generateBatchInsertMethod(tableStructureAnalysis, batchInsertMethodName),
-                    mapperXmlService.generateBatchInsertEvenNullMethod(tableStructureAnalysis,
+                    mapperXmlService.generateResultMap(tableAnalysis, entityName),
+                    mapperXmlService.generateAllCloumnSql(tableAnalysis),
+                    mapperXmlService.generateInsertMethod(tableAnalysis, entityName, insertMethodName),
+                    mapperXmlService.generateBatchInsertMethod(tableAnalysis, batchInsertMethodName),
+                    mapperXmlService.generateBatchInsertEvenNullMethod(tableAnalysis,
                             batchInsertEvenNullMethodName),
-                    mapperXmlService.generateBatchUpdateMethod(tableStructureAnalysis, batchUpdateMethodName),
-                    mapperXmlService.generateBatchUpdateEvenNullMethod(tableStructureAnalysis,
+                    mapperXmlService.generateBatchUpdateMethod(tableAnalysis, batchUpdateMethodName),
+                    mapperXmlService.generateBatchUpdateEvenNullMethod(tableAnalysis,
                             batchUpdateEvenNullMethodName),
-                    mapperXmlService.generateQueryByIdMethod(tableStructureAnalysis, queryByIdMethodName),
-                    mapperXmlService.generateUpdateByIdMethod(tableStructureAnalysis, entityName, updateByIdMethodName),
-                    mapperXmlService.generateUpdateByIdEvenNullMethod(tableStructureAnalysis, entityName,
+                    mapperXmlService.generateQueryByIdMethod(tableAnalysis, queryByIdMethodName),
+                    mapperXmlService.generateUpdateByIdMethod(tableAnalysis, entityName, updateByIdMethodName),
+                    mapperXmlService.generateUpdateByIdEvenNullMethod(tableAnalysis, entityName,
                             updateByIdEvenNullMethodName),
-                    mapperXmlService.generateQueryByIdsMethod(tableStructureAnalysis, queryByIdsProcMethodName),
-                    mapperXmlService.generateQueryByIdsMethod(tableStructureAnalysis, queryByIdsEachIdMethodName),
-                    mapperXmlService.generateQueryByKeyMethod(tableStructureAnalysis, queryByKeyDTOs),
-                    mapperXmlService.generateDeleteByKeyMethod(tableStructureAnalysis, deleteByKeyDTOs),
-                    mapperXmlService.generateQueryByKeysMethod(tableStructureAnalysis, queryByKeysDTOs),
-                    mapperXmlService.generateQueryByEntityMethod(tableStructureAnalysis, entityName,
+                    mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsProcMethodName),
+                    mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsEachIdMethodName),
+                    mapperXmlService.generateQueryByKeyMethod(tableAnalysis, queryByKeyDTOs),
+                    mapperXmlService.generateDeleteByKeyMethod(tableAnalysis, deleteByKeyDTOs),
+                    mapperXmlService.generateQueryByKeysMethod(tableAnalysis, queryByKeysDTOs),
+                    mapperXmlService.generateQueryByEntityMethod(tableAnalysis, entityName,
                             queryByEntityMethodName),
-                    mapperXmlService.generateListAllMethod(tableStructureAnalysis, listAllMethodName),
-                    mapperXmlService.generateInsertOrUpdateMethod(tableStructureAnalysis, entityName,
+                    mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName),
+                    mapperXmlService.generateInsertOrUpdateMethod(tableAnalysis, entityName,
                             insertOrUpdateMethodName));
 
             // 基础方法替换到MapperXml中
@@ -185,14 +178,14 @@ public class PersistenceGenerator implements Allison1875MainService {
                 }
                 try {
                     ReplaceMapperXmlMethodsArgs rmxmmArgs = new ReplaceMapperXmlMethodsArgs();
-                    rmxmmArgs.setTableStructureAnalysisDTO(tableStructureAnalysis);
+                    rmxmmArgs.setTableAnalysis(tableAnalysis);
                     rmxmmArgs.setMapper(mapper);
                     rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
                     rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
                     FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
                     flushes.add(xmlFlush);
                 } catch (Exception e) {
-                    log.error("写入Mapper.xml时发生异常 tableStructureAnalysis={}", tableStructureAnalysis, e);
+                    log.error("写入Mapper.xml时发生异常 tableAnalysis={}", tableAnalysis, e);
                 }
             }
         }

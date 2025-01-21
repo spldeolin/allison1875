@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TableStructureAnalysisDTO {
+public class TableAnalysisDTO {
 
     String tableName;
 
@@ -26,22 +26,22 @@ public class TableStructureAnalysisDTO {
     /**
      * 主键字段（存在联合主键的可能）
      */
-    List<PropertyDTO> idProperties;
+    List<PropertyDTO> idProperties = Lists.newArrayList();
 
     /**
      * 非主键字段
      */
-    List<PropertyDTO> nonIdProperties;
-
-    /**
-     * 所有字段
-     */
-    List<PropertyDTO> properties;
+    List<PropertyDTO> nonIdProperties = Lists.newArrayList();
 
     /**
      * 逻辑外键字段（id结尾的字段算做逻辑外键）
      */
-    List<PropertyDTO> keyProperties;
+    List<PropertyDTO> keyProperties = Lists.newArrayList();
+
+    /**
+     * 所有字段
+     */
+    List<PropertyDTO> properties = Lists.newArrayList();
 
     /**
      * 存在逻辑删除标识符

@@ -17,7 +17,7 @@ public class PropertyDTO {
 
     String propertyName;
 
-    JavaTypeNamingDTO javaType;
+    JavaTypeDTO javaType;
 
     String description;
 
@@ -25,6 +25,6 @@ public class PropertyDTO {
 
     Boolean notnull;
 
-    String defaultV;
+    String defaultValue;
 
 }

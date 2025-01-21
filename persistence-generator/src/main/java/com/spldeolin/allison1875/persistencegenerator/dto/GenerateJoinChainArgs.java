@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateJoinChainArgs {
 
-    TableStructureAnalysisDTO tableStructureAnalysis;
+    TableAnalysisDTO tableAnalysis;
 
     DataModelGeneration entityGeneration;
 

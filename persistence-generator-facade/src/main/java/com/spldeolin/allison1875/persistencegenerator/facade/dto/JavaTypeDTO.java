@@ -11,13 +11,13 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class JavaTypeNamingDTO {
+public class JavaTypeDTO {
 
     String simpleName;
 
     String qualifier;
 
-    public JavaTypeNamingDTO setClass(Class<?> clazz) {
+    public JavaTypeDTO setClass(Class<?> clazz) {
         simpleName = clazz.getSimpleName();
         qualifier = clazz.getName();
         return this;

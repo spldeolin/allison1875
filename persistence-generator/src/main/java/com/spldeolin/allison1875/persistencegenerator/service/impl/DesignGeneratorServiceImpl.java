@@ -38,7 +38,7 @@ import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateJoinChainArgs;
-import com.spldeolin.allison1875.persistencegenerator.dto.TableStructureAnalysisDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant.ChainInitialMethod;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
@@ -66,7 +66,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
     @Override
     public Optional<CompilationUnit> generateJoinChain(GenerateJoinChainArgs args) {
-        TableStructureAnalysisDTO tableStructureAnalysis = args.getTableStructureAnalysis();
+        TableAnalysisDTO tableAnalysis = args.getTableAnalysis();
         DataModelGeneration entityGeneration = args.getEntityGeneration();
         String entityName = entityGeneration.getDtoName();
 
@@ -89,8 +89,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                 designCu.addImport(PropertyName.class.getName());
                 designCu.addOrphanComment(new LineComment("@formatter:" + "off"));
                 ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
-                JavadocComment javadoc = new JavadocComment(
-                        concatJoinChainDescription(args.getTableStructureAnalysis()));
+                JavadocComment javadoc = new JavadocComment(concatJoinChainDescription(args.getTableAnalysis()));
                 designCoid.setJavadocComment(javadoc);
                 designCoid.addAnnotation(StaticJavaParser.parseAnnotation("@SuppressWarnings(\"all\")"));
                 designCoid.setPublic(true).setInterface(false).setName("JoinChain").setTypeParameters(typeParams);
@@ -114,7 +113,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         ClassOrInterfaceDeclaration joinEntityCoid = new ClassOrInterfaceDeclaration();
         joinEntityCoid.setPublic(true).setStatic(true).setName("Join" + entityName).setTypeParameters(typeParams);
-        for (PropertyDTO property : tableStructureAnalysis.getProperties()) {
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
             joinEntityCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     String.format("public Join%s<MQCM, ME> %s;", entityName, property.getPropertyName())));
         }
@@ -130,7 +129,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration joinEntityOnCoid = new ClassOrInterfaceDeclaration();
         joinEntityOnCoid.setPublic(true).setStatic(true).setName("Join" + entityName + "On")
                 .setTypeParameters(typeParams).addImplementedType(args.getDesignQualifier().replace('.', '_'));
-        for (PropertyDTO property : tableStructureAnalysis.getProperties()) {
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
             joinEntityOnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     String.format("public OnChainComparison<MQCM, %s, PropertyName<ME, %s>> %s;",
                             property.getJavaType().getQualifier(), property.getJavaType().getQualifier(),
@@ -148,7 +147,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration joinEntityOnOpenedCoid = new ClassOrInterfaceDeclaration();
         joinEntityOnOpenedCoid.setPublic(true).setStatic(true).setName("Join" + entityName + "OnOpened")
                 .setTypeParameters(typeParams).addImplementedType(args.getDesignQualifier().replace('.', '_'));
-        for (PropertyDTO property : tableStructureAnalysis.getProperties()) {
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
             joinEntityOnOpenedCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
                     "public OnChainComparison<Join%sOnOpenedClosable<MQCM, ME>, %s, PropertyName<ME, %s>> %s;",
                     entityName, property.getJavaType().getQualifier(), property.getJavaType().getQualifier(),
@@ -193,18 +192,18 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
     @Override
     public GenerateDesignRetval generateDesign(GenerateDesignArgs args) {
-        TableStructureAnalysisDTO tableStructureAnalysis = args.getTableStructureAnalysis();
+        TableAnalysisDTO tableAnalysis = args.getTableAnalysis();
         DataModelGeneration entityGeneration = args.getEntityGeneration();
 
         if (!config.getEnableGenerateDesign()) {
             return new GenerateDesignRetval();
         }
 
-        String designName = concatDesignName(tableStructureAnalysis);
+        String designName = concatDesignName(tableAnalysis);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
                 commonConfig.getDesignPackage(), designName + ".java");
 
-        List<PropertyDTO> properties = tableStructureAnalysis.getProperties();
+        List<PropertyDTO> properties = tableAnalysis.getProperties();
         LinkedHashMap<String, PropertyDTO> propertiesByName = Maps.newLinkedHashMap();
 
         CompilationUnit cu = new CompilationUnit();
@@ -386,7 +385,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
         eachCoid.setPublic(true).setStatic(false).setInterface(true).setName("Each").addTypeParameter("P");
-        for (PropertyDTO property : tableStructureAnalysis.getProperties()) {
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
             eachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     String.format("Each<%s> %s = (Each<%s>) new Object();", property.getJavaType().getSimpleName(),
                             property.getPropertyName(), property.getJavaType().getSimpleName())));
@@ -395,7 +394,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         ClassOrInterfaceDeclaration multiEachCoid = new ClassOrInterfaceDeclaration();
         multiEachCoid.setPublic(true).setStatic(false).setInterface(true).setName("MultiEach").addTypeParameter("P");
-        for (PropertyDTO property : tableStructureAnalysis.getProperties()) {
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
             multiEachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     String.format("MultiEach<%s> %s = (MultiEach<%s>) new Object();",
                             property.getJavaType().getSimpleName(), property.getPropertyName(),
@@ -403,7 +402,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
         designCoid.addMember(multiEachCoid);
 
-        for (PropertyDTO property : tableStructureAnalysis.getProperties()) {
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
             designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                     "public static com.spldeolin.allison1875.support.PropertyName<" + entityGeneration.getDtoName()
                             + "," + property.getJavaType().getSimpleName() + "> " + property.getPropertyName() + ";"));
@@ -418,13 +417,13 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                 () -> new Allison1875Exception("Node '" + args.getMapper().getName() + "' has no Qualifier")));
         meta.setMapperName(args.getMapper().getNameAsString());
         meta.setMapperPaths(commonConfig.getMapperXmlDirs().stream()
-                .map(one -> one + File.separator + tableStructureAnalysis.getMapperName() + ".xml")
+                .map(one -> one + File.separator + tableAnalysis.getMapperName() + ".xml")
                 .collect(Collectors.toList()));
-        if (tableStructureAnalysis.getIsDeleteFlagExist()) {
+        if (tableAnalysis.getIsDeleteFlagExist()) {
             meta.setNotDeletedSql(config.getNotDeletedSql());
         }
         meta.setProperties(propertiesByName);
-        meta.setTableName(tableStructureAnalysis.getTableName());
+        meta.setTableName(tableAnalysis.getTableName());
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", KeywordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
@@ -439,11 +438,11 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
     }
 
     @Override
-    public String concatDesignName(TableStructureAnalysisDTO persistence) {
+    public String concatDesignName(TableAnalysisDTO persistence) {
         return MoreStringUtils.toUpperCamel(persistence.getTableName()) + "Design";
     }
 
-    private String concatJoinChainDescription(TableStructureAnalysisDTO persistence) {
+    private String concatJoinChainDescription(TableAnalysisDTO persistence) {
         String result = "";
         if (commonConfig.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;

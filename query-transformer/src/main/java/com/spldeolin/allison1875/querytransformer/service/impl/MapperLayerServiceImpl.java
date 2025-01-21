@@ -229,7 +229,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 }
                 xmlLines.add("</delete>");
             } else {
-                throw new RuntimeException("impossible unless bug.");
+                throw new Allison1875Exception("impossible unless bug.");
             }
 
             List<String> newLines = Lists.newArrayList();
