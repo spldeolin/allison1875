@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.common.service;
 
+import java.util.Optional;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -14,6 +15,8 @@ import com.spldeolin.allison1875.common.service.impl.AnnotationExprServiceImpl;
 public interface AnnotationExprService {
 
     boolean isAnnotated(String annoationQualifier, NodeWithAnnotations<?> node);
+
+    Optional<AnnotationExpr> getAnnotation(String annoationQualifier, NodeWithAnnotations<?> node);
 
     AnnotationExpr lombokData();
 

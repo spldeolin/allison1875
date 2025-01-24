@@ -19,6 +19,10 @@ public class EndpointDTO {
 
     List<String> descriptionLines;
 
+    List<String> reqBodyParamDescriptionLines;
+
+    List<String> returnDescriptionLines;
+
     Boolean isDeprecated;
 
     String author;
@@ -28,6 +32,10 @@ public class EndpointDTO {
     List<String> urls;
 
     String httpMethod;
+
+    List<QueryParamDTO> queryParams;
+
+    List<PathParamDTO> pathParams;
 
     String requestBodyDescribe;
 
@@ -46,6 +54,8 @@ public class EndpointDTO {
         result.setSourceCode(sourceCode);
         result.setUrls(urls);
         result.setHttpMethod(httpMethod);
+        result.setQueryParams(queryParams);
+        result.setPathParams(pathParams);
         result.setRequestBodyDescribe(requestBodyDescribe);
         result.setRequestBodyJsonSchema(requestBodyJsonSchema);
         result.setResponseBodyDescribe(responseBodyDescribe);

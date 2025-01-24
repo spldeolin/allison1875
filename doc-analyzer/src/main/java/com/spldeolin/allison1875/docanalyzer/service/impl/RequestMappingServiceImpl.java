@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.docanalyzer.service.impl;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
@@ -12,8 +11,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -82,24 +79,6 @@ public class RequestMappingServiceImpl implements RequestMappingService {
                     sb.append("&");
                 }
                 sb.append(param);
-            }
-            return sb.toString();
-        });
-
-        // 为组合后的url条件@RequestParam参数
-        combinedUrls.replaceAll(combinedUrl -> {
-            StringBuilder sb = new StringBuilder(combinedUrl);
-            for (Parameter parameter : reflectionMethod.getParameters()) {
-                RequestParam requestParam = AnnotatedElementUtils.findMergedAnnotation(parameter, RequestParam.class);
-                if (requestParam != null && !MultipartFile.class.isAssignableFrom(parameter.getType())) {
-                    if (questionMark.isFalse()) {
-                        questionMark.setTrue();
-                        sb.append("?");
-                    } else {
-                        sb.append("&");
-                    }
-                    sb.append(requestParam.value()).append("={").append(requestParam.value()).append("}");
-                }
             }
             return sb.toString();
         });

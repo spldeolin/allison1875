@@ -15,6 +15,7 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -29,6 +30,8 @@ import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDTO;
+import com.spldeolin.allison1875.docanalyzer.dto.PathParamDTO;
+import com.spldeolin.allison1875.docanalyzer.dto.QueryParamDTO;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
 import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
@@ -76,7 +79,7 @@ public class MarkdownServiceImpl implements MarkdownService {
         // description的第一行（即API的标题）作为cat，以复用this.flushToMarkdown方法来实现singleMarkdown
         endpoints = endpoints.stream().map(e -> e.copy().setCat(e.getDescriptionLines().get(0)))
                 .collect(Collectors.toList());
-        flushToMarkdown(endpoints);
+        this.flushToMarkdown(endpoints);
     }
 
     protected String generateEndpointDoc(EndpointDTO endpoint) {
@@ -89,14 +92,28 @@ public class MarkdownServiceImpl implements MarkdownService {
         }
 
         result.append("### URL\n");
-        String urlsText = endpoint.getUrls().stream().map(e -> "`" + e + "`").collect(Collectors.joining(" 或 "));
-        result.append(endpoint.getHttpMethod().toUpperCase()).append(urlsText).append("\n");
+        String urlsText = Joiner.on(" 或 ").join(endpoint.getUrls());
+        result.append(endpoint.getHttpMethod().toUpperCase()).append(" ").append(urlsText).append("\n");
 
-        result.append("### Request Body（application/json）\n");
-        result.append(this.generateReqOrRespDoc(endpoint, true));
+        if (CollectionUtils.isNotEmpty(endpoint.getPathParams())) {
+            result.append("### Path Param\n");
+            result.append(this.generatePathParams(endpoint.getPathParams()));
+        }
 
-        result.append("### Response Body（application/json）\n");
-        result.append(this.generateReqOrRespDoc(endpoint, false));
+        if (CollectionUtils.isNotEmpty(endpoint.getQueryParams())) {
+            result.append("### Query Param\n");
+            result.append(this.generateQueryParams(endpoint.getQueryParams()));
+        }
+
+        if (endpoint.getRequestBodyJsonSchema() != null) {
+            result.append("### Request Body (application/json)\n");
+            result.append(this.generateReqOrRespDoc(endpoint, true));
+        }
+
+        if (endpoint.getResponseBodyJsonSchema() != null) {
+            result.append("### Response Body (application/json)\n");
+            result.append(this.generateReqOrRespDoc(endpoint, false));
+        }
 
         // 生成cURL
         result.append(this.generateCurlSample(endpoint));
@@ -110,6 +127,40 @@ public class MarkdownServiceImpl implements MarkdownService {
         // markdown语法的分隔线
         result.append("\n---\n");
         return result.toString();
+    }
+
+    private StringBuilder generatePathParams(List<PathParamDTO> pathParams) {
+        StringBuilder result = new StringBuilder("|字段名|类型|注释|\n");
+        result.append("|---|---|---|\n");
+        for (PathParamDTO pathParam : pathParams) {
+            result.append("|");
+            result.append(pathParam.getName());
+            result.append("|");
+            result.append(pathParam.getType().getTitle());
+            result.append("|");
+            result.append(Joiner.on("<br>").join(pathParam.getDescriptionLines()));
+            result.append("|\n");
+        }
+        return result;
+    }
+
+    private StringBuilder generateQueryParams(List<QueryParamDTO> queryParams) {
+        StringBuilder result = new StringBuilder("|字段名|类型|注释|是否必填|默认值|\n");
+        result.append("|---|---|---|---|---|\n");
+        for (QueryParamDTO queryParam : queryParams) {
+            result.append("|");
+            result.append(queryParam.getName());
+            result.append("|");
+            result.append(queryParam.getType().getTitle());
+            result.append("|");
+            result.append(Joiner.on("<br>").join(queryParam.getDescriptionLines()));
+            result.append("|");
+            result.append(queryParam.isRequired() ? "是" : "否");
+            result.append("|");
+            result.append(MoreObjects.firstNonNull(queryParam.getDefaultValue(), ""));
+            result.append("|\n");
+        }
+        return result;
     }
 
     private String generateRespSample(EndpointDTO endpoint) {
@@ -161,22 +212,19 @@ public class MarkdownServiceImpl implements MarkdownService {
     protected String generateReqOrRespDoc(EndpointDTO endpoint, boolean isReqBody) {
         JsonSchema rootJsonSchema;
         if (isReqBody) {
-            if (endpoint.getRequestBodyJsonSchema() == null) {
-                return "无需Request Body\n";
-            }
             rootJsonSchema = endpoint.getRequestBodyJsonSchema();
         } else {
-            if (endpoint.getResponseBodyJsonSchema() == null) {
-                return "没有Response Body\n";
-            }
             rootJsonSchema = endpoint.getResponseBodyJsonSchema();
         }
 
         StringBuilder content = new StringBuilder(64);
 
-        if (!rootJsonSchema.isObjectSchema() && !rootJsonSchema.isArraySchema()) {
-            // TODO 解析javadoc中的@return，作为它的注释。优先级低，这样的写法非常少
-            content.append("| | ").append(rootJsonSchema.getType().value()).append(" | | |\n");
+        // 根节点就是valueType，意味着下面的JsonSchemaTraverseUtils.traverse不会进行回调
+        if (rootJsonSchema.isValueTypeSchema()) {
+            String desc = Joiner.on("<br>").join(isReqBody ? endpoint.getReqBodyParamDescriptionLines()
+                    : endpoint.getReturnDescriptionLines());
+            content.append("| | ").append(StringUtils.capitalize(rootJsonSchema.getType().value())).append(" |")
+                    .append(desc).append(" | |\n");
         }
 
         JsonSchemaTraverseUtils.traverse(rootJsonSchema, (propertyName, jsonSchema, parentJsonSchema, depth) -> {
@@ -214,7 +262,12 @@ public class MarkdownServiceImpl implements MarkdownService {
             }
             content.append("|");
             // 注释
-            content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
+            if (StringUtils.isEmpty(propertyName)) { // 顶层为array或者simple value
+                content.append(Joiner.on("<br>").join(isReqBody ? endpoint.getReqBodyParamDescriptionLines()
+                        : endpoint.getReturnDescriptionLines()));
+            } else {
+                content.append(Joiner.on("<br>").join(jpdv.getCommentLines()));
+            }
             content.append("|");
             // 其他 - 校验项
             StringBuilder validDoc = null;

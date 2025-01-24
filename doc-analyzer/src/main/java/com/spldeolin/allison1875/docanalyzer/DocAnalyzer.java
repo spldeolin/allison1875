@@ -27,6 +27,7 @@ import com.spldeolin.allison1875.docanalyzer.service.MvcHandlerDetectorService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestBodyService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
+import com.spldeolin.allison1875.docanalyzer.service.UrlParamService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,6 +60,9 @@ public class DocAnalyzer implements Allison1875MainService {
 
     @Inject
     private JsgBuilderService jsgBuilderService;
+
+    @Inject
+    private UrlParamService urlParamService;
 
     @Inject
     private RequestBodyService requestBodyService;
@@ -101,16 +105,24 @@ public class DocAnalyzer implements Allison1875MainService {
 
             // 分析
             try {
+                // 分析Path Param
+                endpoint.setPathParams(urlParamService.analyzePathParams(mvcHandler));
+
+                // 分析Query Param
+                endpoint.setQueryParams(urlParamService.analyzeQueryParams(mvcHandler));
+
                 // 分析Request Body
                 AnalyzeBodyRetval analyzeBodyRetval = requestBodyService.analyzeBody(jsg4req, mvcHandler.getMd());
                 endpoint.setRequestBodyDescribe(analyzeBodyRetval.getDescribe());
                 endpoint.setRequestBodyJsonSchema(analyzeBodyRetval.getJsonSchema());
+                endpoint.setReqBodyParamDescriptionLines(analyzeBodyRetval.getDescriptionLines());
 
                 // 分析Response Body
                 analyzeBodyRetval = responseBodyService.analyzeBody(jsg4resp, mvcController.getCoid(),
                         mvcHandler.getMd());
                 endpoint.setResponseBodyDescribe(analyzeBodyRetval.getDescribe());
                 endpoint.setResponseBodyJsonSchema(analyzeBodyRetval.getJsonSchema());
+                endpoint.setReturnDescriptionLines(analyzeBodyRetval.getDescriptionLines());
 
                 // 分析controller级与handler级的@RequestMapping
                 AnalyzeRequestMappingRetval analyzeRequestMappingRetval = requestMappingService.analyzeRequestMapping(

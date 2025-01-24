@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.common.service.impl;
 
+import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
@@ -18,17 +19,22 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public boolean isAnnotated(String annoationQualifier, NodeWithAnnotations<?> node) {
+        return getAnnotation(annoationQualifier, node).isPresent();
+    }
+
+    @Override
+    public Optional<AnnotationExpr> getAnnotation(String annoationQualifier, NodeWithAnnotations<?> node) {
         for (AnnotationExpr annotation : node.getAnnotations()) {
             try {
                 if (annoationQualifier.equals(annotation.resolve().getQualifiedName())) {
-                    return true;
+                    return Optional.of(annotation);
                 }
             } catch (Exception e) {
                 log.warn("annotation '{}' of node '{}' cannot resolve", annotation.getNameAsString(), node, e);
                 // 悲观地认为不匹配
             }
         }
-        return false;
+        return Optional.empty();
     }
 
     @Override

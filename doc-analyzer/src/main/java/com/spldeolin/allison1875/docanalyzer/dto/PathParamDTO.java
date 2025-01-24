@@ -1,23 +1,23 @@
 package com.spldeolin.allison1875.docanalyzer.dto;
 
 import java.util.List;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.spldeolin.allison1875.docanalyzer.enums.ValueTypeEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
- * @author Deolin 2023-12-13
+ * @author Deolin 2025-01-24
  */
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AnalyzeBodyRetval {
+public class PathParamDTO {
 
-    String describe;
+    String name;
 
-    JsonSchema jsonSchema;
+    ValueTypeEnum type;
 
     List<String> descriptionLines;
 

@@ -1,14 +1,17 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
+import java.util.List;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeBodyRetval;
 import com.spldeolin.allison1875.docanalyzer.service.JsonSchemaTransformerService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
@@ -55,7 +58,10 @@ public class ResponseBodyServiceImpl implements ResponseBodyService {
         }
         jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
 
-        return new AnalyzeBodyRetval().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema);
+        List<String> desc = JavadocUtils.getEveryLineByTag(mvcHandlerMd, Type.RETURN, null);
+
+        return new AnalyzeBodyRetval().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema)
+                .setDescriptionLines(desc);
     }
 
     private ResolvedType getResponseBodyType(ClassOrInterfaceDeclaration mvcControllerCoid,

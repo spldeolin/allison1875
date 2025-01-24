@@ -1,24 +1,20 @@
 package com.spldeolin.allison1875.docanalyzer.dto;
 
-import java.util.List;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
- * @author Deolin 2023-12-13
+ * @author Deolin 2025-01-25
  */
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AnalyzeBodyRetval {
+public class AliasMergedPathVariableDTO {
 
-    String describe;
+    String name;
 
-    JsonSchema jsonSchema;
-
-    List<String> descriptionLines;
+    boolean required = true;
 
 }

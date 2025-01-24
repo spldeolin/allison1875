@@ -9,7 +9,6 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
-import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.google.common.collect.Lists;
 
 /**
@@ -62,16 +61,23 @@ public class JavadocUtils {
     /**
      * 获取每个参数blockTagType的标签内容部分的每一行
      */
-    public static List<String> getEveryLineByTag(NodeWithJavadoc<?> node, Type blockTagType) {
+    public static List<String> getEveryLineByTag(NodeWithJavadoc<?> node, JavadocBlockTag.Type tagType,
+            String tagName) {
         if (!node.getJavadoc().isPresent()) {
             return Lists.newArrayList();
         }
         List<String> result = Lists.newArrayList();
         for (JavadocBlockTag blockTag : node.getJavadoc().get().getBlockTags()) {
-            if (blockTag.getType() == blockTagType) {
-                List<String> lines = MoreStringUtils.splitLineByLine(blockTag.getContent().toText());
-                result.addAll(lines);
+            if (blockTag.getType() != tagType) {
+                continue;
             }
+            if (tagName != null) { // 如果指定了tagName
+                if (!blockTag.getName().filter(n -> n.equals(tagName)).isPresent()) { // 但这个tag的name不匹配
+                    continue; // 则跳过，否则视为“匹配”
+                }
+            } // 不指定tagName视为“匹配了tagName”
+            List<String> lines = MoreStringUtils.splitLineByLine(blockTag.getContent().toText());
+            result.addAll(lines);
         }
         return result;
     }
@@ -83,7 +89,7 @@ public class JavadocUtils {
     private static List<String> getEveryAuthor(Node node) {
         // 本节点withJavadoc，并且能获取到可见的@author内容时，直接返回
         if (node instanceof NodeWithJavadoc) {
-            List<String> authors = getEveryLineByTag((NodeWithJavadoc<?>) node, Type.AUTHOR);
+            List<String> authors = getEveryLineByTag((NodeWithJavadoc<?>) node, JavadocBlockTag.Type.AUTHOR, null);
             if (CollectionUtils.isNotEmpty(authors)) {
                 return authors;
             }
@@ -114,4 +120,5 @@ public class JavadocUtils {
         }
         return Optional.empty();
     }
+
 }
