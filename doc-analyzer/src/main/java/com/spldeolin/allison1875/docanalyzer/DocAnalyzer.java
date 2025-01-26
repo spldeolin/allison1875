@@ -145,9 +145,6 @@ public class DocAnalyzer implements Allison1875MainService {
         if (config.getFlushTo() == FlushToEnum.MARKDOWN) {
             markdownService.flushToMarkdown(endpoints);
         }
-        if (config.getFlushTo() == FlushToEnum.SINGLE_MARKDOWN) {
-            markdownService.flushToSingleMarkdown(endpoints);
-        }
 
         log.info("endpoints.size={}", endpoints.size());
     }

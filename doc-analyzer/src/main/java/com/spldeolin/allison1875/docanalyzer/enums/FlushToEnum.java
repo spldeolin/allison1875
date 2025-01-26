@@ -15,9 +15,4 @@ public enum FlushToEnum {
      */
     YAPI,
 
-    /**
-     * 每个endpoint输出到单独的本地markdown文件
-     */
-    SINGLE_MARKDOWN,
-
 }

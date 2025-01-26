@@ -29,6 +29,8 @@ import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDTO;
+import com.spldeolin.allison1875.docanalyzer.dto.PathParamDTO;
+import com.spldeolin.allison1875.docanalyzer.dto.QueryParamDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiInterfaceListMenuRespDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiProjectGetRespDTO;
 import com.spldeolin.allison1875.docanalyzer.service.YApiOpenApiService;
@@ -88,8 +90,8 @@ public class YApiServiceImpl implements YApiService {
             String respJs = this.generateReqOrRespDoc(endpoint.getResponseBodyJsonSchema());
 
             JsonNode yapiInterface = this.createYApiInterface(title, Joiner.on(" 或 ").join(endpoint.getUrls()), reqJs,
-                    respJs, yapiDesc,
-                    endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()));
+                    respJs, yapiDesc, endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()),
+                    endpoint.getQueryParams(), endpoint.getPathParams());
             log.info("Endpoint [{}] output to YApi Project [{}]({}...{}), response: {}", endpoint.getUrls(),
                     project.getName(), StringUtils.left(config.getYapiToken(), 6),
                     StringUtils.right(config.getYapiToken(), 6), JsonUtils.toJson(yapiInterface));
@@ -239,10 +241,29 @@ public class YApiServiceImpl implements YApiService {
     }
 
     private JsonNode createYApiInterface(String title, String url, String requestBodyJsonSchema,
-            String responseBodyJsonSchema, String description, String httpMethod, Long catId) {
+            String responseBodyJsonSchema, String description, String httpMethod, Long catId,
+            List<QueryParamDTO> queryParams, List<PathParamDTO> pathParams) {
         Map<String, Object> form = Maps.newHashMap();
         form.put("title", title);
         form.put("path", url);
+        List<Map<String, String>> reqQuerys = Lists.newArrayList();
+        for (QueryParamDTO queryParam : queryParams) {
+            Map<String, String> map = Maps.newHashMap();
+            map.put("name", queryParam.getName());
+            map.put("type", queryParam.getType().getTitle());
+            map.put("example", queryParam.getDefaultValue());
+            map.put("desc", Joiner.on("<br>").join(queryParam.getDescriptionLines()));
+            reqQuerys.add(map);
+        }
+        form.put("req_query", reqQuerys);
+        List<Map<String, String>> reqParams = Lists.newArrayList();
+        for (PathParamDTO pathParam : pathParams) {
+            Map<String, String> map = Maps.newHashMap();
+            map.put("name", pathParam.getName());
+            map.put("desc", Joiner.on("<br>").join(pathParam.getDescriptionLines()));
+            reqParams.add(map);
+        }
+        form.put("req_params", reqParams);
         form.put("status", "done");
         form.put("req_body_type", "json");
         form.put("req_body_is_json_schema", true);

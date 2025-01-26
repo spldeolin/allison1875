@@ -49,6 +49,8 @@ public class EndpointDTO {
         EndpointDTO result = new EndpointDTO();
         result.setCat(cat);
         result.setDescriptionLines(descriptionLines);
+        result.setReqBodyParamDescriptionLines(reqBodyParamDescriptionLines);
+        result.setReturnDescriptionLines(returnDescriptionLines);
         result.setIsDeprecated(isDeprecated);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);

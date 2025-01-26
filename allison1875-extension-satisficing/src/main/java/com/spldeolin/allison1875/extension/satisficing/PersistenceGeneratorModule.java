@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.extension.satisficing;
 
 import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.extension.satisficing.persistencegenerator.TableAnalyzerServiceImpl2;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.service.TableAnalyzerService;
 
 /**
  * @author Deolin 2024-06-15
@@ -20,8 +22,8 @@ public class PersistenceGeneratorModule extends
     @Override
     protected void configure() {
         super.configure();
-        bind(JdbcTypeService.class).toInstance(new JdbcTypeServiceImpl2(commonConfig.getBasePackage() + ".enums"));
-        bind(CommentService.class).toInstance(new CommentServiceImpl2());
+        bind(TableAnalyzerService.class).toInstance(
+                new TableAnalyzerServiceImpl2(commonConfig.getBasePackage() + ".enums"));
     }
 
 }

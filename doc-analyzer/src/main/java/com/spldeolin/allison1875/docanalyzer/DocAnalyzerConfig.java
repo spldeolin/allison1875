@@ -38,7 +38,7 @@ public class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 文档保存到...
      */
-    @NotNull(message = "must be 'MARKDOWN', 'YAPI' or 'SINGLE_MARKDOWN'")
+    @NotNull(message = "must be 'MARKDOWN', 'YAPI'")
     FlushToEnum flushTo = FlushToEnum.MARKDOWN;
 
     /**
@@ -55,6 +55,11 @@ public class DocAnalyzerConfig extends Allison1875Config {
      * 文档输出到markdown时，Markdown文件的目录的路径（相对于basedir的相对路径 或 绝对路径 皆可）
      */
     File markdownDir = new File("api-docs");
+
+    /**
+     * 文档输出到markdown时，每个Endpoint是否输出到单个markdown文件
+     */
+    Boolean singleEndpointPerMarkdown = false;
 
     /**
      * 文档输出到markdown时，是否启用cURL命令的输出
