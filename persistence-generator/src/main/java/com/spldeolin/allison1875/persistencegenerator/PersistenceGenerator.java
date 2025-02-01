@@ -60,9 +60,6 @@ public class PersistenceGenerator implements Allison1875MainService {
     private CommonConfig commonConfig;
 
     @Inject
-    private PersistenceGeneratorConfig config;
-
-    @Inject
     private ImportExprService importExprService;
 
     @Override
@@ -70,7 +67,7 @@ public class PersistenceGenerator implements Allison1875MainService {
         // 分析表结构
         List<TableAnalysisDTO> tableAnalyses = tableAnalyzerService.analyzeTable();
         if (CollectionUtils.isEmpty(tableAnalyses)) {
-            log.warn("no tables detected in Schema [{}] at Connection [{}].", config.getSchema(), config.getJdbcUrl());
+            log.warn("no tables detected");
             return;
         }
 

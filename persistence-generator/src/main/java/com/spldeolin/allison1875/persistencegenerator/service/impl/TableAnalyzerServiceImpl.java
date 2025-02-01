@@ -56,8 +56,18 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             log.info("analyze tables from jdbc, url={}", config.getJdbcUrl());
             // 查询information_schema.COLUMNS、information_schema.TABLES表
             List<InformationSchemaDTO> infoSchemas = this.queryInformationSchema();
-            infoSchemas.stream().collect(Collectors.groupingBy(InformationSchemaDTO::getTableComment)).forEach(
-                    (tableName, sameTableInfoSchemas) -> tableAnalyses.add(analyzeFromSameTable(sameTableInfoSchemas)));
+            infoSchemas.stream().collect(Collectors.groupingBy(InformationSchemaDTO::getTableName))
+                    .forEach((tableName, sameTableInfoSchemas) -> {
+                        TableAnalysisDTO tableAnalysis = this.analyzeFromSameTable(sameTableInfoSchemas);
+                        for (PropertyDTO prop : tableAnalysis.getProperties()) {
+                            if (prop.getJavaType() == null) {
+                                log.warn("unsupport jbdcType, column={}.{}", tableAnalysis.getTableName(),
+                                        prop.getColumnName());
+                                return;
+                            }
+                        }
+                        tableAnalyses.add(tableAnalysis);
+                    });
         }
 
         // 数据源为ddl
@@ -65,8 +75,17 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             log.info("analyze tables from ddl");
             SQLUtils.parseStatements(config.getDdl(), JdbcConstants.MYSQL).stream()
                     .filter(stmt -> stmt instanceof SQLCreateTableStatement)
-                    .map(stmt -> ((SQLCreateTableStatement) stmt))
-                    .forEach(createTable -> tableAnalyses.add(analyzeFromDdl(createTable)));
+                    .map(stmt -> ((SQLCreateTableStatement) stmt)).forEach(createTable -> {
+                        TableAnalysisDTO tableAnalysis = this.analyzeFromDdl(createTable);
+                        for (PropertyDTO prop : tableAnalysis.getProperties()) {
+                            if (prop.getJavaType() == null) {
+                                log.warn("unsupport jbdcType, column={}.{}", tableAnalysis.getTableName(),
+                                        prop.getColumnName());
+                                return;
+                            }
+                        }
+                        tableAnalyses.add(tableAnalysis);
+                    });
         }
 
         // 设置LotNo
