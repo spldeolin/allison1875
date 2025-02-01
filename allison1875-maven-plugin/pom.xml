@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.spldeolin.allison1875</groupId>
         <artifactId>allison1875</artifactId>
-        <version>12.0</version>
+        <version>12.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>allison1875-maven-plugin</artifactId>
