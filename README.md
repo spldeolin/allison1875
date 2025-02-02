@@ -37,9 +37,6 @@ Transform convenient-to-code expressions in the source code adhering to *Allison
 ```shell
 git clone git@github.com:spldeolin/allison1875.git
 mvn install -f allison1875/pom.xml
-
-# if this project base on Satisficing, install the extension also
-mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
 ```
 
 ### Setup
@@ -53,7 +50,6 @@ mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
 ```
 
 ```xml
-<!-- if this project base on Spring Boot -->
 <plugin>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-maven-plugin</artifactId>
@@ -64,24 +60,26 @@ mvn install -f allison1875/allison1875-extension-satisficing/pom.xml
         </common>
     </configuration>
 </plugin>
-
-<!-- if this project base on Satisficing -->
+<!-- add this plugin if your project depends on lombok -->
 <plugin>
-    <groupId>com.spldeolin.allison1875</groupId>
-    <artifactId>allison1875-maven-plugin</artifactId>
-    <version>12.1</version>
-    <dependencies>
-        <!-- setup extension -->
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>allison1875-extension-satisficing</artifactId>
-            <version>12.1</version>
-        </dependency>
-    </dependencies>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
     <configuration>
-        <common>
-            <basePackage>com.your.base.package</basePackage>
-        </common>
+        <source>${java.version}</source>
+        <target>${java.version}</target>
+        <annotationProcessorPaths>
+            <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </path>
+        </annotationProcessorPaths>
+        <compilerArgs>
+            <arg>-sourcepath</arg>
+            <arg>
+                ${project.basedir}/src/main/java${path.separator}${project.basedir}/target/generated-sources/annotations${path.separator}/
+            </arg>
+        </compilerArgs>
     </configuration>
 </plugin>
 ```
