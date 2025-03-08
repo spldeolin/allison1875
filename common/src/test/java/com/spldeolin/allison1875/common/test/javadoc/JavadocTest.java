@@ -20,9 +20,9 @@ public class JavadocTest {
                 Javadoc javadoc = primaryType.getJavadoc().get();
                 System.out.println(javadoc);
 
-                JavadocUtils.getComment(primaryType);
-                JavadocUtils.getComment(primaryType.getMethodsByName("m1").get(0));
-                JavadocUtils.getComment(primaryType.getMethodsByName("m2").get(0));
+                JavadocUtils.getDescription(primaryType);
+                JavadocUtils.getDescription(primaryType.getMethodsByName("m1").get(0));
+                JavadocUtils.getDescription(primaryType.getMethodsByName("m2").get(0));
                 JavadocUtils.getAuthor(cu.findAll(FieldDeclaration.class,
                         fieldDeclaration -> fieldDeclaration.toString().equals("private String f1;")).get(0));
 

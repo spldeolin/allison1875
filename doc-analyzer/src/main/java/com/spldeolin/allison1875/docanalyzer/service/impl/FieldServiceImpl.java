@@ -86,7 +86,7 @@ public class FieldServiceImpl implements FieldService {
 
     protected List<String> ananlyzeFieldCommentLines(FieldDeclaration field) {
         // 可拓展为分析Swagger注解等
-        return JavadocUtils.getCommentAsLines(field);
+        return JavadocUtils.getDescriptionAsLines(field);
     }
 
     protected Table<String, String, AnalyzeFieldVarsRetval> getAnalyzeFieldVarsRetvalFromThirdParty() {

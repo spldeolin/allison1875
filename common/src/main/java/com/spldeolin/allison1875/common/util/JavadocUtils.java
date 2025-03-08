@@ -1,15 +1,19 @@
 package com.spldeolin.allison1875.common.util;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.ast.AstForest;
 
 /**
  * Javadoc工具类
@@ -23,10 +27,10 @@ public class JavadocUtils {
     }
 
     /**
-     * 为参数node设置Javadoc
+     * 基于提供description和author，为参数node设置简单的Javadoc
      */
-    public static Javadoc setJavadoc(NodeWithJavadoc<?> node, String comment, String author) {
-        Javadoc javadoc = new JavadocComment(comment).parse();
+    public static Javadoc setJavadoc(NodeWithJavadoc<?> node, String description, String author) {
+        Javadoc javadoc = new JavadocComment(description).parse();
         if (StringUtils.isNotBlank(author)) {
             javadoc.addBlockTag(new JavadocBlockTag(JavadocBlockTag.Type.AUTHOR, author));
         }
@@ -35,21 +39,25 @@ public class JavadocUtils {
     }
 
     /**
-     * 获取参数node的Javadoc中的comment部分，返回值至少是Empty String
+     * 获取Javadoc的description部分
+     *
+     * @return 不trim且至少是Empty String
      */
-    public static String getComment(NodeWithJavadoc<?> node) {
+    public static String getDescription(NodeWithJavadoc<?> node) {
         return node.getJavadoc().map(javadoc -> javadoc.getDescription().toText()).orElse("");
     }
 
     /**
-     * 获取参数node的Javadoc中的comment部分的每一行
+     * 获取Javadoc中的description部分的每一行
+     *
+     * @return list至少是Empty List，其中的元素不trim且至少是Empty String
      */
-    public static List<String> getCommentAsLines(NodeWithJavadoc<?> node) {
-        return MoreStringUtils.splitLineByLine(getComment(node));
+    public static List<String> getDescriptionAsLines(NodeWithJavadoc<?> node) {
+        return MoreStringUtils.splitLineByLine(getDescription(node));
     }
 
     /**
-     * 获取参数node的作者信息
+     * 获取Javadoc中的作者信息
      *
      * @return 如果有多个作者，trim、distinct后拼接为半角逗号分隔的文本
      */
@@ -59,9 +67,9 @@ public class JavadocUtils {
     }
 
     /**
-     * 获取每个参数blockTagType的标签内容部分的每一行
+     * 获取Javadoc中指定tag的description部分
      */
-    public static List<String> getEveryLineByTag(NodeWithJavadoc<?> node, JavadocBlockTag.Type tagType,
+    public static List<String> getTagDescriptionAsLines(NodeWithJavadoc<?> node, JavadocBlockTag.Type tagType,
             String tagName) {
         if (!node.getJavadoc().isPresent()) {
             return Lists.newArrayList();
@@ -82,6 +90,30 @@ public class JavadocUtils {
         return result;
     }
 
+    /**
+     * 获取每一级包的package-info.java中Javadoc中description部分的第一行
+     *
+     * @return list至少是Empty List，其中的元素不trim且至少是Empty String
+     */
+    public static List<String> getDescriptionFirstLineInPackageInfos(PackageDeclaration pd, AstForest astForest) {
+        String packageName = pd.getName().asString();
+        List<String> retval = Lists.newArrayList();
+        while (packageName.contains(".")) {
+            astForest.tryFindCu(packageName + ".package-info").flatMap(Node::getComment).ifPresent(comment -> {
+                // 只有javadoc符合标准，ifBlockComment和ifLineComment不予考虑
+                comment.ifJavadocComment(jc -> {
+                    List<String> lines = MoreStringUtils.splitLineByLine(
+                            StaticJavaParser.parseJavadoc(jc.getContent()).getDescription().toText());
+                    if (!lines.isEmpty()) {
+                        retval.add(lines.get(0));
+                    }
+                });
+            });
+            packageName = MoreStringUtils.splitAndRemoveLastPart(packageName, ".");
+        }
+        Collections.reverse(retval);
+        return retval;
+    }
 
     /**
      * 尽可能获取一个Node的所有作者信息
@@ -89,18 +121,17 @@ public class JavadocUtils {
     private static List<String> getEveryAuthor(Node node) {
         // 本节点withJavadoc，并且能获取到可见的@author内容时，直接返回
         if (node instanceof NodeWithJavadoc) {
-            List<String> authors = getEveryLineByTag((NodeWithJavadoc<?>) node, JavadocBlockTag.Type.AUTHOR, null);
+            List<String> authors = getTagDescriptionAsLines((NodeWithJavadoc<?>) node, JavadocBlockTag.Type.AUTHOR,
+                    null);
             if (CollectionUtils.isNotEmpty(authors)) {
                 return authors;
             }
         }
-
         // 本节点没有有效的author信息时，尝试递归地寻找父节点的author信息
         Optional<Node> parentWithJavadoc = getParentWithJavadoc(node);
         if (parentWithJavadoc.isPresent()) {
             return getEveryAuthor(parentWithJavadoc.get());
         }
-
         // 递归到找不到withJavadoc的父节点时，返回empty
         return Lists.newArrayList();
     }

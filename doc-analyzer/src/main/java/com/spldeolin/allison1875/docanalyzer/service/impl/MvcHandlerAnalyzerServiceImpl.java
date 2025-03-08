@@ -47,7 +47,7 @@ public class MvcHandlerAnalyzerServiceImpl implements MvcHandlerAnalyzerService 
 
     protected List<String> ananlyzeMethodDesc(MvcHandlerDTO mvcHandler) {
         // 可拓展为分析Swagger注解等
-        return JavadocUtils.getCommentAsLines(mvcHandler.getMd());
+        return JavadocUtils.getDescriptionAsLines(mvcHandler.getMd());
     }
 
 }

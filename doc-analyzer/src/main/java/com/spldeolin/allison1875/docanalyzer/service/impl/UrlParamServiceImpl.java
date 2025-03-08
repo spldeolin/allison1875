@@ -56,7 +56,8 @@ public class UrlParamServiceImpl implements UrlParamService {
                 dto.setType(valueType);
                 dto.setRequired(aliasMergedReqParam.isRequired());
                 dto.setDefaultValue(aliasMergedReqParam.getDefaultValue());
-                dto.setDescriptionLines(JavadocUtils.getEveryLineByTag(mvcHandler.getMd(), JavadocBlockTag.Type.PARAM,
+                dto.setDescriptionLines(
+                        JavadocUtils.getTagDescriptionAsLines(mvcHandler.getMd(), JavadocBlockTag.Type.PARAM,
                         parameter.getNameAsString()));
                 retval.add(dto);
             });
@@ -82,7 +83,8 @@ public class UrlParamServiceImpl implements UrlParamService {
                 PathParamDTO dto = new PathParamDTO();
                 dto.setName(MoreObjects.firstNonNull(aliasMergedPathVariable.getName(), parameter.getNameAsString()));
                 dto.setType(valueType);
-                dto.setDescriptionLines(JavadocUtils.getEveryLineByTag(mvcHandler.getMd(), JavadocBlockTag.Type.PARAM,
+                dto.setDescriptionLines(
+                        JavadocUtils.getTagDescriptionAsLines(mvcHandler.getMd(), JavadocBlockTag.Type.PARAM,
                         parameter.getNameAsString()));
                 retval.add(dto);
             });

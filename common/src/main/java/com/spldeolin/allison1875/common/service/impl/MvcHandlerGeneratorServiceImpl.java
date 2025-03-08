@@ -130,7 +130,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
                 // Javadoc @param标签
                 fdOpt.ifPresent(fd -> fd.getJavadoc().ifPresent(
                         jd -> javadoc.addBlockTag(Type.PARAM.name().toLowerCase(),
-                                vd.getNameAsString() + " " + JavadocUtils.getComment(fd))));
+                                vd.getNameAsString() + " " + JavadocUtils.getDescription(fd))));
             }
             mvcHandler.setJavadocComment(javadoc);
         }

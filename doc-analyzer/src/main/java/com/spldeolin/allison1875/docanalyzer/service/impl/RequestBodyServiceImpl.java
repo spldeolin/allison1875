@@ -58,7 +58,7 @@ public class RequestBodyServiceImpl implements RequestBodyService {
         }
         jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
 
-        List<String> desc = JavadocUtils.getEveryLineByTag(mvcHandlerMd, Type.PARAM, requestBody.paramName);
+        List<String> desc = JavadocUtils.getTagDescriptionAsLines(mvcHandlerMd, Type.PARAM, requestBody.paramName);
 
         return new AnalyzeBodyRetval().setDescribe(requestBodyDescribe).setJsonSchema(jsonSchema)
                 .setDescriptionLines(desc);

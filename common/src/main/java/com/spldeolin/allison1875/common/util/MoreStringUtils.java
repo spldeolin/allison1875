@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.common.util;
 
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 
@@ -100,6 +102,14 @@ public class MoreStringUtils {
     public static String splitAndGetLastPart(String text, String separator) {
         String[] parts = StringUtils.split(text, separator);
         return parts[parts.length - 1];
+    }
+
+    public static String splitAndRemoveLastPart(String text, String separator) {
+        String[] parts = StringUtils.split(text, separator);
+        if (parts.length < 2) {
+            return text;
+        }
+        return Joiner.on(separator).join(Arrays.copyOfRange(parts, 0, parts.length - 1));
     }
 
 }

@@ -58,7 +58,7 @@ public class ResponseBodyServiceImpl implements ResponseBodyService {
         }
         jsonSchemaTransformerService.transformReferenceSchema(jsonSchema);
 
-        List<String> desc = JavadocUtils.getEveryLineByTag(mvcHandlerMd, Type.RETURN, null);
+        List<String> desc = JavadocUtils.getTagDescriptionAsLines(mvcHandlerMd, Type.RETURN, null);
 
         return new AnalyzeBodyRetval().setDescribe(responseBodyDescribe).setJsonSchema(jsonSchema)
                 .setDescriptionLines(desc);

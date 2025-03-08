@@ -79,7 +79,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
             // 删除Mapper中所有声明了NoModifyAnnounce的方法
             for (MethodDeclaration method : mapper.getMethods()) {
-                if (JavadocUtils.getComment(method).contains(BaseConstant.NO_MODIFY_ANNOUNCE)) {
+                if (JavadocUtils.getDescription(method).contains(BaseConstant.NO_MODIFY_ANNOUNCE)) {
                     method.remove();
                 }
             }

@@ -84,11 +84,13 @@ public class MarkdownServiceImpl implements MarkdownService {
 
     protected String generateEndpointDoc(EndpointDTO endpoint) {
         StringBuilder result = new StringBuilder(64);
-        String title = Iterables.getFirst(endpoint.getDescriptionLines(), null);
+        String title = Iterables.getFirst(endpoint.getDescriptionLines(), "");
+        title = title.replace(" ", "&nbsp;");
         result.append("## ").append(title).append("\n");
 
         if (endpoint.getDescriptionLines().size() > 1) {
-            endpoint.getDescriptionLines().stream().skip(1).forEach(line -> result.append(line).append("\n\n"));
+            endpoint.getDescriptionLines().stream().skip(1).map(l -> l.replace(" ", "&nbsp;"))
+                    .forEach(line -> result.append(line).append("\n\n"));
         }
 
         result.append("### URL\n");

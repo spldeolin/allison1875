@@ -147,7 +147,7 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
     }
 
     protected String getControllerCat(ClassOrInterfaceDeclaration controller) {
-        String controllerCat = Iterables.getFirst(JavadocUtils.getCommentAsLines(controller), "");
+        String controllerCat = Iterables.getFirst(JavadocUtils.getDescriptionAsLines(controller), "");
         if (StringUtils.isEmpty(controllerCat)) {
             controllerCat = controller.getNameAsString();
         }
