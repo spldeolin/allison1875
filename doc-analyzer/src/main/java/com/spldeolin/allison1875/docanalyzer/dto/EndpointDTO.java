@@ -23,7 +23,9 @@ public class EndpointDTO {
 
     List<String> returnDescriptionLines;
 
-    Boolean isDeprecated;
+    String deprecatedDescription;
+
+    String sinceVersion;
 
     String author;
 
@@ -51,7 +53,7 @@ public class EndpointDTO {
         result.setDescriptionLines(descriptionLines);
         result.setReqBodyParamDescriptionLines(reqBodyParamDescriptionLines);
         result.setReturnDescriptionLines(returnDescriptionLines);
-        result.setIsDeprecated(isDeprecated);
+        result.setDeprecatedDescription(deprecatedDescription);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
         result.setUrls(urls);

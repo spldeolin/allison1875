@@ -21,6 +21,16 @@ public class AnalyzeFieldVarsRetval {
     final List<String> commentLines = Lists.newArrayList();
 
     /**
+     * 过时原因，null代表未过时
+     */
+    String deprecatedDescription;
+
+    /**
+     * 加入版本，null代表初版便存在
+     */
+    String sinceVersion;
+
+    /**
      * 枚举项分析结果
      */
     final List<AnalyzeEnumConstantsRetval> analyzeEnumConstantsRetvals = Lists.newArrayList();

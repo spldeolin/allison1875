@@ -152,7 +152,8 @@ public class DocAnalyzer implements Allison1875MainService {
     private void setTo(AnalyzeMvcHandlerRetval analyzeMvcHandlerRetval, EndpointDTO endpoint) {
         endpoint.setCat(analyzeMvcHandlerRetval.getCat());
         endpoint.setDescriptionLines(analyzeMvcHandlerRetval.getDescriptionLines());
-        endpoint.setIsDeprecated(analyzeMvcHandlerRetval.getIsDeprecated());
+        endpoint.setDeprecatedDescription(analyzeMvcHandlerRetval.getDeprecatedDescription());
+        endpoint.setSinceVersion(analyzeMvcHandlerRetval.getSinceVersion());
         endpoint.setAuthor(analyzeMvcHandlerRetval.getAuthor());
         endpoint.setSourceCode(analyzeMvcHandlerRetval.getSourceCode());
     }

@@ -18,7 +18,9 @@ public class AnalyzeMvcHandlerRetval {
 
     List<String> descriptionLines;
 
-    Boolean isDeprecated;
+    String deprecatedDescription;
+
+    String sinceVersion;
 
     String author;
 

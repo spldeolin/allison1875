@@ -112,6 +112,12 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                     jpdv.getCommentLines().addAll(afvRetval.getCommentLines());
                 }
 
+                // jpdv 兼容性
+                if (afvRetval != null) {
+                    jpdv.setDeprecatedDescription(afvRetval.getDeprecatedDescription());
+                    jpdv.setSinceVersion(afvRetval.getSinceVersion());
+                }
+
                 // jpdv 枚举项
                 if (afvRetval != null) {
                     jpdv.getAnalyzeEnumConstantsRetvals().addAll(afvRetval.getAnalyzeEnumConstantsRetvals());

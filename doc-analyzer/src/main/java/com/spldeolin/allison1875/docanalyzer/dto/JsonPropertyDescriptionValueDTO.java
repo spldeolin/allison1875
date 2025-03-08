@@ -49,6 +49,16 @@ public class JsonPropertyDescriptionValueDTO {
      */
     String referencePath;
 
+    /**
+     * 过时原因，null代表未过时
+     */
+    String deprecatedDescription;
+
+    /**
+     * 加入版本，null代表初版便存在
+     */
+    String sinceVersion;
+
     public String serialize() {
         return JsonUtils.toJson(this);
     }

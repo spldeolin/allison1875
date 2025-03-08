@@ -8,6 +8,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.javadoc.JavadocBlockTag.Type;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -53,10 +55,14 @@ public class FieldServiceImpl implements FieldService {
                         .orElseThrow(() -> new Allison1875Exception("Node '" + coid.getName() + "' has no Qualifier"));
                 for (FieldDeclaration field : coid.getFields()) {
                     List<String> fieldCommentLines = this.ananlyzeFieldCommentLines(field);
+                    String deprecatedDescription = this.analyzeDeprecatedDescription(field);
+                    String sinceVersion = this.analyzeSinceVersion(field);
                     for (VariableDeclarator fieldVar : field.getVariables()) {
                         AnalyzeFieldVarsRetval dto = new AnalyzeFieldVarsRetval();
                         String fieldVarName = fieldVar.getNameAsString();
                         dto.getCommentLines().addAll(fieldCommentLines);
+                        dto.setDeprecatedDescription(deprecatedDescription);
+                        dto.setSinceVersion(sinceVersion);
                         dto.getAnalyzeEnumConstantsRetvals().addAll(enumService.analyzeEnumConstants(fieldVar));
                         dto.getMoreDocLines().addAll(this.analyzeMoreAndGenerateDoc(field, fieldVar));
                         result.put(coidQualifier, fieldVarName, dto);
@@ -68,6 +74,16 @@ public class FieldServiceImpl implements FieldService {
         result.putAll(this.getAnalyzeFieldVarsRetvalFromThirdParty());
 
         return result;
+    }
+
+    protected String analyzeSinceVersion(FieldDeclaration field) {
+        List<String> lines = JavadocUtils.getTagDescriptionAsLines(field, Type.SINCE, null);
+        return Joiner.on(System.lineSeparator()).join(lines);
+    }
+
+    protected String analyzeDeprecatedDescription(FieldDeclaration field) {
+        List<String> lines = JavadocUtils.getTagDescriptionAsLines(field, Type.DEPRECATED, null);
+        return Joiner.on(System.lineSeparator()).join(lines);
     }
 
     protected Set<File> buildAnalysisScope() {

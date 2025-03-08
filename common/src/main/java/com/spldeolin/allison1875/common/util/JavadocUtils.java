@@ -67,7 +67,7 @@ public class JavadocUtils {
     }
 
     /**
-     * 获取Javadoc中指定tag的description部分
+     * 获取Javadoc中指定tag的description部分的每一行
      */
     public static List<String> getTagDescriptionAsLines(NodeWithJavadoc<?> node, JavadocBlockTag.Type tagType,
             String tagName) {

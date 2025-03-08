@@ -161,7 +161,19 @@ public class YApiServiceImpl implements YApiService {
                     }
                     enumDoc = sb.deleteCharAt(sb.length() - 1).toString();
                 }
-
+                String compatibilityDoc = null;
+                if (StringUtils.isNotEmpty(jpdv.getSinceVersion())) {
+                    compatibilityDoc = "本字段加入版本：" + jpdv.getSinceVersion();
+                }
+                if (StringUtils.isNotEmpty(jpdv.getDeprecatedDescription())) {
+                    if (compatibilityDoc == null) {
+                        compatibilityDoc =
+                                "本字段已过时，原因：" + jpdv.getDeprecatedDescription().replaceAll("\\r?\\n", " ");
+                    } else {
+                        compatibilityDoc +=
+                                "<br>本字段已过时，原因：" + jpdv.getDeprecatedDescription().replaceAll("\\r?\\n", " ");
+                    }
+                }
                 String moreDoc = null;
                 if (CollectionUtils.isNotEmpty(jpdv.getMoreDocLines())) {
                     StringBuilder sb = new StringBuilder("其他\n");
@@ -172,7 +184,7 @@ public class YApiServiceImpl implements YApiService {
                 }
 
                 jsonSchema.setDescription(Joiner.on("\n\n").skipNulls()
-                        .join(refTypeDoc, commentDoc, validDoc, dataFormatDoc, enumDoc, moreDoc));
+                        .join(refTypeDoc, commentDoc, validDoc, dataFormatDoc, enumDoc, compatibilityDoc, moreDoc));
             }
         });
         return JsonUtils.toJson(bodyJsonSchema);
@@ -284,8 +296,13 @@ public class YApiServiceImpl implements YApiService {
 
     protected String generateEndpointDoc(EndpointDTO endpoint) {
         String deprecatedNode = null;
-        if (endpoint.getIsDeprecated()) {
-            deprecatedNode = "> 该接口已被开发者标记为**已废弃**，不建议调用";
+        if (endpoint.getDeprecatedDescription() != null) {
+            deprecatedNode = "> 本接口已过时，不建议调用，过时原因：" + endpoint.getDeprecatedDescription();
+        }
+
+        String since = null;
+        if (endpoint.getSinceVersion() != null) {
+            since = "> 本接口加入版本：" + endpoint.getSinceVersion();
         }
 
         String comment = null;
@@ -334,7 +351,7 @@ public class YApiServiceImpl implements YApiService {
             }
         }
 
-        return Joiner.on('\n').skipNulls().join(deprecatedNode, comment, developer, code, allison1875Announce)
+        return Joiner.on('\n').skipNulls().join(deprecatedNode, since, comment, developer, code, allison1875Announce)
                 + generateMoreDoc(endpoint);
     }
 

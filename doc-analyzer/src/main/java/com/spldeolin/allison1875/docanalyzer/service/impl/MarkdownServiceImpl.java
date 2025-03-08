@@ -93,6 +93,17 @@ public class MarkdownServiceImpl implements MarkdownService {
                     .forEach(line -> result.append(line).append("\n\n"));
         }
 
+        if (endpoint.getSinceVersion() != null || endpoint.getDeprecatedDescription() != null) {
+            result.append("### 兼容性说明\n");
+            if (endpoint.getSinceVersion() != null) {
+                result.append("- 本接口加入版本：").append(endpoint.getSinceVersion()).append("\n\n");
+            }
+            if (endpoint.getDeprecatedDescription() != null) {
+                result.append("- 本接口已过时，不建议调用，过时原因：").append(endpoint.getDeprecatedDescription())
+                        .append("\n\n");
+            }
+        }
+
         result.append("### URL\n");
         String urlsText = Joiner.on(" 或 ").join(endpoint.getUrls());
         result.append(endpoint.getHttpMethod().toUpperCase()).append(" ").append(urlsText).append("\n");
@@ -310,12 +321,26 @@ public class MarkdownServiceImpl implements MarkdownService {
             if (StringUtils.isNotEmpty(jpdv.getFormatPattern())) {
                 formatDoc = "格式：" + jpdv.getFormatPattern();
             }
+            // 其他 - 兼容性
+            String compatibilityDoc = null;
+            if (StringUtils.isNotEmpty(jpdv.getSinceVersion())) {
+                compatibilityDoc = "本字段加入版本：" + jpdv.getSinceVersion();
+            }
+            if (StringUtils.isNotEmpty(jpdv.getDeprecatedDescription())) {
+                if (compatibilityDoc == null) {
+                    compatibilityDoc =
+                            "本字段已过时，原因：" + jpdv.getDeprecatedDescription().replaceAll("\\r?\\n", " ");
+                } else {
+                    compatibilityDoc +=
+                            "<br>本字段已过时，原因：" + jpdv.getDeprecatedDescription().replaceAll("\\r?\\n", " ");
+                }
+            }
             // 其他 - 更多
             String moreDoc = null;
             if (CollectionUtils.isNotEmpty(jpdv.getMoreDocLines())) {
                 moreDoc = Joiner.on("<br>").join(jpdv.getMoreDocLines());
             }
-            row += Joiner.on("<br><br>").skipNulls().join(validDoc, enumDoc, formatDoc, moreDoc);
+            row += Joiner.on("<br><br>").skipNulls().join(validDoc, enumDoc, formatDoc, compatibilityDoc, moreDoc);
             row += "|\n";
             content.append(row);
         });
