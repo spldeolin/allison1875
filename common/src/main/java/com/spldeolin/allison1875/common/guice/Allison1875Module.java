@@ -13,15 +13,6 @@ public abstract class Allison1875Module extends AbstractModule {
 
     public abstract Class<? extends Allison1875MainService> declareMainService();
 
-    public final void ensureConfigValid() {
-        List<InvalidDTO> invalids = validConfigs();
-        for (InvalidDTO invalid : invalids) {
-            log.error("Allison 1875 fail to work cause invalid config, path={}, reason={}, value={}", invalid.getPath(),
-                    invalid.getReason(), invalid.getValue());
-        }
-        System.exit(-9);
-    }
-
     public abstract List<InvalidDTO> validConfigs();
 
     @Override

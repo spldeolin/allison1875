@@ -43,6 +43,7 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDTO;
+import com.spldeolin.allison1875.docanalyzer.enums.JsonIntegerTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
 
@@ -154,6 +155,19 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                 // jpdv 更多分析后生成的文档
                 if (afvRetval != null) {
                     jpdv.getMoreDocLines().addAll(afvRetval.getMoreDocLines());
+                }
+
+                // jpdv JSON整数细类
+                if (field.getType() == Long.class || field.getType() == long.class) {
+                    jpdv.setJsonIntegerTypeEnum(JsonIntegerTypeEnum.JAVA_LONG);
+                } else if (field.getType() == Integer.class || field.getType() == int.class) {
+                    jpdv.setJsonIntegerTypeEnum(JsonIntegerTypeEnum.JAVA_INTEGER);
+                } else if (field.getType() == Short.class || field.getType() == short.class) {
+                    jpdv.setJsonIntegerTypeEnum(JsonIntegerTypeEnum.JAVA_SHORT);
+                } else if (field.getType() == Byte.class || field.getType() == byte.class) {
+                    jpdv.setJsonIntegerTypeEnum(JsonIntegerTypeEnum.JAVA_BYTE);
+                } else {
+                    jpdv.setJsonIntegerTypeEnum(JsonIntegerTypeEnum.OTHERS);
                 }
 
                 return jpdv.serialize();

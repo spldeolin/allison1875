@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.IntegerSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.google.common.base.Joiner;
@@ -124,7 +125,7 @@ public class MarkdownServiceImpl implements MarkdownService {
         }
 
         if (endpoint.getResponseBodyJsonSchema() != null && !endpoint.getResponseBodyJsonSchema().isNullSchema()) {
-            result.append("### Response Body (application/json)\n");
+            result.append(getResponseBodyTableTitle()).append("\n");
             result.append(this.generateReqOrRespDoc(endpoint, false));
         }
 
@@ -270,6 +271,8 @@ public class MarkdownServiceImpl implements MarkdownService {
                 row += "Object";
             } else if (jsonSchema instanceof ObjectSchema) {
                 row += "Object";
+            } else if (jsonSchema instanceof IntegerSchema) {
+                row += jpdv.getJsonIntegerTypeEnum().getTitle();
             } else {
                 row += StringUtils.capitalize(jsonSchema.getType().value());
             }
@@ -365,6 +368,10 @@ public class MarkdownServiceImpl implements MarkdownService {
 
     protected String generateMoreDoc(EndpointDTO endpoint) {
         return "";
+    }
+
+    protected String getResponseBodyTableTitle() {
+        return "### Response Body (application/json)";
     }
 
 }

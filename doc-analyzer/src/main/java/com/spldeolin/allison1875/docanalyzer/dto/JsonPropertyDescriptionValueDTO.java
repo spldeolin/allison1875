@@ -4,6 +4,7 @@ import java.util.List;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.docanalyzer.enums.JsonIntegerTypeEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -58,6 +59,11 @@ public class JsonPropertyDescriptionValueDTO {
      * 加入版本，null代表初版便存在
      */
     String sinceVersion;
+
+    /**
+     * 整数类型（32或64）
+     */
+    JsonIntegerTypeEnum jsonIntegerTypeEnum;
 
     public String serialize() {
         return JsonUtils.toJson(this);
