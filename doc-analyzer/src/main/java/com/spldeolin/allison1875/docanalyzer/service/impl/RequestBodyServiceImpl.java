@@ -77,7 +77,6 @@ public class RequestBodyServiceImpl implements RequestBodyService {
         }
 
         if (requestBodys.isEmpty()) {
-            log.info("mvcHanler '{}' has no param", name);
             return null;
         }
 
