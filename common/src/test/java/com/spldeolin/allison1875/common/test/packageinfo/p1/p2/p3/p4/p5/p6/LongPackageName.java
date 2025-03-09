@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.common.test.packageinfo.p1.p2.p3.p4.p5.p6;
 
 import java.io.File;
-import java.util.List;
+import java.util.Map;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.test.AstForestTestImpl;
@@ -18,7 +18,7 @@ public class LongPackageName {
                 .ifPresent(cu -> {
                     PackageDeclaration pd = cu.getPackageDeclaration()
                             .orElseThrow(() -> new RuntimeException("impossible"));
-                    List<String> commentInPackageInfos = JavadocUtils.getDescriptionFirstLineInPackageInfos(pd,
+                    Map<String, String> commentInPackageInfos = JavadocUtils.getDescriptionFirstLineInPackageInfos(pd,
                             astForest);
 
                     System.out.println(commentInPackageInfos);

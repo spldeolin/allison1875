@@ -4,13 +4,11 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -20,7 +18,6 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcControllerDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcHandlerDTO;
@@ -66,9 +63,6 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                     continue;
                 }
 
-                // 分类
-                String mvcControllerCat = getControllerCat(coid);
-
                 LinkedHashMap<String/*shortestQualifiedSignature*/, MethodDeclaration> mds = this.listMethods(coid);
 
                 List<MvcHandlerDTO> mvcHandlers = Lists.newArrayList();
@@ -99,7 +93,6 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
                     mvcController.setReflection(mvcControllerReflection);
                     MvcHandlerDTO mvcHandler = new MvcHandlerDTO();
                     mvcHandler.setMvcController(mvcController);
-                    mvcHandler.setCat(mvcControllerCat);
                     mvcHandler.setMd(mvcHandlerMd);
                     mvcHandler.setReflection(methodReflection);
                     mvcHandlers.add(mvcHandler);
@@ -144,14 +137,6 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
             log.error("cannot load class [{}]", qualifier, e);
             throw e;
         }
-    }
-
-    protected String getControllerCat(ClassOrInterfaceDeclaration controller) {
-        String controllerCat = Iterables.getFirst(JavadocUtils.getDescriptionAsLines(controller), "");
-        if (StringUtils.isEmpty(controllerCat)) {
-            controllerCat = controller.getNameAsString();
-        }
-        return controllerCat;
     }
 
     private String convertGlobToRegex(String glob) {

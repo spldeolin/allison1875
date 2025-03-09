@@ -15,8 +15,6 @@ public class MvcHandlerDTO {
 
     MvcControllerDTO mvcController;
 
-    String cat;
-
     MethodDeclaration md;
 
     Method reflection;

@@ -15,7 +15,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EndpointDTO {
 
-    String cat;
+    String directCategory;
+
+    List<String> hierarchicalCategories;
 
     List<String> descriptionLines;
 
@@ -49,7 +51,8 @@ public class EndpointDTO {
 
     public EndpointDTO copy() {
         EndpointDTO result = new EndpointDTO();
-        result.setCat(cat);
+        result.setDirectCategory(directCategory);
+        result.setHierarchicalCategories(hierarchicalCategories);
         result.setDescriptionLines(descriptionLines);
         result.setReqBodyParamDescriptionLines(reqBodyParamDescriptionLines);
         result.setReturnDescriptionLines(returnDescriptionLines);

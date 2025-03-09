@@ -62,7 +62,7 @@ public class YApiServiceImpl implements YApiService {
         YApiProjectGetRespDTO project = yapiOpenApiService.getProject();
         Long projectId = project.getId();
 
-        Set<String> catNames = endpoints.stream().map(EndpointDTO::getCat).collect(Collectors.toSet());
+        Set<String> catNames = endpoints.stream().map(EndpointDTO::getDirectCategory).collect(Collectors.toSet());
         catNames.add("回收站");
         Set<String> yapiCatNames = this.getYapiCatIdsEachName(projectId).keySet();
         this.createYApiCat(Sets.difference(catNames, yapiCatNames), projectId);
@@ -90,7 +90,7 @@ public class YApiServiceImpl implements YApiService {
             String respJs = this.generateReqOrRespDoc(endpoint.getResponseBodyJsonSchema());
 
             JsonNode yapiInterface = this.createYApiInterface(title, Joiner.on(" 或 ").join(endpoint.getUrls()), reqJs,
-                    respJs, yapiDesc, endpoint.getHttpMethod(), catName2catId.get(endpoint.getCat()),
+                    respJs, yapiDesc, endpoint.getHttpMethod(), catName2catId.get(endpoint.getDirectCategory()),
                     endpoint.getQueryParams(), endpoint.getPathParams());
             log.info("Endpoint [{}] output to YApi Project [{}]({}...{}), response: {}", endpoint.getUrls(),
                     project.getName(), StringUtils.left(config.getYapiToken(), 6),

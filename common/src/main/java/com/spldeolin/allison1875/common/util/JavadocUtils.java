@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.common.util;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.spldeolin.allison1875.common.ast.AstForest;
 
 /**
@@ -93,26 +96,36 @@ public class JavadocUtils {
     /**
      * 获取每一级包的package-info.java中Javadoc中description部分的第一行
      *
-     * @return list至少是Empty List，其中的元素不trim且至少是Empty String
+     * @return map至少是Empty Map，其中的value不trim且至少是Empty String
      */
-    public static List<String> getDescriptionFirstLineInPackageInfos(PackageDeclaration pd, AstForest astForest) {
+    public static Map<String, String> getDescriptionFirstLineInPackageInfos(PackageDeclaration pd,
+            AstForest astForest) {
         String packageName = pd.getName().asString();
-        List<String> retval = Lists.newArrayList();
+        Map<String, String> retval = Maps.newLinkedHashMap();
         while (packageName.contains(".")) {
+            String finalPackageName = packageName;
+
+            // 只要package-info.java存在，至少视为空白字符串
+            astForest.tryFindCu(packageName + ".package-info").ifPresent(d -> {
+                retval.put(finalPackageName, "");
+            });
+
+            // 获取javadoc description
             astForest.tryFindCu(packageName + ".package-info").flatMap(Node::getComment).ifPresent(comment -> {
                 // 只有javadoc符合标准，ifBlockComment和ifLineComment不予考虑
                 comment.ifJavadocComment(jc -> {
                     List<String> lines = MoreStringUtils.splitLineByLine(
                             StaticJavaParser.parseJavadoc(jc.getContent()).getDescription().toText());
                     if (!lines.isEmpty()) {
-                        retval.add(lines.get(0));
+                        retval.put(finalPackageName, lines.get(0));
                     }
                 });
             });
             packageName = MoreStringUtils.splitAndRemoveLastPart(packageName, ".");
         }
-        Collections.reverse(retval);
-        return retval;
+//        Collections.reverse(retval);
+        return Lists.reverse(new ArrayList<>(retval.keySet())).stream()
+                .collect(LinkedHashMap::new, (m, k) -> m.put(k, retval.get(k)), LinkedHashMap::putAll);
     }
 
     /**

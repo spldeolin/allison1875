@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -49,6 +50,8 @@ public class MarkdownServiceImpl implements MarkdownService {
 
     private static final EasyRandom er = initEasyRandom();
 
+    private static final String illegalChars = "\\/:*?\"<>|";
+
     @Inject
     private DocAnalyzerConfig config;
 
@@ -56,24 +59,31 @@ public class MarkdownServiceImpl implements MarkdownService {
     public void flushToMarkdown(List<EndpointDTO> endpoints) {
         if (config.getSingleEndpointPerMarkdown()) {
             // description的第一行（即API的标题）作为cat，以复用this.flushToMarkdown方法来实现singleMarkdown
-            endpoints = endpoints.stream().map(e -> e.copy().setCat(e.getDescriptionLines().get(0)))
+            endpoints = endpoints.stream().map(e -> e.copy().setDirectCategory(e.getDescriptionLines().get(0)))
                     .collect(Collectors.toList());
         }
 
-        Multimap<String/*cat*/, EndpointDTO> endpointMap = ArrayListMultimap.create();
-        endpoints.forEach(e -> endpointMap.put(e.getCat(), e));
+        Multimap<String/*hierarchicalcat + cat*/, EndpointDTO> endpointMap = ArrayListMultimap.create();
+        endpoints.forEach(e -> endpointMap.put(e.getHierarchicalCategories() + e.getDirectCategory(), e));
 
-        for (String cat : endpointMap.keySet()) {
+        for (String key : endpointMap.keySet()) {
             StringBuilder content = new StringBuilder();
-            for (EndpointDTO endpoint : endpointMap.get(cat)) {
+            List<EndpointDTO> endpointGroup = Lists.newArrayList(endpointMap.get(key));
+            for (EndpointDTO endpoint : endpointGroup) {
                 content.append(this.generateEndpointDoc(endpoint));
             }
 
-            File dir = config.getMarkdownDir();
-            if (!dir.exists()) {
-                dir.mkdirs();
+            String dirPath = config.getMarkdownDir().getPath();
+            if (CollectionUtils.isNotEmpty(endpointGroup.get(0).getHierarchicalCategories())) {
+                for (String hierarchicalCategory : endpointGroup.get(0).getHierarchicalCategories()) {
+                    dirPath += File.separator + sanitizeFileName(hierarchicalCategory);
+                }
             }
-            File md = new File(dir.getPath() + File.separator + cat + ".md");
+            if (!new File(dirPath).exists()) {
+                new File(dirPath).mkdirs();
+            }
+            File md = new File(
+                    dirPath + File.separator + sanitizeFileName(endpointGroup.get(0).getDirectCategory()) + ".md");
             try {
                 FileUtils.writeStringToFile(md, content.toString(), StandardCharsets.UTF_8);
             } catch (IOException e) {
@@ -81,6 +91,24 @@ public class MarkdownServiceImpl implements MarkdownService {
             }
             log.info("create markdown file. file={}", md);
         }
+    }
+
+    private String sanitizeFileName(String fileName) {
+        StringBuilder sanitized = new StringBuilder();
+        for (char c : fileName.toCharArray()) {
+            if (illegalChars.indexOf(c) != -1) { // 直接检查非法字符
+                log.warn("replaced illegal character: '{}'", c);
+                sanitized.append('_');
+            } else {
+                sanitized.append(c);
+            }
+        }
+        // 清理首尾空格
+        String processed = sanitized.toString().trim();
+        if (StringUtils.isEmpty(processed)) {
+            return "_";
+        }
+        return processed;
     }
 
     protected String generateEndpointDoc(EndpointDTO endpoint) {

@@ -14,7 +14,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AnalyzeMvcHandlerRetval {
 
-    String cat;
+    /**
+     * 直接分类
+     */
+    String directCategory;
+
+    /**
+     * 层级分类
+     */
+    List<String> hierarchicalCategories;
 
     List<String> descriptionLines;
 
