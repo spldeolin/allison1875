@@ -6,13 +6,18 @@ package com.spldeolin.allison1875.docanalyzer.enums;
 public enum FlushToEnum {
 
     /**
-     * 本地markdown文件
+     * 保存到本地markdown文件
      */
     MARKDOWN,
 
     /**
-     * 通过OpenAPI同步到YAPI平台
+     * 同步到YAPI平台
      */
     YAPI,
+
+    /**
+     * 同步到ShowDoc平台
+     */
+    SHOWDOC,
 
 }

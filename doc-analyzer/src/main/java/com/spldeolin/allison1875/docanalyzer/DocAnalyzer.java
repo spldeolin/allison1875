@@ -27,6 +27,7 @@ import com.spldeolin.allison1875.docanalyzer.service.MvcHandlerDetectorService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestBodyService;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 import com.spldeolin.allison1875.docanalyzer.service.ResponseBodyService;
+import com.spldeolin.allison1875.docanalyzer.service.ShowdocService;
 import com.spldeolin.allison1875.docanalyzer.service.UrlParamService;
 import com.spldeolin.allison1875.docanalyzer.service.YApiService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,9 @@ public class DocAnalyzer implements Allison1875MainService {
 
     @Inject
     private MarkdownService markdownService;
+
+    @Inject
+    private ShowdocService showdocService;
 
     @Inject
     private FieldService fieldService;
@@ -144,6 +148,9 @@ public class DocAnalyzer implements Allison1875MainService {
         }
         if (config.getFlushTo() == FlushToEnum.MARKDOWN) {
             markdownService.flushToMarkdown(endpoints);
+        }
+        if (config.getFlushTo() == FlushToEnum.SHOWDOC) {
+            showdocService.flushToShowdoc(endpoints);
         }
 
         log.info("endpoints.size={}", endpoints.size());

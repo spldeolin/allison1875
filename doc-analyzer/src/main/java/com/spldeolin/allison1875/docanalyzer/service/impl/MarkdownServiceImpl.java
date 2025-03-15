@@ -19,8 +19,8 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ReferenceSchema;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
@@ -32,6 +32,7 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
+import com.spldeolin.allison1875.docanalyzer.dto.CategorizedMarkdownDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.PathParamDTO;
@@ -57,15 +58,40 @@ public class MarkdownServiceImpl implements MarkdownService {
 
     @Override
     public void flushToMarkdown(List<EndpointDTO> endpoints) {
+        List<CategorizedMarkdownDTO> categorizedMds = categorizeMarkdowns(endpoints);
+
+        for (CategorizedMarkdownDTO categorizedMd : categorizedMds) {
+            StringBuilder dirPath = new StringBuilder(config.getMarkdownDir().getPath());
+            if (CollectionUtils.isNotEmpty(categorizedMd.getHierarchicalCategories())) {
+                for (String hierarchicalCategory : categorizedMd.getHierarchicalCategories()) {
+                    dirPath.append(File.separator).append(sanitizeFileName(hierarchicalCategory));
+                }
+            }
+            if (!new File(dirPath.toString()).exists()) {
+                new File(dirPath.toString()).mkdirs();
+            }
+            File md = new File(dirPath + File.separator + sanitizeFileName(categorizedMd.getDirectCategory()) + ".md");
+            try {
+                FileUtils.writeStringToFile(md, categorizedMd.getContent(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            log.info("create markdown file. file={}", md);
+        }
+    }
+
+    @Override
+    public List<CategorizedMarkdownDTO> categorizeMarkdowns(List<EndpointDTO> endpoints) {
         if (config.getSingleEndpointPerMarkdown()) {
             // description的第一行（即API的标题）作为cat，以复用this.flushToMarkdown方法来实现singleMarkdown
             endpoints = endpoints.stream().map(e -> e.copy().setDirectCategory(e.getDescriptionLines().get(0)))
                     .collect(Collectors.toList());
         }
 
-        Multimap<String/*hierarchicalcat + cat*/, EndpointDTO> endpointMap = ArrayListMultimap.create();
+        Multimap<String/*hierarchicalcat + cat*/, EndpointDTO> endpointMap = LinkedListMultimap.create();
         endpoints.forEach(e -> endpointMap.put(e.getHierarchicalCategories() + e.getDirectCategory(), e));
 
+        List<CategorizedMarkdownDTO> retval = Lists.newArrayList();
         for (String key : endpointMap.keySet()) {
             StringBuilder content = new StringBuilder();
             List<EndpointDTO> endpointGroup = Lists.newArrayList(endpointMap.get(key));
@@ -73,24 +99,13 @@ public class MarkdownServiceImpl implements MarkdownService {
                 content.append(this.generateEndpointDoc(endpoint));
             }
 
-            String dirPath = config.getMarkdownDir().getPath();
-            if (CollectionUtils.isNotEmpty(endpointGroup.get(0).getHierarchicalCategories())) {
-                for (String hierarchicalCategory : endpointGroup.get(0).getHierarchicalCategories()) {
-                    dirPath += File.separator + sanitizeFileName(hierarchicalCategory);
-                }
-            }
-            if (!new File(dirPath).exists()) {
-                new File(dirPath).mkdirs();
-            }
-            File md = new File(
-                    dirPath + File.separator + sanitizeFileName(endpointGroup.get(0).getDirectCategory()) + ".md");
-            try {
-                FileUtils.writeStringToFile(md, content.toString(), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            log.info("create markdown file. file={}", md);
+            CategorizedMarkdownDTO categorizedMd = new CategorizedMarkdownDTO();
+            categorizedMd.setHierarchicalCategories(endpointGroup.get(0).getHierarchicalCategories());
+            categorizedMd.setDirectCategory(endpointGroup.get(0).getDirectCategory());
+            categorizedMd.setContent(content.toString());
+            retval.add(categorizedMd);
         }
+        return retval;
     }
 
     private String sanitizeFileName(String fileName) {

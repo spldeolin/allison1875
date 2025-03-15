@@ -6,6 +6,7 @@ import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 
 /**
  * @author Deolin 2020-12-06
@@ -38,6 +39,7 @@ public class DocAnalyzerModule extends Allison1875Module {
     protected void configure() {
         bind(CommonConfig.class).toInstance(commonConfig);
         bind(DocAnalyzerConfig.class).toInstance(docAnalyzerConfig);
+        bind(OkHttpClient.class).toInstance(new OkHttpClient());
     }
 
 }

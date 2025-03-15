@@ -38,7 +38,7 @@ public class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 文档保存到...
      */
-    @NotNull(message = "must be 'MARKDOWN', 'YAPI'")
+    @NotNull(message = "must be 'MARKDOWN', 'YAPI' or 'SHOWDOC'")
     FlushToEnum flushTo = FlushToEnum.MARKDOWN;
 
     /**
@@ -57,17 +57,37 @@ public class DocAnalyzerConfig extends Allison1875Config {
     File markdownDir = new File("api-docs");
 
     /**
-     * 文档输出到markdown时，每个Endpoint是否输出到单个markdown文件
+     * 文档输出到Showdoc时，文档的基础目录名（ShowDoc提供的开放API不支持删除，设置基础目录名便于手动一次性删除后重新同步）
+     */
+    String showdocBaseCatName = "doc-analyzer";
+
+    /**
+     * 文档输出到Showdoc时，ShowDoc开放API的URL
+     */
+    String showdocUrl;
+
+    /**
+     * 文档输出到Showdoc时，ShowDoc开放API的api_key
+     */
+    String showdocApiKey;
+
+    /**
+     * 文档输出到Showdoc时，ShowDoc开放API的api_token
+     */
+    String showdocApiToken;
+
+    /**
+     * 文档输出到markdown或ShowDoc时，每个Endpoint是否输出到单个markdown文件
      */
     Boolean singleEndpointPerMarkdown = false;
 
     /**
-     * 文档输出到markdown时，是否启用cURL命令的输出
+     * 文档输出到markdown或ShowDoc时，是否启用cURL命令的输出
      */
     Boolean enableCurl = false;
 
     /**
-     * 文档输出到markdown时，是否启用Response Body示例的输出
+     * 文档输出到markdown或ShowDoc时，是否启用Response Body示例的输出
      */
     Boolean enableResponseBodySample = false;
 
@@ -95,6 +115,23 @@ public class DocAnalyzerConfig extends Allison1875Config {
                         new InvalidDTO().setPath("markdownDirectoryPath").setValue(ValidUtils.formatValue(markdownDir))
                                 .setReason("must not be null"));
             }
+        }
+        if (FlushToEnum.SHOWDOC.equals(flushTo)) {
+            if (showdocUrl == null) {
+                invalids.add(new InvalidDTO().setPath("showdocUrl").setValue(ValidUtils.formatValue(showdocUrl))
+                        .setReason("must not be null"));
+            }
+            if (showdocApiKey == null) {
+                invalids.add(new InvalidDTO().setPath("showdocApiKey").setValue(ValidUtils.formatValue(showdocApiKey))
+                        .setReason("must not be null"));
+            }
+            if (showdocApiToken == null) {
+                invalids.add(
+                        new InvalidDTO().setPath("showdocApiToken").setValue(ValidUtils.formatValue(showdocApiToken))
+                                .setReason("must not be null"));
+            }
+        }
+        if (Lists.newArrayList(FlushToEnum.MARKDOWN, FlushToEnum.SHOWDOC).contains(flushTo)) {
             if (enableCurl == null) {
                 invalids.add(new InvalidDTO().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))
                         .setReason("must not be null"));

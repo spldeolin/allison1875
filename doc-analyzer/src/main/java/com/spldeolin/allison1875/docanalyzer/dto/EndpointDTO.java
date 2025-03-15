@@ -57,6 +57,7 @@ public class EndpointDTO {
         result.setReqBodyParamDescriptionLines(reqBodyParamDescriptionLines);
         result.setReturnDescriptionLines(returnDescriptionLines);
         result.setDeprecatedDescription(deprecatedDescription);
+        result.setSinceVersion(sinceVersion);
         result.setAuthor(author);
         result.setSourceCode(sourceCode);
         result.setUrls(urls);

@@ -26,9 +26,10 @@ import okhttp3.Response;
 @Singleton
 public class YApiOpenApiServiceImpl implements YApiOpenApiService {
 
-    private static final OkHttpClient okHttpClient = new OkHttpClient();
-
     private static final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
+    @Inject
+    private OkHttpClient okHttpClient;
 
     @Inject
     private DocAnalyzerConfig config;
