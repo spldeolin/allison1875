@@ -49,6 +49,8 @@ public class EndpointDTO {
 
     JsonSchema responseBodyJsonSchema;
 
+    Object moreInfo;
+
     public EndpointDTO copy() {
         EndpointDTO result = new EndpointDTO();
         result.setDirectCategory(directCategory);
@@ -68,6 +70,7 @@ public class EndpointDTO {
         result.setRequestBodyJsonSchema(requestBodyJsonSchema);
         result.setResponseBodyDescribe(responseBodyDescribe);
         result.setResponseBodyJsonSchema(responseBodyJsonSchema);
+        result.setMoreInfo(moreInfo);
         return result;
     }
 

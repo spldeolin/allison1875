@@ -48,6 +48,7 @@ public class MvcHandlerAnalyzerServiceImpl implements MvcHandlerAnalyzerService 
         result.setSinceVersion(analyzeSinceVersion(mvcControllerCoid, mvcHandler.getMd()));
         result.setAuthor(JavadocUtils.getAuthor(mvcHandler.getMd()));
         result.setSourceCode(MethodQualifierUtils.getTypeQualifierWithMethodName(mvcHandler.getMd()));
+        result.setMoreInfo(this.moreAnalyze(mvcControllerCoid, mvcHandler));
         return result;
     }
 
@@ -100,6 +101,10 @@ public class MvcHandlerAnalyzerServiceImpl implements MvcHandlerAnalyzerService 
     protected List<String> analyzeMethodDesc(MvcHandlerDTO mvcHandler) {
         // 可拓展为分析Swagger注解等
         return JavadocUtils.getDescriptionAsLines(mvcHandler.getMd());
+    }
+
+    protected Object moreAnalyze(ClassOrInterfaceDeclaration mvcControllerCoid, MvcHandlerDTO mvcHandler) {
+        return null;
     }
 
 }

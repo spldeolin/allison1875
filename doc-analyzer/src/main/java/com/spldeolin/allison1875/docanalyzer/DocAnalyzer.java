@@ -164,6 +164,7 @@ public class DocAnalyzer implements Allison1875MainService {
         endpoint.setSinceVersion(analyzeMvcHandlerRetval.getSinceVersion());
         endpoint.setAuthor(analyzeMvcHandlerRetval.getAuthor());
         endpoint.setSourceCode(analyzeMvcHandlerRetval.getSourceCode());
+        endpoint.setMoreInfo(analyzeMvcHandlerRetval.getMoreInfo());
     }
 
     private String getMoreAcceptableOnes(List<RequestMethod> combinedVerbs) {
