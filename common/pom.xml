@@ -121,6 +121,7 @@
                         <includeOnlyProperty>^git.remote.origin.url$</includeOnlyProperty>
                     </includeOnlyProperties>
                     <commitIdGenerationMode>flat</commitIdGenerationMode>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
                 </configuration>
             </plugin>
         </plugins>
