@@ -25,10 +25,10 @@ import lombok.experimental.FieldDefaults;
 public class DocAnalyzerConfig extends Allison1875Config {
 
     /**
-     * 目标项目handler方法签名所依赖的外部项目的源码路径（相对于basedir的相对路径 或 绝对路径 皆可）
+     * 目标项目handler方法签名所依赖的外部项目的目录或者具体Java文件的相对路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
      */
     @NotNull
-    List<File> dependencyProjectDirs = Lists.newArrayList();
+    List<File> dependencyDirsOrJavaFilePath = Lists.newArrayList();
 
     /**
      * 全局URL前缀
@@ -53,7 +53,7 @@ public class DocAnalyzerConfig extends Allison1875Config {
     String yapiToken;
 
     /**
-     * 文档输出到markdown时，Markdown文件的目录的路径（相对于basedir的相对路径 或 绝对路径 皆可）
+     * 文档输出到markdown时，Markdown文件的目录的路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
      */
     File markdownDir = new File("api-docs");
 
@@ -78,7 +78,7 @@ public class DocAnalyzerConfig extends Allison1875Config {
     String showdocApiToken;
 
     /**
-     * 文档输出到dsl时，dsl文件的目录的路径（相对于basedir的相对路径 或 绝对路径 皆可）
+     * 文档输出到dsl时，dsl文件的目录的路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
      */
     File dslDir = new File("api-dsls");
 

@@ -85,7 +85,7 @@ public class CommonConfig extends Allison1875Config {
     String wholeDTOPackage;
 
     /**
-     * mapper.xml所在目录（相对于basedir的相对路径 或 绝对路径 皆可）
+     * mapper.xml所在目录（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
      */
     @NotEmpty
     List<File> mapperXmlDirs = Lists.newArrayList(new File("src/main/resources/mapper"));

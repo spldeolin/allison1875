@@ -26,9 +26,8 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         // 对config对象中的文件路径进行相对basedir的处理
-        docAnalyzerConfig.setDependencyProjectDirs(
-                docAnalyzerConfig.getDependencyProjectDirs().stream().map(super::getCanonicalFileRelativeToBasedir)
-                        .collect(Collectors.toList()));
+        docAnalyzerConfig.setDependencyDirsOrJavaFilePath(docAnalyzerConfig.getDependencyDirsOrJavaFilePath().stream()
+                .map(super::getCanonicalFileRelativeToBasedir).collect(Collectors.toList()));
         docAnalyzerConfig.setMarkdownDir(getCanonicalFileRelativeToBasedir(docAnalyzerConfig.getMarkdownDir()));
         docAnalyzerConfig.setDslDir(getCanonicalFileRelativeToBasedir(docAnalyzerConfig.getDslDir()));
         log.info("docAnalyzerConfig={}", JsonUtils.toJsonPrettily(docAnalyzerConfig));

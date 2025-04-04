@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -87,17 +88,25 @@ public class FieldServiceImpl implements FieldService {
     }
 
     protected Set<File> buildAnalysisScope() {
-        Set<File> result = Sets.newLinkedHashSet();
+        Set<File> retval = Sets.newLinkedHashSet();
         FileUtils.iterateFiles(AstForestContext.get().cloneWithResetting().getSourceRoot().toFile(),
-                BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(result::add);
-        // dependent projects
-        for (File dependencyProjectDir : config.getDependencyProjectDirs()) {
-            if (dependencyProjectDir.exists()) {
-                FileUtils.iterateFiles(dependencyProjectDir, BaseConstant.JAVA_EXTENSIONS, true)
-                        .forEachRemaining(result::add);
+                BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(retval::add);
+        // dependent dirs or javas
+        for (File dirOrJavaFile : config.getDependencyDirsOrJavaFilePath()) {
+            if (dirOrJavaFile.exists()) {
+                if (dirOrJavaFile.isDirectory()) {
+                    FileUtils.iterateFiles(dirOrJavaFile, BaseConstant.JAVA_EXTENSIONS, true)
+                            .forEachRemaining(retval::add);
+                }
+                if (FilenameUtils.getExtension(dirOrJavaFile.getPath()).equals(BaseConstant.JAVA_EXTENSIONS[0])) {
+                    retval.add(dirOrJavaFile);
+                }
             }
         }
-        return result;
+        if (!retval.isEmpty()) {
+            log.info("{} external java files found in {}", retval.size(), config.getDependencyDirsOrJavaFilePath());
+        }
+        return retval;
     }
 
     protected List<String> ananlyzeFieldCommentLines(FieldDeclaration field) {
