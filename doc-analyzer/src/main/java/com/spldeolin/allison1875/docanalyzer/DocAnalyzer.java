@@ -19,6 +19,7 @@ import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcControllerDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcHandlerDTO;
 import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
+import com.spldeolin.allison1875.docanalyzer.service.EndpointDslService;
 import com.spldeolin.allison1875.docanalyzer.service.FieldService;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownService;
@@ -58,6 +59,9 @@ public class DocAnalyzer implements Allison1875MainService {
 
     @Inject
     private ShowdocService showdocService;
+
+    @Inject
+    private EndpointDslService endpointDslService;
 
     @Inject
     private FieldService fieldService;
@@ -143,14 +147,17 @@ public class DocAnalyzer implements Allison1875MainService {
         }
 
         // 输出
-        if (config.getFlushTo() == FlushToEnum.YAPI) {
+        if (config.getFlushTo().contains(FlushToEnum.YAPI)) {
             yapiService.flushToYApi(endpoints);
         }
-        if (config.getFlushTo() == FlushToEnum.MARKDOWN) {
+        if (config.getFlushTo().contains(FlushToEnum.MARKDOWN)) {
             markdownService.flushToMarkdown(endpoints);
         }
-        if (config.getFlushTo() == FlushToEnum.SHOWDOC) {
+        if (config.getFlushTo().contains(FlushToEnum.SHOWDOC)) {
             showdocService.flushToShowdoc(endpoints);
+        }
+        if (config.getFlushTo().contains(FlushToEnum.DSL)) {
+            endpointDslService.flushToEndpointDsl(endpoints);
         }
 
         log.info("endpoints.size={}", endpoints.size());

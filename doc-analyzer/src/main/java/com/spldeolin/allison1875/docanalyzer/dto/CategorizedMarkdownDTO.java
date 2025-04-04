@@ -20,4 +20,6 @@ public class CategorizedMarkdownDTO {
 
     String content;
 
+    List<EndpointDTO> endpointGroup;
+
 }

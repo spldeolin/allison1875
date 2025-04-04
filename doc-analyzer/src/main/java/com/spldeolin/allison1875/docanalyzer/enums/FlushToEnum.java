@@ -20,4 +20,9 @@ public enum FlushToEnum {
      */
     SHOWDOC,
 
+    /**
+     * 将endpoint直接序列化成DSL保存到本地json文件
+     */
+    DSL,
+
 }

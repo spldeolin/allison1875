@@ -66,10 +66,6 @@ public class MvcHandlerAnalyzerServiceImpl implements MvcHandlerAnalyzerService 
             JavadocUtils.getDescriptionFirstLineInPackageInfos(pd, AstForestContext.get()).forEach((pkg, desc) -> {
                 if (StringUtils.isNotBlank(desc)) {
                     retval.add(desc);
-                } else {
-                    pkg = StringUtils.removeStart(pkg, commonConfig.getBasePackage());
-                    pkg = StringUtils.removeStart(pkg, ".");
-                    retval.add(pkg);
                 }
             });
         });

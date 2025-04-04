@@ -30,6 +30,7 @@ public class DocAnalyzerMojo extends Allison1875Mojo {
                 docAnalyzerConfig.getDependencyProjectDirs().stream().map(super::getCanonicalFileRelativeToBasedir)
                         .collect(Collectors.toList()));
         docAnalyzerConfig.setMarkdownDir(getCanonicalFileRelativeToBasedir(docAnalyzerConfig.getMarkdownDir()));
+        docAnalyzerConfig.setDslDir(getCanonicalFileRelativeToBasedir(docAnalyzerConfig.getDslDir()));
         log.info("docAnalyzerConfig={}", JsonUtils.toJsonPrettily(docAnalyzerConfig));
         log.info("new module instance for {}", docAnalyzerConfig.getModule());
         return (Allison1875Module) classLoader.loadClass(docAnalyzerConfig.getModule())

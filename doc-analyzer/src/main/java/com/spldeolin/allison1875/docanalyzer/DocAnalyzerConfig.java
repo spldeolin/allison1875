@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.docanalyzer;
 
 import java.io.File;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.config.Allison1875Config;
@@ -38,8 +39,8 @@ public class DocAnalyzerConfig extends Allison1875Config {
     /**
      * 文档保存到...
      */
-    @NotNull(message = "must be 'MARKDOWN', 'YAPI' or 'SHOWDOC'")
-    FlushToEnum flushTo = FlushToEnum.MARKDOWN;
+    @NotEmpty(message = "must be 'MARKDOWN', 'YAPI', 'SHOWDOC' or 'DSL'")
+    List<FlushToEnum> flushTo = Lists.newArrayList(FlushToEnum.MARKDOWN);
 
     /**
      * 文档输出到YApi时，YApi请求URL
@@ -77,6 +78,11 @@ public class DocAnalyzerConfig extends Allison1875Config {
     String showdocApiToken;
 
     /**
+     * 文档输出到dsl时，dsl文件的目录的路径（相对于basedir的相对路径 或 绝对路径 皆可）
+     */
+    File dslDir = new File("api-dsls");
+
+    /**
      * 文档输出到markdown或ShowDoc时，每个Endpoint是否输出到单个markdown文件
      */
     Boolean singleEndpointPerMarkdown = false;
@@ -99,7 +105,7 @@ public class DocAnalyzerConfig extends Allison1875Config {
     @Override
     public List<InvalidDTO> invalidSelf() {
         List<InvalidDTO> invalids = super.invalidSelf();
-        if (FlushToEnum.YAPI.equals(flushTo)) {
+        if (flushTo.contains(FlushToEnum.YAPI)) {
             if (yapiUrl == null) {
                 invalids.add(new InvalidDTO().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
                         .setReason("must not be null"));
@@ -109,14 +115,14 @@ public class DocAnalyzerConfig extends Allison1875Config {
                         .setReason("must not be null"));
             }
         }
-        if (FlushToEnum.MARKDOWN.equals(flushTo)) {
+        if (flushTo.contains(FlushToEnum.MARKDOWN)) {
             if (markdownDir == null) {
                 invalids.add(
                         new InvalidDTO().setPath("markdownDirectoryPath").setValue(ValidUtils.formatValue(markdownDir))
                                 .setReason("must not be null"));
             }
         }
-        if (FlushToEnum.SHOWDOC.equals(flushTo)) {
+        if (flushTo.contains(FlushToEnum.SHOWDOC)) {
             if (showdocUrl == null) {
                 invalids.add(new InvalidDTO().setPath("showdocUrl").setValue(ValidUtils.formatValue(showdocUrl))
                         .setReason("must not be null"));
@@ -131,7 +137,7 @@ public class DocAnalyzerConfig extends Allison1875Config {
                                 .setReason("must not be null"));
             }
         }
-        if (Lists.newArrayList(FlushToEnum.MARKDOWN, FlushToEnum.SHOWDOC).contains(flushTo)) {
+        if (flushTo.contains(FlushToEnum.MARKDOWN) || flushTo.contains(FlushToEnum.SHOWDOC)) {
             if (enableCurl == null) {
                 invalids.add(new InvalidDTO().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))
                         .setReason("must not be null"));
