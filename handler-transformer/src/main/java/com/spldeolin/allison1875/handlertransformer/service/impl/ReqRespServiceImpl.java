@@ -150,6 +150,9 @@ public class ReqRespServiceImpl implements ReqRespService {
             }
         }
 
+        if (dtos.isEmpty()) {
+            result.setIsHttpGet(false);
+        }
         return result;
     }
 
