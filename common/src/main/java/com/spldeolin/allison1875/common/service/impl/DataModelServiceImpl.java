@@ -55,9 +55,11 @@ public class DataModelServiceImpl implements DataModelService {
 
     @Override
     public DataModelGeneration generateDataModel(DataModelArg arg) {
-        String className = arg.getClassName();
+        String packageName = arg.getPackageName().trim();
+        String className = arg.getClassName().trim();
+        String description = MoreObjects.firstNonNull(arg.getDescription(), "").trim();
         Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getSourceRoot(),
-                arg.getPackageName(), className + ".java");
+                packageName, className + ".java");
 
         if (absulutePath.toFile().exists()) {
             if (arg.getDataModelExistenceResolution() == FileExistenceResolutionEnum.OVERWRITE) {
@@ -75,7 +77,7 @@ public class DataModelServiceImpl implements DataModelService {
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(absulutePath);
-        cu.setPackageDeclaration(arg.getPackageName());
+        cu.setPackageDeclaration(packageName);
 
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.addAnnotation(annotationExprService.lombokData());
@@ -88,15 +90,12 @@ public class DataModelServiceImpl implements DataModelService {
         if (arg.getIsDataModelCloneable()) {
             coid.addImplementedType("Cloneable");
         }
-        String comment = MoreObjects.firstNonNull(arg.getDescription(), "");
-        JavadocUtils.setJavadoc(coid, comment, arg.getAuthor() + " " + LocalDate.now());
+        JavadocUtils.setJavadoc(coid, description, arg.getAuthor().trim() + " " + LocalDate.now());
         cu.addType(coid);
 
         for (FieldArg fieldArg : arg.getFieldArgs()) {
-            FieldDeclaration field = coid.addField(fieldArg.getTypeQualifier(), fieldArg.getFieldName());
-            if (fieldArg.getDescription() != null) {
-                field.setJavadocComment(fieldArg.getDescription());
-            }
+            FieldDeclaration field = coid.addField(fieldArg.getTypeQualifier().trim(), fieldArg.getFieldName().trim());
+            field.setJavadocComment(MoreObjects.firstNonNull(fieldArg.getDescription(), "").trim());
             // more for Field
             if (fieldArg.getMoreOperation() != null) {
                 fieldArg.getMoreOperation().accept(coid, field);
@@ -123,7 +122,7 @@ public class DataModelServiceImpl implements DataModelService {
         result.setCu(cu);
         result.setFileFlush(FileFlush.build(cu));
         result.setDtoName(className);
-        result.setDtoQualifier(arg.getPackageName() + "." + className);
+        result.setDtoQualifier(packageName + "." + className);
         result.setCoid(coid);
         result.setPath(absulutePath);
         return result;

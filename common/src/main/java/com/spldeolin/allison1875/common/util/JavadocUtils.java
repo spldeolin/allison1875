@@ -44,19 +44,21 @@ public class JavadocUtils {
     /**
      * 获取Javadoc的description部分
      *
-     * @return 不trim且至少是Empty String
+     * @return 返回值至少是Empty String且进行trim
      */
     public static String getDescription(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(javadoc -> javadoc.getDescription().toText()).orElse("");
+        return node.getJavadoc().map(javadoc -> javadoc.getDescription().toText()).orElse("").trim();
     }
 
     /**
      * 获取Javadoc中的description部分的每一行
      *
-     * @return list至少是Empty List，其中的元素不trim且至少是Empty String
+     * @return 返回值至少是Empty List，其中的元素至少是Empty String且进行trim
      */
     public static List<String> getDescriptionAsLines(NodeWithJavadoc<?> node) {
-        return MoreStringUtils.splitLineByLine(getDescription(node));
+        List<String> retval = MoreStringUtils.splitLineByLine(getDescription(node));
+        retval.replaceAll(String::trim);
+        return retval;
     }
 
     /**
@@ -66,11 +68,14 @@ public class JavadocUtils {
      */
     public static String getAuthor(Node node) {
         List<String> authors = getEveryAuthor(node);
-        return authors.stream().map(String::trim).distinct().collect(Collectors.joining(", "));
+        return authors.stream().map(String::trim).filter(StringUtils::isNotEmpty).distinct()
+                .collect(Collectors.joining(", "));
     }
 
     /**
      * 获取Javadoc中指定tag的description部分的每一行
+     *
+     * @return 返回值至少是Empty List，其中的元素至少是Empty String且进行trim
      */
     public static List<String> getTagDescriptionAsLines(NodeWithJavadoc<?> node, JavadocBlockTag.Type tagType,
             String tagName) {
@@ -88,7 +93,9 @@ public class JavadocUtils {
                 }
             } // 不指定tagName视为“匹配了tagName”
             List<String> lines = MoreStringUtils.splitLineByLine(blockTag.getContent().toText());
-            result.addAll(lines);
+            for (String line : lines) {
+                result.add(line.trim());
+            }
         }
         return result;
     }
@@ -96,7 +103,7 @@ public class JavadocUtils {
     /**
      * 获取每一级包的package-info.java中Javadoc中description部分的第一行
      *
-     * @return map至少是Empty Map，其中的value不trim且至少是Empty String
+     * @return map至少是Empty Map，其中的value是Empty String且进行trim
      */
     public static Map<String, String> getDescriptionFirstLineInPackageInfos(PackageDeclaration pd,
             AstForest astForest) {
@@ -105,7 +112,7 @@ public class JavadocUtils {
         while (packageName.contains(".")) {
             String finalPackageName = packageName;
 
-            // 只要package-info.java存在，至少视为空白字符串
+            // 只要package-info.java存在，至少视为空白字符串，防止NPE
             astForest.tryFindCu(packageName + ".package-info").ifPresent(d -> {
                 retval.put(finalPackageName, "");
             });
