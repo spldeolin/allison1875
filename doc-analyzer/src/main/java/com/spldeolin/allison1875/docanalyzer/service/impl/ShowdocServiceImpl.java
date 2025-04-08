@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -40,7 +41,7 @@ public class ShowdocServiceImpl implements ShowdocService {
     public void flushToShowdoc(List<EndpointDTO> endpoints) {
         List<CategorizedMarkdownDTO> categorizedMds = markdownService.categorizeMarkdowns(endpoints);
         for (CategorizedMarkdownDTO categorizedMd : categorizedMds) {
-            List<String> catNames = categorizedMd.getHierarchicalCategories();
+            List<String> catNames = Lists.newArrayList(categorizedMd.getHierarchicalCategories());
             catNames.add(0, config.getShowdocBaseCatName());
             catNames.removeIf(StringUtils::isBlank);
             String catName = Joiner.on("/").join(catNames);
