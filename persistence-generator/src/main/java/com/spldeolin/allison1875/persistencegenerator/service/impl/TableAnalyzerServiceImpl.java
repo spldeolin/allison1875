@@ -112,6 +112,8 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             property.setLength(infoSchema.getCharacterMaximumLength());
             property.setNotnull("NO".equals(infoSchema.getIsNullable()));
             property.setDefaultValue(infoSchema.getColumnDefault());
+            property.setIsAutoIncrement(
+                    infoSchema.getExtra() != null && infoSchema.getExtra().contains("auto_increment"));
             if ("PRI".equalsIgnoreCase(infoSchema.getColumnKey())) {
                 tableAnalysis.getIdProperties().add(property);
             } else {
@@ -156,8 +158,9 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             if (columnDef.getDefaultExpr() != null) {
                 property.setDefaultValue(columnDef.getDefaultExpr().toString());
             }
-            if (createTableStmt.getPrimaryKeyNames() != null && createTableStmt.getPrimaryKeyNames()
-                    .contains(columnName)) {
+            property.setIsAutoIncrement(columnDef.isAutoIncrement());
+            if ((createTableStmt.getPrimaryKeyNames() != null && createTableStmt.getPrimaryKeyNames()
+                    .contains(columnName)) || columnDef.isPrimaryKey()) {
                 tableAnalysis.getIdProperties().add(property);
             } else {
                 tableAnalysis.getNonIdProperties().add(property);

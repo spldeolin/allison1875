@@ -252,7 +252,15 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
+        String generatedKeyPart = "";
+        if (persistence.getIdProperties().size() == 1) {
+            PropertyDTO onlyId = persistence.getIdProperties().get(0);
+            if (onlyId.getIsAutoIncrement()) {
+                generatedKeyPart = " useGeneratedKeys=\"true\" keyProperty=\"" + onlyId.getPropertyName() + "\"";
+            }
+        }
+        xmlLines.add(
+                String.format("<insert id=\"%s\" parameterType=\"%s\"%s>", methodName, entityName, generatedKeyPart));
         if (config.getEnableGenerateFormatterMarker()) {
             xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
         }

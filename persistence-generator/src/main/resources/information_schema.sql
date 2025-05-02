@@ -7,7 +7,8 @@ SELECT t1.TABLE_NAME,
        t1.COLUMN_KEY,
        t1.CHARACTER_MAXIMUM_LENGTH,
        t1.IS_NULLABLE,
-       t1.COLUMN_DEFAULT
+       t1.COLUMN_DEFAULT,
+       t1.EXTRA
 FROM information_schema.COLUMNS t1,
      information_schema.TABLES t2
 WHERE t1.TABLE_SCHEMA = ${tableSchema}

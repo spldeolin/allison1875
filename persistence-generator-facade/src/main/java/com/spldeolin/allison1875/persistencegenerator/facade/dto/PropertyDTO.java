@@ -27,4 +27,7 @@ public class PropertyDTO {
 
     String defaultValue;
 
+    Boolean isAutoIncrement;
+
+
 }

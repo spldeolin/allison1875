@@ -31,4 +31,6 @@ public class InformationSchemaDTO {
 
     String columnDefault;
 
+    String extra;
+
 }
