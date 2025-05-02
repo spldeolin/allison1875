@@ -179,7 +179,14 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                 }
                 if (annotated instanceof Method) {
                     Method method = (Method) annotated;
-                    String fieldName = MoreStringUtils.toLowerCamel(method.getName().substring(3));
+                    String fieldName;
+                    if (method.getName().startsWith("get") || method.getName().startsWith("set")) {
+                        fieldName = MoreStringUtils.toLowerCamel(method.getName().substring(3));
+                    } else if (method.getName().startsWith("is")) {
+                        fieldName = MoreStringUtils.toLowerCamel(method.getName().substring(2));
+                    } else {
+                        fieldName = method.getName();
+                    }
                     try {
                         return method.getDeclaringClass().getDeclaredField(fieldName);
                     } catch (NoSuchFieldException e) {
