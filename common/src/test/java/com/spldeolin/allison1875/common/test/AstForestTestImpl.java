@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
+import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
@@ -34,7 +35,7 @@ public class AstForestTestImpl implements AstForest {
             throw new UncheckedIOException(e);
         }
         this.sourceRoot = sourceRoot;
-        StaticJavaParser.getParserConfiguration()
+        StaticJavaParser.getParserConfiguration().setLanguageLevel(LanguageLevel.JAVA_17)
                 .setSymbolResolver(new JavaSymbolSolver(new ClassLoaderTypeSolver(classLoader)));
         Thread.currentThread().setContextClassLoader(classLoader);
         log.info("AstForest created, sourceRoot={}", sourceRoot);

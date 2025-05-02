@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.common.test.memberadder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
@@ -19,7 +20,7 @@ public class MemberAdderServiceImplTest {
     private static final MemberAdderService memberAdderService = new MemberAdderServiceImpl();
 
     public static void main(String[] args) throws FileNotFoundException {
-        StaticJavaParser.getParserConfiguration()
+        StaticJavaParser.getParserConfiguration().setLanguageLevel(LanguageLevel.JAVA_17)
                 .setSymbolResolver(new JavaSymbolSolver(new ClassLoaderTypeSolver(Allison1875.class.getClassLoader())));
 
         ClassOrInterfaceDeclaration coid = StaticJavaParser.parse(new File(
