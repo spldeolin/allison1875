@@ -113,7 +113,7 @@ public class HandlerTransformer implements Allison1875MainService {
                             serviceLayerService.generateServiceAndImpl(
                             gsaiArgs);
 
-                    // service方法加入到Service层
+                    // service方法加入到Service层，然后flush
                     AddMethodToServiceArgs args = new AddMethodToServiceArgs();
                     args.setControllerCu(cu);
                     args.setInitDecAnalysisDTO(initDecAnalysis);
@@ -125,7 +125,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     }
                     flushes.addAll(addMethodToServiceRetval.getFlushes());
 
-                    // 确保mvcController有autowired 新生成的service（由于Service/Impl是新生成的，生成时已AntiDupl了，所以这个方法不会发挥作用）
+                    // 确保mvcController有autowired 新生成的service
                     AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(
                             generateServiceAndImplRetval.getServiceQualifier(),
                             generateServiceAndImplRetval.getServiceVarName(), mvcController);

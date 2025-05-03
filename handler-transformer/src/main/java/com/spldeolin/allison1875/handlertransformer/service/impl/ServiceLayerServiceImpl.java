@@ -9,6 +9,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
@@ -119,10 +120,110 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
     @Override
     public GenerateServiceAndImplRetval generateServiceAndImpl(GenerateServiceAndImplArgs args) {
-        String serviceName =
-                MoreStringUtils.toUpperCamel(args.getInitDecAnalysisDTO().getMvcHandlerMethodName()) + "Service";
-
+        String serviceName;
+        if (config.getEnableOneService()) {
+            serviceName = args.getControllerCu().getPrimaryTypeName()
+                    .orElseThrow(() -> new Allison1875Exception("cannot find primary type name"))
+                    .replace("Controller", "Service");
+        } else {
+            serviceName =
+                    MoreStringUtils.toUpperCamel(args.getInitDecAnalysisDTO().getMvcHandlerMethodName()) + "Service";
+        }
         Path sourceRoot = AstForestContext.get().getSourceRoot();
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServicePackage(),
+                serviceName + ".java");
+
+        // 查找或生成service和cu
+        CompilationUnit serviceCu;
+        ClassOrInterfaceDeclaration service;
+        if (absolutePath.toFile().exists()) {
+            // 文件存在
+            if (config.getEnableOneService()) {
+                // 单service模式下直接查找
+                serviceCu = AstForestContext.get().tryFindCu(commonConfig.getServicePackage() + "." + serviceName)
+                        .orElseThrow(() -> new Allison1875Exception("fail to parse cu"));
+                service = serviceCu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
+                        .orElseThrow(() -> new Allison1875Exception("")).asClassOrInterfaceDeclaration();
+            } else {
+                // 非单service模式下直接生成empty service
+                CuAndCoid result = this.generateEmptyService(args, absolutePath);
+                serviceCu = result.cu;
+                service = result.coid;
+            }
+        } else {
+            // 文件不存在，是否单service模式都需要直接生成empty service
+            CuAndCoid temp = this.generateEmptyService(args, absolutePath);
+            serviceCu = temp.cu;
+            service = temp.coid;
+        }
+
+        String serviceImplName = serviceName + "Impl";
+        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServiceImplPackage(),
+                serviceImplName + ".java");
+
+        // 查找或生成serviceImpl和cu
+        CompilationUnit serviceImplCu;
+        ClassOrInterfaceDeclaration serviceImpl;
+        if (absolutePath.toFile().exists()) {
+            // 文件存在
+            if (config.getEnableOneService()) {
+                // 单service模式下直接查找
+                serviceImplCu = AstForestContext.get()
+                        .tryFindCu(commonConfig.getServiceImplPackage() + "." + serviceImplName)
+                        .orElseThrow(() -> new Allison1875Exception("fail to parse cu"));
+                serviceImpl = serviceImplCu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
+                        .orElseThrow(() -> new Allison1875Exception("")).asClassOrInterfaceDeclaration();
+            } else {
+                // 非单service模式下直接生成empty serviceImpl
+                CuAndCoid result = generateEmptyServiceImpl(args, absolutePath, service);
+                serviceImplCu = result.cu;
+                serviceImpl = result.coid;
+            }
+        } else {
+            // 文件不存在，是否单service模式都需要直接生成empty service
+            CuAndCoid temp = generateEmptyServiceImpl(args, absolutePath, service);
+            serviceImplCu = temp.cu;
+            serviceImpl = temp.coid;
+        }
+
+        GenerateServiceAndImplRetval retval = new GenerateServiceAndImplRetval();
+        retval.setService(service);
+        retval.setServiceCu(serviceCu);
+        retval.setServiceImpl(serviceImpl);
+        retval.setServiceImplCu(serviceImplCu);
+        retval.setServiceVarName(MoreStringUtils.toLowerCamel(service.getNameAsString()));
+        retval.setServiceQualifier(commonConfig.getServicePackage() + "." + serviceName);
+        return retval;
+    }
+
+    private CuAndCoid generateEmptyServiceImpl(GenerateServiceAndImplArgs args, Path absolutePath,
+            ClassOrInterfaceDeclaration service) {
+        // anti-duplication
+        absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
+        String serviceImplName = FilenameUtils.getBaseName(absolutePath.toString());
+
+        CompilationUnit serviceImplCu = new CompilationUnit();
+        serviceImplCu.setPackageDeclaration(commonConfig.getServiceImplPackage());
+        importExprService.copyImports(args.getControllerCu(), serviceImplCu);
+        ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
+        JavadocUtils.setJavadoc(serviceImpl, concatServiceDescription(args.getInitDecAnalysisDTO()),
+                commonConfig.getAuthor());
+        serviceImpl.addAnnotation(annotationExprService.lombokSlf4J());
+        serviceImpl.addAnnotation(annotationExprService.springService());
+        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName).addImplementedType(
+                service.getFullyQualifiedName().orElseThrow(
+                        () -> new Allison1875Exception("Node '" + service.getName() + "' has no Qualifier")));
+        serviceImplCu.setTypes(new NodeList<>(serviceImpl));
+        serviceImplCu.setStorage(absolutePath);
+        log.info("generate empty ServiceImpl [{}]", serviceImpl.getName());
+        return new CuAndCoid(serviceImplCu, serviceImpl);
+    }
+
+    private CuAndCoid generateEmptyService(GenerateServiceAndImplArgs args, Path absolutePath) {
+        // anti-duplication
+        absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
+        String serviceName = FilenameUtils.getBaseName(absolutePath.toString());
+
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(commonConfig.getServicePackage());
         importExprService.copyImports(args.getControllerCu(), serviceCu);
@@ -130,48 +231,23 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         String comment = concatServiceDescription(args.getInitDecAnalysisDTO());
         JavadocUtils.setJavadoc(service, comment, commonConfig.getAuthor());
         service.setPublic(true).setStatic(false).setInterface(true).setName(serviceName);
-        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServicePackage(),
-                service.getName() + ".java");
-
-        // anti-duplication
-        absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
-        serviceName = FilenameUtils.getBaseName(absolutePath.toString());
-        service.setName(serviceName);
-
         serviceCu.setTypes(new NodeList<>(service));
         serviceCu.setStorage(absolutePath);
-        log.info("generate Service [{}]", service.getName());
+        log.info("generate empty Service [{}]", service.getName());
+        return new CuAndCoid(serviceCu, service);
+    }
 
-        CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(commonConfig.getServiceImplPackage());
-        importExprService.copyImports(args.getControllerCu(), serviceImplCu);
-        ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
-        JavadocUtils.setJavadoc(serviceImpl, comment, commonConfig.getAuthor());
-        serviceImpl.addAnnotation(annotationExprService.lombokSlf4J());
-        serviceImpl.addAnnotation(annotationExprService.springService());
-        String serviceImplName = service.getNameAsString() + "Impl";
-        serviceImpl.setPublic(true).setStatic(false).setInterface(false).setName(serviceImplName).addImplementedType(
-                service.getFullyQualifiedName().orElseThrow(
-                        () -> new Allison1875Exception("Node '" + service.getName() + "' has no Qualifier")));
-        serviceImplCu.setTypes(new NodeList<>(serviceImpl));
-        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServiceImplPackage(),
-                serviceImpl.getName() + ".java");
+    private static class CuAndCoid {
 
-        // anti-duplication
-        absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
-        serviceImpl.setName(FilenameUtils.getBaseName(absolutePath.toString()));
+        private final CompilationUnit cu;
 
-        serviceImplCu.setStorage(absolutePath);
-        log.info("generate ServiceImpl [{}]", serviceImpl.getName());
+        private final ClassOrInterfaceDeclaration coid;
 
-        GenerateServiceAndImplRetval result = new GenerateServiceAndImplRetval();
-        result.setService(service);
-        result.setServiceCu(serviceCu);
-        result.setServiceImpl(serviceImpl);
-        result.setServiceImplCu(serviceImplCu);
-        result.setServiceVarName(MoreStringUtils.toLowerCamel(service.getNameAsString()));
-        result.setServiceQualifier(commonConfig.getServicePackage() + "." + serviceName);
-        return result;
+        private CuAndCoid(CompilationUnit serviceCu, ClassOrInterfaceDeclaration service) {
+            this.cu = serviceCu;
+            this.coid = service;
+        }
+
     }
 
     private String concatServiceDescription(InitDecAnalysisDTO initDecAnalysis) {

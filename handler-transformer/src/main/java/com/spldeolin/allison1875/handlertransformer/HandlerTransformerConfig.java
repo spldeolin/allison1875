@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.config.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -22,5 +23,11 @@ public class HandlerTransformerConfig extends Allison1875Config {
      */
     @NotEmpty
     String pageTypeQualifier;
+
+    /**
+     * 启用「一个Controller均调用同一个Service」的模式
+     */
+    @NotNull
+    Boolean enableOneService = false;
 
 }
