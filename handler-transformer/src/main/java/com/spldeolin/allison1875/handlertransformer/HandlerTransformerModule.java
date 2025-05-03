@@ -5,6 +5,9 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
+import com.spldeolin.allison1875.common.service.DataModelService;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import lombok.ToString;
 
 /**
@@ -38,6 +41,11 @@ public class HandlerTransformerModule extends Allison1875Module {
     protected void configure() {
         bind(CommonConfig.class).toInstance(commonConfig);
         bind(HandlerTransformerConfig.class).toInstance(handlerTransformerConfig);
+        if (commonConfig.getIsDataModuleWithoutLombok()) {
+            bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
+        } else {
+            bind(DataModelService.class).toInstance(new DataModelServiceImpl());
+        }
     }
 
 }

@@ -21,12 +21,15 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
+import com.spldeolin.allison1875.common.dto.FieldArg;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
@@ -61,6 +64,9 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private ImportExprService importExprService;
+
+    @Inject
+    private DataModelServiceNoLombokImpl dataModelServiceNoLombok;
 
     @Override
     public void validInitBody(BlockStmt initBody, InitDecAnalysisDTO initDecAnalysis) {
@@ -114,11 +120,26 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
             arg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
             arg.setMoreOperation((tempCu, dataModel) -> {
+                // copy fields
                 for (FieldDeclaration field : dto.getFields()) {
                     fieldService.more4SpecialTypeField(field, dtoTypeEnum);
                 }
                 importExprService.copyImports(initDecAnalysis.getMvcControllerCu(), tempCu);
                 dataModel.setMembers(dto.getMembers());
+                // generate getters, setters
+                if (commonConfig.getIsDataModuleWithoutLombok()) {
+                    List<FieldArg> fieldArgs = Lists.newArrayList();
+                    for (FieldDeclaration field : dto.getFields()) {
+                        for (VariableDeclarator variable : field.getVariables()) {
+                            FieldArg fieldArg = new FieldArg();
+                            fieldArg.setDescription(JavadocUtils.getDescription(field));
+                            fieldArg.setTypeQualifier(variable.getTypeAsString());
+                            fieldArg.setFieldName(variable.getNameAsString());
+                            fieldArgs.add(fieldArg);
+                        }
+                    }
+                    dataModelServiceNoLombok.addGetterSetterToStringEqualsHashcode(fieldArgs, dataModel);
+                }
             });
             arg.setDataModelExistenceResolution(FileExistenceResolutionEnum.RENAME);
             DataModelGeneration dataModelGeneration = dataModelGeneratorService.generateDataModel(arg);

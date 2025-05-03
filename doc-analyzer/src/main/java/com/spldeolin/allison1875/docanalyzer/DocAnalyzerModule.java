@@ -5,6 +5,9 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
+import com.spldeolin.allison1875.common.service.DataModelService;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 
@@ -40,6 +43,11 @@ public class DocAnalyzerModule extends Allison1875Module {
         bind(CommonConfig.class).toInstance(commonConfig);
         bind(DocAnalyzerConfig.class).toInstance(docAnalyzerConfig);
         bind(OkHttpClient.class).toInstance(new OkHttpClient());
+        if (commonConfig.getIsDataModuleWithoutLombok()) {
+            bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
+        } else {
+            bind(DataModelService.class).toInstance(new DataModelServiceImpl());
+        }
     }
 
 }

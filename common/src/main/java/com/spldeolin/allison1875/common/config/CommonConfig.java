@@ -109,6 +109,12 @@ public class CommonConfig extends Allison1875Config {
     Boolean isDataModelCloneable = false;
 
     /**
+     * 生成的DataModel是否使用Lombok
+     */
+    @NotNull
+    Boolean isDataModuleWithoutLombok = false;
+
+    /**
      * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
      */
     @NotNull

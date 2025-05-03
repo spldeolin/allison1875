@@ -5,6 +5,9 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
+import com.spldeolin.allison1875.common.service.DataModelService;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
+import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import lombok.ToString;
 
 /**
@@ -18,6 +21,7 @@ public class QueryTransformerModule extends Allison1875Module {
     private final QueryTransformerConfig queryTransformerConfig;
 
     public QueryTransformerModule(CommonConfig commonConfig, QueryTransformerConfig queryTransformerConfig) {
+        super();
         this.commonConfig = commonConfig;
         this.queryTransformerConfig = queryTransformerConfig;
     }
@@ -38,6 +42,11 @@ public class QueryTransformerModule extends Allison1875Module {
     protected void configure() {
         bind(CommonConfig.class).toInstance(commonConfig);
         bind(QueryTransformerConfig.class).toInstance(queryTransformerConfig);
+        if (commonConfig.getIsDataModuleWithoutLombok()) {
+            bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
+        } else {
+            bind(DataModelService.class).toInstance(new DataModelServiceImpl());
+        }
     }
 
 }
