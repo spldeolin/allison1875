@@ -120,4 +120,10 @@ public class CommonConfig extends Allison1875Config {
     @NotNull
     Boolean enableLotNoAnnounce = true;
 
+    /**
+     * 将javax命名空间移动到jakarta，兼容Spring Boot 3+的项目
+     */
+    @NotNull
+    Boolean enableJavaxMoveToJakarta = false;
+
 }

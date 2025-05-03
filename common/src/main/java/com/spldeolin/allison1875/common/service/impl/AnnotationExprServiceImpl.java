@@ -6,7 +6,9 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class AnnotationExprServiceImpl implements AnnotationExprService {
+
+    @Inject
+    private CommonConfig commonConfig;
 
     @Override
     public boolean isAnnotated(String annoationQualifier, NodeWithAnnotations<?> node) {
@@ -108,7 +113,11 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public AnnotationExpr javaxValid() {
-        return StaticJavaParser.parseAnnotation("@javax.validation.Valid").clone();
+        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+            return StaticJavaParser.parseAnnotation("@jakarta.validation.Valid").clone();
+        } else {
+            return StaticJavaParser.parseAnnotation("@javax.validation.Valid").clone();
+        }
     }
 
     @Override
