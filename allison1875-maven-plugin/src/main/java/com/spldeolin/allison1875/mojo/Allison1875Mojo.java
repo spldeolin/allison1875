@@ -58,6 +58,8 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         commonConfig = MoreObjects.firstNonNull(commonConfig, new CommonConfig());
         String basePackage = commonConfig.getBasePackage();
         commonConfig.setBasePackage(MoreObjects.firstNonNull(basePackage, project.getGroupId()));
+        commonConfig.setControllerPackage(
+                MoreObjects.firstNonNull(commonConfig.getControllerPackage(), basePackage + ".controller"));
         commonConfig.setReqDTOPackage(
                 MoreObjects.firstNonNull(commonConfig.getReqDTOPackage(), basePackage + ".dto.req"));
         commonConfig.setRespDTOPackage(

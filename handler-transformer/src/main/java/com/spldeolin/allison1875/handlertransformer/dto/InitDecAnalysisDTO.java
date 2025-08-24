@@ -1,8 +1,10 @@
 package com.spldeolin.allison1875.handlertransformer.dto;
 
+import java.util.Map;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
+import com.google.common.collect.Maps;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +29,8 @@ public class InitDecAnalysisDTO {
     ClassOrInterfaceDeclaration mvcController;
 
     String lotNo;
+
+    Map<String, String> expansion = Maps.newHashMap();
 
     @Override
     public String toString() {

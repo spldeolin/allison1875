@@ -6,7 +6,7 @@
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875</artifactId>
     <packaging>pom</packaging>
-    <version>12.2</version>
+    <version>13.0-SNAPSHOT</version>
 
     <modules>
         <module>allison1875-maven-plugin</module>
@@ -18,6 +18,7 @@
         <module>persistence-generator-facade</module>
         <module>query-transformer</module>
         <module>star-transformer</module>
+        <module>form-generator</module>
     </modules>
 
     <name>Allison 1875</name>
@@ -240,6 +241,11 @@
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>star-transformer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spldeolin.allison1875</groupId>
+                <artifactId>form-generator</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

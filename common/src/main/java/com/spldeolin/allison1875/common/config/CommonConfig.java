@@ -25,6 +25,12 @@ public class CommonConfig {
     String basePackage;
 
     /**
+     * 控制器所在包的包名
+     */
+    @NotEmpty
+    String controllerPackage;
+
+    /**
      * 控制层@RequestBody类型所在包的包名
      */
     @NotEmpty

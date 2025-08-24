@@ -54,6 +54,10 @@ public class InitDecAnalyzerServiceImpl implements InitDecAnalyzerService {
                                 log.warn("'desc' [{}] is not String Literal, ignore.", i);
                             }
                         }
+
+                        if (i.isStringLiteralExpr()) {
+                            result.getExpansion().put(vd.getNameAsString(), i.asStringLiteralExpr().getValue());
+                        }
                     }
                 }
             }));

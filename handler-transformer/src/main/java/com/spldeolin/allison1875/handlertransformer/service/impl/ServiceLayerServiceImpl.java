@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.io.FilenameUtils;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -35,6 +34,7 @@ import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceRetval
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
+import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,6 +60,9 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     @Inject
     private ImportExprService importExprService;
 
+    @Inject
+    private ServiceLayerExpansionService serviceLayerExpansionService;
+
     @Override
     public MethodDeclaration generateServiceMethod(InitDecAnalysisDTO initDecAnalysisDTO, String reqBodyDTOType,
             List<VariableDeclarator> reqParams, String respBodyDTOType) {
@@ -79,10 +82,8 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             method.addParameter(new Parameter(vd.getType(), vd.getName()));
         }
 
-        BlockStmt body = new BlockStmt();
-        if (respBodyDTOType != null) {
-            body.addStatement(StaticJavaParser.parseStatement("return null;"));
-        }
+        BlockStmt body = serviceLayerExpansionService.buildServiceImplMethodBody(initDecAnalysisDTO, reqBodyDTOType,
+                reqParams, respBodyDTOType);
         method.setBody(body);
 
         return method;
@@ -192,6 +193,10 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             serviceImplCu = temp.cu;
             serviceImpl = temp.coid;
         }
+
+        // 为serviceImpl构建Field
+        serviceLayerExpansionService.buildFieldForServiceImpl(serviceImpl, args.getInitDecAnalysisDTO())
+                .ifPresent(serviceImpl::addMember);
 
         GenerateServiceAndImplRetval retval = new GenerateServiceAndImplRetval();
         retval.setService(service);

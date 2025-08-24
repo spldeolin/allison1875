@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -55,7 +56,7 @@ public class MemberAdderServiceImpl implements MemberAdderService {
         }
 
         // 找得到名称一致的field，尝试判断类型是否一致
-        boolean isTypeSame;
+        boolean isTypeSame = false;
         String describe;
         try {
             // sameVarNameVd.getType()可能经过了extractQualifiedTypeToImport，也可能没有
@@ -67,9 +68,17 @@ public class MemberAdderServiceImpl implements MemberAdderService {
             }
             isTypeSame = typeQualifier.equals(describe);
         } catch (Exception e) {
-            log.warn("fail to resolve and describe, considered not same, type={}", sameVarNameVd.getType(), e);
-            // 悲观地视为类型不一致，确保不会出错
-            isTypeSame = false;
+            // 可能因sameVarNameVd位于尚未flush的cu中导致的，尝试根据scope判断（form-generator调用handler-transformer会遇到这样的情况）
+            if (sameVarNameVd.getType().isClassOrInterfaceType()) {
+                ClassOrInterfaceType type = sameVarNameVd.getType().asClassOrInterfaceType();
+                if (type.getScope().isPresent()) {
+                    String describeMight = type.getScope().get() + "." + sameVarNameVd.getType();
+                    isTypeSame = typeQualifier.equals(describeMight);
+                }
+            } else {
+                // 悲观地视为类型不一致，确保不会出错
+                log.warn("fail to resolve and describe, considered not same, type={}", sameVarNameVd.getType(), e);
+            }
         }
 
         // 找得到名称和类型都一致的field，无需添加直接返回

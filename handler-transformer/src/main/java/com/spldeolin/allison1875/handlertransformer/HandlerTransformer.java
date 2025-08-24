@@ -78,6 +78,18 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
+        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest);
+
+        // write all to file
+        if (CollectionUtils.isNotEmpty(flushes)) {
+            flushes.forEach(FileFlush::flush);
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        } else {
+            log.warn("no valiad Initializer detected");
+        }
+    }
+
+    public List<FileFlush> process(Iterable<CompilationUnit> astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
 
         for (CompilationUnit cu : astForest) {
@@ -172,14 +184,7 @@ public class HandlerTransformer implements Allison1875MainService {
                 flushes.add(FileFlush.build(cu));
             }
         }
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        } else {
-            log.warn("no valiad Initializer detected");
-        }
+        return flushes;
     }
 
 }

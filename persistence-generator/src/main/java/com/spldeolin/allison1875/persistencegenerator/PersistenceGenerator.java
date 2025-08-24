@@ -63,13 +63,24 @@ public class PersistenceGenerator implements Allison1875MainService {
     @Inject
     private ImportExprService importExprService;
 
+
     @Override
     public void process(AstForest astForest) {
+        List<FileFlush> flushes = process();
+
+        // write all to file
+        if (CollectionUtils.isNotEmpty(flushes)) {
+            flushes.forEach(FileFlush::flush);
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        }
+    }
+
+    public List<FileFlush> process() {
         // 分析表结构
         List<TableAnalysisDTO> tableAnalyses = tableAnalyzerService.analyzeTable();
         if (CollectionUtils.isEmpty(tableAnalyses)) {
             log.warn("no tables detected");
-            return;
+            return Lists.newArrayList();
         }
 
         List<FileFlush> flushes = Lists.newArrayList();
@@ -196,12 +207,7 @@ public class PersistenceGenerator implements Allison1875MainService {
         if (joinChainCu.getValue() != null) {
             flushes.add(FileFlush.build(joinChainCu.getValue()));
         }
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        }
+        return flushes;
     }
 
     protected String getEntityNameInXml(DataModelGeneration dataModelGeneration) {

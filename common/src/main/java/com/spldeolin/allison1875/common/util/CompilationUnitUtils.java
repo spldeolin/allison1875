@@ -7,6 +7,10 @@ import java.util.Optional;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,6 +64,13 @@ public class CompilationUnitUtils {
 
     private static String toRelativePath(String qualifier) {
         return qualifier.replace('.', File.separatorChar) + ".java";
+    }
+
+    public static CompilationUnit newBaseCurrentAstForest() {
+        CompilationUnit cu = new CompilationUnit();
+        cu.setData(Node.SYMBOL_RESOLVER_KEY,
+                new JavaSymbolSolver(new ClassLoaderTypeSolver(AstForestContext.get().getClassLoader())));
+        return cu;
     }
 
 }
