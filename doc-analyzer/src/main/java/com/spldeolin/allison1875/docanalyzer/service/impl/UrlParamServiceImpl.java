@@ -177,6 +177,13 @@ public class UrlParamServiceImpl implements UrlParamService {
                     .anyMatch(ancestor -> ancestor.describe().equalsIgnoreCase("java.lang.CharSequence"))) {
                 return ValueTypeEnum.STRING;
             }
+            if (Lists.newArrayList("java.lang.Integer", "java.lang.Long")
+                    .contains(type.asReferenceType().resolve().describe())) {
+                return ValueTypeEnum.INTEGER;
+            }
+            if ("java.lang.Boolean".equalsIgnoreCase(type.asReferenceType().resolve().describe())) {
+                return ValueTypeEnum.INTEGER;
+            }
         }
         return ValueTypeEnum.UNKNOWN;
     }
