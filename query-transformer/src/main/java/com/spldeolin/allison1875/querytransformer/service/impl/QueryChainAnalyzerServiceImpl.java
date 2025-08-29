@@ -145,6 +145,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
             try {
                 describe = fae.calculateResolvedType().describe();
             } catch (Exception e) {
+                // 如果fae的scope中出现了调用内部类对象的方法，会进入这个分支，暂时需要规避这种用法
                 log.warn("fail to resolve, fae={}", fae);
                 continue;
             }
