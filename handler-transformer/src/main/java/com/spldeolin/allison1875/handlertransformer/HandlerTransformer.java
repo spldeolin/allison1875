@@ -72,6 +72,9 @@ public class HandlerTransformer implements Allison1875MainService {
     @Inject
     private CommonConfig commonConfig;
 
+    @Inject
+    private HandlerTransformerConfig handlerTransformerConfig;
+
     @Override
     public void process(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
@@ -80,6 +83,10 @@ public class HandlerTransformer implements Allison1875MainService {
             boolean anyTransformed = false;
 
             for (ClassOrInterfaceDeclaration mvcController : mvcControllerService.detectMvcControllers(cu)) {
+
+                // oneService模式下一个controller只需要一对ServiceImpl，无需为每个initDec都生成一对
+                GenerateServiceAndImplRetval generateServiceAndImplRetval = null;
+
                 for (InitializerDeclaration initDec : initDecDetectorService.detectInitDecs(mvcController)) {
                     BlockStmt initBody = initDec.getBody().clone();
                     InitDecAnalysisDTO initDecAnalysis = initDecAnalyzerService.analyzeInitDec(cu, mvcController,
@@ -105,13 +112,13 @@ public class HandlerTransformer implements Allison1875MainService {
                             generateDTOsRetval.getReqBodyDTOType(), generateDTOsRetval.getReqParams(),
                             generateDTOsRetval.getRespBodyDTOType());
 
-                    // 生成Service / ServiceImpl
-                    GenerateServiceAndImplArgs gsaiArgs = new GenerateServiceAndImplArgs();
-                    gsaiArgs.setControllerCu(cu);
-                    gsaiArgs.setInitDecAnalysisDTO(initDecAnalysis);
-                    GenerateServiceAndImplRetval generateServiceAndImplRetval =
-                            serviceLayerService.generateServiceAndImpl(
-                            gsaiArgs);
+                    // 生成Service / ServiceImpl（非oneService每次都生成、oneService只有第一次生成）
+                    if (!handlerTransformerConfig.getEnableOneService() || generateServiceAndImplRetval == null) {
+                        GenerateServiceAndImplArgs gsaiArgs = new GenerateServiceAndImplArgs();
+                        gsaiArgs.setControllerCu(cu);
+                        gsaiArgs.setInitDecAnalysisDTO(initDecAnalysis);
+                        generateServiceAndImplRetval = serviceLayerService.generateServiceAndImpl(gsaiArgs);
+                    }
 
                     // service方法加入到Service层，然后flush
                     AddMethodToServiceArgs args = new AddMethodToServiceArgs();

@@ -58,7 +58,13 @@ public class MemberAdderServiceImpl implements MemberAdderService {
         boolean isTypeSame;
         String describe;
         try {
-            describe = sameVarNameVd.getType().resolve().describe();
+            // sameVarNameVd.getType()可能经过了extractQualifiedTypeToImport，也可能没有
+            // 基于是否包含点号决定是否进行resolve().describe()
+            if (sameVarNameVd.getType().toString().contains(".")) {
+                describe = sameVarNameVd.getType().toString();
+            } else {
+                describe = sameVarNameVd.getType().resolve().describe();
+            }
             isTypeSame = typeQualifier.equals(describe);
         } catch (Exception e) {
             log.warn("fail to resolve and describe, considered not same, type={}", sameVarNameVd.getType(), e);
