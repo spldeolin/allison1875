@@ -34,7 +34,7 @@ public class TableAnalysisDTO {
     List<PropertyDTO> nonIdProperties = Lists.newArrayList();
 
     /**
-     * 逻辑外键字段（id结尾的字段算做逻辑外键）
+     * 逻辑外键字段（id或code结尾的字段算做逻辑外键）
      */
     List<PropertyDTO> keyProperties = Lists.newArrayList();
 

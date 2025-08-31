@@ -118,7 +118,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                 tableAnalysis.getIdProperties().add(property);
             } else {
                 tableAnalysis.getNonIdProperties().add(property);
-                if (infoSchema.getColumnName().endsWith("_id")) {
+                if (infoSchema.getColumnName().endsWith("_id") || infoSchema.getColumnName().endsWith("_code")) {
                     tableAnalysis.getKeyProperties().add(property);
                 }
             }
@@ -164,7 +164,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                 tableAnalysis.getIdProperties().add(property);
             } else {
                 tableAnalysis.getNonIdProperties().add(property);
-                if (columnName.endsWith("_id")) {
+                if (columnName.endsWith("_id") || columnName.endsWith("_code")) {
                     tableAnalysis.getKeyProperties().add(property);
                 }
             }
