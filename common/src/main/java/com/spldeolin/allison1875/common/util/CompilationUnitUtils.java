@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.common.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.util.Optional;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -40,6 +41,25 @@ public class CompilationUnitUtils {
     public static Path getCuAbsolutePath(CompilationUnit cu) {
         return cu.getStorage().orElseThrow(() -> new Allison1875Exception("Cu [" + cu + "has not set Storage yet"))
                 .getPath();
+    }
+
+    public static Optional<CompilationUnit> tryFindCu(Path sourceRoot, String primaryTypeQualifier) {
+        try {
+            Path absPath = sourceRoot.resolve(toRelativePath(primaryTypeQualifier));
+            if (!absPath.toFile().exists()) {
+                log.debug("cu not exists, qualifier={}", primaryTypeQualifier);
+                return Optional.empty();
+            }
+
+            return Optional.of(CompilationUnitUtils.parseJava(absPath.toFile()));
+        } catch (Exception e) {
+            log.debug("cannot find cu, qualifier={}", primaryTypeQualifier, e);
+            return Optional.empty();
+        }
+    }
+
+    private static String toRelativePath(String qualifier) {
+        return qualifier.replace('.', File.separatorChar) + ".java";
     }
 
 }

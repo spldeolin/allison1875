@@ -43,7 +43,7 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     @Override
     public DataModelGeneration generateEntity(TableAnalysisDTO persistence) {
         DataModelArg arg = new DataModelArg();
-        arg.setAstForest(AstForestContext.get());
+        arg.setSourceRoot(AstForestContext.get().getSourceRoot());
         arg.setPackageName(commonConfig.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));

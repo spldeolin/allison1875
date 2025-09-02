@@ -15,6 +15,7 @@ public interface AstForest extends Iterable<CompilationUnit> {
 
     Path getSourceRoot();
 
+    @Deprecated
     Optional<CompilationUnit> tryFindCu(String primaryTypeQualifier);
 
 }

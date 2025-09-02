@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer;
 
+import java.io.File;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.config.Allison1875Config;
 import lombok.AccessLevel;
@@ -20,5 +21,10 @@ public class QueryTransformerConfig extends Allison1875Config {
      */
     @NotNull
     Boolean enableGenerateFormatterMarker = true;
+
+    /**
+     * 持久层所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
+     */
+    File persistenceSourcePath;
 
 }

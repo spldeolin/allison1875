@@ -60,7 +60,7 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
         String packageName = arg.getPackageName().trim();
         String className = arg.getClassName().trim();
         String description = MoreObjects.firstNonNull(arg.getDescription(), "").trim();
-        Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getAstForest().getSourceRoot(),
+        Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(arg.getSourceRoot(),
                 packageName, className + ".java");
 
         if (absulutePath.toFile().exists()) {

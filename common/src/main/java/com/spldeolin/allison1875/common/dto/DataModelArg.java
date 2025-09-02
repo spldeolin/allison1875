@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.common.dto;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.BiConsumer;
 import javax.validation.Valid;
@@ -8,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -24,7 +24,7 @@ import lombok.experimental.FieldDefaults;
 public class DataModelArg {
 
     @NotNull
-    AstForest astForest;
+    Path sourceRoot;
 
     @NotBlank
     String packageName;

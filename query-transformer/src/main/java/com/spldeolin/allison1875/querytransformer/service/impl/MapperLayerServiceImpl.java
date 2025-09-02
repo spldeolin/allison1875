@@ -5,6 +5,7 @@ import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDE
 import static com.spldeolin.allison1875.common.constant.BaseConstant.TREBLE_INDENT;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
@@ -357,7 +359,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         if (methodAddedMappers.containsKey(mapperQualifier)) {
             return methodAddedMappers.get(mapperQualifier);
         }
-        Optional<CompilationUnit> cu = AstForestContext.get().tryFindCu(mapperQualifier);
+        Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+                .orElse(AstForestContext.get().getSourceRoot());
+        Optional<CompilationUnit> cu = CompilationUnitUtils.tryFindCu(sourceRoot, mapperQualifier);
         if (!cu.isPresent()) {
             return null;
         }
@@ -383,6 +387,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         }
 
         File mapperXml = new File(mapperPath);
+        if (queryTransformerConfig.getPersistenceSourcePath() != null) {
+            mapperXml = queryTransformerConfig.getPersistenceSourcePath().toPath().resolve(mapperPath).toFile();
+        }
         if (!mapperXml.exists()) {
             return null;
         }

@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
@@ -27,6 +29,7 @@ import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateReturnTypeRetval;
@@ -46,9 +49,14 @@ public class DesignServiceImpl implements DesignService {
     @Inject
     private TransformMethodCallService transformMethodCallService;
 
+    @Inject
+    private QueryTransformerConfig queryTransformerConfig;
+
     @Override
     public ClassOrInterfaceDeclaration findCoidWithChecksum(String qualifier) {
-        Optional<CompilationUnit> opt = AstForestContext.get().tryFindCu(qualifier);
+        Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+                .orElse(AstForestContext.get().getSourceRoot());
+        Optional<CompilationUnit> opt = CompilationUnitUtils.tryFindCu(sourceRoot, qualifier);
         if (!opt.isPresent()) {
             throw new Allison1875Exception("cannot found Design [" + qualifier + "]");
         }

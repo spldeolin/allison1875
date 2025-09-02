@@ -24,6 +24,10 @@ public class QueryTransformerMojo extends Allison1875Mojo {
 
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
+        if (queryTransformerConfig.getPersistenceSourcePath() != null) {
+            queryTransformerConfig.setPersistenceSourcePath(
+                    this.getCanonicalFileRelativeToBasedir(queryTransformerConfig.getPersistenceSourcePath()));
+        }
         log.info("queryTransformerConfig={}", JsonUtils.toJsonPrettily(queryTransformerConfig));
         log.info("new module instance for {}", queryTransformerConfig.getModule());
         return (Allison1875Module) classLoader.loadClass(queryTransformerConfig.getModule())

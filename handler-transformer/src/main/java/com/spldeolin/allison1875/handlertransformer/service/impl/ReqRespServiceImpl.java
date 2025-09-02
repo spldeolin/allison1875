@@ -112,7 +112,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             }
 
             DataModelArg arg = new DataModelArg();
-            arg.setAstForest(AstForestContext.get());
+            arg.setSourceRoot(AstForestContext.get().getSourceRoot());
             arg.setPackageName(packageName);
             arg.setClassName(dtoName);
             arg.setDescription(concatDTODescription(initDecAnalysis));

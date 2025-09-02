@@ -1,6 +1,9 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.Parameter;
@@ -23,6 +26,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
+import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.CompareableBinary;
@@ -47,6 +51,9 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
     @Inject
     private DataModelService dataModelGeneratorService;
 
+    @Inject
+    private QueryTransformerConfig queryTransformerConfig;
+
     @Override
     public GenerateParamRetval generateParam(ChainAnalysisDTO chainAnalysis) {
         List<Parameter> params = Lists.newArrayList();
@@ -56,7 +63,9 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
         if (binaries.size() > 3) {
             DataModelArg dataModelArg = new DataModelArg();
-            dataModelArg.setAstForest(AstForestContext.get());
+            Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+                    .orElse(AstForestContext.get().getSourceRoot());
+            dataModelArg.setSourceRoot(sourceRoot);
             dataModelArg.setPackageName(commonConfig.getParamDTOPackage());
             if (commonConfig.getEnableLotNoAnnounce()) {
                 dataModelArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
@@ -147,7 +156,9 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         Set<VariableProperty> returnProps = chainAnalysis.getPropertiesAsResult();
         if (returnProps.size() > 1) {
             DataModelArg dataModelArg = new DataModelArg();
-            dataModelArg.setAstForest(AstForestContext.get());
+            Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+                    .orElse(AstForestContext.get().getSourceRoot());
+            dataModelArg.setSourceRoot(sourceRoot);
             dataModelArg.setPackageName(commonConfig.getRecordDTOPackage());
             if (commonConfig.getEnableLotNoAnnounce()) {
                 dataModelArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());

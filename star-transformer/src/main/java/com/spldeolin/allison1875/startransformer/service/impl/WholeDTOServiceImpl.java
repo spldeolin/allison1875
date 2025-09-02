@@ -37,7 +37,7 @@ public class WholeDTOServiceImpl implements WholeDTOService {
     @Override
     public DataModelGeneration generateWholeDTO(ChainAnalysisDTO analysis) {
         DataModelArg dataModelArg = new DataModelArg();
-        dataModelArg.setAstForest(AstForestContext.get());
+        dataModelArg.setSourceRoot(AstForestContext.get().getSourceRoot());
         dataModelArg.setPackageName(commonConfig.getWholeDTOPackage());
         dataModelArg.setClassName(analysis.getWholeDTOName());
         if (commonConfig.getEnableLotNoAnnounce()) {
