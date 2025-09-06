@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer;
 
+import java.io.File;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.common.config.Allison1875Config;
@@ -29,5 +30,20 @@ public class HandlerTransformerConfig extends Allison1875Config {
      */
     @NotNull
     Boolean enableOneService = false;
+
+    /**
+     * Service接口所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
+     */
+    File serviceSourcePath;
+
+    /**
+     * ServiceImpl类所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
+     */
+    File serviceImplSourcePath;
+
+    /**
+     * DTO类所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
+     */
+    File DTOSourcePath;
 
 }

@@ -1,7 +1,9 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -24,6 +26,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
@@ -129,9 +132,10 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             serviceName =
                     MoreStringUtils.toUpperCamel(args.getInitDecAnalysisDTO().getMvcHandlerMethodName()) + "Service";
         }
-        Path sourceRoot = AstForestContext.get().getSourceRoot();
-        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServicePackage(),
-                serviceName + ".java");
+        Path serviceSourceRoot = Optional.ofNullable(config.getServiceSourcePath()).map(File::toPath)
+                .orElse(AstForestContext.get().getSourceRoot());
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(serviceSourceRoot,
+                commonConfig.getServicePackage(), serviceName + ".java");
 
         // 查找或生成service和cu
         CompilationUnit serviceCu;
@@ -140,7 +144,8 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             // 文件存在
             if (config.getEnableOneService()) {
                 // 单service模式下直接查找
-                serviceCu = AstForestContext.get().tryFindCu(commonConfig.getServicePackage() + "." + serviceName)
+                serviceCu = CompilationUnitUtils.tryFindCu(serviceSourceRoot,
+                                commonConfig.getServicePackage() + "." + serviceName)
                         .orElseThrow(() -> new Allison1875Exception("fail to parse cu"));
                 service = serviceCu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
                         .orElseThrow(() -> new Allison1875Exception("")).asClassOrInterfaceDeclaration();
@@ -158,8 +163,10 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         }
 
         String serviceImplName = serviceName + "Impl";
-        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(sourceRoot, commonConfig.getServiceImplPackage(),
-                serviceImplName + ".java");
+        Path serviceImplSourceRoot = Optional.ofNullable(config.getServiceImplSourcePath()).map(File::toPath)
+                .orElse(AstForestContext.get().getSourceRoot());
+        absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(serviceImplSourceRoot,
+                commonConfig.getServiceImplPackage(), serviceImplName + ".java");
 
         // 查找或生成serviceImpl和cu
         CompilationUnit serviceImplCu;
@@ -168,8 +175,8 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             // 文件存在
             if (config.getEnableOneService()) {
                 // 单service模式下直接查找
-                serviceImplCu = AstForestContext.get()
-                        .tryFindCu(commonConfig.getServiceImplPackage() + "." + serviceImplName)
+                serviceImplCu = CompilationUnitUtils.tryFindCu(serviceImplSourceRoot,
+                                commonConfig.getServiceImplPackage() + "." + serviceImplName)
                         .orElseThrow(() -> new Allison1875Exception("fail to parse cu"));
                 serviceImpl = serviceImplCu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
                         .orElseThrow(() -> new Allison1875Exception("")).asClassOrInterfaceDeclaration();

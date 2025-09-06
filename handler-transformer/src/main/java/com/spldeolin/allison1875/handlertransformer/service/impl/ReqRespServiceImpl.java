@@ -1,6 +1,9 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,6 +71,9 @@ public class ReqRespServiceImpl implements ReqRespService {
     @Inject
     private DataModelServiceNoLombokImpl dataModelServiceNoLombok;
 
+    @Inject
+    private HandlerTransformerConfig handlerTransformerConfig;
+
     @Override
     public void validInitBody(BlockStmt initBody, InitDecAnalysisDTO initDecAnalysis) {
         if (initBody.findAll(LocalClassDeclarationStmt.class).size() > 2) {
@@ -112,7 +118,9 @@ public class ReqRespServiceImpl implements ReqRespService {
             }
 
             DataModelArg arg = new DataModelArg();
-            arg.setSourceRoot(AstForestContext.get().getSourceRoot());
+            Path sourceRoot = Optional.ofNullable(handlerTransformerConfig.getDTOSourcePath()).map(File::toPath)
+                    .orElse(AstForestContext.get().getSourceRoot());
+            arg.setSourceRoot(sourceRoot);
             arg.setPackageName(packageName);
             arg.setClassName(dtoName);
             arg.setDescription(concatDTODescription(initDecAnalysis));
