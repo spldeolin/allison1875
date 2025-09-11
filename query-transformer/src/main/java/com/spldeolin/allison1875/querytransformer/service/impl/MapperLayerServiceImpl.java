@@ -140,7 +140,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     if (join) {
                         // 有join时，最外层的select_expr需要加上t1.
                         for (PropertyDTO property : designMeta.getProperties().values()) {
-                            xmlLines.add(DOUBLE_INDENT + "t1.`" + property.getColumnName() + "` AS "
+                            xmlLines.add(DOUBLE_INDENT + "t1." + property.getColumnName() + " AS "
                                     + property.getPropertyName() + ",");
                         }
                         // 有join时，还需要select joinedProperties
@@ -148,8 +148,8 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                             JoinClauseDTO joinClause = joinClauses.get(i);
                             for (JoinedPropertyDTO joinedProp : joinClause.getJoinedProperties()) {
                                 xmlLines.add(
-                                        DOUBLE_INDENT + "t" + (i + 2) + ".`" + joinedProp.getProperty().getColumnName()
-                                                + "` AS " + joinedProp.getVarName() + ",");
+                                        DOUBLE_INDENT + "t" + (i + 2) + "." + joinedProp.getProperty().getColumnName()
+                                                + " AS " + joinedProp.getVarName() + ",");
                             }
                         }
                     } else {
@@ -157,14 +157,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     }
                 } else {
                     for (PropertyDTO property : chainAnalysis.getSelectProperties()) {
-                        xmlLines.add(DOUBLE_INDENT + (join ? "t1." : "") + "`" + property.getColumnName() + "` AS "
+                        xmlLines.add(DOUBLE_INDENT + (join ? "t1." : "") + property.getColumnName() + " AS "
                                 + property.getPropertyName() + ",");
                     }
                     // 删除最后一个语句中，最后的逗号
                     int last = xmlLines.size() - 1;
                     xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 }
-                xmlLines.add(SINGLE_INDENT + "FROM " + "`" + designMeta.getTableName() + "`" + (join ? " t1" : ""));
+                xmlLines.add(SINGLE_INDENT + "FROM " + designMeta.getTableName() + (join ? " t1" : ""));
                 for (int i = 0; i < joinClauses.size(); i++) {
                     xmlLines.addAll(concatJoinSection(joinClauses.get(i), i));
                 }
@@ -173,7 +173,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     xmlLines.add(SINGLE_INDENT + "ORDER BY");
                     for (SortPropertyDTO sortProp : chainAnalysis.getSortProperties()) {
                         PropertyDTO property = designMeta.getProperties().get(sortProp.getPropertyName());
-                        xmlLines.add(DOUBLE_INDENT + (join ? "t1." : "") + "`" + property.getColumnName() + "`" + (
+                        xmlLines.add(DOUBLE_INDENT + (join ? "t1." : "") + property.getColumnName() + (
                                 sortProp.getOrderSequence() == OrderSequenceEnum.DESC ? " DESC," : ","));
                     }
                     // 删除最后一个语句中，最后的逗号
@@ -196,12 +196,11 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
                     xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                 }
-                xmlLines.add(SINGLE_INDENT + "UPDATE `" + designMeta.getTableName() + "`");
+                xmlLines.add(SINGLE_INDENT + "UPDATE " + designMeta.getTableName());
                 xmlLines.add(SINGLE_INDENT + "SET");
                 for (AssignmentDTO assignment : chainAnalysis.getAssignments()) {
                     PropertyDTO property = designMeta.getProperties().get(assignment.getProperty().getPropertyName());
-                    xmlLines.add(
-                            DOUBLE_INDENT + "`" + property.getColumnName() + "` = #{" + assignment.getVarName() + "},");
+                    xmlLines.add(DOUBLE_INDENT + property.getColumnName() + " = #{" + assignment.getVarName() + "},");
                 }
                 // 删除最后一个语句中，最后的逗号
                 int last = xmlLines.size() - 1;
@@ -221,7 +220,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                         xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
                     }
                 }
-                xmlLines.add(SINGLE_INDENT + "DELETE FROM `" + designMeta.getTableName() + "`");
+                xmlLines.add(SINGLE_INDENT + "DELETE FROM " + designMeta.getTableName());
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
                 if (CollectionUtils.isNotEmpty(chainAnalysis.getSearchConditions())) {
                     if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
@@ -258,8 +257,8 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     private List<String> concatJoinSection(JoinClauseDTO joinClause, int i) {
         i += 2;
         List<String> xmlLines = Lists.newArrayList();
-        String joinSql = DOUBLE_INDENT + joinClause.getJoinType().getSql() + " `" + joinClause.getJoinedDesignMeta()
-                .getTableName() + "` t" + i + " ON ";
+        String joinSql = DOUBLE_INDENT + joinClause.getJoinType().getSql() + " " + joinClause.getJoinedDesignMeta()
+                .getTableName() + " t" + i + " ON ";
         if (joinClause.getJoinConditions().size() == 1) {
             JoinConditionDTO joinCond = Iterables.getOnlyElement(joinClause.getJoinConditions());
             String onBinary = concatOnBinary(i, joinCond);
@@ -276,12 +275,12 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     }
 
     private static String concatOnBinary(int i, JoinConditionDTO joinCond) {
-        String onBinary = "t" + i + ".`" + joinCond.getProperty().getColumnName() + "`";
+        String onBinary = "t" + i + "." + joinCond.getProperty().getColumnName();
         switch (joinCond.getComparisonOperator()) {
             case EQUALS:
                 onBinary += " = ";
                 if (joinCond.getComparedProperty() != null) {
-                    onBinary += "t1.`" + joinCond.getComparedProperty().getColumnName() + "`";
+                    onBinary += "t1." + joinCond.getComparedProperty().getColumnName();
                 } else {
                     onBinary += "#{" + joinCond.getVarName() + "}";
                 }
@@ -289,7 +288,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             case NOT_EQUALS:
                 onBinary += " != ";
                 if (joinCond.getComparedProperty() != null) {
-                    onBinary += "t1.`" + joinCond.getComparedProperty().getColumnName() + "`";
+                    onBinary += "t1." + joinCond.getComparedProperty().getColumnName();
                 } else {
                     onBinary += "#{" + joinCond.getVarName() + "}";
                 }
@@ -307,7 +306,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             case GREATER_THEN:
                 onBinary += " > ";
                 if (joinCond.getComparedProperty() != null) {
-                    onBinary += "t1.`" + joinCond.getComparedProperty().getColumnName() + "`";
+                    onBinary += "t1." + joinCond.getComparedProperty().getColumnName();
                 } else {
                     onBinary += "#{" + joinCond.getVarName() + "}";
                 }
@@ -315,7 +314,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             case GREATER_OR_EQUALS:
                 onBinary += " >= ";
                 if (joinCond.getComparedProperty() != null) {
-                    onBinary += "t1.`" + joinCond.getComparedProperty().getColumnName() + "`";
+                    onBinary += "t1." + joinCond.getComparedProperty().getColumnName();
                 } else {
                     onBinary += "#{" + joinCond.getVarName() + "}";
                 }
@@ -323,7 +322,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             case LESS_THEN:
                 onBinary += " < ";
                 if (joinCond.getComparedProperty() != null) {
-                    onBinary += "t1.`" + joinCond.getComparedProperty().getColumnName() + "`";
+                    onBinary += "t1." + joinCond.getComparedProperty().getColumnName();
                 } else {
                     onBinary += "#{" + joinCond.getVarName() + "}";
                 }
@@ -331,7 +330,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             case LESS_OR_EQUALS:
                 onBinary += " <= ";
                 if (joinCond.getComparedProperty() != null) {
-                    onBinary += "t1.`" + joinCond.getComparedProperty().getColumnName() + "`";
+                    onBinary += "t1." + joinCond.getComparedProperty().getColumnName();
                 } else {
                     onBinary += "#{" + joinCond.getVarName() + "}";
                 }
@@ -422,40 +421,36 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             switch (searchCond.getComparisonOperator()) {
                 case EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(
-                                SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName() + "` = "
-                                        + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " = "
+                                + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(
-                                DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName() + "` = "
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " = "
                                         + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case NOT_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(
-                                SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName() + "` != "
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " != "
                                         + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(
-                                DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName() + "` != "
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " != "
                                         + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case IN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` IN (<foreach collection='" + varName
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName()
+                                + " IN (<foreach collection='" + varName
                                 + "' item='one' separator=','>#{one}</foreach>)");
                     } else {
                         xmlLines.add(SINGLE_INDENT + "<if test=\"" + varName + " != null\">");
                         xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() > 0\">");
-                        xmlLines.add(TREBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` IN (<foreach collection='" + varName
+                        xmlLines.add(TREBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName()
+                                + " IN (<foreach collection='" + varName
                                 + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(DOUBLE_INDENT + "</if>");
                         xmlLines.add(DOUBLE_INDENT + "<if test=\"" + varName + ".size() == 0\">");
@@ -466,83 +461,79 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     break;
                 case NOT_IN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` NOT IN (<foreach collection='" + varName
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName()
+                                + " NOT IN (<foreach collection='" + varName
                                 + "' item='one' separator=','>#{one}</foreach>)");
                     } else {
                         xmlLines.add(
                                 SINGLE_INDENT + String.format("<if test=\"%s != null and %s.size() > 0\">", varName,
                                         varName));
-                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` NOT IN (<foreach collection='" + varName
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName()
+                                + " NOT IN (<foreach collection='" + varName
                                 + "' item='one' separator=','>#{one}</foreach>)");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case GREATER_THEN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(
-                                SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName() + "` > "
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " > "
                                         + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(
-                                DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName() + "` > "
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " > "
                                         + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case GREATER_OR_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(
-                                SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName() + "` >= "
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " >= "
                                         + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(
-                                DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName() + "` >= "
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " >= "
                                         + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case LESS_THEN:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` &lt; " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " &lt; "
+                                + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` &lt; " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " &lt; "
+                                + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case LESS_OR_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` &lt;= " + dollarVar);
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " &lt;= "
+                                + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` &lt;= " + dollarVar);
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " &lt;= "
+                                + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case NOT_NULL:
-                    xmlLines.add(SINGLE_INDENT + "  AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                            + "` IS NOT NULL");
+                    xmlLines.add(
+                            SINGLE_INDENT + "  AND " + (join ? "t1." : "") + property.getColumnName() + " IS NOT NULL");
                     break;
                 case IS_NULL:
-                    xmlLines.add(SINGLE_INDENT + "  AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                            + "` IS NULL");
+                    xmlLines.add(
+                            SINGLE_INDENT + "  AND " + (join ? "t1." : "") + property.getColumnName() + " IS NULL");
                     break;
                 case LIKE:
                     if (chainAnalysis.getIsByForced()) {
-                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` LIKE CONCAT('%', " + dollarVar + ", '%')");
+                        xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName()
+                                + " LIKE CONCAT('%', " + dollarVar + ", '%')");
                     } else {
                         xmlLines.add(ifTag);
-                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + "`" + property.getColumnName()
-                                + "` LIKE CONCAT('%', " + dollarVar + ", '%')");
+                        xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName()
+                                + " LIKE CONCAT('%', " + dollarVar + ", '%')");
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
