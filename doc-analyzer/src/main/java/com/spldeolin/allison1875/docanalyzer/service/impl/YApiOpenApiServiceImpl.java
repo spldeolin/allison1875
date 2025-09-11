@@ -8,7 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiCommonRespDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiInterfaceListMenuRespDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiProjectGetRespDTO;

@@ -8,7 +8,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**

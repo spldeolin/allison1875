@@ -10,7 +10,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.dto.GenerateMvcHandlerRetval;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.MvcControllerService;

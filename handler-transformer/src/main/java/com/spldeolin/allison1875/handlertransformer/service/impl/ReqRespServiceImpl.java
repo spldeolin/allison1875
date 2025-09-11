@@ -34,7 +34,7 @@ import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImp
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.enums.DTOTypeEnum;

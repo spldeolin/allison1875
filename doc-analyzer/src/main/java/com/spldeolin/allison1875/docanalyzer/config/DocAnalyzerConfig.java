@@ -1,13 +1,10 @@
-package com.spldeolin.allison1875.docanalyzer;
+package com.spldeolin.allison1875.docanalyzer.config;
 
 import java.io.File;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.config.Allison1875Config;
-import com.spldeolin.allison1875.common.dto.InvalidDTO;
-import com.spldeolin.allison1875.common.util.ValidUtils;
 import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -22,7 +19,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DocAnalyzerConfig extends Allison1875Config {
+@DocAnalyzerConfigValid
+public class DocAnalyzerConfig {
 
     /**
      * 目标项目handler方法签名所依赖的外部项目的目录或者具体Java文件的相对路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
@@ -101,53 +99,5 @@ public class DocAnalyzerConfig extends Allison1875Config {
      * 多个方法全限定名，只有能够匹配这些的MVC Handler方法才会被分析并输出文档，支持*和?通配符的
      */
     List<String> mvcHandlerQualifierWildcards;
-
-    @Override
-    public List<InvalidDTO> invalidSelf() {
-        List<InvalidDTO> invalids = super.invalidSelf();
-        if (flushTo.contains(FlushToEnum.YAPI)) {
-            if (yapiUrl == null) {
-                invalids.add(new InvalidDTO().setPath("yapiUrl").setValue(ValidUtils.formatValue(yapiUrl))
-                        .setReason("must not be null"));
-            }
-            if (yapiToken == null) {
-                invalids.add(new InvalidDTO().setPath("yapiToken").setValue(ValidUtils.formatValue(yapiToken))
-                        .setReason("must not be null"));
-            }
-        }
-        if (flushTo.contains(FlushToEnum.MARKDOWN)) {
-            if (markdownDir == null) {
-                invalids.add(
-                        new InvalidDTO().setPath("markdownDirectoryPath").setValue(ValidUtils.formatValue(markdownDir))
-                                .setReason("must not be null"));
-            }
-        }
-        if (flushTo.contains(FlushToEnum.SHOWDOC)) {
-            if (showdocUrl == null) {
-                invalids.add(new InvalidDTO().setPath("showdocUrl").setValue(ValidUtils.formatValue(showdocUrl))
-                        .setReason("must not be null"));
-            }
-            if (showdocApiKey == null) {
-                invalids.add(new InvalidDTO().setPath("showdocApiKey").setValue(ValidUtils.formatValue(showdocApiKey))
-                        .setReason("must not be null"));
-            }
-            if (showdocApiToken == null) {
-                invalids.add(
-                        new InvalidDTO().setPath("showdocApiToken").setValue(ValidUtils.formatValue(showdocApiToken))
-                                .setReason("must not be null"));
-            }
-        }
-        if (flushTo.contains(FlushToEnum.MARKDOWN) || flushTo.contains(FlushToEnum.SHOWDOC)) {
-            if (enableCurl == null) {
-                invalids.add(new InvalidDTO().setPath("enableCurl").setValue(ValidUtils.formatValue(enableCurl))
-                        .setReason("must not be null"));
-            }
-            if (enableResponseBodySample == null) {
-                invalids.add(new InvalidDTO().setPath("enableResponseBodySample")
-                        .setValue(ValidUtils.formatValue(enableResponseBodySample)).setReason("must not be null"));
-            }
-        }
-        return invalids;
-    }
 
 }

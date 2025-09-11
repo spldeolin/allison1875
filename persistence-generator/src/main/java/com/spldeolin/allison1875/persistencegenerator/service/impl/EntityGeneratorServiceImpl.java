@@ -15,7 +15,7 @@ import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.DataModelService;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;

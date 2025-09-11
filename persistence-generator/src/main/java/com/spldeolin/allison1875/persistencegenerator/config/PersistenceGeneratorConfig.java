@@ -1,13 +1,9 @@
-package com.spldeolin.allison1875.persistencegenerator;
+package com.spldeolin.allison1875.persistencegenerator.config;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.config.Allison1875Config;
-import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
-import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -19,7 +15,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PersistenceGeneratorConfig extends Allison1875Config {
+@PersistenceGeneratorConfigValid
+public class PersistenceGeneratorConfig {
 
     /**
      * 数据库连接
@@ -89,25 +86,5 @@ public class PersistenceGeneratorConfig extends Allison1875Config {
      */
     @NotNull
     Boolean enableGenerateFormatterMarker = true;
-
-    @Override
-    public List<InvalidDTO> invalidSelf() {
-        List<InvalidDTO> result = super.invalidSelf();
-        if (StringUtils.isNotEmpty(jdbcUrl)) {
-            if (StringUtils.isEmpty(userName)) {
-                result.add(new InvalidDTO().setPath("userName").setValue(ValidUtils.formatValue(userName))
-                        .setReason("must not be empty"));
-            }
-            if (StringUtils.isEmpty(password)) {
-                result.add(new InvalidDTO().setPath("password").setValue(ValidUtils.formatValue(password))
-                        .setReason("must not be empty"));
-            }
-            if (StringUtils.isEmpty(schema)) {
-                result.add(new InvalidDTO().setPath("schema").setValue(ValidUtils.formatValue(schema))
-                        .setReason("must not be empty"));
-            }
-        }
-        return result;
-    }
 
 }

@@ -26,7 +26,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
-import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.CompareableBinary;

@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.startransformer.StarTransformerConfig;
+import com.spldeolin.allison1875.startransformer.config.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.startransformer.dto.PhraseDTO;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;

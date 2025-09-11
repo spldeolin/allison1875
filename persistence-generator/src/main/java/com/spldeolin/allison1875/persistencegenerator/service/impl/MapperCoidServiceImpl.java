@@ -33,7 +33,7 @@ import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;

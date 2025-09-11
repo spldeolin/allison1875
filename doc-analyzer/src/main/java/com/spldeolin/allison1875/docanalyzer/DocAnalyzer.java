@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeBodyRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeMvcHandlerRetval;

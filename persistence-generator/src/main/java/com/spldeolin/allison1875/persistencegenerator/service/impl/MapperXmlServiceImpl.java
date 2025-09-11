@@ -23,7 +23,7 @@ import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.KeyMethodNameDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;

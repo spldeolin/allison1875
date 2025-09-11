@@ -9,7 +9,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**

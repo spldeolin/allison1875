@@ -23,7 +23,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;

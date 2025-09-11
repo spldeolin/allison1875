@@ -1,13 +1,12 @@
 package com.spldeolin.allison1875.startransformer;
 
-import java.util.List;
 import com.spldeolin.allison1875.common.config.CommonConfig;
-import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
+import com.spldeolin.allison1875.startransformer.config.StarTransformerConfig;
 import lombok.ToString;
 
 /**
@@ -28,13 +27,6 @@ public class StarTransformerModule extends Allison1875Module {
     @Override
     public final Class<? extends Allison1875MainService> declareMainService() {
         return StarTransformer.class;
-    }
-
-    @Override
-    public List<InvalidDTO> validConfigs() {
-        List<InvalidDTO> invalids = commonConfig.invalidSelf();
-        invalids.addAll(starTransformerConfig.invalidSelf());
-        return invalids;
     }
 
     @Override

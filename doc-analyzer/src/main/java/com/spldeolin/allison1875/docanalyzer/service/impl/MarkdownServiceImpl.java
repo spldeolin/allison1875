@@ -29,7 +29,7 @@ import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.CategorizedMarkdownDTO;

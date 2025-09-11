@@ -36,7 +36,7 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
-import com.spldeolin.allison1875.querytransformer.QueryTransformerConfig;
+import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.AssignmentDTO;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateMethodToMapperArgs;

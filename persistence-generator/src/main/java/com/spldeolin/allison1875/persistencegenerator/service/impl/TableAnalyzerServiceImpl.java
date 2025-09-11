@@ -29,7 +29,7 @@ import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.InformationSchemaDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;

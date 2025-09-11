@@ -8,6 +8,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.dto.InvalidDTO;
@@ -41,8 +42,11 @@ public class ValidUtils {
 
         List<InvalidDTO> result = Lists.newArrayList();
         for (ConstraintViolation<?> violation : violations) {
-            String path = violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath().toString()
-                    .replace(".<iterable element>", "");
+            String path = violation.getRootBeanClass().getSimpleName();
+            if (StringUtils.isNotEmpty(violation.getPropertyPath().toString())) {
+                path += "." + violation.getPropertyPath();
+            }
+            path = path.replace(".<iterable element>", "");
             String valueText = formatValue(violation.getInvalidValue());
             InvalidDTO invalid = new InvalidDTO().setPath(path).setValue(valueText).setReason(violation.getMessage());
             result.add(invalid);

@@ -1,7 +1,6 @@
-package com.spldeolin.allison1875.startransformer;
+package com.spldeolin.allison1875.startransformer.config;
 
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.common.config.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -13,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StarTransformerConfig extends Allison1875Config {
+public class StarTransformerConfig {
 
     /**
      * Whole DTO的后缀

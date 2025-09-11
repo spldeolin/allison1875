@@ -1,9 +1,8 @@
-package com.spldeolin.allison1875.handlertransformer;
+package com.spldeolin.allison1875.handlertransformer.config;
 
 import java.io.File;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.common.config.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -17,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class HandlerTransformerConfig extends Allison1875Config {
+public class HandlerTransformerConfig {
 
     /**
      * 分页对象的全限定名

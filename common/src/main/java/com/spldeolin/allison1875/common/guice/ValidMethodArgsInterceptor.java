@@ -7,6 +7,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.ValidUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2024-02-14
  */
 @Slf4j
-public class ValidInterceptor implements MethodInterceptor {
+public class ValidMethodArgsInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
@@ -25,11 +26,12 @@ public class ValidInterceptor implements MethodInterceptor {
             if (args == null) {
                 continue;
             }
-            List<InvalidDTO> valid = ValidUtils.valid(args);
-            if (CollectionUtils.isNotEmpty(valid)) {
-                throw new Allison1875Exception(
-                        String.format("invalid arguments, method=%s, index=%s, invalids=%s, args=%s", method.getName(),
-                                i, valid, args));
+            List<InvalidDTO> invalids = ValidUtils.valid(args);
+            if (CollectionUtils.isNotEmpty(invalids)) {
+                throw new Allison1875Exception(String.format(
+                        "Allison 1875 fail to work cause method '%s.%s' encounter invalid argument\ninvalids=%s",
+                        methodInvocation.getThis().getClass().getSimpleName(), method.getName(),
+                        JsonUtils.toJsonPrettily(invalids)));
             }
         }
 

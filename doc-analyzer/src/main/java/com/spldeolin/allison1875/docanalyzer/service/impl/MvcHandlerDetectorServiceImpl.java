@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcControllerDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcHandlerDTO;
 import com.spldeolin.allison1875.docanalyzer.service.MvcHandlerDetectorService;

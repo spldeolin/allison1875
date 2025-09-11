@@ -1,13 +1,12 @@
 package com.spldeolin.allison1875.docanalyzer;
 
-import java.util.List;
 import com.spldeolin.allison1875.common.config.CommonConfig;
-import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 
@@ -29,13 +28,6 @@ public class DocAnalyzerModule extends Allison1875Module {
     @Override
     public final Class<? extends Allison1875MainService> declareMainService() {
         return DocAnalyzer.class;
-    }
-
-    @Override
-    public List<InvalidDTO> validConfigs() {
-        List<InvalidDTO> invalids = commonConfig.invalidSelf();
-        invalids.addAll(docAnalyzerConfig.invalidSelf());
-        return invalids;
     }
 
     @Override

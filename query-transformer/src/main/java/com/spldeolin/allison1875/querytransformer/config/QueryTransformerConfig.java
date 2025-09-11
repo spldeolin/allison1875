@@ -1,8 +1,7 @@
-package com.spldeolin.allison1875.querytransformer;
+package com.spldeolin.allison1875.querytransformer.config;
 
 import java.io.File;
 import javax.validation.constraints.NotNull;
-import com.spldeolin.allison1875.common.config.Allison1875Config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -14,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QueryTransformerConfig extends Allison1875Config {
+public class QueryTransformerConfig {
 
     /**
      * 是否生成Intell IDEA的“Turn formatter on/off with makers in code comments”

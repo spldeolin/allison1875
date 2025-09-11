@@ -34,7 +34,7 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateJoinChainArgs;

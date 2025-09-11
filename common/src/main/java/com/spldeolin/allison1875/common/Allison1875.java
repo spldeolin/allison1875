@@ -8,18 +8,15 @@ import java.util.List;
 import java.util.Properties;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.matcher.Matchers;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.dto.InvalidDTO;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
-import com.spldeolin.allison1875.common.guice.ValidInterceptor;
-import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.common.guice.ValidationModule;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -63,19 +60,19 @@ public class Allison1875 {
     }
 
     public static void letsGo(Allison1875Module allison1875Module, AstForest astForest) {
-        // valid config
-        List<InvalidDTO> invalids = allison1875Module.validConfigs();
-        if (CollectionUtils.isNotEmpty(invalids)) {
-            throw new Allison1875Exception(
-                    "Allison 1875 fail to work cause invalid config\ninvalids=" + JsonUtils.toJsonPrettily(invalids));
+        // append built-in guice modules
+        List<Module> guiceModules = Lists.newArrayList(allison1875Module, new ValidationModule());
+
+        // create guice container
+        Injector injector;
+        try {
+            injector = Guice.createInjector(guiceModules);
+        } catch (CreationException e) {
+            if (e.getCause() instanceof Allison1875Exception) {
+                throw (Allison1875Exception) e.getCause();
+            }
+            throw e;
         }
-
-        // register interceptor
-        List<Module> guiceModules = Lists.newArrayList(allison1875Module,
-                binder -> binder.bindInterceptor(Matchers.any(), Matchers.any(), new ValidInterceptor()));
-
-        // create ioc container
-        Injector injector = Guice.createInjector(guiceModules);
 
         // process main service
         AstForestContext.set(astForest);

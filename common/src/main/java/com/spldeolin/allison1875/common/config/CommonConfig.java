@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommonConfig extends Allison1875Config {
+public class CommonConfig {
 
     /**
      * 基础包名

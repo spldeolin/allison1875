@@ -23,7 +23,7 @@ import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzerConfig;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.service.EnumService;
 import com.spldeolin.allison1875.docanalyzer.service.FieldService;
