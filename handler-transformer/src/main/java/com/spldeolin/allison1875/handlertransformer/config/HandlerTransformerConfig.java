@@ -43,6 +43,6 @@ public class HandlerTransformerConfig {
     /**
      * DTO类所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
      */
-    File DTOSourcePath;
+    File dtoSourcePath;
 
 }

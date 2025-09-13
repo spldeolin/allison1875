@@ -118,7 +118,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             }
 
             DataModelArg arg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(handlerTransformerConfig.getDTOSourcePath()).map(File::toPath)
+            Path sourceRoot = Optional.ofNullable(handlerTransformerConfig.getDtoSourcePath()).map(File::toPath)
                     .orElse(AstForestContext.get().getSourceRoot());
             arg.setSourceRoot(sourceRoot);
             arg.setPackageName(packageName);
