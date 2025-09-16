@@ -404,7 +404,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             boolean needNotDeletedSql) {
         List<String> xmlLines = Lists.newArrayList();
         boolean join = !chainAnalysis.getJoinClauses().isEmpty();
-        xmlLines.add(SINGLE_INDENT + "WHERE 1 = 1");
+        xmlLines.add(SINGLE_INDENT + "<where>");
         if (needNotDeletedSql && designMeta.getNotDeletedSql() != null) {
             xmlLines.add(SINGLE_INDENT + "  AND " + designMeta.getNotDeletedSql());
         }
@@ -539,6 +539,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     break;
             }
         }
+        xmlLines.add(SINGLE_INDENT + "</where>");
         return xmlLines;
     }
 
