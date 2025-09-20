@@ -46,6 +46,7 @@ import com.spldeolin.allison1875.docanalyzer.dto.JsonPropertyDescriptionValueDTO
 import com.spldeolin.allison1875.docanalyzer.enums.JsonIntegerTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.enums.ValidatorTypeEnum;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 内聚了 解析得到所有枚举、属性信息 和 生成自定义JsonSchemaGenerator对象的功能
@@ -53,6 +54,7 @@ import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
  * @author Deolin 2020-06-10
  */
 @Singleton
+@Slf4j
 public class JsgBuilderServiceImpl implements JsgBuilderService {
 
     @Override
@@ -209,22 +211,31 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
     }
 
     protected boolean isIgnored(AnnotatedMember m, @Nullable AnalyzeFieldVarsRetval afvRetval, boolean forReqOrResp) {
-        return false;
+        if (afvRetval == null) {
+            return false;
+        }
+        boolean isIngored = afvRetval.getCommentLines().stream().anyMatch(l -> l.trim().equals("#API-DOC-IGNORE#"));
+        if (isIngored) {
+            log.info("ignore {} clause #API-DOC-IGNORE# is found", m);
+        }
+        return isIngored;
     }
 
     protected List<AnalyzeValidRetval> analyzeValid(AnnotatedElement annotatedElement) {
         List<AnalyzeValidRetval> valids = Lists.newArrayList();
-        NotNull notNull = find(annotatedElement, NotNull.class);
-        if (notNull != null) {
+        if (find(annotatedElement, NotNull.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.NotNull.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));
         }
 
         if (find(annotatedElement, javax.validation.constraints.NotEmpty.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.NotEmpty.class) != null
                 || find(annotatedElement, org.hibernate.validator.constraints.NotEmpty.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_EMPTY.getValue()));
         }
 
         if (find(annotatedElement, javax.validation.constraints.NotBlank.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.NotBlank.class) != null
                 || find(annotatedElement, org.hibernate.validator.constraints.NotBlank.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_BLANK.getValue()));
         }
@@ -235,6 +246,14 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                     .setNote(String.valueOf(size.min())));
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
                     .setNote(String.valueOf(size.max())));
+        }
+
+        jakarta.validation.constraints.Size size2 = find(annotatedElement, jakarta.validation.constraints.Size.class);
+        if (size2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue())
+                    .setNote(String.valueOf(size2.min())));
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
+                    .setNote(String.valueOf(size2.max())));
         }
 
         Length length = find(annotatedElement, Length.class);
@@ -251,10 +270,23 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                     .setNote(String.valueOf(min.value())));
         }
 
+        jakarta.validation.constraints.Min min2 = find(annotatedElement, jakarta.validation.constraints.Min.class);
+        if (min2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
+                    .setNote(String.valueOf(min2.value())));
+        }
+
         DecimalMin decimalMin = find(annotatedElement, DecimalMin.class);
         if (decimalMin != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
                     .setNote(decimalMin.value()));
+        }
+
+        jakarta.validation.constraints.DecimalMin decimalMin2 = find(annotatedElement,
+                jakarta.validation.constraints.DecimalMin.class);
+        if (decimalMin2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
+                    .setNote(decimalMin2.value()));
         }
 
         Max max = find(annotatedElement, Max.class);
@@ -263,29 +295,42 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                     .setNote(String.valueOf(max.value())));
         }
 
+        jakarta.validation.constraints.Max max2 = find(annotatedElement, jakarta.validation.constraints.Max.class);
+        if (max2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
+                    .setNote(String.valueOf(max2.value())));
+        }
+
         DecimalMax decimalMax = find(annotatedElement, DecimalMax.class);
         if (decimalMax != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
                     .setNote(decimalMax.value()));
         }
 
-        Future future = find(annotatedElement, Future.class);
-        if (future != null) {
+        jakarta.validation.constraints.DecimalMax decimalMax2 = find(annotatedElement,
+                jakarta.validation.constraints.DecimalMax.class);
+        if (decimalMax2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
+                    .setNote(decimalMax2.value()));
+        }
+
+        if (find(annotatedElement, Future.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.Future.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.FUTURE.getValue()));
         }
 
-        FutureOrPresent futureOrPresent = find(annotatedElement, FutureOrPresent.class);
-        if (futureOrPresent != null) {
+        if (find(annotatedElement, FutureOrPresent.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.FutureOrPresent.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.FUTURE_OR_PRESENT.getValue()));
         }
 
-        Past past = find(annotatedElement, Past.class);
-        if (past != null) {
+        if (find(annotatedElement, Past.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.Past.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.PAST.getValue()));
         }
 
-        PastOrPresent pastOrPresent = find(annotatedElement, PastOrPresent.class);
-        if (pastOrPresent != null) {
+        if (find(annotatedElement, PastOrPresent.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.PastOrPresent.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.PAST_OR_PRESENT.getValue()));
         }
 
@@ -297,13 +342,22 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                     .setNote(String.valueOf(digits.fraction())));
         }
 
-        Positive positive = find(annotatedElement, Positive.class);
-        if (positive != null) {
+        jakarta.validation.constraints.Digits digits2 = find(annotatedElement,
+                jakarta.validation.constraints.Digits.class);
+        if (digits2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_INTEGRAL_DIGITS.getValue())
+                    .setNote(String.valueOf(digits2.integer())));
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_FRACTIONAL_DIGITS.getValue())
+                    .setNote(String.valueOf(digits2.fraction())));
+        }
+
+        if (find(annotatedElement, Positive.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.Positive.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.POSITIVE.getValue()));
         }
 
-        Negative negative = find(annotatedElement, Negative.class);
-        if (negative != null) {
+        if (find(annotatedElement, Negative.class) != null
+                || find(annotatedElement, jakarta.validation.constraints.Negative.class) != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NEGATIVE.getValue()));
         }
 
@@ -311,6 +365,13 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
         if (pattern != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.REGEX.getValue())
                     .setNote(pattern.regexp()));
+        }
+
+        jakarta.validation.constraints.Pattern pattern2 = find(annotatedElement,
+                jakarta.validation.constraints.Pattern.class);
+        if (pattern2 != null) {
+            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.REGEX.getValue())
+                    .setNote(pattern2.regexp()));
         }
 
         valids.forEach(valid -> {
