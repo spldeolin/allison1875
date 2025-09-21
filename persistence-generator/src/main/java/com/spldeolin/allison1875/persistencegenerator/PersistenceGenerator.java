@@ -22,8 +22,8 @@ import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateJoinChainArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
-import com.spldeolin.allison1875.persistencegenerator.dto.KeyMethodNameDTO;
-import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.IndexDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
@@ -112,27 +112,24 @@ public class PersistenceGenerator implements Allison1875MainService {
             String batchInsertMethodName = mapperCoidService.generateBatchInsertMethodToMapper(gmtmArgs);
             String batchInsertEvenNullMethodName = mapperCoidService.generateBatchInsertEvenNullMethodToMapper(
                     gmtmArgs);
+            String updateByIdMethodName = mapperCoidService.generateUpdateByIdMethodToMapper(gmtmArgs);
+            String updateByIdEvenNullMethodName = mapperCoidService.generateUpdateByIdEvenNullMethodToMapper(gmtmArgs);
             String batchUpdateMethodName = mapperCoidService.generateBatchUpdateMethodToMapper(gmtmArgs);
             String batchUpdateEvenNullMethodName = mapperCoidService.generateBatchUpdateEvenNullMethodToMapper(
                     gmtmArgs);
             String queryByIdMethodName = mapperCoidService.generateQueryByIdMethodToMapper(gmtmArgs);
-            String updateByIdMethodName = mapperCoidService.generateUpdateByIdMethodToMapper(gmtmArgs);
-            String updateByIdEvenNullMethodName = mapperCoidService.generateUpdateByIdEvenNullMethodToMapper(gmtmArgs);
             String queryByIdsProcMethodName = mapperCoidService.generateQueryByIdsMethodToMapper(gmtmArgs);
             String queryByIdsEachIdMethodName = mapperCoidService.generateQueryByIdsEachIdMethodToMapper(gmtmArgs);
-            List<KeyMethodNameDTO> queryByKeyDTOs = Lists.newArrayList();
-            List<KeyMethodNameDTO> deleteByKeyDTOs = Lists.newArrayList();
-            List<QueryByKeysDTO> queryByKeysDTOs = Lists.newArrayList();
-            for (PropertyDTO key : tableAnalysis.getKeyProperties()) {
-                queryByKeyDTOs.add(new KeyMethodNameDTO().setKey(key)
-                        .setMethodName(mapperCoidService.generateQueryByKeyMethodToMapper(gmtmArgs.setKey(key))));
-                deleteByKeyDTOs.add(new KeyMethodNameDTO().setKey(key)
-                        .setMethodName(mapperCoidService.generateDeleteByKeyMethodToMapper(gmtmArgs.setKey(key))));
-                queryByKeysDTOs.add(mapperCoidService.generateQueryByKeysMethodToMapper(gmtmArgs.setKey(key)));
+            List<QueryByIndexMethodDTO> queryByIndexMethodNames = Lists.newArrayList();
+            for (IndexDTO index : tableAnalysis.getIndices()) {
+                for (int i = 0; i < index.getProperties().size(); i++) {
+                    List<PropertyDTO> indexProperties = index.getProperties().subList(0, i + 1);
+                    boolean isUnique = i == index.getProperties().size() - 1 ? index.getIsUnique() : false;
+                    queryByIndexMethodNames.add(
+                            mapperCoidService.generateQueryByIndexMethodToMapper(gmtmArgs, indexProperties, isUnique));
+                }
             }
-            String queryByEntityMethodName = mapperCoidService.generateQueryByEntityMethodToMapper(gmtmArgs);
             String listAllMethodName = mapperCoidService.generateListAllMethodToMapper(gmtmArgs);
-            String insertOrUpdateMethodName = mapperCoidService.generateInsertOrUpdateMethodToMapper(gmtmArgs);
 
             // 将临时删除的开发者自定义方法添加到Mapper的最后
             detectOrGenerateMapperRetval.getCustomMethods().forEach(one -> mapper.getMembers().addLast(one));
@@ -152,17 +149,13 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateBatchUpdateMethod(tableAnalysis, batchUpdateMethodName),
                     mapperXmlService.generateBatchUpdateEvenNullMethod(tableAnalysis, batchUpdateEvenNullMethodName),
                     mapperXmlService.generateQueryByIdMethod(tableAnalysis, queryByIdMethodName),
+                    mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsProcMethodName),
+                    mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsEachIdMethodName),
                     mapperXmlService.generateUpdateByIdMethod(tableAnalysis, entityName, updateByIdMethodName),
                     mapperXmlService.generateUpdateByIdEvenNullMethod(tableAnalysis, entityName,
                             updateByIdEvenNullMethodName),
-                    mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsProcMethodName),
-                    mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsEachIdMethodName),
-                    mapperXmlService.generateQueryByKeyMethod(tableAnalysis, queryByKeyDTOs),
-                    mapperXmlService.generateDeleteByKeyMethod(tableAnalysis, deleteByKeyDTOs),
-                    mapperXmlService.generateQueryByKeysMethod(tableAnalysis, queryByKeysDTOs),
-                    mapperXmlService.generateQueryByEntityMethod(tableAnalysis, entityName, queryByEntityMethodName),
-                    mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName),
-                    mapperXmlService.generateInsertOrUpdateMethod(tableAnalysis, entityName, insertOrUpdateMethodName));
+                    mapperXmlService.generateQueryByIndexMethod(tableAnalysis, queryByIndexMethodNames),
+                    mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName));
 
             // 基础方法替换到MapperXml中
             for (File mapperXmlDirectory : commonConfig.getMapperXmlDirs()) {

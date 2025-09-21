@@ -128,17 +128,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                         generateReturnTypeRetval);
                 xmlLines.add(startTag);
 
-                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
-                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-                }
                 ArrayList<JoinClauseDTO> joinClauses = Lists.newArrayList(chainAnalysis.getJoinClauses());
                 boolean join = !joinClauses.isEmpty();
-                xmlLines.add(SINGLE_INDENT + "SELECT");
                 if (chainAnalysis.getReturnShape() == ReturnShapeEnum.count) {
-                    xmlLines.add(DOUBLE_INDENT + "COUNT(*)");
+                    xmlLines.add(SINGLE_INDENT + "SELECT COUNT(*)");
                 } else if (CollectionUtils.isEmpty(chainAnalysis.getSelectProperties())) {
                     if (join) {
                         // 有join时，最外层的select_expr需要加上t1.
+                        xmlLines.add(SINGLE_INDENT + "SELECT");
                         for (PropertyDTO property : designMeta.getProperties().values()) {
                             xmlLines.add(DOUBLE_INDENT + "t1." + property.getColumnName() + " AS "
                                     + property.getPropertyName() + ",");
@@ -153,7 +150,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                             }
                         }
                     } else {
-                        xmlLines.add(DOUBLE_INDENT + "<include refid='all' />");
+                        xmlLines.add(SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
                     }
                 } else {
                     for (PropertyDTO property : chainAnalysis.getSelectProperties()) {
@@ -184,18 +181,12 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     xmlLines.add(SINGLE_INDENT + "LIMIT 1");
                 }
 
-                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
-                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-                }
                 xmlLines.add("</select>");
             } else if (chainAnalysis.getChainInitialMethod() == KeywordConstant.ChainInitialMethod.UPDATE) {
                 // UPDATE
                 xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatUpdateStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
-                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
-                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-                }
                 xmlLines.add(SINGLE_INDENT + "UPDATE " + designMeta.getTableName());
                 xmlLines.add(SINGLE_INDENT + "SET");
                 for (AssignmentDTO assignment : chainAnalysis.getAssignments()) {
@@ -206,27 +197,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 int last = xmlLines.size() - 1;
                 xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
-                if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
-                    xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-                }
                 xmlLines.add("</update>");
             } else if (chainAnalysis.getChainInitialMethod() == KeywordConstant.ChainInitialMethod.DELETE) {
                 // DROP
                 xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatDeleteStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
-                if (CollectionUtils.isNotEmpty(chainAnalysis.getSearchConditions())) {
-                    if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
-                        xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-                    }
-                }
                 xmlLines.add(SINGLE_INDENT + "DELETE FROM " + designMeta.getTableName());
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, false));
-                if (CollectionUtils.isNotEmpty(chainAnalysis.getSearchConditions())) {
-                    if (queryTransformerConfig.getEnableGenerateFormatterMarker()) {
-                        xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-                    }
-                }
                 xmlLines.add("</delete>");
             } else {
                 throw new Allison1875Exception("impossible unless bug.");

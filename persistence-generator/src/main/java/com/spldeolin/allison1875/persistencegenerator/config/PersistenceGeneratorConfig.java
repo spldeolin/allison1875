@@ -81,10 +81,4 @@ public class PersistenceGeneratorConfig {
     @NotNull
     FileExistenceResolutionEnum entityExistenceResolution = FileExistenceResolutionEnum.OVERWRITE;
 
-    /**
-     * 是否生成Intell IDEA的“Turn formatter on/off with makers in code comments”
-     */
-    @NotNull
-    Boolean enableGenerateFormatterMarker = true;
-
 }

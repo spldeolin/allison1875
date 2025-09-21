@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDENT;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -24,8 +22,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.persistencegenerator.dto.KeyMethodNameDTO;
-import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
@@ -56,8 +53,8 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add("<sql id=\"all\">");
         xmlLines.addAll(TextUtils.formatLines(BaseConstant.SINGLE_INDENT,
-                persistence.getProperties().stream().map(PropertyDTO::getColumnName)
-                        .collect(Collectors.toList()), 120));
+                persistence.getProperties().stream().map(PropertyDTO::getColumnName).collect(Collectors.toList()),
+                120));
         xmlLines.add("</sql>");
         xmlLines.add("");
         return xmlLines;
@@ -67,9 +64,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     public List<String> generateBatchInsertEvenNullMethod(TableAnalysisDTO persistence, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "( <include refid=\"all\"/> )");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "VALUES");
@@ -78,9 +72,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 persistence.getProperties().stream().map(p -> "#{one." + p.getPropertyName() + "}")
                         .collect(Collectors.toList()), 120));
         xmlLines.add(BaseConstant.DOUBLE_INDENT + ")</foreach>");
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
         xmlLines.add("</insert>");
         xmlLines.add("");
         return xmlLines;
@@ -90,9 +81,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     public List<String> generateBatchInsertMethod(TableAnalysisDTO persistence, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "INSERT INTO " + persistence.getTableName());
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
@@ -108,9 +96,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</trim>");
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>;");
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
         xmlLines.add("</insert>");
         xmlLines.add("");
         return xmlLines;
@@ -121,14 +106,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE " + persistence.getTableName());
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "SET");
         for (PropertyDTO nonId : persistence.getNonIdProperties()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + nonId.getColumnName() + " = #{one." + nonId.getPropertyName()
-                            + "},");
+            xmlLines.add(
+                    BaseConstant.TREBLE_INDENT + nonId.getColumnName() + " = #{one." + nonId.getPropertyName() + "},");
         }
         // 删除最后一个语句中，最后的逗号
         if (CollectionUtils.isNotEmpty(xmlLines)) {
@@ -137,17 +119,14 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<where>");
         if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + config.getNotDeletedSql());
+            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + config.getNotDeletedSql());
         }
         for (PropertyDTO idProperty : persistence.getIdProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{one."
+            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{one."
                     + idProperty.getPropertyName() + "}");
         }
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</where>");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add("</update>");
         xmlLines.add("");
         return xmlLines;
@@ -158,93 +137,24 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE " + persistence.getTableName());
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<set>");
         for (PropertyDTO nonId : persistence.getNonIdProperties()) {
             xmlLines.add(BaseConstant.TREBLE_INDENT + String.format("<if test=\"one.%s!=null\"> %s = #{one.%s}, </if>",
-                            nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
+                    nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
         }
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</set>");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "<where>");
         if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + config.getNotDeletedSql());
+            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + config.getNotDeletedSql());
         }
         for (PropertyDTO idProperty : persistence.getIdProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{one."
+            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{one."
                     + idProperty.getPropertyName() + "}");
         }
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add(BaseConstant.DOUBLE_INDENT + "</where>");
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
         xmlLines.add("</update>");
-        xmlLines.add("");
-        return xmlLines;
-    }
-
-    /**
-     * 根据外键删除
-     *
-     * 表中每有几个外键，这个Proc就生成几个方法，以_id结尾的字段算作外键
-     */
-    @Override
-    public List<String> generateDeleteByKeyMethod(TableAnalysisDTO persistence,
-            List<KeyMethodNameDTO> KeyAndMethodNames) {
-        List<String> result = Lists.newArrayList();
-        for (KeyMethodNameDTO KeyAndMethodName : KeyAndMethodNames) {
-            List<String> xmlLines = Lists.newArrayList();
-            PropertyDTO key = KeyAndMethodName.getKey();
-            xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", KeyAndMethodName.getMethodName(),
-                    key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            xmlLines.add(SINGLE_INDENT + "UPDATE " + persistence.getTableName());
-            xmlLines.add(SINGLE_INDENT + "SET " + config.getDeletedSql());
-            xmlLines.add(SINGLE_INDENT + "WHERE " + key.getColumnName() + " = #{" + key.getPropertyName() + "}");
-            xmlLines.add(SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            xmlLines.add("</update>");
-            result.addAll(xmlLines);
-            result.add("");
-        }
-        return result;
-    }
-
-    @Override
-    public List<String> generateInsertOrUpdateMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName) {
-        List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(String.format("<insert id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO " + persistence.getTableName());
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
-        for (PropertyDTO property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> %s, </if>",
-                    property.getPropertyName(), property.getColumnName()));
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"VALUES (\" suffix=\")\" suffixOverrides=\",\">");
-        for (PropertyDTO property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> #{%s}, </if>",
-                    property.getPropertyName(), property.getPropertyName()));
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "ON DUPLICATE KEY UPDATE");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim suffixOverrides=\",\">");
-        for (PropertyDTO nonId : persistence.getNonIdProperties()) {
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("<if test=\"%s!=null\"> %s = #{%s}, </if>",
-                    nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
-        xmlLines.add("</insert>");
-
         xmlLines.add("");
         return xmlLines;
     }
@@ -261,9 +171,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         }
         xmlLines.add(
                 String.format("<insert id=\"%s\" parameterType=\"%s\"%s>", methodName, entityName, generatedKeyPart));
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "INSERT INTO " + persistence.getTableName());
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
         for (PropertyDTO property : persistence.getProperties()) {
@@ -277,9 +184,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                     property.getPropertyName(), property.getPropertyName()));
         }
         xmlLines.add(BaseConstant.SINGLE_INDENT + "</trim>");
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
         xmlLines.add("</insert>");
 
         xmlLines.add("");
@@ -292,52 +196,14 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         String firstLine = "<select id=\"" + methodName + "\" ";
         firstLine += "resultMap=\"all\">";
         result.add(firstLine);
-        if (config.getEnableGenerateFormatterMarker()) {
-            result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
-        result.add(BaseConstant.SINGLE_INDENT + "SELECT");
-        result.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
+        result.add(BaseConstant.SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
         result.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
-        result.add(BaseConstant.SINGLE_INDENT + "<where>");
         if (persistence.getIsDeleteFlagExist()) {
-            result.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
+            result.add(config.getNotDeletedSql());
         }
-        if (config.getEnableGenerateFormatterMarker()) {
-            result.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
-        result.add(BaseConstant.SINGLE_INDENT + "</where>");
         result.add("</select>");
         result.add("");
         return result;
-    }
-
-    @Override
-    public List<String> generateQueryByEntityMethod(TableAnalysisDTO persistence, String entityName,
-            String methodName) {
-        List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(
-                String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName, entityName));
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
-        if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
-        }
-        for (PropertyDTO property : persistence.getProperties()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  <if test=\"%s!=null\"> AND %s = #{%s} </if>",
-                    property.getPropertyName(), property.getColumnName(), property.getPropertyName()));
-        }
-        if (config.getEnableGenerateFormatterMarker()) {
-            xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-        }
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
-        xmlLines.add("</select>");
-        xmlLines.add("");
-        return xmlLines;
     }
 
     /**
@@ -355,22 +221,15 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             PropertyDTO onlyPk = Iterables.getOnlyElement(persistence.getIdProperties());
             xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">", methodName,
                     onlyPk.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
             }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + onlyPk.getColumnName() + String.format(
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + onlyPk.getColumnName() + String.format(
                     " IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
                     English.plural(MoreStringUtils.toLowerCamel(onlyPk.getPropertyName()))));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
             xmlLines.add("</select>");
             xmlLines.add("");
@@ -389,97 +248,21 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             firstLine += "resultMap=\"all\">";
             xmlLines.add(firstLine);
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
             }
             for (PropertyDTO idProperty : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{"
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{"
                         + idProperty.getPropertyName() + "}");
-            }
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
             xmlLines.add("</select>");
             xmlLines.add("");
         }
         return xmlLines;
-    }
-
-    /**
-     * 根据外键列表查询，表中每有几个外键，这个Proc就生成几个方法
-     */
-    @Override
-    public List<String> generateQueryByKeysMethod(TableAnalysisDTO persistence, List<QueryByKeysDTO> queryByKeysDTOs) {
-        List<String> sourceCodeLines = Lists.newArrayList();
-        for (QueryByKeysDTO queryByKeysDTO : queryByKeysDTOs) {
-            List<String> xmlLines = Lists.newArrayList();
-            PropertyDTO key = queryByKeysDTO.getKey();
-            xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
-                    queryByKeysDTO.getMethodName(),
-                    key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
-            if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + key.getColumnName() + String.format(
-                    " IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
-                    queryByKeysDTO.getVarsName()));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
-            xmlLines.add("</select>");
-            sourceCodeLines.addAll(xmlLines);
-            sourceCodeLines.add("");
-        }
-        return sourceCodeLines;
-    }
-
-    @Override
-    public List<String> generateQueryByKeyMethod(TableAnalysisDTO persistence,
-            List<KeyMethodNameDTO> keyAndMethodNames) {
-        List<String> result = Lists.newArrayList();
-        for (KeyMethodNameDTO keyAndMethodName : keyAndMethodNames) {
-            List<String> xmlLines = Lists.newArrayList();
-            PropertyDTO key = keyAndMethodName.getKey();
-            xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
-                    keyAndMethodName.getMethodName(),
-                    key.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT");
-            xmlLines.add(BaseConstant.DOUBLE_INDENT + "<include refid=\"all\"/>");
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
-            if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + key.getColumnName() + " = #{" + key.getPropertyName()
-                    + "}");
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
-            xmlLines.add("</select>");
-            result.addAll(xmlLines);
-            result.add("");
-        }
-        return result;
     }
 
     @Override
@@ -505,14 +288,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
             for (PropertyDTO nonId : persistence.getNonIdProperties()) {
-                xmlLines.add(BaseConstant.DOUBLE_INDENT + nonId.getColumnName() + " = #{" + nonId.getPropertyName()
-                                + "},");
+                xmlLines.add(
+                        BaseConstant.DOUBLE_INDENT + nonId.getColumnName() + " = #{" + nonId.getPropertyName() + "},");
             }
             // 删除最后一个语句中，最后的逗号
             if (CollectionUtils.isNotEmpty(xmlLines)) {
@@ -521,14 +301,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
             }
             for (PropertyDTO idProperty : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + idProperty.getColumnName() + " = #{"
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{"
                         + idProperty.getPropertyName() + "}");
-            }
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
             xmlLines.add("</update>");
@@ -542,9 +319,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         List<String> xmlLines = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_OFF_MARKER);
-            }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<set>");
             for (PropertyDTO nonId : persistence.getNonIdProperties()) {
@@ -554,14 +328,11 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</set>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
             if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + "  AND " + config.getNotDeletedSql());
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
             }
             for (PropertyDTO id : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("  AND %s = #{%s}", id.getColumnName(),
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + String.format("AND %s = #{%s}", id.getColumnName(),
                         id.getPropertyName()));
-            }
-            if (config.getEnableGenerateFormatterMarker()) {
-                xmlLines.add(BaseConstant.SINGLE_INDENT + BaseConstant.FORMATTER_ON_MARKER);
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</update>");
@@ -630,6 +401,32 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @Override
+    public List<String> generateQueryByIndexMethod(TableAnalysisDTO tableAnalysis,
+            List<QueryByIndexMethodDTO> queryByIndexMethods) {
+        List<String> xmlLines = Lists.newArrayList();
+        for (QueryByIndexMethodDTO queryByIndexMethod : queryByIndexMethods) {
+            if (queryByIndexMethod.getMethodName() == null) {
+                continue;
+            }
+            xmlLines.add(String.format("<select id=\"%s\" resultMap=\"all\">", queryByIndexMethod.getMethodName()));
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + tableAnalysis.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+            if (tableAnalysis.getIsDeleteFlagExist()) {
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
+            }
+            for (PropertyDTO indexProperty : queryByIndexMethod.getIndexProperties()) {
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + indexProperty.getColumnName() + " = #{"
+                        + indexProperty.getPropertyName() + "}");
+            }
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+            xmlLines.add("</select>");
+            xmlLines.add("");
+        }
+        return xmlLines;
     }
 
     private String concatXmlComment(TableAnalysisDTO persistence) {

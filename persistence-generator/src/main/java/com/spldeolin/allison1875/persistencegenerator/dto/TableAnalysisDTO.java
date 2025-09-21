@@ -6,12 +6,14 @@ import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * @author Deolin 2020-07-12
  */
 @Data
+@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TableAnalysisDTO {
 
@@ -34,9 +36,9 @@ public class TableAnalysisDTO {
     List<PropertyDTO> nonIdProperties = Lists.newArrayList();
 
     /**
-     * 逻辑外键字段（id或code结尾的字段算做逻辑外键）
+     * 索引
      */
-    List<PropertyDTO> keyProperties = Lists.newArrayList();
+    List<IndexDTO> indices = Lists.newArrayList();
 
     /**
      * 所有字段

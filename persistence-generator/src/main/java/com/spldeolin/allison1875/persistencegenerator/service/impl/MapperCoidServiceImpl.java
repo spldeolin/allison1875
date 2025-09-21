@@ -7,6 +7,7 @@ import static com.github.javaparser.StaticJavaParser.parseType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -20,6 +21,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.github.javaparser.utils.CodeGenerationUtils;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -36,7 +38,7 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
-import com.spldeolin.allison1875.persistencegenerator.dto.QueryByKeysDTO;
+import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperCoidService;
@@ -187,40 +189,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     }
 
     @Override
-    public String generateDeleteByKeyMethodToMapper(GenerateMethodToMapperArgs args) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist(
-                "deleteBy" + MoreStringUtils.toUpperCamel(args.getKey().getPropertyName()), args.getMapper());
-        MethodDeclaration method = new MethodDeclaration();
-        String varName = MoreStringUtils.toLowerCamel(args.getKey().getPropertyName());
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                "根据「" + args.getKey().getDescription() + "」删除");
-        method.setJavadocComment(comment);
-        method.setType(PrimitiveType.intType());
-        method.setName(methodName);
-
-        Parameter parameter = parseParameter(args.getKey().getJavaType().getSimpleName() + " " + varName);
-        method.addParameter(parameter);
-        method.setBody(null);
-        args.getMapper().getMembers().addLast(method);
-        return methodName;
-    }
-
-    @Override
-    public String generateInsertOrUpdateMethodToMapper(GenerateMethodToMapperArgs args) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist("insertOrUpdate", args.getMapper());
-        MethodDeclaration insert = new MethodDeclaration();
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                "尝试插入，若指定了id并存在，则更新，即INSERT ON DUPLICATE KEY UPDATE");
-        insert.setJavadocComment(comment);
-        insert.setType(PrimitiveType.intType());
-        insert.setName(methodName);
-        insert.addParameter(args.getEntityGeneration().getDtoQualifier(), "entity");
-        insert.setBody(null);
-        args.getMapper().getMembers().addLast(insert);
-        return methodName;
-    }
-
-    @Override
     public String generateInsertMethodToMapper(GenerateMethodToMapperArgs args) {
         String methodName = antiDuplicationService.getNewMethodNameIfExist("insert", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
@@ -237,7 +205,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     @Override
     public String generateListAllMethodToMapper(GenerateMethodToMapperArgs args) {
         String methodName = null;
-        if (CollectionUtils.isNotEmpty(args.getTableAnalysisDTO().getIdProperties())) {
+        // 无索引表才支持listAll
+        if (CollectionUtils.isEmpty(args.getTableAnalysisDTO().getIndices())) {
             methodName = antiDuplicationService.getNewMethodNameIfExist("listAll", args.getMapper());
             MethodDeclaration listAll = new MethodDeclaration();
             String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "获取全部");
@@ -247,20 +216,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             listAll.setBody(null);
             args.getMapper().getMembers().addLast(listAll);
         }
-        return methodName;
-    }
-
-    @Override
-    public String generateQueryByEntityMethodToMapper(GenerateMethodToMapperArgs args) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist("queryByEntity", args.getMapper());
-        MethodDeclaration queryByEntity = new MethodDeclaration();
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据实体内的属性查询");
-        queryByEntity.setType(parseType("java.util.List<" + args.getEntityGeneration().getDtoQualifier() + ">"));
-        queryByEntity.setName(methodName);
-        queryByEntity.addParameter(args.getEntityGeneration().getDtoQualifier(), "entity");
-        queryByEntity.setBody(null);
-        queryByEntity.setJavadocComment(comment);
-        args.getMapper().getMembers().addLast(queryByEntity);
         return methodName;
     }
 
@@ -322,6 +277,38 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     }
 
     @Override
+    public QueryByIndexMethodDTO generateQueryByIndexMethodToMapper(GenerateMethodToMapperArgs args,
+            List<PropertyDTO> indexProperties, Boolean isUnique) {
+        String methodName =
+                "queryBy" + indexProperties.stream().map(prop -> MoreStringUtils.toUpperCamel(prop.getPropertyName()))
+                        .collect(Collectors.joining());
+        methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, args.getMapper());
+        MethodDeclaration queryByKeys = new MethodDeclaration();
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据" + indexProperties.stream()
+                .map(prop -> "“" + MoreObjects.firstNonNull(prop.getDescription(), prop.getPropertyName()) + "”")
+                .collect(Collectors.joining("、")) + "查询");
+        if (isUnique) {
+            queryByKeys.setType(parseType(args.getEntityGeneration().getDtoQualifier()));
+        } else {
+            queryByKeys.setType(parseType("java.util.List<" + args.getEntityGeneration().getDtoQualifier() + ">"));
+        }
+        queryByKeys.setName(methodName);
+        for (PropertyDTO key : indexProperties) {
+            queryByKeys.addParameter(parseParameter(
+                    "@org.apache.ibatis.annotations.Param(\"" + key.getPropertyName() + "\") " + key.getJavaType()
+                            .getQualifier() + " " + key.getPropertyName()));
+        }
+        queryByKeys.setBody(null);
+        queryByKeys.setJavadocComment(comment);
+        args.getMapper().getMembers().addLast(queryByKeys);
+        QueryByIndexMethodDTO retval = new QueryByIndexMethodDTO();
+        retval.setMethodName(methodName);
+        retval.setIndexProperties(indexProperties);
+        retval.setIsUnique(isUnique);
+        return retval;
+    }
+
+    @Override
     public String generateQueryByIdsMethodToMapper(GenerateMethodToMapperArgs args) {
         String methodName = null;
         if (args.getTableAnalysisDTO().getIdProperties().size() == 1) {
@@ -341,48 +328,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             args.getMapper().getMembers().addLast(queryByIds);
         }
         return methodName;
-    }
-
-    @Override
-    public String generateQueryByKeyMethodToMapper(GenerateMethodToMapperArgs generateMethodToMapper) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist(
-                "queryBy" + MoreStringUtils.toUpperCamel(generateMethodToMapper.getKey().getPropertyName()),
-                generateMethodToMapper.getMapper());
-        MethodDeclaration method = new MethodDeclaration();
-        String comment = concatMapperMethodComment(generateMethodToMapper.getTableAnalysisDTO(),
-                "根据「" + generateMethodToMapper.getKey().getDescription() + "」查询");
-        method.setType(
-                parseType("java.util.List<" + generateMethodToMapper.getEntityGeneration().getDtoQualifier() + ">"));
-        method.setName(methodName);
-        String varName = MoreStringUtils.toLowerCamel(generateMethodToMapper.getKey().getPropertyName());
-        Parameter parameter = parseParameter(
-                generateMethodToMapper.getKey().getJavaType().getSimpleName() + " " + varName);
-        method.addParameter(parameter);
-        method.setBody(null);
-        method.setJavadocComment(comment);
-        generateMethodToMapper.getMapper().getMembers().addLast(method);
-        return methodName;
-    }
-
-    @Override
-    public QueryByKeysDTO generateQueryByKeysMethodToMapper(GenerateMethodToMapperArgs args) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist(
-                "queryBy" + English.plural(MoreStringUtils.toUpperCamel(args.getKey().getPropertyName())),
-                args.getMapper());
-        MethodDeclaration method = new MethodDeclaration();
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                "根据多个「" + args.getKey().getDescription() + "」查询");
-        method.setType(parseType("java.util.List<" + args.getEntityGeneration().getDtoQualifier() + ">"));
-        method.setName(methodName);
-        String typeName = "java.util.List<" + args.getKey().getJavaType().getSimpleName() + ">";
-        String varsName = English.plural(MoreStringUtils.toLowerCamel(args.getKey().getPropertyName()));
-        String paramAnno = "@org.apache.ibatis.annotations.Param(\"" + varsName + "\")";
-        Parameter parameter = parseParameter(paramAnno + " " + typeName + " " + varsName);
-        method.addParameter(parameter);
-        method.setBody(null);
-        method.setJavadocComment(comment);
-        args.getMapper().getMembers().addLast(method);
-        return new QueryByKeysDTO().setKey(args.getKey()).setMethodName(methodName).setVarsName(varsName);
     }
 
     @Override
