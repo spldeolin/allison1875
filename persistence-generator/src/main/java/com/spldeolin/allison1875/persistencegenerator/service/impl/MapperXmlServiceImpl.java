@@ -192,6 +192,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateListAllMethod(TableAnalysisDTO persistence, String methodName) {
+        if (methodName == null) {
+            return null;
+        }
         List<String> result = Lists.newArrayList();
         String firstLine = "<select id=\"" + methodName + "\" ";
         firstLine += "resultMap=\"all\">";
