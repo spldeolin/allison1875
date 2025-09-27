@@ -62,6 +62,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateBatchInsertEvenNullMethod(TableAnalysisDTO persistence, String methodName) {
+        if (methodName == null) {
+            return Lists.newArrayList();
+        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<insert id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + String.format("INSERT INTO %s", persistence.getTableName()));
@@ -103,6 +106,9 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     @Override
     public List<String> generateBatchUpdateEvenNullMethod(TableAnalysisDTO persistence, String methodName) {
+        if (methodName == null) {
+            return Lists.newArrayList();
+        }
         List<String> xmlLines = Lists.newArrayList();
         xmlLines.add(String.format("<update id=\"%s\">", methodName));
         xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
@@ -288,8 +294,10 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     @Override
     public List<String> generateUpdateByIdEvenNullMethod(TableAnalysisDTO persistence, String entityName,
             String methodName) {
+        if (methodName == null) {
+            return Lists.newArrayList();
+        }
         List<String> xmlLines = Lists.newArrayList();
-        if (CollectionUtils.isNotEmpty(persistence.getIdProperties())) {
             xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
             xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
             xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
@@ -313,7 +321,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
             xmlLines.add("</update>");
             xmlLines.add("");
-        }
         return xmlLines;
     }
 

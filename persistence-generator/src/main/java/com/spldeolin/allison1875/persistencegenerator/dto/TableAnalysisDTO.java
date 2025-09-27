@@ -55,6 +55,11 @@ public class TableAnalysisDTO {
      */
     final List<FileFlush> flushes = Lists.newArrayList();
 
+    /**
+     * 所有属性均不能为null
+     */
+    Boolean isAllPropertiesNotNull;
+
     String lotNo;
 
 }

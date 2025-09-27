@@ -125,6 +125,9 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchInsertEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
+        if (args.getTableAnalysisDTO().getIsAllPropertiesNotNull()) {
+            return null;
+        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchInsertEvenNull", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "批量插入，为null的属性会被作为null插入");
@@ -157,6 +160,9 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchUpdateEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
+        if (args.getTableAnalysisDTO().getIsAllPropertiesNotNull()) {
+            return null;
+        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchUpdateEvenNull", args.getMapper());
         MethodDeclaration update = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
@@ -332,19 +338,20 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateUpdateByIdEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
-        String methodName = null;
-        if (CollectionUtils.isNotEmpty(args.getTableAnalysisDTO().getIdProperties())) {
-            methodName = antiDuplicationService.getNewMethodNameIfExist("updateByIdEvenNull", args.getMapper());
-            MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
-            String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                    "根据ID更新数据，为null属性对应的字段会被更新为null");
-            updateByIdEvenNull.setJavadocComment(comment);
-            updateByIdEvenNull.setType(PrimitiveType.intType());
-            updateByIdEvenNull.setName(methodName);
-            updateByIdEvenNull.addParameter(args.getEntityGeneration().getDtoQualifier(), "entity");
-            updateByIdEvenNull.setBody(null);
-            args.getMapper().getMembers().addLast(updateByIdEvenNull);
+        if (args.getTableAnalysisDTO().getIsAllPropertiesNotNull() || CollectionUtils.isEmpty(
+                args.getTableAnalysisDTO().getIdProperties())) {
+            return null;
         }
+        String methodName = antiDuplicationService.getNewMethodNameIfExist("updateByIdEvenNull", args.getMapper());
+        MethodDeclaration updateByIdEvenNull = new MethodDeclaration();
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
+                "根据ID更新数据，为null属性对应的字段会被更新为null");
+        updateByIdEvenNull.setJavadocComment(comment);
+        updateByIdEvenNull.setType(PrimitiveType.intType());
+        updateByIdEvenNull.setName(methodName);
+        updateByIdEvenNull.addParameter(args.getEntityGeneration().getDtoQualifier(), "entity");
+        updateByIdEvenNull.setBody(null);
+        args.getMapper().getMembers().addLast(updateByIdEvenNull);
         return methodName;
     }
 

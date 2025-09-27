@@ -118,6 +118,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                 tableAnalysis.setEntityName(MoreStringUtils.toUpperCamel(tableName) + endWith());
                 tableAnalysis.setMapperName(MoreStringUtils.toUpperCamel(tableName) + "Mapper");
                 tableAnalysis.setDescrption(record.getValue("TABLE_COMMENT", String.class));
+                tableAnalysis.setIsAllPropertiesNotNull(true);
                 tableMap.put(tableName, tableAnalysis);
             }
 
@@ -139,6 +140,9 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             }
             tableAnalysis.getProperties().add(property);
             propertyMap.put(tableName, columnName, property);
+            if (!property.getNotnull()) {
+                tableAnalysis.setIsAllPropertiesNotNull(false);
+            }
         }
 
         for (Record record : indexRecords) {
@@ -235,6 +239,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                     if (createTable.getComment() != null) {
                         tableAnalysis.setDescrption(((SQLTextLiteralExpr) createTable.getComment()).getText());
                     }
+                    tableAnalysis.setIsAllPropertiesNotNull(true);
                     for (SQLColumnDefinition columnDef : createTable.getColumnDefinitions()) {
                         PropertyDTO property = new PropertyDTO();
                         String columnName = columnDef.getName().getSimpleName().replace("`", "");
@@ -262,6 +267,9 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                         tableAnalysis.getProperties().add(property);
                         if (columnName.equals(getDeleteFlagName())) {
                             tableAnalysis.setIsDeleteFlagExist(true);
+                        }
+                        if (!property.getNotnull()) {
+                            tableAnalysis.setIsAllPropertiesNotNull(false);
                         }
                     }
                     for (PropertyDTO prop : tableAnalysis.getProperties()) {
