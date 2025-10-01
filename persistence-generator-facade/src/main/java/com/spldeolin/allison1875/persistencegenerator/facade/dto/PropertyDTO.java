@@ -17,8 +17,6 @@ public class PropertyDTO {
 
     String propertyName;
 
-    JavaTypeDTO javaType;
-
     String description;
 
     Long length;
@@ -29,5 +27,6 @@ public class PropertyDTO {
 
     Boolean isAutoIncrement;
 
+    JavaTypeDTO javaType;
 
 }

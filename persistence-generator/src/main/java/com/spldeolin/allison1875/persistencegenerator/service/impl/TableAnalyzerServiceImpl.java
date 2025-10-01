@@ -125,14 +125,14 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             PropertyDTO property = new PropertyDTO();
             property.setColumnName(columnName);
             property.setPropertyName(MoreStringUtils.toLowerCamel(columnName));
-            property.setJavaType(jdbcType2javaType(record.getValue("COLUMN_TYPE", String.class),
-                    record.getValue("DATA_TYPE", String.class)));
             property.setDescription(record.getValue("COLUMN_COMMENT", String.class));
             property.setLength(record.getValue("CHARACTER_MAXIMUM_LENGTH", Long.class));
             property.setNotnull("NO".equals(record.getValue("IS_NULLABLE", String.class)));
             property.setDefaultValue(record.getValue("COLUMN_DEFAULT", String.class));
             property.setIsAutoIncrement(record.getValue("EXTRA") != null && record.getValue("EXTRA", String.class)
                     .contains("auto_increment"));
+            property.setJavaType(jdbcType2javaType(record.getValue("COLUMN_TYPE", String.class),
+                    record.getValue("DATA_TYPE", String.class), property, tableAnalysis));
             if ("PRI".equalsIgnoreCase(record.getValue("COLUMN_KEY", String.class))) {
                 tableAnalysis.getIdProperties().add(property);
             } else {
@@ -164,7 +164,8 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
         return Lists.newArrayList(tableMap.values());
     }
 
-    private JavaTypeDTO jdbcType2javaType(String columnType, String dataType) {
+    protected JavaTypeDTO jdbcType2javaType(String columnType, String dataType, PropertyDTO property,
+            TableAnalysisDTO tableAnalysis) {
         if (columnType == null || dataType == null) {
             throw new IllegalArgumentException("illegal argument.");
         }
@@ -245,8 +246,6 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                         String columnName = columnDef.getName().getSimpleName().replace("`", "");
                         property.setColumnName(columnName);
                         property.setPropertyName(MoreStringUtils.toLowerCamel(columnName));
-                        property.setJavaType(jdbcType2javaType(columnDef.getDataType().toString(),
-                                columnDef.getDataType().getName()));
                         if (columnDef.getComment() != null) {
                             property.setDescription(((SQLTextLiteralExpr) columnDef.getComment()).getText());
                         } else {
@@ -258,6 +257,9 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                             property.setDefaultValue(columnDef.getDefaultExpr().toString());
                         }
                         property.setIsAutoIncrement(columnDef.isAutoIncrement());
+                        property.setJavaType(
+                                jdbcType2javaType(columnDef.getDataType().toString(), columnDef.getDataType().getName(),
+                                        property, tableAnalysis));
                         if ((createTable.getPrimaryKeyNames() != null && createTable.getPrimaryKeyNames()
                                 .contains(columnName)) || columnDef.isPrimaryKey()) {
                             tableAnalysis.getIdProperties().add(property);
