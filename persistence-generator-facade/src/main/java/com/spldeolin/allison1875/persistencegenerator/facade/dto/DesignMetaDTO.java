@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.facade.dto;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -38,5 +39,10 @@ public class DesignMetaDTO {
      * 如果properties中有逻辑删除标识，则值来自PersistenceGeneratorConfig#notDeletedSql
      */
     String notDeletedSql;
+
+    /**
+     * 指定Design类中的分页接口使用「pageNo + pageSize」还是「offset + limit」
+     */
+    PageParamStyleEnum pageParamStyle = PageParamStyleEnum.PAGE_NO_PAGE_SIZE;
 
 }

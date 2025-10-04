@@ -61,7 +61,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         FileFlush paramDTOFlush = null;
 
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
-        if (binaries.size() > 3) {
+        if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnShape() == ReturnShapeEnum.page)) {
             DataModelArg dataModelArg = new DataModelArg();
             Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
                     .orElse(AstForestContext.get().getSourceRoot());
@@ -88,6 +88,12 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 fieldArg.setFieldName(varName);
                 dataModelArg.getFieldArgs().add(fieldArg);
             }
+            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                dataModelArg.getFieldArgs()
+                        .add(new FieldArg().setTypeQualifier("java.lang.Integer").setFieldName("offset"));
+                dataModelArg.getFieldArgs()
+                        .add(new FieldArg().setTypeQualifier("java.lang.Integer").setFieldName("limit"));
+            }
             dataModelArg.setDataModelExistenceResolution(FileExistenceResolutionEnum.RENAME);
             DataModelGeneration paramDTOGeneration = dataModelGeneratorService.generateDataModel(dataModelArg);
             paramDTOFlush = paramDTOGeneration.getFileFlush();
@@ -113,8 +119,18 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 param.setName(varName);
                 params.add(param);
             }
+            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                params.add(new Parameter().setType("Integer").setName("offset"));
+                params.add(new Parameter().setType("Integer").setName("limit"));
+            }
         } else {
-            return new GenerateParamRetval().setIsParamDTO(false);
+            GenerateParamRetval retval = new GenerateParamRetval();
+            retval.setIsParamDTO(false);
+            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                retval.getParameters().add(new Parameter().setType("Integer").setName("offset"));
+                retval.getParameters().add(new Parameter().setType("Integer").setName("limit"));
+            }
+            return retval;
         }
 
         GenerateParamRetval result = new GenerateParamRetval();
@@ -141,8 +157,8 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         }
 
         if (isAssigned) {
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                    .contains(chainAnalysis.getReturnShape())) {
+            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach,
+                    ReturnShapeEnum.page).contains(chainAnalysis.getReturnShape())) {
                 result.setResultType(
                         StaticJavaParser.parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
                 result.setElementTypeQualifier(chainAnalysis.getEntityQualifier());
@@ -179,8 +195,8 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             DataModelGeneration recordDTOGeneration = dataModelGeneratorService.generateDataModel(dataModelArg);
             result.setFlush(recordDTOGeneration.getFileFlush());
             result.setElementTypeQualifier(recordDTOGeneration.getDtoQualifier());
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                    .contains(chainAnalysis.getReturnShape())) {
+            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach,
+                    ReturnShapeEnum.page).contains(chainAnalysis.getReturnShape())) {
                 result.setResultType(
                         StaticJavaParser.parseType("java.util.List<" + recordDTOGeneration.getDtoQualifier() + ">"));
             } else {
@@ -193,8 +209,8 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             VariableProperty returnProp = Iterables.getOnlyElement(returnProps);
             JavaTypeDTO javaType = returnProp.getProperty().getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                    .contains(chainAnalysis.getReturnShape())) {
+            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach,
+                    ReturnShapeEnum.page).contains(chainAnalysis.getReturnShape())) {
                 result.setResultType(StaticJavaParser.parseType("java.util.List<" + javaType.getQualifier() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getQualifier()));

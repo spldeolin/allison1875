@@ -31,7 +31,8 @@ public class QueryChainDetectorServiceImpl implements QueryChainDetectorService 
     public List<MethodCallExpr> detectQueryChains(Node node) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : node.findAll(MethodCallExpr.class)) {
-            if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count") && mce.getParentNode()
+            if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count", "page")
+                    && mce.getParentNode()
                     .isPresent()) {
                 if (this.finalNameExprRecursively(mce, commonConfig.getDesignPackage())) {
                     mces.add(mce);

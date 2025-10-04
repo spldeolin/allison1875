@@ -20,4 +20,6 @@ public enum ReturnShapeEnum {
 
     count,
 
+    page,
+
 }

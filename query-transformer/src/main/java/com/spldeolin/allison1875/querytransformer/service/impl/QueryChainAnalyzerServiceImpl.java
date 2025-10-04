@@ -13,8 +13,12 @@ import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.BinaryExpr.Operator;
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -32,6 +36,7 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
+import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.querytransformer.dto.AssignmentDTO;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
@@ -90,9 +95,12 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         }
 
         String methodName = this.analyzeSpecifiedMethodName(initialMethod, queryChain, designMeta);
+        String countMethodNameForPage = analyzeCountMethodNameForPage(methodName);
 
         ReturnShapeEnum returnShape;
         String keyPropertyName = null;
+        Expression offsetExpr = null;
+        Expression limitExpr = null;
         if (queryChain.getNameAsString().equals("one")) {
             returnShape = ReturnShapeEnum.one;
         } else if (queryChain.getNameAsString().equals("many")) {
@@ -109,10 +117,23 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
             }
         } else if (queryChain.getNameAsString().equals("count")) {
             returnShape = ReturnShapeEnum.count;
+        } else if (queryChain.getNameAsString().equals("page")) {
+            returnShape = ReturnShapeEnum.page;
+            if (designMeta.getPageParamStyle() == PageParamStyleEnum.OFFSET_LIMIT) {
+                offsetExpr = queryChain.getArgument(0);
+                limitExpr = queryChain.getArgument(1);
+            } else {
+
+                offsetExpr = new BinaryExpr(new EnclosedExpr(
+                        new BinaryExpr(queryChain.getArgument(0), new IntegerLiteralExpr("1"), Operator.MINUS)),
+                        queryChain.getArgument(1), Operator.MULTIPLY);
+                limitExpr = queryChain.getArgument(1);
+            }
         } else {
             returnShape = null;
         }
-        log.info("initialMethod={} returnShape={}", initialMethod, returnShape);
+        log.info("initialMethod={} returnShape={} offset={} limit={}", initialMethod, returnShape, offsetExpr,
+                limitExpr);
 
         Set<PropertyDTO> selectProperties = Sets.newLinkedHashSet();
         Set<SearchConditionDTO> searchConditions = Sets.newLinkedHashSet();
@@ -330,10 +351,13 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         ChainAnalysisDTO result = new ChainAnalysisDTO();
         result.setEntityQualifier(designMeta.getEntityQualifier());
         result.setMethodName(methodName);
+        result.setCountMethodNameForPage(countMethodNameForPage);
         result.setChainInitialMethod(initialMethod);
         result.setReturnShape(returnShape);
         result.setSelectProperties(selectProperties);
         result.setSearchConditions(searchConditions);
+        result.setOffsetExpr(offsetExpr);
+        result.setLimitExpr(limitExpr);
         result.setSortProperties(sortProperties);
         result.setJoinClauses(joinClauses);
         result.setAssignments(assignments);
@@ -344,6 +368,16 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
+    }
+
+    private static String analyzeCountMethodNameForPage(String methodName) {
+        String countMethodNameForPage;
+        if (methodName.startsWith("query")) {
+            countMethodNameForPage = methodName.replaceFirst("query", "count");
+        } else {
+            countMethodNameForPage = "count" + StringUtils.capitalize(methodName);
+        }
+        return countMethodNameForPage;
     }
 
     private Stream<String> extractPropertyNames(String joinedEntityWithProperty, DesignMetaDTO joinedEntityMeta) {

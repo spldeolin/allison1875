@@ -125,6 +125,15 @@ public class DesignServiceImpl implements DesignService {
                 generateParamRetval);
 
         List<Statement> replacementStatements = Lists.newArrayList();
+
+        // 分页
+        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+            MethodCallExpr callCountMce = StaticJavaParser.parseExpression(mceCode).asMethodCallExpr();
+            callCountMce.setName(chainAnalysis.getCountMethodNameForPage());
+            replacementStatements.add(StaticJavaParser.parseStatement(
+                    "long " + calcAssignVarName(chainAnalysis) + "Total = " + callCountMce + ";"));
+        }
+
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
             // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
             replacementStatements.add(StaticJavaParser.parseStatement(

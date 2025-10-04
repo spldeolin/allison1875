@@ -39,6 +39,11 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         } else {
             result += chainAnalysis.getBinariesAsArgs().stream().filter(b -> b.getArgument() != null)
                     .map(p -> p.getArgument().toString()).collect(Collectors.joining(", "));
+            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                result += result.endsWith("(") ? "" : " ,";
+                result += chainAnalysis.getOffsetExpr() + ", ";
+                result += chainAnalysis.getLimitExpr();
+            }
         }
         result += ")";
         log.info("Method Call built [{}]", result);
@@ -59,6 +64,12 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
             result.add(StaticJavaParser.parseStatement(
                     paramDTOVarName + ".set" + MoreStringUtils.toUpperCamel(binariesAsArg.getVarName()) + "("
                             + binariesAsArg.getArgument() + ");"));
+        }
+        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+            result.add(StaticJavaParser.parseStatement(
+                    paramDTOVarName + ".setOffset(" + chainAnalysis.getOffsetExpr() + ");"));
+            result.add(StaticJavaParser.parseStatement(
+                    paramDTOVarName + ".setLimit(" + chainAnalysis.getLimitExpr() + ");"));
         }
         return result;
     }

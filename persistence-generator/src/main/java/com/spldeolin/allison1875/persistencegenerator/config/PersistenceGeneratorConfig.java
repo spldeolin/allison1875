@@ -4,6 +4,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
+import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -53,6 +54,12 @@ public class PersistenceGeneratorConfig {
      */
     @NotNull
     Boolean enableGenerateDesign = true;
+
+    /**
+     * 指定Design类中的分页接口使用「pageNo + pageSize」还是「offset + limit」
+     */
+    @NotNull
+    PageParamStyleEnum pageParamStyle = PageParamStyleEnum.PAGE_NO_PAGE_SIZE;
 
     /**
      * 生成出的Entity类是否以Entity作为类名的结尾

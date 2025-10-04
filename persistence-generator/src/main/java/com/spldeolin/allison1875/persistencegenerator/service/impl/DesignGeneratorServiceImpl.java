@@ -43,6 +43,7 @@ import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordCon
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant.ChainInitialMethod;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
+import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.persistencegenerator.service.DesignGeneratorService;
 import com.spldeolin.allison1875.support.OnChainComparison;
 import com.spldeolin.allison1875.support.PropertyName;
@@ -255,6 +256,13 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public %s one() { throw e; }", entityGeneration.getDtoName())));
         queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
+        String pageParamName1 =
+                config.getPageParamStyle() == PageParamStyleEnum.PAGE_NO_PAGE_SIZE ? "pageNo" : "offset";
+        String pageParamName2 =
+                config.getPageParamStyle() == PageParamStyleEnum.PAGE_NO_PAGE_SIZE ? "pageSize" : "limit";
+        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
+                        + pageParamName2 + ") { throw e; }"));
         queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public JoinChain<QueryChainMethods, %s> leftJoin() { throw e; }",
                         entityGeneration.getDtoName())));
@@ -342,6 +350,9 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
+        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
+                        + pageParamName2 + ") { throw e; }"));
         nextableByChainReturnCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         designCoid.addMember(nextableByChainReturnCoid);
@@ -381,6 +392,9 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
+        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
+                        + pageParamName2 + ") { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
 
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
@@ -424,6 +438,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
         meta.setProperties(propertiesByName);
         meta.setTableName(tableAnalysis.getTableName());
+        meta.setPageParamStyle(config.getPageParamStyle());
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", KeywordConstant.META_FIELD_NAME,
                 StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));

@@ -81,8 +81,27 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         if (mapper == null) {
             return Optional.empty();
         }
-
         ChainAnalysisDTO chainAnalysis = args.getChainAnalysis();
+
+        if (args.getChainAnalysis().getReturnShape() == ReturnShapeEnum.page) {
+            // 除了query还需要生成count方法
+            String methodName = chainAnalysis.getCountMethodNameForPage();
+            methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
+            log.info("anti duplication worked completed, new method name '{}' update to ChainAnalysisDTO.methodName, "
+                    + "old={}", methodName, chainAnalysis.getMethodName());
+            chainAnalysis.setCountMethodNameForPage(methodName);
+
+            MethodDeclaration method = new MethodDeclaration();
+            if (commonConfig.getEnableLotNoAnnounce()) {
+                method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
+            }
+            method.setType("long");
+            method.setName(methodName);
+            method.setParameters(new NodeList<>(args.getCloneParameters()));
+            method.setBody(null);
+            mapper.getMembers().add(method);
+        }
+
         String methodName = chainAnalysis.getMethodName();
         methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
         log.info(
@@ -123,13 +142,34 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             xmlLines.add("");
             if (chainAnalysis.getChainInitialMethod() == KeywordConstant.ChainInitialMethod.SELECT) {
                 // QUERY
-                xmlLines.add(concatLotNoComment(chainAnalysis));
-                String startTag = this.concatSelectStartTag(designMeta, chainAnalysis, generateParamRetval,
-                        generateReturnTypeRetval);
-                xmlLines.add(startTag);
-
                 ArrayList<JoinClauseDTO> joinClauses = Lists.newArrayList(chainAnalysis.getJoinClauses());
                 boolean join = !joinClauses.isEmpty();
+
+                if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                    // 分页场景除了query还需要生成count方法
+                    xmlLines.add(concatLotNoComment(chainAnalysis));
+                    String startTag = this.concatSelectStartTag(null, chainAnalysis.getCountMethodNameForPage(),
+                            generateParamRetval,
+                            new GenerateReturnTypeRetval().setResultType(PrimitiveType.longType()));
+                    xmlLines.add(startTag);
+                    // select部分
+                    xmlLines.add(SINGLE_INDENT + "SELECT COUNT(*)");
+                    // from部分
+                    xmlLines.add(SINGLE_INDENT + "FROM " + designMeta.getTableName() + (join ? " t1" : ""));
+                    for (int i = 0; i < joinClauses.size(); i++) {
+                        xmlLines.addAll(concatJoinSection(joinClauses.get(i), i));
+                    }
+                    // where部分
+                    xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
+                    xmlLines.add("</select>");
+                }
+
+                xmlLines.add(concatLotNoComment(chainAnalysis));
+                String startTag = this.concatSelectStartTag(designMeta.getEntityQualifier(),
+                        chainAnalysis.getMethodName(), generateParamRetval, generateReturnTypeRetval);
+                xmlLines.add(startTag);
+
+                // select 部分
                 if (chainAnalysis.getReturnShape() == ReturnShapeEnum.count) {
                     xmlLines.add(SINGLE_INDENT + "SELECT COUNT(*)");
                 } else if (CollectionUtils.isEmpty(chainAnalysis.getSelectProperties())) {
@@ -153,6 +193,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                         xmlLines.add(SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
                     }
                 } else {
+                    xmlLines.add(SINGLE_INDENT + "SELECT");
                     for (PropertyDTO property : chainAnalysis.getSelectProperties()) {
                         xmlLines.add(DOUBLE_INDENT + (join ? "t1." : "") + property.getColumnName() + " AS "
                                 + property.getPropertyName() + ",");
@@ -161,11 +202,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     int last = xmlLines.size() - 1;
                     xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 }
+                // from部分
                 xmlLines.add(SINGLE_INDENT + "FROM " + designMeta.getTableName() + (join ? " t1" : ""));
                 for (int i = 0; i < joinClauses.size(); i++) {
                     xmlLines.addAll(concatJoinSection(joinClauses.get(i), i));
                 }
+                // where部分
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
+                // order by部分
                 if (CollectionUtils.isNotEmpty(chainAnalysis.getSortProperties())) {
                     xmlLines.add(SINGLE_INDENT + "ORDER BY");
                     for (SortPropertyDTO sortProp : chainAnalysis.getSortProperties()) {
@@ -177,8 +221,12 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     int last = xmlLines.size() - 1;
                     xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 }
+                // limit部分
                 if (chainAnalysis.getReturnShape() == ReturnShapeEnum.one) {
                     xmlLines.add(SINGLE_INDENT + "LIMIT 1");
+                }
+                if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                    xmlLines.add(SINGLE_INDENT + "LIMIT #{offset}, #{limit}");
                 }
 
                 xmlLines.add("</select>");
@@ -404,18 +452,18 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     } else {
                         xmlLines.add(ifTag);
                         xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " = "
-                                        + dollarVar);
+                                + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case NOT_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " != "
-                                        + dollarVar);
+                                + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
                         xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " != "
-                                        + dollarVar);
+                                + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
@@ -455,22 +503,22 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 case GREATER_THEN:
                     if (chainAnalysis.getIsByForced()) {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " > "
-                                        + dollarVar);
+                                + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
                         xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " > "
-                                        + dollarVar);
+                                + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
                 case GREATER_OR_EQUALS:
                     if (chainAnalysis.getIsByForced()) {
                         xmlLines.add(SINGLE_INDENT_WITH_AND + (join ? "t1." : "") + property.getColumnName() + " >= "
-                                        + dollarVar);
+                                + dollarVar);
                     } else {
                         xmlLines.add(ifTag);
                         xmlLines.add(DOUBLE_INDENT + "AND " + (join ? "t1." : "") + property.getColumnName() + " >= "
-                                        + dollarVar);
+                                + dollarVar);
                         xmlLines.add(SINGLE_INDENT + "</if>");
                     }
                     break;
@@ -518,6 +566,10 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             }
         }
         xmlLines.add(SINGLE_INDENT + "</where>");
+        if (xmlLines.size() == 2) {
+            // 代表<where></where>中没有内容
+            return Lists.newArrayList();
+        }
         return xmlLines;
     }
 
@@ -528,9 +580,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         return "";
     }
 
-    private String concatSelectStartTag(DesignMetaDTO designMeta, ChainAnalysisDTO chainAnalysis,
-            GenerateParamRetval paramGeneration, GenerateReturnTypeRetval resultGeneration) {
-        String startTag = "<select id='" + chainAnalysis.getMethodName() + "'";
+    private String concatSelectStartTag(String entityQualifier, String methodName, GenerateParamRetval paramGeneration,
+            GenerateReturnTypeRetval resultGeneration) {
+        String startTag = "<select id='" + methodName + "'";
         if (paramGeneration.getParameters().size() == 1) {
             Parameter onlyParam = paramGeneration.getParameters().get(0);
             if (onlyParam.getAnnotations().stream()
@@ -539,12 +591,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             }
         }
         if (resultGeneration.getElementTypeQualifier() != null && !resultGeneration.getElementTypeQualifier()
-                .equals(designMeta.getEntityQualifier())) {
+                .equals(entityQualifier)) {
             startTag += " resultType='" + resultGeneration.getElementTypeQualifier() + "'>";
-        } else if (!resultGeneration.getResultType().equals(PrimitiveType.intType())) {
-            startTag += " resultMap='all'>";
-        } else {
+        } else if (resultGeneration.getResultType().equals(PrimitiveType.longType())) {
+            startTag += " resultType='long'>";
+        } else if (resultGeneration.getResultType().equals(PrimitiveType.intType())) {
             startTag += " resultType='int'>";
+        } else {
+            startTag += " resultMap='all'>";
         }
         return startTag;
     }

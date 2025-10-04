@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.querytransformer.dto;
 
 import java.util.Set;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Sets;
@@ -26,6 +27,8 @@ public class ChainAnalysisDTO {
 
     String methodName;
 
+    String countMethodNameForPage;
+
     KeywordConstant.ChainInitialMethod chainInitialMethod;
 
     ReturnShapeEnum returnShape;
@@ -33,6 +36,10 @@ public class ChainAnalysisDTO {
     Set<PropertyDTO> selectProperties = Sets.newLinkedHashSet();
 
     Set<SearchConditionDTO> searchConditions = Sets.newLinkedHashSet();
+
+    Expression offsetExpr;
+
+    Expression limitExpr;
 
     Set<SortPropertyDTO> sortProperties = Sets.newLinkedHashSet();
 
