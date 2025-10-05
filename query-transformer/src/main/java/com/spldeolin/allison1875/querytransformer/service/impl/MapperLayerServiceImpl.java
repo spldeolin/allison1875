@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -50,7 +51,7 @@ import com.spldeolin.allison1875.querytransformer.dto.SearchConditionDTO;
 import com.spldeolin.allison1875.querytransformer.dto.SortPropertyDTO;
 import com.spldeolin.allison1875.querytransformer.dto.XmlSourceFile;
 import com.spldeolin.allison1875.querytransformer.enums.OrderSequenceEnum;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,7 +84,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         }
         ChainAnalysisDTO chainAnalysis = args.getChainAnalysis();
 
-        if (args.getChainAnalysis().getReturnShape() == ReturnShapeEnum.page) {
+        if (args.getChainAnalysis().getReturnStyle() == ReturnStyleEnum.PAGE) {
             // 除了query还需要生成count方法
             String methodName = chainAnalysis.getCountMethodNameForPage();
             methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, mapper);
@@ -112,6 +113,12 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         MethodDeclaration method = new MethodDeclaration();
         if (commonConfig.getEnableLotNoAnnounce()) {
             method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
+        }
+        // 增加Mybatis @MapKey注解
+        if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
+            method.addAnnotation(StaticJavaParser.parseAnnotation(
+                    String.format("@org.apache.ibatis.annotations.MapKey(\"%s\")",
+                            chainAnalysis.getMapOrGroupKeyProperty().getPropertyName())));
         }
         method.setType(args.getClonedReturnType());
         method.setName(methodName);
@@ -145,7 +152,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 ArrayList<JoinClauseDTO> joinClauses = Lists.newArrayList(chainAnalysis.getJoinClauses());
                 boolean join = !joinClauses.isEmpty();
 
-                if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                     // 分页场景除了query还需要生成count方法
                     xmlLines.add(concatLotNoComment(chainAnalysis));
                     String startTag = this.concatSelectStartTag(null, chainAnalysis.getCountMethodNameForPage(),
@@ -170,7 +177,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 xmlLines.add(startTag);
 
                 // select 部分
-                if (chainAnalysis.getReturnShape() == ReturnShapeEnum.count) {
+                if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.COUNT) {
                     xmlLines.add(SINGLE_INDENT + "SELECT COUNT(*)");
                 } else if (CollectionUtils.isEmpty(chainAnalysis.getSelectProperties())) {
                     if (join) {
@@ -222,10 +229,10 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 }
                 // limit部分
-                if (chainAnalysis.getReturnShape() == ReturnShapeEnum.one) {
+                if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.ONE) {
                     xmlLines.add(SINGLE_INDENT + "LIMIT 1");
                 }
-                if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+                if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                     xmlLines.add(SINGLE_INDENT + "LIMIT #{offset}, #{limit}");
                 }
 

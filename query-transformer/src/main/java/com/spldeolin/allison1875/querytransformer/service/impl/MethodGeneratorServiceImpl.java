@@ -25,6 +25,7 @@ import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
+import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
 import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
@@ -34,7 +35,7 @@ import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.dto.VariableProperty;
 import com.spldeolin.allison1875.querytransformer.enums.ComparisonOperatorEnum;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.MethodGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,7 +62,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         FileFlush paramDTOFlush = null;
 
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
-        if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnShape() == ReturnShapeEnum.page)) {
+        if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE)) {
             DataModelArg dataModelArg = new DataModelArg();
             Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
                     .orElse(AstForestContext.get().getSourceRoot());
@@ -88,7 +89,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 fieldArg.setFieldName(varName);
                 dataModelArg.getFieldArgs().add(fieldArg);
             }
-            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+            if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                 dataModelArg.getFieldArgs()
                         .add(new FieldArg().setTypeQualifier("java.lang.Integer").setFieldName("offset"));
                 dataModelArg.getFieldArgs()
@@ -119,14 +120,14 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 param.setName(varName);
                 params.add(param);
             }
-            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+            if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                 params.add(new Parameter().setType("Integer").setName("offset"));
                 params.add(new Parameter().setType("Integer").setName("limit"));
             }
         } else {
             GenerateParamRetval retval = new GenerateParamRetval();
             retval.setIsParamDTO(false);
-            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+            if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                 retval.getParameters().add(new Parameter().setType("Integer").setName("offset"));
                 retval.getParameters().add(new Parameter().setType("Integer").setName("limit"));
             }
@@ -141,7 +142,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
     }
 
     @Override
-    public GenerateReturnTypeRetval generateReturnType(ChainAnalysisDTO chainAnalysis) {
+    public GenerateReturnTypeRetval generateReturnType(ChainAnalysisDTO chainAnalysis, DesignMetaDTO designMeta) {
         boolean isAssigned = isAssigned(chainAnalysis);
         GenerateReturnTypeRetval result = new GenerateReturnTypeRetval();
 
@@ -151,20 +152,23 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             return result;
         }
 
-        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.count) {
+        if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.COUNT) {
             result.setResultType(PrimitiveType.intType());
             return result;
         }
 
         if (isAssigned) {
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach,
-                    ReturnShapeEnum.page).contains(chainAnalysis.getReturnShape())) {
+            result.setElementTypeQualifier(chainAnalysis.getEntityQualifier());
+            if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
+                    .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(
                         StaticJavaParser.parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
-                result.setElementTypeQualifier(chainAnalysis.getEntityQualifier());
+            } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
+                String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
+                result.setResultType(StaticJavaParser.parseType(
+                        "java.util.Map<" + propertyTypeName + ", " + chainAnalysis.getEntityQualifier() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(chainAnalysis.getEntityQualifier()));
-                result.setElementTypeQualifier(chainAnalysis.getEntityQualifier());
             }
             return result;
         }
@@ -195,10 +199,14 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             DataModelGeneration recordDTOGeneration = dataModelGeneratorService.generateDataModel(dataModelArg);
             result.setFlush(recordDTOGeneration.getFileFlush());
             result.setElementTypeQualifier(recordDTOGeneration.getDtoQualifier());
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach,
-                    ReturnShapeEnum.page).contains(chainAnalysis.getReturnShape())) {
+            if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
+                    .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(
                         StaticJavaParser.parseType("java.util.List<" + recordDTOGeneration.getDtoQualifier() + ">"));
+            } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
+                String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
+                result.setResultType(StaticJavaParser.parseType(
+                        "java.util.Map<" + propertyTypeName + " ," + recordDTOGeneration.getDtoQualifier() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(recordDTOGeneration.getDtoQualifier()));
             }
@@ -209,9 +217,13 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             VariableProperty returnProp = Iterables.getOnlyElement(returnProps);
             JavaTypeDTO javaType = returnProp.getProperty().getJavaType();
             result.setElementTypeQualifier(javaType.getQualifier());
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach,
-                    ReturnShapeEnum.page).contains(chainAnalysis.getReturnShape())) {
+            if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
+                    .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(StaticJavaParser.parseType("java.util.List<" + javaType.getQualifier() + ">"));
+            } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
+                String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
+                result.setResultType(StaticJavaParser.parseType(
+                        "java.util.Map<" + propertyTypeName + " ," + javaType.getQualifier() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(javaType.getQualifier()));
             }
@@ -220,10 +232,14 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         } else {
             // 没有指定属性，使用Entity作为返回值类型
             result.setElementTypeQualifier(chainAnalysis.getEntityQualifier());
-            if (Lists.newArrayList(ReturnShapeEnum.many, ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                    .contains(chainAnalysis.getReturnShape())) {
+            if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
+                    .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(
                         StaticJavaParser.parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
+            } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
+                String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
+                result.setResultType(StaticJavaParser.parseType(
+                        "java.util.Map<" + propertyTypeName + " ," + chainAnalysis.getEntityQualifier() + ">"));
             } else {
                 result.setResultType(StaticJavaParser.parseType(chainAnalysis.getEntityQualifier()));
             }

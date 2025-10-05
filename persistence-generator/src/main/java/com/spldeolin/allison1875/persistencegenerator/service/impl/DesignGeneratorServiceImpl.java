@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -246,13 +247,19 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         queryChainMethodsCoid.addMember(
                 StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
         queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public java.util.List<" + entityGeneration.getDtoQualifier() + "> many() { throw e; }"));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> java.util.Map<P, %s> many(Each<P> property) { throw e; }",
-                        entityGeneration.getDtoName())));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
-                "public <P> com.google.common.collect.Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                entityGeneration.getDtoName())));
+                "public java.util.List<" + entityGeneration.getDtoQualifier() + "> list() { throw e; }"));
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
+            queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("public java.util.Map<%s, %s> mapBy%s() { throw e; }",
+                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                            StringUtils.capitalize(property.getPropertyName()))));
+        }
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
+            queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
+                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                            StringUtils.capitalize(property.getPropertyName()))));
+        }
         queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 String.format("public %s one() { throw e; }", entityGeneration.getDtoName())));
         queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
@@ -340,13 +347,19 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                     .setJavadocComment(property.getDescription()));
         }
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public java.util.List<" + entityGeneration.getDtoQualifier() + "> many() { throw e; }"));
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> java.util.Map<P, %s> many(Each<P> property) { throw e; }",
-                        entityGeneration.getDtoName())));
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
-                "public <P> com.google.common.collect.Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                entityGeneration.getDtoName())));
+                "public java.util.List<" + entityGeneration.getDtoQualifier() + "> list() { throw e; }"));
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
+            nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("public java.util.Map<%s, %s> mapBy%s() { throw e; }",
+                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                            StringUtils.capitalize(property.getPropertyName()))));
+        }
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
+            nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
+                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                            StringUtils.capitalize(property.getPropertyName()))));
+        }
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
         nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
@@ -382,13 +395,19 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
                 .addExtendedType("OrderChain");
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                "public java.util.List<" + entityGeneration.getDtoQualifier() + "> many() { throw e; }"));
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public <P> java.util.Map<P, %s> many(Each<P> property) { throw e; }",
-                        entityGeneration.getDtoName())));
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
-                "public <P> com.google.common.collect.Multimap<P, %s> many(MultiEach<P> property) { throw e; }",
-                entityGeneration.getDtoName())));
+                "public java.util.List<" + entityGeneration.getDtoQualifier() + "> list() { throw e; }"));
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
+            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("public java.util.Map<%s, %s> mapBy%s() { throw e; }",
+                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                            StringUtils.capitalize(property.getPropertyName()))));
+        }
+        for (PropertyDTO property : tableAnalysis.getProperties()) {
+            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                    String.format("public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
+                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                            StringUtils.capitalize(property.getPropertyName()))));
+        }
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
         nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));

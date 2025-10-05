@@ -8,18 +8,18 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public enum ReturnShapeEnum {
+public enum ReturnStyleEnum {
 
-    one,
+    ONE,
 
-    many,
+    LIST,
 
-    each,
+    MAP,
 
-    multiEach,
+    GROUP,
 
-    count,
+    COUNT,
 
-    page,
+    PAGE,
 
 }

@@ -12,6 +12,6 @@ import com.spldeolin.allison1875.querytransformer.service.impl.QueryChainAnalyze
 @ImplementedBy(QueryChainAnalyzerServiceImpl.class)
 public interface QueryChainAnalyzerService {
 
-    ChainAnalysisDTO analyzeQueryChain(MethodCallExpr chain, DesignMetaDTO designMeta);
+    ChainAnalysisDTO analyzeDesignChain(MethodCallExpr chain, DesignMetaDTO designMeta);
 
 }

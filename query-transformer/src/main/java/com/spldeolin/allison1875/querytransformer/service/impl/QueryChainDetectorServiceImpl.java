@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.CommonConfig;
-import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.service.QueryChainDetectorService;
 
 /**
@@ -24,15 +23,12 @@ public class QueryChainDetectorServiceImpl implements QueryChainDetectorService 
     @Inject
     private CommonConfig commonConfig;
 
-    @Inject
-    private QueryTransformerConfig config;
-
     @Override
     public List<MethodCallExpr> detectQueryChains(Node node) {
         List<MethodCallExpr> mces = Lists.newArrayList();
         for (MethodCallExpr mce : node.findAll(MethodCallExpr.class)) {
-            if (StringUtils.equalsAny(mce.getNameAsString(), "many", "one", "over", "count", "page")
-                    && mce.getParentNode()
+            if ((StringUtils.equalsAny(mce.getNameAsString(), "list", "one", "over", "count", "page")
+                    || StringUtils.startsWithAny(mce.getNameAsString(), "mapBy", "groupBy")) && mce.getParentNode()
                     .isPresent()) {
                 if (this.finalNameExprRecursively(mce, commonConfig.getDesignPackage())) {
                     mces.add(mce);

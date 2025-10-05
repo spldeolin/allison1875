@@ -1,24 +1,16 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
-import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
-import com.spldeolin.allison1875.querytransformer.dto.GenerateReturnTypeRetval;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +31,7 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         } else {
             result += chainAnalysis.getBinariesAsArgs().stream().filter(b -> b.getArgument() != null)
                     .map(p -> p.getArgument().toString()).collect(Collectors.joining(", "));
-            if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+            if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                 result += result.endsWith("(") ? "" : " ,";
                 result += chainAnalysis.getOffsetExpr() + ", ";
                 result += chainAnalysis.getLimitExpr();
@@ -65,76 +57,13 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                     paramDTOVarName + ".set" + MoreStringUtils.toUpperCamel(binariesAsArg.getVarName()) + "("
                             + binariesAsArg.getArgument() + ");"));
         }
-        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+        if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
             result.add(StaticJavaParser.parseStatement(
                     paramDTOVarName + ".setOffset(" + chainAnalysis.getOffsetExpr() + ");"));
             result.add(StaticJavaParser.parseStatement(
                     paramDTOVarName + ".setLimit(" + chainAnalysis.getLimitExpr() + ");"));
         }
         return result;
-    }
-
-    @Override
-    public List<Statement> mapOrMultimapBuildStmts(DesignMetaDTO designMeta, ChainAnalysisDTO chainAnalysis,
-            GenerateReturnTypeRetval resultGeneration) {
-        Map<String, PropertyDTO> properties = designMeta.getProperties();
-
-        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.each) {
-            String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
-            String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");
-
-            boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode().get().getParentNode()
-                    .filter(gp -> gp instanceof ExpressionStmt)).isPresent();
-
-            List<Statement> statements = Lists.newArrayList();
-            if (isAssignWithoutType) {
-                statements.add(
-                        StaticJavaParser.parseStatement(calcResultVarName(chainAnalysis) + " = new HashMap<>();"));
-            } else {
-                statements.add(StaticJavaParser.parseStatement(
-                        "final java.util.Map<" + propertyTypeName + ", " + elementTypeName + "> " + calcResultVarName(
-                                chainAnalysis) + " = new HashMap<>();"));
-            }
-            statements.add(StaticJavaParser.parseStatement(
-                    chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
-                            + ".put(one.get" + MoreStringUtils.toUpperCamel(propertyName) + "(), one));"));
-            return statements;
-        }
-
-        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.multiEach) {
-            String propertyName = chainAnalysis.getChain().getArgument(0).asFieldAccessExpr().getNameAsString();
-            String propertyTypeName = properties.get(propertyName).getJavaType().getSimpleName();
-            String elementTypeName = StringUtils.substringAfterLast(resultGeneration.getElementTypeQualifier(), ".");
-
-            boolean isAssignWithoutType = (chainAnalysis.getChain().getParentNode()
-                    .orElseThrow(() -> new Allison1875Exception("cannot find parent for" + chainAnalysis.getChain()))
-                    .getParentNode().filter(gp -> gp instanceof ExpressionStmt)).isPresent();
-
-            List<Statement> statements = Lists.newArrayList();
-            if (isAssignWithoutType) {
-                statements.add(StaticJavaParser.parseStatement(
-                        calcResultVarName(chainAnalysis) + " = ArrayListMultimap.create();"));
-            } else {
-                statements.add(StaticJavaParser.parseStatement(
-                        "final com.google.common.collect.ArrayListMultimap<" + propertyTypeName + ", " + elementTypeName
-                                + "> " + calcResultVarName(chainAnalysis) + " = ArrayListMultimap.create();"));
-            }
-            statements.add(StaticJavaParser.parseStatement(
-                    chainAnalysis.getMethodName() + "List.forEach(one -> " + calcResultVarName(chainAnalysis)
-                            + ".put(one.get" + MoreStringUtils.toUpperCamel(propertyName) + "(), one));"));
-            return statements;
-        }
-
-        return null;
-    }
-
-    private String calcResultVarName(ChainAnalysisDTO chainAnalysis) {
-        String varName = chainAnalysis.getMethodName();
-        if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof AssignExpr).isPresent()) {
-            varName = ((AssignExpr) chainAnalysis.getChain().getParentNode().get()).getTarget().toString();
-        }
-        return varName;
     }
 
 }

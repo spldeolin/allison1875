@@ -49,7 +49,7 @@ import com.spldeolin.allison1875.querytransformer.dto.VariableProperty;
 import com.spldeolin.allison1875.querytransformer.enums.ComparisonOperatorEnum;
 import com.spldeolin.allison1875.querytransformer.enums.JoinTypeEnum;
 import com.spldeolin.allison1875.querytransformer.enums.OrderSequenceEnum;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 import com.spldeolin.allison1875.querytransformer.service.QueryChainAnalyzerService;
 import com.spldeolin.allison1875.support.OnChainComparison;
@@ -78,8 +78,8 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
     private CommonConfig commonConfig;
 
     @Override
-    public ChainAnalysisDTO analyzeQueryChain(MethodCallExpr queryChain, DesignMetaDTO designMeta) {
-        String chainCode = queryChain.toString();
+    public ChainAnalysisDTO analyzeDesignChain(MethodCallExpr designChain, DesignMetaDTO designMeta) {
+        String chainCode = designChain.toString();
         String betweenCode = chainCode.substring(chainCode.indexOf(".") + 1, chainCode.lastIndexOf("."));
         String designQualifier = designMeta.getDesignQualifier();
 
@@ -94,45 +94,48 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
             throw new Allison1875Exception("initialMethod is none of select, update nor delete");
         }
 
-        String methodName = this.analyzeSpecifiedMethodName(initialMethod, queryChain, designMeta);
+        String methodName = this.analyzeSpecifiedMethodName(initialMethod, designChain, designMeta);
         String countMethodNameForPage = analyzeCountMethodNameForPage(methodName);
 
-        ReturnShapeEnum returnShape;
-        String keyPropertyName = null;
+        ReturnStyleEnum returnStyle;
+        PropertyDTO mapOrGroupKeyProperty = null;
         Expression offsetExpr = null;
         Expression limitExpr = null;
-        if (queryChain.getNameAsString().equals("one")) {
-            returnShape = ReturnShapeEnum.one;
-        } else if (queryChain.getNameAsString().equals("many")) {
-            if (CollectionUtils.isEmpty(queryChain.getArguments())) {
-                returnShape = ReturnShapeEnum.many;
-            } else if (queryChain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("Each")) {
-                returnShape = ReturnShapeEnum.each;
-                keyPropertyName = queryChain.getArgument(0).asFieldAccessExpr().getNameAsString();
-            } else if (queryChain.getArgument(0).asFieldAccessExpr().getScope().toString().equals("MultiEach")) {
-                returnShape = ReturnShapeEnum.multiEach;
-                keyPropertyName = queryChain.getArgument(0).asFieldAccessExpr().getNameAsString();
-            } else {
-                throw new Allison1875Exception("many() argument is none of each nor multiEach");
-            }
-        } else if (queryChain.getNameAsString().equals("count")) {
-            returnShape = ReturnShapeEnum.count;
-        } else if (queryChain.getNameAsString().equals("page")) {
-            returnShape = ReturnShapeEnum.page;
+        if (designChain.getNameAsString().equals("one")) {
+            returnStyle = ReturnStyleEnum.ONE;
+        } else if (designChain.getNameAsString().equals("list")) {
+            returnStyle = ReturnStyleEnum.LIST;
+        } else if (designChain.getNameAsString().equals("count")) {
+            returnStyle = ReturnStyleEnum.COUNT;
+        } else if (designChain.getNameAsString().equals("page")) {
+            returnStyle = ReturnStyleEnum.PAGE;
             if (designMeta.getPageParamStyle() == PageParamStyleEnum.OFFSET_LIMIT) {
-                offsetExpr = queryChain.getArgument(0);
-                limitExpr = queryChain.getArgument(1);
+                offsetExpr = designChain.getArgument(0);
             } else {
-
                 offsetExpr = new BinaryExpr(new EnclosedExpr(
-                        new BinaryExpr(queryChain.getArgument(0), new IntegerLiteralExpr("1"), Operator.MINUS)),
-                        queryChain.getArgument(1), Operator.MULTIPLY);
-                limitExpr = queryChain.getArgument(1);
+                        new BinaryExpr(designChain.getArgument(0), new IntegerLiteralExpr("1"), Operator.MINUS)),
+                        designChain.getArgument(1), Operator.MULTIPLY);
+            }
+            limitExpr = designChain.getArgument(1);
+        } else if (designChain.getNameAsString().startsWith("mapBy")) {
+            returnStyle = ReturnStyleEnum.MAP;
+            String keyName = StringUtils.uncapitalize(StringUtils.removeStart(designChain.getNameAsString(), "mapBy"));
+            mapOrGroupKeyProperty = designMeta.getProperties().get(keyName);
+            if (mapOrGroupKeyProperty == null) {
+                throw new Allison1875Exception("mapKeyProperty not found, keyName=" + keyName);
+            }
+        } else if (designChain.getNameAsString().startsWith("groupBy")) {
+            returnStyle = ReturnStyleEnum.GROUP;
+            String keyName = StringUtils.uncapitalize(
+                    StringUtils.removeStart(designChain.getNameAsString(), "groupBy"));
+            mapOrGroupKeyProperty = designMeta.getProperties().get(keyName);
+            if (mapOrGroupKeyProperty == null) {
+                throw new Allison1875Exception("mapKeyProperty not found, keyName=" + keyName);
             }
         } else {
-            returnShape = null;
+            returnStyle = null;
         }
-        log.info("initialMethod={} returnShape={} offset={} limit={}", initialMethod, returnShape, offsetExpr,
+        log.info("initialMethod={} returnStyle={} offset={} limit={}", initialMethod, returnStyle, offsetExpr,
                 limitExpr);
 
         Set<PropertyDTO> selectProperties = Sets.newLinkedHashSet();
@@ -154,11 +157,11 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration).flatMap(coid -> coid.getFields().stream())
                 .map(fd -> fd.getVariable(0).getNameAsString()).distinct().collect(Collectors.toList());
 
-        for (FieldAccessExpr fae : queryChain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
+        for (FieldAccessExpr fae : designChain.findAll(FieldAccessExpr.class, TreeTraversal.POSTORDER)) {
             if (!designMeta.getProperties().containsKey(fae.getNameAsString()) && !propertyNamesFromJoinChain.contains(
                     fae.getNameAsString())) {
                 // 例如：XxxxDesign.query("xx").by().privilegeCode.in(Lists.newArrayList(OneTypeEnum.FIRST.getCode()))
-                // .many();，其中的OneTypeEnum.FIRST应当被跳过
+                // .list();，其中的OneTypeEnum.FIRST应当被跳过
                 continue;
             }
 
@@ -278,15 +281,16 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         }
 
         // 如果终结方法是Each或者MultiEach，确保queryPhrases中必须包含each的key
-        if (keyPropertyName != null && CollectionUtils.isNotEmpty(selectProperties) && selectProperties.stream()
-                .map(PropertyDTO::getPropertyName).collect(Collectors.toList()).contains(keyPropertyName)) {
-            log.warn("Each or MultiEach Key [{}] is not declared in Query Phrases [{}], auto add in", keyPropertyName,
-                    selectProperties);
-            selectProperties.add(designMeta.getProperties().get(keyPropertyName));
+        if (mapOrGroupKeyProperty != null && CollectionUtils.isNotEmpty(selectProperties) && !selectProperties.stream()
+                .map(PropertyDTO::getPropertyName).collect(Collectors.toList())
+                .contains(mapOrGroupKeyProperty.getPropertyName())) {
+            log.warn("Each or MultiEach Key [{}] is not declared in Query Phrases [{}], auto add in",
+                    mapOrGroupKeyProperty.getPropertyName(), selectProperties);
+            selectProperties.add(mapOrGroupKeyProperty);
         }
 
         // update set assignment
-        for (MethodCallExpr mce : queryChain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
+        for (MethodCallExpr mce : designChain.findAll(MethodCallExpr.class, TreeTraversal.POSTORDER)) {
             String describe;
             try {
                 describe = mce.calculateResolvedType().describe();
@@ -353,7 +357,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         result.setMethodName(methodName);
         result.setCountMethodNameForPage(countMethodNameForPage);
         result.setChainInitialMethod(initialMethod);
-        result.setReturnShape(returnShape);
+        result.setReturnStyle(returnStyle);
         result.setSelectProperties(selectProperties);
         result.setSearchConditions(searchConditions);
         result.setOffsetExpr(offsetExpr);
@@ -363,7 +367,8 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         result.setAssignments(assignments);
         result.setBinariesAsArgs(binaries);
         result.setPropertiesAsResult(returnProps);
-        result.setChain(queryChain);
+        result.setMapOrGroupKeyProperty(mapOrGroupKeyProperty);
+        result.setChain(designChain);
         result.setIsByForced(chainCode.contains("." + KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME + "()"));
         String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
         result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));

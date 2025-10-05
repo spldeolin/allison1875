@@ -53,7 +53,7 @@ public class StarChainTransformerServiceImpl implements StarChainTransformerServ
             if (phrase.getIsOneToOne()) {
                 code += ".one();";
             } else {
-                code += ".many();";
+                code += ".list();";
             }
             block.addStatement(++i, StaticJavaParser.parseStatement(code));
             NodeList<Statement> stmtsInForBlock = new NodeList<>();

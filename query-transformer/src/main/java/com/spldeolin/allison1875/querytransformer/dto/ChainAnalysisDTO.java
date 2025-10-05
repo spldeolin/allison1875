@@ -7,7 +7,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Sets;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -31,7 +31,7 @@ public class ChainAnalysisDTO {
 
     KeywordConstant.ChainInitialMethod chainInitialMethod;
 
-    ReturnShapeEnum returnShape;
+    ReturnStyleEnum returnStyle;
 
     Set<PropertyDTO> selectProperties = Sets.newLinkedHashSet();
 
@@ -61,6 +61,8 @@ public class ChainAnalysisDTO {
      * - 所有joinClause的所有joinedProperty
      */
     Set<VariableProperty> propertiesAsResult;
+
+    PropertyDTO mapOrGroupKeyProperty;
 
     BlockStmt directBlock;
 

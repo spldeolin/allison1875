@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -27,6 +28,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
@@ -34,7 +36,7 @@ import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.dto.ReplaceDesignArgs;
-import com.spldeolin.allison1875.querytransformer.enums.ReturnShapeEnum;
+import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.DesignService;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
 import com.spldeolin.allison1875.querytransformer.util.TokenRangeUtils;
@@ -107,13 +109,8 @@ public class DesignServiceImpl implements DesignService {
     @Override
     public void replaceDesign(ReplaceDesignArgs args) {
         ChainAnalysisDTO chainAnalysis = args.getChainAnalysis();
-        DesignMetaDTO designMeta = args.getDesignMeta();
         GenerateParamRetval generateParamRetval = args.getGenerateParamRetval();
         GenerateReturnTypeRetval generateReturnTypeRetval = args.getGenerateReturnTypeRetval();
-
-        // build Map  build Multimap
-        List<Statement> mapOrMultimapBuilt = transformMethodCallService.mapOrMultimapBuildStmts(designMeta,
-                chainAnalysis, generateReturnTypeRetval);
 
         Statement ancestorStatement = chainAnalysis.getChain().findAncestor(Statement.class)
                 .orElseThrow(() -> new Allison1875Exception("cannot find parent for" + chainAnalysis.getChain()));
@@ -124,10 +121,17 @@ public class DesignServiceImpl implements DesignService {
         String mceCode = transformMethodCallService.methodCallExpr(args.getMapperVarName(), chainAnalysis,
                 generateParamRetval);
 
+        if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.GROUP) {
+            String groupKeyName = chainAnalysis.getMapOrGroupKeyProperty().getPropertyName();
+            mceCode += String.format(".stream().collect(java.util.stream.Collectors.groupingBy(%s::get%s))",
+                    MoreStringUtils.splitAndGetLastPart(args.getGenerateReturnTypeRetval().getElementTypeQualifier(),
+                            "."), StringUtils.capitalize(groupKeyName));
+        }
+
         List<Statement> replacementStatements = Lists.newArrayList();
 
         // 分页
-        if (chainAnalysis.getReturnShape() == ReturnShapeEnum.page) {
+        if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
             MethodCallExpr callCountMce = StaticJavaParser.parseExpression(mceCode).asMethodCallExpr();
             callCountMce.setName(chainAnalysis.getCountMethodNameForPage());
             replacementStatements.add(StaticJavaParser.parseStatement(
@@ -136,31 +140,25 @@ public class DesignServiceImpl implements DesignService {
 
         if (chainAnalysis.getChain().getParentNode().filter(p -> p instanceof ExpressionStmt).isPresent()) {
             // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
-            replacementStatements.add(StaticJavaParser.parseStatement(
-                    generateReturnTypeRetval.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = " + mceCode
-                            + ";"));
-
+            if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.GROUP) {
+                String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
+                replacementStatements.add(StaticJavaParser.parseStatement(
+                        "java.util.Map<" + propertyTypeName + ", java.util.List<"
+                                + generateReturnTypeRetval.getElementTypeQualifier() + ">> " + calcAssignVarName(
+                                chainAnalysis) + " = " + mceCode + ";"));
+            } else {
+                replacementStatements.add(StaticJavaParser.parseStatement(
+                        generateReturnTypeRetval.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = "
+                                + mceCode + ";"));
+            }
         } else if (chainAnalysis.getChain().getParentNode()
                 .filter(p -> p instanceof AssignExpr || p instanceof VariableDeclarator).isPresent()) {
             // parent是VariableDeclarator的情况，例如：Entity a = Design.query("a").one();
             // 或是AssignExpr的情况，例如：a = Design.query("a").one();
             // 则将chain替换成转化出的mce（chain是mce类型）
-            if (Lists.newArrayList(ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                    .contains(chainAnalysis.getReturnShape())) {
-                replacementStatements.add(StaticJavaParser.parseStatement(
-                        generateReturnTypeRetval.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = "
-                                + mceCode + ";"));
-            } else {
-                replacementStatements.add(StaticJavaParser.parseStatement(
-                        ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
-            }
+            replacementStatements.add(StaticJavaParser.parseStatement(
+                    ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
         } else {
-            if (Lists.newArrayList(ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                    .contains(chainAnalysis.getReturnShape())) {
-                throw new UnsupportedOperationException(
-                        "chain that return 'each' or 'multiEach' are currently supported only when they are defined "
-                                + "within an assignment statement or as a single expression");
-            }
             // 以外的情况，往往是继续调用mce返回值，例如：if (0 == Design.update("a").id(-1).over()) { }，则将chain替换成转化出的mce（chain是mce类型）
             replacementStatements.add(StaticJavaParser.parseStatement(
                     ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
@@ -171,11 +169,6 @@ public class DesignServiceImpl implements DesignService {
             List<Statement> argumentBuildStmts = transformMethodCallService.argumentBuildStmts(chainAnalysis,
                     generateParamRetval);
             replacementStatements.addAll(0, argumentBuildStmts);
-        }
-
-        // 在ancestorStatement的下方添加map or multimap build代码块（如果需要mapOrMultimapBuilt的话）
-        if (mapOrMultimapBuilt != null) {
-            replacementStatements.addAll(mapOrMultimapBuilt);
         }
 
         // replace ancestorStatement to replacementStatements
@@ -189,8 +182,7 @@ public class DesignServiceImpl implements DesignService {
                 .contains(chainAnalysis.getChainInitialMethod())) {
             return chainAnalysis.getMethodName() + "Count";
         }
-        if (Lists.newArrayList(ReturnShapeEnum.each, ReturnShapeEnum.multiEach)
-                .contains(chainAnalysis.getReturnShape())) {
+        if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.GROUP) {
             return chainAnalysis.getMethodName() + "List";
         }
         return chainAnalysis.getMethodName();

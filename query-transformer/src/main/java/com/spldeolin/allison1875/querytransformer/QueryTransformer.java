@@ -85,34 +85,34 @@ public class QueryTransformer implements Allison1875MainService {
                 continue;
             }
             for (BlockStmt directBlock : cu.findAll(BlockStmt.class, TreeTraversal.POSTORDER)) {
-                for (MethodCallExpr queryChain : queryChainDetectorService.detectQueryChains(directBlock)) {
+                for (MethodCallExpr designChain : queryChainDetectorService.detectQueryChains(directBlock)) {
 
-                    if (!queryChain.findAncestor(ClassOrInterfaceDeclaration.class).isPresent()) {
-                        log.warn("Query Chain is not in a Coid, ignore, queryChain={}", queryChain);
+                    if (!designChain.findAncestor(ClassOrInterfaceDeclaration.class).isPresent()) {
+                        log.warn("Query Chain is not in a Coid, ignore, designChain={}", designChain);
                         continue;
                     }
-                    ClassOrInterfaceDeclaration directCoid = queryChain.findAncestor(ClassOrInterfaceDeclaration.class)
+                    ClassOrInterfaceDeclaration directCoid = designChain.findAncestor(ClassOrInterfaceDeclaration.class)
                             .get();
 
                     // 找到所属Design中记录的实体Meta信息
                     DesignMetaDTO designMeta;
                     try {
-                        designMeta = designService.findDesignMeta(queryChain);
+                        designMeta = designService.findDesignMeta(designChain);
                         log.info("Design Meta found, designMeta={}", designMeta);
                     } catch (SameNameTerminationMethodException e) {
                         continue;
                     } catch (Allison1875Exception e) {
-                        log.error("fail to find Design Meta, queryChain={}", queryChain, e);
+                        log.error("fail to find Design Meta, designChain={}", designChain, e);
                         continue;
                     }
 
                     // 分析出chain所描述的信息
                     ChainAnalysisDTO chainAnalysis;
                     try {
-                        chainAnalysis = queryChainAnalyzerService.analyzeQueryChain(queryChain, designMeta);
+                        chainAnalysis = queryChainAnalyzerService.analyzeDesignChain(designChain, designMeta);
                         log.info("Query Chain analyzed, chainAnalysis={}", chainAnalysis);
                     } catch (Exception e) {
-                        log.error("fail to analyze Query Chain, queryChain={}", queryChain, e);
+                        log.error("fail to analyze Query Chain, designChain={}", designChain, e);
                         continue;
                     }
                     chainAnalysis.setDirectBlock(directBlock);
@@ -134,7 +134,7 @@ public class QueryTransformer implements Allison1875MainService {
                     // generate Result Type
                     GenerateReturnTypeRetval generateReturnTypeRetval;
                     try {
-                        generateReturnTypeRetval = methodGeneratorService.generateReturnType(chainAnalysis);
+                        generateReturnTypeRetval = methodGeneratorService.generateReturnType(chainAnalysis, designMeta);
                         log.info("Result generated, generation={}", generateReturnTypeRetval);
                     } catch (Exception e) {
                         log.error("fail to generate result chainAnalysis={}", chainAnalysis, e);
