@@ -326,22 +326,26 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         }
 
         // mapper方法的返回值字段
-        Set<VariableProperty> returnProps = Sets.newLinkedHashSet();
-        for (PropertyDTO selectProp : selectProperties) {
-            returnProps.add(new VariableProperty() {
+        Set<VariableProperty> returnVps = Sets.newLinkedHashSet();
+        Set<PropertyDTO> returnProperties = selectProperties;
+        if (returnProperties.isEmpty()) {
+            returnProperties = Sets.newLinkedHashSet(designMeta.getProperties().values());
+        }
+        for (PropertyDTO returnProperty : returnProperties) {
+            returnVps.add(new VariableProperty() {
                 @Override
                 public PropertyDTO getProperty() {
-                    return selectProp;
+                    return returnProperty;
                 }
 
                 @Override
                 public String getVarName() {
-                    return selectProp.getPropertyName();
+                    return returnProperty.getPropertyName();
                 }
             });
         }
         for (JoinClauseDTO joinClause : joinClauses) {
-            returnProps.addAll(joinClause.getJoinedProperties());
+            returnVps.addAll(joinClause.getJoinedProperties());
         }
 
         log.info("selectProperties={}", JsonUtils.toJsonPrettily(selectProperties));
@@ -350,7 +354,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         log.info("joinClauses={}", JsonUtils.toJsonPrettily(joinClauses));
         log.info("assignments={}", JsonUtils.toJsonPrettily(assignments));
         log.info("binaries={}", JsonUtils.toJsonPrettily(binaries));
-        log.info("returnProps={}", JsonUtils.toJsonPrettily(returnProps));
+        log.info("returnVps={}", JsonUtils.toJsonPrettily(returnVps));
 
         ChainAnalysisDTO result = new ChainAnalysisDTO();
         result.setEntityQualifier(designMeta.getEntityQualifier());
@@ -366,7 +370,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         result.setJoinClauses(joinClauses);
         result.setAssignments(assignments);
         result.setBinariesAsArgs(binaries);
-        result.setPropertiesAsResult(returnProps);
+        result.setPropertiesAsResult(returnVps);
         result.setMapOrGroupKeyProperty(mapOrGroupKeyProperty);
         result.setChain(designChain);
         result.setIsByForced(chainCode.contains("." + KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME + "()"));
