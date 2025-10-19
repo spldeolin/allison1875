@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.service;
 import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
@@ -43,5 +44,10 @@ public interface MapperXmlService {
 
     List<String> generateQueryByIndexMethod(TableAnalysisDTO tableAnalysis,
             List<QueryByIndexMethodDTO> queryByIndexMethodNames);
+
+    List<String> generateDeleteByIdMethod(TableAnalysisDTO tableAnalysis, String deleteByIdMethodName);
+
+    List<String> generateDeleteByIndexMethod(TableAnalysisDTO tableAnalysis,
+            List<DeleteByIndexMethodDTO> deleteByIndexMethodNames);
 
 }

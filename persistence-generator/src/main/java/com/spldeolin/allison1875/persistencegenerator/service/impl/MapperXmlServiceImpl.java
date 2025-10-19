@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
@@ -237,29 +238,28 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             return Lists.newArrayList();
         }
         List<String> xmlLines = Lists.newArrayList();
-            xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
-            for (PropertyDTO nonId : persistence.getNonIdProperties()) {
-                xmlLines.add(
-                        BaseConstant.DOUBLE_INDENT + nonId.getColumnName() + " = #{" + nonId.getPropertyName() + "},");
-            }
-            // 删除最后一个语句中，最后的逗号
-            if (CollectionUtils.isNotEmpty(xmlLines)) {
-                int last = xmlLines.size() - 1;
-                xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
-            if (persistence.getIsDeleteFlagExist()) {
-                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
-            }
-            for (PropertyDTO idProperty : persistence.getIdProperties()) {
-                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{"
-                        + idProperty.getPropertyName() + "}");
-            }
-            xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
-            xmlLines.add("</update>");
-            xmlLines.add("");
+        xmlLines.add(String.format("<update id=\"%s\" parameterType=\"%s\">", methodName, entityName));
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "SET");
+        for (PropertyDTO nonId : persistence.getNonIdProperties()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + nonId.getColumnName() + " = #{" + nonId.getPropertyName() + "},");
+        }
+        // 删除最后一个语句中，最后的逗号
+        if (CollectionUtils.isNotEmpty(xmlLines)) {
+            int last = xmlLines.size() - 1;
+            xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
+        }
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+        if (persistence.getIsDeleteFlagExist()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
+        }
+        for (PropertyDTO idProperty : persistence.getIdProperties()) {
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{"
+                    + idProperty.getPropertyName() + "}");
+        }
+        xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+        xmlLines.add("</update>");
+        xmlLines.add("");
         return xmlLines;
     }
 
@@ -373,6 +373,85 @@ public class MapperXmlServiceImpl implements MapperXmlService {
             }
             xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
             xmlLines.add("</select>");
+            xmlLines.add("");
+        }
+        return xmlLines;
+    }
+
+    @Override
+    public List<String> generateDeleteByIdMethod(TableAnalysisDTO persistence, String methodName) {
+        List<String> xmlLines = Lists.newArrayList();
+
+        if (!persistence.getIsDeleteFlagExist()) {
+            String firstLine = "<delete id=\"" + methodName + "\" ";
+            if (persistence.getIdProperties().size() == 1) {
+                firstLine += "parameterType=\"" + Iterables.getOnlyElement(persistence.getIdProperties()).getJavaType()
+                        .getQualifier().replaceFirst("java\\.lang\\.", "") + "\">";
+            }
+            xmlLines.add(firstLine);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "DELETE FROM " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+            for (PropertyDTO idProperty : persistence.getIdProperties()) {
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{"
+                        + idProperty.getPropertyName() + "}");
+            }
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+            xmlLines.add("</delete>");
+        } else {
+            String firstLine = "<update id=\"" + methodName + "\" ";
+            if (persistence.getIdProperties().size() == 1) {
+                firstLine += "parameterType=\"" + Iterables.getOnlyElement(persistence.getIdProperties()).getJavaType()
+                        .getQualifier().replaceFirst("java\\.lang\\.", "") + "\">";
+            }
+            xmlLines.add(firstLine);
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + persistence.getTableName());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "SET " + config.getDeletedSql());
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+            xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
+            for (PropertyDTO idProperty : persistence.getIdProperties()) {
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{"
+                        + idProperty.getPropertyName() + "}");
+            }
+            xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+            xmlLines.add("</update>");
+        }
+        xmlLines.add("");
+        return xmlLines;
+    }
+
+    @Override
+    public List<String> generateDeleteByIndexMethod(TableAnalysisDTO tableAnalysis,
+            List<DeleteByIndexMethodDTO> deleteByIndexMethodNames) {
+        List<String> xmlLines = Lists.newArrayList();
+        for (DeleteByIndexMethodDTO deleteByIndexMethod : deleteByIndexMethodNames) {
+            if (deleteByIndexMethod.getMethodName() == null) {
+                continue;
+            }
+            if (!tableAnalysis.getIsDeleteFlagExist()) {
+                xmlLines.add(
+                        String.format("<delete id=\"%s\" resultType=\"int\">", deleteByIndexMethod.getMethodName()));
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "DELETE FROM " + tableAnalysis.getTableName());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+                for (PropertyDTO indexProperty : deleteByIndexMethod.getIndexProperties()) {
+                    xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + indexProperty.getColumnName() + " = #{"
+                            + indexProperty.getPropertyName() + "}");
+                }
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+                xmlLines.add("</delete>");
+            } else {
+                xmlLines.add(
+                        String.format("<update id=\"%s\" resultType=\"int\">", deleteByIndexMethod.getMethodName()));
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + tableAnalysis.getTableName());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "SET " + config.getDeletedSql());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
+                for (PropertyDTO indexProperty : deleteByIndexMethod.getIndexProperties()) {
+                    xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + indexProperty.getColumnName() + " = #{"
+                            + indexProperty.getPropertyName() + "}");
+                }
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+                xmlLines.add("</update>");
+            }
             xmlLines.add("");
         }
         return xmlLines;

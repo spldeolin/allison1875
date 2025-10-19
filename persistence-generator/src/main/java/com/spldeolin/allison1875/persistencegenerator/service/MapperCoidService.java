@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.persistencegenerator.service;
 import java.util.List;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
+import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
@@ -31,12 +32,16 @@ public interface MapperCoidService {
 
     String generateUpdateByIdEvenNullMethodToMapper(GenerateMethodToMapperArgs args);
 
+    String generateDeleteByIdMethodToMapper(GenerateMethodToMapperArgs args);
+
     String generateQueryByIdsMethodToMapper(GenerateMethodToMapperArgs args);
 
     String generateQueryByIdsEachIdMethodToMapper(GenerateMethodToMapperArgs args);
 
     QueryByIndexMethodDTO generateQueryByIndexMethodToMapper(GenerateMethodToMapperArgs args, List<PropertyDTO> keys,
             Boolean isUnique);
+
+    DeleteByIndexMethodDTO generateDeleteByIndexMethodToMapper(GenerateMethodToMapperArgs args, List<PropertyDTO> keys);
 
     String generateListAllMethodToMapper(GenerateMethodToMapperArgs args);
 

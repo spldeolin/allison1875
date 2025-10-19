@@ -36,6 +36,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
@@ -256,7 +257,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         MethodDeclaration queryByKeys = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据" + indexProperties.stream()
                 .map(prop -> "“" + MoreObjects.firstNonNull(prop.getDescription(), prop.getPropertyName()) + "”")
-                .collect(Collectors.joining("、")) + "查询");
+                .collect(Collectors.joining("、")) + "查询数据");
         if (isUnique) {
             queryByKeys.setType(parseType(args.getEntityGeneration().getDtoQualifier()));
         } else {
@@ -275,6 +276,33 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         retval.setMethodName(methodName);
         retval.setIndexProperties(indexProperties);
         retval.setIsUnique(isUnique);
+        return retval;
+    }
+
+    @Override
+    public DeleteByIndexMethodDTO generateDeleteByIndexMethodToMapper(GenerateMethodToMapperArgs args,
+            List<PropertyDTO> indexProperties) {
+        String methodName =
+                "deleteBy" + indexProperties.stream().map(prop -> MoreStringUtils.toUpperCamel(prop.getPropertyName()))
+                        .collect(Collectors.joining());
+        methodName = antiDuplicationService.getNewMethodNameIfExist(methodName, args.getMapper());
+        MethodDeclaration deleteByKeys = new MethodDeclaration();
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据" + indexProperties.stream()
+                .map(prop -> "“" + MoreObjects.firstNonNull(prop.getDescription(), prop.getPropertyName()) + "”")
+                .collect(Collectors.joining("、")) + "删除数据");
+        deleteByKeys.setType(PrimitiveType.intType());
+        deleteByKeys.setName(methodName);
+        for (PropertyDTO key : indexProperties) {
+            deleteByKeys.addParameter(parseParameter(
+                    "@org.apache.ibatis.annotations.Param(\"" + key.getPropertyName() + "\") " + key.getJavaType()
+                            .getQualifier() + " " + key.getPropertyName()));
+        }
+        deleteByKeys.setBody(null);
+        deleteByKeys.setJavadocComment(comment);
+        args.getMapper().getMembers().addLast(deleteByKeys);
+        DeleteByIndexMethodDTO retval = new DeleteByIndexMethodDTO();
+        retval.setMethodName(methodName);
+        retval.setIndexProperties(indexProperties);
         return retval;
     }
 
@@ -316,6 +344,36 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         updateByIdEvenNull.addParameter(args.getEntityGeneration().getDtoQualifier(), "entity");
         updateByIdEvenNull.setBody(null);
         args.getMapper().getMembers().addLast(updateByIdEvenNull);
+        return methodName;
+    }
+
+    @Override
+    public String generateDeleteByIdMethodToMapper(GenerateMethodToMapperArgs args) {
+        if (args.getTableAnalysisDTO().getIdProperties().isEmpty()) {
+            return null;
+        }
+        String methodName = antiDuplicationService.getNewMethodNameIfExist("deleteById", args.getMapper());
+        MethodDeclaration deleteById = new MethodDeclaration();
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据ID删除数据");
+        deleteById.setJavadocComment(comment);
+        deleteById.setType(PrimitiveType.intType());
+        deleteById.setName(methodName);
+        if (args.getTableAnalysisDTO().getIdProperties().size() == 1) {
+            PropertyDTO onlyPk = Iterables.getOnlyElement(args.getTableAnalysisDTO().getIdProperties());
+            String varName = MoreStringUtils.toLowerCamel(onlyPk.getPropertyName());
+            Parameter parameter = parseParameter(onlyPk.getJavaType().getSimpleName() + " " + varName);
+            deleteById.addParameter(parameter);
+        } else {
+            for (PropertyDTO pk : args.getTableAnalysisDTO().getIdProperties()) {
+                String varName = MoreStringUtils.toLowerCamel(pk.getPropertyName());
+                Parameter parameter = parseParameter(
+                        "@org.apache.ibatis.annotations.Param(\"" + varName + "\")" + pk.getJavaType().getSimpleName()
+                                + " " + varName);
+                deleteById.addParameter(parameter);
+            }
+        }
+        deleteById.setBody(null);
+        args.getMapper().getMembers().addLast(deleteById);
         return methodName;
     }
 

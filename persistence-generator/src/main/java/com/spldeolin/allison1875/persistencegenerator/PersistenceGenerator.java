@@ -17,6 +17,7 @@ import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignRetval;
@@ -114,16 +115,20 @@ public class PersistenceGenerator implements Allison1875MainService {
                     gmtmArgs);
             String updateByIdMethodName = mapperCoidService.generateUpdateByIdMethodToMapper(gmtmArgs);
             String updateByIdEvenNullMethodName = mapperCoidService.generateUpdateByIdEvenNullMethodToMapper(gmtmArgs);
+            String deleteByIdMethodName = mapperCoidService.generateDeleteByIdMethodToMapper(gmtmArgs);
             String queryByIdMethodName = mapperCoidService.generateQueryByIdMethodToMapper(gmtmArgs);
             String queryByIdsProcMethodName = mapperCoidService.generateQueryByIdsMethodToMapper(gmtmArgs);
             String queryByIdsEachIdMethodName = mapperCoidService.generateQueryByIdsEachIdMethodToMapper(gmtmArgs);
             List<QueryByIndexMethodDTO> queryByIndexMethodNames = Lists.newArrayList();
+            List<DeleteByIndexMethodDTO> deleteByIndexMethodNames = Lists.newArrayList();
             for (IndexDTO index : tableAnalysis.getIndices()) {
                 for (int i = 0; i < index.getProperties().size(); i++) {
                     List<PropertyDTO> indexProperties = index.getProperties().subList(0, i + 1);
                     boolean isUnique = i == index.getProperties().size() - 1 ? index.getIsUnique() : false;
                     queryByIndexMethodNames.add(
                             mapperCoidService.generateQueryByIndexMethodToMapper(gmtmArgs, indexProperties, isUnique));
+                    deleteByIndexMethodNames.add(
+                            mapperCoidService.generateDeleteByIndexMethodToMapper(gmtmArgs, indexProperties));
                 }
             }
             String listAllMethodName = mapperCoidService.generateListAllMethodToMapper(gmtmArgs);
@@ -143,6 +148,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateInsertMethod(tableAnalysis, entityName, insertMethodName),
                     mapperXmlService.generateBatchInsertMethod(tableAnalysis, batchInsertMethodName),
                     mapperXmlService.generateBatchInsertEvenNullMethod(tableAnalysis, batchInsertEvenNullMethodName),
+                    mapperXmlService.generateDeleteByIdMethod(tableAnalysis, deleteByIdMethodName),
                     mapperXmlService.generateQueryByIdMethod(tableAnalysis, queryByIdMethodName),
                     mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsProcMethodName),
                     mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsEachIdMethodName),
@@ -150,6 +156,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateUpdateByIdEvenNullMethod(tableAnalysis, entityName,
                             updateByIdEvenNullMethodName),
                     mapperXmlService.generateQueryByIndexMethod(tableAnalysis, queryByIndexMethodNames),
+                    mapperXmlService.generateDeleteByIndexMethod(tableAnalysis, deleteByIndexMethodNames),
                     mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName));
 
             // 基础方法替换到MapperXml中
