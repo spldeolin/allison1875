@@ -1,9 +1,19 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.BooleanUtils;
+import com.github.javaparser.ast.expr.BooleanLiteralExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.LongLiteralExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -13,6 +23,7 @@ import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
+import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
@@ -66,10 +77,48 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
             fieldArg.setDescription(cancatPropertyDescription(property));
             fieldArg.setTypeQualifier(property.getJavaType().getQualifier());
             fieldArg.setFieldName(property.getPropertyName());
+            fieldArg.setMoreOperation((cu, fd) -> {
+                // 默认值
+                buildFieldInitExpr(persistence, property).ifPresent(
+                        initExpr -> fd.getVariable(0).setInitializer(initExpr));
+
+            });
             arg.getFieldArgs().add(fieldArg);
         }
         arg.setDataModelExistenceResolution(config.getEntityExistenceResolution());
         return dataModelGeneratorService.generateDataModel(arg);
+    }
+
+    private Optional<Expression> buildFieldInitExpr(TableAnalysisDTO tableAnalysis, PropertyDTO property) {
+        String defaultValue = property.getDefaultValue();
+        if (defaultValue == null) {
+            return Optional.empty();
+        }
+        String typeQualifier = property.getJavaType().getQualifier();
+        if (Boolean.class.getName().equals(typeQualifier)) {
+            return Optional.of(new BooleanLiteralExpr(BooleanUtils.toBoolean(defaultValue)));
+        }
+        if (String.class.getName().equals(typeQualifier)) {
+            return Optional.of(new StringLiteralExpr(defaultValue.replaceAll("^'|'$", "")));
+        }
+        if (Byte.class.getName().equals(typeQualifier) || Integer.class.getName().equals(typeQualifier)) {
+            return Optional.of(new IntegerLiteralExpr(defaultValue));
+        }
+        if (Long.class.getName().equals(typeQualifier)) {
+            return Optional.of(new LongLiteralExpr(defaultValue));
+        }
+        if (Date.class.getName().equals(typeQualifier)) {
+            if (defaultValue.equals("CURRENT_TIMESTAMP")) {
+                return Optional.of(new ObjectCreationExpr().setType("Date"));
+            } else {
+                throw new Allison1875Exception("暂不支持非CURRENT_TIMESTAMP的默认值");
+            }
+        }
+        if (BigDecimal.class.getName().equals(typeQualifier)) {
+            return Optional.of(new ObjectCreationExpr().setType("BigDecimal").addArgument(defaultValue));
+        }
+
+        return Optional.empty();
     }
 
     private List<String> getSuperEntityFieldNames() {
