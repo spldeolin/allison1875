@@ -114,9 +114,6 @@ public class PersistenceGenerator implements Allison1875MainService {
                     gmtmArgs);
             String updateByIdMethodName = mapperCoidService.generateUpdateByIdMethodToMapper(gmtmArgs);
             String updateByIdEvenNullMethodName = mapperCoidService.generateUpdateByIdEvenNullMethodToMapper(gmtmArgs);
-            String batchUpdateMethodName = mapperCoidService.generateBatchUpdateMethodToMapper(gmtmArgs);
-            String batchUpdateEvenNullMethodName = mapperCoidService.generateBatchUpdateEvenNullMethodToMapper(
-                    gmtmArgs);
             String queryByIdMethodName = mapperCoidService.generateQueryByIdMethodToMapper(gmtmArgs);
             String queryByIdsProcMethodName = mapperCoidService.generateQueryByIdsMethodToMapper(gmtmArgs);
             String queryByIdsEachIdMethodName = mapperCoidService.generateQueryByIdsEachIdMethodToMapper(gmtmArgs);
@@ -146,8 +143,6 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateInsertMethod(tableAnalysis, entityName, insertMethodName),
                     mapperXmlService.generateBatchInsertMethod(tableAnalysis, batchInsertMethodName),
                     mapperXmlService.generateBatchInsertEvenNullMethod(tableAnalysis, batchInsertEvenNullMethodName),
-                    mapperXmlService.generateBatchUpdateMethod(tableAnalysis, batchUpdateMethodName),
-                    mapperXmlService.generateBatchUpdateEvenNullMethod(tableAnalysis, batchUpdateEvenNullMethodName),
                     mapperXmlService.generateQueryByIdMethod(tableAnalysis, queryByIdMethodName),
                     mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsProcMethodName),
                     mapperXmlService.generateQueryByIdsMethod(tableAnalysis, queryByIdsEachIdMethodName),

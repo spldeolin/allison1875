@@ -159,42 +159,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     }
 
     @Override
-    public String generateBatchUpdateEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (args.getTableAnalysisDTO().getIsAllPropertiesNotNull()) {
-            return null;
-        }
-        String methodName = antiDuplicationService.getNewMethodNameIfExist("batchUpdateEvenNull", args.getMapper());
-        MethodDeclaration update = new MethodDeclaration();
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(),
-                "批量根据ID更新数据，为null对应的字段会被更新为null");
-        update.setJavadocComment(comment);
-        update.setType(PrimitiveType.intType());
-        update.setName(methodName);
-        update.addParameter(StaticJavaParser.parseParameter(
-                "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
-                        .getDtoQualifier() + "> entities"));
-        update.setBody(null);
-        args.getMapper().getMembers().addLast(update);
-        return methodName;
-    }
-
-    @Override
-    public String generateBatchUpdateMethodToMapper(GenerateMethodToMapperArgs args) {
-        String methodName = antiDuplicationService.getNewMethodNameIfExist("batchUpdate", args.getMapper());
-        MethodDeclaration update = new MethodDeclaration();
-        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "批量根据ID更新数据");
-        update.setJavadocComment(comment);
-        update.setType(PrimitiveType.intType());
-        update.setName(methodName);
-        update.addParameter(StaticJavaParser.parseParameter(
-                "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
-                        .getDtoQualifier() + "> entities"));
-        update.setBody(null);
-        args.getMapper().getMembers().addLast(update);
-        return methodName;
-    }
-
-    @Override
     public String generateInsertMethodToMapper(GenerateMethodToMapperArgs args) {
         String methodName = antiDuplicationService.getNewMethodNameIfExist("insert", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();

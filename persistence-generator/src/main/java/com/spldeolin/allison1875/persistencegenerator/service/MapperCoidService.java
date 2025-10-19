@@ -25,10 +25,6 @@ public interface MapperCoidService {
 
     String generateBatchInsertEvenNullMethodToMapper(GenerateMethodToMapperArgs args);
 
-    String generateBatchUpdateMethodToMapper(GenerateMethodToMapperArgs args);
-
-    String generateBatchUpdateEvenNullMethodToMapper(GenerateMethodToMapperArgs args);
-
     String generateQueryByIdMethodToMapper(GenerateMethodToMapperArgs args);
 
     String generateUpdateByIdMethodToMapper(GenerateMethodToMapperArgs args);
