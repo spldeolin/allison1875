@@ -75,10 +75,33 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             tableAnalyses = analyzeFromDdl();
         }
 
-        // 设置LotNo
-        tableAnalyses.forEach(tableAnalysis -> tableAnalysis.setLotNo(
-                String.format("PG%s-%s", Allison1875.SHORT_VERSION,
-                        StringUtils.upperCase(HashingUtils.hashString(tableAnalysis.toString())))));
+        // 统一处理
+        for (TableAnalysisDTO tableAnalysis : tableAnalyses) {
+
+            // 将索引进行平铺（防止idx_1(col_1, col_2)和idx_2(col_1)重复生成queryByCol1方法；提前进行subList处理，简化生成的逻辑）
+            List<IndexDTO> flattenIndices = Lists.newArrayList();
+            for (IndexDTO index : tableAnalysis.getIndices()) {
+                for (int i = 0; i < index.getProperties().size(); i++) {
+                    List<PropertyDTO> indexProperties = index.getProperties().subList(0, i + 1);
+                    boolean isUnique = i == index.getProperties().size() - 1 ? index.getIsUnique() : false;
+                    IndexDTO flattenIndex = new IndexDTO().setProperties(indexProperties).setIsUnique(isUnique);
+
+                    if (flattenIndices.contains(flattenIndex)) {
+                        // 如果已经平铺，并且发现该联合关系是唯一联合索引，则把已平铺的索引设置为唯一
+                        if (isUnique) {
+                            flattenIndices.get(flattenIndices.indexOf(flattenIndex)).setIsUnique(true);
+                        }
+                    } else {
+                        flattenIndices.add(flattenIndex);
+                    }
+                }
+            }
+            tableAnalysis.setIndices(flattenIndices);
+
+            // 设置LotNo
+            tableAnalysis.setLotNo(String.format("PG%s-%s", Allison1875.SHORT_VERSION,
+                    StringUtils.upperCase(HashingUtils.hashString(tableAnalysis.toString()))));
+        }
         return tableAnalyses;
     }
 
@@ -157,7 +180,6 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             IndexDTO index = indexMap.get(tableName, indexName);
             if (index == null) {
                 index = new IndexDTO();
-                index.setIndexName(indexName);
                 index.setIsUnique(record.getValue("NON_UNIQUE", Integer.class) == 0);
                 tableMap.get(tableName).getIndices().add(index);
                 indexMap.put(tableName, indexName, index);
@@ -285,8 +307,6 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                     for (SQLTableElement sqlTableElement : createTable.getTableElementList()) {
                         if (sqlTableElement instanceof MySqlKey && !(sqlTableElement instanceof MySqlPrimaryKey)) {
                             IndexDTO index = new IndexDTO();
-                            index.setIndexName(
-                                    ((MySqlKey) sqlTableElement).getIndexDefinition().getName().getSimpleName());
                             index.setProperties(((MySqlKey) sqlTableElement).getIndexDefinition().getColumns().stream()
                                     .map(o -> properties.get(o.getExpr().toString().replace("`", "")))
                                     .collect(Collectors.toList()));

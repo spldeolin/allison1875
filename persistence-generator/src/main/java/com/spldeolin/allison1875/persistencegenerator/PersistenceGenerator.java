@@ -27,7 +27,6 @@ import com.spldeolin.allison1875.persistencegenerator.dto.IndexDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
-import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.DesignGeneratorService;
 import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperCoidService;
@@ -122,14 +121,11 @@ public class PersistenceGenerator implements Allison1875MainService {
             List<QueryByIndexMethodDTO> queryByIndexMethodNames = Lists.newArrayList();
             List<DeleteByIndexMethodDTO> deleteByIndexMethodNames = Lists.newArrayList();
             for (IndexDTO index : tableAnalysis.getIndices()) {
-                for (int i = 0; i < index.getProperties().size(); i++) {
-                    List<PropertyDTO> indexProperties = index.getProperties().subList(0, i + 1);
-                    boolean isUnique = i == index.getProperties().size() - 1 ? index.getIsUnique() : false;
-                    queryByIndexMethodNames.add(
-                            mapperCoidService.generateQueryByIndexMethodToMapper(gmtmArgs, indexProperties, isUnique));
-                    deleteByIndexMethodNames.add(
-                            mapperCoidService.generateDeleteByIndexMethodToMapper(gmtmArgs, indexProperties));
-                }
+                queryByIndexMethodNames.add(
+                        mapperCoidService.generateQueryByIndexMethodToMapper(gmtmArgs, index.getProperties(),
+                                index.getIsUnique()));
+                deleteByIndexMethodNames.add(
+                        mapperCoidService.generateDeleteByIndexMethodToMapper(gmtmArgs, index.getProperties()));
             }
             String listAllMethodName = mapperCoidService.generateListAllMethodToMapper(gmtmArgs);
 

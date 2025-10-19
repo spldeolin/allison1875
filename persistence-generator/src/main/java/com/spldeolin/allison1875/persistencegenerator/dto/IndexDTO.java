@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.persistencegenerator.dto;
 
 import java.util.List;
+import java.util.Objects;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import lombok.AccessLevel;
@@ -17,11 +18,6 @@ import lombok.experimental.FieldDefaults;
 public class IndexDTO {
 
     /**
-     * 索引名
-     */
-    String indexName;
-
-    /**
      * 索引字段
      */
     List<PropertyDTO> properties = Lists.newArrayList();
@@ -30,5 +26,19 @@ public class IndexDTO {
      * 是否唯一
      */
     Boolean isUnique;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        IndexDTO indexDTO = (IndexDTO) o;
+        return Objects.equals(properties, indexDTO.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(properties);
+    }
 
 }
