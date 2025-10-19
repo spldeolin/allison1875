@@ -20,10 +20,6 @@ public interface MapperXmlService {
 
     List<String> generateBatchInsertMethod(TableAnalysisDTO persistence, String methodName);
 
-    List<String> generateBatchUpdateEvenNullMethod(TableAnalysisDTO persistence, String methodName);
-
-    List<String> generateBatchUpdateMethod(TableAnalysisDTO persistence, String methodName);
-
     List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName, String methodName);
 
     List<String> generateListAllMethod(TableAnalysisDTO persistence, String methodName);

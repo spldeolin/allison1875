@@ -105,67 +105,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public List<String> generateBatchUpdateEvenNullMethod(TableAnalysisDTO persistence, String methodName) {
-        if (methodName == null) {
-            return Lists.newArrayList();
-        }
-        List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(String.format("<update id=\"%s\">", methodName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE " + persistence.getTableName());
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "SET");
-        for (PropertyDTO nonId : persistence.getNonIdProperties()) {
-            xmlLines.add(
-                    BaseConstant.TREBLE_INDENT + nonId.getColumnName() + " = #{one." + nonId.getPropertyName() + "},");
-        }
-        // 删除最后一个语句中，最后的逗号
-        if (CollectionUtils.isNotEmpty(xmlLines)) {
-            int last = xmlLines.size() - 1;
-            xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
-        }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<where>");
-        if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + config.getNotDeletedSql());
-        }
-        for (PropertyDTO idProperty : persistence.getIdProperties()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{one."
-                    + idProperty.getPropertyName() + "}");
-        }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "</where>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
-        xmlLines.add("</update>");
-        xmlLines.add("");
-        return xmlLines;
-    }
-
-    @Override
-    public List<String> generateBatchUpdateMethod(TableAnalysisDTO persistence, String methodName) {
-        List<String> xmlLines = Lists.newArrayList();
-        xmlLines.add(String.format("<update id=\"%s\">", methodName));
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "<foreach collection=\"entities\" item=\"one\" separator=\";\">");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "UPDATE " + persistence.getTableName());
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<set>");
-        for (PropertyDTO nonId : persistence.getNonIdProperties()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + String.format("<if test=\"one.%s!=null\"> %s = #{one.%s}, </if>",
-                    nonId.getPropertyName(), nonId.getColumnName(), nonId.getPropertyName()));
-        }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "</set>");
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "<where>");
-        if (persistence.getIsDeleteFlagExist()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + config.getNotDeletedSql());
-        }
-        for (PropertyDTO idProperty : persistence.getIdProperties()) {
-            xmlLines.add(BaseConstant.TREBLE_INDENT + "AND " + idProperty.getColumnName() + " = #{one."
-                    + idProperty.getPropertyName() + "}");
-        }
-        xmlLines.add(BaseConstant.DOUBLE_INDENT + "</where>");
-        xmlLines.add(BaseConstant.SINGLE_INDENT + "</foreach>");
-        xmlLines.add("</update>");
-        xmlLines.add("");
-        return xmlLines;
-    }
-
-    @Override
     public List<String> generateInsertMethod(TableAnalysisDTO persistence, String entityName, String methodName) {
         List<String> xmlLines = Lists.newArrayList();
         String generatedKeyPart = "";
