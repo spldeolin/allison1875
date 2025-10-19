@@ -329,7 +329,10 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         Set<VariableProperty> returnVps = Sets.newLinkedHashSet();
         Set<PropertyDTO> returnProperties = selectProperties;
         if (returnProperties.isEmpty()) {
-            returnProperties = Sets.newLinkedHashSet(designMeta.getProperties().values());
+            // 只有join场景需要这么做，确保join中未指定select字段时也能加入到返回字段中；非join场景不需要，返回值直接使用Entity即可
+            if (!joinConditions.isEmpty()) {
+                returnProperties = Sets.newLinkedHashSet(designMeta.getProperties().values());
+            }
         }
         for (PropertyDTO returnProperty : returnProperties) {
             returnVps.add(new VariableProperty() {
