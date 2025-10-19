@@ -27,6 +27,13 @@ public class IndexDTO {
      */
     Boolean isUnique;
 
+    /**
+     * 是否是业务主键
+     */
+    public boolean isBizId() {
+        return properties.size() == 1 && isUnique;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

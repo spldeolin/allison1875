@@ -50,4 +50,7 @@ public interface MapperXmlService {
     List<String> generateDeleteByIndexMethod(TableAnalysisDTO tableAnalysis,
             List<DeleteByIndexMethodDTO> deleteByIndexMethodNames);
 
+    List<String> generateQueryByBizIdsMethod(TableAnalysisDTO tableAnalysis,
+            List<QueryByIndexMethodDTO> queryByBizIdsMethodNames);
+
 }

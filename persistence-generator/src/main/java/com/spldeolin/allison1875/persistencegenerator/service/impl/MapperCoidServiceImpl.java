@@ -191,6 +191,49 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     }
 
     @Override
+    public QueryByIndexMethodDTO generateQueryByBizIdsMethodToMapper(GenerateMethodToMapperArgs args,
+            PropertyDTO bizId) {
+        String methodName = antiDuplicationService.getNewMethodNameIfExist(
+                "queryBy" + English.plural(MoreStringUtils.toUpperCamel(bizId.getPropertyName())), args.getMapper());
+        MethodDeclaration queryByIds = new MethodDeclaration();
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据多个ID查询");
+        queryByIds.setType(parseType("java.util.List<" + args.getEntityGeneration().getDtoQualifier() + ">"));
+        queryByIds.setName(methodName);
+        String varsName = English.plural(MoreStringUtils.toLowerCamel(bizId.getPropertyName()));
+        Parameter parameter = parseParameter(
+                "@org.apache.ibatis.annotations.Param(\"" + varsName + "\") java.util.List<" + bizId.getJavaType()
+                        .getSimpleName() + "> " + varsName);
+        queryByIds.addParameter(parameter);
+        queryByIds.setBody(null);
+        queryByIds.setJavadocComment(comment);
+        args.getMapper().getMembers().addLast(queryByIds);
+        return new QueryByIndexMethodDTO().setMethodName(methodName).setIndexProperties(Lists.newArrayList(bizId));
+    }
+
+    @Override
+    public QueryByIndexMethodDTO generateQueryByBizIdsEachIdMethodToMapper(GenerateMethodToMapperArgs args,
+            PropertyDTO bizId) {
+        String methodName = antiDuplicationService.getNewMethodNameIfExist(
+                String.format("queryBy%sEach%s", English.plural(MoreStringUtils.toUpperCamel(bizId.getPropertyName())),
+                        MoreStringUtils.toUpperCamel(bizId.getPropertyName())), args.getMapper());
+        MethodDeclaration queryByIdsEachId = new MethodDeclaration();
+        String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "根据多个ID查询，并以ID作为key映射到Map");
+        String varName = MoreStringUtils.toLowerCamel(bizId.getPropertyName());
+        String pkTypeName = bizId.getJavaType().getSimpleName();
+        queryByIdsEachId.addAnnotation(parseAnnotation("@org.apache.ibatis.annotations.MapKey(\"" + varName + "\")"));
+        queryByIdsEachId.setType(
+                parseType("java.util.Map<" + pkTypeName + ", " + args.getEntityGeneration().getDtoQualifier() + ">"));
+        queryByIdsEachId.setName(methodName);
+        String varsName = English.plural(varName);
+        queryByIdsEachId.addParameter(parseParameter(
+                "@org.apache.ibatis.annotations.Param(\"" + varsName + "\") List<" + pkTypeName + "> " + varsName));
+        queryByIdsEachId.setBody(null);
+        queryByIdsEachId.setJavadocComment(comment);
+        args.getMapper().getMembers().addLast(queryByIdsEachId);
+        return new QueryByIndexMethodDTO().setMethodName(methodName).setIndexProperties(Lists.newArrayList(bizId));
+    }
+
+    @Override
     public String generateQueryByIdMethodToMapper(GenerateMethodToMapperArgs args) {
         String methodName = null;
         if (CollectionUtils.isNotEmpty(args.getTableAnalysisDTO().getIdProperties())) {

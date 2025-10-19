@@ -38,11 +38,16 @@ public interface MapperCoidService {
 
     String generateQueryByIdsEachIdMethodToMapper(GenerateMethodToMapperArgs args);
 
-    QueryByIndexMethodDTO generateQueryByIndexMethodToMapper(GenerateMethodToMapperArgs args, List<PropertyDTO> keys,
-            Boolean isUnique);
+    QueryByIndexMethodDTO generateQueryByIndexMethodToMapper(GenerateMethodToMapperArgs args,
+            List<PropertyDTO> indexProperties, Boolean isUnique);
 
-    DeleteByIndexMethodDTO generateDeleteByIndexMethodToMapper(GenerateMethodToMapperArgs args, List<PropertyDTO> keys);
+    DeleteByIndexMethodDTO generateDeleteByIndexMethodToMapper(GenerateMethodToMapperArgs args,
+            List<PropertyDTO> indexProperties);
 
     String generateListAllMethodToMapper(GenerateMethodToMapperArgs args);
+
+    QueryByIndexMethodDTO generateQueryByBizIdsMethodToMapper(GenerateMethodToMapperArgs args, PropertyDTO bizId);
+
+    QueryByIndexMethodDTO generateQueryByBizIdsEachIdMethodToMapper(GenerateMethodToMapperArgs args, PropertyDTO bizId);
 
 }

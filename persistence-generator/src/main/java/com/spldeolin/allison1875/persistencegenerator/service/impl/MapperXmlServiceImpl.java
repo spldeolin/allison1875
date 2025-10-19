@@ -428,8 +428,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 continue;
             }
             if (!tableAnalysis.getIsDeleteFlagExist()) {
-                xmlLines.add(
-                        String.format("<delete id=\"%s\" resultType=\"int\">", deleteByIndexMethod.getMethodName()));
+                xmlLines.add(String.format("<delete id=\"%s\">", deleteByIndexMethod.getMethodName()));
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "DELETE FROM " + tableAnalysis.getTableName());
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
                 for (PropertyDTO indexProperty : deleteByIndexMethod.getIndexProperties()) {
@@ -453,6 +452,32 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 xmlLines.add("</update>");
             }
             xmlLines.add("");
+        }
+        return xmlLines;
+    }
+
+    @Override
+    public List<String> generateQueryByBizIdsMethod(TableAnalysisDTO persistence,
+            List<QueryByIndexMethodDTO> queryByBizIdsMethodNames) {
+        List<String> xmlLines = Lists.newArrayList();
+        for (QueryByIndexMethodDTO method : queryByBizIdsMethodNames) {
+            if (persistence.getIdProperties().size() == 1) {
+                PropertyDTO bizId = Iterables.getOnlyElement(method.getIndexProperties());
+                xmlLines.add(String.format("<select id=\"%s\" parameterType=\"%s\" resultMap=\"all\">",
+                        method.getMethodName(), bizId.getJavaType().getQualifier().replaceFirst("java\\.lang\\.", "")));
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "SELECT <include refid=\"all\"/>");
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "FROM " + persistence.getTableName());
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
+                if (persistence.getIsDeleteFlagExist()) {
+                    xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + config.getNotDeletedSql());
+                }
+                xmlLines.add(BaseConstant.DOUBLE_INDENT + "AND " + bizId.getColumnName() + String.format(
+                        " IN (<foreach collection=\"%s\" item=\"one\" separator=\",\">#{one}</foreach>)",
+                        English.plural(MoreStringUtils.toLowerCamel(bizId.getPropertyName()))));
+                xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
+                xmlLines.add("</select>");
+                xmlLines.add("");
+            }
         }
         return xmlLines;
     }
