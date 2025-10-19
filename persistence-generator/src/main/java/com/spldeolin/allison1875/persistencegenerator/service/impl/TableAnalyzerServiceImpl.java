@@ -21,10 +21,15 @@ import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLTextLiteralExpr;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.alibaba.druid.sql.ast.statement.SQLCreateTableStatement;
+import com.alibaba.druid.sql.ast.statement.SQLTableElement;
+import com.alibaba.druid.sql.dialect.mysql.ast.MySqlKey;
+import com.alibaba.druid.sql.dialect.mysql.ast.MySqlPrimaryKey;
+import com.alibaba.druid.sql.dialect.mysql.ast.MySqlUnique;
 import com.alibaba.druid.util.JdbcConstants;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -241,6 +246,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                         tableAnalysis.setDescrption(((SQLTextLiteralExpr) createTable.getComment()).getText());
                     }
                     tableAnalysis.setIsAllPropertiesNotNull(true);
+                    Map<String/*columnName*/, PropertyDTO> properties = Maps.newHashMap();
                     for (SQLColumnDefinition columnDef : createTable.getColumnDefinitions()) {
                         PropertyDTO property = new PropertyDTO();
                         String columnName = columnDef.getName().getSimpleName().replace("`", "");
@@ -272,6 +278,20 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                         }
                         if (!property.getNotnull()) {
                             tableAnalysis.setIsAllPropertiesNotNull(false);
+                        }
+                        properties.put(columnName, property);
+                    }
+                    // 索引
+                    for (SQLTableElement sqlTableElement : createTable.getTableElementList()) {
+                        if (sqlTableElement instanceof MySqlKey && !(sqlTableElement instanceof MySqlPrimaryKey)) {
+                            IndexDTO index = new IndexDTO();
+                            index.setIndexName(
+                                    ((MySqlKey) sqlTableElement).getIndexDefinition().getName().getSimpleName());
+                            index.setProperties(((MySqlKey) sqlTableElement).getIndexDefinition().getColumns().stream()
+                                    .map(o -> properties.get(o.getExpr().toString().replace("`", "")))
+                                    .collect(Collectors.toList()));
+                            index.setIsUnique(sqlTableElement instanceof MySqlUnique);
+                            tableAnalysis.getIndices().add(index);
                         }
                     }
                     for (PropertyDTO prop : tableAnalysis.getProperties()) {
