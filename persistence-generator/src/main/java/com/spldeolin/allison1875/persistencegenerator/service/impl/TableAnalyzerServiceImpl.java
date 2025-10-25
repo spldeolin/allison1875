@@ -167,6 +167,9 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                 tableAnalysis.getNonIdProperties().add(property);
             }
             tableAnalysis.getProperties().add(property);
+            if (columnName.equals(getDeleteFlagName())) {
+                tableAnalysis.setIsDeleteFlagExist(true);
+            }
             propertyMap.put(tableName, columnName, property);
             if (!property.getNotnull()) {
                 tableAnalysis.setIsAllPropertiesNotNull(false);

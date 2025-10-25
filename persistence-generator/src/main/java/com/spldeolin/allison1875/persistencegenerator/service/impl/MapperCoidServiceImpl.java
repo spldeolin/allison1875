@@ -126,9 +126,6 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Override
     public String generateBatchInsertEvenNullMethodToMapper(GenerateMethodToMapperArgs args) {
-        if (args.getTableAnalysisDTO().getIsAllPropertiesNotNull()) {
-            return null;
-        }
         String methodName = antiDuplicationService.getNewMethodNameIfExist("batchInsertEvenNull", args.getMapper());
         MethodDeclaration insert = new MethodDeclaration();
         String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "批量插入，为null的属性会被作为null插入");

@@ -438,8 +438,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "</where>");
                 xmlLines.add("</delete>");
             } else {
-                xmlLines.add(
-                        String.format("<update id=\"%s\" resultType=\"int\">", deleteByIndexMethod.getMethodName()));
+                xmlLines.add(String.format("<update id=\"%s\">", deleteByIndexMethod.getMethodName()));
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "UPDATE " + tableAnalysis.getTableName());
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "SET " + config.getDeletedSql());
                 xmlLines.add(BaseConstant.SINGLE_INDENT + "<where>");
