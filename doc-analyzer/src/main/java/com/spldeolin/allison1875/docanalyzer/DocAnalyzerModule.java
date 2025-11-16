@@ -8,7 +8,6 @@ import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
 
 /**
  * @author Deolin 2020-12-06
@@ -34,7 +33,6 @@ public class DocAnalyzerModule extends Allison1875Module {
     protected void configure() {
         bind(CommonConfig.class).toInstance(commonConfig);
         bind(DocAnalyzerConfig.class).toInstance(docAnalyzerConfig);
-        bind(OkHttpClient.class).toInstance(new OkHttpClient());
         if (commonConfig.getIsDataModuleWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
