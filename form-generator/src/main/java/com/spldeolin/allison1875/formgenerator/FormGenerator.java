@@ -25,10 +25,10 @@ import com.spldeolin.allison1875.formgenerator.enums.ItemValidEnum;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerExpansionServiceImplManager;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**
