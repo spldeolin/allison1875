@@ -1,0 +1,308 @@
+---
+description: Allison1875 Java AST 代码生成工具集 - AI 编码助手指导文档
+alwaysApply: true
+---
+
+# Allison1875 项目上下文
+
+## 项目概述
+
+Allison1875 是一个基于 Java AST 技术的**源码生成工具集**，以 Maven 插件形式提供。它通过解析和转换 Java 内部 DSL，自动生成 Controller、Service、DTO、Mapper、XML 等样板代码。
+
+**核心信息**:
+- GitHub: https://github.com/spldeolin/allison1875
+- 技术栈: Java AST + Maven Plugin
+- 目标用户: Spring Boot + MyBatis 开发者
+- 当前版本: 12.2 (正式版) / 13.0-SNAPSHOT (开发版)
+- GroupId: `com.spldeolin.allison1875`
+
+## 项目架构 (多模块 Maven 项目)
+
+```
+allison1875/
+├── common/                          [公共模块] AST 工具、配置、日志
+├── allison1875-support/             [运行时库] 用户项目依赖，提供 @L、@P 等注解
+├── allison1875-maven-plugin/        [插件入口] Maven Mojo 定义
+├── persistence-generator/           [功能1] 数据库表 → Entity/Mapper/XML
+├── persistence-generator-facade/    [门面模块] persistence-generator 外部接口
+├── handler-transformer/             [功能2] DSL 初始化块 → Controller/Service/DTO
+├── query-transformer/               [功能3] 链式 DSL → 条件查询 Mapper/XML
+├── star-transformer/                [功能4] 星型 DSL → 多表关联 DTO
+└── doc-analyzer/                    [功能5] Controller → API 文档
+```
+
+## 五大核心功能详解
+
+### 1. persistence-generator (持久层生成)
+**命令**: `mvn allison1875:persistence-generator`
+**用途**: 从 MySQL 数据库表生成 MyBatis 持久层代码
+**生成**: Entity.java + Mapper.java + Mapper.xml + Design.java
+
+**必需配置**:
+```xml
+<persistenceGenerator>
+    <jdbcUrl>jdbc:mysql://localhost:3306</jdbcUrl>
+    <userName>root</userName>
+    <password>password</password>
+    <schema>your_database</schema>
+    <tables>user,order,product</tables>
+    <enableGenerateDesign>true</enableGenerateDesign>  <!-- 必须开启，供其他功能使用 -->
+</persistenceGenerator>
+```
+
+### 2. handler-transformer (API 接口生成)
+**命令**: `mvn allison1875:handler-transformer`
+**用途**: 在 Controller 中编写 DSL，生成完整 HTTP API
+**关键**: DSL 必须是**实例初始化块** `{ ... }`，放在 @RestController 类中
+
+**DSL 语法**:
+```java
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    {  // ← 实例初始化块，非静态块
+        String handler = "listUsers", desc = "获取用户列表";
+
+        class req {
+            @NotNull String keyword;     // JSR-303 验证注解会保留
+            int pageNum;
+            int pageSize = 20;           // 默认值会保留
+        }
+
+        @P  // 分页响应包装
+        class resp {
+            String userId;
+            String userName;
+            @L class addresses { String city; }  // List 类型
+        }
+    }
+    // DSL 执行后会被替换为真正的 Controller 方法
+}
+```
+
+**生成结果**:
+- Controller 方法 (DSL 块消失)
+- Request DTO (`ListUsersReq.java`)
+- Response DTO (`ListUsersResp.java`)
+- Service 接口方法
+- Service 实现方法 (返回 null，待填充)
+
+### 3. query-transformer (条件查询生成)
+**命令**: `mvn allison1875:query-transformer`
+**前置条件**: 需要 Design 类 (由 persistence-generator 生成)
+**用途**: 编写链式 DSL，生成动态条件查询
+
+**DSL 语法**:
+```java
+// 在 Service 实现中编写
+List<User> users = UserDesign
+    .query("findByConditions")           // Mapper 方法名
+    .id.userName.createdAt               // SELECT 字段 (可选，默认全字段)
+    .where()                             // WHERE 子句开始
+    .userName.like(keyword)              // userName LIKE '%keyword%' (带 null 检查)
+    .status.eq(1)                        // AND status = 1
+    .createdAt.ge(startDate)             // AND created_at >= startDate
+    .list();                             // 终结操作: 返回 List<Entity>
+
+// 其他终结操作:
+// .one()          - 返回单个对象
+// .count()        - 返回 long 计数
+// .groupByXxx()   - 返回 Map<XxxType, List<Entity>>
+```
+
+**生成结果**:
+- Param DTO (`FindByConditionsParam.java`)
+- Mapper 方法 (添加到现有 Mapper 接口)
+- MyBatis XML (带 `<if>` 动态条件)
+- DSL 调用被替换为常规代码
+
+### 4. star-transformer (星型关联查询)
+**命令**: `mvn allison1875:star-transformer`
+**用途**: 一次查询获取主实体及所有关联数据
+**前置条件**: 所有表都需要 Design 类
+
+**DSL 语法**:
+```java
+// 在需要关联数据的地方编写
+SandboxWholeDTO result = StarSchema
+    .cft(SandboxDesign.sandboxId, targetId)     // 中心事实表
+    .oo(SandboxHeartbeatDesign.sandboxId)       // 一对一关联
+    .om(SandboxEnvVarDesign.sandboxId)          // 一对多关联
+    .over();                                    // 结束
+```
+
+**生成结果**:
+- Whole DTO (`SandboxWholeDTO.java`) 聚合所有实体
+- 各 Mapper 的查询方法
+- DSL 被替换为多个查询 + 数据组装代码
+
+### 5. doc-analyzer (API 文档生成)
+**命令**: `mvn allison1875:doc-analyzer`
+**用途**: 分析 Spring MVC Controller，生成结构化 API 文档
+
+**配置选项**:
+```xml
+<docAnalyzer>
+    <flushTo>YAPI</flushTo>                     <!-- MARKDOWN/YAPI/SHOWDOC/DSL -->
+    <yapiUrl>http://yapi.company.com</yapiUrl>
+    <yapiToken>your-project-token</yapiToken>
+    <!-- Markdown 输出配置 -->
+    <markdownDir>api-docs</markdownDir>
+    <enableCurl>true</enableCurl>
+    <enableResponseBodySample>true</enableResponseBodySample>
+</docAnalyzer>
+```
+
+## 开发配置模板
+
+### 用户项目 pom.xml 配置
+
+```xml
+<plugin>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-maven-plugin</artifactId>
+    <version>12.2</version>
+    <configuration>
+        <common>
+            <basePackage>com.example.yourapp</basePackage>
+            <author>yourname</author>
+            <!-- 包路径约定 (可选覆盖) -->
+            <entityPackage>com.example.yourapp.model</entityPackage>
+            <mapperPackage>com.example.yourapp.mapper</mapperPackage>
+            <designPackage>com.example.yourapp.design</designPackage>
+            <reqDTOPackage>com.example.yourapp.dto.req</reqDTOPackage>
+            <respDTOPackage>com.example.yourapp.dto.resp</respDTOPackage>
+            <servicePackage>com.example.yourapp.service</servicePackage>
+            <serviceImplPackage>com.example.yourapp.service.impl</serviceImplPackage>
+            <paramDTOPackage>com.example.yourapp.mapper.param</paramDTOPackage>
+            <mapperXmlDirs>src/main/resources/mapper</mapperXmlDirs>
+        </common>
+
+        <!-- 数据库配置 -->
+        <persistenceGenerator>
+            <jdbcUrl>jdbc:mysql://localhost:3306</jdbcUrl>
+            <userName>root</userName>
+            <password>password</password>
+            <schema>your_database</schema>
+            <tables>*</tables>  <!-- 或指定表名: user,order,product -->
+            <enableGenerateDesign>true</enableGenerateDesign>
+        </persistenceGenerator>
+
+        <!-- 接口生成配置 -->
+        <handlerTransformer>
+            <pageTypeQualifier>com.example.common.PageResult</pageTypeQualifier>
+            <enableOneService>false</enableOneService>
+        </handlerTransformer>
+
+        <!-- 文档生成配置 -->
+        <docAnalyzer>
+            <flushTo>MARKDOWN</flushTo>
+            <markdownDir>api-docs</markdownDir>
+        </docAnalyzer>
+    </configuration>
+</plugin>
+
+<!-- 运行时依赖 -->
+<dependency>
+    <groupId>com.spldeolin.allison1875</groupId>
+    <artifactId>allison1875-support</artifactId>
+    <version>12.2</version>
+</dependency>
+```
+
+## 开发工作流
+
+### 1. 本地安装 (必需步骤)
+```bash
+# Allison1875 未发布到 Maven Central，需本地安装
+git clone https://github.com/spldeolin/allison1875.git
+cd allison1875
+mvn install -DskipTests
+```
+
+### 2. 典型开发流程
+```bash
+# 步骤1: 从数据库生成持久层 (一次性/表结构变更时)
+mvn allison1875:persistence-generator
+
+# 步骤2: 在 Controller 编写接口 DSL
+# 在 @RestController 类中添加 { ... } 初始化块
+
+# 步骤3: 生成接口代码
+mvn allison1875:handler-transformer
+
+# 步骤4: 在 Service 中编写查询 DSL (可选)
+# 使用 XxxDesign.query("methodName").where()...
+
+# 步骤5: 生成查询代码
+mvn allison1875:query-transformer
+
+# 步骤6: 生成 API 文档 (可选)
+mvn allison1875:doc-analyzer
+```
+
+### 3. 单元测试运行
+```bash
+# 运行特定模块测试
+cd handler-transformer
+mvn test
+
+# 运行特定测试类
+mvn test -Dtest=HandlerTransformerTest
+```
+
+## AI 助手关键规则
+
+### DSL 编写规范
+1. **handler-transformer**: 必须使用实例初始化块 `{ ... }`，不是静态块 `static { ... }`
+2. **query-transformer**: 链式调用必须以 `.query("methodName")` 开始，以 `.list()/.one()/.count()` 等结束
+3. **star-transformer**: 必须以 `StarSchema.cft()` 开始，以 `.over()` 结束
+
+### 代码风格要求
+1. **包名**: 统一使用 `com.spldeolin.allison1875.{module}` 格式
+2. **类名**:
+   - 配置类: `{Module}Config`
+   - 工具类: `{Function}Utils`
+   - 转换器: `{Entity}Transformer`
+3. **方法名**: 驼峰命名，动词开头
+4. **常量**: 全大写，下划线分隔
+
+### 错误处理模式
+```java
+// 标准异常处理
+try {
+    // 业务逻辑
+} catch (Exception e) {
+    log.error("操作失败: {}", e.getMessage(), e);
+    throw new AllisongateException("具体错误信息", e);
+}
+```
+
+## 常见问题解决
+
+| 问题现象 | 原因分析 | 解决方案 |
+|---------|----------|----------|
+| `mvn allison1875:*` 找不到插件 | 未本地安装 | `git clone` + `mvn install` |
+| handler-transformer 不识别 DSL | 使用了静态块或类没有 @RestController | 确保是实例初始化块且类有正确注解 |
+| query-transformer 报 Design 类不存在 | 未生成 Design 类 | 先运行 persistence-generator 并开启 enableGenerateDesign |
+| 生成代码使用 javax.* 但项目用 jakarta.* | 版本兼容问题 | 设置 `<enableJavaxMoveToJakarta>true</enableJavaxMoveToJakarta>` |
+| 多个 handler DSL 只生成了一个 | DSL 语法错误 | 每个 `{ ... }` 块定义一个 handler，检查语法 |
+
+## 快速命令参考
+
+```bash
+# 完整流程命令
+mvn allison1875:persistence-generator    # 生成持久层
+mvn allison1875:handler-transformer      # 生成接口
+mvn allison1875:query-transformer        # 生成查询
+mvn allison1875:star-transformer         # 生成关联查询
+mvn allison1875:doc-analyzer             # 生成文档
+
+# 开发调试
+mvn compile                              # 编译项目
+mvn test -Dtest=ClassName                # 运行单测
+mvn install -DskipTests                  # 本地安装 (跳过测试)
+```
+
+---
+*更新时间: 2025-02 | 版本: 12.2/13.0-SNAPSHOT*
