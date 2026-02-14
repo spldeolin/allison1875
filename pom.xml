@@ -185,6 +185,20 @@
                 <version>1.2.24</version>
             </dependency>
 
+            <!-- snakeyaml -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>2.5</version>
+            </dependency>
+
+            <!-- freemarker -->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.34</version>
+            </dependency>
+
             <!-- maven plugin dependencies -->
             <dependency>
                 <groupId>org.apache.maven</groupId>

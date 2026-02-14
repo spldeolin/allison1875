@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.formgenerator.dto.FormDefDTO;
+import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +35,8 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
             List<VariableDeclarator> reqParams, String respBodyDTOType) {
         BlockStmt body = new BlockStmt();
 
-        FormDefDTO formDef = JsonUtils.toObject(
-                StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("formDef")), FormDefDTO.class);
+        FormDef formDef = JsonUtils.toObject(
+                StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("formDef")), FormDef.class);
         log.info("formDef={}", formDef);
 
         if (respBodyDTOType != null) {
@@ -48,8 +48,8 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
     @Override
     public Optional<FieldDeclaration> buildFieldForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
             InitDecAnalysisDTO initDecAnalysis) {
-        FormDefDTO formDef = JsonUtils.toObject(
-                StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("formDef")), FormDefDTO.class);
+        FormDef formDef = JsonUtils.toObject(
+                StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("formDef")), FormDef.class);
         log.info("formDef={}", formDef);
 
         String mapperType =

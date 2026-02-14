@@ -1,0 +1,136 @@
+forms:
+  # 1. 学生基本信息表单（覆盖text、number、time、select、secret类型）
+  - name: StudentBasicInfo
+    title: 学生基本信息
+    desc: 用于录入和展示学生核心身份信息
+    items:
+      - type: text
+        name: studentName
+        title: 学生姓名
+        is_non_void:
+        max_length: 50
+        filter_patterns:
+          - kwLike
+        check_duplicate: true
+      - type: number
+        name: studentId
+        title: 学号
+        is_non_void: true
+        can_be_decimal: false
+        can_be_negative: false
+      - type: select
+        name: grade
+        title: 年级
+        is_non_void: true
+        options:
+          - code: '1'
+            title: 一年级
+          - code: '2'
+            title: 二年级
+          - code: '3'
+            title: 三年级
+      - type: time
+        name: enrollmentDate
+        title: 入学日期
+        is_non_void: true
+        pattern: date
+      - type: secret
+        name: idCardNumber
+        title: 身份证号
+        is_non_void: true
+        display_type: desensitization
+        desensitization: [ 6, 14 ]
+    indices:
+      - item_names: [ studentId ]
+        is_unique: true
+      - item_names: [ idCardNumber ]
+        is_unique: true
+
+  # 2. 学生住宿申请表单（覆盖onOff、select(multi)、text(multiline)类型）
+  - name: DormitoryApplication
+    title: 学生住宿申请
+    desc: 学生申请校内住宿的提交表单
+    items:
+      - type: number
+        name: studentId
+        title: 关联学号
+        is_non_void: true
+        can_be_decimal: false
+        can_be_negative: false
+      - type: onOff
+        name: needDormitory
+        title: 是否需要住宿
+        is_non_void: true
+      - type: select
+        name: preferredDormitoryType
+        title: 偏好宿舍类型
+        is_non_void: true
+        options:
+          - code: '4'
+            title: 四人间
+          - code: '6'
+            title: 六人间
+      - type: select
+        name: specialNeeds
+        title: 特殊需求（多选）
+        is_non_void: true
+        is_multi: true
+        options:
+          - code: 'lower_floor'
+            title: 低楼层
+          - code: 'near_bathroom'
+            title: 近卫生间
+          - code: 'quiet_area'
+            title: 安静区域
+      - type: text
+        name: applicationReason
+        title: 申请理由
+        is_non_void: true
+        is_multiline_or_rich: true
+        max_length: 2000
+    indices:
+      - item_names: [ studentId ]
+        is_unique: true
+
+  # 3. 学生成绩录入表单（覆盖number(decimal)、time(dateTime)、secret(hidden)类型）
+  - name: StudentGradeRecord
+    title: 学生成绩录入
+    desc: 教师录入学生学科成绩的表单
+    items:
+      - type: number
+        name: studentId
+        title: 学生学号
+        is_non_void: true
+        can_be_decimal: false
+        can_be_negative: false
+        check_duplicate: true
+      - type: select
+        name: subject
+        title: 学科
+        is_non_void: true
+        options:
+          - code: 'math'
+            title: 数学
+          - code: 'chinese'
+            title: 语文
+          - code: 'english'
+            title: 英语
+      - type: number
+        name: score
+        title: 成绩分数
+        is_non_void: true
+        can_be_decimal: true
+        can_be_negative: false
+      - type: time
+        name: examDateTime
+        title: 考试时间
+        is_non_void: true
+        pattern: dateTime
+      - type: secret
+        name: teacherOperateCode
+        title: 教师操作码
+        is_non_void: true
+        display_type: hidden
+    indices:
+      - item_names: [ studentId, subject, examDateTime ]
+        is_unique: true

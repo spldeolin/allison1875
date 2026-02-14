@@ -19,9 +19,8 @@ import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.formgenerator.dto.FormDefDTO;
-import com.spldeolin.allison1875.formgenerator.dto.ItemDefDTO;
-import com.spldeolin.allison1875.formgenerator.enums.ItemValidEnum;
+import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
@@ -70,7 +69,7 @@ public class FormGenerator implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        List<FormDefDTO> formDefs = JsonUtils.toListOfObject(formGeneratorConfig.getDsl(), FormDefDTO.class);
+        List<FormDef> formDefs = JsonUtils.toListOfObject(formGeneratorConfig.getDsl(), FormDef.class);
         if (CollectionUtils.isEmpty(formDefs)) {
             log.warn("no form definitions detected");
             return;
@@ -80,12 +79,12 @@ public class FormGenerator implements Allison1875MainService {
 
         // 生成DDL
         StringBuilder ddl = new StringBuilder(512);
-        for (FormDefDTO formDef : formDefs) {
+        for (FormDef formDef : formDefs) {
             ddl.append("CREATE TABLE `").append(formDef.getName()).append("`\n(");
             ddl.append("`id` BIGINT NOT NULL COMMENT '主键',\n");
-            for (ItemDefDTO item : formDef.getItems()) {
-                ddl.append("`").append(item.getName()).append("` ").append(item.getType().getDdlColumnType());
-                if (item.getValids().contains(ItemValidEnum.NOT_NULL_BROADLY)) {
+            for (ItemDef item : formDef.getItems()) {
+                ddl.append("`").append(item.getName()).append("` ").append(item.getDbColumnType());
+                if (item.getIsNonValid()) {
                     ddl.append(" NOT NULL");
                 }
                 ddl.append(" COMMENT '").append(item.getTitle()).append("',\n");
@@ -103,7 +102,7 @@ public class FormGenerator implements Allison1875MainService {
         flushes.addAll(persistenceGenerator.process());
 
         List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);
-        for (FormDefDTO formDef : formDefs) {
+        for (FormDef formDef : formDefs) {
 
             // 生成controller和initDec
             CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();

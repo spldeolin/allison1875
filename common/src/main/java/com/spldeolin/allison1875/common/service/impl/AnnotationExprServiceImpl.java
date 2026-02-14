@@ -121,6 +121,33 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
+    public AnnotationExpr notNull() {
+        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotNull").clone();
+        } else {
+            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotNull").clone();
+        }
+    }
+
+    @Override
+    public AnnotationExpr notBlank() {
+        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotBlank").clone();
+        } else {
+            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotBlank").clone();
+        }
+    }
+
+    @Override
+    public AnnotationExpr size(Integer min, Integer max) {
+        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.Size").clone();
+        } else {
+            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.Size").clone();
+        }
+    }
+
+    @Override
     public AnnotationExpr springAutowired() {
         return StaticJavaParser.parseAnnotation("@org.springframework.beans.factory.annotation.Autowired").clone();
     }

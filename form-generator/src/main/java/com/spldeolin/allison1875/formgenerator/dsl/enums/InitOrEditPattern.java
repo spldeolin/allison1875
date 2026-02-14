@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.formgenerator.enums;
+package com.spldeolin.allison1875.formgenerator.dsl.enums;
 
 import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -11,23 +11,32 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public enum ItemValidEnum {
+public enum InitOrEditPattern {
 
-    NOT_NULL_BROADLY("notNullBroadly"),
+    /**
+     * 不进行初始化或者不可编辑
+     */
+    DO_NOT("doNot"),
 
-    MAX_LENGTH("maxLength"),
+    /**
+     * 用户输入
+     */
+    USER_INPUT("userInput"),
 
-    MIN_LENGTH("minLength"),
-
-    PATTERN("pattern"),
+    /**
+     * 生成为T0DO，由开发者自行开发
+     */
+    TODO("todo"),
 
     ;
 
     @JsonValue
     private final String code;
 
+
     @JsonCreator
-    public static ItemValidEnum of(String code) {
+    public static InitOrEditPattern of(String code) {
         return Arrays.stream(values()).filter(anEnum -> anEnum.getCode().equals(code)).findFirst().orElse(null);
     }
+
 }

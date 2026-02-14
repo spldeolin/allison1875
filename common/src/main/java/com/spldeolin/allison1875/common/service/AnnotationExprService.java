@@ -46,6 +46,12 @@ public interface AnnotationExprService {
 
     AnnotationExpr javaxValid();
 
+    AnnotationExpr notNull();
+
+    AnnotationExpr notBlank();
+
+    AnnotationExpr size(Integer min, Integer max);
+
     AnnotationExpr springAutowired();
 
     AnnotationExpr lombokEqualsAndHashCode();
