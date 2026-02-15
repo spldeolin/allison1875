@@ -19,14 +19,29 @@ public interface ItemService<I extends ItemDef> {
      */
     Boolean isSortable(I itemDef);
 
+    /**
+     * 字段对应的数据库列名
+     */
     String getDbColumnName(I itemDef);
 
+    /**
+     * 字段对应的数据库字段类型
+     */
     String getDbColumnType(I itemDef);
 
+    /**
+     * 字段对应的Java类型
+     */
     String getJavaType(I itemDef);
 
+    /**
+     * 字段对应的Java校验注解
+     */
     List<String> getJavaValidAnnotations(I itemDef);
 
+    /**
+     * 字段对应的Java @JsonFormat注解
+     */
     String getJavaJsonFormatAnnoatation(I itemDef);
 
 }

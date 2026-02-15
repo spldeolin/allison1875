@@ -28,14 +28,4 @@ public class TimeItemDef extends ItemDef {
     @NotNull
     TimeFormat format = TimeFormat.DATE_TIME;
 
-    @Override
-    public String getDbColumnType() {
-        return "DATETIME";
-    }
-
-    @Override
-    public String getJavaType() {
-        return "java.time.LocalDateTime";
-    }
-
 }

@@ -6,10 +6,12 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.LE;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.LT;
 
-import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.item.NumberItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
@@ -19,6 +21,9 @@ import com.spldeolin.allison1875.formgenerator.service.ItemService;
  */
 @Singleton
 public class NumberItemService implements ItemService<NumberItemDef> {
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public List<FilterPattern> getFilterPatterns(NumberItemDef itemDef) {
@@ -32,27 +37,31 @@ public class NumberItemService implements ItemService<NumberItemDef> {
 
     @Override
     public String getDbColumnName(NumberItemDef itemDef) {
-        return "";
+        return MoreStringUtils.toLowerCamel(itemDef.getName());
     }
 
     @Override
     public String getDbColumnType(NumberItemDef itemDef) {
-        return "";
+        return itemDef.getCanBeDecimal() ? "DECIMAL(14, 4)" : "BIGINT";
     }
 
     @Override
     public String getJavaType(NumberItemDef itemDef) {
-        return "";
+        return itemDef.getCanBeDecimal() ? "java.math.BigDecimal" : "Long";
     }
 
     @Override
     public List<String> getJavaValidAnnotations(NumberItemDef itemDef) {
-        return Collections.emptyList();
+        List<String> retval = Lists.newArrayList();
+        if (itemDef.getIsNonValid()) {
+            retval.add(annotationExprService.notNull().toString());
+        }
+        return retval;
     }
 
     @Override
     public String getJavaJsonFormatAnnoatation(NumberItemDef itemDef) {
-        return "";
+        return null;
     }
 
 }

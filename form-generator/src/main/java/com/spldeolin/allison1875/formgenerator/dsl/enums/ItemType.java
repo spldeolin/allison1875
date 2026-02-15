@@ -16,37 +16,37 @@ public enum ItemType {
     /**
      * 数字类字段定义
      */
-    NUMBER("number", , ),
+    NUMBER("number"),
 
     /**
      * 开关类字段定义，只有True、False的选择类字段定义
      */
-    ON_OFF("onOff", , ),
+    ON_OFF("onOff"),
 
     /**
      * 密码、密钥类字段定义（特点是不能返回，DB中需要被加密保存，不能编辑，只能重置）
      */
-    SECRET("secret", , ),
+    SECRET("secret"),
 
     /**
      * 选择类字段定义
      */
-    SELECT("select", , ),
+    SELECT("select"),
 
     /**
      * 多选类字段定义
      */
-    MULTI_SELECT("multiSelect", , ),// 多选类很特殊，为了能过滤需要创建关联表
+    MULTI_SELECT("multiSelect"),// 多选类很特殊，为了能过滤需要创建关联表
 
     /**
      * 文本类字段定义
      */
-    TEXT("text", , ),
+    TEXT("text"),
 
     /**
      * 时间类字段定义
      */
-    TIME("time", , ),
+    TIME("time"),
 
     ;
 

@@ -130,6 +130,15 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
+    public AnnotationExpr notEmpty() {
+        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotEmpty").clone();
+        } else {
+            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotEmpty").clone();
+        }
+    }
+
+    @Override
     public AnnotationExpr notBlank() {
         if (commonConfig.getEnableJavaxMoveToJakarta()) {
             return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotBlank").clone();

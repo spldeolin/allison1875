@@ -16,7 +16,7 @@ public enum TimeFormat {
     /**
      * yyyy-MM-dd形式的日期
      */
-    DATE("date", "yyyy-MM-dd", "java.time.LocalDateTime"),
+    DATE("date", "yyyy-MM-dd", "java.time.LocalDate"),
 
     /**
      * HH:mm:ss形式的时间

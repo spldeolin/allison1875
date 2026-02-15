@@ -2,10 +2,12 @@ package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 
-import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.item.OnOffItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
@@ -15,6 +17,9 @@ import com.spldeolin.allison1875.formgenerator.service.ItemService;
  */
 @Singleton
 public class OnOffItemService implements ItemService<OnOffItemDef> {
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public List<FilterPattern> getFilterPatterns(OnOffItemDef itemDef) {
@@ -28,27 +33,31 @@ public class OnOffItemService implements ItemService<OnOffItemDef> {
 
     @Override
     public String getDbColumnName(OnOffItemDef itemDef) {
-        return "";
+        return MoreStringUtils.toLowerCamel(itemDef.getName());
     }
 
     @Override
     public String getDbColumnType(OnOffItemDef itemDef) {
-        return "";
+        return "TINYINT(1)";
     }
 
     @Override
     public String getJavaType(OnOffItemDef itemDef) {
-        return "";
+        return "Boolean";
     }
 
     @Override
     public List<String> getJavaValidAnnotations(OnOffItemDef itemDef) {
-        return Collections.emptyList();
+        List<String> retval = Lists.newArrayList();
+        if (itemDef.getIsNonValid()) {
+            retval.add(annotationExprService.notNull().toString());
+        }
+        return retval;
     }
 
     @Override
     public String getJavaJsonFormatAnnoatation(OnOffItemDef itemDef) {
-        return "";
+        return null;
     }
 
 }

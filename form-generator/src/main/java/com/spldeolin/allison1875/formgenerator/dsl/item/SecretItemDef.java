@@ -20,14 +20,4 @@ public class SecretItemDef extends ItemDef {
      */
     final ItemType type = ItemType.SECRET;
 
-    @Override
-    public String getDbColumnType() {
-        return "VARCHAR(255)";
-    }
-
-    @Override
-    public String getJavaType() {
-        return "String";
-    }
-
 }

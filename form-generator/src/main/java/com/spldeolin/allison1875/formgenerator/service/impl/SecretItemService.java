@@ -1,8 +1,11 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import java.util.Collections;
 import java.util.List;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.item.SecretItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
@@ -13,6 +16,8 @@ import com.spldeolin.allison1875.formgenerator.service.ItemService;
 @Singleton
 public class SecretItemService implements ItemService<SecretItemDef> {
 
+    @Inject
+    private AnnotationExprService annotationExprService;
     @Override
     public List<FilterPattern> getFilterPatterns(SecretItemDef itemDef) {
         return null;
@@ -25,27 +30,31 @@ public class SecretItemService implements ItemService<SecretItemDef> {
 
     @Override
     public String getDbColumnName(SecretItemDef itemDef) {
-        return "";
+        return MoreStringUtils.toLowerCamel(itemDef.getName());
     }
 
     @Override
     public String getDbColumnType(SecretItemDef itemDef) {
-        return "";
+        return "VARCHAR(255)";
     }
 
     @Override
     public String getJavaType(SecretItemDef itemDef) {
-        return "";
+        return "String";
     }
 
     @Override
     public List<String> getJavaValidAnnotations(SecretItemDef itemDef) {
-        return Collections.emptyList();
+        List<String> retval = Lists.newArrayList();
+        if (itemDef.getIsNonValid()) {
+            retval.add(annotationExprService.notEmpty().toString());
+        }
+        return retval;
     }
 
     @Override
     public String getJavaJsonFormatAnnoatation(SecretItemDef itemDef) {
-        return "";
+        return null;
     }
 
 }

@@ -48,6 +48,8 @@ public interface AnnotationExprService {
 
     AnnotationExpr notNull();
 
+    AnnotationExpr notEmpty();
+
     AnnotationExpr notBlank();
 
     AnnotationExpr size(Integer min, Integer max);

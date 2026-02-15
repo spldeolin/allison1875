@@ -4,7 +4,6 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.OptionDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
@@ -32,29 +31,5 @@ public class MultiSelectItemDef extends ItemDef {
     @NotEmpty
     @Valid
     List<@NotNull OptionDef> options;
-
-    @Override
-    public String getDbColumnType() {
-        return "VARCHAR(64)";
-    }
-
-    @Override
-    public String getJavaType() {
-        return "String";
-    }
-
-    @Override
-    public List<String> getJavaValidAnnotations() {
-        List<String> retval = Lists.newArrayList();
-        if (getIsNonValid()) {
-            retval.add("javax.validation.constraints.NotNull");
-        }
-        return retval;
-    }
-
-    @Override
-    public String getJavaJsonFormatAnnoatation() {
-        return null;
-    }
 
 }

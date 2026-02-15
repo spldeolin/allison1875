@@ -43,6 +43,12 @@ public class CommonConfig {
     String respDTOPackage;
 
     /**
+     * 枚举所在包的包名
+     */
+    @NotEmpty
+    String enumPackage;
+
+    /**
      * 业务层Service接口所在包的包名
      */
     @NotEmpty

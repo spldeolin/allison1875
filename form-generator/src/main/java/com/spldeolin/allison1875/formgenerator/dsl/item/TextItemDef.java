@@ -40,14 +40,4 @@ public class TextItemDef extends ItemDef {
      */
     String regex;
 
-    @Override
-    public String getDbColumnType() {
-        return !isMultilineOrRich ? "VARCHAR(" + maxLength + ")" : "LONGTXT";
-    }
-
-    @Override
-    public String getJavaType() {
-        return "String";
-    }
-
 }

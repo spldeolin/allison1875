@@ -32,14 +32,4 @@ public class SelectItemDef extends ItemDef {
     @Valid
     List<@NotNull OptionDef> options;
 
-    @Override
-    public String getDbColumnType() {
-        return "VARCHAR(64)";
-    }
-
-    @Override
-    public String getJavaType() {
-        return "String";
-    }
-
 }

@@ -20,14 +20,4 @@ public class OnOffItemDef extends ItemDef {
      */
     final ItemType type = ItemType.ON_OFF;
 
-    @Override
-    public String getDbColumnType() {
-        return "TINYINT(1)";
-    }
-
-    @Override
-    public String getJavaType() {
-        return "Boolean";
-    }
-
 }

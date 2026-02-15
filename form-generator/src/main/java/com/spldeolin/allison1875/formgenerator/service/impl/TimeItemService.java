@@ -4,10 +4,12 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.DA
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.DATE_TIME_RANGE;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 
-import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
@@ -17,6 +19,9 @@ import com.spldeolin.allison1875.formgenerator.service.ItemService;
  */
 @Singleton
 public class TimeItemService implements ItemService<TimeItemDef> {
+
+    @Inject
+    private AnnotationExprService annotationExprService;
 
     @Override
     public List<FilterPattern> getFilterPatterns(TimeItemDef itemDef) {
@@ -30,27 +35,32 @@ public class TimeItemService implements ItemService<TimeItemDef> {
 
     @Override
     public String getDbColumnName(TimeItemDef itemDef) {
-        return "";
+        return MoreStringUtils.toLowerCamel(itemDef.getName());
     }
 
     @Override
     public String getDbColumnType(TimeItemDef itemDef) {
-        return "";
+        return "DATETIME";
     }
 
     @Override
     public String getJavaType(TimeItemDef itemDef) {
-        return "";
+        return "java.time.LocalDateTime";
     }
 
     @Override
     public List<String> getJavaValidAnnotations(TimeItemDef itemDef) {
-        return Collections.emptyList();
+        List<String> retval = Lists.newArrayList();
+        if (itemDef.getIsNonValid()) {
+            retval.add(annotationExprService.notNull().toString());
+        }
+        return retval;
     }
 
     @Override
     public String getJavaJsonFormatAnnoatation(TimeItemDef itemDef) {
-        return "";
+        return "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"" + itemDef.getFormat().getPattern()
+                + "\", timezone = " + "\"Asia/Shanghai\")";
     }
 
 }
