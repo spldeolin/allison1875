@@ -52,7 +52,7 @@ public interface AnnotationExprService {
 
     AnnotationExpr notBlank();
 
-    AnnotationExpr size(Integer min, Integer max);
+    AnnotationExpr size(int min, int max);
 
     AnnotationExpr springAutowired();
 

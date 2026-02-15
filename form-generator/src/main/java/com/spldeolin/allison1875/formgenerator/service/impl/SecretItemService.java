@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -51,17 +53,17 @@ public class SecretItemService implements ItemService<SecretItemDef> {
     }
 
     @Override
-    public List<String> getJavaValidAnnotations(SecretItemDef itemDef) {
-        List<String> retval = Lists.newArrayList();
-        if (itemDef.getIsNonValid()) {
-            retval.add(annotationExprService.notEmpty().toString());
+    public List<AnnotationExpr> getJavaValidAnnotations(SecretItemDef itemDef) {
+        List<AnnotationExpr> retval = Lists.newArrayList();
+        if (itemDef.getIsNonVoid()) {
+            retval.add(annotationExprService.notEmpty());
         }
         return retval;
     }
 
     @Override
-    public String getJavaJsonFormatAnnoatation(SecretItemDef itemDef) {
-        return null;
+    public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(SecretItemDef itemDef) {
+        return Optional.empty();
     }
 
 }

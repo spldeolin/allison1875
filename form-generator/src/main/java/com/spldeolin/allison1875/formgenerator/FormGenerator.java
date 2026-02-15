@@ -1,11 +1,14 @@
 package com.spldeolin.allison1875.formgenerator;
 
+import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern.TODO;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.javaparser.ast.CompilationUnit;
@@ -25,6 +28,10 @@ import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
@@ -83,6 +90,9 @@ public class FormGenerator implements Allison1875MainService {
             return;
         }
 
+        // 为每个Form增加业务主键、审计字段等
+        addCommonItems(forms);
+
         List<FileFlush> flushes = Lists.newArrayList(); // 多组件flushes合成为一个
 
         // 生成DDL
@@ -91,9 +101,11 @@ public class FormGenerator implements Allison1875MainService {
         log.info("build ddl.sql, path={}", ddlSql.normalize());
         flushes.add(FileFlush.build(ddlSql.toFile(), ddl));
 
-        // 调用persistence-generator
+        // 生成持久层
         persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl);
         flushes.addAll(persistenceGenerator.process());
+
+        // 生成枚举
 
         List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);
         for (FormDef formDef : forms) {
@@ -112,10 +124,9 @@ public class FormGenerator implements Allison1875MainService {
             cu.addType(coid);
 
             // 生成CURD接口的initDec
-            coid.addMember(initDecService.buildCreateHandler(formDef));
+            coid.addMember(initDecService.buildSaveHandler(formDef));
             coid.addMember(initDecService.buildListHandler(formDef));
             coid.addMember(initDecService.buildGetDetailHandler(formDef));
-            coid.addMember(initDecService.buildUpdateHandler(formDef));
             coid.addMember(initDecService.buildDeleteHandler(formDef));
 
             astForestWithUnflushedCus.add(cu);
@@ -131,6 +142,37 @@ public class FormGenerator implements Allison1875MainService {
         if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        }
+    }
+
+    private void addCommonItems(List<FormDef> forms) {
+        for (FormDef form : forms) {
+            TextItemDef bizId = new TextItemDef();
+            bizId.setName(StringUtils.uncapitalize(form.getName()) + "Code");
+            bizId.setTitle("业务主键");
+            bizId.setIsNonVoid(true);
+            bizId.setInitPattern(TODO);
+            bizId.setEditPattern(InitOrEditPattern.DO_NOT);
+            bizId.setMaxLength(36);
+            form.getItems().add(0, bizId);
+            TimeItemDef createdAt = new TimeItemDef();
+            createdAt.setName("createdAt");
+            createdAt.setTitle("创建时间");
+            createdAt.setIsNonVoid(true);
+            createdAt.setInitPattern(TODO);
+            createdAt.setEditPattern(InitOrEditPattern.DO_NOT);
+            form.getItems().add(createdAt);
+            TimeItemDef updatedAt = new TimeItemDef();
+            updatedAt.setName("updatedAt");
+            updatedAt.setTitle("更新时间");
+            updatedAt.setIsNonVoid(true);
+            updatedAt.setInitPattern(TODO);
+            updatedAt.setEditPattern(TODO);
+            form.getItems().add(updatedAt);
+            IndexDef index = new IndexDef();
+            index.setItemNames(Lists.newArrayList(bizId.getName()));
+            index.setIsUnique(true);
+            form.getIndices().add(0, index);
         }
     }
 

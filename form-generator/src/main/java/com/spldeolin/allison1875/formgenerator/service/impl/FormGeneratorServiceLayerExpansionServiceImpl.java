@@ -35,9 +35,9 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
             List<VariableDeclarator> reqParams, String respBodyDTOType) {
         BlockStmt body = new BlockStmt();
 
-        FormDef formDef = JsonUtils.toObject(
-                StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("formDef")), FormDef.class);
-        log.info("formDef={}", formDef);
+        FormDef form = JsonUtils.toObject(StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("form")),
+                FormDef.class);
+        log.info("formDef={}", form);
 
         if (respBodyDTOType != null) {
             body.addStatement("return null;");
@@ -48,13 +48,13 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
     @Override
     public Optional<FieldDeclaration> buildFieldForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
             InitDecAnalysisDTO initDecAnalysis) {
-        FormDef formDef = JsonUtils.toObject(
-                StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("formDef")), FormDef.class);
-        log.info("formDef={}", formDef);
+        FormDef form = JsonUtils.toObject(StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("form")),
+                FormDef.class);
+        log.info("form={}", form);
 
         String mapperType =
-                commonConfig.getMapperPackage() + "." + MoreStringUtils.toUpperCamel(formDef.getName()) + "Mapper";
-        String mapperName = MoreStringUtils.toLowerCamel(formDef.getName()) + "Mapper";
+                commonConfig.getMapperPackage() + "." + MoreStringUtils.toUpperCamel(form.getName()) + "Mapper";
+        String mapperName = MoreStringUtils.toLowerCamel(form.getName()) + "Mapper";
         FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(
                 String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();
         field.addAnnotation(annotationExprService.springAutowired());

@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.formgenerator.service;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
@@ -46,11 +48,11 @@ public interface ItemService<I extends ItemDef> {
     /**
      * 字段对应的Java校验注解
      */
-    List<String> getJavaValidAnnotations(I itemDef);
+    List<AnnotationExpr> getJavaValidAnnotations(I itemDef);
 
     /**
      * 字段对应的Java @JsonFormat注解
      */
-    String getJavaJsonFormatAnnoatation(I itemDef);
+    Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(I itemDef);
 
 }

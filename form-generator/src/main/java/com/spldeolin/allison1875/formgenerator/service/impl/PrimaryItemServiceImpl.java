@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
@@ -68,12 +70,12 @@ public class PrimaryItemServiceImpl implements ItemService<ItemDef> {
     }
 
     @Override
-    public List<String> getJavaValidAnnotations(ItemDef itemDef) {
+    public List<AnnotationExpr> getJavaValidAnnotations(ItemDef itemDef) {
         return delegate(itemDef).getJavaValidAnnotations(itemDef);
     }
 
     @Override
-    public String getJavaJsonFormatAnnoatation(ItemDef itemDef) {
+    public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(ItemDef itemDef) {
         return delegate(itemDef).getJavaJsonFormatAnnoatation(itemDef);
     }
 

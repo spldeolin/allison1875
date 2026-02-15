@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.formgenerator.service.impl;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,17 +59,17 @@ public class SelectItemService implements ItemService<SelectItemDef> {
     }
 
     @Override
-    public List<String> getJavaValidAnnotations(SelectItemDef itemDef) {
-        List<String> retval = Lists.newArrayList();
-        if (itemDef.getIsNonValid()) {
-            retval.add(annotationExprService.notNull().toString());
+    public List<AnnotationExpr> getJavaValidAnnotations(SelectItemDef itemDef) {
+        List<AnnotationExpr> retval = Lists.newArrayList();
+        if (itemDef.getIsNonVoid()) {
+            retval.add(annotationExprService.notNull());
         }
         return retval;
     }
 
     @Override
-    public String getJavaJsonFormatAnnoatation(SelectItemDef itemDef) {
-        return null;
+    public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(SelectItemDef itemDef) {
+        return Optional.empty();
     }
 
 }

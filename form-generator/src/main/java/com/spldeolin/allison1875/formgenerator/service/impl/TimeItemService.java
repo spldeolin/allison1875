@@ -5,6 +5,9 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.DA
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,18 +58,19 @@ public class TimeItemService implements ItemService<TimeItemDef> {
     }
 
     @Override
-    public List<String> getJavaValidAnnotations(TimeItemDef itemDef) {
-        List<String> retval = Lists.newArrayList();
-        if (itemDef.getIsNonValid()) {
-            retval.add(annotationExprService.notNull().toString());
+    public List<AnnotationExpr> getJavaValidAnnotations(TimeItemDef itemDef) {
+        List<AnnotationExpr> retval = Lists.newArrayList();
+        if (itemDef.getIsNonVoid()) {
+            retval.add(annotationExprService.notNull());
         }
         return retval;
     }
 
     @Override
-    public String getJavaJsonFormatAnnoatation(TimeItemDef itemDef) {
-        return "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"" + itemDef.getFormat().getPattern()
-                + "\", timezone = " + "\"Asia/Shanghai\")";
+    public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(TimeItemDef itemDef) {
+        return Optional.of(StaticJavaParser.parseAnnotation(
+                "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"" + itemDef.getFormat().getPattern()
+                        + "\", timezone = " + "\"Asia/Shanghai\")"));
     }
 
 }

@@ -11,13 +11,11 @@ import com.spldeolin.allison1875.formgenerator.service.impl.InitDecServiceImpl;
 @ImplementedBy(InitDecServiceImpl.class)
 public interface InitDecService {
 
-    InitializerDeclaration buildCreateHandler(FormDef formDef);
+    InitializerDeclaration buildSaveHandler(FormDef formDef);
 
     InitializerDeclaration buildListHandler(FormDef formDef);
 
     InitializerDeclaration buildGetDetailHandler(FormDef formDef);
-
-    InitializerDeclaration buildUpdateHandler(FormDef formDef);
 
     InitializerDeclaration buildDeleteHandler(FormDef formDef);
 

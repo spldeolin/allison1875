@@ -7,6 +7,8 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.LE
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.LT;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,17 +59,17 @@ public class NumberItemService implements ItemService<NumberItemDef> {
     }
 
     @Override
-    public List<String> getJavaValidAnnotations(NumberItemDef itemDef) {
-        List<String> retval = Lists.newArrayList();
-        if (itemDef.getIsNonValid()) {
-            retval.add(annotationExprService.notNull().toString());
+    public List<AnnotationExpr> getJavaValidAnnotations(NumberItemDef itemDef) {
+        List<AnnotationExpr> retval = Lists.newArrayList();
+        if (itemDef.getIsNonVoid()) {
+            retval.add(annotationExprService.notNull());
         }
         return retval;
     }
 
     @Override
-    public String getJavaJsonFormatAnnoatation(NumberItemDef itemDef) {
-        return null;
+    public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(NumberItemDef itemDef) {
+        return Optional.empty();
     }
 
 }

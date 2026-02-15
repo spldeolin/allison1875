@@ -148,11 +148,16 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
-    public AnnotationExpr size(Integer min, Integer max) {
+    public AnnotationExpr size(int min, int max) {
+        String args = "(";
+        if (min > 0) {
+            args += "min=" + min + ", ";
+        }
+        args += "max=" + max + ")";
         if (commonConfig.getEnableJavaxMoveToJakarta()) {
-            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.Size").clone();
+            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.Size" + args).clone();
         } else {
-            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.Size").clone();
+            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.Size" + args).clone();
         }
     }
 

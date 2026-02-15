@@ -4,6 +4,8 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.LIKE;
 
 import java.util.List;
+import java.util.Optional;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,17 +56,18 @@ public class TextItemService implements ItemService<TextItemDef> {
     }
 
     @Override
-    public List<String> getJavaValidAnnotations(TextItemDef itemDef) {
-        List<String> retval = Lists.newArrayList();
-        if (itemDef.getIsNonValid()) {
-            retval.add(annotationExprService.notBlank().toString());
+    public List<AnnotationExpr> getJavaValidAnnotations(TextItemDef itemDef) {
+        List<AnnotationExpr> retval = Lists.newArrayList();
+        if (itemDef.getIsNonVoid()) {
+            retval.add(annotationExprService.notBlank());
         }
+        retval.add(annotationExprService.size(0, itemDef.getMaxLength()));
         return retval;
     }
 
     @Override
-    public String getJavaJsonFormatAnnoatation(TextItemDef itemDef) {
-        return null;
+    public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(TextItemDef itemDef) {
+        return Optional.empty();
     }
 
 }

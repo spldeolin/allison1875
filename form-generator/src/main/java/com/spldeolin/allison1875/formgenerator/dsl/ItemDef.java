@@ -53,7 +53,7 @@ public abstract class ItemDef {
      * 字段是否非空（广义的，具体指：非未指定、非null值、非空列表/数组、非0长度/纯空格字符串
      */
     @NotNull
-    Boolean isNonValid;
+    Boolean isNonVoid;
 
     /**
      * 字段的初始化方式

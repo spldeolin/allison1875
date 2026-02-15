@@ -27,7 +27,7 @@ public class DdlServiceImpl implements DdlService {
             for (ItemDef item : form.getItems()) {
                 ddl.append("`").append(itemService.getDbColumnName(item)).append("` ")
                         .append(itemService.getDbColumnType(item));
-                if (item.getIsNonValid()) {
+                if (item.getIsNonVoid()) {
                     ddl.append(" NOT NULL");
                 }
                 ddl.append(" COMMENT '").append(item.getTitle()).append("',\n");
