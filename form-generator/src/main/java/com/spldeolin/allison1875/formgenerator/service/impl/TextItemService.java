@@ -49,7 +49,7 @@ public class TextItemService implements ItemService<TextItemDef> {
     }
 
     @Override
-    public String getJavaType(TextItemDef itemDef) {
+    public String getJavaTypeInDTO(TextItemDef itemDef) {
         return "String";
     }
 

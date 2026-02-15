@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.formgenerator;
 
-import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -14,7 +15,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FormGeneratorConfig {
 
-    @NotEmpty
-    String dsl;
+    /**
+     * DSL.yml文件的相对路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
+     */
+    @NotNull
+    File dslPath = new File("./forms.yml");
 
 }

@@ -46,7 +46,7 @@ public class SecretItemService implements ItemService<SecretItemDef> {
     }
 
     @Override
-    public String getJavaType(SecretItemDef itemDef) {
+    public String getJavaTypeInDTO(SecretItemDef itemDef) {
         return "String";
     }
 

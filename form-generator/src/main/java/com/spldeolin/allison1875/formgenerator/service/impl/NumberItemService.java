@@ -52,7 +52,7 @@ public class NumberItemService implements ItemService<NumberItemDef> {
     }
 
     @Override
-    public String getJavaType(NumberItemDef itemDef) {
+    public String getJavaTypeInDTO(NumberItemDef itemDef) {
         return itemDef.getCanBeDecimal() ? "java.math.BigDecimal" : "Long";
     }
 

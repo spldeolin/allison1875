@@ -4,9 +4,18 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPatter
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.LowerCamel;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.NumberItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.OnOffItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.SecretItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.SelectItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +25,15 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible =
+        true)
+@JsonSubTypes({@JsonSubTypes.Type(value = NumberItemDef.class, name = "number"),
+        @JsonSubTypes.Type(value = OnOffItemDef.class, name = "onOff"),
+        @JsonSubTypes.Type(value = SecretItemDef.class, name = "secret"),
+        @JsonSubTypes.Type(value = SelectItemDef.class, name = "select"),
+        @JsonSubTypes.Type(value = MultiSelectItemDef.class, name = "multiSelect"),
+        @JsonSubTypes.Type(value = TextItemDef.class, name = "text"),
+        @JsonSubTypes.Type(value = TimeItemDef.class, name = "time")})
 public abstract class ItemDef {
 
     /**

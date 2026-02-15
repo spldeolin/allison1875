@@ -52,7 +52,7 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
     }
 
     @Override
-    public String getJavaType(MultiSelectItemDef itemDef) {
+    public String getJavaTypeInDTO(MultiSelectItemDef itemDef) {
         return commonConfig.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName()) + "Enum";
     }
 

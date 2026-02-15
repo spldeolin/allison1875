@@ -36,9 +36,9 @@ public interface ItemService<I extends ItemDef> {
     String getDbColumnType(I itemDef);
 
     /**
-     * 字段对应的Java类型
+     * 字段对应在DTO中的Java类型
      */
-    String getJavaType(I itemDef);
+    String getJavaTypeInDTO(I itemDef);
 
     /**
      * 字段对应的Java校验注解

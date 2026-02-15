@@ -24,12 +24,6 @@
             <artifactId>handler-transformer</artifactId>
         </dependency>
 
-        <!-- snakeyaml -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-        </dependency>
-
         <!-- jackson yaml (for polymorphic DSL deserialization) -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>

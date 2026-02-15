@@ -48,7 +48,7 @@ public class OnOffItemService implements ItemService<OnOffItemDef> {
     }
 
     @Override
-    public String getJavaType(OnOffItemDef itemDef) {
+    public String getJavaTypeInDTO(OnOffItemDef itemDef) {
         return "Boolean";
     }
 

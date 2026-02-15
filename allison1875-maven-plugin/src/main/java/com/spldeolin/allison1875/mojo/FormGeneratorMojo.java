@@ -32,6 +32,8 @@ public class FormGeneratorMojo extends Allison1875Mojo {
 
     @Override
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
+        // 对config对象中的文件路径进行相对basedir的处理
+        formGeneratorConfig.setDslPath(super.getCanonicalFileRelativeToBasedir(formGeneratorConfig.getDslPath()));
         log.info("formGeneratorMojoConfig={}", JsonUtils.toJsonPrettily(formGeneratorConfig));
         log.info("new module instance for {}", formGeneratorConfig.getModule());
         return (Allison1875Module) classLoader.loadClass(formGeneratorConfig.getModule())

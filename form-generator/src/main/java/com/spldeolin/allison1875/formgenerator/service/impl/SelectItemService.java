@@ -52,7 +52,7 @@ public class SelectItemService implements ItemService<SelectItemDef> {
     }
 
     @Override
-    public String getJavaType(SelectItemDef itemDef) {
+    public String getJavaTypeInDTO(SelectItemDef itemDef) {
         return commonConfig.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName()) + "Enum";
     }
 

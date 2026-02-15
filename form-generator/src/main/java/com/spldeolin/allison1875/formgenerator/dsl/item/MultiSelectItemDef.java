@@ -23,7 +23,7 @@ public class MultiSelectItemDef extends ItemDef {
     /**
      * 字段类型，用于在反序列时区别ItemDef的具体类型
      */
-    final ItemType type = ItemType.SELECT;
+    final ItemType type = ItemType.MULTI_SELECT;
 
     /**
      * 字段的可选项

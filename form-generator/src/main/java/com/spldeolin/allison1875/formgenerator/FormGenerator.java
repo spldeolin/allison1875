@@ -1,7 +1,13 @@
 package com.spldeolin.allison1875.formgenerator;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
@@ -17,7 +23,6 @@ import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
@@ -76,7 +81,7 @@ public class FormGenerator implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        List<FormDef> forms = JsonUtils.toListOfObject(formGeneratorConfig.getDsl(), FormDef.class);
+        List<FormDef> forms = deserializeDSL();
         if (CollectionUtils.isEmpty(forms)) {
             log.warn("no form definitions detected");
             return;
@@ -131,6 +136,17 @@ public class FormGenerator implements Allison1875MainService {
         if (CollectionUtils.isNotEmpty(flushes)) {
             flushes.forEach(FileFlush::flush);
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        }
+    }
+
+    private List<FormDef> deserializeDSL() {
+        try {
+            return new YAMLMapper().readValue(
+                    FileUtils.readFileToString(formGeneratorConfig.getDslPath(), StandardCharsets.UTF_8),
+                    new TypeReference<List<FormDef>>() {
+                    });
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
