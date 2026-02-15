@@ -27,7 +27,6 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
-import com.spldeolin.allison1875.formgenerator.service.ItemServiceRegistry;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
@@ -42,9 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class FormGenerator implements Allison1875MainService {
-
-    @Inject
-    private ItemServiceRegistry itemServiceRegistry;
 
     @Inject
     private CommonConfig commonConfig;

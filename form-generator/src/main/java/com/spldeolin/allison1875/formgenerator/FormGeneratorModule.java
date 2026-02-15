@@ -1,21 +1,11 @@
 package com.spldeolin.allison1875.formgenerator;
 
-import com.google.inject.multibindings.Multibinder;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
-import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
-import com.spldeolin.allison1875.formgenerator.service.ItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.MultiSelectItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.NumberItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.OnOffItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.SecretItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.SelectItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.TextItemService;
-import com.spldeolin.allison1875.formgenerator.service.impl.TimeItemService;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.ToString;
@@ -59,17 +49,9 @@ public class FormGeneratorModule extends Allison1875Module {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());
         }
 
-        // 配置 ItemService 的 Multibinder
-        Multibinder<ItemService<? extends ItemDef>> itemServiceBinder = Multibinder.newSetBinder(binder(),
-                new com.google.inject.TypeLiteral<ItemService<? extends ItemDef>>() {
-                });
-        itemServiceBinder.addBinding().to(NumberItemService.class);
-        itemServiceBinder.addBinding().to(OnOffItemService.class);
-        itemServiceBinder.addBinding().to(SecretItemService.class);
-        itemServiceBinder.addBinding().to(SelectItemService.class);
-        itemServiceBinder.addBinding().to(MultiSelectItemService.class);
-        itemServiceBinder.addBinding().to(TextItemService.class);
-        itemServiceBinder.addBinding().to(TimeItemService.class);
+        // 绑定 ItemService<ItemDef> 到 PrimaryItemServiceImpl（分发器）
+//        bind(new com.google.inject.TypeLiteral<ItemService<ItemDef>>() {
+//        }).to(PrimaryItemServiceImpl.class);
     }
 
 }

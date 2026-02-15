@@ -1,13 +1,16 @@
 package com.spldeolin.allison1875.formgenerator.service;
 
 import java.util.List;
+import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.service.impl.PrimaryItemServiceImpl;
 
 /**
  * @author Deolin 2026-02-11
  */
+@ImplementedBy(PrimaryItemServiceImpl.class)
 public interface ItemService<I extends ItemDef> {
 
     /**

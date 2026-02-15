@@ -7,7 +7,6 @@ import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
-import com.spldeolin.allison1875.formgenerator.service.ItemServiceRegistry;
 
 /**
  * @author Deolin 2026-02-15
@@ -16,7 +15,7 @@ import com.spldeolin.allison1875.formgenerator.service.ItemServiceRegistry;
 public class DdlServiceImpl implements DdlService {
 
     @Inject
-    private ItemServiceRegistry itemServiceRegistry;
+    private ItemService<ItemDef> itemService;
 
     @Override
     public String generateDdl(List<FormDef> forms) {
@@ -26,7 +25,6 @@ public class DdlServiceImpl implements DdlService {
             ddl.append("CREATE TABLE `").append(tableName).append("`\n(");
             ddl.append("`id` BIGINT NOT NULL COMMENT '主键',\n");
             for (ItemDef item : form.getItems()) {
-                ItemService<ItemDef> itemService = itemServiceRegistry.getService(item);
                 ddl.append("`").append(itemService.getDbColumnName(item)).append("` ")
                         .append(itemService.getDbColumnType(item));
                 if (item.getIsNonValid()) {
