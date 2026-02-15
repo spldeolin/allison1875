@@ -7,13 +7,11 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
@@ -43,6 +41,7 @@ import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
+import com.spldeolin.allison1875.handlertransformer.HandlerTransformer.Retval;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerExpansionServiceImplManager;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
@@ -125,7 +124,7 @@ public class FormGenerator implements Allison1875MainService {
         flushes.add(FileFlush.build(ddlSql.toFile(), ddl));
 
         // 生成持久层
-        persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl);
+        persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
         flushes.addAll(persistenceGenerator.process());
 
         // 生成枚举
@@ -141,6 +140,7 @@ public class FormGenerator implements Allison1875MainService {
                     commonConfig.getControllerPackage(), controllerName + ".java");
             cu.setStorage(absulutePath);
             cu.setPackageDeclaration(commonConfig.getControllerPackage());
+            cu.addImport(commonConfig.getDesignPackage() + ".*");
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
             coid.addAnnotation(annotationExprService.springRestController());
@@ -164,11 +164,15 @@ public class FormGenerator implements Allison1875MainService {
         serviceMethodServiceImplManager.setCurrentImpl(expansionService);
 
         // 调用handler-transformer转换initDec
-        flushes.addAll(handlerTransformer.process(astForestWithUnflushedCus));
+        Retval handlerTransformerRetval = handlerTransformer.process(astForestWithUnflushedCus);
+        flushes.addAll(handlerTransformerRetval.getFlushes());
+
+        // TODO 获取ServiceImplCu的方式得改，靠methodBody无法findCu，因为handler——transformer内部的后续流程会有method.clone操作
+        // 计划让HandlerTransformer.process()方法将ServiceImpl也返回出来
+        // 如果能成，FormGeneratorServiceLayerExpansionServiceImpl需改回单例模式
 
         // handler-transformer执行完毕，可获取到ServiceImpl的CU
-        expansionService.getServiceImplMethodBodies().stream().map(Node::findCompilationUnit)
-                .filter(Optional::isPresent).map(Optional::get).forEach(astForestWithUnflushedCus::add);
+        astForestWithUnflushedCus.addAll(handlerTransformerRetval.getServiceImplCus());
 
         // 调用query-transformer转换业务层的DesignChain
         flushes.addAll(queryTransformer.process(astForestWithUnflushedCus));

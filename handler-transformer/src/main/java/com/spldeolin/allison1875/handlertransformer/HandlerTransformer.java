@@ -34,6 +34,8 @@ import com.spldeolin.allison1875.handlertransformer.service.InitDecDetectorServi
 import com.spldeolin.allison1875.handlertransformer.service.MvcControllerService;
 import com.spldeolin.allison1875.handlertransformer.service.ReqRespService;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -78,7 +80,7 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest);
+        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest).flushes;
 
         // write all to file
         if (CollectionUtils.isNotEmpty(flushes)) {
@@ -89,8 +91,9 @@ public class HandlerTransformer implements Allison1875MainService {
         }
     }
 
-    public List<FileFlush> process(Iterable<CompilationUnit> astForest) {
+    public Retval process(Iterable<CompilationUnit> astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
+        List<CompilationUnit> serviceImplCus = Lists.newArrayList();
 
         for (CompilationUnit cu : astForest) {
             boolean anyTransformed = false;
@@ -131,6 +134,8 @@ public class HandlerTransformer implements Allison1875MainService {
                         gsaiArgs.setControllerCu(cu);
                         gsaiArgs.setInitDecAnalysisDTO(initDecAnalysis);
                         generateServiceAndImplRetval = serviceLayerService.generateServiceAndImpl(gsaiArgs);
+                        // 记录新生成的ServiceImpl
+                        serviceImplCus.add(generateServiceAndImplRetval.getServiceImplCu());
                     }
 
                     // service方法加入到Service层，然后flush
@@ -184,7 +189,17 @@ public class HandlerTransformer implements Allison1875MainService {
                 flushes.add(FileFlush.build(cu));
             }
         }
-        return flushes;
+        return new Retval(flushes, serviceImplCus);
+    }
+
+    @AllArgsConstructor
+    @Data
+    public static class Retval {
+
+        private List<FileFlush> flushes;
+
+        private List<CompilationUnit> serviceImplCus;
+
     }
 
 }
