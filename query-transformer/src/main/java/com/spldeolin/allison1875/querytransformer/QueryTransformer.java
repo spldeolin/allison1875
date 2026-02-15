@@ -71,6 +71,18 @@ public class QueryTransformer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
+        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest);
+
+        // write all to file
+        if (CollectionUtils.isNotEmpty(flushes)) {
+            flushes.forEach(FileFlush::flush);
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        } else {
+            log.warn("no valid Chain transformed");
+        }
+    }
+
+    public List<FileFlush> process(Iterable<CompilationUnit> astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
 
         // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml
@@ -195,6 +207,7 @@ public class QueryTransformer implements Allison1875MainService {
         } else {
             log.warn("no valid Chain transformed");
         }
+        return flushes;
     }
 
 }

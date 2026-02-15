@@ -23,6 +23,10 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>handler-transformer</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>query-transformer</artifactId>
+        </dependency>
 
         <!-- jackson yaml (for polymorphic DSL deserialization) -->
         <dependency>

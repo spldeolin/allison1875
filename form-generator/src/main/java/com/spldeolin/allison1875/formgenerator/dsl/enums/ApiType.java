@@ -7,26 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * @author Deolin 2025-08-12
+ * @author Deolin 2026-02-15
  */
 @Getter
 @AllArgsConstructor
-public enum InitOrEditPattern {
+public enum ApiType {
 
-    /**
-     * 不进行初始化或者不可编辑
-     */
-    DO_NOT("doNot"),
+    SAVE("save"),
 
-    /**
-     * 用户输入
-     */
-    USER_INPUT("userInput"),
+    LIST("list"),
 
-    /**
-     * 生成为T0DO，由开发者自行开发
-     */
-    TODO("todo"),
+    GET_DETAIL("getDetail"),
+
+    DELETE("delete"),
 
     ;
 
@@ -34,8 +27,7 @@ public enum InitOrEditPattern {
     private final String code;
 
     @JsonCreator
-    public static InitOrEditPattern of(String code) {
+    public static ApiType of(String code) {
         return Arrays.stream(values()).filter(anEnum -> anEnum.getCode().equals(code)).findFirst().orElse(null);
     }
-
 }

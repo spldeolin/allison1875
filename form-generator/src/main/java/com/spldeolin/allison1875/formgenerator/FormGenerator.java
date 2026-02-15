@@ -7,11 +7,13 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
@@ -33,14 +35,19 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
+import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.EnumService;
+import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
+import com.spldeolin.allison1875.formgenerator.service.ListApiService;
+import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerExpansionServiceImplManager;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.querytransformer.QueryTransformer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -69,6 +76,9 @@ public class FormGenerator implements Allison1875MainService {
     private HandlerTransformer handlerTransformer;
 
     @Inject
+    private QueryTransformer queryTransformer;
+
+    @Inject
     private AnnotationExprService annotationExprService;
 
     @Inject
@@ -78,13 +88,22 @@ public class FormGenerator implements Allison1875MainService {
     private ServiceLayerExpansionServiceImplManager serviceMethodServiceImplManager;
 
     @Inject
-    private FormGeneratorServiceLayerExpansionServiceImpl formGeneratorServiceLayerExpansionService;
-
-    @Inject
     private DdlService ddlService;
 
     @Inject
     private EnumService enumService;
+
+    @Inject
+    private DeleteApiService deleteApiService;
+
+    @Inject
+    private GetDetailApiService getDetailApiService;
+
+    @Inject
+    private ListApiService listApiService;
+
+    @Inject
+    private SaveApiService saveApiService;
 
     @Override
     public void process(AstForest astForest) {
@@ -113,35 +132,46 @@ public class FormGenerator implements Allison1875MainService {
         flushes.addAll(enumService.generateEnums(forms));
 
         List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);
-        for (FormDef formDef : forms) {
+        for (FormDef form : forms) {
 
             // 生成controller和initDec
             CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
-            String controllerName = MoreStringUtils.toUpperCamel(formDef.getName()) + "Controller";
+            String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
             Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
                     commonConfig.getControllerPackage(), controllerName + ".java");
             cu.setStorage(absulutePath);
             cu.setPackageDeclaration(commonConfig.getControllerPackage());
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            JavadocUtils.setJavadoc(coid, formDef.getTitle(), "ballcat");
+            JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
             coid.addAnnotation(annotationExprService.springRestController());
             coid.setPublic(true).setName(controllerName);
             cu.addType(coid);
 
             // 生成CURD接口的initDec
-            coid.addMember(initDecService.buildSaveHandler(formDef));
-            coid.addMember(initDecService.buildListHandler(formDef));
-            coid.addMember(initDecService.buildGetDetailHandler(formDef));
-            coid.addMember(initDecService.buildDeleteHandler(formDef));
+            coid.addMember(initDecService.buildSaveHandler(form));
+            coid.addMember(initDecService.buildListHandler(form));
+            coid.addMember(initDecService.buildGetDetailHandler(form));
+            coid.addMember(initDecService.buildDeleteHandler(form));
 
             astForestWithUnflushedCus.add(cu);
         }
 
         // 运行时替换form-generator中ServiceMethodService的实现类
-        serviceMethodServiceImplManager.setCurrentImpl(formGeneratorServiceLayerExpansionService);
+        FormGeneratorServiceLayerExpansionServiceImpl expansionService =
+                new FormGeneratorServiceLayerExpansionServiceImpl(
+                commonConfig, annotationExprService, deleteApiService, getDetailApiService, listApiService,
+                saveApiService);
+        serviceMethodServiceImplManager.setCurrentImpl(expansionService);
 
         // 调用handler-transformer转换initDec
         flushes.addAll(handlerTransformer.process(astForestWithUnflushedCus));
+
+        // handler-transformer执行完毕，可获取到ServiceImpl的CU
+        expansionService.getServiceImplMethodBodies().stream().map(Node::findCompilationUnit)
+                .filter(Optional::isPresent).map(Optional::get).forEach(astForestWithUnflushedCus::add);
+
+        // 调用query-transformer转换业务层的DesignChain
+        flushes.addAll(queryTransformer.process(astForestWithUnflushedCus));
 
         // write all to file
         if (CollectionUtils.isNotEmpty(flushes)) {

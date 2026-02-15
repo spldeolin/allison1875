@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -13,9 +14,9 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
@@ -38,9 +39,9 @@ public class InitDecServiceImpl implements InitDecService {
         BlockStmt bs = new BlockStmt();
         // handler, desc声明部分
         bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"create%s\", desc = \"创建%s\", form=\"%s\";",
-                        MoreStringUtils.toUpperCamel(form.getName()), form.getTitle(),
-                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)))));
+                String.format("String handler = \"save%s\", desc = \"创建%s\", form=\"%s\", type=\"%s\";",
+                        form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
+                        ApiType.SAVE.getCode())));
 
         // req声明
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req");
@@ -70,9 +71,9 @@ public class InitDecServiceImpl implements InitDecService {
     public InitializerDeclaration buildListHandler(FormDef form) {
         BlockStmt bs = new BlockStmt();
         bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"list%s\", desc = \"%s列表\", form=\"%s\";",
-                        MoreStringUtils.toUpperCamel(form.getName()), form.getTitle(),
-                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)))));
+                String.format("String handler = \"list%s\", desc = \"%s列表\", form=\"%s\", type=\"%s\";",
+                        English.plural(form.getName()), form.getTitle(),
+                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)), ApiType.LIST.getCode())));
 
         // req声明
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req");
@@ -114,9 +115,9 @@ public class InitDecServiceImpl implements InitDecService {
     public InitializerDeclaration buildGetDetailHandler(FormDef form) {
         BlockStmt bs = new BlockStmt();
         bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"get%sDetail\", desc = \"%s详情\", form=\"%s\";",
-                        MoreStringUtils.toUpperCamel(form.getName()), form.getTitle(),
-                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)))));
+                String.format("String handler = \"get%sDetail\", desc = \"%s详情\", form=\"%s\", type=\"%s\";",
+                        form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
+                        ApiType.GET_DETAIL.getCode())));
 
         // req声明
         FieldDeclaration bizIdField = StaticJavaParser.parseBodyDeclaration(
@@ -145,9 +146,9 @@ public class InitDecServiceImpl implements InitDecService {
     public InitializerDeclaration buildDeleteHandler(FormDef form) {
         BlockStmt bs = new BlockStmt();
         bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"delete%s\", desc = \"删除%s\", form=\"%s\";",
-                        MoreStringUtils.toUpperCamel(form.getName()), form.getTitle(),
-                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)))));
+                String.format("String handler = \"delete%s\", desc = \"删除%s\", form=\"%s\", type=\"%s\";",
+                        form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
+                        ApiType.DELETE.getCode())));
 
         // req声明
         FieldDeclaration bizIdField = StaticJavaParser.parseBodyDeclaration(
