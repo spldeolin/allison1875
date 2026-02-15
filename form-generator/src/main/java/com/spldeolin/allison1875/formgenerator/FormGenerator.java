@@ -92,8 +92,7 @@ public class FormGenerator implements Allison1875MainService {
         flushes.add(FileFlush.build(ddlSql.toFile(), ddl));
 
         // 调用persistence-generator
-        persistenceGeneratorConfig.setDdl(ddl);
-        persistenceGeneratorConfig.setEnableGenerateDesign(false);
+        persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl);
         flushes.addAll(persistenceGenerator.process());
 
         List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);

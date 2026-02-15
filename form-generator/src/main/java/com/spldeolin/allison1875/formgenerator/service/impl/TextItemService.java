@@ -45,7 +45,7 @@ public class TextItemService implements ItemService<TextItemDef> {
 
     @Override
     public String getDbColumnType(TextItemDef itemDef) {
-        return !itemDef.getIsMultilineOrRich() ? "VARCHAR(" + itemDef.getMaxLength() + ")" : "LONGTXT";
+        return !itemDef.getIsMultilineOrRich() ? "VARCHAR(" + itemDef.getMaxLength() + ")" : "LONGTEXT";
     }
 
     @Override

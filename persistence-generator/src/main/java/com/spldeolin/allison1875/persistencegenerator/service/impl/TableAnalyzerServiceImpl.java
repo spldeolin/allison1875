@@ -321,7 +321,6 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                         if (prop.getJavaType() == null) {
                             log.warn("unsupport jbdcType, column={}.{}", tableAnalysis.getTableName(),
                                     prop.getColumnName());
-                            return;
                         }
                     }
                     tableAnalyses.add(tableAnalysis);
