@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 
 /**
  * FormDef 校验器：
@@ -35,8 +36,26 @@ public class FormDefValidator implements ConstraintValidator<FormDefValid, FormD
         }
 
         // 3. indices[].itemNames 必须存在于 items[].name
-        return formDef.getItems() == null || formDef.getIndices() == null || validateIndicesItemNamesExist(formDef,
-                context);
+        if (formDef.getItems() != null && formDef.getIndices() != null && !validateIndicesItemNamesExist(formDef,
+                context)) {
+            return false;
+        }
+
+        // 4. indices[].itemNames中不能包含多选
+        if (formDef.getItems() != null && formDef.getIndices() != null) {
+            for (int i = 0; i < formDef.getIndices().size(); i++) {
+                IndexDef indexDef = formDef.getIndices().get(i);
+                for (ItemDef item : formDef.getItems()) {
+                    if (indexDef.getItemNames().contains(item.getName()) && item.getType() == ItemType.MULTI_SELECT) {
+                        buildViolation(context, "indices",
+                                "indices[" + i + "] 中的 itemNames 不能是多选类型，错误项: " + item.getName());
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

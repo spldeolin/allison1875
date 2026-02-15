@@ -54,7 +54,7 @@ public class TimeItemService implements ItemService<TimeItemDef> {
 
     @Override
     public String getJavaTypeInDTO(TimeItemDef itemDef) {
-        return "java.time.LocalDateTime";
+        return itemDef.getFormat().getJavaType();
     }
 
     @Override
