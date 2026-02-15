@@ -20,8 +20,9 @@ import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
-import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
+import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
+import com.spldeolin.allison1875.formgenerator.service.ItemServiceRegistry;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
@@ -36,6 +37,9 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class FormGenerator implements Allison1875MainService {
+
+    @Inject
+    private ItemServiceRegistry itemServiceRegistry;
 
     @Inject
     private CommonConfig commonConfig;
@@ -67,10 +71,13 @@ public class FormGenerator implements Allison1875MainService {
     @Inject
     private FormGeneratorServiceLayerExpansionServiceImpl formGeneratorServiceLayerExpansionService;
 
+    @Inject
+    private DdlService ddlService;
+
     @Override
     public void process(AstForest astForest) {
-        List<FormDef> formDefs = JsonUtils.toListOfObject(formGeneratorConfig.getDsl(), FormDef.class);
-        if (CollectionUtils.isEmpty(formDefs)) {
+        List<FormDef> forms = JsonUtils.toListOfObject(formGeneratorConfig.getDsl(), FormDef.class);
+        if (CollectionUtils.isEmpty(forms)) {
             log.warn("no form definitions detected");
             return;
         }
@@ -78,31 +85,18 @@ public class FormGenerator implements Allison1875MainService {
         List<FileFlush> flushes = Lists.newArrayList(); // 多组件flushes合成为一个
 
         // 生成DDL
-        StringBuilder ddl = new StringBuilder(512);
-        for (FormDef formDef : formDefs) {
-            ddl.append("CREATE TABLE `").append(formDef.getName()).append("`\n(");
-            ddl.append("`id` BIGINT NOT NULL COMMENT '主键',\n");
-            for (ItemDef item : formDef.getItems()) {
-                ddl.append("`").append(item.getName()).append("` ").append(item.getDbColumnType());
-                if (item.getIsNonValid()) {
-                    ddl.append(" NOT NULL");
-                }
-                ddl.append(" COMMENT '").append(item.getTitle()).append("',\n");
-            }
-            ddl.append("PRIMARY KEY (`id`)\n");
-            ddl.append(") COMMENT '").append(formDef.getTitle()).append("'").append(";\n\n");
-        }
-        Path ddlSql = astForest.getSourceRoot().resolve("../../../../distribution/ddl.sql");
+        String ddl = ddlService.generateDdl(forms);
+        Path ddlSql = astForest.getSourceRoot().resolve("../../../../sql/ddl.sql");
         log.info("build ddl.sql, path={}", ddlSql.normalize());
-        flushes.add(FileFlush.build(ddlSql.toFile(), ddl.toString()));
+        flushes.add(FileFlush.build(ddlSql.toFile(), ddl));
 
         // 调用persistence-generator
-        persistenceGeneratorConfig.setDdl(ddl.toString());
+        persistenceGeneratorConfig.setDdl(ddl);
         persistenceGeneratorConfig.setEnableGenerateDesign(false);
         flushes.addAll(persistenceGenerator.process());
 
         List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);
-        for (FormDef formDef : formDefs) {
+        for (FormDef formDef : forms) {
 
             // 生成controller和initDec
             CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();

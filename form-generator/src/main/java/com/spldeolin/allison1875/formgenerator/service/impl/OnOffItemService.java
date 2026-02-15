@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.OnOffItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 
@@ -20,6 +21,11 @@ public class OnOffItemService implements ItemService<OnOffItemDef> {
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Override
+    public ItemType supportedItemType() {
+        return ItemType.ON_OFF;
+    }
 
     @Override
     public List<FilterPattern> getFilterPatterns(OnOffItemDef itemDef) {

@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.SecretItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 
@@ -18,6 +19,12 @@ public class SecretItemService implements ItemService<SecretItemDef> {
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Override
+    public ItemType supportedItemType() {
+        return ItemType.SECRET;
+    }
+
     @Override
     public List<FilterPattern> getFilterPatterns(SecretItemDef itemDef) {
         return null;

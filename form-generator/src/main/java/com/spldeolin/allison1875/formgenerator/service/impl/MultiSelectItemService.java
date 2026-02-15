@@ -10,6 +10,7 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 
@@ -24,6 +25,11 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
 
     @Inject
     private CommonConfig commonConfig;
+
+    @Override
+    public ItemType supportedItemType() {
+        return ItemType.MULTI_SELECT;
+    }
 
     @Override
     public List<FilterPattern> getFilterPatterns(MultiSelectItemDef itemDef) {

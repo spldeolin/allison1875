@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.NumberItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 
@@ -24,6 +25,11 @@ public class NumberItemService implements ItemService<NumberItemDef> {
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Override
+    public ItemType supportedItemType() {
+        return ItemType.NUMBER;
+    }
 
     @Override
     public List<FilterPattern> getFilterPatterns(NumberItemDef itemDef) {

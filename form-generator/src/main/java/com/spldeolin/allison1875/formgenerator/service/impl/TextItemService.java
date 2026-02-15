@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 
@@ -21,6 +22,12 @@ public class TextItemService implements ItemService<TextItemDef> {
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Override
+    public ItemType supportedItemType() {
+        return ItemType.TEXT;
+    }
+
     @Override
     public List<FilterPattern> getFilterPatterns(TextItemDef itemDef) {
         return Lists.newArrayList(IN, LIKE);
