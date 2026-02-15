@@ -45,7 +45,7 @@ public class SelectItemService implements ItemService<SelectItemDef> {
 
     @Override
     public String getDbColumnName(SelectItemDef itemDef) {
-        return MoreStringUtils.toLowerCamel(itemDef.getName());
+        return MoreStringUtils.camelToSnakeCase(itemDef.getName());
     }
 
     @Override

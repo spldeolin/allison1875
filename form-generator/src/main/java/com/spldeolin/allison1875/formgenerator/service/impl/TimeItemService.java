@@ -44,7 +44,7 @@ public class TimeItemService implements ItemService<TimeItemDef> {
 
     @Override
     public String getDbColumnName(TimeItemDef itemDef) {
-        return MoreStringUtils.toLowerCamel(itemDef.getName());
+        return MoreStringUtils.camelToSnakeCase(itemDef.getName());
     }
 
     @Override

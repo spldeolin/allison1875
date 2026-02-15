@@ -41,7 +41,7 @@ public class OnOffItemService implements ItemService<OnOffItemDef> {
 
     @Override
     public String getDbColumnName(OnOffItemDef itemDef) {
-        return MoreStringUtils.toLowerCamel(itemDef.getName());
+        return MoreStringUtils.camelToSnakeCase(itemDef.getName());
     }
 
     @Override

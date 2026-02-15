@@ -33,6 +33,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
+import com.spldeolin.allison1875.formgenerator.service.EnumService;
 import com.spldeolin.allison1875.formgenerator.service.InitDecService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
@@ -82,6 +83,9 @@ public class FormGenerator implements Allison1875MainService {
     @Inject
     private DdlService ddlService;
 
+    @Inject
+    private EnumService enumService;
+
     @Override
     public void process(AstForest astForest) {
         List<FormDef> forms = deserializeDSL();
@@ -106,6 +110,7 @@ public class FormGenerator implements Allison1875MainService {
         flushes.addAll(persistenceGenerator.process());
 
         // 生成枚举
+        flushes.addAll(enumService.generateEnums(forms));
 
         List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);
         for (FormDef formDef : forms) {

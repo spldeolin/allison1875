@@ -1,0 +1,118 @@
+package com.spldeolin.allison1875.formgenerator.service.impl;
+
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.List;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.EnumConstantDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.utils.CodeGenerationUtils;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.util.JavadocUtils;
+import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.OptionDef;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.SelectItemDef;
+import com.spldeolin.allison1875.formgenerator.service.EnumService;
+
+/**
+ * @author Deolin 2026-02-15
+ */
+@Singleton
+public class EnumServiceImpl implements EnumService {
+
+    @Inject
+    private CommonConfig commonConfig;
+
+    @Inject
+    private AnnotationExprService annotationExprService;
+
+    @Inject
+    private ImportExprService importExprService;
+
+    @Override
+    public List<FileFlush> generateEnums(List<FormDef> forms) {
+        List<FileFlush> retval = Lists.newArrayList();
+        for (FormDef form : forms) {
+            for (ItemDef item : form.getItems()) {
+                if (item.getType() != ItemType.MULTI_SELECT && item.getType() != ItemType.SELECT) {
+                    continue;
+                }
+
+                // 枚举名防重
+                String enumName = StringUtils.capitalize(item.getName()) + "Enum";
+                Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(
+                        AstForestContext.get().getSourceRoot(), commonConfig.getEnumPackage(), enumName + ".java");
+                // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
+//                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
+                enumName = FilenameUtils.getBaseName(absulutePath.toString());
+
+                // 枚举
+                CompilationUnit cu = new CompilationUnit();
+                cu.setPackageDeclaration(commonConfig.getEnumPackage());
+                EnumDeclaration ed = new EnumDeclaration();
+                JavadocUtils.setJavadoc(ed, item.getTitle(), commonConfig.getAuthor() + " " + LocalDate.now());
+                ed.addAnnotation(annotationExprService.lombokGetter());
+                ed.addAnnotation(annotationExprService.lombokAllArgsConstructor());
+                ed.setPublic(true);
+                ed.setName(enumName);
+
+                // 枚举项
+                for (OptionDef option : getOptions(item)) {
+                    EnumConstantDeclaration ecd = new EnumConstantDeclaration().setName(option.javaEnumConstantName())
+                            .addArgument(new StringLiteralExpr(option.getCode()))
+                            .addArgument(new StringLiteralExpr(option.getTitle()));
+                    ed.addEntry(ecd);
+                }
+
+                // 枚举其他成员
+                ed.addMember(StaticJavaParser.parseBodyDeclaration(
+                        "@com.fasterxml.jackson.annotation.JsonValue private final String code;"));
+                ed.addMember(StaticJavaParser.parseBodyDeclaration("private final String title;"));
+                ed.addMember(StaticJavaParser.parseBodyDeclaration(
+                                "public static boolean valid(String code) { return Arrays.stream(values())" +
+                                        ".anyMatch"
+                                        + "(anEnum -> anEnum.getCode().equals(code)); }").asMethodDeclaration()
+                        .setJavadocComment("判断参数code是否是一个有效的枚举"));
+                ed.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
+                                "@com.fasterxml.jackson.annotation.JsonCreator public static %s of(String code) { "
+                                        + "return Arrays" + ".stream(values()).filter(anEnum -> anEnum.getCode()"
+                                        + ".equals(code))" + ".findFirst().orElse(null); }", enumName)).asMethodDeclaration()
+                        .setJavadocComment("获取code对应的枚举"));
+                ed.addMember(
+                        StaticJavaParser.parseBodyDeclaration("@Override public String toString() { return code; }")
+                                .asMethodDeclaration());
+                cu.addType(ed);
+                cu.setStorage(absulutePath);
+                importExprService.extractQualifiedTypeToImport(cu);
+                cu.addImport("java.util.Arrays");
+                retval.add(FileFlush.build(cu));
+            }
+        }
+        return retval;
+    }
+
+    private List<OptionDef> getOptions(ItemDef item) {
+        if (item instanceof MultiSelectItemDef) {
+            return ((MultiSelectItemDef) item).getOptions();
+        }
+        if (item instanceof SelectItemDef) {
+            return ((SelectItemDef) item).getOptions();
+        }
+        throw new RuntimeException("impossible unless bug");
+    }
+
+}

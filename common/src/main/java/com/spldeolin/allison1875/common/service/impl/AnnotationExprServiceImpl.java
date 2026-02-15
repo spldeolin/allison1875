@@ -53,9 +53,19 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
-    public AnnotationExpr lomokFieldDefaultsPrivate() {
+    public AnnotationExpr lombokFieldDefaultsPrivate() {
         return StaticJavaParser.parseAnnotation(
                 "@lombok.experimental.FieldDefaults(level = lombok.AccessLevel.PRIVATE)").clone();
+    }
+
+    @Override
+    public AnnotationExpr lombokGetter() {
+        return StaticJavaParser.parseAnnotation("@lombok.Getter").clone();
+    }
+
+    @Override
+    public AnnotationExpr lombokAllArgsConstructor() {
+        return StaticJavaParser.parseAnnotation("@lombok.AllArgsConstructor").clone();
     }
 
     @Override

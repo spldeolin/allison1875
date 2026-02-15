@@ -42,7 +42,7 @@ public class TextItemService implements ItemService<TextItemDef> {
 
     @Override
     public String getDbColumnName(TextItemDef itemDef) {
-        return MoreStringUtils.toLowerCamel(itemDef.getName());
+        return MoreStringUtils.camelToSnakeCase(itemDef.getName());
     }
 
     @Override

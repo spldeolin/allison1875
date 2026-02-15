@@ -22,7 +22,11 @@ public interface AnnotationExprService {
 
     AnnotationExpr lombokAccessors();
 
-    AnnotationExpr lomokFieldDefaultsPrivate();
+    AnnotationExpr lombokFieldDefaultsPrivate();
+
+    AnnotationExpr lombokGetter();
+
+    AnnotationExpr lombokAllArgsConstructor();
 
     AnnotationExpr springService();
 

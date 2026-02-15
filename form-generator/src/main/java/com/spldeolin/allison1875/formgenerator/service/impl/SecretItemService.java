@@ -39,7 +39,7 @@ public class SecretItemService implements ItemService<SecretItemDef> {
 
     @Override
     public String getDbColumnName(SecretItemDef itemDef) {
-        return MoreStringUtils.toLowerCamel(itemDef.getName());
+        return MoreStringUtils.camelToSnakeCase(itemDef.getName());
     }
 
     @Override

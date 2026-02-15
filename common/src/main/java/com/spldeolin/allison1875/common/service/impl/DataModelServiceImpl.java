@@ -82,7 +82,7 @@ public class DataModelServiceImpl implements DataModelService {
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.addAnnotation(annotationExprService.lombokData());
         coid.addAnnotation(annotationExprService.lombokAccessors());
-        coid.addAnnotation(annotationExprService.lomokFieldDefaultsPrivate());
+        coid.addAnnotation(annotationExprService.lombokFieldDefaultsPrivate());
         coid.setPublic(true).setInterface(false).setName(className);
         if (arg.getIsDataModelSerializable()) {
             coid.addImplementedType("java.io.Serializable");

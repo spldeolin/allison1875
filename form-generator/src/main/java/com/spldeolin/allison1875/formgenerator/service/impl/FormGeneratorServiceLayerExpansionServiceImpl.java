@@ -11,6 +11,7 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
+import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -29,6 +30,9 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Inject
+    private AntiDuplicationService antiDuplicationService;
 
     @Override
     public BlockStmt buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis, String reqBodyDTOType,

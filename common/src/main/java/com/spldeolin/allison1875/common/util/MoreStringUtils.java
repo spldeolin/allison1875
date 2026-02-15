@@ -65,7 +65,7 @@ public class MoreStringUtils {
         StringBuilder sb = new StringBuilder(64);
         boolean firstNotEmptyPart = true;
         for (String part : string.split("[^a-zA-Z0-9]+")) {
-            if ("".equals(part)) {
+            if ("" .equals(part)) {
                 // e.g.: /user/create
                 continue;
             }
@@ -110,6 +110,11 @@ public class MoreStringUtils {
             return text;
         }
         return Joiner.on(separator).join(Arrays.copyOfRange(parts, 0, parts.length - 1));
+    }
+
+    public static String camelToSnakeCase(String camelStr) {
+        String snakeCaseStr = camelStr.replaceAll("(?<!^)([A-Z])", "_$1");
+        return snakeCaseStr.toLowerCase();
     }
 
 }

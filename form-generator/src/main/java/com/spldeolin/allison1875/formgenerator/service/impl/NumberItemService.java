@@ -45,7 +45,7 @@ public class NumberItemService implements ItemService<NumberItemDef> {
 
     @Override
     public String getDbColumnName(NumberItemDef itemDef) {
-        return MoreStringUtils.toLowerCamel(itemDef.getName());
+        return MoreStringUtils.camelToSnakeCase(itemDef.getName());
     }
 
     @Override

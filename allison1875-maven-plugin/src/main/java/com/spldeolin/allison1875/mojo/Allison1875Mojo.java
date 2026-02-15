@@ -64,7 +64,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
                 MoreObjects.firstNonNull(commonConfig.getReqDTOPackage(), basePackage + ".dto.req"));
         commonConfig.setRespDTOPackage(
                 MoreObjects.firstNonNull(commonConfig.getRespDTOPackage(), basePackage + ".dto.resp"));
-        commonConfig.setEnumPackage(MoreObjects.firstNonNull(commonConfig.getRespDTOPackage(), basePackage + ".enums"));
+        commonConfig.setEnumPackage(MoreObjects.firstNonNull(commonConfig.getEnumPackage(), basePackage + ".enums"));
         commonConfig.setServicePackage(
                 MoreObjects.firstNonNull(commonConfig.getServicePackage(), basePackage + ".service"));
         commonConfig.setServiceImplPackage(
