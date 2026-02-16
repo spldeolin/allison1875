@@ -18,7 +18,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.ast.ProceedingAstForest;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
@@ -125,15 +127,19 @@ public class FormGenerator implements Allison1875MainService {
 
         // 生成持久层
         persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
-        flushes.addAll(persistenceGenerator.process());
+        PersistenceGenerator.Retval persistenceGeneratorRetval = persistenceGenerator.process();
+        flushes.addAll(persistenceGeneratorRetval.getFlushes());
+
+        // persistence-generator执行完毕，获取designCu以供query-transformer使用
+        ProceedingAstForest proceedingAstForest = new ProceedingAstForest(astForest);
+        AstForestContext.set(proceedingAstForest);
+        proceedingAstForest.addUnflushedCus(persistenceGeneratorRetval.getDesignCus());
 
         // 生成枚举
         flushes.addAll(enumService.generateEnums(forms));
 
-        List<CompilationUnit> astForestWithUnflushedCus = Lists.newArrayList(astForest);
+        // 生成controller和initDec
         for (FormDef form : forms) {
-
-            // 生成controller和initDec
             CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
             String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
             Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
@@ -146,14 +152,11 @@ public class FormGenerator implements Allison1875MainService {
             coid.addAnnotation(annotationExprService.springRestController());
             coid.setPublic(true).setName(controllerName);
             cu.addType(coid);
-
-            // 生成CURD接口的initDec
             coid.addMember(initDecService.buildSaveHandler(form));
             coid.addMember(initDecService.buildListHandler(form));
             coid.addMember(initDecService.buildGetDetailHandler(form));
             coid.addMember(initDecService.buildDeleteHandler(form));
-
-            astForestWithUnflushedCus.add(cu);
+            proceedingAstForest.addUnflushedCu(cu);
         }
 
         // 运行时替换form-generator中ServiceMethodService的实现类
@@ -164,18 +167,14 @@ public class FormGenerator implements Allison1875MainService {
         serviceMethodServiceImplManager.setCurrentImpl(expansionService);
 
         // 调用handler-transformer转换initDec
-        Retval handlerTransformerRetval = handlerTransformer.process(astForestWithUnflushedCus);
+        Retval handlerTransformerRetval = handlerTransformer.internalProcess(proceedingAstForest);
         flushes.addAll(handlerTransformerRetval.getFlushes());
 
-        // TODO 获取ServiceImplCu的方式得改，靠methodBody无法findCu，因为handler——transformer内部的后续流程会有method.clone操作
-        // 计划让HandlerTransformer.process()方法将ServiceImpl也返回出来
-        // 如果能成，FormGeneratorServiceLayerExpansionServiceImpl需改回单例模式
-
         // handler-transformer执行完毕，可获取到ServiceImpl的CU
-        astForestWithUnflushedCus.addAll(handlerTransformerRetval.getServiceImplCus());
+        proceedingAstForest.addUnflushedCus(handlerTransformerRetval.getServiceImplCus());
 
         // 调用query-transformer转换业务层的DesignChain
-        flushes.addAll(queryTransformer.process(astForestWithUnflushedCus));
+        flushes.addAll(queryTransformer.internalProcess(proceedingAstForest));
 
         // write all to file
         if (CollectionUtils.isNotEmpty(flushes)) {

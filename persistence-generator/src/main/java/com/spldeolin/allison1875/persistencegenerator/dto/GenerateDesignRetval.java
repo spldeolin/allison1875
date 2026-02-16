@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.persistencegenerator.dto;
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -13,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateDesignRetval {
+
+    CompilationUnit designCu;
 
     FileFlush designFile;
 

@@ -467,7 +467,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
 
-        return new GenerateDesignRetval().setDesignFile(FileFlush.build(cu))
+        return new GenerateDesignRetval().setDesignCu(cu).setDesignFile(FileFlush.build(cu))
                 .setDesignQualifer(commonConfig.getDesignPackage() + "." + designName);
     }
 

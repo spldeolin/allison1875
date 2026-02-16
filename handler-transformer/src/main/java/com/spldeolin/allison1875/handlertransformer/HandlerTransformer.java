@@ -80,7 +80,7 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest).flushes;
+        List<FileFlush> flushes = internalProcess(astForest).flushes;
 
         // write all to file
         if (CollectionUtils.isNotEmpty(flushes)) {
@@ -91,7 +91,7 @@ public class HandlerTransformer implements Allison1875MainService {
         }
     }
 
-    public Retval process(Iterable<CompilationUnit> astForest) {
+    public Retval internalProcess(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
         List<CompilationUnit> serviceImplCus = Lists.newArrayList();
 

@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
+import com.spldeolin.allison1875.common.ast.ProceedingAstForest;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -71,7 +72,7 @@ public class QueryTransformer implements Allison1875MainService {
 
     @Override
     public void process(AstForest astForest) {
-        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest);
+        List<FileFlush> flushes = internalProcess(astForest);
 
         // write all to file
         if (CollectionUtils.isNotEmpty(flushes)) {
@@ -82,7 +83,7 @@ public class QueryTransformer implements Allison1875MainService {
         }
     }
 
-    public List<FileFlush> process(Iterable<CompilationUnit> astForest) {
+    public List<FileFlush> internalProcess(AstForest astForest) {
         List<FileFlush> flushes = Lists.newArrayList();
 
         // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml
@@ -91,7 +92,10 @@ public class QueryTransformer implements Allison1875MainService {
 
         for (CompilationUnit cu : astForest) {
             boolean anyTransformed = false;
-            LexicalPreservingPrinter.setup(cu);
+
+            if (!(astForest instanceof ProceedingAstForest)) {
+                LexicalPreservingPrinter.setup(cu);
+            }
 
             if (CollectionUtils.isEmpty(cu.findAll(BlockStmt.class))) {
                 continue;
@@ -196,7 +200,11 @@ public class QueryTransformer implements Allison1875MainService {
             }
             if (anyTransformed) {
                 importExprService.extractQualifiedTypeToImport(cu);
-                flushes.add(FileFlush.buildLexicalPreserving(cu));
+                if (astForest instanceof ProceedingAstForest) {
+                    flushes.add(FileFlush.build(cu));
+                } else {
+                    flushes.add(FileFlush.buildLexicalPreserving(cu));
+                }
             }
         }
 

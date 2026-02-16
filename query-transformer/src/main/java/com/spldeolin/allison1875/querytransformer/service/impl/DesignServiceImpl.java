@@ -23,6 +23,7 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.ast.ProceedingAstForest;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -56,9 +57,15 @@ public class DesignServiceImpl implements DesignService {
 
     @Override
     public ClassOrInterfaceDeclaration findCoidWithChecksum(String qualifier) {
-        Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
-                .orElse(AstForestContext.get().getSourceRoot());
-        Optional<CompilationUnit> opt = CompilationUnitUtils.tryFindCu(sourceRoot, qualifier);
+        Optional<CompilationUnit> opt;
+        if (AstForestContext.get() instanceof ProceedingAstForest) {
+            opt = AstForestContext.get().tryFindCu(qualifier);
+        } else {
+            Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+                    .orElse(AstForestContext.get().getSourceRoot());
+            opt = CompilationUnitUtils.tryFindCu(sourceRoot, qualifier);
+        }
+
         if (!opt.isPresent()) {
             throw new Allison1875Exception("cannot found Design [" + qualifier + "]");
         }
