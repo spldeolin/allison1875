@@ -4,8 +4,10 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.FormDefValid;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.UpperCamel;
+import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -49,5 +51,29 @@ public class FormDef {
      */
     @Valid
     List<@NotNull IndexDef> indices;
+
+    public String getEntityName(PersistenceGeneratorConfig persistenceGeneratorConfig) {
+        if (persistenceGeneratorConfig.getIsEntityEndWithEntity()) {
+            return this.getName() + "Entity";
+        } else {
+            return this.getName();
+        }
+    }
+
+    public String getVarName() {
+        return StringUtils.uncapitalize(this.getName());
+    }
+
+    public String getBizIdName() {
+        return this.getItems().get(0).getName();
+    }
+
+    public String getBizIdGetterName() {
+        return "get" + StringUtils.capitalize(this.getBizIdName());
+    }
+
+    public String getBizIdSetterName() {
+        return "set" + StringUtils.capitalize(this.getBizIdName());
+    }
 
 }

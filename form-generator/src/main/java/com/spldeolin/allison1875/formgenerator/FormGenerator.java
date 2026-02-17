@@ -38,16 +38,13 @@ import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.EnumService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
-import com.spldeolin.allison1875.formgenerator.service.InitDecService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
-import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerExpansionServiceImplManager;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
-import com.spldeolin.allison1875.querytransformer.QueryTransformer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -70,19 +67,10 @@ public class FormGenerator implements Allison1875MainService {
     private PersistenceGenerator persistenceGenerator;
 
     @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
-
-    @Inject
     private HandlerTransformer handlerTransformer;
 
     @Inject
-    private QueryTransformer queryTransformer;
-
-    @Inject
     private AnnotationExprService annotationExprService;
-
-    @Inject
-    private InitDecService initDecService;
 
     @Inject
     private ServiceLayerExpansionServiceImplManager serviceMethodServiceImplManager;
@@ -146,15 +134,16 @@ public class FormGenerator implements Allison1875MainService {
                 cu.setStorage(absulutePath);
                 cu.setPackageDeclaration(commonConfig.getControllerPackage());
                 cu.addImport(commonConfig.getDesignPackage() + ".*");
+                cu.addImport(commonConfig.getEntityPackage() + ".*");
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
                 coid.addAnnotation(annotationExprService.springRestController());
                 coid.setPublic(true).setName(controllerName);
                 cu.addType(coid);
-                coid.addMember(initDecService.buildSaveHandler(form));
-                coid.addMember(initDecService.buildListHandler(form));
-                coid.addMember(initDecService.buildGetDetailHandler(form));
-                coid.addMember(initDecService.buildDeleteHandler(form));
+                coid.addMember(saveApiService.generateSaveInitDec(form));
+                coid.addMember(listApiService.generateListInitDec(form));
+                coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
+                coid.addMember(deleteApiService.generateDeleteInitDec(form));
                 FileFlush.build(cu).flush();
             }
             AstForestContext.set(astForest.cloneWithResetting());
@@ -165,9 +154,6 @@ public class FormGenerator implements Allison1875MainService {
             // 调用handler-transformer转换initDec
             handlerTransformer.process(AstForestContext.get());
             AstForestContext.set(astForest.cloneWithResetting());
-
-            // 调用query-transformer转换业务层的DesignChain TODO query-transformer内部有resolve操作，必须依赖编译
-//            queryTransformer.process(AstForestContext.get());
 
             snapshot.cleanup();
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
