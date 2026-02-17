@@ -200,13 +200,6 @@ public class QueryTransformer implements Allison1875MainService {
             }
         }
 
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        } else {
-            log.warn("no valid Chain transformed");
-        }
         return flushes;
     }
 

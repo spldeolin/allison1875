@@ -373,8 +373,10 @@ public class FormGeneratorMojo extends Allison1875Mojo {
      */
     private Element buildQueryTransformerConfigElement() {
         java.util.List<Element> qtElements = new java.util.ArrayList<>();
-        qtElements.add(element(name("persistenceSourcePath"),
-                String.valueOf(queryTransformerConfig.getPersistenceSourcePath())));
+        if (queryTransformerConfig.getPersistenceSourcePath() != null) {
+            qtElements.add(element(name("persistenceSourcePath"),
+                    String.valueOf(queryTransformerConfig.getPersistenceSourcePath())));
+        }
         qtElements.add(element(name("module"), String.valueOf(queryTransformerConfig.getModule())));
         Element[] qtArray = qtElements.toArray(new Element[0]);
         return element(name("queryTransformerConfig"), qtArray);
