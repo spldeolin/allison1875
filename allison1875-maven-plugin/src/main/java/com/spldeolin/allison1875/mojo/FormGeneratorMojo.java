@@ -60,20 +60,6 @@ public class FormGeneratorMojo extends Allison1875Mojo {
     @Parameter(property = "enableChainExecution", defaultValue = "true")
     private boolean enableChainExecution;
 
-    /**
-     * 编译时使用的 Java 源码版本
-     * 如果不指定，会自动检测项目的 Java 版本
-     */
-    @Parameter(property = "maven.compiler.source")
-    private String compilerSource;
-
-    /**
-     * 编译时使用的 Java 目标版本
-     * 如果不指定，会自动检测项目的 Java 版本
-     */
-    @Parameter(property = "maven.compiler.target")
-    private String compilerTarget;
-
     @Component
     private MavenSession mavenSession;
 
@@ -119,179 +105,21 @@ public class FormGeneratorMojo extends Allison1875Mojo {
      */
     private void executeCompile() throws Exception {
         try {
-            // 检测和设置 Java 版本
-            String[] javaVersions = detectJavaVersion();
-            String sourceVersion = "21";
-            String targetVersion = "21";
-
-            log.info("检测到的编译版本配置: source={}, target={}", sourceVersion, targetVersion);
-
-            // 构建编译配置
-            Element[] configElements = buildCompilerConfiguration(sourceVersion, targetVersion);
+            String javaVersion = commonConfig.getJavaVersion();
+            log.info("使用编译版本: {}", javaVersion);
 
             executeMojo(
                     plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version("3.11.0")),
-                    goal("compile"), configuration(configElements),
+                    goal("compile"),
+                    configuration(element(name("source"), javaVersion), element(name("target"), javaVersion),
+                            element(name("encoding"), "UTF-8"),
+                            element(name("compilerArgs"), element(name("arg"), "-parameters"),
+                                    element(name("arg"), "-Xlint:unchecked"))),
                     executionEnvironment(project, mavenSession, pluginManager));
         } catch (Exception e) {
             log.error("Maven 编译执行失败", e);
             throw new Exception("Maven 编译失败", e);
         }
-    }
-
-    /**
-     * 检测项目的 Java 版本配置
-     *
-     * @return [source, target] 版本数组
-     */
-    private String[] detectJavaVersion() {
-        String sourceVersion = null;
-        String targetVersion = null;
-
-        // 1. 优先使用命令行参数
-        if (compilerSource != null) {
-            sourceVersion = compilerSource;
-        }
-        if (compilerTarget != null) {
-            targetVersion = compilerTarget;
-        }
-
-        // 2. 从项目属性中获取
-        if (sourceVersion == null) {
-            sourceVersion = project.getProperties().getProperty("maven.compiler.source");
-        }
-        if (targetVersion == null) {
-            targetVersion = project.getProperties().getProperty("maven.compiler.target");
-        }
-
-        // 3. 检测运行时 JVM 版本
-        if (sourceVersion == null || targetVersion == null) {
-            String jvmVersion = detectJvmVersion();
-            if (sourceVersion == null) {
-                sourceVersion = jvmVersion;
-            }
-            if (targetVersion == null) {
-                targetVersion = jvmVersion;
-            }
-        }
-
-        // 4. 最后的默认值
-        if (sourceVersion == null) {
-            sourceVersion = "11";  // 默认使用 Java 11，支持大部分现代特性
-        }
-        if (targetVersion == null) {
-            targetVersion = sourceVersion;
-        }
-
-        // 5. 版本标准化
-        sourceVersion = normalizeJavaVersion(sourceVersion);
-        targetVersion = normalizeJavaVersion(targetVersion);
-
-        log.info("最终使用的 Java 版本: source={}, target={}", sourceVersion, targetVersion);
-
-        return new String[]{sourceVersion, targetVersion};
-    }
-
-    /**
-     * 检测当前 JVM 版本
-     */
-    private String detectJvmVersion() {
-        String javaVersion = System.getProperty("java.version");
-        log.debug("检测到的 JVM 版本: {}", javaVersion);
-
-        // 解析版本号
-        if (javaVersion.startsWith("1.")) {
-            // Java 8 及以下版本格式: 1.8.0_xxx
-            return javaVersion.substring(2, 3);
-        } else {
-            // Java 9+ 版本格式: 11.0.1, 17.0.2, 21.0.1
-            int dotIndex = javaVersion.indexOf('.');
-            if (dotIndex > 0) {
-                return javaVersion.substring(0, dotIndex);
-            } else {
-                return javaVersion;
-            }
-        }
-    }
-
-    /**
-     * 标准化 Java 版本字符串
-     */
-    private String normalizeJavaVersion(String version) {
-        if (version == null) {
-            return "11";
-        }
-
-        // 移除可能的前缀和后缀
-        version = version.trim();
-        if (version.startsWith("1.")) {
-            version = version.substring(2);
-        }
-
-        // 提取主版本号
-        int dotIndex = version.indexOf('.');
-        if (dotIndex > 0) {
-            version = version.substring(0, dotIndex);
-        }
-
-        // 验证版本号
-        try {
-            int versionNum = Integer.parseInt(version);
-            if (versionNum < 8) {
-                log.warn("检测到的 Java 版本过低: {}, 使用默认版本 11", version);
-                return "11";
-            }
-            return String.valueOf(versionNum);
-        } catch (NumberFormatException e) {
-            log.warn("无法解析 Java 版本: {}, 使用默认版本 11", version);
-            return "11";
-        }
-    }
-
-    /**
-     * 构建编译器配置
-     */
-    private Element[] buildCompilerConfiguration(String sourceVersion, String targetVersion) {
-        java.util.List<Element> elements = new java.util.ArrayList<>();
-
-        // 基础配置
-        elements.add(element(name("source"), sourceVersion));
-        elements.add(element(name("target"), targetVersion));
-        elements.add(element(name("encoding"), "UTF-8"));
-
-        // 根据版本添加特殊配置
-        int sourceVersionNum = Integer.parseInt(sourceVersion);
-
-        // 编译器参数
-        java.util.List<Element> compilerArgs = new java.util.ArrayList<>();
-
-        // Java 14+ 支持 record 关键字
-        if (sourceVersionNum >= 14) {
-            log.info("检测到 Java {}, 启用 record 语法支持", sourceVersion);
-            // record 在 Java 14 是预览特性，Java 16 成为正式特性
-            if (sourceVersionNum == 14 || sourceVersionNum == 15) {
-                compilerArgs.add(element(name("arg"), "--enable-preview"));
-                log.info("为 Java {} 启用预览特性支持", sourceVersion);
-            }
-        }
-
-        // Java 21+ 特殊支持
-        if (sourceVersionNum >= 21) {
-            log.info("检测到 Java {}, 启用现代语法支持", sourceVersion);
-            // 可以添加 Java 21+ 特有的编译器参数
-        }
-
-        // 通用编译器参数
-        compilerArgs.add(element(name("arg"), "-parameters")); // 保留参数名
-        compilerArgs.add(element(name("arg"), "-Xlint:unchecked")); // 显示未检查的警告
-
-        // 如果有编译器参数，添加到配置中
-        Element[] argsArray = compilerArgs.toArray(new Element[0]);
-        elements.add(element(name("compilerArgs"), argsArray));
-
-        log.debug("编译器配置: source={}, target={}, args={}", sourceVersion, targetVersion, compilerArgs.size());
-
-        return elements.toArray(new Element[0]);
     }
 
     /**
