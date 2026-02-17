@@ -44,6 +44,9 @@ public abstract class Allison1875Mojo extends AbstractMojo {
                     .collect(Collectors.toList());
             log.info("sourceRoots={}", sourceRoots);
             for (File sourceRoot : sourceRoots) {
+                if (sourceRoot.toString().endsWith("generated-sources/annotations")) {
+                    continue;
+                }
                 AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot);
                 Allison1875.letsGo(allison1875Module, astForest);
             }
