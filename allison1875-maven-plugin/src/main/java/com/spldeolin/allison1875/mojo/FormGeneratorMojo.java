@@ -21,6 +21,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import com.google.common.base.Joiner;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -321,15 +322,11 @@ public class FormGeneratorMojo extends Allison1875Mojo {
 
         // 1. 传递 common 配置
         Element commonElement = buildCommonConfigElement();
-        if (commonElement != null) {
-            elements.add(commonElement);
-        }
+        elements.add(commonElement);
 
         // 2. 传递 queryTransformer 配置
         Element queryTransformerElement = buildQueryTransformerConfigElement();
-        if (queryTransformerElement != null) {
-            elements.add(queryTransformerElement);
-        }
+        elements.add(queryTransformerElement);
 
         log.debug("构建的 QueryTransformer 配置元素数量: {}", elements.size());
 
@@ -341,38 +338,34 @@ public class FormGeneratorMojo extends Allison1875Mojo {
      */
     private Element buildCommonConfigElement() {
         java.util.List<Element> commonElements = new java.util.ArrayList<>();
-
-        // 基础包配置 - 通过项目信息重新计算（与父类逻辑保持一致）
-        String basePackage = project.getGroupId();
-        if (basePackage != null) {
-            commonElements.add(element(name("basePackage"), basePackage));
-
-            // 根据 basePackage 推断其他包名（与父类逻辑保持一致）
-            commonElements.add(element(name("controllerPackage"), basePackage + ".controller"));
-            commonElements.add(element(name("reqDTOPackage"), basePackage + ".dto.req"));
-            commonElements.add(element(name("respDTOPackage"), basePackage + ".dto.resp"));
-            commonElements.add(element(name("enumPackage"), basePackage + ".enums"));
-            commonElements.add(element(name("servicePackage"), basePackage + ".service"));
-            commonElements.add(element(name("serviceImplPackage"), basePackage + ".service.impl"));
-            commonElements.add(element(name("mapperPackage"), basePackage + ".mapper"));
-            commonElements.add(element(name("entityPackage"), basePackage + ".entity"));
-            commonElements.add(element(name("designPackage"), basePackage + ".design"));
-            commonElements.add(element(name("paramDTOPackage"), basePackage + ".dto.param"));
-            commonElements.add(element(name("recordDTOPackage"), basePackage + ".dto.record"));
-            commonElements.add(element(name("wholeDTOPackage"), basePackage + ".dto"));
-
-            log.debug("构建 common 配置，basePackage: {}", basePackage);
-        }
-
-        // Mapper XML 目录配置
-        commonElements.add(element(name("mapperXmlDirs"), element(name("mapperXmlDir"), "src/main/resources/mapper")));
-
-        if (commonElements.isEmpty()) {
-            return null;
-        }
-
+        commonElements.add(element(name("basePackage"), commonConfig.getBasePackage()));
+        commonElements.add(element(name("controllerPackage"), commonConfig.getControllerPackage()));
+        commonElements.add(element(name("reqDTOPackage"), commonConfig.getReqDTOPackage()));
+        commonElements.add(element(name("respDTOPackage"), commonConfig.getRespDTOPackage()));
+        commonElements.add(element(name("enumPackage"), commonConfig.getEnumPackage()));
+        commonElements.add(element(name("servicePackage"), commonConfig.getServicePackage()));
+        commonElements.add(element(name("serviceImplPackage"), commonConfig.getServiceImplPackage()));
+        commonElements.add(element(name("mapperPackage"), commonConfig.getMapperPackage()));
+        commonElements.add(element(name("entityPackage"), commonConfig.getEntityPackage()));
+        commonElements.add(element(name("designPackage"), commonConfig.getDesignPackage()));
+        commonElements.add(element(name("paramDTOPackage"), commonConfig.getParamDTOPackage()));
+        commonElements.add(element(name("recordDTOPackage"), commonConfig.getRecordDTOPackage()));
+        commonElements.add(element(name("wholeDTOPackage"), commonConfig.getWholeDTOPackage()));
+        commonElements.add(element(name("mapperXmlDirs"), Joiner.on(",").join(commonConfig.getMapperXmlDirs())));
+        commonElements.add(element(name("author"), commonConfig.getAuthor()));
+        commonElements.add(
+                element(name("isDataModelSerializable"), String.valueOf(commonConfig.getIsDataModelSerializable())));
+        commonElements.add(
+                element(name("isDataModelCloneable"), String.valueOf(commonConfig.getIsDataModelCloneable())));
+        commonElements.add(element(name("isDataModuleWithoutLombok"),
+                String.valueOf(commonConfig.getIsDataModuleWithoutLombok())));
+        commonElements.add(
+                element(name("enableNoModifyAnnounce"), String.valueOf(commonConfig.getEnableNoModifyAnnounce())));
+        commonElements.add(element(name("enableLotNoAnnounce"), String.valueOf(commonConfig.getEnableLotNoAnnounce())));
+        commonElements.add(
+                element(name("enableJavaxMoveToJakarta"), String.valueOf(commonConfig.getEnableJavaxMoveToJakarta())));
         Element[] commonArray = commonElements.toArray(new Element[0]);
-        return element(name("common"), commonArray);
+        return element(name("commonConfig"), commonArray);
     }
 
     /**
@@ -380,42 +373,11 @@ public class FormGeneratorMojo extends Allison1875Mojo {
      */
     private Element buildQueryTransformerConfigElement() {
         java.util.List<Element> qtElements = new java.util.ArrayList<>();
-
-        // 从当前 FormGeneratorMojo 的 queryTransformerConfig 获取配置
-        if (queryTransformerConfig != null) {
-            // 持久层源码路径
-            if (queryTransformerConfig.getPersistenceSourcePath() != null) {
-                qtElements.add(element(name("persistenceSourcePath"),
-                        String.valueOf(queryTransformerConfig.getPersistenceSourcePath())));
-            } else {
-                // 默认值
-                qtElements.add(element(name("persistenceSourcePath"), "src/main/java"));
-            }
-
-            // 模块类名
-            if (queryTransformerConfig.getModule() != null) {
-                qtElements.add(element(name("module"), queryTransformerConfig.getModule()));
-            } else {
-                // 默认模块
-                qtElements.add(
-                        element(name("module"), "com.spldeolin.allison1875.querytransformer.QueryTransformerModule"));
-            }
-
-            // 其他可能的 QueryTransformer 特有配置
-            // 可以根据 QueryTransformerConfig 的具体字段来添加
-        } else {
-            // 如果没有配置，提供默认值
-            qtElements.add(element(name("persistenceSourcePath"), "src/main/java"));
-            qtElements.add(
-                    element(name("module"), "com.spldeolin.allison1875.querytransformer.QueryTransformerModule"));
-        }
-
-        if (qtElements.isEmpty()) {
-            return null;
-        }
-
+        qtElements.add(element(name("persistenceSourcePath"),
+                String.valueOf(queryTransformerConfig.getPersistenceSourcePath())));
+        qtElements.add(element(name("module"), String.valueOf(queryTransformerConfig.getModule())));
         Element[] qtArray = qtElements.toArray(new Element[0]);
-        return element(name("queryTransformer"), qtArray);
+        return element(name("queryTransformerConfig"), qtArray);
     }
 
     @Override

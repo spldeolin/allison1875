@@ -29,7 +29,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
     protected MavenProject project;
 
     @Parameter(alias = "common")
-    private CommonConfig commonConfig = new CommonConfig();
+    protected CommonConfig commonConfig = new CommonConfig();
 
     @Override
     public void execute() throws MojoExecutionException {
