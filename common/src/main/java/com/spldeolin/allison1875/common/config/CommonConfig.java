@@ -144,4 +144,10 @@ public class CommonConfig {
     @NotNull
     Boolean enableJavaxMoveToJakarta = false;
 
+    /**
+     * 编译版本（如：8、11、17、21），用于链式执行时Maven编译阶段的source和target版本
+     */
+    @NotNull
+    String javaVersion = "21";
+
 }
