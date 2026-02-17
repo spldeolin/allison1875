@@ -8,7 +8,8 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.utils.StringEscapeUtils;
-import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -21,40 +22,32 @@ import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Deolin 2025-08-14
  */
 @Slf4j
+@Singleton
 public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLayerExpansionService {
 
-    private final CommonConfig commonConfig;
+    @Inject
+    private CommonConfig commonConfig;
 
-    private final AnnotationExprService annotationExprService;
+    @Inject
+    private AnnotationExprService annotationExprService;
 
-    private final DeleteApiService deleteApiService;
+    @Inject
+    private DeleteApiService deleteApiService;
 
-    private final GetDetailApiService getDetailApiService;
+    @Inject
+    private GetDetailApiService getDetailApiService;
 
-    private final ListApiService listApiService;
+    @Inject
+    private ListApiService listApiService;
 
-    private final SaveApiService saveApiService;
-
-    @Getter
-    private final List<BlockStmt> serviceImplMethodBodies = Lists.newArrayList();
-
-    public FormGeneratorServiceLayerExpansionServiceImpl(CommonConfig commonConfig,
-            AnnotationExprService annotationExprService, DeleteApiService deleteApiService,
-            GetDetailApiService getDetailApiService, ListApiService listApiService, SaveApiService saveApiService) {
-        this.commonConfig = commonConfig;
-        this.annotationExprService = annotationExprService;
-        this.deleteApiService = deleteApiService;
-        this.getDetailApiService = getDetailApiService;
-        this.listApiService = listApiService;
-        this.saveApiService = saveApiService;
-    }
+    @Inject
+    private SaveApiService saveApiService;
 
     @Override
     public BlockStmt buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis, String reqBodyDTOType,
@@ -81,7 +74,6 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
             default:
                 throw new RuntimeException("Unknown api type");
         }
-        this.serviceImplMethodBodies.add(body);
         return body;
     }
 

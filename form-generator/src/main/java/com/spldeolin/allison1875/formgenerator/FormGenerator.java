@@ -20,13 +20,13 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.FileFlush;
-import com.spldeolin.allison1875.common.ast.ProceedingAstForest;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
+import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -43,7 +43,6 @@ import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
-import com.spldeolin.allison1875.handlertransformer.HandlerTransformer.Retval;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerExpansionServiceImplManager;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
@@ -89,6 +88,9 @@ public class FormGenerator implements Allison1875MainService {
     private ServiceLayerExpansionServiceImplManager serviceMethodServiceImplManager;
 
     @Inject
+    private FormGeneratorServiceLayerExpansionServiceImpl formGeneratorServiceLayerExpansionServiceImpl;
+
+    @Inject
     private DdlService ddlService;
 
     @Inject
@@ -117,69 +119,61 @@ public class FormGenerator implements Allison1875MainService {
         // 为每个Form增加业务主键、审计字段等
         addCommonItems(forms);
 
-        List<FileFlush> flushes = Lists.newArrayList(); // 多组件flushes合成为一个
+        FileSnapshotUtils.FileSystemSnapshot snapshot = FileSnapshotUtils.createSnapshot(astForest.getSourceRoot());
+        try {
+            // 生成DDL
+            String ddl = ddlService.generateDdl(forms);
+            Path ddlSql = astForest.getSourceRoot().resolve("../../../../sql/ddl.sql");
+            log.info("build ddl.sql, path={}", ddlSql.normalize());
+            FileFlush.build(ddlSql.toFile(), ddl).flush();
 
-        // 生成DDL
-        String ddl = ddlService.generateDdl(forms);
-        Path ddlSql = astForest.getSourceRoot().resolve("../../../../sql/ddl.sql");
-        log.info("build ddl.sql, path={}", ddlSql.normalize());
-        flushes.add(FileFlush.build(ddlSql.toFile(), ddl));
+            // 生成持久层
+            persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
+            PersistenceGenerator.Retval persistenceGeneratorRetval = persistenceGenerator.process();
+            persistenceGeneratorRetval.getFlushes().forEach(FileFlush::flush);
+            AstForestContext.set(astForest.cloneWithResetting());
 
-        // 生成持久层
-        persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
-        PersistenceGenerator.Retval persistenceGeneratorRetval = persistenceGenerator.process();
-        flushes.addAll(persistenceGeneratorRetval.getFlushes());
+            // 生成枚举
+            enumService.generateEnums(forms).forEach(FileFlush::flush);
+            AstForestContext.set(astForest.cloneWithResetting());
 
-        // persistence-generator执行完毕，获取designCu以供query-transformer使用
-        ProceedingAstForest proceedingAstForest = new ProceedingAstForest(astForest);
-        AstForestContext.set(proceedingAstForest);
-        proceedingAstForest.addUnflushedCus(persistenceGeneratorRetval.getDesignCus());
+            // 生成controller和initDec
+            for (FormDef form : forms) {
+                CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
+                String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
+                Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
+                        commonConfig.getControllerPackage(), controllerName + ".java");
+                cu.setStorage(absulutePath);
+                cu.setPackageDeclaration(commonConfig.getControllerPackage());
+                cu.addImport(commonConfig.getDesignPackage() + ".*");
+                ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+                JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
+                coid.addAnnotation(annotationExprService.springRestController());
+                coid.setPublic(true).setName(controllerName);
+                cu.addType(coid);
+                coid.addMember(initDecService.buildSaveHandler(form));
+                coid.addMember(initDecService.buildListHandler(form));
+                coid.addMember(initDecService.buildGetDetailHandler(form));
+                coid.addMember(initDecService.buildDeleteHandler(form));
+                FileFlush.build(cu).flush();
+            }
+            AstForestContext.set(astForest.cloneWithResetting());
 
-        // 生成枚举
-        flushes.addAll(enumService.generateEnums(forms));
+            // 运行时替换form-generator中ServiceMethodService的实现类
+            serviceMethodServiceImplManager.setCurrentImpl(formGeneratorServiceLayerExpansionServiceImpl);
 
-        // 生成controller和initDec
-        for (FormDef form : forms) {
-            CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
-            String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
-            Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
-                    commonConfig.getControllerPackage(), controllerName + ".java");
-            cu.setStorage(absulutePath);
-            cu.setPackageDeclaration(commonConfig.getControllerPackage());
-            cu.addImport(commonConfig.getDesignPackage() + ".*");
-            ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
-            coid.addAnnotation(annotationExprService.springRestController());
-            coid.setPublic(true).setName(controllerName);
-            cu.addType(coid);
-            coid.addMember(initDecService.buildSaveHandler(form));
-            coid.addMember(initDecService.buildListHandler(form));
-            coid.addMember(initDecService.buildGetDetailHandler(form));
-            coid.addMember(initDecService.buildDeleteHandler(form));
-            proceedingAstForest.addUnflushedCu(cu);
-        }
+            // 调用handler-transformer转换initDec
+            handlerTransformer.process(AstForestContext.get());
+            AstForestContext.set(astForest.cloneWithResetting());
 
-        // 运行时替换form-generator中ServiceMethodService的实现类
-        FormGeneratorServiceLayerExpansionServiceImpl expansionService =
-                new FormGeneratorServiceLayerExpansionServiceImpl(
-                commonConfig, annotationExprService, deleteApiService, getDetailApiService, listApiService,
-                saveApiService);
-        serviceMethodServiceImplManager.setCurrentImpl(expansionService);
+            // 调用query-transformer转换业务层的DesignChain TODO query-transformer内部有resolve操作，必须依赖编译
+//            queryTransformer.process(AstForestContext.get());
 
-        // 调用handler-transformer转换initDec
-        Retval handlerTransformerRetval = handlerTransformer.internalProcess(proceedingAstForest);
-        flushes.addAll(handlerTransformerRetval.getFlushes());
-
-        // handler-transformer执行完毕，可获取到ServiceImpl的CU
-        proceedingAstForest.addUnflushedCus(handlerTransformerRetval.getServiceImplCus());
-
-        // 调用query-transformer转换业务层的DesignChain
-        flushes.addAll(queryTransformer.internalProcess(proceedingAstForest));
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
+            snapshot.cleanup();
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        } catch (Exception e) {
+            log.error("Error occurred during processing", e);
+            FileSnapshotUtils.rollback(snapshot);
         }
     }
 
