@@ -4,11 +4,13 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPatter
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.LowerCamel;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.NumberItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.OnOffItemDef;
@@ -71,5 +73,11 @@ public abstract class ItemDef {
      * 字段的类型
      */
     public abstract ItemType getType();
+
+    /**
+     * 特殊字段类型，null代表非特殊字段
+     */
+    @JsonIgnore
+    SpecialItemType specialItemType;
 
 }

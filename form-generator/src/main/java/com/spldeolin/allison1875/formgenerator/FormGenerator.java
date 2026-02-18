@@ -32,6 +32,7 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
@@ -171,6 +172,7 @@ public class FormGenerator implements Allison1875MainService {
             bizId.setIsNonVoid(true);
             bizId.setInitPattern(TODO);
             bizId.setEditPattern(InitOrEditPattern.DO_NOT);
+            bizId.setSpecialItemType(SpecialItemType.BIZ_ID);
             bizId.setMaxLength(36);
             form.getItems().add(0, bizId);
             TimeItemDef createdAt = new TimeItemDef();
@@ -179,6 +181,7 @@ public class FormGenerator implements Allison1875MainService {
             createdAt.setIsNonVoid(true);
             createdAt.setInitPattern(TODO);
             createdAt.setEditPattern(InitOrEditPattern.DO_NOT);
+            bizId.setSpecialItemType(SpecialItemType.CREATED_AT);
             form.getItems().add(createdAt);
             TimeItemDef updatedAt = new TimeItemDef();
             updatedAt.setName("updatedAt");
@@ -186,6 +189,7 @@ public class FormGenerator implements Allison1875MainService {
             updatedAt.setIsNonVoid(true);
             updatedAt.setInitPattern(TODO);
             updatedAt.setEditPattern(TODO);
+            bizId.setSpecialItemType(SpecialItemType.UPDATED_AT);
             form.getItems().add(updatedAt);
             IndexDef index = new IndexDef();
             index.setItemNames(Lists.newArrayList(bizId.getName()));

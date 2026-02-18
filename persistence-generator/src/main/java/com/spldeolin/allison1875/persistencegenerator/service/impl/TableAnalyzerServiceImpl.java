@@ -3,7 +3,9 @@ package com.spldeolin.allison1875.persistencegenerator.service.impl;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -215,16 +217,16 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             return new JavaTypeDTO().setClass(Long.class);
         }
         if ("date".equalsIgnoreCase(dataType)) {
-            return new JavaTypeDTO().setClass(Date.class);
+            return new JavaTypeDTO().setClass(LocalDate.class);
         }
         if ("time".equalsIgnoreCase(dataType)) {
-            return new JavaTypeDTO().setClass(Date.class);
+            return new JavaTypeDTO().setClass(LocalTime.class);
         }
         if ("datetime".equalsIgnoreCase(dataType)) {
-            return new JavaTypeDTO().setClass(Date.class);
+            return new JavaTypeDTO().setClass(LocalDateTime.class);
         }
         if ("timestamp".equalsIgnoreCase(dataType)) {
-            return new JavaTypeDTO().setClass(Date.class);
+            return new JavaTypeDTO().setClass(LocalDateTime.class);
         }
         if ("decimal".equalsIgnoreCase(dataType)) {
             return new JavaTypeDTO().setClass(BigDecimal.class);

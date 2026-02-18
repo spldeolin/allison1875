@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.formgenerator.FormGeneratorConfig;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
@@ -41,6 +42,9 @@ public class SaveApiServiceImpl implements SaveApiService {
     @Inject
     private PersistenceGeneratorConfig persistenceGeneratorConfig;
 
+    @Inject
+    private FormGeneratorConfig formGeneratorConfig;
+
     @Override
     public InitializerDeclaration generateSaveInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
@@ -57,7 +61,8 @@ public class SaveApiServiceImpl implements SaveApiService {
         JavadocUtils.setJavadoc(bizIdField, form.getTitle() + "的业务ID", null);
         reqCoid.addMember(bizIdField);
         for (ItemDef item : form.getItems()) {
-            if (item.getInitPattern() == InitOrEditPattern.USER_INPUT) {
+            if (item.getInitPattern() == InitOrEditPattern.USER_INPUT
+                    || item.getEditPattern() == InitOrEditPattern.USER_INPUT) {
                 FieldDeclaration itemField = StaticJavaParser.parseBodyDeclaration(
                         itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
                 JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
@@ -87,6 +92,11 @@ public class SaveApiServiceImpl implements SaveApiService {
         ifStmt.setElseStmt(generateElseBody(form));
         body.addStatement(ifStmt);
 
+        // initPattern==userInput且 editPattern==userInput添加此处
+
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("%s.setUpdateTime(LocalDateTime.now());", form.getVarName())));
+
         body.addStatement(StaticJavaParser.parseStatement(
                 "return new Save" + form.getName() + "Resp()." + form.getBizIdSetterName() + "(" + form.getVarName()
                         + "." + form.getBizIdGetterName() + "());"));
@@ -97,6 +107,12 @@ public class SaveApiServiceImpl implements SaveApiService {
         BlockStmt body = new BlockStmt();
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("%s = new %s();", form.getVarName(), form.getEntityName(persistenceGeneratorConfig))));
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
+                        formGeneratorConfig.getShortUuidGeneration())));
+        // initPattern!=userInput添加此处
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("%s.setCreatedAt(LocalDateTime.now());", form.getVarName())));
         return body;
     }
 
@@ -105,6 +121,7 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("%s = %sMapper.queryBy%s(req.%s());", form.getVarName(), form.getVarName(),
                         StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName())));
+        // editPattern!=userInput添加此处
         return body;
     }
 
