@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.utils.StringEscapeUtils;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.CommonConfig;
@@ -20,6 +21,7 @@ import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
+import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +52,8 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
     private SaveApiService saveApiService;
 
     @Override
-    public BlockStmt buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis, String reqBodyDTOType,
+    public BuildServiceImplMethodBodyRetval buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis,
+            String reqBodyDTOType,
             List<VariableDeclarator> reqParams, String respBodyDTOType) {
         FormDef form = JsonUtils.toObject(StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("form")),
                 FormDef.class);
@@ -74,7 +77,14 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
             default:
                 throw new RuntimeException("Unknown api type");
         }
-        return body;
+
+        // 准备必要的imports
+        List<String> neededImports = Lists.newArrayList();
+        neededImports.add("java.time.*");
+        neededImports.add("java.math.*");
+        neededImports.add("java.util.*");
+
+        return new BuildServiceImplMethodBodyRetval().setBody(body).setNeededImports(neededImports);
     }
 
     @Override

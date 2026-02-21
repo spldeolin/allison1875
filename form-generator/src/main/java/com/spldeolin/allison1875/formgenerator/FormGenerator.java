@@ -43,7 +43,6 @@ import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
-import com.spldeolin.allison1875.handlertransformer.service.impl.ServiceLayerExpansionServiceImplManager;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -72,9 +71,6 @@ public class FormGenerator implements Allison1875MainService {
 
     @Inject
     private AnnotationExprService annotationExprService;
-
-    @Inject
-    private ServiceLayerExpansionServiceImplManager serviceMethodServiceImplManager;
 
     @Inject
     private FormGeneratorServiceLayerExpansionServiceImpl formGeneratorServiceLayerExpansionServiceImpl;
@@ -150,7 +146,7 @@ public class FormGenerator implements Allison1875MainService {
             AstForestContext.set(astForest.cloneWithResetting());
 
             // 运行时替换form-generator中ServiceMethodService的实现类
-            serviceMethodServiceImplManager.setCurrentImpl(formGeneratorServiceLayerExpansionServiceImpl);
+//            serviceMethodServiceImplManager.setCurrentImpl(formGeneratorServiceLayerExpansionServiceImpl);
 
             // 调用handler-transformer转换initDec
             handlerTransformer.process(AstForestContext.get());

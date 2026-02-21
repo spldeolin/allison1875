@@ -4,7 +4,6 @@ import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -27,6 +26,7 @@ import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceRetval
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
+import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceMethodRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.DTOService;
 import com.spldeolin.allison1875.handlertransformer.service.InitDecAnalyzerService;
@@ -121,7 +121,8 @@ public class HandlerTransformer implements Allison1875MainService {
                     flushes.addAll(generateDTOsRetval.getFlushes());
 
                     // 生成Service方法
-                    MethodDeclaration serviceMethod = serviceLayerService.generateServiceMethod(initDecAnalysis,
+                    GenerateServiceMethodRetval serviceMethod = serviceLayerService.generateServiceMethod(
+                            initDecAnalysis,
                             generateDTOsRetval.getReqBodyDTOType(), generateDTOsRetval.getReqParams(),
                             generateDTOsRetval.getRespBodyDTOType());
 
@@ -133,11 +134,15 @@ public class HandlerTransformer implements Allison1875MainService {
                         generateServiceAndImplRetval = serviceLayerService.generateServiceAndImpl(gsaiArgs);
                     }
 
+                    // 为ServiceImpl加入实现方法体所需的import。（在handler-transformer场景，实现方法不是空方法，会需要import）
+                    final CompilationUnit serviceImplCu = generateServiceAndImplRetval.getServiceImplCu();
+                    serviceMethod.getNeededImportsInImpl().forEach(serviceImplCu::addImport);
+
                     // service方法加入到Service层，然后flush
                     AddMethodToServiceArgs args = new AddMethodToServiceArgs();
                     args.setControllerCu(cu);
                     args.setInitDecAnalysisDTO(initDecAnalysis);
-                    args.setServiceMethod(serviceMethod);
+                    args.setServiceMethod(serviceMethod.getMethod());
                     args.setGenerateServiceAndImplRetval(generateServiceAndImplRetval);
                     AddMethodToServiceRetval addMethodToServiceRetval = serviceLayerService.addMethodToService(args);
                     if (addMethodToServiceRetval == null) {

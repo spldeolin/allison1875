@@ -95,7 +95,7 @@ public class SaveApiServiceImpl implements SaveApiService {
         // initPattern==userInput且 editPattern==userInput添加此处
 
         body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s.setUpdateTime(LocalDateTime.now());", form.getVarName())));
+                String.format("%s.setUpdatedAt(java.time.LocalDateTime.now());", form.getVarName())));
 
         body.addStatement(StaticJavaParser.parseStatement(
                 "return new Save" + form.getName() + "Resp()." + form.getBizIdSetterName() + "(" + form.getVarName()

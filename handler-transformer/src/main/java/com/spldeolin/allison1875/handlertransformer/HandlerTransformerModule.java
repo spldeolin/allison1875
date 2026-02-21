@@ -7,6 +7,8 @@ import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
+import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
+import com.spldeolin.allison1875.handlertransformer.service.impl.HandlerTransformerServiceLayerExpansionServiceImpl;
 import lombok.ToString;
 
 /**
@@ -33,6 +35,7 @@ public class HandlerTransformerModule extends Allison1875Module {
     protected void configure() {
         bind(CommonConfig.class).toInstance(commonConfig);
         bind(HandlerTransformerConfig.class).toInstance(handlerTransformerConfig);
+        bind(ServiceLayerExpansionService.class).toInstance(new HandlerTransformerServiceLayerExpansionServiceImpl());
         if (commonConfig.getIsDataModuleWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {

@@ -8,22 +8,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>handler-transformer</artifactId>
+    <artifactId>handler-transformer-facade</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>handler-transformer-facade</artifactId>
-        </dependency>
-
-        <!-- spring mvc -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
         </dependency>
     </dependencies>
 

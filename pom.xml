@@ -14,6 +14,7 @@
         <module>common</module>
         <module>doc-analyzer</module>
         <module>handler-transformer</module>
+        <module>handler-transformer-facade</module>
         <module>persistence-generator</module>
         <module>persistence-generator-facade</module>
         <module>query-transformer</module>
@@ -228,6 +229,11 @@
             <dependency>
                 <groupId>com.spldeolin.allison1875</groupId>
                 <artifactId>handler-transformer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spldeolin.allison1875</groupId>
+                <artifactId>handler-transformer-facade</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

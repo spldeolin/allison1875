@@ -12,7 +12,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
@@ -31,8 +30,10 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceRetval;
+import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
+import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceMethodRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerService;
@@ -64,7 +65,8 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     private ServiceLayerExpansionService serviceLayerExpansionService;
 
     @Override
-    public MethodDeclaration generateServiceMethod(InitDecAnalysisDTO initDecAnalysisDTO, String reqBodyDTOType,
+    public GenerateServiceMethodRetval generateServiceMethod(InitDecAnalysisDTO initDecAnalysisDTO,
+            String reqBodyDTOType,
             List<VariableDeclarator> reqParams, String respBodyDTOType) {
         MethodDeclaration method = new MethodDeclaration();
         method.addAnnotation(annotationExprService.javaOverride());
@@ -82,11 +84,13 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             method.addParameter(new Parameter(vd.getType(), vd.getName()));
         }
 
-        BlockStmt body = serviceLayerExpansionService.buildServiceImplMethodBody(initDecAnalysisDTO, reqBodyDTOType,
-                reqParams, respBodyDTOType);
-        method.setBody(body);
+        BuildServiceImplMethodBodyRetval buildServiceImplMethodBodyRetval =
+                serviceLayerExpansionService.buildServiceImplMethodBody(
+                initDecAnalysisDTO, reqBodyDTOType, reqParams, respBodyDTOType);
+        method.setBody(buildServiceImplMethodBodyRetval.getBody());
 
-        return method;
+        return new GenerateServiceMethodRetval().setMethod(method)
+                .setNeededImportsInImpl(buildServiceImplMethodBodyRetval.getNeededImports());
     }
 
     @Override
