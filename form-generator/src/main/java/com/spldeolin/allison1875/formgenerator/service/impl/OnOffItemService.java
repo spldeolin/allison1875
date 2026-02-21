@@ -68,4 +68,9 @@ public class OnOffItemService implements ItemService<OnOffItemDef> {
         return Optional.empty();
     }
 
+    @Override
+    public String getTodoValue(OnOffItemDef itemDef) {
+        return "false";
+    }
+
 }

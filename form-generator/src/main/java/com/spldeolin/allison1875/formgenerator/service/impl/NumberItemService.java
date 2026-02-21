@@ -72,4 +72,9 @@ public class NumberItemService implements ItemService<NumberItemDef> {
         return Optional.empty();
     }
 
+    @Override
+    public String getTodoValue(NumberItemDef itemDef) {
+        return itemDef.getCanBeDecimal() ? "new BigDecimal(0)" : "0L";
+    }
+
 }

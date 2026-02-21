@@ -38,6 +38,6 @@ public class FormGeneratorConfig {
      * 短UUID的生成语句
      */
     @NotEmpty
-    String shortUuidGeneration = "java.util.UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()";
+    String shortUuidGeneration = "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()";
 
 }

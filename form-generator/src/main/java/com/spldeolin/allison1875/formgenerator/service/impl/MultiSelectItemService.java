@@ -80,6 +80,11 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
         return Optional.empty();
     }
 
+    @Override
+    public String getTodoValue(MultiSelectItemDef itemDef) {
+        return "null";
+    }
+
     public FormDef toAssociationForm(FormDef majorForm, MultiSelectItemDef item) {
         FormDef form = new FormDef();
         form.setName(majorForm.getName() + StringUtils.capitalize(item.getName()));

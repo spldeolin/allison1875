@@ -70,4 +70,9 @@ public class TextItemService implements ItemService<TextItemDef> {
         return Optional.empty();
     }
 
+    @Override
+    public String getTodoValue(TextItemDef itemDef) {
+        return "\"\"";
+    }
+
 }

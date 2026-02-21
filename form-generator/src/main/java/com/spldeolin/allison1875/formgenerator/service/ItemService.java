@@ -55,4 +55,6 @@ public interface ItemService<I extends ItemDef> {
      */
     Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(I itemDef);
 
+    String getTodoValue(I itemDef);
+
 }

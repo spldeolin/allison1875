@@ -79,6 +79,11 @@ public class PrimaryItemServiceImpl implements ItemService<ItemDef> {
         return delegate(itemDef).getJavaJsonFormatAnnoatation(itemDef);
     }
 
+    @Override
+    public String getTodoValue(ItemDef itemDef) {
+        return delegate(itemDef).getTodoValue(itemDef);
+    }
+
     @SuppressWarnings("unchecked")
     private <I extends ItemDef> ItemService<I> delegate(ItemDef itemDef) {
         switch (itemDef.getType()) {

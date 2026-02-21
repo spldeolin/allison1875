@@ -73,4 +73,9 @@ public class TimeItemService implements ItemService<TimeItemDef> {
                         + "\", timezone = " + "\"Asia/Shanghai\")"));
     }
 
+    @Override
+    public String getTodoValue(TimeItemDef itemDef) {
+        return "LocalDateTime.now()";
+    }
+
 }

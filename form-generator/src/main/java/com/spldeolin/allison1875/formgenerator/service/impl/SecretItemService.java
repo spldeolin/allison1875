@@ -66,4 +66,9 @@ public class SecretItemService implements ItemService<SecretItemDef> {
         return Optional.empty();
     }
 
+    @Override
+    public String getTodoValue(SecretItemDef itemDef) {
+        return "\"\"";
+    }
+
 }
