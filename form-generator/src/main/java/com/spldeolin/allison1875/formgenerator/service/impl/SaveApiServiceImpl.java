@@ -5,7 +5,6 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
-import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
@@ -113,7 +112,7 @@ public class SaveApiServiceImpl implements SaveApiService {
             }
         }
         body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s.setUpdatedAt(java.time.LocalDateTime.now());", form.getVarName())));
+                String.format("%s.setUpdatedAt(LocalDateTime.now());", form.getVarName())));
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
                         form.getVarName(), form.getVarName(), form.getVarName(), form.getVarName())));
@@ -122,11 +121,13 @@ public class SaveApiServiceImpl implements SaveApiService {
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
-                body.addStatement(StaticJavaParser.parseStatement(
+                Statement stmt = StaticJavaParser.parseStatement(
                         String.format("%sDesign.delete(\"deleteBy%s\").where().%s.eq(%s.%s()).over();",
                                 associationForm.getName(), StringUtils.capitalize(associationForm.getBizIdName()),
                                 associationForm.getBizIdName(), form.getVarName(),
-                                associationForm.getBizIdGetterName())));
+                                associationForm.getBizIdGetterName()));
+                stmt.setLineComment(String.format("重建与%s的关联（先删除，后创建）", item.getTitle()));
+                body.addStatement(stmt);
                 ForEachStmt forEachStmt = new ForEachStmt();
                 forEachStmt.setVariable(StaticJavaParser.parseVariableDeclarationExpr(
                         String.format("%s %s", MoreStringUtils.toUpperCamel(item.getName()) + "Enum", item.getName())));
@@ -179,7 +180,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                         String.format("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
                                 itemService.getTodoValue(item)));
                 if (item.getInitPattern() == InitOrEditPattern.TODO) {
-                    stmt.addOrphanComment(new LineComment("TODO 请补充初始值"));
+                    stmt.setLineComment("TODO 请补充初始值");
                 }
                 body.addStatement(stmt);
             }
@@ -213,7 +214,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                         String.format("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
                                 itemService.getTodoValue(item)));
                 if (item.getEditPattern() == InitOrEditPattern.TODO) {
-                    stmt.addOrphanComment(new LineComment("TODO 请补充更新值"));
+                    stmt.setLineComment("TODO 请补充更新值");
                 }
                 body.addStatement(stmt);
             }

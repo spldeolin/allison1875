@@ -74,7 +74,8 @@ public class SelectItemService implements ItemService<SelectItemDef> {
 
     @Override
     public String getTodoValue(SelectItemDef itemDef) {
-        return getJavaTypeInDTO(itemDef) + "." + itemDef.getOptions().get(0).javaEnumConstantName() + ".getCode()";
+        return MoreStringUtils.splitAndGetLastPart(getJavaTypeInDTO(itemDef), ".") + "." + itemDef.getOptions().get(0)
+                .javaEnumConstantName() + ".getCode()";
     }
 
 }

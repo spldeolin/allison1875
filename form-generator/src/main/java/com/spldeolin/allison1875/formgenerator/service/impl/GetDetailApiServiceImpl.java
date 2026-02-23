@@ -17,6 +17,8 @@ import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
+import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import lombok.extern.slf4j.Slf4j;
@@ -68,9 +70,59 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-
-        body.addStatement(StaticJavaParser.parseStatement("return new Get" + form.getName() + "DetailResp();"));
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("%s %s = %sMapper.queryBy%s(req.%s());", form.getName(), form.getVarName(),
+                        form.getVarName(), StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName())));
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
+                        form.getVarName(), form.getTitle())));
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("Get%sDetailResp result = new Get%sDetailResp();", form.getName(), form.getName())));
+        for (ItemDef item : form.getItems()) {
+            if (item.getType() == ItemType.SECRET) {
+                // 密码、密钥类不应返回
+                continue;
+            }
+            if (item.getType() == ItemType.MULTI_SELECT) {
+                // TODO
+                continue;
+            }
+            generatorSetterToGetter(form, item, body);
+        }
+        body.addStatement(StaticJavaParser.parseStatement("return result;"));
         return body;
+    }
+
+    private void generatorSetterToGetter(FormDef form, ItemDef item, BlockStmt body) {
+        String getterWithConvert = String.format("%s.get%s()", form.getVarName(),
+                StringUtils.capitalize(item.getName()));
+        if (item.getType() == ItemType.SELECT) {
+            getterWithConvert = String.format("%s.of(%s)", StringUtils.capitalize(item.getName()) + "Enum",
+                    getterWithConvert);
+        }
+        if (item.getType() == ItemType.TIME) {
+            TimeItemDef itemItem = (TimeItemDef) item;
+            if (itemItem.getFormat() == TimeFormat.DATE) {
+                if (item.getIsNonVoid()) {
+                    getterWithConvert = String.format("%s.toLocalDate()", getterWithConvert);
+                } else {
+                    getterWithConvert = String.format(
+                            getterWithConvert + String.format("!=null ? %s.toLocalDate() : null",
+                                    StringUtils.capitalize(item.getName())));
+                }
+            }
+            if (itemItem.getFormat() == TimeFormat.TIME) {
+                if (item.getIsNonVoid()) {
+                    getterWithConvert = String.format("%s.toLocalTime()", getterWithConvert);
+                } else {
+                    getterWithConvert = String.format(
+                            getterWithConvert + String.format("!=null ? %s.toLocalTime() : null",
+                                    StringUtils.capitalize(item.getName())));
+                }
+            }
+        }
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("result.set%s(%s);", StringUtils.capitalize(item.getName()), getterWithConvert)));
     }
 
 }
