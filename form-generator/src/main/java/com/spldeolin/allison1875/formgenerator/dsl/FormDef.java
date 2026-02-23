@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.FormDefValid;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.UpperCamel;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
@@ -74,6 +75,14 @@ public class FormDef {
 
     public String getBizIdSetterName() {
         return "set" + StringUtils.capitalize(this.getBizIdName());
+    }
+
+    /**
+     * 获取非审计字段
+     */
+    @JsonIgnore
+    public List<ItemDef> getNonAuditedItems() {
+        return items.subList(1, items.size() - 2);
     }
 
 }

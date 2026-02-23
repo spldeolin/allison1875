@@ -64,4 +64,6 @@ public interface AnnotationExprService {
 
     AnnotationExpr springController();
 
+    AnnotationExpr springTransactional();
+
 }

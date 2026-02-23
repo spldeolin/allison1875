@@ -1,11 +1,15 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
+import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.DELETE;
+import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.SAVE;
+
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
@@ -14,9 +18,11 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
@@ -51,10 +57,20 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
     @Inject
     private SaveApiService saveApiService;
 
+    @Inject
+    private MultiSelectItemService multiSelectItemService;
+
+    @Override
+    public List<AnnotationExpr> buildAnnotationsFormServiceImplMethod(InitDecAnalysisDTO initDecAnalysis) {
+        if (Lists.newArrayList(SAVE, DELETE).contains(ApiType.of(initDecAnalysis.getExpansion().get("type")))) {
+            return Lists.newArrayList(annotationExprService.springTransactional());
+        }
+        return Collections.emptyList();
+    }
+
     @Override
     public BuildServiceImplMethodBodyRetval buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis,
-            String reqBodyDTOType,
-            List<VariableDeclarator> reqParams, String respBodyDTOType) {
+            String reqBodyDTOType, List<VariableDeclarator> reqParams, String respBodyDTOType) {
         FormDef form = JsonUtils.toObject(StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("form")),
                 FormDef.class);
         log.info("formDef={}", form);
@@ -88,20 +104,34 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
     }
 
     @Override
-    public Optional<FieldDeclaration> buildFieldForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
+    public List<FieldDeclaration> buildFieldsForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
             InitDecAnalysisDTO initDecAnalysis) {
         FormDef form = JsonUtils.toObject(StringEscapeUtils.unescapeJava(initDecAnalysis.getExpansion().get("form")),
                 FormDef.class);
         log.info("form={}", form);
 
-        String mapperType =
-                commonConfig.getMapperPackage() + "." + MoreStringUtils.toUpperCamel(form.getName()) + "Mapper";
-        String mapperName = MoreStringUtils.toLowerCamel(form.getName()) + "Mapper";
+        // 加入主表单Mapper
+        String mapperType = commonConfig.getMapperPackage() + "." + form.getName() + "Mapper";
+        String mapperName = form.getVarName() + "Mapper";
         FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(
                 String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();
         field.addAnnotation(annotationExprService.springAutowired());
+        List<FieldDeclaration> retval = Lists.newArrayList(field);
 
-        return Optional.of(field);
+        // 加入关联表单Mapper
+        for (ItemDef item : form.getItems()) {
+            if (item.getType() == ItemType.MULTI_SELECT) {
+                FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
+                mapperType = commonConfig.getMapperPackage() + "." + associationForm.getName() + "Mapper";
+                mapperName = associationForm.getVarName() + "Mapper";
+                FieldDeclaration associationFormMapperField = StaticJavaParser.parseBodyDeclaration(
+                        String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();
+                associationFormMapperField.addAnnotation(annotationExprService.springAutowired());
+                retval.add(associationFormMapperField);
+            }
+        }
+
+        return retval;
     }
 
 }

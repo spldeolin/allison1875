@@ -7,6 +7,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
@@ -17,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString(callSuper = true)
 public class TimeItemDef extends ItemDef {
 
     /**

@@ -66,9 +66,10 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
 
     @Override
     public GenerateServiceMethodRetval generateServiceMethod(InitDecAnalysisDTO initDecAnalysisDTO,
-            String reqBodyDTOType,
-            List<VariableDeclarator> reqParams, String respBodyDTOType) {
+            String reqBodyDTOType, List<VariableDeclarator> reqParams, String respBodyDTOType) {
         MethodDeclaration method = new MethodDeclaration();
+        serviceLayerExpansionService.buildAnnotationsFormServiceImplMethod(initDecAnalysisDTO)
+                .forEach(method::addAnnotation);
         method.addAnnotation(annotationExprService.javaOverride());
         method.setPublic(true);
         if (respBodyDTOType != null) {
@@ -199,8 +200,8 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         }
 
         // 为serviceImpl构建Field
-        serviceLayerExpansionService.buildFieldForServiceImpl(serviceImpl, args.getInitDecAnalysisDTO())
-                .ifPresent(serviceImpl::addMember);
+        serviceLayerExpansionService.buildFieldsForServiceImpl(serviceImpl, args.getInitDecAnalysisDTO())
+                .forEach(serviceImpl::addMember);
 
         GenerateServiceAndImplRetval retval = new GenerateServiceAndImplRetval();
         retval.setService(service);

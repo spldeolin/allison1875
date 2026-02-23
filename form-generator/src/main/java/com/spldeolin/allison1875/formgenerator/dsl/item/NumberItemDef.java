@@ -6,6 +6,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -14,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString(callSuper = true)
 public class NumberItemDef extends ItemDef {
 
     /**

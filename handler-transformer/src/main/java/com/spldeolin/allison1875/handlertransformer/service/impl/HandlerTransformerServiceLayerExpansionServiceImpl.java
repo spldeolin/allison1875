@@ -1,11 +1,12 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
@@ -17,9 +18,13 @@ import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansio
 public class HandlerTransformerServiceLayerExpansionServiceImpl implements ServiceLayerExpansionService {
 
     @Override
+    public List<AnnotationExpr> buildAnnotationsFormServiceImplMethod(InitDecAnalysisDTO initDecAnalysis) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public BuildServiceImplMethodBodyRetval buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis,
-            String reqBodyDTOType,
-            List<VariableDeclarator> reqParams, String respBodyDTOType) {
+            String reqBodyDTOType, List<VariableDeclarator> reqParams, String respBodyDTOType) {
         BlockStmt body = new BlockStmt();
         if (respBodyDTOType != null) {
             body.addStatement(StaticJavaParser.parseStatement("return null;"));
@@ -28,9 +33,9 @@ public class HandlerTransformerServiceLayerExpansionServiceImpl implements Servi
     }
 
     @Override
-    public Optional<FieldDeclaration> buildFieldForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
+    public List<FieldDeclaration> buildFieldsForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
             InitDecAnalysisDTO initDecAnalysis) {
-        return Optional.empty();
+        return Collections.emptyList();
     }
 
 }

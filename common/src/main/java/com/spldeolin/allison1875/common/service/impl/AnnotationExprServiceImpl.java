@@ -186,4 +186,9 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
         return StaticJavaParser.parseAnnotation("@org.springframework.stereotype.Controller").clone();
     }
 
+    @Override
+    public AnnotationExpr springTransactional() {
+        return StaticJavaParser.parseAnnotation("@org.springframework.transaction.annotation.Transactional").clone();
+    }
+
 }

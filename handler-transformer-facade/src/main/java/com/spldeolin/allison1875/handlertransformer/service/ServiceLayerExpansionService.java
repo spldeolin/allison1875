@@ -1,10 +1,10 @@
 package com.spldeolin.allison1875.handlertransformer.service;
 
 import java.util.List;
-import java.util.Optional;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 
@@ -13,11 +13,12 @@ import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
  */
 public interface ServiceLayerExpansionService {
 
-    BuildServiceImplMethodBodyRetval buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis,
-            String reqBodyDTOType,
-            List<VariableDeclarator> reqParams, String respBodyDTOType);
+    List<AnnotationExpr> buildAnnotationsFormServiceImplMethod(InitDecAnalysisDTO initDecAnalysis);
 
-    Optional<FieldDeclaration> buildFieldForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
+    BuildServiceImplMethodBodyRetval buildServiceImplMethodBody(InitDecAnalysisDTO initDecAnalysis,
+            String reqBodyDTOType, List<VariableDeclarator> reqParams, String respBodyDTOType);
+
+    List<FieldDeclaration> buildFieldsForServiceImpl(ClassOrInterfaceDeclaration serviceImpl,
             InitDecAnalysisDTO initDecAnalysis);
 
 }

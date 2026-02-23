@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -9,16 +8,17 @@ import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.StringEscapeUtils;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.FormGeneratorConfig;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
@@ -26,6 +26,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
@@ -50,6 +51,9 @@ public class SaveApiServiceImpl implements SaveApiService {
 
     @Inject
     private FormGeneratorConfig formGeneratorConfig;
+
+    @Inject
+    private MultiSelectItemService multiSelectItemService;
 
     @Override
     public InitializerDeclaration generateSaveInitDec(FormDef form) {
@@ -98,13 +102,9 @@ public class SaveApiServiceImpl implements SaveApiService {
         ifStmt.setElseStmt(generateElseBody(form));
         body.addStatement(ifStmt);
 
-        // 忽略业务主键和审计字段的字段
-        List<ItemDef> items = form.getItems().subList(1, form.getItems().size() - 2);
-
         // initPattern==userInput且 editPattern==userInput添加此处
-        for (ItemDef item : items) {
+        for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
-                // TODO 多选需要保存到临时表
                 continue;
             }
             if (item.getInitPattern() == InitOrEditPattern.USER_INPUT
@@ -117,6 +117,41 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
                         form.getVarName(), form.getVarName(), form.getVarName(), form.getVarName())));
+
+        // 删除、重新创建关联实体
+        for (ItemDef item : form.getNonAuditedItems()) {
+            if (item.getType() == ItemType.MULTI_SELECT) {
+                FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
+                body.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%sDesign.delete(\"deleteBy%s\").where().%s.eq(%s.%s()).over();",
+                                associationForm.getName(), StringUtils.capitalize(associationForm.getBizIdName()),
+                                associationForm.getBizIdName(), form.getVarName(),
+                                associationForm.getBizIdGetterName())));
+                ForEachStmt forEachStmt = new ForEachStmt();
+                forEachStmt.setVariable(StaticJavaParser.parseVariableDeclarationExpr(
+                        String.format("%s %s", MoreStringUtils.toUpperCamel(item.getName()) + "Enum", item.getName())));
+                forEachStmt.setIterable(StaticJavaParser.parseExpression(
+                        String.format("req.get%s()", StringUtils.capitalize(item.getName()))));
+                BlockStmt forEachBody = new BlockStmt();
+                forEachBody.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%s %s = new %s();", associationForm.getName(), associationForm.getVarName(),
+                                associationForm.getName())));
+                forEachBody.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%s.%s(%s.%s());", associationForm.getVarName(),
+                                associationForm.getBizIdSetterName(), form.getVarName(), form.getBizIdGetterName())));
+                forEachBody.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%s.set%s(%s.getCode());", associationForm.getVarName(),
+                                StringUtils.capitalize(item.getName()), item.getName())));
+                forEachBody.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%s.setCreatedAt(LocalDateTime.now());", associationForm.getVarName())));
+                forEachBody.addStatement(StaticJavaParser.parseStatement(
+                        String.format("%sMapper.insert(%s);", associationForm.getVarName(),
+                                associationForm.getVarName())));
+                forEachStmt.setBody(forEachBody);
+                body.addStatement(forEachStmt);
+            }
+        }
+
         body.addStatement(StaticJavaParser.parseStatement(
                 "return new Save" + form.getName() + "Resp()." + form.getBizIdSetterName() + "(" + form.getVarName()
                         + "." + form.getBizIdGetterName() + "());"));
@@ -131,13 +166,8 @@ public class SaveApiServiceImpl implements SaveApiService {
                 String.format("%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
                         formGeneratorConfig.getShortUuidGeneration())));
         // initPattern!=userInput添加此处
-        for (ItemDef item : form.getItems()) {
-            if (Lists.newArrayList(form.getBizIdName(), "updatedAt", "createdAt").contains(item.getName())) {
-                // 业务主键、审计字段不加入
-                continue;
-            }
+        for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
-                // TODO 多选需要保存到临时表
                 continue;
             }
             if (item.getInitPattern() == InitOrEditPattern.USER_INPUT && item.getEditPattern()
@@ -170,13 +200,8 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
                         form.getVarName(), form.getTitle())));
-        for (ItemDef item : form.getItems()) {
-            if (Lists.newArrayList(form.getBizIdName(), "updatedAt", "createdAt").contains(item.getName())) {
-                // 业务主键、审计字段不加入
-                continue;
-            }
+        for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
-                // TODO 多选需要保存到临时表
                 continue;
             }
             if (item.getEditPattern() == InitOrEditPattern.USER_INPUT
