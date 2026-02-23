@@ -51,10 +51,6 @@ public class FormGeneratorModule extends Allison1875Module {
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());
         }
-
-        // 绑定 ItemService<ItemDef> 到 PrimaryItemServiceImpl（分发器）
-//        bind(new com.google.inject.TypeLiteral<ItemService<ItemDef>>() {
-//        }).to(PrimaryItemServiceImpl.class);
     }
 
 }

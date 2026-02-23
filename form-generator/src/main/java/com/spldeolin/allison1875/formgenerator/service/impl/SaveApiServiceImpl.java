@@ -169,7 +169,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                         StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName())));
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
-                        form.getVarName(), form.getVarName())));
+                        form.getVarName(), form.getTitle())));
         for (ItemDef item : form.getItems()) {
             if (Lists.newArrayList(form.getBizIdName(), "updatedAt", "createdAt").contains(item.getName())) {
                 // 业务主键、审计字段不加入

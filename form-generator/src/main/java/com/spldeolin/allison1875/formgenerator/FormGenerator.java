@@ -145,9 +145,6 @@ public class FormGenerator implements Allison1875MainService {
             }
             AstForestContext.set(astForest.cloneWithResetting());
 
-            // 运行时替换form-generator中ServiceMethodService的实现类
-//            serviceMethodServiceImplManager.setCurrentImpl(formGeneratorServiceLayerExpansionServiceImpl);
-
             // 调用handler-transformer转换initDec
             handlerTransformer.process(AstForestContext.get());
             AstForestContext.set(astForest.cloneWithResetting());
