@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -46,7 +45,7 @@ public class DeleteApiServiceImpl implements DeleteApiService {
 
         // req声明
         FieldDeclaration bizIdField = StaticJavaParser.parseBodyDeclaration(
-                "java.util.List<String> " + StringUtils.uncapitalize(form.getName()) + "Codes;").asFieldDeclaration();
+                "java.util.List<String> " + form.getBizIdName() + "s;").asFieldDeclaration();
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req")
                 .addMember(bizIdField.clone().addAnnotation(annotationExprService.notEmpty()));
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
@@ -56,7 +55,9 @@ public class DeleteApiServiceImpl implements DeleteApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(form.getName() + "Design.delete().over();"));
+        body.addStatement(StaticJavaParser.parseStatement(
+                form.getName() + "Design.delete().where()." + form.getBizIdName() + ".in(req."
+                        + form.getBizIdGetterName() + "s()).over();"));
         return body;
     }
 

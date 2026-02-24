@@ -20,6 +20,7 @@ import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.OptionDef;
@@ -46,7 +47,10 @@ public class EnumServiceImpl implements EnumService {
     @Override
     public List<FileFlush> generateEnums(List<FormDef> forms) {
         List<FileFlush> retval = Lists.newArrayList();
+
         for (FormDef form : forms) {
+
+            // 为单选和多选生成枚举
             for (ItemDef item : form.getItems()) {
                 if (item.getType() != ItemType.MULTI_SELECT && item.getType() != ItemType.SELECT) {
                     continue;
@@ -101,7 +105,59 @@ public class EnumServiceImpl implements EnumService {
                 cu.addImport("java.util.Arrays");
                 retval.add(FileFlush.build(cu));
             }
+
+            // 为表单生成字段枚举
+            // 枚举名防重
+            String enumName = StringUtils.capitalize(form.getName()) + "SortItemEnum";
+            Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
+                    commonConfig.getEnumPackage(), enumName + ".java");
+            // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
+//                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
+            enumName = FilenameUtils.getBaseName(absulutePath.toString());
+
+            // 枚举
+            CompilationUnit cu = new CompilationUnit();
+            cu.setPackageDeclaration(commonConfig.getEnumPackage());
+            EnumDeclaration ed = new EnumDeclaration();
+            JavadocUtils.setJavadoc(ed, form.getTitle() + "的排序字段",
+                    commonConfig.getAuthor() + " " + LocalDate.now());
+            ed.addAnnotation(annotationExprService.lombokGetter());
+            ed.addAnnotation(annotationExprService.lombokAllArgsConstructor());
+            ed.setPublic(true);
+            ed.setName(enumName);
+
+            // 枚举项
+            for (ItemDef item : form.getItems()) {
+                EnumConstantDeclaration ecd = new EnumConstantDeclaration().setName(
+                                MoreStringUtils.camelToSnakeCase(item.getName()).toUpperCase())
+                        .addArgument(new StringLiteralExpr(item.getName()))
+                        .addArgument(new StringLiteralExpr("按“" + item.getTitle() + "”排序"));
+                ed.addEntry(ecd);
+            }
+
+            // 枚举其他成员
+            ed.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "@com.fasterxml.jackson.annotation.JsonValue private final String code;"));
+            ed.addMember(StaticJavaParser.parseBodyDeclaration("private final String title;"));
+            ed.addMember(StaticJavaParser.parseBodyDeclaration(
+                            "public static boolean valid(String code) { return Arrays.stream(values())" + ".anyMatch"
+                                    + "(anEnum -> anEnum.getCode().equals(code)); }").asMethodDeclaration()
+                    .setJavadocComment("判断参数code是否是一个有效的枚举"));
+            ed.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
+                            "@com.fasterxml.jackson.annotation.JsonCreator public static %s of(String code) { "
+                                    + "return Arrays" + ".stream(values()).filter(anEnum -> anEnum.getCode()" +
+                                    ".equals(code))"
+                                    + ".findFirst().orElse(null); }", enumName)).asMethodDeclaration()
+                    .setJavadocComment("获取code对应的枚举"));
+            ed.addMember(StaticJavaParser.parseBodyDeclaration("@Override public String toString() { return code; }")
+                    .asMethodDeclaration());
+            cu.addType(ed);
+            cu.setStorage(absulutePath);
+            importExprService.extractQualifiedTypeToImport(cu);
+            cu.addImport("java.util.Arrays");
+//            retval.add(FileFlush.build(cu)); TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         }
+
         return retval;
     }
 

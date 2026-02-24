@@ -133,7 +133,15 @@ public class ListApiServiceImpl implements ListApiService {
         reqCoid.addMember(pageSize);
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
 
-        // TODO 排序规则
+        // 排序方式 TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
+//        itemField = StaticJavaParser.parseBodyDeclaration(form.getName() + "SortItemEnum sortItem;")
+//                .asFieldDeclaration();
+//        JavadocUtils.setJavadoc(itemField, "排序字段，null代表更新时间", null);
+//        reqCoid.addMember(itemField);
+//        itemField = StaticJavaParser.parseBodyDeclaration("Boolean isSortAsc;")
+//                .asFieldDeclaration();
+//        JavadocUtils.setJavadoc(itemField, "true代表正序，否则代表倒序", null);
+//        reqCoid.addMember(itemField);
 
         // resp声明
         ClassOrInterfaceDeclaration respCoid = new ClassOrInterfaceDeclaration().setName("resp");
@@ -157,7 +165,7 @@ public class ListApiServiceImpl implements ListApiService {
 
         String designChain = form.getName() + "Design.select().where()";
         designChain += "." + form.getBizIdName() + ".in(req." + form.getBizIdGetterName() + "())";
-        for (ItemDef item : form.getItems().subList(1, form.getItems().size())) {
+        for (ItemDef item : form.getItems().subList(1, form.getItems().size() - 1)) { // 跳过第一个业务主键和最后一个更新时间
             switch (item.getType()) {
                 case SECRET:
                 case MULTI_SELECT:
@@ -188,11 +196,23 @@ public class ListApiServiceImpl implements ListApiService {
                                     item.getName()) + "Start(), LocalTime.of(0,0)))";
                             designChain += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
                                     + "End() == null ? null : LocalDateTime.of(req.get" + StringUtils.capitalize(
-                                    item.getName()) + "End(), LocalTime.of(0,0)))";
+                                    item.getName()) + "End(), LocalTime.of(23, 59, 59)))";
                             break;
                         case TIME:
+                            designChain += "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
+                                    + "Start() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
+                                    + StringUtils.capitalize(item.getName()) + "Start()))";
+                            designChain += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
+                                    + "End() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
+                                    + StringUtils.capitalize(item.getName()) + "End()))";
                             break;
                         case DATE_TIME:
+                            designChain += "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
+                                    + "Start() == null ? null : req.get" + StringUtils.capitalize(item.getName())
+                                    + "Start())";
+                            designChain += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
+                                    + "End() == null ? null : req.get" + StringUtils.capitalize(item.getName())
+                                    + "End())";
                             break;
                         default:
                             throw new RuntimeException("impossible");
@@ -202,6 +222,7 @@ public class ListApiServiceImpl implements ListApiService {
                     throw new RuntimeException("impossible");
             }
         }
+        designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         designChain += ".page(req.getPageNum(),req.getPageSize());";
 
         body.addStatement(StaticJavaParser.parseStatement(designChain));
