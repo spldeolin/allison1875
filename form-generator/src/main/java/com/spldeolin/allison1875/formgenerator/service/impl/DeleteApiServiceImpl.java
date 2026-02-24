@@ -15,6 +15,8 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,9 @@ public class DeleteApiServiceImpl implements DeleteApiService {
 
     @Inject
     private CommonConfig commonConfig;
+
+    @Inject
+    private MultiSelectItemService multiSelectItemService;
 
     @Override
     public InitializerDeclaration generateDeleteInitDec(FormDef form) {
@@ -58,6 +63,14 @@ public class DeleteApiServiceImpl implements DeleteApiService {
         body.addStatement(StaticJavaParser.parseStatement(
                 form.getName() + "Design.delete().where()." + form.getBizIdName() + ".in(req."
                         + form.getBizIdGetterName() + "s()).over();"));
+        form.getItems().stream().filter(item -> item.getType() == ItemType.MULTI_SELECT)
+                .map(item -> ((MultiSelectItemDef) item)).forEach(multiSelectItem -> {
+                    FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
+                    body.addStatement(StaticJavaParser.parseStatement(
+                            String.format("%sDesign.delete().where().%s.in(req.%ss()).over();",
+                                    associationForm.getName(),
+                                    associationForm.getBizIdName(), associationForm.getBizIdGetterName())));
+                });
         return body;
     }
 

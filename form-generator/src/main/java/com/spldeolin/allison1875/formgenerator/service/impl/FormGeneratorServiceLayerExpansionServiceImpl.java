@@ -131,6 +131,11 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
             }
         }
 
+        // 加入分页total，避免在调用query-transformer前因total不存在而编译错误
+        field = StaticJavaParser.parseBodyDeclaration(
+                String.format("private final Long query%sTotal = 0L;", form.getName())).asFieldDeclaration();
+        retval.add(field);
+
         return retval;
     }
 

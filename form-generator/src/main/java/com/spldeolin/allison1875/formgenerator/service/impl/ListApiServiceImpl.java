@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
+import static com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType.MULTI_SELECT;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType.SECRET;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +10,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
@@ -21,6 +24,7 @@ import com.spldeolin.allison1875.formgenerator.FormGeneratorConfig;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
@@ -73,7 +77,7 @@ public class ListApiServiceImpl implements ListApiService {
                 case SELECT:
                 case MULTI_SELECT:
                     itemField = StaticJavaParser.parseBodyDeclaration(
-                                    "List<" + itemService.getJavaTypeInDTO(item) + "> " + item.getName() + ";")
+                                    itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";")
                             .asFieldDeclaration();
                     JavadocUtils.setJavadoc(itemField, "按“" + item.getTitle() + "”列表过滤，null或empty代表无需过滤",
                             null);
@@ -224,11 +228,71 @@ public class ListApiServiceImpl implements ListApiService {
         }
         designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         designChain += ".page(req.getPageNum(),req.getPageSize());";
-
-        body.addStatement(StaticJavaParser.parseStatement(designChain));
         body.addStatement(StaticJavaParser.parseStatement(
-                "return " + formGeneratorConfig.getPageResultEmptyConstruction() + ";"));
+                "List<" + form.getName() + "> " + English.plural(form.getVarName()) + " = " + designChain));
+
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
+                        formGeneratorConfig.getPageResultEmptyConstruction())));
+
+        body.addStatement(StaticJavaParser.parseStatement(
+                "List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
+        ForEachStmt forEachStmt = new ForEachStmt();
+        forEachStmt.setVariable(StaticJavaParser.parseVariableDeclarationExpr(
+                String.format("%s %s", form.getName(), form.getVarName())));
+        forEachStmt.setIterable(new NameExpr(English.plural(form.getVarName())));
+        BlockStmt forEachBody = new BlockStmt();
+        forEachBody.addStatement(StaticJavaParser.parseStatement(
+                String.format("List%sResp dto = new List%sResp();", English.plural(form.getName()),
+                        English.plural(form.getName()))));
+        for (ItemDef item : form.getItems()) {
+            if (item.getType() == SECRET) {
+                continue;
+            }
+            if (item.getType() == MULTI_SELECT) {
+                // TODO
+                continue;
+            }
+            generatorSetterToGetter(form, item, forEachBody);
+        }
+        forEachBody.addStatement("dtos.add(dto);");
+        forEachStmt.setBody(forEachBody);
+        body.addStatement(forEachStmt);
+        body.addStatement(StaticJavaParser.parseStatement("return " + formGeneratorConfig.getPageResultConstruction()
+                .replace("${total}", "query" + form.getName() + "Total").replace("${dtos}", "dtos") + ";"));
         return body;
+    }
+
+    private void generatorSetterToGetter(FormDef form, ItemDef item, BlockStmt body) {
+        String getterWithConvert = String.format("%s.get%s()", form.getVarName(),
+                StringUtils.capitalize(item.getName()));
+        if (item.getType() == ItemType.SELECT) {
+            getterWithConvert = String.format("%s.of(%s)", StringUtils.capitalize(item.getName()) + "Enum",
+                    getterWithConvert);
+        }
+        if (item.getType() == ItemType.TIME) {
+            TimeItemDef itemItem = (TimeItemDef) item;
+            if (itemItem.getFormat() == TimeFormat.DATE) {
+                if (item.getIsNonVoid()) {
+                    getterWithConvert = String.format("%s.toLocalDate()", getterWithConvert);
+                } else {
+                    getterWithConvert = String.format(
+                            getterWithConvert + String.format("!=null ? %s.toLocalDate() : null",
+                                    StringUtils.capitalize(item.getName())));
+                }
+            }
+            if (itemItem.getFormat() == TimeFormat.TIME) {
+                if (item.getIsNonVoid()) {
+                    getterWithConvert = String.format("%s.toLocalTime()", getterWithConvert);
+                } else {
+                    getterWithConvert = String.format(
+                            getterWithConvert + String.format("!=null ? %s.toLocalTime() : null",
+                                    StringUtils.capitalize(item.getName())));
+                }
+            }
+        }
+        body.addStatement(StaticJavaParser.parseStatement(
+                String.format("dto.set%s(%s);", StringUtils.capitalize(item.getName()), getterWithConvert)));
     }
 
 }

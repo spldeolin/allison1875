@@ -34,7 +34,7 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
+import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant.ChainInitialMethod;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
@@ -50,6 +50,7 @@ import com.spldeolin.allison1875.querytransformer.dto.JoinedPropertyDTO;
 import com.spldeolin.allison1875.querytransformer.dto.SearchConditionDTO;
 import com.spldeolin.allison1875.querytransformer.dto.SortPropertyDTO;
 import com.spldeolin.allison1875.querytransformer.dto.XmlSourceFile;
+import com.spldeolin.allison1875.querytransformer.enums.ComparisonOperatorEnum;
 import com.spldeolin.allison1875.querytransformer.enums.OrderSequenceEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
@@ -147,7 +148,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
             List<String> xmlLines = Lists.newArrayList();
             xmlLines.add("");
-            if (chainAnalysis.getChainInitialMethod() == KeywordConstant.ChainInitialMethod.SELECT) {
+            if (chainAnalysis.getChainInitialMethod() == ChainInitialMethod.SELECT) {
                 // QUERY
                 ArrayList<JoinClauseDTO> joinClauses = Lists.newArrayList(chainAnalysis.getJoinClauses());
                 boolean join = !joinClauses.isEmpty();
@@ -237,7 +238,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 }
 
                 xmlLines.add("</select>");
-            } else if (chainAnalysis.getChainInitialMethod() == KeywordConstant.ChainInitialMethod.UPDATE) {
+            } else if (chainAnalysis.getChainInitialMethod() == ChainInitialMethod.UPDATE) {
                 // UPDATE
                 xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatUpdateStartTag(chainAnalysis, generateParamRetval);
@@ -253,7 +254,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
                 xmlLines.addAll(concatWhereSection(designMeta, chainAnalysis, true));
                 xmlLines.add("</update>");
-            } else if (chainAnalysis.getChainInitialMethod() == KeywordConstant.ChainInitialMethod.DELETE) {
+            } else if (chainAnalysis.getChainInitialMethod() == ChainInitialMethod.DELETE) {
                 // DROP
                 xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatDeleteStartTag(chainAnalysis, generateParamRetval);
@@ -622,8 +623,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     private String concatDeleteStartTag(ChainAnalysisDTO chainAnalysis, GenerateParamRetval paramGeneration) {
         String startTag = "<delete id='" + chainAnalysis.getMethodName() + "'";
         if (paramGeneration.getParameters().size() == 1) {
-            startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
+            ComparisonOperatorEnum comparison = Iterables.getOnlyElement(chainAnalysis.getSearchConditions())
+                    .getComparisonOperator();
+            if (comparison == ComparisonOperatorEnum.IN || comparison == ComparisonOperatorEnum.NOT_IN) {
+                startTag += ">";
+                return startTag;
+            }
         }
+        startTag += " parameterType='" + paramGeneration.getParameters().get(0).getTypeAsString() + "'";
         startTag += ">";
         return startTag;
     }

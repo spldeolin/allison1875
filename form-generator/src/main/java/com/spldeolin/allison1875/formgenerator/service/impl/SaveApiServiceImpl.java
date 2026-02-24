@@ -122,9 +122,8 @@ public class SaveApiServiceImpl implements SaveApiService {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
                 Statement stmt = StaticJavaParser.parseStatement(
-                        String.format("%sDesign.delete(\"deleteBy%s\").where().%s.eq(%s.%s()).over();",
-                                associationForm.getName(), StringUtils.capitalize(associationForm.getBizIdName()),
-                                associationForm.getBizIdName(), form.getVarName(),
+                        String.format("%sMapper.deleteBy%s(%s.%s());", associationForm.getVarName(),
+                                StringUtils.capitalize(associationForm.getBizIdName()), form.getVarName(),
                                 associationForm.getBizIdGetterName()));
                 stmt.setLineComment(String.format("重建与%s的关联（先删除，后创建）", item.getTitle()));
                 body.addStatement(stmt);
