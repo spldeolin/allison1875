@@ -23,21 +23,27 @@ public class FormGeneratorConfig {
     File dslPath = new File("./forms.yml");
 
     /**
-     * 分页返回值的构造语句（占位符${total}代表总条数，${dtos}代表当前页数据列表）
+     * 构造分页返回值的代码片段（占位符${total}代表总条数，${dtos}代表当前页数据列表）
      */
     @NotEmpty
     String pageResultConstruction;
 
     /**
-     * 空的分页返回值的构造语句
+     * 构造空的分页返回值的代码片段
      */
     @NotEmpty
     String pageResultEmptyConstruction;
 
     /**
-     * 短UUID的生成语句
+     * 生成短UUID的的代码片段
      */
     @NotEmpty
     String shortUuidGeneration = "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()";
+
+    /**
+     * 判断列表是否为empty的代码片段（占位符${list}代表列表）
+     */
+    @NotEmpty
+    String collectionEmptyCheck = "CollectionUtils.isEmpty(${list})";
 
 }

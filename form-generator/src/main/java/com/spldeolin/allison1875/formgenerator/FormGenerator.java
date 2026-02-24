@@ -134,6 +134,7 @@ public class FormGenerator implements Allison1875MainService {
                 cu.addImport(commonConfig.getEntityPackage() + ".*");
                 cu.addImport(commonConfig.getEnumPackage() + ".*");
                 cu.addImport("java.util.stream.*");
+                cu.addImport("org.springframework.util.*");
                 ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
                 JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
                 coid.addAnnotation(annotationExprService.springRestController());
