@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,6 +19,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
@@ -35,6 +37,9 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
 
     @Inject
     private AnnotationExprService annotationExprService;
+
+    @Inject
+    private MultiSelectItemService multiSelectItemService;
 
     @Override
     public InitializerDeclaration generateGetDetailInitDec(FormDef form) {
@@ -70,21 +75,43 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(
+        Statement stmt = StaticJavaParser.parseStatement(
                 String.format("%s %s = %sMapper.queryBy%s(req.%s());", form.getName(), form.getVarName(),
-                        form.getVarName(), StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName())));
+                        form.getVarName(), StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName()));
+        stmt.setLineComment("查询" + form.getTitle());
+        body.addStatement(stmt);
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
                         form.getVarName(), form.getTitle())));
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("Get%sDetailResp result = new Get%sDetailResp();", form.getName(), form.getName())));
+
+        // 为每个多选字段查询关联表单
+        form.getItems().stream().filter(item -> item.getType() == ItemType.MULTI_SELECT)
+                .map(item -> ((MultiSelectItemDef) item)).forEach(multiSelectItem -> {
+                    FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
+                    String enumName = StringUtils.capitalize(multiSelectItem.getName()) + "Enum";
+                    Statement statement = StaticJavaParser.parseStatement(String.format(
+                            "List<%s> %s = %sMapper.queryBy%s(%s.%s()).stream().map(%s::get%s).map(%s::of).collect"
+                                    + "(Collectors.toList());", enumName, multiSelectItem.getName(),
+                            associationForm.getVarName(), StringUtils.capitalize(form.getBizIdName()),
+                            form.getVarName(),
+                            form.getBizIdGetterName(), associationForm.getName(),
+                            StringUtils.capitalize(multiSelectItem.getName()), enumName));
+                    statement.setLineComment("查询" + associationForm.getTitle());
+                    body.addStatement(statement);
+                });
+
+        stmt = StaticJavaParser.parseStatement(
+                String.format("Get%sDetailResp result = new Get%sDetailResp();", form.getName(), form.getName()));
+        stmt.setLineComment("构建返回值");
+        body.addStatement(stmt);
         for (ItemDef item : form.getItems()) {
             if (item.getType() == ItemType.SECRET) {
                 // 密码、密钥类不应返回
                 continue;
             }
             if (item.getType() == ItemType.MULTI_SELECT) {
-                // TODO
+                body.addStatement(StaticJavaParser.parseStatement(
+                        String.format("result.set%s(%s);", StringUtils.capitalize(item.getName()), item.getName())));
                 continue;
             }
             generatorSetterToGetter(form, item, body);

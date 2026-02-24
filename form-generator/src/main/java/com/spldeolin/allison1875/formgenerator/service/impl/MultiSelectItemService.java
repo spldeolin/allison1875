@@ -112,6 +112,7 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
         IndexDef index = new IndexDef();
         index.setItemNames(Lists.newArrayList(majorForm.getItems().get(0).getName(), item.getName()));
         index.setIsUnique(true);
+        indices.add(index);
         form.setIndices(indices);
         return form;
     }
