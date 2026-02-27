@@ -22,8 +22,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import com.google.common.base.Joiner;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
+import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
@@ -186,19 +189,66 @@ public class FormGeneratorMojo extends Allison1875Mojo {
     public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
         // 对config对象中的文件路径进行相对basedir的处理
         formGeneratorConfig.setDslPath(super.getCanonicalFileRelativeToBasedir(formGeneratorConfig.getDslPath()));
+        if (queryTransformerConfig.getPersistenceSourcePath() != null) {
+            queryTransformerConfig.setPersistenceSourcePath(
+                    super.getCanonicalFileRelativeToBasedir(queryTransformerConfig.getPersistenceSourcePath()));
+        }
         log.info("formGeneratorMojoConfig={}", JsonUtils.toJsonPrettily(formGeneratorConfig));
-        log.info("new module instance for {}", formGeneratorConfig.getModule());
-        return (Allison1875Module) classLoader.loadClass(formGeneratorConfig.getModule())
+
+        CompileFacade compileFacade = (astForest, javaVersion) -> {
+            try {
+                executeCompile();
+            } catch (MojoExecutionException e) {
+                throw new Allison1875Exception(e);
+            }
+        };
+
+        // 1. 加载各 config 指定的 module 实例
+        Module persistenceModule = loadModule(classLoader, persistenceGeneratorConfig.getModule(), commonConfig,
+                persistenceGeneratorConfig);
+        Module handlerModule = loadModule(classLoader, handlerTransformerConfig.getModule(), commonConfig,
+                handlerTransformerConfig);
+        Module docModule = loadModule(classLoader, docAnalyzerConfig.getModule(), commonConfig, docAnalyzerConfig);
+        Module queryModule = loadModule(classLoader, queryTransformerConfig.getModule(), commonConfig,
+                queryTransformerConfig);
+
+        // 2. 加载 FormGeneratorModule
+        Allison1875Module formGeneratorModule = (Allison1875Module) classLoader.loadClass(
+                        formGeneratorConfig.getModule())
                 .getConstructor(CommonConfig.class, FormGeneratorConfig.class, PersistenceGeneratorConfig.class,
                         HandlerTransformerConfig.class, DocAnalyzerConfig.class, CompileFacade.class)
                 .newInstance(commonConfig, formGeneratorConfig, persistenceGeneratorConfig, handlerTransformerConfig,
-                        docAnalyzerConfig, (CompileFacade) (astForest, javaVersion) -> {
-                            try {
-                                executeCompile();
-                            } catch (MojoExecutionException e) {
-                                throw new Allison1875Exception(e);
-                            }
-                        });
+                        docAnalyzerConfig, compileFacade);
+
+        // 3. 合并：子 module 依次 override（后者覆盖前者），最后 FormGenerator 覆盖全部，bind 冲突以 FormGenerator 为准
+        Module combined = Modules.override(persistenceModule).with(handlerModule);
+        combined = Modules.override(combined).with(docModule);
+        combined = Modules.override(combined).with(queryModule);
+        combined = Modules.override(combined).with(formGeneratorModule);
+
+        final Module finalCombined = combined;
+        return new Allison1875Module() {
+            @Override
+            public Class<? extends Allison1875MainService> declareMainService() {
+                return formGeneratorModule.declareMainService();
+            }
+
+            @Override
+            protected void configure() {
+                install(finalCombined);
+            }
+        };
+    }
+
+    /**
+     * 通过反射加载并实例化指定 module 类
+     */
+    private Module loadModule(ClassLoader classLoader, String moduleClassName, CommonConfig commonConfig, Object config)
+            throws Exception {
+        Class<?> moduleClass = classLoader.loadClass(moduleClassName);
+        log.info("load module: {}", moduleClassName);
+        return (Module) moduleClass.getConstructor(CommonConfig.class, config.getClass().getSuperclass())
+                .newInstance(commonConfig, config);
     }
 
 }
