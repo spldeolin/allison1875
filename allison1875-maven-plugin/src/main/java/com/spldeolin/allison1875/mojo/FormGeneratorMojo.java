@@ -23,8 +23,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import com.google.common.base.Joiner;
 import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
+import com.spldeolin.allison1875.formgenerator.CompileFacade;
 import com.spldeolin.allison1875.formgenerator.FormGeneratorConfig;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
@@ -50,6 +53,9 @@ public class FormGeneratorMojo extends Allison1875Mojo {
     @Parameter(alias = "handlerTransformer")
     private final HandlerTransformerMojoConfig handlerTransformerConfig = new HandlerTransformerMojoConfig();
 
+    @Parameter(alias = "docAnalyzer")
+    private final DocAnalyzerMojoConfig docAnalyzerConfig = new DocAnalyzerMojoConfig();
+
     @Parameter(alias = "queryTransformer")
     private final QueryTransformerMojoConfig queryTransformerConfig = new QueryTransformerMojoConfig();
 
@@ -61,20 +67,20 @@ public class FormGeneratorMojo extends Allison1875Mojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-            // 1. 执行 FormGenerator 本身的逻辑
-            log.info("第1步: 执行 FormGenerator");
-            super.execute();
-            log.info("FormGenerator 执行完成");
+        // 1. 执行 FormGenerator 本身的逻辑
+        log.info("第1步: 执行 FormGenerator");
+        super.execute();
+        log.info("FormGenerator 执行完成");
 
-            // 2. 执行 Maven 编译
-            log.info("第2步: 执行 Maven 编译");
-            executeCompile();
-            log.info("Maven 编译执行完成");
+        // 2. 执行 Maven 编译
+        log.info("第2步: 执行 Maven 编译");
+        executeCompile();
+        log.info("Maven 编译执行完成");
 
-            // 3. 执行 QueryTransformerMojo
-            log.info("第3步: 执行 QueryTransformer");
-            executeQueryTransformer();
-            log.info("QueryTransformer 执行完成");
+        // 3. 执行 QueryTransformerMojo
+        log.info("第3步: 执行 QueryTransformer");
+        executeQueryTransformer();
+        log.info("QueryTransformer 执行完成");
     }
 
     /**
@@ -184,8 +190,15 @@ public class FormGeneratorMojo extends Allison1875Mojo {
         log.info("new module instance for {}", formGeneratorConfig.getModule());
         return (Allison1875Module) classLoader.loadClass(formGeneratorConfig.getModule())
                 .getConstructor(CommonConfig.class, FormGeneratorConfig.class, PersistenceGeneratorConfig.class,
-                        HandlerTransformerConfig.class)
-                .newInstance(commonConfig, formGeneratorConfig, persistenceGeneratorConfig, handlerTransformerConfig);
+                        HandlerTransformerConfig.class, DocAnalyzerConfig.class, CompileFacade.class)
+                .newInstance(commonConfig, formGeneratorConfig, persistenceGeneratorConfig, handlerTransformerConfig,
+                        docAnalyzerConfig, (CompileFacade) (astForest, javaVersion) -> {
+                            try {
+                                executeCompile();
+                            } catch (MojoExecutionException e) {
+                                throw new Allison1875Exception(e);
+                            }
+                        });
     }
 
 }

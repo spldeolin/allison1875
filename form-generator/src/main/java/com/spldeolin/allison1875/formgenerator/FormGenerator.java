@@ -98,6 +98,9 @@ public class FormGenerator implements Allison1875MainService {
     @Inject
     private SaveApiService saveApiService;
 
+    @Inject
+    private CompileFacade compileFacade;
+
     @Override
     public void process() {
         List<FormDef> forms = deserializeDSL();
@@ -152,6 +155,10 @@ public class FormGenerator implements Allison1875MainService {
         // 调用handler-transformer转换initDec
         AstForestContext.set(AstForestContext.get().cloneWithResetting());
         handlerTransformer.process();
+
+        // 编译
+        log.info("call compileFacade.compile");
+        compileFacade.compile(AstForestContext.get(), commonConfig.getJavaVersion());
 
         // 分析接口文档
         if (formGeneratorConfig.getEnableDocAnalyzer()) { // TODO 暂不能开启，因为docAnalyzer依赖类加载。开启的前提是form-generator
