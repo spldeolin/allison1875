@@ -149,7 +149,7 @@ public class FormGenerator implements Allison1875MainService {
             coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
             coid.addMember(deleteApiService.generateDeleteInitDec(form));
             FileFlush.build(cu).flush();
-            controllerQualifiers.add(commonConfig.getControllerPackage() + controllerName);
+            controllerQualifiers.add(commonConfig.getControllerPackage() + "." + controllerName + ".*");
         }
 
         // 调用handler-transformer转换initDec
