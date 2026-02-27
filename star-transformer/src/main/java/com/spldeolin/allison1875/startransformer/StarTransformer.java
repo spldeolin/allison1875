@@ -8,7 +8,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
@@ -43,10 +43,10 @@ public class StarTransformer implements Allison1875MainService {
     private ImportExprService importExprService;
 
     @Override
-    public void process(AstForest astForest) {
+    public void process() {
         List<FileFlush> flushes = Lists.newArrayList();
 
-        for (CompilationUnit cu : astForest) {
+        for (CompilationUnit cu : AstForestContext.get()) {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
 

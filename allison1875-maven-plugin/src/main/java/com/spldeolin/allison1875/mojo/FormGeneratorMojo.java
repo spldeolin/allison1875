@@ -53,13 +53,6 @@ public class FormGeneratorMojo extends Allison1875Mojo {
     @Parameter(alias = "queryTransformer")
     private final QueryTransformerMojoConfig queryTransformerConfig = new QueryTransformerMojoConfig();
 
-    /**
-     * 是否启用链式执行（默认启用）
-     * 如果设置为 false，则只执行 FormGenerator 本身
-     */
-    @Parameter(property = "enableChainExecution", defaultValue = "true")
-    private boolean enableChainExecution;
-
     @Component
     private MavenSession mavenSession;
 
@@ -68,19 +61,10 @@ public class FormGeneratorMojo extends Allison1875Mojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        try {
-            log.info("=== 开始执行 FormGeneratorMojo (链式执行: {}) ===", enableChainExecution);
-
             // 1. 执行 FormGenerator 本身的逻辑
             log.info("第1步: 执行 FormGenerator");
             super.execute();
             log.info("FormGenerator 执行完成");
-
-            // 如果不启用链式执行，直接返回
-            if (!enableChainExecution) {
-                log.info("链式执行已禁用，FormGenerator 单独执行完成");
-                return;
-            }
 
             // 2. 执行 Maven 编译
             log.info("第2步: 执行 Maven 编译");
@@ -91,55 +75,37 @@ public class FormGeneratorMojo extends Allison1875Mojo {
             log.info("第3步: 执行 QueryTransformer");
             executeQueryTransformer();
             log.info("QueryTransformer 执行完成");
-
-            log.info("=== FormGeneratorMojo 链式执行全部完成 ===");
-
-        } catch (Exception e) {
-            log.error("FormGeneratorMojo 链式执行失败", e);
-            throw new MojoExecutionException("FormGeneratorMojo 链式执行失败", e);
-        }
     }
 
     /**
      * 执行 Maven 编译
      */
-    private void executeCompile() throws Exception {
-        try {
-            String javaVersion = commonConfig.getJavaVersion();
-            log.info("使用编译版本: {}", javaVersion);
+    private void executeCompile() throws MojoExecutionException {
+        String javaVersion = commonConfig.getJavaVersion();
+        log.info("使用编译版本: {}", javaVersion);
 
-            executeMojo(
-                    plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version("3.11.0")),
-                    goal("compile"),
-                    configuration(element(name("source"), javaVersion), element(name("target"), javaVersion),
-                            element(name("encoding"), "UTF-8"),
-                            element(name("compilerArgs"), element(name("arg"), "-parameters"),
-                                    element(name("arg"), "-Xlint:unchecked"))),
-                    executionEnvironment(project, mavenSession, pluginManager));
-        } catch (Exception e) {
-            log.error("Maven 编译执行失败", e);
-            throw new Exception("Maven 编译失败", e);
-        }
+        executeMojo(plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version("3.11.0")),
+                goal("compile"),
+                configuration(element(name("source"), javaVersion), element(name("target"), javaVersion),
+                        element(name("encoding"), "UTF-8"),
+                        element(name("compilerArgs"), element(name("arg"), "-parameters"),
+                                element(name("arg"), "-Xlint:unchecked"))),
+                executionEnvironment(project, mavenSession, pluginManager));
     }
 
     /**
      * 执行 QueryTransformerMojo
      */
-    private void executeQueryTransformer() throws Exception {
-        try {
-            log.info("准备执行 QueryTransformer，构建配置参数");
+    private void executeQueryTransformer() throws MojoExecutionException {
+        log.info("准备执行 QueryTransformer，构建配置参数");
 
-            // 构建完整的配置传递给 query-transformer
-            Element[] configElements = buildQueryTransformerConfiguration();
+        // 构建完整的配置传递给 query-transformer
+        Element[] configElements = buildQueryTransformerConfiguration();
 
-            // 使用 MojoExecutor 执行 allison1875:query-transformer
-            executeMojo(plugin(groupId("com.spldeolin.allison1875"), artifactId("allison1875-maven-plugin"),
-                            version("13.0-SNAPSHOT")), goal("query-transformer"), configuration(configElements),
-                    executionEnvironment(project, mavenSession, pluginManager));
-        } catch (Exception e) {
-            log.error("QueryTransformer 执行失败", e);
-            throw new Exception("QueryTransformer 执行失败", e);
-        }
+        // 使用 MojoExecutor 执行 allison1875:query-transformer
+        executeMojo(plugin(groupId("com.spldeolin.allison1875"), artifactId("allison1875-maven-plugin"),
+                        version("13.0-SNAPSHOT")), goal("query-transformer"), configuration(configElements),
+                executionEnvironment(project, mavenSession, pluginManager));
     }
 
     /**

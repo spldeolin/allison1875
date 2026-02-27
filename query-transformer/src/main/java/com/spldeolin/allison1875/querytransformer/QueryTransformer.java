@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
@@ -70,26 +70,14 @@ public class QueryTransformer implements Allison1875MainService {
     private MemberAdderService memberAdderService;
 
     @Override
-    public void process(AstForest astForest) {
-        List<FileFlush> flushes = process((Iterable<CompilationUnit>) astForest);
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        } else {
-            log.warn("no valid Chain transformed");
-        }
-    }
-
-    public List<FileFlush> process(Iterable<CompilationUnit> astForest) {
+    public void process() {
         List<FileFlush> flushes = Lists.newArrayList();
 
         // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml
         Map<String, ClassOrInterfaceDeclaration> methodAddedMappers = Maps.newHashMap();
         Map<String, XmlSourceFile> methodAddedMapperXmls = Maps.newHashMap();
 
-        for (CompilationUnit cu : astForest) {
+        for (CompilationUnit cu : AstForestContext.get()) {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
 
@@ -200,7 +188,13 @@ public class QueryTransformer implements Allison1875MainService {
             }
         }
 
-        return flushes;
+        // write all to file
+        if (CollectionUtils.isNotEmpty(flushes)) {
+            flushes.forEach(FileFlush::flush);
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        } else {
+            log.warn("no valid Chain transformed");
+        }
     }
 
 }

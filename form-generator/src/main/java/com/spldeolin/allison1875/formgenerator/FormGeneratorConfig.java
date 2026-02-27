@@ -23,6 +23,12 @@ public class FormGeneratorConfig {
     File dslPath = new File("./forms.yml");
 
     /**
+     * 使用doc-analyzer生成接口文档
+     */
+    @NotNull
+    Boolean enableDocAnalyzer = false;
+
+    /**
      * 构造分页返回值的代码片段（占位符${total}代表总条数，${dtos}代表当前页数据列表）
      */
     @NotEmpty

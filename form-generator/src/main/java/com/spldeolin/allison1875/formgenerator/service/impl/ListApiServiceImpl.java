@@ -75,10 +75,17 @@ public class ListApiServiceImpl implements ListApiService {
                 case NUMBER:
                 case ON_OFF:
                 case SELECT:
+                    itemField = StaticJavaParser.parseBodyDeclaration(
+                                    "List<" + itemService.getJavaTypeInDTO(item) + "> " + item.getName() + ";")
+                            .asFieldDeclaration();
+                    JavadocUtils.setJavadoc(itemField, "按“" + item.getTitle() + "”列表过滤，null或empty代表无需过滤",
+                            null);
+                    itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
+                    reqCoid.addMember(itemField);
+                    break;
                 case MULTI_SELECT:
                     itemField = StaticJavaParser.parseBodyDeclaration(
-                                    itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";")
-                            .asFieldDeclaration();
+                            itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
                     JavadocUtils.setJavadoc(itemField, "按“" + item.getTitle() + "”列表过滤，null或empty代表无需过滤",
                             null);
                     itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);

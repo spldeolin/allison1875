@@ -17,18 +17,17 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
+import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
+import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
@@ -70,6 +69,12 @@ public class FormGenerator implements Allison1875MainService {
     private HandlerTransformer handlerTransformer;
 
     @Inject
+    private DocAnalyzerConfig docAnalyzerConfig;
+
+    @Inject
+    private DocAnalyzer docAnalyzer;
+
+    @Inject
     private AnnotationExprService annotationExprService;
 
     @Inject
@@ -94,7 +99,7 @@ public class FormGenerator implements Allison1875MainService {
     private SaveApiService saveApiService;
 
     @Override
-    public void process(AstForest astForest) {
+    public void process() {
         List<FormDef> forms = deserializeDSL();
         if (CollectionUtils.isEmpty(forms)) {
             log.warn("no form definitions detected");
@@ -104,59 +109,56 @@ public class FormGenerator implements Allison1875MainService {
         // 为每个Form增加业务主键、审计字段等
         addCommonItems(forms);
 
-        FileSnapshotUtils.FileSystemSnapshot snapshot = FileSnapshotUtils.createSnapshot(astForest.getSourceRoot());
-        try {
-            // 生成DDL
-            String ddl = ddlService.generateDdl(forms);
-            Path ddlSql = astForest.getSourceRoot().resolve("../../../../sql/ddl.sql");
-            log.info("build ddl.sql, path={}", ddlSql.normalize());
-            FileFlush.build(ddlSql.toFile(), ddl).flush();
+        // 生成DDL
+        String ddl = ddlService.generateDdl(forms);
+        Path ddlSql = AstForestContext.get().getSourceRoot().resolve("../../../../sql/ddl.sql");
+        log.info("build ddl.sql, path={}", ddlSql.normalize());
+        FileFlush.build(ddlSql.toFile(), ddl).flush();
 
-            // 生成持久层
-            persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
-            PersistenceGenerator.Retval persistenceGeneratorRetval = persistenceGenerator.process();
-            persistenceGeneratorRetval.getFlushes().forEach(FileFlush::flush);
-            AstForestContext.set(astForest.cloneWithResetting());
+        // 生成持久层
+        persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
+        persistenceGenerator.process();
 
-            // 生成枚举
-            enumService.generateEnums(forms).forEach(FileFlush::flush);
-            AstForestContext.set(astForest.cloneWithResetting());
+        // 生成枚举
+        enumService.generateEnums(forms).forEach(FileFlush::flush);
 
-            // 生成controller和initDec
-            for (FormDef form : forms) {
-                CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
-                String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
-                Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(astForest.getSourceRoot(),
-                        commonConfig.getControllerPackage(), controllerName + ".java");
-                cu.setStorage(absulutePath);
-                cu.setPackageDeclaration(commonConfig.getControllerPackage());
-                cu.addImport(commonConfig.getDesignPackage() + ".*");
-                cu.addImport(commonConfig.getEntityPackage() + ".*");
-                cu.addImport(commonConfig.getEnumPackage() + ".*");
-                cu.addImport("java.util.stream.*");
-                cu.addImport("org.springframework.util.*");
-                ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-                JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
-                coid.addAnnotation(annotationExprService.springRestController());
-                coid.setPublic(true).setName(controllerName);
-                cu.addType(coid);
-                coid.addMember(saveApiService.generateSaveInitDec(form));
-                coid.addMember(listApiService.generateListInitDec(form));
-                coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
-                coid.addMember(deleteApiService.generateDeleteInitDec(form));
-                FileFlush.build(cu).flush();
-            }
-            AstForestContext.set(astForest.cloneWithResetting());
+        // 生成controller和initDec
+        List<String> controllerQualifiers = Lists.newArrayList();
+        for (FormDef form : forms) {
+            CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
+            String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
+            Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
+                    commonConfig.getControllerPackage(), controllerName + ".java");
+            cu.setStorage(absulutePath);
+            cu.setPackageDeclaration(commonConfig.getControllerPackage());
+            cu.addImport(commonConfig.getDesignPackage() + ".*");
+            cu.addImport(commonConfig.getEntityPackage() + ".*");
+            cu.addImport(commonConfig.getEnumPackage() + ".*");
+            cu.addImport("java.util.stream.*");
+            cu.addImport("org.springframework.util.*");
+            ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
+            JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
+            coid.addAnnotation(annotationExprService.springRestController());
+            coid.setPublic(true).setName(controllerName);
+            cu.addType(coid);
+            coid.addMember(saveApiService.generateSaveInitDec(form));
+            coid.addMember(listApiService.generateListInitDec(form));
+            coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
+            coid.addMember(deleteApiService.generateDeleteInitDec(form));
+            FileFlush.build(cu).flush();
+            controllerQualifiers.add(commonConfig.getControllerPackage() + controllerName);
+        }
 
-            // 调用handler-transformer转换initDec
-            handlerTransformer.process(AstForestContext.get());
-            AstForestContext.set(astForest.cloneWithResetting());
+        // 调用handler-transformer转换initDec
+        AstForestContext.set(AstForestContext.get().cloneWithResetting());
+        handlerTransformer.process();
 
-            snapshot.cleanup();
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        } catch (Exception e) {
-            log.error("Error occurred during processing", e);
-            FileSnapshotUtils.rollback(snapshot);
+        // 分析接口文档
+        if (formGeneratorConfig.getEnableDocAnalyzer()) { // TODO 暂不能开启，因为docAnalyzer依赖类加载。开启的前提是form-generator
+            // 声明compile interface由mojo层实现
+            AstForestContext.set(AstForestContext.get().cloneWithResetting());
+            docAnalyzerConfig.setMvcHandlerQualifierWildcards(controllerQualifiers);
+            docAnalyzer.process();
         }
     }
 

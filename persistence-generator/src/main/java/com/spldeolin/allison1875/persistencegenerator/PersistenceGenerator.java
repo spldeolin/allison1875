@@ -9,7 +9,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
@@ -33,8 +32,6 @@ import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorSer
 import com.spldeolin.allison1875.persistencegenerator.service.MapperCoidService;
 import com.spldeolin.allison1875.persistencegenerator.service.MapperXmlService;
 import com.spldeolin.allison1875.persistencegenerator.service.TableAnalyzerService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -67,26 +64,15 @@ public class PersistenceGenerator implements Allison1875MainService {
 
 
     @Override
-    public void process(AstForest astForest) {
-        List<FileFlush> flushes = process().flushes;
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        }
-    }
-
-    public Retval process() {
+    public void process() {
         // 分析表结构
         List<TableAnalysisDTO> tableAnalyses = tableAnalyzerService.analyzeTable();
         if (CollectionUtils.isEmpty(tableAnalyses)) {
             log.warn("no tables detected");
-            return new Retval(Lists.newArrayList(), Lists.newArrayList());
+            return;
         }
 
         List<FileFlush> flushes = Lists.newArrayList();
-        List<CompilationUnit> designCus = Lists.newArrayList();
         Mutable<CompilationUnit> joinChainCu = new MutableObject<>();
         for (TableAnalysisDTO tableAnalysis : tableAnalyses) {
             flushes.addAll(tableAnalysis.getFlushes());
@@ -108,7 +94,6 @@ public class PersistenceGenerator implements Allison1875MainService {
             GenerateDesignRetval gdRetval = designGeneratorService.generateDesign(gdArgs);
             if (gdRetval.getDesignFile() != null) {
                 flushes.add(gdRetval.getDesignFile());
-                designCus.add(gdRetval.getDesignCu());
             }
 
             // 生成JoinChain
@@ -210,23 +195,17 @@ public class PersistenceGenerator implements Allison1875MainService {
 
         if (joinChainCu.getValue() != null) {
             flushes.add(FileFlush.build(joinChainCu.getValue()));
-            designCus.add(joinChainCu.getValue());
         }
-        return new Retval(flushes, designCus);
+
+        // write all to file
+        if (CollectionUtils.isNotEmpty(flushes)) {
+            flushes.forEach(FileFlush::flush);
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        }
     }
 
     protected String getEntityNameInXml(DataModelGeneration dataModelGeneration) {
         return dataModelGeneration.getDtoQualifier();
-    }
-
-    @AllArgsConstructor
-    @Data
-    public static class Retval {
-
-        private List<FileFlush> flushes;
-
-        private List<CompilationUnit> designCus;
-
     }
 
 }

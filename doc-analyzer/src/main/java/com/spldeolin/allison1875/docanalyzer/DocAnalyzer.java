@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
@@ -83,7 +82,7 @@ public class DocAnalyzer implements Allison1875MainService {
     private DocAnalyzerConfig config;
 
     @Override
-    public void process(AstForest astForest) {
+    public void process() {
         // 分析所有fieldVars
         Table<String, String, AnalyzeFieldVarsRetval> analyzeFieldVarsRetvals = fieldService.analyzeFieldVars();
 

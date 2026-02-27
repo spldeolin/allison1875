@@ -15,6 +15,8 @@ import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
+import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
+import com.spldeolin.allison1875.common.util.FileSnapshotUtils.FileSystemSnapshot;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.mojo.ast.MavenProjectBuiltAstForest;
 import lombok.extern.slf4j.Slf4j;
@@ -33,13 +35,19 @@ public abstract class Allison1875Mojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        // 为整个maven project拍摄快照
+        FileSystemSnapshot fileSnapshot = FileSnapshotUtils.createSnapshot(project.getBasedir());
+
         try {
+            // banner
             Allison1875.hello();
 
+            // 构造guice module
             initParam();
             ClassLoader classLoader = getClassLoader(project);
             Allison1875Module allison1875Module = newAllison1875Module(commonConfig, classLoader);
 
+            // 构造AstForest，执行Allison1875
             List<File> sourceRoots = project.getCompileSourceRoots().stream().map(File::new)
                     .collect(Collectors.toList());
             log.info("sourceRoots={}", sourceRoots);
@@ -50,7 +58,13 @@ public abstract class Allison1875Mojo extends AbstractMojo {
                 AstForest astForest = new MavenProjectBuiltAstForest(classLoader, sourceRoot);
                 Allison1875.letsGo(allison1875Module, astForest);
             }
-        } catch (Exception e) {
+
+            // 成功时清理快照
+            fileSnapshot.cleanup();
+        } catch (Throwable e) {
+
+            // 任何异常回滚整个maven project
+            FileSnapshotUtils.rollback(fileSnapshot);
             throw new MojoExecutionException(e);
         }
     }

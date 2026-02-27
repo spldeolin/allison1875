@@ -8,7 +8,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
@@ -77,22 +77,10 @@ public class HandlerTransformer implements Allison1875MainService {
     private HandlerTransformerConfig handlerTransformerConfig;
 
     @Override
-    public void process(AstForest astForest) {
-        List<FileFlush> flushes = this.process((Iterable<CompilationUnit>) astForest);
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        } else {
-            log.warn("no valiad Initializer detected");
-        }
-    }
-
-    public List<FileFlush> process(Iterable<CompilationUnit> astForest) {
+    public void process() {
         List<FileFlush> flushes = Lists.newArrayList();
 
-        for (CompilationUnit cu : astForest) {
+        for (CompilationUnit cu : AstForestContext.get()) {
             boolean anyTransformed = false;
 
             for (ClassOrInterfaceDeclaration mvcController : mvcControllerService.detectMvcControllers(cu)) {
@@ -122,8 +110,7 @@ public class HandlerTransformer implements Allison1875MainService {
 
                     // 生成Service方法
                     GenerateServiceMethodRetval serviceMethod = serviceLayerService.generateServiceMethod(
-                            initDecAnalysis,
-                            generateDTOsRetval.getReqBodyDTOType(), generateDTOsRetval.getReqParams(),
+                            initDecAnalysis, generateDTOsRetval.getReqBodyDTOType(), generateDTOsRetval.getReqParams(),
                             generateDTOsRetval.getRespBodyDTOType());
 
                     // 生成Service / ServiceImpl（非oneService每次都生成、oneService只有第一次生成）
@@ -189,7 +176,14 @@ public class HandlerTransformer implements Allison1875MainService {
                 flushes.add(FileFlush.build(cu));
             }
         }
-        return flushes;
+
+        // write all to file
+        if (CollectionUtils.isNotEmpty(flushes)) {
+            flushes.forEach(FileFlush::flush);
+            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+        } else {
+            log.warn("no valiad Initializer detected");
+        }
     }
 
 }
