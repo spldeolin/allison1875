@@ -94,6 +94,12 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
+    public AnnotationExpr springRequestMapping(String path) {
+        return StaticJavaParser.parseAnnotation(
+                String.format("@org.springframework.web.bind.annotation.RequestMapping(\"%s\")", path)).clone();
+    }
+
+    @Override
     public AnnotationExpr springRequestBody() {
         return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestBody").clone();
     }

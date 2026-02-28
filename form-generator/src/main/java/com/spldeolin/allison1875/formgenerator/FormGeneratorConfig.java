@@ -29,6 +29,12 @@ public class FormGeneratorConfig {
     Boolean enableDocAnalyzer = false;
 
     /**
+     * Controller类@RequestMapping路径的代码片段（占位符${formName}代表表单名称）
+     */
+    @NotEmpty
+    String controllerRequestMapping = "/api/v1/${formName}";
+
+    /**
      * 构造分页返回值的代码片段（占位符${total}代表总条数，${dtos}代表当前页数据列表）
      */
     @NotEmpty

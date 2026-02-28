@@ -142,6 +142,8 @@ public class FormGenerator implements Allison1875MainService {
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
             JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
             coid.addAnnotation(annotationExprService.springRestController());
+            coid.addAnnotation(annotationExprService.springRequestMapping(
+                    formGeneratorConfig.getControllerRequestMapping().replace("${formName}", form.getVarName())));
             coid.setPublic(true).setName(controllerName);
             cu.addType(coid);
             coid.addMember(saveApiService.generateSaveInitDec(form));

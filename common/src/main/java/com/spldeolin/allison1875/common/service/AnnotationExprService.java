@@ -38,6 +38,8 @@ public interface AnnotationExprService {
 
     AnnotationExpr springRequestMapping();
 
+    AnnotationExpr springRequestMapping(String path);
+
     AnnotationExpr springRequestBody();
 
     MarkerAnnotationExpr springRequestParamWithoutProperty();
