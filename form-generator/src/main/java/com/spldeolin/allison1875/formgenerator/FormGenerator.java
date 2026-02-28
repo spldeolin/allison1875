@@ -44,6 +44,7 @@ import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorService
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
+import com.spldeolin.allison1875.querytransformer.QueryTransformer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -73,6 +74,9 @@ public class FormGenerator implements Allison1875MainService {
 
     @Inject
     private DocAnalyzer docAnalyzer;
+
+    @Inject
+    private QueryTransformer queryTransformer;
 
     @Inject
     private AnnotationExprService annotationExprService;
@@ -162,9 +166,12 @@ public class FormGenerator implements Allison1875MainService {
         log.info("call compileFacade.compile");
         compileFacade.compile(AstForestContext.get(), commonConfig.getJavaVersion());
 
-        // 分析接口文档
-        if (formGeneratorConfig.getEnableDocAnalyzer()) { // TODO 暂不能开启，因为docAnalyzer依赖类加载。开启的前提是form-generator
-            // 声明compile interface由mojo层实现
+        // 调用query-transformer转换Design Chain
+        AstForestContext.set(AstForestContext.get().cloneWithResetting());
+        queryTransformer.process();
+
+        // 调用doc-analyzer分析接口文档
+        if (formGeneratorConfig.getEnableDocAnalyzer()) {
             AstForestContext.set(AstForestContext.get().cloneWithResetting());
             docAnalyzerConfig.setMvcHandlerQualifierWildcards(controllerQualifiers);
             docAnalyzer.process();
