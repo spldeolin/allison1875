@@ -118,7 +118,7 @@ public class FormGenerator implements Allison1875MainService {
 
         // 生成DDL
         String ddl = ddlService.generateDdl(forms);
-        Path ddlSql = AstForestContext.get().getSourceRoot().resolve("../../../../sql/ddl.sql");
+        Path ddlSql = AstForestContext.get().getSourceRoot().resolve("../../../sql/ddl.sql");
         log.info("build ddl.sql, path={}", ddlSql.normalize());
         FileFlush.build(ddlSql.toFile(), ddl).flush();
 
