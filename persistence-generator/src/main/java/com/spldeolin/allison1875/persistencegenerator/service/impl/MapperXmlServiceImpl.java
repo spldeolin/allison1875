@@ -15,7 +15,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -291,7 +290,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     }
 
     @Override
-    public FileFlush replaceMapperXmlMethods(ReplaceMapperXmlMethodsArgs args) {
+    public void replaceMapperXmlMethods(ReplaceMapperXmlMethodsArgs args) {
         try {
             // find
             File mapperXmlFile = args.getMapperXmlDirectory().resolve(args.getTableAnalysis().getMapperName() + ".xml")
@@ -346,7 +345,13 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                 Collections.reverse(newLines);
             }
 
-            return FileFlush.build(mapperXmlFile, Joiner.on(BaseConstant.NEW_LINE).join(newLines));
+            // writeXml
+            try {
+                FileUtils.writeStringToFile(mapperXmlFile, Joiner.on(BaseConstant.NEW_LINE).join(newLines),
+                        StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

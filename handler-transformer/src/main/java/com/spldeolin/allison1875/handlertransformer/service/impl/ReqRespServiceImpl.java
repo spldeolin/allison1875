@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
@@ -32,6 +31,7 @@ import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
@@ -151,7 +151,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             });
             arg.setDataModelExistenceResolution(FileExistenceResolutionEnum.RENAME);
             DataModelGeneration dataModelGeneration = dataModelGeneratorService.generateDataModel(arg);
-            result.getFlushes().add(FileFlush.build(dataModelGeneration.getCu()));
+            CompilationUnitUtils.writeJava(dataModelGeneration.getCu());
 
             dto.setName(dataModelGeneration.getDtoName());
 

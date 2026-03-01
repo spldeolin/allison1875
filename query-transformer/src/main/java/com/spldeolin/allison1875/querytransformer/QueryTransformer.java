@@ -1,8 +1,11 @@
 package com.spldeolin.allison1875.querytransformer;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -11,12 +14,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -24,6 +25,7 @@ import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
@@ -71,12 +73,12 @@ public class QueryTransformer implements Allison1875MainService {
 
     @Override
     public void process() {
-        List<FileFlush> flushes = Lists.newArrayList();
 
         // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml
         Map<String, ClassOrInterfaceDeclaration> methodAddedMappers = Maps.newHashMap();
         Map<String, XmlSourceFile> methodAddedMapperXmls = Maps.newHashMap();
 
+        boolean anyTransformedForAll = false;
         for (CompilationUnit cu : AstForestContext.get()) {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
@@ -127,10 +129,6 @@ public class QueryTransformer implements Allison1875MainService {
                         continue;
                     }
 
-                    if (generateParamRetval.getParamDTOFlush() != null) {
-                        flushes.add(generateParamRetval.getParamDTOFlush());
-                    }
-
                     // generate Result Type
                     GenerateReturnTypeRetval generateReturnTypeRetval;
                     try {
@@ -139,9 +137,6 @@ public class QueryTransformer implements Allison1875MainService {
                     } catch (Exception e) {
                         log.error("fail to generate result chainAnalysis={}", chainAnalysis, e);
                         continue;
-                    }
-                    if (generateReturnTypeRetval.getFlush() != null) {
-                        flushes.add(generateReturnTypeRetval.getFlush());
                     }
 
                     // generate Method to Mapper
@@ -152,7 +147,7 @@ public class QueryTransformer implements Allison1875MainService {
                             .collect(Collectors.toList()));
                     gmtmArgs.setClonedReturnType(generateReturnTypeRetval.getResultType().clone());
                     gmtmArgs.setMethodAddedMappers(methodAddedMappers);
-                    mapperLayerService.generateMethodToMapper(gmtmArgs).ifPresent(flushes::add);
+                    mapperLayerService.generateMethodToMapper(gmtmArgs);
 
                     // generate Method into mapper.xml
                     GenerateMethodToMapperXmlArgs gmtmxArgs = new GenerateMethodToMapperXmlArgs();
@@ -162,8 +157,14 @@ public class QueryTransformer implements Allison1875MainService {
                     gmtmxArgs.setGenerateReturnTypeRetval(generateReturnTypeRetval);
                     gmtmxArgs.setMethodAddedMapperXmls(methodAddedMapperXmls);
                     mapperLayerService.generateMethodToMapperXml(gmtmxArgs);
-                    methodAddedMapperXmls.values().stream().map(o -> FileFlush.build(o.getFile(),
-                            Joiner.on(BaseConstant.NEW_LINE).join(o.getContentLines()))).forEach(flushes::add);
+                    methodAddedMapperXmls.values().forEach(o -> {
+                        try {
+                            FileUtils.writeStringToFile(o.getFile(),
+                                    Joiner.on(BaseConstant.NEW_LINE).join(o.getContentLines()), StandardCharsets.UTF_8);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
 
                     // append autowired mapper
                     AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(
@@ -180,17 +181,17 @@ public class QueryTransformer implements Allison1875MainService {
                     designService.replaceDesign(args);
 
                     anyTransformed = true;
+                    anyTransformedForAll = true;
                 }
             }
             if (anyTransformed) {
                 importExprService.extractQualifiedTypeToImport(cu);
-                flushes.add(FileFlush.buildLexicalPreserving(cu));
+                CompilationUnitUtils.writeJava(cu, true);
             }
         }
 
         // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
+        if (anyTransformedForAll) {
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
         } else {
             log.warn("no valid Chain transformed");

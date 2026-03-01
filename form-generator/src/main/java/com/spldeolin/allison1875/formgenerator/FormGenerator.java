@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
@@ -120,14 +119,18 @@ public class FormGenerator implements Allison1875MainService {
         String ddl = ddlService.generateDdl(forms);
         Path ddlSql = AstForestContext.get().getSourceRoot().resolve("../../../sql/ddl.sql");
         log.info("build ddl.sql, path={}", ddlSql.normalize());
-        FileFlush.build(ddlSql.toFile(), ddl).flush();
+        try {
+            FileUtils.writeStringToFile(ddlSql.toFile(), ddl, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 
         // 生成持久层
         persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
         persistenceGenerator.process();
 
         // 生成枚举
-        enumService.generateEnums(forms).forEach(FileFlush::flush);
+        enumService.generateEnums(forms);
 
         // 生成controller和initDec
         List<String> controllerQualifiers = Lists.newArrayList();
@@ -154,7 +157,7 @@ public class FormGenerator implements Allison1875MainService {
             coid.addMember(listApiService.generateListInitDec(form));
             coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
             coid.addMember(deleteApiService.generateDeleteInitDec(form));
-            FileFlush.build(cu).flush();
+            CompilationUnitUtils.writeJava(cu);
             controllerQualifiers.add(commonConfig.getControllerPackage() + "." + controllerName + ".*");
         }
 

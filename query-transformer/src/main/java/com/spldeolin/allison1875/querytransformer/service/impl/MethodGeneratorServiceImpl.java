@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
@@ -59,7 +58,6 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
     public GenerateParamRetval generateParam(ChainAnalysisDTO chainAnalysis) {
         List<Parameter> params = Lists.newArrayList();
         boolean isParamDTO = false;
-        FileFlush paramDTOFlush = null;
 
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
         if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE)) {
@@ -97,7 +95,6 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             }
             dataModelArg.setDataModelExistenceResolution(FileExistenceResolutionEnum.RENAME);
             DataModelGeneration paramDTOGeneration = dataModelGeneratorService.generateDataModel(dataModelArg);
-            paramDTOFlush = paramDTOGeneration.getFileFlush();
             Parameter param = new Parameter();
             param.setType(paramDTOGeneration.getDtoQualifier());
             param.setName(MoreStringUtils.toLowerCamel(paramDTOGeneration.getDtoName()));
@@ -137,7 +134,6 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         GenerateParamRetval result = new GenerateParamRetval();
         result.getParameters().addAll(params);
         result.setIsParamDTO(isParamDTO);
-        result.setParamDTOFlush(paramDTOFlush);
         return result;
     }
 
@@ -197,7 +193,6 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             }
             dataModelArg.setDataModelExistenceResolution(FileExistenceResolutionEnum.RENAME);
             DataModelGeneration recordDTOGeneration = dataModelGeneratorService.generateDataModel(dataModelArg);
-            result.setFlush(recordDTOGeneration.getFileFlush());
             result.setElementTypeQualifier(recordDTOGeneration.getDtoQualifier());
             if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
                     .contains(chainAnalysis.getReturnStyle())) {

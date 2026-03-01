@@ -26,12 +26,12 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -101,6 +101,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                 designCoid.addMember(StaticJavaParser.parseBodyDeclaration("private JoinChain() {}"));
                 designCu.addType(designCoid);
                 designCu.addOrphanComment(new LineComment(""));
+                CompilationUnitUtils.writeJava(designCu);
                 return designCu;
             });
         }
@@ -188,6 +189,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         cu.removeOrphanComment(cu.getOrphanComments().get(cu.getOrphanComments().size() - 1));
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(design)));
+        CompilationUnitUtils.writeJava(cu);
 
         return Optional.of(cu);
     }
@@ -464,10 +466,10 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         cu.addType(designCoid);
 
         importExprService.extractQualifiedTypeToImport(cu);
-
         cu.addOrphanComment(new LineComment(HashingUtils.hashTypeDeclaration(designCoid)));
+        CompilationUnitUtils.writeJava(cu);
 
-        return new GenerateDesignRetval().setDesignCu(cu).setDesignFile(FileFlush.build(cu))
+        return new GenerateDesignRetval().setDesignCu(cu)
                 .setDesignQualifer(commonConfig.getDesignPackage() + "." + designName);
     }
 

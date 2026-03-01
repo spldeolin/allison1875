@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.dto;
 
 import com.github.javaparser.ast.type.Type;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -28,7 +27,5 @@ public class GenerateReturnTypeRetval {
      * 这个值是null
      */
     String elementTypeQualifier;
-
-    FileFlush flush;
 
 }

@@ -1,8 +1,6 @@
 package com.spldeolin.allison1875.querytransformer.service;
 
-import java.util.Optional;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateMethodToMapperArgs;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateMethodToMapperXmlArgs;
 import com.spldeolin.allison1875.querytransformer.service.impl.MapperLayerServiceImpl;
@@ -13,7 +11,7 @@ import com.spldeolin.allison1875.querytransformer.service.impl.MapperLayerServic
 @ImplementedBy(MapperLayerServiceImpl.class)
 public interface MapperLayerService {
 
-    Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args);
+    void generateMethodToMapper(GenerateMethodToMapperArgs args);
 
     void generateMethodToMapperXml(GenerateMethodToMapperXmlArgs args);
 

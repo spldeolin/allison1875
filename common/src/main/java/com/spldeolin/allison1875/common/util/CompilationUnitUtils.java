@@ -2,12 +2,17 @@ package com.spldeolin.allison1875.common.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
+import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
@@ -71,6 +76,24 @@ public class CompilationUnitUtils {
         cu.setData(Node.SYMBOL_RESOLVER_KEY,
                 new JavaSymbolSolver(new ClassLoaderTypeSolver(AstForestContext.get().getClassLoader())));
         return cu;
+    }
+
+    public static void writeJava(CompilationUnit cu) {
+        writeJava(cu, false);
+    }
+
+    public static void writeJava(CompilationUnit cu, boolean lexicalPreserving) {
+        String content;
+        if (lexicalPreserving) {
+            content = LexicalPreservingPrinter.print(cu);
+        } else {
+            content = cu.toString();
+        }
+        try {
+            FileUtils.writeStringToFile(getCuAbsolutePath(cu).toFile(), content, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 }

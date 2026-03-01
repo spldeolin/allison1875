@@ -64,7 +64,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         } catch (Throwable e) {
 
             // 任何异常回滚整个maven project
-            FileSnapshotUtils.rollback(fileSnapshot);
+//            FileSnapshotUtils.rollback(fileSnapshot);
             throw new MojoExecutionException(e);
         }
     }

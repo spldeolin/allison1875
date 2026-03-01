@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -78,10 +77,10 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     private ImportExprService importExprService;
 
     @Override
-    public Optional<FileFlush> generateMethodToMapper(GenerateMethodToMapperArgs args) {
+    public void generateMethodToMapper(GenerateMethodToMapperArgs args) {
         ClassOrInterfaceDeclaration mapper = this.findMapper(args.getMapperQualifier(), args.getMethodAddedMappers());
         if (mapper == null) {
-            return Optional.empty();
+            return;
         }
         ChainAnalysisDTO chainAnalysis = args.getChainAnalysis();
 
@@ -130,7 +129,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         CompilationUnit cu = mapper.findCompilationUnit()
                 .orElseThrow(() -> new Allison1875Exception("cannot find cu for " + mapper.getName()));
         importExprService.extractQualifiedTypeToImport(cu);
-        return Optional.of(FileFlush.build(cu));
+        CompilationUnitUtils.writeJava(cu);
     }
 
     @Override

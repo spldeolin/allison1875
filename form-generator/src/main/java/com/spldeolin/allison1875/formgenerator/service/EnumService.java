@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.formgenerator.service;
 
 import java.util.List;
 import com.google.inject.ImplementedBy;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.service.impl.EnumServiceImpl;
 
@@ -12,6 +11,6 @@ import com.spldeolin.allison1875.formgenerator.service.impl.EnumServiceImpl;
 @ImplementedBy(EnumServiceImpl.class)
 public interface EnumService {
 
-    List<FileFlush> generateEnums(List<FormDef> forms);
+    void generateEnums(List<FormDef> forms);
 
 }

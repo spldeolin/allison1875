@@ -9,13 +9,13 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
@@ -72,14 +72,11 @@ public class PersistenceGenerator implements Allison1875MainService {
             return;
         }
 
-        List<FileFlush> flushes = Lists.newArrayList();
         Mutable<CompilationUnit> joinChainCu = new MutableObject<>();
         for (TableAnalysisDTO tableAnalysis : tableAnalyses) {
-            flushes.addAll(tableAnalysis.getFlushes());
 
             // 生成Entity
             DataModelGeneration entityGeneration = entityGeneratorService.generateEntity(tableAnalysis);
-            flushes.add(entityGeneration.getFileFlush());
 
             // 寻找或创建Mapper
             DetectOrGenerateMapperRetval detectOrGenerateMapperRetval = mapperCoidService.detectOrGenerateMapper(
@@ -92,9 +89,6 @@ public class PersistenceGenerator implements Allison1875MainService {
             gdArgs.setEntityGeneration(entityGeneration);
             gdArgs.setMapper(mapper);
             GenerateDesignRetval gdRetval = designGeneratorService.generateDesign(gdArgs);
-            if (gdRetval.getDesignFile() != null) {
-                flushes.add(gdRetval.getDesignFile());
-            }
 
             // 生成JoinChain
             GenerateJoinChainArgs gjcArgs = new GenerateJoinChainArgs();
@@ -147,7 +141,7 @@ public class PersistenceGenerator implements Allison1875MainService {
 
             CompilationUnit mapperCu = detectOrGenerateMapperRetval.getMapperCu();
             importExprService.extractQualifiedTypeToImport(mapperCu);
-            flushes.add(FileFlush.build(mapperCu));
+            CompilationUnitUtils.writeJava(mapperCu);
 
             // 生成MapperXml的基础方法
             String entityName = getEntityNameInXml(entityGeneration);
@@ -184,8 +178,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                 rmxmmArgs.setMapperXmlDirectory(mapperXmlDirectory.toPath());
                 rmxmmArgs.setSourceCodes(generateMapperXmlCodes);
                 try {
-                    FileFlush xmlFlush = mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
-                    flushes.add(xmlFlush);
+                    mapperXmlService.replaceMapperXmlMethods(rmxmmArgs);
                 } catch (Exception e) {
                     log.error("fail to replaceMapperXmlMethods, rmxmmArgs={}", rmxmmArgs, e);
                     throw e;
@@ -193,15 +186,7 @@ public class PersistenceGenerator implements Allison1875MainService {
             }
         }
 
-        if (joinChainCu.getValue() != null) {
-            flushes.add(FileFlush.build(joinChainCu.getValue()));
-        }
-
-        // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
-            log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
-        }
+        log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
     }
 
     protected String getEntityNameInXml(DataModelGeneration dataModelGeneration) {

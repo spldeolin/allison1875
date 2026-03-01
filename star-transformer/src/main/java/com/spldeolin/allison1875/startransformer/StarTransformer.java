@@ -1,21 +1,18 @@
 package com.spldeolin.allison1875.startransformer;
 
-import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
-import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.startransformer.dto.TransformStarChainArgs;
 import com.spldeolin.allison1875.startransformer.service.StarChainService;
@@ -44,8 +41,7 @@ public class StarTransformer implements Allison1875MainService {
 
     @Override
     public void process() {
-        List<FileFlush> flushes = Lists.newArrayList();
-
+        boolean anyTransformedForAll = false;
         for (CompilationUnit cu : AstForestContext.get()) {
             boolean anyTransformed = false;
             LexicalPreservingPrinter.setup(cu);
@@ -73,7 +69,6 @@ public class StarTransformer implements Allison1875MainService {
                         log.error("fail to generate Whole DTO, analysis={}", analysis, e);
                         continue;
                     }
-                    flushes.add(wholeDTOGeneration.getFileFlush());
 
                     // transform Query Chain and replace Star Chain
                     TransformStarChainArgs args = new TransformStarChainArgs();
@@ -90,16 +85,15 @@ public class StarTransformer implements Allison1875MainService {
 
                     importExprService.extractQualifiedTypeToImport(cu);
                     anyTransformed = true;
+                    anyTransformedForAll = true;
                 }
             }
             if (anyTransformed) {
-                flushes.add(FileFlush.buildLexicalPreserving(cu));
+                CompilationUnitUtils.writeJava(cu, true);
             }
         }
 
-        // flush
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
+        if (anyTransformedForAll) {
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
         } else {
             log.warn("no valid Chain transformed");

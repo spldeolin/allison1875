@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.common.dto;
 import java.nio.file.Path;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -18,8 +17,6 @@ import lombok.experimental.FieldDefaults;
 public class DataModelGeneration {
 
     CompilationUnit cu;
-
-    FileFlush fileFlush;
 
     String dtoName;
 

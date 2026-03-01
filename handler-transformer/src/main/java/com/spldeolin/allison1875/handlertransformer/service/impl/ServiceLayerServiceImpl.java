@@ -17,7 +17,6 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -29,7 +28,6 @@ import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceArgs;
-import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
@@ -95,7 +93,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     }
 
     @Override
-    public AddMethodToServiceRetval addMethodToService(AddMethodToServiceArgs args) {
+    public String addMethodToService(AddMethodToServiceArgs args) {
         GenerateServiceAndImplRetval serviceRetval = args.getGenerateServiceAndImplRetval();
 
         // 方法名去重
@@ -120,11 +118,10 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         importExprService.extractQualifiedTypeToImport(serviceRetval.getServiceCu());
         importExprService.extractQualifiedTypeToImport(serviceRetval.getServiceImplCu());
 
-        AddMethodToServiceRetval result = new AddMethodToServiceRetval();
-        result.setMethodName(serviceMethod.getNameAsString());
-        result.getFlushes().add(FileFlush.build(serviceRetval.getServiceCu()));
-        result.getFlushes().add(FileFlush.build(serviceRetval.getServiceImplCu()));
-        return result;
+        CompilationUnitUtils.writeJava(serviceRetval.getServiceCu());
+        CompilationUnitUtils.writeJava(serviceRetval.getServiceImplCu());
+
+        return serviceMethod.getNameAsString();
     }
 
     @Override

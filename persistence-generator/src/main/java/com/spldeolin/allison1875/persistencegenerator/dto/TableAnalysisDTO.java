@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.persistencegenerator.dto;
 
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -49,11 +48,6 @@ public class TableAnalysisDTO {
      * 存在逻辑删除标识符
      */
     Boolean isDeleteFlagExist = false;
-
-    /**
-     * 如果分析表结构时需要生成源码，使用这个属性传递
-     */
-    final List<FileFlush> flushes = Lists.newArrayList();
 
     /**
      * 所有属性均不能为null

@@ -11,14 +11,13 @@ import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -45,9 +44,7 @@ public class EnumServiceImpl implements EnumService {
     private ImportExprService importExprService;
 
     @Override
-    public List<FileFlush> generateEnums(List<FormDef> forms) {
-        List<FileFlush> retval = Lists.newArrayList();
-
+    public void generateEnums(List<FormDef> forms) {
         for (FormDef form : forms) {
 
             // 为单选和多选生成枚举
@@ -103,7 +100,7 @@ public class EnumServiceImpl implements EnumService {
                 cu.setStorage(absulutePath);
                 importExprService.extractQualifiedTypeToImport(cu);
                 cu.addImport("java.util.Arrays");
-                retval.add(FileFlush.build(cu));
+                CompilationUnitUtils.writeJava(cu);
             }
 
             // 为表单生成字段枚举
@@ -155,10 +152,8 @@ public class EnumServiceImpl implements EnumService {
             cu.setStorage(absulutePath);
             importExprService.extractQualifiedTypeToImport(cu);
             cu.addImport("java.util.Arrays");
-//            retval.add(FileFlush.build(cu)); TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
+//            CompilationUnitUtils.writeJava(cu); TODO query-transformer能力不支持，所以暂时固定为更新时间倒序，不生成排序字段枚举
         }
-
-        return retval;
     }
 
     private List<OptionDef> getOptions(ItemDef item) {

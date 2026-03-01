@@ -25,7 +25,6 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -36,6 +35,7 @@ import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -119,10 +119,10 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
         }
 
         importExprService.extractQualifiedTypeToImport(cu);
+        CompilationUnitUtils.writeJava(cu);
 
         DataModelGeneration result = new DataModelGeneration();
         result.setCu(cu);
-        result.setFileFlush(FileFlush.build(cu));
         result.setDtoName(className);
         result.setDtoQualifier(packageName + "." + className);
         result.setCoid(coid);

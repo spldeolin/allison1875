@@ -5,11 +5,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.FileFlush;
 import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
@@ -19,10 +17,9 @@ import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
-import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceArgs;
-import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
@@ -78,8 +75,8 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Override
     public void process() {
-        List<FileFlush> flushes = Lists.newArrayList();
 
+        boolean anyTransformedForAll = false;
         for (CompilationUnit cu : AstForestContext.get()) {
             boolean anyTransformed = false;
 
@@ -106,7 +103,6 @@ public class HandlerTransformer implements Allison1875MainService {
 
                     // 生成DTO
                     GenerateDTOsRetval generateDTOsRetval = reqRespService.generateDTOs(initDecAnalysis, dtoCoids);
-                    flushes.addAll(generateDTOsRetval.getFlushes());
 
                     // 生成Service方法
                     GenerateServiceMethodRetval serviceMethod = serviceLayerService.generateServiceMethod(
@@ -131,11 +127,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     args.setInitDecAnalysisDTO(initDecAnalysis);
                     args.setServiceMethod(serviceMethod.getMethod());
                     args.setGenerateServiceAndImplRetval(generateServiceAndImplRetval);
-                    AddMethodToServiceRetval addMethodToServiceRetval = serviceLayerService.addMethodToService(args);
-                    if (addMethodToServiceRetval == null) {
-                        continue;
-                    }
-                    flushes.addAll(addMethodToServiceRetval.getFlushes());
+                    String methodName = serviceLayerService.addMethodToService(args);
 
                     // 确保mvcController有autowired 新生成的service
                     AddInjectFieldRetval addInjectFieldRetval = memberAdderService.addInjectField(
@@ -154,7 +146,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     gmhArgs.setReqBodyDTOType(generateDTOsRetval.getReqBodyDTOType());
                     gmhArgs.setRespBodyDTOType(generateDTOsRetval.getRespBodyDTOType());
                     gmhArgs.setInjectedServiceVarName(addInjectFieldRetval.getFieldVarName());
-                    gmhArgs.setServiceMethodName(addMethodToServiceRetval.getMethodName());
+                    gmhArgs.setServiceMethodName(methodName);
                     gmhArgs.setMvcController(mvcController);
                     gmhArgs.setIsHttpGet(generateDTOsRetval.getIsHttpGet());
                     gmhArgs.setReqParams(generateDTOsRetval.getReqParams());
@@ -168,18 +160,18 @@ public class HandlerTransformer implements Allison1875MainService {
                             generateMvcHandlerRetval.getMvcHandler().getName(), mvcController.getName());
 
                     anyTransformed = true;
+                    anyTransformedForAll = true;
                 }
             }
 
             if (anyTransformed) {
                 importExprService.extractQualifiedTypeToImport(cu);
-                flushes.add(FileFlush.build(cu));
+                CompilationUnitUtils.writeJava(cu);
             }
         }
 
         // write all to file
-        if (CollectionUtils.isNotEmpty(flushes)) {
-            flushes.forEach(FileFlush::flush);
+        if (anyTransformedForAll) {
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
         } else {
             log.warn("no valiad Initializer detected");
