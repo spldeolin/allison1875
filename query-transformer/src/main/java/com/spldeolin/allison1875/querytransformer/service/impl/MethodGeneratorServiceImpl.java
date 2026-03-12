@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
@@ -26,7 +26,6 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
-import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.CompareableBinary;
@@ -46,13 +45,10 @@ import lombok.extern.slf4j.Slf4j;
 public class MethodGeneratorServiceImpl implements MethodGeneratorService {
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Inject
     private DataModelService dataModelGeneratorService;
-
-    @Inject
-    private QueryTransformerConfig queryTransformerConfig;
 
     @Override
     public GenerateParamRetval generateParam(ChainAnalysisDTO chainAnalysis) {
@@ -62,17 +58,17 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
         if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE)) {
             DataModelArg dataModelArg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+            Path sourceRoot = Optional.ofNullable(config.getPersistenceSourcePath()).map(File::toPath)
                     .orElse(AstForestContext.get().getSourceRoot());
             dataModelArg.setSourceRoot(sourceRoot);
-            dataModelArg.setPackageName(commonConfig.getParamDTOPackage());
-            if (commonConfig.getEnableLotNoAnnounce()) {
+            dataModelArg.setPackageName(config.getParamDTOPackage());
+            if (config.getEnableLotNoAnnounce()) {
                 dataModelArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             dataModelArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Param");
-            dataModelArg.setAuthor(commonConfig.getAuthor());
-            dataModelArg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
-            dataModelArg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
+            dataModelArg.setAuthor(config.getAuthor());
+            dataModelArg.setIsDataModelSerializable(config.getIsDataModelSerializable());
+            dataModelArg.setIsDataModelCloneable(config.getIsDataModelCloneable());
             for (Binary binary : binaries) {
                 String varName = binary.getVarName();
                 JavaTypeDTO javaType = binary.getProperty().getJavaType();
@@ -172,17 +168,17 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         Set<VariableProperty> returnProps = chainAnalysis.getPropertiesAsResult();
         if (returnProps.size() > 1) {
             DataModelArg dataModelArg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+            Path sourceRoot = Optional.ofNullable(config.getPersistenceSourcePath()).map(File::toPath)
                     .orElse(AstForestContext.get().getSourceRoot());
             dataModelArg.setSourceRoot(sourceRoot);
-            dataModelArg.setPackageName(commonConfig.getRecordDTOPackage());
-            if (commonConfig.getEnableLotNoAnnounce()) {
+            dataModelArg.setPackageName(config.getRecordDTOPackage());
+            if (config.getEnableLotNoAnnounce()) {
                 dataModelArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             dataModelArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Record");
-            dataModelArg.setAuthor(commonConfig.getAuthor());
-            dataModelArg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
-            dataModelArg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
+            dataModelArg.setAuthor(config.getAuthor());
+            dataModelArg.setIsDataModelSerializable(config.getIsDataModelSerializable());
+            dataModelArg.setIsDataModelCloneable(config.getIsDataModelCloneable());
             for (VariableProperty returnProp : returnProps) {
                 JavaTypeDTO javaType = returnProp.getProperty().getJavaType();
                 FieldArg fieldArg = new FieldArg();

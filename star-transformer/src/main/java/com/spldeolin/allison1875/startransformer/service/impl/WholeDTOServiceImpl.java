@@ -5,7 +5,7 @@ import org.atteo.evo.inflector.English;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
@@ -14,7 +14,6 @@ import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.startransformer.config.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.startransformer.dto.PhraseDTO;
 import com.spldeolin.allison1875.startransformer.service.WholeDTOService;
@@ -26,10 +25,7 @@ import com.spldeolin.allison1875.startransformer.service.WholeDTOService;
 public class WholeDTOServiceImpl implements WholeDTOService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private StarTransformerConfig config;
+    private Config config;
 
     @Inject
     private DataModelService dataModelGeneratorService;
@@ -38,14 +34,14 @@ public class WholeDTOServiceImpl implements WholeDTOService {
     public DataModelGeneration generateWholeDTO(ChainAnalysisDTO analysis) {
         DataModelArg dataModelArg = new DataModelArg();
         dataModelArg.setSourceRoot(AstForestContext.get().getSourceRoot());
-        dataModelArg.setPackageName(commonConfig.getWholeDTOPackage());
+        dataModelArg.setPackageName(config.getWholeDTOPackage());
         dataModelArg.setClassName(analysis.getWholeDTOName());
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             dataModelArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
         }
-        dataModelArg.setAuthor(commonConfig.getAuthor());
-        dataModelArg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
-        dataModelArg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
+        dataModelArg.setAuthor(config.getAuthor());
+        dataModelArg.setIsDataModelSerializable(config.getIsDataModelSerializable());
+        dataModelArg.setIsDataModelCloneable(config.getIsDataModelCloneable());
         FieldArg cftFieldArg = new FieldArg();
         cftFieldArg.setTypeQualifier(analysis.getCftEntityQualifier());
         cftFieldArg.setFieldName(this.entityNameToVarName(analysis.getCftEntityName()));

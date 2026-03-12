@@ -18,7 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
@@ -26,7 +26,6 @@ import com.spldeolin.allison1875.common.dto.FieldArg;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.DataModelService;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
 import com.spldeolin.allison1875.persistencegenerator.service.EntityGeneratorService;
@@ -40,10 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private PersistenceGeneratorConfig config;
+    private Config config;
 
     @Inject
     private DataModelService dataModelGeneratorService;
@@ -55,12 +51,12 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     public DataModelGeneration generateEntity(TableAnalysisDTO persistence) {
         DataModelArg arg = new DataModelArg();
         arg.setSourceRoot(AstForestContext.get().getSourceRoot());
-        arg.setPackageName(commonConfig.getEntityPackage());
+        arg.setPackageName(config.getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
-        arg.setAuthor(commonConfig.getAuthor());
-        arg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
-        arg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
+        arg.setAuthor(config.getAuthor());
+        arg.setIsDataModelSerializable(config.getIsDataModelSerializable());
+        arg.setIsDataModelCloneable(config.getIsDataModelCloneable());
         arg.setMoreOperation((cu, dataModel) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             if (config.getSuperEntity() != null) {
@@ -131,13 +127,13 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     private String concatEntityDescription(TableAnalysisDTO persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (commonConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

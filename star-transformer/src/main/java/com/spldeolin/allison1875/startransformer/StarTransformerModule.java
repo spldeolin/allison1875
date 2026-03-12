@@ -1,12 +1,11 @@
 package com.spldeolin.allison1875.startransformer;
 
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
-import com.spldeolin.allison1875.startransformer.config.StarTransformerConfig;
 import lombok.ToString;
 
 /**
@@ -15,13 +14,10 @@ import lombok.ToString;
 @ToString
 public class StarTransformerModule extends Allison1875Module {
 
-    private final CommonConfig commonConfig;
+    private final Config config;
 
-    private final StarTransformerConfig starTransformerConfig;
-
-    public StarTransformerModule(CommonConfig commonConfig, StarTransformerConfig starTransformerConfig) {
-        this.commonConfig = commonConfig;
-        this.starTransformerConfig = starTransformerConfig;
+    public StarTransformerModule(Config config) {
+        this.config = config;
     }
 
     @Override
@@ -31,9 +27,8 @@ public class StarTransformerModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        bind(CommonConfig.class).toInstance(commonConfig);
-        bind(StarTransformerConfig.class).toInstance(starTransformerConfig);
-        if (commonConfig.getIsDataModuleWithoutLombok()) {
+        bind(Config.class).toInstance(config);
+        if (config.getIsDataModuleWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());

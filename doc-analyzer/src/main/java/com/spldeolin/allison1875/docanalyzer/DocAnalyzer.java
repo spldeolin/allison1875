@@ -8,9 +8,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.enums.FlushToEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeBodyRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeMvcHandlerRetval;
@@ -18,7 +19,6 @@ import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeRequestMappingRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcControllerDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.MvcHandlerDTO;
-import com.spldeolin.allison1875.docanalyzer.enums.FlushToEnum;
 import com.spldeolin.allison1875.docanalyzer.service.EndpointDslService;
 import com.spldeolin.allison1875.docanalyzer.service.FieldService;
 import com.spldeolin.allison1875.docanalyzer.service.JsgBuilderService;
@@ -79,7 +79,7 @@ public class DocAnalyzer implements Allison1875MainService {
     private ResponseBodyService responseBodyService;
 
     @Inject
-    private DocAnalyzerConfig config;
+    private Config config;
 
     @Override
     public void process() {

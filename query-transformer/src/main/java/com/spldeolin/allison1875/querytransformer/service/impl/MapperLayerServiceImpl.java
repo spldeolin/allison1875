@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
@@ -36,7 +36,6 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant.ChainInitialMethod;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
-import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.AssignmentDTO;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateMethodToMapperArgs;
@@ -65,10 +64,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     public static final String SINGLE_INDENT_WITH_AND = SINGLE_INDENT + "  AND ";
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private QueryTransformerConfig queryTransformerConfig;
+    private Config config;
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
@@ -93,7 +89,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             chainAnalysis.setCountMethodNameForPage(methodName);
 
             MethodDeclaration method = new MethodDeclaration();
-            if (commonConfig.getEnableLotNoAnnounce()) {
+            if (config.getEnableLotNoAnnounce()) {
                 method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
             }
             method.setType("long");
@@ -111,7 +107,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         chainAnalysis.setMethodName(methodName);
 
         MethodDeclaration method = new MethodDeclaration();
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
         }
         // 增加Mybatis @MapKey注解
@@ -391,7 +387,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         if (methodAddedMappers.containsKey(mapperQualifier)) {
             return methodAddedMappers.get(mapperQualifier);
         }
-        Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
+        Path sourceRoot = Optional.ofNullable(config.getPersistenceSourcePath()).map(File::toPath)
                 .orElse(AstForestContext.get().getSourceRoot());
         Optional<CompilationUnit> cu = CompilationUnitUtils.tryFindCu(sourceRoot, mapperQualifier);
         if (!cu.isPresent()) {
@@ -419,8 +415,8 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         }
 
         File mapperXml = new File(mapperPath);
-        if (queryTransformerConfig.getPersistenceSourcePath() != null) {
-            mapperXml = queryTransformerConfig.getPersistenceSourcePath().toPath().resolve(mapperPath).toFile();
+        if (config.getPersistenceSourcePath() != null) {
+            mapperXml = config.getPersistenceSourcePath().toPath().resolve(mapperPath).toFile();
         }
         if (!mapperXml.exists()) {
             return null;
@@ -581,7 +577,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
     }
 
     private String concatLotNoComment(ChainAnalysisDTO chainAnalysis) {
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
         }
         return "";

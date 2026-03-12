@@ -14,7 +14,7 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -35,7 +35,7 @@ import com.spldeolin.allison1875.formgenerator.service.EnumService;
 public class EnumServiceImpl implements EnumService {
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Inject
     private AnnotationExprService annotationExprService;
@@ -56,16 +56,16 @@ public class EnumServiceImpl implements EnumService {
                 // 枚举名防重
                 String enumName = StringUtils.capitalize(item.getName()) + "Enum";
                 Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(
-                        AstForestContext.get().getSourceRoot(), commonConfig.getEnumPackage(), enumName + ".java");
+                        AstForestContext.get().getSourceRoot(), config.getEnumPackage(), enumName + ".java");
                 // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
 //                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
                 enumName = FilenameUtils.getBaseName(absulutePath.toString());
 
                 // 枚举
                 CompilationUnit cu = new CompilationUnit();
-                cu.setPackageDeclaration(commonConfig.getEnumPackage());
+                cu.setPackageDeclaration(config.getEnumPackage());
                 EnumDeclaration ed = new EnumDeclaration();
-                JavadocUtils.setJavadoc(ed, item.getTitle(), commonConfig.getAuthor() + " " + LocalDate.now());
+                JavadocUtils.setJavadoc(ed, item.getTitle(), config.getAuthor() + " " + LocalDate.now());
                 ed.addAnnotation(annotationExprService.lombokGetter());
                 ed.addAnnotation(annotationExprService.lombokAllArgsConstructor());
                 ed.setPublic(true);
@@ -107,17 +107,16 @@ public class EnumServiceImpl implements EnumService {
             // 枚举名防重
             String enumName = StringUtils.capitalize(form.getName()) + "SortItemEnum";
             Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                    commonConfig.getEnumPackage(), enumName + ".java");
+                    config.getEnumPackage(), enumName + ".java");
             // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
 //                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
             enumName = FilenameUtils.getBaseName(absulutePath.toString());
 
             // 枚举
             CompilationUnit cu = new CompilationUnit();
-            cu.setPackageDeclaration(commonConfig.getEnumPackage());
+            cu.setPackageDeclaration(config.getEnumPackage());
             EnumDeclaration ed = new EnumDeclaration();
-            JavadocUtils.setJavadoc(ed, form.getTitle() + "的排序字段",
-                    commonConfig.getAuthor() + " " + LocalDate.now());
+            JavadocUtils.setJavadoc(ed, form.getTitle() + "的排序字段", config.getAuthor() + " " + LocalDate.now());
             ed.addAnnotation(annotationExprService.lombokGetter());
             ed.addAnnotation(annotationExprService.lombokAllArgsConstructor());
             ed.setPublic(true);

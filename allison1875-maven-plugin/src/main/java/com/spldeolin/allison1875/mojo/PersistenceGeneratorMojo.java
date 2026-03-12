@@ -3,12 +3,9 @@ package com.spldeolin.allison1875.mojo;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
-import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,16 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PersistenceGeneratorMojo extends Allison1875Mojo {
 
-    @Parameter(alias = "persistenceGenerator")
-    private final PersistenceGeneratorMojoConfig persistenceGeneratorConfig = new PersistenceGeneratorMojoConfig();
-
     @Override
-    public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
-        log.info("persistenceGeneratorConfig={}", JsonUtils.toJsonPrettily(persistenceGeneratorConfig));
-        log.info("new module instance for {}", persistenceGeneratorConfig.getModule());
-        return (Allison1875Module) classLoader.loadClass(persistenceGeneratorConfig.getModule())
-                .getConstructor(CommonConfig.class, PersistenceGeneratorConfig.class)
-                .newInstance(commonConfig, persistenceGeneratorConfig);
+    public Allison1875Module newAllison1875Module(MojoConfig config, ClassLoader classLoader) throws Exception {
+        log.info("persistenceGeneratorModule={}", config.getPersistenceGeneratorModule());
+        return (Allison1875Module) classLoader.loadClass(config.getPersistenceGeneratorModule())
+                .getConstructor(Config.class).newInstance(config);
     }
 
 }

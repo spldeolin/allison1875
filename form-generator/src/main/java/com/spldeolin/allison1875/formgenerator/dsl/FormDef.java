@@ -6,9 +6,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.FormDefValid;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.UpperCamel;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -53,7 +53,7 @@ public class FormDef {
     @Valid
     List<@NotNull IndexDef> indices;
 
-    public String getEntityName(PersistenceGeneratorConfig persistenceGeneratorConfig) {
+    public String getEntityName(Config persistenceGeneratorConfig) {
         if (persistenceGeneratorConfig.getIsEntityEndWithEntity()) {
             return this.getName() + "Entity";
         } else {

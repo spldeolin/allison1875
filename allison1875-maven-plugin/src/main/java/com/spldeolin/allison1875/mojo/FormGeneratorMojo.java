@@ -6,20 +6,14 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
-import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.formgenerator.CompileFacade;
-import com.spldeolin.allison1875.formgenerator.FormGeneratorConfig;
-import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.mojo.facade.CompileFacadeImpl;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,21 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FormGeneratorMojo extends Allison1875Mojo {
 
-    @Parameter(alias = "formGenerator")
-    private final FormGeneratorMojoConfig formGeneratorConfig = new FormGeneratorMojoConfig();
-
-    @Parameter(alias = "persistenceGenerator")
-    private final PersistenceGeneratorMojoConfig persistenceGeneratorConfig = new PersistenceGeneratorMojoConfig();
-
-    @Parameter(alias = "handlerTransformer")
-    private final HandlerTransformerMojoConfig handlerTransformerConfig = new HandlerTransformerMojoConfig();
-
-    @Parameter(alias = "docAnalyzer")
-    private final DocAnalyzerMojoConfig docAnalyzerConfig = new DocAnalyzerMojoConfig();
-
-    @Parameter(alias = "queryTransformer")
-    private final QueryTransformerMojoConfig queryTransformerConfig = new QueryTransformerMojoConfig();
-
     @Component
     private MavenSession mavenSession;
 
@@ -55,34 +34,28 @@ public class FormGeneratorMojo extends Allison1875Mojo {
     private BuildPluginManager pluginManager;
 
     @Override
-    public Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader) throws Exception {
+    public Allison1875Module newAllison1875Module(MojoConfig config, ClassLoader classLoader) throws Exception {
         // 对config对象中的文件路径进行相对basedir的处理
-        formGeneratorConfig.setDslPath(super.getCanonicalFileRelativeToBasedir(formGeneratorConfig.getDslPath()));
-        if (queryTransformerConfig.getPersistenceSourcePath() != null) {
-            queryTransformerConfig.setPersistenceSourcePath(
-                    super.getCanonicalFileRelativeToBasedir(queryTransformerConfig.getPersistenceSourcePath()));
+        if (config.getDslPath() != null) {
+            config.setDslPath(super.getCanonicalFileRelativeToBasedir(config.getDslPath()));
         }
-        log.info("formGeneratorMojoConfig={}", JsonUtils.toJsonPrettily(formGeneratorConfig));
+        if (config.getPersistenceSourcePath() != null) {
+            config.setPersistenceSourcePath(super.getCanonicalFileRelativeToBasedir(config.getPersistenceSourcePath()));
+        }
 
         // 构造CompileFacade实现类
         CompileFacade compileFacade = new CompileFacadeImpl(project, mavenSession, pluginManager);
 
         // 1. 加载各 config 指定的 module 实例
-        Module persistenceModule = loadModule(classLoader, persistenceGeneratorConfig.getModule(), commonConfig,
-                persistenceGeneratorConfig);
-        Module handlerModule = loadModule(classLoader, handlerTransformerConfig.getModule(), commonConfig,
-                handlerTransformerConfig);
-        Module docModule = loadModule(classLoader, docAnalyzerConfig.getModule(), commonConfig, docAnalyzerConfig);
-        Module queryModule = loadModule(classLoader, queryTransformerConfig.getModule(), commonConfig,
-                queryTransformerConfig);
+        Module persistenceModule = loadModule(classLoader, config.getPersistenceGeneratorModule(), config);
+        Module handlerModule = loadModule(classLoader, config.getHandlerTransformerModule(), config);
+        Module docModule = loadModule(classLoader, config.getDocAnalyzerModule(), config);
+        Module queryModule = loadModule(classLoader, config.getQueryTransformerModule(), config);
 
-        // 2. 加载 FormGeneratorModule
+        // 2. 加载 FormGeneratorModule（需要 CompileFacade，单独处理）
         Allison1875Module formGeneratorModule = (Allison1875Module) classLoader.loadClass(
-                        formGeneratorConfig.getModule())
-                .getConstructor(CommonConfig.class, FormGeneratorConfig.class, PersistenceGeneratorConfig.class,
-                        HandlerTransformerConfig.class, DocAnalyzerConfig.class, CompileFacade.class)
-                .newInstance(commonConfig, formGeneratorConfig, persistenceGeneratorConfig, handlerTransformerConfig,
-                        docAnalyzerConfig, compileFacade);
+                        config.getFormGeneratorModule()).getConstructor(Config.class, CompileFacade.class)
+                .newInstance(config, compileFacade);
 
         // 3. 合并：子 module 依次 override（后者覆盖前者），最后 FormGenerator 覆盖全部，bind 冲突以 FormGenerator 为准
         Module combined = Modules.override(persistenceModule).with(handlerModule);
@@ -105,14 +78,12 @@ public class FormGeneratorMojo extends Allison1875Mojo {
     }
 
     /**
-     * 通过反射加载并实例化指定 module 类
+     * 通过反射加载并实例化指定 module 类（统一使用 Config 单参数构造器）
      */
-    private Module loadModule(ClassLoader classLoader, String moduleClassName, CommonConfig commonConfig, Object config)
-            throws Exception {
+    private Module loadModule(ClassLoader classLoader, String moduleClassName, MojoConfig config) throws Exception {
         Class<?> moduleClass = classLoader.loadClass(moduleClassName);
         log.info("load module: {}", moduleClassName);
-        return (Module) moduleClass.getConstructor(CommonConfig.class, config.getClass().getSuperclass())
-                .newInstance(commonConfig, config);
+        return (Module) moduleClass.getConstructor(Config.class).newInstance(config);
     }
 
 }

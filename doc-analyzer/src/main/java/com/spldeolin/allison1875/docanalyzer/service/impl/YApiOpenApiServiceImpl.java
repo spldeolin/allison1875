@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiCommonRespDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiInterfaceListMenuRespDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.YApiProjectGetRespDTO;
@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.docanalyzer.util.HttpUtils;
 public class YApiOpenApiServiceImpl implements YApiOpenApiService {
 
     @Inject
-    private DocAnalyzerConfig config;
+    private Config config;
 
     @Override
     public YApiProjectGetRespDTO getProject() {

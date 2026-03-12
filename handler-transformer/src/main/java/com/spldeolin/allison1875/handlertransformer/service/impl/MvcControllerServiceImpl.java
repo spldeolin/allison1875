@@ -7,10 +7,10 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.dto.GenerateMvcHandlerRetval;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
-import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.MvcControllerService;
@@ -27,7 +27,7 @@ public class MvcControllerServiceImpl implements MvcControllerService {
     private AnnotationExprService annotationExprService;
 
     @Inject
-    private HandlerTransformerConfig config;
+    private Config config;
 
     @Inject
     private MemberAdderService memberAdderService;

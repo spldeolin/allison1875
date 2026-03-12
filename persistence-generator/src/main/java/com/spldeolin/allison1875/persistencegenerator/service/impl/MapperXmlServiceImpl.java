@@ -15,12 +15,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.QueryByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.ReplaceMapperXmlMethodsArgs;
@@ -40,10 +39,7 @@ public class MapperXmlServiceImpl implements MapperXmlService {
     private static final String endMark = "[END]";
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private PersistenceGeneratorConfig config;
+    private Config config;
 
     /**
      * <sql id="all"></sql> 标签
@@ -488,10 +484,10 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
     private String concatXmlComment(TableAnalysisDTO persistence) {
         String result = "<!--";
-        if (commonConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += " " + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += " " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         result += " -->";

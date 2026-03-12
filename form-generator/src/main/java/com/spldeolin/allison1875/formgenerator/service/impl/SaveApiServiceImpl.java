@@ -14,11 +14,11 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.formgenerator.FormGeneratorConfig;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
@@ -29,7 +29,6 @@ import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,10 +45,7 @@ public class SaveApiServiceImpl implements SaveApiService {
     private AnnotationExprService annotationExprService;
 
     @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
-
-    @Inject
-    private FormGeneratorConfig formGeneratorConfig;
+    private Config config;
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
@@ -94,7 +90,7 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("boolean toCreate = req.%s() == null;", form.getBizIdGetterName())));
         body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s %s;", form.getEntityName(persistenceGeneratorConfig), form.getVarName())));
+                String.format("%s %s;", form.getEntityName(config), form.getVarName())));
         IfStmt ifStmt = new IfStmt();
         ifStmt.setCondition(new NameExpr("toCreate"));
         ifStmt.setThenStmt(generateIfThenBody(form));
@@ -161,10 +157,10 @@ public class SaveApiServiceImpl implements SaveApiService {
     private Statement generateIfThenBody(FormDef form) {
         BlockStmt body = new BlockStmt();
         body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s = new %s();", form.getVarName(), form.getEntityName(persistenceGeneratorConfig))));
+                String.format("%s = new %s();", form.getVarName(), form.getEntityName(config))));
         body.addStatement(StaticJavaParser.parseStatement(
                 String.format("%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
-                        formGeneratorConfig.getShortUuidGeneration())));
+                        config.getShortUuidGeneration())));
         // initPattern!=userInput添加此处
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {

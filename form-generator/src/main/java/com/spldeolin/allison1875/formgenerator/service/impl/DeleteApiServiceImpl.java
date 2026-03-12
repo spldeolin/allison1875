@@ -9,16 +9,13 @@ import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
-import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
-import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,13 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeleteApiServiceImpl implements DeleteApiService {
 
     @Inject
-    private ItemService<ItemDef> itemService;
-
-    @Inject
     private AnnotationExprService annotationExprService;
-
-    @Inject
-    private CommonConfig commonConfig;
 
     @Inject
     private MultiSelectItemService multiSelectItemService;

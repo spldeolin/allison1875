@@ -17,13 +17,12 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
@@ -49,10 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 public class YApiServiceImpl implements YApiService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private DocAnalyzerConfig config;
+    private Config config;
 
     @Inject
     private YApiOpenApiService yapiOpenApiService;
@@ -333,13 +329,13 @@ public class YApiServiceImpl implements YApiService {
         code += endpoint.getSourceCode();
 
         String allison1875Announce = "";
-        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             allison1875Announce += BaseConstant.NEW_LINE + "---";
-            if (commonConfig.getEnableNoModifyAnnounce()) {
+            if (config.getEnableNoModifyAnnounce()) {
                 allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
             }
-            if (commonConfig.getEnableLotNoAnnounce()) {
-                if (commonConfig.getEnableNoModifyAnnounce()) {
+            if (config.getEnableLotNoAnnounce()) {
+                if (config.getEnableNoModifyAnnounce()) {
                     allison1875Announce += " ";
                 } else {
                     allison1875Announce += BaseConstant.NEW_LINE;

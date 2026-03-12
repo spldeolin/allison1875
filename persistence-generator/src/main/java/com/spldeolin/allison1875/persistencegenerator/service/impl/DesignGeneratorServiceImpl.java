@@ -26,16 +26,16 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
+import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignArgs;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateDesignRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateJoinChainArgs;
@@ -44,7 +44,6 @@ import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordCon
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant.ChainInitialMethod;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
-import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.persistencegenerator.service.DesignGeneratorService;
 import com.spldeolin.allison1875.support.OnChainComparison;
 import com.spldeolin.allison1875.support.PropertyName;
@@ -58,10 +57,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private PersistenceGeneratorConfig config;
+    private Config config;
 
     @Inject
     private ImportExprService importExprService;
@@ -80,13 +76,13 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         CompilationUnit cu = args.getJoinChainCu();
         if (cu == null) {
-            cu = AstForestContext.get().tryFindCu(commonConfig.getDesignPackage() + ".JoinChain").orElseGet(() -> {
+            cu = AstForestContext.get().tryFindCu(config.getDesignPackage() + ".JoinChain").orElseGet(() -> {
                 CompilationUnit designCu = new CompilationUnit();
                 Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                        commonConfig.getDesignPackage(), "JoinChain.java");
+                        config.getDesignPackage(), "JoinChain.java");
                 log.info("Join Design absent, create it, path={}", designPath);
                 designCu.setStorage(designPath);
-                designCu.setPackageDeclaration(commonConfig.getDesignPackage());
+                designCu.setPackageDeclaration(config.getDesignPackage());
                 designCu.addImport(OnChainComparison.class.getName());
                 designCu.addImport(PropertyName.class.getName());
                 designCu.addOrphanComment(new LineComment("@formatter:" + "off"));
@@ -205,14 +201,14 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         String designName = concatDesignName(tableAnalysis);
         Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                commonConfig.getDesignPackage(), designName + ".java");
+                config.getDesignPackage(), designName + ".java");
 
         List<PropertyDTO> properties = tableAnalysis.getProperties();
         LinkedHashMap<String, PropertyDTO> propertiesByName = Maps.newLinkedHashMap();
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
-        cu.setPackageDeclaration(commonConfig.getDesignPackage());
+        cu.setPackageDeclaration(config.getDesignPackage());
         for (PropertyDTO property : properties) {
             propertiesByName.put(property.getPropertyName(), property);
         }
@@ -444,14 +440,14 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
 
         DesignMetaDTO meta = new DesignMetaDTO();
-        meta.setDesignQualifier(commonConfig.getDesignPackage() + "." + designName);
+        meta.setDesignQualifier(config.getDesignPackage() + "." + designName);
         meta.setDesignName(designName);
         meta.setEntityQualifier(entityGeneration.getDtoQualifier());
         meta.setEntityName(entityGeneration.getDtoName());
         meta.setMapperQualifier(args.getMapper().getFullyQualifiedName().orElseThrow(
                 () -> new Allison1875Exception("Node '" + args.getMapper().getName() + "' has no Qualifier")));
         meta.setMapperName(args.getMapper().getNameAsString());
-        meta.setMapperPaths(commonConfig.getMapperXmlDirs().stream()
+        meta.setMapperPaths(config.getMapperXmlDirs().stream()
                 .map(one -> one + File.separator + tableAnalysis.getMapperName() + ".xml")
                 .collect(Collectors.toList()));
         if (tableAnalysis.getIsDeleteFlagExist()) {
@@ -470,7 +466,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         CompilationUnitUtils.writeJava(cu);
 
         return new GenerateDesignRetval().setDesignCu(cu)
-                .setDesignQualifer(commonConfig.getDesignPackage() + "." + designName);
+                .setDesignQualifer(config.getDesignPackage() + "." + designName);
     }
 
     @Override
@@ -480,10 +476,10 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
     private String concatJoinChainDescription(TableAnalysisDTO persistence) {
         String result = "";
-        if (commonConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

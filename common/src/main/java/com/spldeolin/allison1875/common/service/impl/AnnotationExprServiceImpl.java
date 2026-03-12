@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Override
     public boolean isAnnotated(String annoationQualifier, NodeWithAnnotations<?> node) {
@@ -129,7 +129,7 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public AnnotationExpr javaxValid() {
-        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+        if (config.getEnableJavaxMoveToJakarta()) {
             return StaticJavaParser.parseAnnotation("@jakarta.validation.Valid").clone();
         } else {
             return StaticJavaParser.parseAnnotation("@javax.validation.Valid").clone();
@@ -138,7 +138,7 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public AnnotationExpr notNull() {
-        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+        if (config.getEnableJavaxMoveToJakarta()) {
             return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotNull").clone();
         } else {
             return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotNull").clone();
@@ -147,7 +147,7 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public AnnotationExpr notEmpty() {
-        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+        if (config.getEnableJavaxMoveToJakarta()) {
             return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotEmpty").clone();
         } else {
             return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotEmpty").clone();
@@ -156,7 +156,7 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public AnnotationExpr notBlank() {
-        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+        if (config.getEnableJavaxMoveToJakarta()) {
             return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotBlank").clone();
         } else {
             return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotBlank").clone();
@@ -170,7 +170,7 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
             args += "min=" + min + ", ";
         }
         args += "max=" + max + ")";
-        if (commonConfig.getEnableJavaxMoveToJakarta()) {
+        if (config.getEnableJavaxMoveToJakarta()) {
             return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.Size" + args).clone();
         } else {
             return StaticJavaParser.parseAnnotation("@javax.validation.constraints.Size" + args).clone();

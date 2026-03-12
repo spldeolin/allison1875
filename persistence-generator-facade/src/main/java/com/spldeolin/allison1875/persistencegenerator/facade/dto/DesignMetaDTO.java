@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.persistencegenerator.facade.dto;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
+import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;

@@ -9,9 +9,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.CategorizedMarkdownDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownService;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ShowdocServiceImpl implements ShowdocService {
 
     @Inject
-    private DocAnalyzerConfig config;
+    private Config config;
 
     @Inject
     private MarkdownService markdownService;

@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
@@ -26,7 +26,7 @@ public class SelectItemService implements ItemService<SelectItemDef> {
     private AnnotationExprService annotationExprService;
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Override
     public ItemType supportedItemType() {
@@ -55,7 +55,7 @@ public class SelectItemService implements ItemService<SelectItemDef> {
 
     @Override
     public String getJavaTypeInDTO(SelectItemDef itemDef) {
-        return commonConfig.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName()) + "Enum";
+        return config.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName()) + "Enum";
     }
 
     @Override

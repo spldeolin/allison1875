@@ -23,6 +23,7 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -31,7 +32,6 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
-import com.spldeolin.allison1875.querytransformer.config.QueryTransformerConfig;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateReturnTypeRetval;
@@ -52,7 +52,7 @@ public class DesignServiceImpl implements DesignService {
     private TransformMethodCallService transformMethodCallService;
 
     @Inject
-    private QueryTransformerConfig queryTransformerConfig;
+    private Config queryTransformerConfig;
 
     @Override
     public ClassOrInterfaceDeclaration findCoidWithChecksum(String qualifier) {

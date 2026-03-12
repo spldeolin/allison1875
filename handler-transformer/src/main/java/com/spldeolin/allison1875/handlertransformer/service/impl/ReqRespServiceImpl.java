@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
@@ -34,7 +34,6 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.enums.DTOTypeEnum;
@@ -51,10 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private HandlerTransformerConfig config;
+    private Config config;
 
     @Inject
     private FieldService fieldService;
@@ -70,9 +66,6 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     @Inject
     private DataModelServiceNoLombokImpl dataModelServiceNoLombok;
-
-    @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
 
     @Override
     public void validInitBody(BlockStmt initBody, InitDecAnalysisDTO initDecAnalysis) {
@@ -118,15 +111,15 @@ public class ReqRespServiceImpl implements ReqRespService {
             }
 
             DataModelArg arg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(handlerTransformerConfig.getDtoSourcePath()).map(File::toPath)
+            Path sourceRoot = Optional.ofNullable(config.getDtoSourcePath()).map(File::toPath)
                     .orElse(AstForestContext.get().getSourceRoot());
             arg.setSourceRoot(sourceRoot);
             arg.setPackageName(packageName);
             arg.setClassName(dtoName);
             arg.setDescription(concatDTODescription(initDecAnalysis));
-            arg.setAuthor(commonConfig.getAuthor());
-            arg.setIsDataModelSerializable(commonConfig.getIsDataModelSerializable());
-            arg.setIsDataModelCloneable(commonConfig.getIsDataModelCloneable());
+            arg.setAuthor(config.getAuthor());
+            arg.setIsDataModelSerializable(config.getIsDataModelSerializable());
+            arg.setIsDataModelCloneable(config.getIsDataModelCloneable());
             arg.setMoreOperation((tempCu, dataModel) -> {
                 // copy fields
                 for (FieldDeclaration field : dto.getFields()) {
@@ -135,7 +128,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 importExprService.copyImports(initDecAnalysis.getMvcControllerCu(), tempCu);
                 dataModel.setMembers(dto.getMembers());
                 // generate getters, setters
-                if (commonConfig.getIsDataModuleWithoutLombok()) {
+                if (config.getIsDataModuleWithoutLombok()) {
                     List<FieldArg> fieldArgs = Lists.newArrayList();
                     for (FieldDeclaration field : dto.getFields()) {
                         for (VariableDeclarator variable : field.getVariables()) {
@@ -188,13 +181,13 @@ public class ReqRespServiceImpl implements ReqRespService {
     private String estimatePackageName(DTOTypeEnum dtoType) {
         String packageName;
         if (dtoType == DTOTypeEnum.REQ_DTO) {
-            packageName = commonConfig.getReqDTOPackage();
+            packageName = config.getReqDTOPackage();
         } else if (dtoType == DTOTypeEnum.RESP_DTO) {
-            packageName = commonConfig.getRespDTOPackage();
+            packageName = config.getRespDTOPackage();
         } else if (dtoType == DTOTypeEnum.NEST_DTO_IN_REQ) {
-            packageName = commonConfig.getReqDTOPackage();
+            packageName = config.getReqDTOPackage();
         } else {
-            packageName = commonConfig.getRespDTOPackage();
+            packageName = config.getRespDTOPackage();
         }
         return packageName;
     }
@@ -272,7 +265,7 @@ public class ReqRespServiceImpl implements ReqRespService {
 
     private String concatDTODescription(InitDecAnalysisDTO initDecAnalysis) {
         String result = "";
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                     + initDecAnalysis.getLotNo();
         }

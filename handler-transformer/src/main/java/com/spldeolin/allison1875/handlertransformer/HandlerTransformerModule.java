@@ -1,12 +1,11 @@
 package com.spldeolin.allison1875.handlertransformer;
 
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
-import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
 import com.spldeolin.allison1875.handlertransformer.service.impl.HandlerTransformerServiceLayerExpansionServiceImpl;
 import lombok.ToString;
@@ -17,13 +16,10 @@ import lombok.ToString;
 @ToString
 public class HandlerTransformerModule extends Allison1875Module {
 
-    private final CommonConfig commonConfig;
+    private final Config config;
 
-    private final HandlerTransformerConfig handlerTransformerConfig;
-
-    public HandlerTransformerModule(CommonConfig commonConfig, HandlerTransformerConfig handlerTransformerConfig) {
-        this.commonConfig = commonConfig;
-        this.handlerTransformerConfig = handlerTransformerConfig;
+    public HandlerTransformerModule(Config config) {
+        this.config = config;
     }
 
     @Override
@@ -33,10 +29,9 @@ public class HandlerTransformerModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        bind(CommonConfig.class).toInstance(commonConfig);
-        bind(HandlerTransformerConfig.class).toInstance(handlerTransformerConfig);
+        bind(Config.class).toInstance(config);
         bind(ServiceLayerExpansionService.class).toInstance(new HandlerTransformerServiceLayerExpansionServiceImpl());
-        if (commonConfig.getIsDataModuleWithoutLombok()) {
+        if (config.getIsDataModuleWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());

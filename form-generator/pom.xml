@@ -32,16 +32,10 @@
             <artifactId>query-transformer</artifactId>
         </dependency>
 
-        <!-- jackson yaml (for polymorphic DSL deserialization) -->
+        <!-- jackson yaml -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-
-        <!-- freemarker -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
         </dependency>
     </dependencies>
 

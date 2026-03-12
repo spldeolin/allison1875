@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeRequestMappingRetval;
 import com.spldeolin.allison1875.docanalyzer.service.RequestMappingService;
 
@@ -30,7 +30,7 @@ public class RequestMappingServiceImpl implements RequestMappingService {
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Inject
-    private DocAnalyzerConfig config;
+    private Config config;
 
     @Override
     public AnalyzeRequestMappingRetval analyzeRequestMapping(Class<?> controllerClass, Method reflectionMethod) {

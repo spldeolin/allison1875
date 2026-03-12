@@ -9,9 +9,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.docanalyzer.dto.CategorizedMarkdownDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.EndpointDTO;
 import com.spldeolin.allison1875.docanalyzer.service.EndpointDslService;
@@ -31,7 +31,7 @@ public class EndpointDslServiceImpl implements EndpointDslService {
     private MarkdownService markdownService;
 
     @Inject
-    private DocAnalyzerConfig config;
+    private Config config;
 
     @Override
     public void flushToEndpointDsl(List<EndpointDTO> endpoints) {

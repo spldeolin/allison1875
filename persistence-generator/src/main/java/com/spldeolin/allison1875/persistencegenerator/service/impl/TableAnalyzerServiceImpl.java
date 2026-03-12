@@ -36,10 +36,10 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.IndexDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
@@ -59,7 +59,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
     }
 
     @Inject
-    private PersistenceGeneratorConfig config;
+    private Config config;
 
     @Override
     public List<TableAnalysisDTO> analyzeTable() {

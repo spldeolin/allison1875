@@ -26,7 +26,8 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
@@ -36,7 +37,6 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
-import com.spldeolin.allison1875.persistencegenerator.facade.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.querytransformer.dto.AssignmentDTO;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
@@ -75,7 +75,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
     private DesignService designService;
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Override
     public ChainAnalysisDTO analyzeDesignChain(MethodCallExpr designChain, DesignMetaDTO designMeta) {
@@ -151,7 +151,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         List<String> propertyVarNamesInRecord = Lists.newArrayList();
 
         ClassOrInterfaceDeclaration joinChain = designService.findCoidWithChecksum(
-                commonConfig.getDesignPackage() + ".JoinChain");
+                config.getDesignPackage() + ".JoinChain");
         List<String> propertyNamesFromJoinChain = joinChain.getMembers().stream()
                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration).flatMap(coid -> coid.getFields().stream())

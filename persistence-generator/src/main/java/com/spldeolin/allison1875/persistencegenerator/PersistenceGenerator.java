@@ -9,7 +9,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
@@ -57,7 +57,7 @@ public class PersistenceGenerator implements Allison1875MainService {
     private DesignGeneratorService designGeneratorService;
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Inject
     private ImportExprService importExprService;
@@ -168,7 +168,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName));
 
             // 基础方法替换到MapperXml中
-            for (File mapperXmlDirectory : commonConfig.getMapperXmlDirs()) {
+            for (File mapperXmlDirectory : config.getMapperXmlDirs()) {
                 if (!mapperXmlDirectory.exists()) {
                     log.debug("mapperXmlDirectory.mkdirs()={}", mapperXmlDirectory.mkdirs());
                 }

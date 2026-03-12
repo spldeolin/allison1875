@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.persistencegenerator.config;
+package com.spldeolin.allison1875.common.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,13 +8,12 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 /**
- * @author Deolin 2025-09-11
+ * @author Deolin 2026-03-12
  */
-
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {PersistenceGeneratorConfigValidator.class})
-public @interface PersistenceGeneratorConfigValid {
+@Constraint(validatedBy = {ConfigValidator.class})
+public @interface ConfigValid {
 
     String message() default "";
 

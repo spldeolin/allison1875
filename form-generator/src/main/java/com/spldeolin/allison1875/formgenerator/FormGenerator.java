@@ -18,7 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
@@ -26,7 +26,6 @@ import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
-import com.spldeolin.allison1875.docanalyzer.config.DocAnalyzerConfig;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
@@ -39,10 +38,8 @@ import com.spldeolin.allison1875.formgenerator.service.EnumService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
-import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.querytransformer.QueryTransformer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,22 +51,13 @@ import lombok.extern.slf4j.Slf4j;
 public class FormGenerator implements Allison1875MainService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private FormGeneratorConfig formGeneratorConfig;
-
-    @Inject
-    private PersistenceGeneratorConfig persistenceGeneratorConfig;
+    private Config config;
 
     @Inject
     private PersistenceGenerator persistenceGenerator;
 
     @Inject
     private HandlerTransformer handlerTransformer;
-
-    @Inject
-    private DocAnalyzerConfig docAnalyzerConfig;
 
     @Inject
     private DocAnalyzer docAnalyzer;
@@ -79,9 +67,6 @@ public class FormGenerator implements Allison1875MainService {
 
     @Inject
     private AnnotationExprService annotationExprService;
-
-    @Inject
-    private FormGeneratorServiceLayerExpansionServiceImpl formGeneratorServiceLayerExpansionServiceImpl;
 
     @Inject
     private DdlService ddlService;
@@ -126,7 +111,9 @@ public class FormGenerator implements Allison1875MainService {
         }
 
         // 生成持久层
-        persistenceGeneratorConfig.setJdbcUrl(null).setDdl(ddl).setEnableGenerateDesign(true);
+        config.setJdbcUrl(null);
+        config.setDdl(ddl);
+        config.setEnableGenerateDesign(true);
         persistenceGenerator.process();
 
         // 生成枚举
@@ -138,19 +125,19 @@ public class FormGenerator implements Allison1875MainService {
             CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
             String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
             Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                    commonConfig.getControllerPackage(), controllerName + ".java");
+                    config.getControllerPackage(), controllerName + ".java");
             cu.setStorage(absulutePath);
-            cu.setPackageDeclaration(commonConfig.getControllerPackage());
-            cu.addImport(commonConfig.getDesignPackage() + ".*");
-            cu.addImport(commonConfig.getEntityPackage() + ".*");
-            cu.addImport(commonConfig.getEnumPackage() + ".*");
+            cu.setPackageDeclaration(config.getControllerPackage());
+            cu.addImport(config.getDesignPackage() + ".*");
+            cu.addImport(config.getEntityPackage() + ".*");
+            cu.addImport(config.getEnumPackage() + ".*");
             cu.addImport("java.util.stream.*");
             cu.addImport("org.springframework.util.*");
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
-            JavadocUtils.setJavadoc(coid, form.getTitle(), commonConfig.getAuthor());
+            JavadocUtils.setJavadoc(coid, form.getTitle(), config.getAuthor());
             coid.addAnnotation(annotationExprService.springRestController());
             coid.addAnnotation(annotationExprService.springRequestMapping(
-                    formGeneratorConfig.getControllerRequestMapping().replace("${formName}", form.getVarName())));
+                    config.getControllerRequestMapping().replace("${formName}", form.getVarName())));
             coid.setPublic(true).setName(controllerName);
             cu.addType(coid);
             coid.addMember(saveApiService.generateSaveInitDec(form));
@@ -158,7 +145,7 @@ public class FormGenerator implements Allison1875MainService {
             coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
             coid.addMember(deleteApiService.generateDeleteInitDec(form));
             CompilationUnitUtils.writeJava(cu);
-            controllerQualifiers.add(commonConfig.getControllerPackage() + "." + controllerName + ".*");
+            controllerQualifiers.add(config.getControllerPackage() + "." + controllerName + ".*");
         }
 
         // 调用handler-transformer转换initDec
@@ -167,16 +154,16 @@ public class FormGenerator implements Allison1875MainService {
 
         // 编译
         log.info("call compileFacade.compile");
-        compileFacade.compile(AstForestContext.get(), commonConfig.getJavaVersion());
+        compileFacade.compile(AstForestContext.get(), config.getJavaVersion());
 
         // 调用query-transformer转换Design Chain
         AstForestContext.set(AstForestContext.get().cloneWithResetting());
         queryTransformer.process();
 
         // 调用doc-analyzer分析接口文档
-        if (formGeneratorConfig.getEnableDocAnalyzer()) {
+        if (config.getEnableDocAnalyzer()) {
             AstForestContext.set(AstForestContext.get().cloneWithResetting());
-            docAnalyzerConfig.setMvcHandlerQualifierWildcards(controllerQualifiers);
+            config.setMvcHandlerQualifierWildcards(controllerQualifiers);
             docAnalyzer.process();
         }
     }
@@ -217,8 +204,7 @@ public class FormGenerator implements Allison1875MainService {
 
     private List<FormDef> deserializeDSL() {
         try {
-            return new YAMLMapper().readValue(
-                    FileUtils.readFileToString(formGeneratorConfig.getDslPath(), StandardCharsets.UTF_8),
+            return new YAMLMapper().readValue(FileUtils.readFileToString(config.getDslPath(), StandardCharsets.UTF_8),
                     new TypeReference<List<FormDef>>() {
                     });
         } catch (IOException e) {

@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeMvcHandlerRetval;
@@ -30,7 +30,7 @@ public class MvcHandlerAnalyzerServiceImpl implements MvcHandlerAnalyzerService 
     private AnnotationExprService annotationExprService;
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Override
     public AnalyzeMvcHandlerRetval analyzeMvcHandler(ClassOrInterfaceDeclaration mvcControllerCoid,

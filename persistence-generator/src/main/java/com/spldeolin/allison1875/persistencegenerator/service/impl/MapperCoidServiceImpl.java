@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -35,7 +35,6 @@ import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.DetectOrGenerateMapperRetval;
 import com.spldeolin.allison1875.persistencegenerator.dto.GenerateMethodToMapperArgs;
@@ -53,10 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MapperCoidServiceImpl implements MapperCoidService {
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private PersistenceGeneratorConfig config;
+    private Config config;
 
     @Inject
     private AntiDuplicationService antiDuplicationService;
@@ -67,7 +63,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
         // find
         List<MethodDeclaration> customMethods = Lists.newArrayList();
-        String mapperQualifier = commonConfig.getMapperPackage() + "." + persistence.getMapperName();
+        String mapperQualifier = config.getMapperPackage() + "." + persistence.getMapperName();
         Optional<CompilationUnit> opt = AstForestContext.get().tryFindCu(mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
         if (opt.isPresent()) {
@@ -95,12 +91,11 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             log.info("mapper is absent, create it, [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
             cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                    commonConfig.getMapperPackage(), persistence.getMapperName() + ".java"));
-            cu.setPackageDeclaration(commonConfig.getMapperPackage());
+                    config.getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(config.getMapperPackage());
             mapper = new ClassOrInterfaceDeclaration();
             String comment = concatMapperDescription(persistence);
-            Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment,
-                    commonConfig.getAuthor() + " " + LocalDate.now());
+            Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment, config.getAuthor() + " " + LocalDate.now());
             javadoc.addBlockTag(new JavadocBlockTag(Type.SEE, dataModelGeneration.getDtoName()));
             mapper.setPublic(true).setInterface(true).setName(persistence.getMapperName());
             mapper.setInterface(true);
@@ -117,7 +112,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperDescription(TableAnalysisDTO persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
@@ -436,13 +431,13 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperMethodComment(TableAnalysisDTO persistence, String methodDescription) {
         String result = methodDescription;
-        if (commonConfig.getEnableNoModifyAnnounce() || commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE;
         }
-        if (commonConfig.getEnableNoModifyAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (commonConfig.getEnableLotNoAnnounce()) {
+        if (config.getEnableLotNoAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;

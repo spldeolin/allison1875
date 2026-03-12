@@ -1,14 +1,15 @@
-package com.spldeolin.allison1875.persistencegenerator.facade.enums;
+package com.spldeolin.allison1875.common.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * @deprecated 请使用 {@link com.spldeolin.allison1875.common.enums.PageParamStyleEnum}
+ * 分页参数风格枚举
+ *
+ * @author Deolin 2023-12-29
  */
 @Getter
 @AllArgsConstructor
-@Deprecated
 public enum PageParamStyleEnum {
 
     PAGE_NO_PAGE_SIZE,

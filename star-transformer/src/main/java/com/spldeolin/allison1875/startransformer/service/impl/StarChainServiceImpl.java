@@ -14,11 +14,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.startransformer.config.StarTransformerConfig;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.startransformer.dto.PhraseDTO;
 import com.spldeolin.allison1875.startransformer.enums.ChainMethodEnum;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StarChainServiceImpl implements StarChainService {
 
     @Inject
-    private StarTransformerConfig config;
+    private Config config;
 
     @Override
     public List<MethodCallExpr> detectStarChains(BlockStmt block) {

@@ -83,12 +83,12 @@ public class StarTransformer implements Allison1875MainService {
                         log.error("fail to transformStarChain Star Chain, starAnalysis={}", analysis, e);
                     }
 
-                    importExprService.extractQualifiedTypeToImport(cu);
                     anyTransformed = true;
                     anyTransformedForAll = true;
                 }
             }
             if (anyTransformed) {
+                importExprService.extractQualifiedTypeToImport(cu);
                 CompilationUnitUtils.writeJava(cu, true);
             }
         }

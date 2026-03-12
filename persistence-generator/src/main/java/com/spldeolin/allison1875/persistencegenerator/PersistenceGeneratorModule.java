@@ -1,12 +1,11 @@
 package com.spldeolin.allison1875.persistencegenerator;
 
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
-import com.spldeolin.allison1875.persistencegenerator.config.PersistenceGeneratorConfig;
 import lombok.ToString;
 
 /**
@@ -15,14 +14,10 @@ import lombok.ToString;
 @ToString
 public class PersistenceGeneratorModule extends Allison1875Module {
 
-    private final CommonConfig commonConfig;
+    private final Config config;
 
-    private final PersistenceGeneratorConfig persistenceGeneratorConfig;
-
-    public PersistenceGeneratorModule(CommonConfig commonConfig,
-            PersistenceGeneratorConfig persistenceGeneratorConfig) {
-        this.commonConfig = commonConfig;
-        this.persistenceGeneratorConfig = persistenceGeneratorConfig;
+    public PersistenceGeneratorModule(Config config) {
+        this.config = config;
     }
 
     @Override
@@ -32,9 +27,8 @@ public class PersistenceGeneratorModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        bind(CommonConfig.class).toInstance(commonConfig);
-        bind(PersistenceGeneratorConfig.class).toInstance(persistenceGeneratorConfig);
-        if (commonConfig.getIsDataModuleWithoutLombok()) {
+        bind(Config.class).toInstance(config);
+        if (config.getIsDataModuleWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());

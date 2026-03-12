@@ -15,7 +15,7 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLayerExpansionService {
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Inject
     private AnnotationExprService annotationExprService;
@@ -111,7 +111,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         log.info("form={}", form);
 
         // 加入主表单Mapper
-        String mapperType = commonConfig.getMapperPackage() + "." + form.getName() + "Mapper";
+        String mapperType = config.getMapperPackage() + "." + form.getName() + "Mapper";
         String mapperName = form.getVarName() + "Mapper";
         FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(
                 String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();
@@ -122,7 +122,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         for (ItemDef item : form.getItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
-                mapperType = commonConfig.getMapperPackage() + "." + associationForm.getName() + "Mapper";
+                mapperType = config.getMapperPackage() + "." + associationForm.getName() + "Mapper";
                 mapperName = associationForm.getVarName() + "Mapper";
                 FieldDeclaration associationFormMapperField = StaticJavaParser.parseBodyDeclaration(
                         String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();

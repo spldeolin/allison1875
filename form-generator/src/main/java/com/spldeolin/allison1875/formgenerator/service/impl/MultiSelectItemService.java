@@ -10,7 +10,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -33,7 +33,7 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
     private AnnotationExprService annotationExprService;
 
     @Inject
-    private CommonConfig commonConfig;
+    private Config config;
 
     @Override
     public ItemType supportedItemType() {
@@ -62,7 +62,7 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
 
     @Override
     public String getJavaTypeInDTO(MultiSelectItemDef itemDef) {
-        return "java.util.List<" + commonConfig.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName())
+        return "java.util.List<" + config.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName())
                 + "Enum" + ">";
     }
 

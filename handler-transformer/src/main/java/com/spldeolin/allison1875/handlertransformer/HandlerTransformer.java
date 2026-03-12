@@ -8,7 +8,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.config.CommonConfig;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.dto.GenerateMvcHandlerArgs;
@@ -18,7 +18,6 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.handlertransformer.config.HandlerTransformerConfig;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
@@ -68,10 +67,7 @@ public class HandlerTransformer implements Allison1875MainService {
     private MvcHandlerGeneratorService mvcHandlerGeneratorService;
 
     @Inject
-    private CommonConfig commonConfig;
-
-    @Inject
-    private HandlerTransformerConfig handlerTransformerConfig;
+    private Config config;
 
     @Override
     public void process() {
@@ -110,14 +106,14 @@ public class HandlerTransformer implements Allison1875MainService {
                             generateDTOsRetval.getRespBodyDTOType());
 
                     // 生成Service / ServiceImpl（非oneService每次都生成、oneService只有第一次生成）
-                    if (!handlerTransformerConfig.getEnableOneService() || generateServiceAndImplRetval == null) {
+                    if (!config.getEnableOneService() || generateServiceAndImplRetval == null) {
                         GenerateServiceAndImplArgs gsaiArgs = new GenerateServiceAndImplArgs();
                         gsaiArgs.setControllerCu(cu);
                         gsaiArgs.setInitDecAnalysisDTO(initDecAnalysis);
                         generateServiceAndImplRetval = serviceLayerService.generateServiceAndImpl(gsaiArgs);
                     }
 
-                    // 为ServiceImpl加入实现方法体所需的import。（在handler-transformer场景，实现方法不是空方法，会需要import）
+                    // 为ServiceImpl加入实现方法体所需的import。（在form-generator场景，实现方法不是空方法，会需要import）
                     final CompilationUnit serviceImplCu = generateServiceAndImplRetval.getServiceImplCu();
                     serviceMethod.getNeededImportsInImpl().forEach(serviceImplCu::addImport);
 
@@ -138,7 +134,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     GenerateMvcHandlerArgs gmhArgs = new GenerateMvcHandlerArgs();
                     gmhArgs.setMvcHandlerUrl(initDecAnalysis.getMvcHandlerUrl());
                     String description = initDecAnalysis.getMvcHandlerDescription();
-                    if (commonConfig.getEnableLotNoAnnounce()) {
+                    if (config.getEnableLotNoAnnounce()) {
                         description += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
                                 + initDecAnalysis.getLotNo();
                     }

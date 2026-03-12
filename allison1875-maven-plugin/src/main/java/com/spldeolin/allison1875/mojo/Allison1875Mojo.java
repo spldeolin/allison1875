@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.mojo;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -10,10 +11,11 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import com.google.common.base.MoreObjects;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.config.CommonConfig;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils.FileSystemSnapshot;
@@ -30,8 +32,11 @@ public abstract class Allison1875Mojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
-    @Parameter(alias = "common")
-    protected CommonConfig commonConfig = new CommonConfig();
+    /**
+     * configYml文件的路径（相对于项目basedir），默认为 .allison1875.yml
+     */
+    @Parameter(defaultValue = ".allison1875.yml")
+    private String configYmlPath;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -43,9 +48,9 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             Allison1875.hello();
 
             // 构造guice module
-            initParam();
+            MojoConfig config = initParam();
             ClassLoader classLoader = getClassLoader(project);
-            Allison1875Module allison1875Module = newAllison1875Module(commonConfig, classLoader);
+            Allison1875Module allison1875Module = newAllison1875Module(config, classLoader);
 
             // 构造AstForest，执行Allison1875
             List<File> sourceRoots = project.getCompileSourceRoots().stream().map(File::new)
@@ -69,43 +74,27 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         }
     }
 
-    private void initParam() {
+    private MojoConfig initParam() throws IOException {
         log.info("project={}", project);
         log.info("basedir={}", project.getBasedir());
-        commonConfig = MoreObjects.firstNonNull(commonConfig, new CommonConfig());
-        String basePackage = MoreObjects.firstNonNull(commonConfig.getBasePackage(), project.getGroupId());
-        commonConfig.setBasePackage(basePackage);
-        commonConfig.setControllerPackage(
-                MoreObjects.firstNonNull(commonConfig.getControllerPackage(), basePackage + ".controller"));
-        commonConfig.setReqDTOPackage(
-                MoreObjects.firstNonNull(commonConfig.getReqDTOPackage(), basePackage + ".dto.req"));
-        commonConfig.setRespDTOPackage(
-                MoreObjects.firstNonNull(commonConfig.getRespDTOPackage(), basePackage + ".dto.resp"));
-        commonConfig.setEnumPackage(MoreObjects.firstNonNull(commonConfig.getEnumPackage(), basePackage + ".enums"));
-        commonConfig.setServicePackage(
-                MoreObjects.firstNonNull(commonConfig.getServicePackage(), basePackage + ".service"));
-        commonConfig.setServiceImplPackage(
-                MoreObjects.firstNonNull(commonConfig.getServiceImplPackage(), basePackage + ".service.impl"));
-        commonConfig.setMapperPackage(
-                MoreObjects.firstNonNull(commonConfig.getMapperPackage(), basePackage + ".mapper"));
-        commonConfig.setEntityPackage(
-                MoreObjects.firstNonNull(commonConfig.getEntityPackage(), basePackage + ".entity"));
-        commonConfig.setDesignPackage(
-                MoreObjects.firstNonNull(commonConfig.getDesignPackage(), basePackage + ".design"));
-        commonConfig.setParamDTOPackage(
-                MoreObjects.firstNonNull(commonConfig.getParamDTOPackage(), basePackage + ".dto.param"));
-        commonConfig.setRecordDTOPackage(
-                MoreObjects.firstNonNull(commonConfig.getRecordDTOPackage(), basePackage + ".dto.record"));
-        commonConfig.setWholeDTOPackage(
-                MoreObjects.firstNonNull(commonConfig.getWholeDTOPackage(), basePackage + ".dto"));
-        commonConfig.setMapperXmlDirs(
-                commonConfig.getMapperXmlDirs().stream().map(this::getCanonicalFileRelativeToBasedir)
+
+        // 从 YAML 文件反序列化 MojoConfig
+        File configFile = getCanonicalFileRelativeToBasedir(new File(configYmlPath));
+        log.info("configYmlPath={}", configFile);
+        Yaml yaml = new Yaml(new Constructor(MojoConfig.class, new LoaderOptions()));
+        MojoConfig config;
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            config = yaml.load(fis);
+        }
+
+        // 将 mapperXmlDirs 转换为相对于 basedir 的绝对路径
+        config.setMapperXmlDirs(config.getMapperXmlDirs().stream().map(this::getCanonicalFileRelativeToBasedir)
                         .collect(Collectors.toList()));
-        log.info("commonConfig={}", JsonUtils.toJsonPrettily(commonConfig));
+        log.info("config={}", JsonUtils.toJsonPrettily(config));
+        return config;
     }
 
-    public abstract Allison1875Module newAllison1875Module(CommonConfig commonConfig, ClassLoader classLoader)
-            throws Exception;
+    public abstract Allison1875Module newAllison1875Module(MojoConfig config, ClassLoader classLoader) throws Exception;
 
     private ClassLoader getClassLoader(MavenProject project) throws Exception {
         List<String> classpathElements = project.getCompileClasspathElements();

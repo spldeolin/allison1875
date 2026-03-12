@@ -190,7 +190,6 @@ public class QueryTransformer implements Allison1875MainService {
             }
         }
 
-        // write all to file
         if (anyTransformedForAll) {
             log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
         } else {
