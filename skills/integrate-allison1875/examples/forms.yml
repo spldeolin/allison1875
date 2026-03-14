@@ -1,0 +1,630 @@
+# Form Generator DSL 示例配置
+# 学生表单 + 教师表单，覆盖所有 ItemType 和主要配置选项
+
+# ========================================
+# 1. 学生基本信息表单
+# 覆盖类型: text, number, select, time, onOff, secret
+# ========================================
+- name: Student
+  title: 学生信息管理
+  desc: 学生基本信息的录入、编辑和查询表单
+  items:
+    # TEXT 类型 - 基础文本
+    - type: text
+      name: studentName
+      title: 学生姓名
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 50
+      regex: ^[\u4e00-\u9fa5]{2,10}$  # 2-10个中文字符
+
+    # TEXT 类型 - 长文本（可选）
+    - type: text
+      name: personalProfile
+      title: 个人简介
+      isNonVoid: false
+      initPattern: userInput
+      editPattern: userInput
+      isMultilineOrRich: true
+      maxLength: 2000
+
+    # NUMBER 类型 - 整数
+    - type: number
+      name: studentNo
+      title: 学号
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot  # 学号一旦创建不可修改
+      canBeDecimal: false
+
+    # NUMBER 类型 - 小数
+    - type: number
+      name: gpa
+      title: 平均绩点
+      isNonVoid: false
+      initPattern: doNot  # 不在初始化时填写
+      editPattern: todo   # 编辑时需要开发者自定义逻辑
+      canBeDecimal: true
+
+    # SELECT 类型 - 单选
+    - type: select
+      name: grade
+      title: 年级
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: grade1
+          title: 一年级
+        - code: grade2
+          title: 二年级
+        - code: grade3
+          title: 三年级
+        - code: grade4
+          title: 四年级
+        - code: grade5
+          title: 五年级
+        - code: grade6
+          title: 六年级
+
+    # SELECT 类型 - 性别
+    - type: select
+      name: gender
+      title: 性别
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: male
+          title: 男
+        - code: female
+          title: 女
+
+    # MULTI_SELECT 类型 - 多选
+    - type: multiSelect
+      name: hobbies
+      title: 兴趣爱好
+      isNonVoid: false
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: reading
+          title: 阅读
+        - code: sports
+          title: 运动
+        - code: music
+          title: 音乐
+        - code: painting
+          title: 绘画
+        - code: programming
+          title: 编程
+        - code: photography
+          title: 摄影
+
+    # TIME 类型 - 日期
+    - type: time
+      name: birthDate
+      title: 出生日期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      format: date
+
+    # TIME 类型 - 日期时间
+    - type: time
+      name: enrollmentTime
+      title: 入学时间
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      format: dateTime
+
+    # ON_OFF 类型 - 布尔开关
+    - type: onOff
+      name: isActive
+      title: 是否在校
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # ON_OFF 类型 - 布尔开关（另一个例子）
+    - type: onOff
+      name: hasDormitory
+      title: 是否住宿
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # SECRET 类型 - 密码/密钥
+    - type: secret
+      name: guardianPhone
+      title: 监护人电话
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # TEXT 类型 - 带正则验证的文本（邮箱）
+    - type: text
+      name: email
+      title: 电子邮箱
+      isNonVoid: false
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 100
+      regex: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+  # 索引定义
+  indices:
+    # 唯一索引 - 学号
+    - itemNames: [ studentNo ]
+      isUnique: true
+    # 唯一索引 - 邮箱
+    - itemNames: [ email ]
+      isUnique: true
+    # 普通索引 - 年级
+    - itemNames: [ grade ]
+      isUnique: false
+    # 复合索引 - 年级+姓名
+    - itemNames: [ grade, studentName ]
+      isUnique: false
+
+# ========================================
+# 2. 教师信息表单
+# 覆盖更多场景和组合
+# ========================================
+- name: Teacher
+  title: 教师信息管理
+  desc: 教师基本信息及教学相关数据的管理表单
+  items:
+    # TEXT 类型 - 教师姓名
+    - type: text
+      name: teacherName
+      title: 教师姓名
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 50
+
+    # NUMBER 类型 - 工号
+    - type: number
+      name: employeeNo
+      title: 工号
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      canBeDecimal: false
+
+    # SELECT 类型 - 职称
+    - type: select
+      name: professionalTitle
+      title: 职称
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: assistant
+          title: 助教
+        - code: lecturer
+          title: 讲师
+        - code: associateProfessor
+          title: 副教授
+        - code: professor
+          title: 教授
+
+    # SELECT 类型 - 所属学院
+    - type: select
+      name: department
+      title: 所属学院
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: computerScience
+          title: 计算机学院
+        - code: mathematics
+          title: 数学学院
+        - code: physics
+          title: 物理学院
+        - code: chemistry
+          title: 化学学院
+        - code: literature
+          title: 文学院
+
+    # MULTI_SELECT 类型 - 任教科目（可多选）
+    - type: multiSelect
+      name: teachingSubjects
+      title: 任教科目
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: math
+          title: 数学
+        - code: physics
+          title: 物理
+        - code: chemistry
+          title: 化学
+        - code: biology
+          title: 生物
+        - code: chinese
+          title: 语文
+        - code: english
+          title: 英语
+        - code: history
+          title: 历史
+        - code: geography
+          title: 地理
+
+    # NUMBER 类型 - 工作年限
+    - type: number
+      name: yearsOfService
+      title: 工作年限
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      canBeDecimal: false
+
+    # NUMBER 类型 - 月薪（小数）
+    - type: number
+      name: monthlySalary
+      title: 月薪
+      isNonVoid: false
+      initPattern: todo
+      editPattern: todo
+      canBeDecimal: true
+
+    # TIME 类型 - 入职日期
+    - type: time
+      name: hireDate
+      title: 入职日期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      format: date
+
+    # TIME 类型 - 最后考核时间
+    - type: time
+      name: lastEvaluationTime
+      title: 最后考核时间
+      isNonVoid: false
+      initPattern: doNot
+      editPattern: todo
+      format: dateTime
+
+    # ON_OFF 类型 - 是否在职
+    - type: onOff
+      name: isActive
+      title: 是否在职
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # ON_OFF 类型 - 是否班主任
+    - type: onOff
+      name: isClassAdvisor
+      title: 是否担任班主任
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # SECRET 类型 - 工作证密码
+    - type: secret
+      name: workCardPassword
+      title: 工作证密码
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # TEXT 类型 - 办公室地点
+    - type: text
+      name: officeLocation
+      title: 办公室地点
+      isNonVoid: false
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 200
+
+    # TEXT 类型 - 个人简介（多行文本）
+    - type: text
+      name: biography
+      title: 个人简介
+      isNonVoid: false
+      initPattern: userInput
+      editPattern: userInput
+      isMultilineOrRich: true
+      maxLength: 5000
+
+    # TEXT 类型 - 联系电话
+    - type: text
+      name: contactPhone
+      title: 联系电话
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 20
+      regex: ^1[3-9]\d{9}$  # 手机号正则
+
+    # TEXT 类型 - 邮箱
+    - type: text
+      name: email
+      title: 电子邮箱
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 100
+      regex: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+  # 索引定义
+  indices:
+    # 唯一索引 - 工号
+    - itemNames: [ employeeNo ]
+      isUnique: true
+    # 唯一索引 - 邮箱
+    - itemNames: [ email ]
+      isUnique: true
+    # 唯一索引 - 联系电话
+    - itemNames: [ contactPhone ]
+      isUnique: true
+    # 普通索引 - 学院
+    - itemNames: [ department ]
+      isUnique: false
+    # 普通索引 - 职称
+    - itemNames: [ professionalTitle ]
+      isUnique: false
+    # 复合索引 - 学院+在职状态
+    - itemNames: [ department, isActive ]
+      isUnique: false
+
+# ========================================
+# 3. 学生成绩表单
+# 展示更多字段组合和索引场景
+# ========================================
+- name: StudentGrade
+  title: 学生成绩管理
+  desc: 学生各科目成绩的录入和管理
+  items:
+    # NUMBER 类型 - 学生ID（外键关联）
+    - type: number
+      name: studentNo
+      title: 学号
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      canBeDecimal: false
+
+    # SELECT 类型 - 科目
+    - type: select
+      name: subject
+      title: 科目
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      options:
+        - code: math
+          title: 数学
+        - code: chinese
+          title: 语文
+        - code: english
+          title: 英语
+        - code: physics
+          title: 物理
+        - code: chemistry
+          title: 化学
+
+    # SELECT 类型 - 学期
+    - type: select
+      name: semester
+      title: 学期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      options:
+        - code: 2024Spring
+          title: 2024春季
+        - code: 2024Fall
+          title: 2024秋季
+        - code: 2025Spring
+          title: 2025春季
+        - code: 2025Fall
+          title: 2025秋季
+
+    # NUMBER 类型 - 成绩分数（小数）
+    - type: number
+      name: score
+      title: 成绩分数
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      canBeDecimal: true
+
+    # SELECT 类型 - 成绩等级
+    - type: select
+      name: gradeLevel
+      title: 成绩等级
+      isNonVoid: false
+      initPattern: todo
+      editPattern: todo
+      options:
+        - code: A
+          title: 优秀
+        - code: B
+          title: 良好
+        - code: C
+          title: 中等
+        - code: D
+          title: 及格
+        - code: F
+          title: 不及格
+
+    # TIME 类型 - 考试日期
+    - type: time
+      name: examDate
+      title: 考试日期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      format: date
+
+    # ON_OFF 类型 - 是否补考
+    - type: onOff
+      name: isMakeupExam
+      title: 是否补考
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+    # TEXT 类型 - 备注
+    - type: text
+      name: remark
+      title: 备注
+      isNonVoid: false
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 500
+
+  # 索引定义
+  indices:
+    # 唯一索引 - 学号+科目+学期（一个学生在一个学期的某科目只能有一条成绩记录）
+    - itemNames: [ studentNo, subject, semester ]
+      isUnique: true
+    # 普通索引 - 科目
+    - itemNames: [ subject ]
+      isUnique: false
+    # 普通索引 - 学期
+    - itemNames: [ semester ]
+      isUnique: false
+    # 普通索引 - 考试日期
+    - itemNames: [ examDate ]
+      isUnique: false
+
+# ========================================
+# 4. 教师课程安排表单
+# 展示复杂的多对多关系场景
+# ========================================
+- name: TeacherSchedule
+  title: 教师课程安排
+  desc: 教师的授课时间和课程安排管理
+  items:
+    # NUMBER 类型 - 教师工号
+    - type: number
+      name: employeeNo
+      title: 教师工号
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: doNot
+      canBeDecimal: false
+
+    # SELECT 类型 - 课程
+    - type: select
+      name: courseName
+      title: 课程名称
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: advancedMath
+          title: 高等数学
+        - code: linearAlgebra
+          title: 线性代数
+        - code: dataStructure
+          title: 数据结构
+        - code: algorithms
+          title: 算法设计
+        - code: operatingSystem
+          title: 操作系统
+
+    # SELECT 类型 - 星期
+    - type: select
+      name: dayOfWeek
+      title: 星期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: monday
+          title: 星期一
+        - code: tuesday
+          title: 星期二
+        - code: wednesday
+          title: 星期三
+        - code: thursday
+          title: 星期四
+        - code: friday
+          title: 星期五
+
+    # SELECT 类型 - 节次
+    - type: select
+      name: period
+      title: 节次
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      options:
+        - code: period1
+          title: 第1-2节
+        - code: period2
+          title: 第3-4节
+        - code: period3
+          title: 第5-6节
+        - code: period4
+          title: 第7-8节
+
+    # TEXT 类型 - 教室
+    - type: text
+      name: classroom
+      title: 教室
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      maxLength: 50
+
+    # NUMBER 类型 - 学时
+    - type: number
+      name: creditHours
+      title: 学时
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      canBeDecimal: false
+
+    # TIME 类型 - 开课日期
+    - type: time
+      name: startDate
+      title: 开课日期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      format: date
+
+    # TIME 类型 - 结课日期
+    - type: time
+      name: endDate
+      title: 结课日期
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+      format: date
+
+    # ON_OFF 类型 - 是否有效
+    - type: onOff
+      name: isActive
+      title: 是否有效
+      isNonVoid: true
+      initPattern: userInput
+      editPattern: userInput
+
+  # 索引定义
+  indices:
+    # 唯一索引 - 教师+星期+节次（一个教师在同一时间只能上一门课）
+    - itemNames: [ employeeNo, dayOfWeek, period ]
+      isUnique: true
+    # 唯一索引 - 教室+星期+节次（一个教室在同一时间只能有一门课）
+    - itemNames: [ classroom, dayOfWeek, period ]
+      isUnique: true
+    # 普通索引 - 课程名称
+    - itemNames: [ courseName ]
+      isUnique: false
+    # 普通索引 - 教师工号
+    - itemNames: [ employeeNo ]
+      isUnique: false
