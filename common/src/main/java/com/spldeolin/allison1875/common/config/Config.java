@@ -125,7 +125,7 @@ public class Config {
      * 生成的DataModel是否使用Lombok
      */
     @NotNull
-    Boolean isDataModuleWithoutLombok = false;
+    Boolean isDataModelWithoutLombok = false;
 
     /**
      * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明

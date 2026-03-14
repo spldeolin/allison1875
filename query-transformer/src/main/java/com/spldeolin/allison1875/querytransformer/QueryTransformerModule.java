@@ -29,7 +29,7 @@ public class QueryTransformerModule extends Allison1875Module {
     @Override
     protected void configure() {
         bind(Config.class).toInstance(config);
-        if (config.getIsDataModuleWithoutLombok()) {
+        if (config.getIsDataModelWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());

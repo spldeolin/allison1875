@@ -35,7 +35,7 @@ public class FormGeneratorModule extends Allison1875Module {
         bind(ServiceLayerExpansionService.class).toInstance(new FormGeneratorServiceLayerExpansionServiceImpl());
         bind(Config.class).toInstance(config);
         bind(CompileFacade.class).toInstance(compileFacade);
-        if (config.getIsDataModuleWithoutLombok()) {
+        if (config.getIsDataModelWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());

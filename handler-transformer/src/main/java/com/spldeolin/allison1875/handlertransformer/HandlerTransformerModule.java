@@ -31,7 +31,7 @@ public class HandlerTransformerModule extends Allison1875Module {
     protected void configure() {
         bind(Config.class).toInstance(config);
         bind(ServiceLayerExpansionService.class).toInstance(new HandlerTransformerServiceLayerExpansionServiceImpl());
-        if (config.getIsDataModuleWithoutLombok()) {
+        if (config.getIsDataModelWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
             bind(DataModelService.class).toInstance(new DataModelServiceImpl());

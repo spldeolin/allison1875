@@ -128,7 +128,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                 importExprService.copyImports(initDecAnalysis.getMvcControllerCu(), tempCu);
                 dataModel.setMembers(dto.getMembers());
                 // generate getters, setters
-                if (config.getIsDataModuleWithoutLombok()) {
+                if (config.getIsDataModelWithoutLombok()) {
                     List<FieldArg> fieldArgs = Lists.newArrayList();
                     for (FieldDeclaration field : dto.getFields()) {
                         for (VariableDeclarator variable : field.getVariables()) {
