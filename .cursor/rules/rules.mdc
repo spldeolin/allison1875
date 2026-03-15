@@ -1,0 +1,482 @@
+---
+description: AI coding guidance and rules for this repository.
+alwaysApply: true
+---
+<rule>
+
+# Allison 1875 — AI Coding Agent Rules
+
+## 1. High-Level Overview
+
+### 1.1 Architecture
+
+Allison 1875 is a **Java AST-based source code analysis & transformation toolkit**, packaged as a Maven plugin.
+It targets **Spring Boot + MyBatis** projects, generating boilerplate Controller / Service / DTO / Mapper / XML code
+from lightweight Java DSL or database schema.
+
+**Technology Stack:**
+- Java 8 (source/target 1.8), Maven multi-module
+- JavaParser 3.25.10 for AST parsing & manipulation
+- Google Guice 5.1.0 for dependency injection (NOT Spring inside the tool itself)
+- Lombok 1.18.30
+- Jackson 2.13.x for JSON
+- Guava 33.0.0-jre
+- SLF4J + Logback for logging
+
+**Module Map (11 modules):**
+```
+allison1875/                            (parent POM, version 13.0-SNAPSHOT)
+├── common/                             Core: AST forest, config, DI, utilities, base services
+├── allison1875-support/                Runtime dependency for target projects (@L, @P annotations)
+├── allison1875-maven-plugin/           Maven Mojo entry points (one Mojo per tool)
+├── handler-transformer/                DSL → Controller + Service + DTO
+├── handler-transformer-facade/         Handler-transformer public API types
+├── persistence-generator/              DB table → Entity + Mapper + Mapper XML + Design
+├── persistence-generator-facade/       Persistence-generator public API types
+├── query-transformer/                  QueryChain DSL → MyBatis CRUD + SQL
+├── star-transformer/                   StarChain DSL → join queries + data assembly
+├── doc-analyzer/                       Spring MVC Controller → API documentation
+└── form-generator/                     YAML form DSL → full CRUD stack
+```
+
+### 1.2 Application Entry Points & Main Loop
+
+**Maven Plugin Entry:**
+`Allison1875Mojo` (abstract) → concrete Mojos (e.g. `HandlerTransformerMojo`, `PersistenceGeneratorMojo`)
+each call:
+```
+Allison1875.hello()           → print banner + version
+Allison1875.letsGo(module, astForest) → create Guice injector → call MainService.process()
+```
+
+**Lifecycle:**
+1. Mojo reads `.allison1875.yml` → deserializes to `MojoConfig` (extends `Config`)
+2. Builds `AstForest` from Maven compile source roots
+3. Constructs the tool-specific `Allison1875Module` (extends Guice `AbstractModule`)
+4. `Allison1875.letsGo()`:
+   - Creates Guice injector with `[toolModule, ValidationModule]`
+   - Sets `AstForestContext` (ThreadLocal)
+   - Calls `Allison1875MainService.process()` — the tool's main loop
+5. On failure: snapshot can rollback the entire project (via `FileSnapshotUtils`)
+
+**Each tool implements `Allison1875MainService.process()`** — that is the "game loop" equivalent.
+Inside `process()`, the tool iterates over `AstForestContext.get()` (an `Iterable<CompilationUnit>`)
+and performs detection → analysis → code generation → file write.
+
+---
+
+## 2. Code Style & Consistency Enforcers
+
+### 2.1 Naming Conventions
+
+| Element              | Convention                     | Examples                                                                 |
+|----------------------|--------------------------------|--------------------------------------------------------------------------|
+| **Classes**          | UpperCamelCase                 | `HandlerTransformer`, `PersistenceGenerator`, `DataModelArg`             |
+| **Interfaces**       | UpperCamelCase, suffix `Service` | `DTOService`, `ImportExprService`, `MemberAdderService`                |
+| **Implementations**  | Interface name + `Impl`        | `DTOServiceImpl`, `ImportExprServiceImpl`                                |
+| **Enums**            | UpperCamelCase + `Enum` suffix | `FileExistenceResolutionEnum`, `FlushToEnum`, `PageParamStyleEnum`       |
+| **DTO classes**      | Descriptive + `DTO`/`Arg`/`Retval` | `InitDecAnalysisDTO`, `DataModelArg`, `GenerateDTOsRetval`          |
+| **Guice Modules**    | Tool name + `Module`           | `HandlerTransformerModule`, `PersistenceGeneratorModule`                  |
+| **Mojo classes**     | Tool name + `Mojo`             | `HandlerTransformerMojo`, `DocAnalyzerMojo`                              |
+| **Utility classes**  | Plural noun + `Utils`          | `JsonUtils`, `CompilationUnitUtils`, `MoreStringUtils`, `CollectionUtils`|
+| **Constants**        | `UPPER_SNAKE_CASE`             | `SINGLE_INDENT`, `NEW_LINE`, `LOT_NO_ANNOUNCE_PREFIXION`                |
+| **Variables/Fields** | lowerCamelCase                 | `mvcControllerService`, `astForest`, `initDecAnalysis`                   |
+| **Methods**          | lowerCamelCase, verb-first     | `detectMvcControllers()`, `generateEntity()`, `analyzeInitDec()`         |
+| **Packages**         | All lowercase, no separators   | `handlertransformer`, `persistencegenerator`, `docanalyzer`              |
+| **Test classes**     | Subject + `Test`               | `MoreStringTest`, `JsonSchemaTraverseUtilsTest`                          |
+
+**Method naming patterns (highly consistent):**
+- `detect*` — find/locate AST nodes
+- `generate*` — create new code/files
+- `analyze*` — parse and extract information
+- `validate*` / `valid*` — validation logic
+
+### 2.2 Package Structure per Module
+
+Each tool module follows:
+```
+com.spldeolin.allison1875.<toolname>/
+├── <ToolName>.java                    # implements Allison1875MainService (the main class)
+├── <ToolName>Module.java              # extends Allison1875Module (Guice bindings)
+├── dto/                               # Data transfer objects for internal use
+├── enums/                             # Module-specific enums
+├── service/                           # Service interfaces
+│   └── impl/                          # Service implementations
+└── util/                              # Module-specific utilities (if any)
+```
+
+### 2.3 Header/Footer Standards
+
+- **File header:** Every Java file MUST have a Javadoc with `@author` tag and date:
+  ```java
+  /**
+   * @author Deolin 2024-06-10
+   */
+  ```
+  Date format: `yyyy-MM-dd`. Some older files omit the author description line above `@author`.
+
+- **No file footer** is required.
+
+### 2.4 Lombok Usage
+
+- **DTO classes:** `@Data`, `@Accessors(chain = true)`, `@FieldDefaults(level = AccessLevel.PRIVATE)`
+- **Config classes:** `@Data`, `@FieldDefaults(level = AccessLevel.PRIVATE)`
+- **Enum classes:** `@Getter`, `@AllArgsConstructor`
+- **Service impls & main classes:** `@Slf4j`
+- **Guice module classes:** `@Slf4j`, `@ToString`
+
+### 2.5 Type Hinting & Comments
+
+- **Chinese comments** are used extensively for inline and Javadoc descriptions.
+- Javadoc is expected on all public interfaces and important methods.
+- Validation annotations (`@NotNull`, `@NotEmpty`, `@NotBlank`, `@Valid`) serve as type contracts on `Config` and DTO fields.
+- Always use `javax.validation` annotations (not `jakarta`) within this tool itself (target 1.8).
+
+### 2.6 Utility Class Pattern
+
+All utility classes MUST follow:
+```java
+public class XxxUtils {
+    private XxxUtils() {
+        throw new UnsupportedOperationException("Never instantiate me.");
+    }
+    // static methods only
+}
+```
+
+### 2.7 Import Ordering
+
+Follow the observed order:
+1. `java.*`
+2. `javax.*`
+3. Third-party (`org.*`, `com.*`)
+4. Project-internal (`com.spldeolin.allison1875.*`)
+5. Lombok (`lombok.*`) — always last
+
+No wildcard imports. Every import is explicit.
+
+---
+
+## 3. Rapid Reference & Context Map
+
+### 3.1 Core Utility Functions (Top 10, with exact signatures)
+
+```java
+// === JsonUtils (com.spldeolin.allison1875.common.util.JsonUtils) ===
+public static String toJson(Object object)
+public static String toJsonPrettily(Object object)
+public static <T> T toObject(String json, Class<T> clazz)
+public static <T> List<T> toListOfObject(String json, Class<T> clazz)
+public static JsonNode toTree(String json)
+public static ObjectMapper createObjectMapper()
+
+// === CompilationUnitUtils (com.spldeolin.allison1875.common.util.CompilationUnitUtils) ===
+public static CompilationUnit parseJava(File javaFile)
+public static Path getCuAbsolutePath(CompilationUnit cu)
+public static Optional<CompilationUnit> tryFindCu(Path sourceRoot, String primaryTypeQualifier)
+public static void writeJava(CompilationUnit cu)
+public static void writeJava(CompilationUnit cu, boolean lexicalPreserving)
+public static CompilationUnit newBaseCurrentAstForest()
+
+// === MoreStringUtils (com.spldeolin.allison1875.common.util.MoreStringUtils) ===
+public static String toUpperCamel(String string)
+public static String toLowerCamel(String string)
+public static List<String> splitLineByLine(String string)
+public static String replaceLast(String from, String target, String replacement)
+public static String camelToSnakeCase(String camelStr)
+
+// === CollectionUtils (com.spldeolin.allison1875.common.util.CollectionUtils) ===
+public static boolean isEmpty(Collection<?> collection)
+public static boolean isNotEmpty(Collection<?> collection)
+
+// === HashingUtils (com.spldeolin.allison1875.common.util.HashingUtils) ===
+public static String hashString(String string)
+public static String hashTypeDeclaration(TypeDeclaration<?> typeDeclaration)
+
+// === ValidUtils (com.spldeolin.allison1875.common.util.ValidUtils) ===
+public static List<InvalidDTO> valid(Object object)
+
+// === JavadocUtils (com.spldeolin.allison1875.common.util.JavadocUtils) ===
+public static Javadoc setJavadoc(NodeWithJavadoc<?> node, String description, String author)
+public static String getDescription(NodeWithJavadoc<?> node)
+public static List<String> getDescriptionAsLines(NodeWithJavadoc<?> node)
+
+// === FileSnapshotUtils (com.spldeolin.allison1875.common.util.FileSnapshotUtils) ===
+public static FileSystemSnapshot createSnapshot(File basePath)
+public static void rollback(FileSystemSnapshot snapshot)
+```
+
+### 3.2 Key Constants (`BaseConstant`)
+
+```java
+// com.spldeolin.allison1875.common.constant.BaseConstant
+String SINGLE_INDENT = "    ";                        // 4 spaces
+String DOUBLE_INDENT = Strings.repeat(SINGLE_INDENT, 2);
+String TREBLE_INDENT = Strings.repeat(SINGLE_INDENT, 3);
+String NEW_LINE = System.lineSeparator();
+String JAVA_DOC_NEW_LINE = System.lineSeparator() + "<p>";
+String NEW_LINE_FOR_MATCHING = "[\\r\\n]+";
+String LOT_NO_ANNOUNCE_PREFIXION = "Allison 1875 Lot No: ";
+String NO_MODIFY_ANNOUNCE = "Any modifications may be overwritten by future code generations.";
+String[] JAVA_EXTENSIONS = new String[]{"java"};
+String REMEMBER_REFORMAT_CODE_ANNOUNCE = "# REMEMBER REFORMAT CODE #";
+```
+
+### 3.3 Key Enums
+
+```java
+// FileExistenceResolutionEnum: OVERWRITE, RENAME
+// FlushToEnum: MARKDOWN, YAPI, SHOWDOC, DSL
+// PageParamStyleEnum: PAGE_NO_PAGE_SIZE, OFFSET_LIMIT
+```
+
+### 3.4 Common Entity/Object Access
+
+| What                  | How to access                                                      |
+|-----------------------|--------------------------------------------------------------------|
+| **Current AstForest** | `AstForestContext.get()` (ThreadLocal, set before `process()`)     |
+| **Source Root**        | `AstForestContext.get().getSourceRoot()`                           |
+| **ClassLoader**       | `AstForestContext.get().getClassLoader()`                          |
+| **Find a CU by FQN**  | `AstForestContext.get().tryFindCu(qualifiedName)` → `Optional<CompilationUnit>` |
+| **Iterate all CUs**   | `for (CompilationUnit cu : AstForestContext.get()) { ... }`       |
+| **Config**             | Inject `Config config` via `@Inject` in Guice-managed classes    |
+| **Services**           | Inject via `@Inject private XxxService xxxService;`               |
+
+---
+
+## 4. Architecture-Specific Patterns
+
+### 4.1 Dependency Injection (Guice, NOT Spring)
+
+- The tool itself uses **Google Guice**, not Spring.
+- Every tool module extends `Allison1875Module` and implements `declareMainService()`.
+- Service interfaces use `@ImplementedBy(XxxServiceImpl.class)` for default bindings.
+- Custom bindings go in `configure()`:
+  ```java
+  @Override
+  protected void configure() {
+      bind(Config.class).toInstance(config);
+      bind(DataModelService.class).toInstance(new DataModelServiceImpl());
+  }
+  ```
+- Use `@Inject` for field injection, `@Singleton` on implementation classes.
+- The `ValidationModule` auto-registers parameter validation interceptors for all Guice-managed methods.
+
+### 4.2 AST Processing Pipeline
+
+Standard processing pattern in `process()`:
+```java
+@Override
+public void process() {
+    for (CompilationUnit cu : AstForestContext.get()) {
+        // 1. Detect target AST nodes
+        // 2. Analyze / extract information
+        // 3. Generate new code (DTOs, services, etc.)
+        // 4. Modify existing CU if needed
+    }
+    // 5. Write modified CUs: CompilationUnitUtils.writeJava(cu)
+    // 6. Extract qualified types to imports: importExprService.extractQualifiedTypeToImport(cu)
+    // 7. Log REMEMBER_REFORMAT_CODE_ANNOUNCE
+}
+```
+
+**CRITICAL:** Always call `importExprService.extractQualifiedTypeToImport(cu)` BEFORE
+`CompilationUnitUtils.writeJava(cu)` — the former converts fully qualified type names in the AST
+into proper import statements.
+
+### 4.3 Error Handling
+
+- Use `Allison1875Exception` (extends `RuntimeException`) for all domain errors.
+- Constructors: `(String message)`, `(Throwable cause)`, `(String message, Throwable cause)`.
+- In `Allison1875.letsGo()`, `CreationException` with `Allison1875Exception` cause is unwrapped and re-thrown.
+- IO errors: wrap `IOException` in `UncheckedIOException` or `Allison1875Exception`.
+- In `process()` body: log errors via `log.error(...)` then throw `Allison1875Exception`.
+- In Mojo: catch all `Throwable`, wrap in `MojoExecutionException`.
+
+### 4.4 File Snapshot & Rollback
+
+Before any transformation, `Allison1875Mojo.execute()` creates a `FileSystemSnapshot` of the entire
+Maven project. On failure, `FileSnapshotUtils.rollback(snapshot)` can restore all files.
+```java
+FileSystemSnapshot snapshot = FileSnapshotUtils.createSnapshot(project.getBasedir());
+try { ... snapshot.cleanup(); }
+catch (Throwable e) { FileSnapshotUtils.rollback(snapshot); throw ...; }
+```
+
+### 4.5 Config Validation
+
+`Config` uses `@ConfigValid` (custom annotation) + Hibernate Validator annotations.
+`ValidationModule` installs `ValidSingletonListener` and `ValidMethodArgsInterceptor` for
+automatic validation of `@Singleton` beans at creation time and method args at invocation.
+
+### 4.6 DTO Conventions
+
+DTOs follow a strict pattern:
+```java
+@Data
+@Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class XxxArg {          // input args
+    @NotNull Type field;
+}
+
+@Data
+@Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class XxxRetval {       // return values
+    Type field;
+}
+
+// or for pure data:
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class XxxDTO { ... }
+```
+
+Naming: `*Arg` for inputs, `*Retval` for outputs, `*DTO` for data transfer.
+
+---
+
+## 5. Developer Workflows
+
+### 5.1 Build & Install
+
+```bash
+# Clone and install locally (required, not on Maven Central)
+git clone git@github.com:spldeolin/allison1875.git
+mvn install -f allison1875/pom.xml
+
+# Compile only
+mvn compile
+
+# Full build with tests
+mvn verify
+```
+
+### 5.2 Running a Single Test Case
+
+Tests in this project use `public static void main(String[] args)` (not JUnit).
+Run from IDE or:
+```bash
+mvn compile -pl common
+java -cp common/target/classes:... com.spldeolin.allison1875.common.test.MoreStringTest
+```
+
+### 5.3 Running a Tool Against a Target Project
+
+```bash
+mvn allison1875:handler-transformer   -f target-project/pom.xml
+mvn allison1875:persistence-generator -f target-project/pom.xml
+mvn allison1875:query-transformer     -f target-project/pom.xml
+mvn allison1875:star-transformer      -f target-project/pom.xml
+mvn allison1875:doc-analyzer          -f target-project/pom.xml
+mvn allison1875:form-generator        -f target-project/pom.xml
+```
+
+### 5.4 Scaffolding: New Tool Module
+
+To create a new Allison 1875 tool:
+
+```java
+// 1. Create the Module (XxxModule.java)
+@ToString
+public class XxxModule extends Allison1875Module {
+    private final Config config;
+    public XxxModule(Config config) { this.config = config; }
+
+    @Override
+    public final Class<? extends Allison1875MainService> declareMainService() {
+        return Xxx.class;
+    }
+
+    @Override
+    protected void configure() {
+        bind(Config.class).toInstance(config);
+    }
+}
+
+// 2. Create the MainService (Xxx.java)
+@Singleton
+@Slf4j
+public class Xxx implements Allison1875MainService {
+    @Inject private Config config;
+    // @Inject other services...
+
+    @Override
+    public void process() {
+        for (CompilationUnit cu : AstForestContext.get()) {
+            // detection → analysis → generation → write
+        }
+        log.info(BaseConstant.REMEMBER_REFORMAT_CODE_ANNOUNCE);
+    }
+}
+
+// 3. Create the Mojo (XxxMojo.java in allison1875-maven-plugin)
+@Mojo(name = "xxx", requiresDependencyResolution = ResolutionScope.TEST)
+@Execute(phase = LifecyclePhase.COMPILE)
+@Slf4j
+public class XxxMojo extends Allison1875Mojo {
+    @Override
+    public Allison1875Module newAllison1875Module(MojoConfig config, ClassLoader cl) throws Exception {
+        return new XxxModule(config);
+    }
+}
+```
+
+### 5.5 Scaffolding: New Service Interface + Implementation
+
+```java
+// Interface (in service/ package)
+@ImplementedBy(XxxServiceImpl.class)
+public interface XxxService {
+    ReturnType methodName(ArgType arg);
+}
+
+// Implementation (in service/impl/ package)
+@Singleton
+@Slf4j
+public class XxxServiceImpl implements XxxService {
+    @Inject private Config config;
+
+    @Override
+    public ReturnType methodName(ArgType arg) {
+        // implementation
+    }
+}
+```
+
+---
+
+## 6. Critical Rules for AI Agents
+
+### 6.1 Style Consistency is Law
+- Match existing 4-space indentation exactly.
+- Match existing import ordering: java → javax → third-party → project → lombok.
+- Match existing variable naming: lowerCamelCase, no abbreviations unless established.
+- Match existing Javadoc pattern: `/** @author Deolin yyyy-MM-dd */`.
+- All utility classes: private constructor throwing `UnsupportedOperationException`.
+
+### 6.2 Zero-Hallucination Policy
+- ONLY reference APIs, classes, constants, and patterns that actually exist in this codebase.
+- Do NOT invent annotations, utility methods, or configuration keys.
+- Do NOT assume JUnit is used — tests use `main()` methods.
+- Do NOT assume Spring is used within the tool — it uses Google Guice.
+- The tool GENERATES code for Spring projects but does NOT run on Spring itself.
+
+### 6.3 Safety Rules
+- NEVER modify `Allison1875.java` or `Allison1875Module.java` without understanding the full Guice lifecycle.
+- NEVER bypass `importExprService.extractQualifiedTypeToImport()` before writing a CU.
+- NEVER use `System.out.println()` in production code — use `log.info/debug/warn/error`.
+- ALWAYS use `Allison1875Exception` for error signaling, not generic exceptions.
+- ALWAYS guard iteration over `AstForestContext.get()` — it may be empty.
+- ALWAYS call `CompilationUnitUtils.writeJava(cu)` to persist AST changes — never write files manually
+  for Java source code.
+
+### 6.4 Performance
+- AST iteration (`for (CompilationUnit cu : AstForestContext.get())`) is the hot path.
+  Minimize redundant parsing inside the loop.
+- Use `tryFindCu()` with full qualifiers for targeted lookups instead of iterating all CUs.
+- `MoreStringUtils.toUpperCamel/toLowerCamel` are frequently called — they are already efficient.
+- `FileSnapshotUtils.createSnapshot()` copies ALL files — it's expensive. It runs once per Mojo execution.
+
+</rule>
