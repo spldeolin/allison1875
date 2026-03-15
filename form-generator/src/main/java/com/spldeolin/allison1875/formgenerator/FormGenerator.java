@@ -122,7 +122,7 @@ public class FormGenerator implements Allison1875MainService {
         // 生成controller和initDec
         List<String> controllerQualifiers = Lists.newArrayList();
         for (FormDef form : forms) {
-            CompilationUnit cu = CompilationUnitUtils.newBaseCurrentAstForest();
+            CompilationUnit cu = new CompilationUnit();
             String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
             Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
                     config.getControllerPackage(), controllerName + ".java");

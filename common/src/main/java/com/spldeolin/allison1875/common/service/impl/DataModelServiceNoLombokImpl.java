@@ -194,7 +194,8 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
             String qualifier = type.asReferenceType().getQualifiedName();
 
             // 如果能找到源码……
-            AstForestContext.get().tryFindCu(qualifier).flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
+            CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(), qualifier)
+                    .flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
                 CompilationUnit previousCu = collector.putIfAbsent(qualifier, pt.findCompilationUnit()
                         .orElseThrow(() -> new Allison1875Exception("cannot find cu for " + pt.getName())));
                 if (previousCu == null) {
@@ -219,8 +220,8 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
                     String qualifier = typeParamter.asReferenceType().getQualifiedName();
 
                     // 如果能找到源码……
-                    AstForestContext.get().tryFindCu(qualifier).flatMap(CompilationUnit::getPrimaryType)
-                            .ifPresent(pt -> {
+                    CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(), qualifier)
+                            .flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
                                 CompilationUnit previousCu = collector.putIfAbsent(qualifier, pt.findCompilationUnit()
                                         .orElseThrow(
                                                 () -> new Allison1875Exception("cannot find cu for " + pt.getName())));

@@ -71,13 +71,6 @@ public class CompilationUnitUtils {
         return qualifier.replace('.', File.separatorChar) + ".java";
     }
 
-    public static CompilationUnit newBaseCurrentAstForest() {
-        CompilationUnit cu = new CompilationUnit();
-        cu.setData(Node.SYMBOL_RESOLVER_KEY,
-                new JavaSymbolSolver(new ClassLoaderTypeSolver(AstForestContext.get().getClassLoader())));
-        return cu;
-    }
-
     public static void writeJava(CompilationUnit cu) {
         writeJava(cu, false);
     }

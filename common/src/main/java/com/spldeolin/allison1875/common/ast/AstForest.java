@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.common.ast;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
 
 /**
@@ -14,7 +13,5 @@ public interface AstForest extends Iterable<CompilationUnit> {
     ClassLoader getClassLoader();
 
     Path getSourceRoot();
-
-    Optional<CompilationUnit> tryFindCu(String primaryTypeQualifier);
 
 }

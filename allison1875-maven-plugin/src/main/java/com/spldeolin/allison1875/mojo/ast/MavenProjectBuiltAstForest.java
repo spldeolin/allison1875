@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Iterator;
-import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.StaticJavaParser;
@@ -66,26 +65,6 @@ public class MavenProjectBuiltAstForest implements AstForest {
     @Override
     public Path getSourceRoot() {
         return sourceRoot.toPath();
-    }
-
-    @Override
-    public Optional<CompilationUnit> tryFindCu(String primaryTypeQualifier) {
-        try {
-            Path absPath = sourceRoot.toPath().resolve(qualifierToRelativePath(primaryTypeQualifier));
-            if (!absPath.toFile().exists()) {
-                log.debug("cu not exists, qualifier={}", primaryTypeQualifier);
-                return Optional.empty();
-            }
-
-            return Optional.of(CompilationUnitUtils.parseJava(absPath.toFile()));
-        } catch (Exception e) {
-            log.debug("cannot find cu, qualifier={}", primaryTypeQualifier, e);
-            return Optional.empty();
-        }
-    }
-
-    private String qualifierToRelativePath(String qualifier) {
-        return qualifier.replace('.', File.separatorChar) + ".java";
     }
 
 }

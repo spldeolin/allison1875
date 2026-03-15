@@ -17,6 +17,7 @@ import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
@@ -110,7 +111,8 @@ public class StarChainServiceImpl implements StarChainService {
             phrase.setKeys(Lists.newArrayList(keys));
             phrase.setMkeys(Lists.newArrayList(mkeys));
             if (CollectionUtils.isNotEmpty(phrase.getKeys()) || CollectionUtils.isNotEmpty(phrase.getMkeys())) {
-                AstForestContext.get().tryFindCu(phrase.getDtEntityQualifier()).ifPresent(cu -> {
+                CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(),
+                        phrase.getDtEntityQualifier()).ifPresent(cu -> {
                     for (VariableDeclarator vd : cu.findAll(VariableDeclarator.class)) {
                         phrase.getEntityFieldTypesEachFieldName()
                                 .put(vd.getNameAsString(), vd.getType().resolve().describe());

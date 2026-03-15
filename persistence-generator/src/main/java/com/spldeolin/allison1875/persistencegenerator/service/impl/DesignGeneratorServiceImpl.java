@@ -81,7 +81,8 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         CompilationUnit cu = args.getJoinChainCu();
         if (cu == null) {
-            cu = AstForestContext.get().tryFindCu(config.getDesignPackage() + ".JoinChain").orElseGet(() -> {
+            cu = CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(),
+                    config.getDesignPackage() + ".JoinChain").orElseGet(() -> {
                 CompilationUnit designCu = new CompilationUnit();
                 Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
                         config.getDesignPackage(), "JoinChain.java");

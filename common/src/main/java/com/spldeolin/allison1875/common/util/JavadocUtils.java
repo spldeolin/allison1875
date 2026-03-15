@@ -113,12 +113,13 @@ public class JavadocUtils {
             String finalPackageName = packageName;
 
             // 只要package-info.java存在，至少视为空白字符串，防止NPE
-            astForest.tryFindCu(packageName + ".package-info").ifPresent(d -> {
+            CompilationUnitUtils.tryFindCu(astForest.getSourceRoot(), packageName + ".package-info").ifPresent(d -> {
                 retval.put(finalPackageName, "");
             });
 
             // 获取javadoc description
-            astForest.tryFindCu(packageName + ".package-info").flatMap(Node::getComment).ifPresent(comment -> {
+            CompilationUnitUtils.tryFindCu(astForest.getSourceRoot(), packageName + ".package-info")
+                    .flatMap(Node::getComment).ifPresent(comment -> {
                 // 只有javadoc符合标准，ifBlockComment和ifLineComment不予考虑
                 comment.ifJavadocComment(jc -> {
                     List<String> lines = MoreStringUtils.splitLineByLine(

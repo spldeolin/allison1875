@@ -5,6 +5,7 @@ import java.util.Map;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.test.AstForestTestImpl;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 
 /**
@@ -14,8 +15,8 @@ public class LongPackageName {
 
     public static void main(String[] args) {
         AstForest astForest = new AstForestTestImpl(new File("common/src/test/java"));
-        astForest.tryFindCu("com.spldeolin.allison1875.common.test.packageinfo.p1.p2.p3.p4.p5.p6.LongPackageName")
-                .ifPresent(cu -> {
+        CompilationUnitUtils.tryFindCu(astForest.getSourceRoot(),
+                "com.spldeolin.allison1875.common.test.packageinfo.p1.p2.p3.p4.p5.p6.LongPackageName").ifPresent(cu -> {
                     PackageDeclaration pd = cu.getPackageDeclaration()
                             .orElseThrow(() -> new RuntimeException("impossible"));
                     Map<String, String> commentInPackageInfos = JavadocUtils.getDescriptionFirstLineInPackageInfos(pd,

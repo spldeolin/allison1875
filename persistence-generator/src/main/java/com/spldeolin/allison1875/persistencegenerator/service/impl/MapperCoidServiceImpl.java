@@ -29,6 +29,7 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
@@ -64,7 +65,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         // find
         List<MethodDeclaration> customMethods = Lists.newArrayList();
         String mapperQualifier = config.getMapperPackage() + "." + persistence.getMapperName();
-        Optional<CompilationUnit> opt = AstForestContext.get().tryFindCu(mapperQualifier);
+        Optional<CompilationUnit> opt = CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(),
+                mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
         if (opt.isPresent()) {
             Optional<TypeDeclaration<?>> primaryType = opt.get().getPrimaryType();
