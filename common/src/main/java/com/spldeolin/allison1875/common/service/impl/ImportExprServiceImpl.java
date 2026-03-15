@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.common.service.impl;
 
 import java.util.List;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -59,7 +59,7 @@ public class ImportExprServiceImpl implements ImportExprService {
                 log.debug("Qualified Type '{}' in '{}' extract to Import", type,
                         CompilationUnitUtils.getCuAbsolutePath(cu));
                 cu.addImport(type.toString());
-                type.replace(StaticJavaParser.parseType(MoreStringUtils.splitAndGetLastPart(type.toString(), ".")));
+                type.replace(parseType(MoreStringUtils.splitAndGetLastPart(type.toString(), ".")));
             }
         }
 

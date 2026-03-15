@@ -5,7 +5,7 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.SAVE;
 
 import java.util.Collections;
 import java.util.List;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -113,8 +113,8 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         // 加入主表单Mapper
         String mapperType = config.getMapperPackage() + "." + form.getName() + "Mapper";
         String mapperName = form.getVarName() + "Mapper";
-        FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(
-                String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();
+                FieldDeclaration field = parseFieldDeclaration(
+                        "private %s %s;", mapperType, mapperName);
         field.addAnnotation(annotationExprService.springAutowired());
         List<FieldDeclaration> retval = Lists.newArrayList(field);
 
@@ -124,16 +124,16 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
                 mapperType = config.getMapperPackage() + "." + associationForm.getName() + "Mapper";
                 mapperName = associationForm.getVarName() + "Mapper";
-                FieldDeclaration associationFormMapperField = StaticJavaParser.parseBodyDeclaration(
-                        String.format("private %s %s;", mapperType, mapperName)).asFieldDeclaration();
+                        FieldDeclaration associationFormMapperField = parseFieldDeclaration(
+                                "private %s %s;", mapperType, mapperName);
                 associationFormMapperField.addAnnotation(annotationExprService.springAutowired());
                 retval.add(associationFormMapperField);
             }
         }
 
         // 加入分页total，避免在调用query-transformer前因total不存在而编译错误
-        field = StaticJavaParser.parseBodyDeclaration(
-                String.format("private final Long query%sTotal = 0L;", form.getName())).asFieldDeclaration();
+                field = parseFieldDeclaration(
+                        "private final Long query%sTotal = 0L;", form.getName());
         retval.add(field);
 
         return retval;

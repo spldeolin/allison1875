@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
@@ -101,7 +103,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 String varName = binary.getVarName();
                 JavaTypeDTO javaType = binary.getProperty().getJavaType();
                 Parameter param = new Parameter();
-                param.addAnnotation(StaticJavaParser.parseAnnotation(
+                param.addAnnotation(parseAnnotation(
                         String.format("@org.apache.ibatis.annotations.Param(\"%s\")", varName)));
 
                 if (binary instanceof CompareableBinary && Lists.newArrayList(ComparisonOperatorEnum.IN,
@@ -154,13 +156,13 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
                     .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(
-                        StaticJavaParser.parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
+                        parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
             } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
                 String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
-                result.setResultType(StaticJavaParser.parseType(
+                result.setResultType(parseType(
                         "java.util.Map<" + propertyTypeName + ", " + chainAnalysis.getEntityQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(chainAnalysis.getEntityQualifier()));
+                result.setResultType(parseType(chainAnalysis.getEntityQualifier()));
             }
             return result;
         }
@@ -193,13 +195,13 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
                     .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(
-                        StaticJavaParser.parseType("java.util.List<" + recordDTOGeneration.getDtoQualifier() + ">"));
+                        parseType("java.util.List<" + recordDTOGeneration.getDtoQualifier() + ">"));
             } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
                 String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
-                result.setResultType(StaticJavaParser.parseType(
+                result.setResultType(parseType(
                         "java.util.Map<" + propertyTypeName + " ," + recordDTOGeneration.getDtoQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(recordDTOGeneration.getDtoQualifier()));
+                result.setResultType(parseType(recordDTOGeneration.getDtoQualifier()));
             }
             return result;
 
@@ -210,13 +212,13 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             result.setElementTypeQualifier(javaType.getQualifier());
             if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
                     .contains(chainAnalysis.getReturnStyle())) {
-                result.setResultType(StaticJavaParser.parseType("java.util.List<" + javaType.getQualifier() + ">"));
+                result.setResultType(parseType("java.util.List<" + javaType.getQualifier() + ">"));
             } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
                 String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
-                result.setResultType(StaticJavaParser.parseType(
+                result.setResultType(parseType(
                         "java.util.Map<" + propertyTypeName + " ," + javaType.getQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(javaType.getQualifier()));
+                result.setResultType(parseType(javaType.getQualifier()));
             }
             return result;
 
@@ -226,13 +228,13 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
             if (Lists.newArrayList(ReturnStyleEnum.LIST, ReturnStyleEnum.GROUP, ReturnStyleEnum.PAGE)
                     .contains(chainAnalysis.getReturnStyle())) {
                 result.setResultType(
-                        StaticJavaParser.parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
+                        parseType("java.util.List<" + chainAnalysis.getEntityQualifier() + ">"));
             } else if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
                 String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
-                result.setResultType(StaticJavaParser.parseType(
+                result.setResultType(parseType(
                         "java.util.Map<" + propertyTypeName + " ," + chainAnalysis.getEntityQualifier() + ">"));
             } else {
-                result.setResultType(StaticJavaParser.parseType(chainAnalysis.getEntityQualifier()));
+                result.setResultType(parseType(chainAnalysis.getEntityQualifier()));
             }
             return result;
         }

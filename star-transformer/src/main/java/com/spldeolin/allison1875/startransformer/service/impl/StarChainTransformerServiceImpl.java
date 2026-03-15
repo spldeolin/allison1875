@@ -3,6 +3,8 @@ package com.spldeolin.allison1875.startransformer.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -34,9 +36,9 @@ public class StarChainTransformerServiceImpl implements StarChainTransformerServ
         ChainAnalysisDTO analysis = args.getAnalysis();
 
         int i = block.getStatements().indexOf(starChain.findAncestor(Statement.class).get());
-        block.setStatement(i, StaticJavaParser.parseStatement(
+        block.setStatement(i, parseStatement(
                 wholeDTOGeneration.getDtoQualifier() + " whole = new " + wholeDTOGeneration.getDtoName() + "();"));
-        block.addStatement(++i, StaticJavaParser.parseStatement(
+        block.addStatement(++i, parseStatement(
                 analysis.getCftEntityQualifier() + " " + entityNameToVarName(analysis.getCftEntityName()) + " = "
                         + analysis.getCftDesignName() + "." + "query().byForced().id.eq("
                         + analysis.getCftSecondArgument() + ").one();"));
@@ -55,16 +57,16 @@ public class StarChainTransformerServiceImpl implements StarChainTransformerServ
             } else {
                 code += ".list();";
             }
-            block.addStatement(++i, StaticJavaParser.parseStatement(code));
+            block.addStatement(++i, parseStatement(code));
             NodeList<Statement> stmtsInForBlock = new NodeList<>();
             for (String key : phrase.getKeys()) {
                 String mapVarName =
                         English.plural(entityNameToVarName(phrase.getDtEntityName())) + "Each" + StringUtils.capitalize(
                                 key);
-                block.addStatement(++i, StaticJavaParser.parseStatement(
+                block.addStatement(++i, parseStatement(
                         "java.util.LinkedHashMap<" + phrase.getEntityFieldTypesEachFieldName().get(key) + ", "
                                 + phrase.getDtEntityName() + "> " + mapVarName + " = new LinkedHashMap<>();"));
-                stmtsInForBlock.add(StaticJavaParser.parseStatement(
+                stmtsInForBlock.add(parseStatement(
                         mapVarName + ".put(" + entityNameToVarName(phrase.getDtEntityName()) + ".get"
                                 + StringUtils.capitalize(key) + "(), " + entityNameToVarName(phrase.getDtEntityName())
                                 + ");"));
@@ -73,39 +75,39 @@ public class StarChainTransformerServiceImpl implements StarChainTransformerServ
                 String mapVarName =
                         English.plural(entityNameToVarName(phrase.getDtEntityName())) + "Each" + StringUtils.capitalize(
                                 mkey);
-                block.addStatement(++i, StaticJavaParser.parseStatement(
+                block.addStatement(++i, parseStatement(
                         "com.google.common.collect.LinkedListMultimap<" + phrase.getEntityFieldTypesEachFieldName()
                                 .get(mkey) + ", " + phrase.getDtEntityName() + "> " + mapVarName
                                 + " = LinkedListMultimap.create();"));
-                stmtsInForBlock.add(StaticJavaParser.parseStatement(
+                stmtsInForBlock.add(parseStatement(
                         mapVarName + ".put(" + entityNameToVarName(phrase.getDtEntityName()) + ".get"
                                 + StringUtils.capitalize(mkey) + "(), " + entityNameToVarName(phrase.getDtEntityName())
                                 + ");"));
             }
             if (CollectionUtils.isNotEmpty(stmtsInForBlock)) {
                 ForEachStmt forEach = new ForEachStmt();
-                forEach.setVariable(new VariableDeclarationExpr(StaticJavaParser.parseType(phrase.getDtEntityName()),
+                forEach.setVariable(new VariableDeclarationExpr(parseType(phrase.getDtEntityName()),
                         entityNameToVarName(phrase.getDtEntityName())));
                 forEach.setIterable(new NameExpr(English.plural(entityNameToVarName(phrase.getDtEntityName()))));
                 forEach.setBody(new BlockStmt(stmtsInForBlock));
                 block.addStatement(++i, forEach);
             }
         }
-        block.addStatement(++i, StaticJavaParser.parseStatement(
+        block.addStatement(++i, parseStatement(
                 "whole." + CodeGenerationUtils.setterName(entityNameToVarName(analysis.getCftEntityName())) + "("
                         + entityNameToVarName(analysis.getCftEntityName()) + ");"));
         for (PhraseDTO phrase : analysis.getPhrases()) {
             String dtVarName = English.plural(entityNameToVarName(phrase.getDtEntityName()),
                     phrase.getIsOneToOne() ? 1 : 2);
-            block.addStatement(++i, StaticJavaParser.parseStatement(
+            block.addStatement(++i, parseStatement(
                     "whole." + CodeGenerationUtils.setterName(dtVarName) + "(" + dtVarName + ");"));
             for (String key : phrase.getKeys()) {
-                block.addStatement(++i, StaticJavaParser.parseStatement(
+                block.addStatement(++i, parseStatement(
                         "whole." + CodeGenerationUtils.setterName(dtVarName) + "Each" + StringUtils.capitalize(key)
                                 + "(" + dtVarName + "Each" + StringUtils.capitalize(key) + ");"));
             }
             for (String mkey : phrase.getMkeys()) {
-                block.addStatement(++i, StaticJavaParser.parseStatement(
+                block.addStatement(++i, parseStatement(
                         "whole." + CodeGenerationUtils.setterName(dtVarName) + "Each" + StringUtils.capitalize(mkey)
                                 + "(" + dtVarName + "Each" + StringUtils.capitalize(mkey) + ");"));
             }

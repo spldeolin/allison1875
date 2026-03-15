@@ -7,6 +7,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -62,7 +64,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
         }
 
         mvcHandler.addAnnotation(
-                StaticJavaParser.parseAnnotation(String.format(requestMapping, args.getMvcHandlerUrl())));
+                parseAnnotation(String.format(requestMapping, args.getMvcHandlerUrl())));
 
         mvcHandler.setPublic(true);
 
@@ -147,8 +149,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
             argNames.append(requestParam.getName());
         }
 
-        String statement = String.format("%s %s.%s(%s);", returnOrNot, serviceVarName, serviceMethodName, argNames);
-        body.addStatement(StaticJavaParser.parseStatement(statement));
+        body.addStatement(parseStatement("%s %s.%s(%s);", returnOrNot, serviceVarName, serviceMethodName, argNames));
 
         mvcHandler.setBody(body);
         return new GenerateMvcHandlerRetval().setMvcHandler(mvcHandler);

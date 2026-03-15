@@ -6,6 +6,10 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType.SECRET;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -53,17 +57,17 @@ public class ListApiServiceImpl implements ListApiService {
     @Override
     public InitializerDeclaration generateListInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
-        bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"list%s\", desc = \"%s列表\", form=\"%s\", type=\"%s\";",
+        bs.addStatement(parseStatement(
+                "String handler = \"list%s\", desc = \"%s列表\", form=\"%s\", type=\"%s\";",
                         English.plural(form.getName()), form.getTitle(),
-                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)), ApiType.LIST.getCode())));
+                        StringEscapeUtils.escapeJava(JsonUtils.toJson(form)), ApiType.LIST.getCode()));
 
         // req声明
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req");
 
         // 业务主键
-        FieldDeclaration itemField = StaticJavaParser.parseBodyDeclaration(
-                String.format("java.util.List<String> %s;", form.getBizIdName())).asFieldDeclaration();
+        FieldDeclaration itemField = parseFieldDeclaration(
+                "java.util.List<String> %s;", form.getBizIdName());
         JavadocUtils.setJavadoc(itemField, "按业务主键列表过滤，null或empty代表无需过滤", null);
         reqCoid.addMember(itemField);
 
@@ -75,41 +79,38 @@ public class ListApiServiceImpl implements ListApiService {
                 case NUMBER:
                 case ON_OFF:
                 case SELECT:
-                    itemField = StaticJavaParser.parseBodyDeclaration(
-                                    "List<" + itemService.getJavaTypeInDTO(item) + "> " + item.getName() + ";")
-                            .asFieldDeclaration();
+                    itemField = parseFieldDeclaration(
+                            "List<" + itemService.getJavaTypeInDTO(item) + "> " + item.getName() + ";");
                     JavadocUtils.setJavadoc(itemField, "按“" + item.getTitle() + "”列表过滤，null或empty代表无需过滤",
                             null);
                     itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
                     reqCoid.addMember(itemField);
                     break;
                 case MULTI_SELECT:
-                    itemField = StaticJavaParser.parseBodyDeclaration(
-                            itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
+                    itemField = parseFieldDeclaration(
+                            itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
                     JavadocUtils.setJavadoc(itemField, "按“" + item.getTitle() + "”列表过滤，null或empty代表无需过滤",
                             null);
                     itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
                     reqCoid.addMember(itemField);
                     break;
                 case TEXT:
-                    itemField = StaticJavaParser.parseBodyDeclaration(
-                            itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
+                    itemField = parseFieldDeclaration(
+                            itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
                     JavadocUtils.setJavadoc(itemField,
                             "按“" + item.getTitle() + "”模糊匹配过滤，null或empty代表无需过滤", null);
                     itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
                     reqCoid.addMember(itemField);
                     break;
                 case TIME:
-                    itemField = StaticJavaParser.parseBodyDeclaration(
-                                    String.format("%s %sStart;", itemService.getJavaTypeInDTO(item), item.getName()))
-                            .asFieldDeclaration();
+                    itemField = parseFieldDeclaration(
+                            "%s %sStart;", itemService.getJavaTypeInDTO(item), item.getName());
                     JavadocUtils.setJavadoc(itemField,
                             String.format("按“%s”晚于该时间过滤，null代表无需过滤", item.getTitle()), null);
                     itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
                     reqCoid.addMember(itemField);
-                    itemField = StaticJavaParser.parseBodyDeclaration(
-                                    String.format("%s %sEnd;", itemService.getJavaTypeInDTO(item), item.getName()))
-                            .asFieldDeclaration();
+                    itemField = parseFieldDeclaration(
+                            "%s %sEnd;", itemService.getJavaTypeInDTO(item), item.getName());
                     JavadocUtils.setJavadoc(itemField,
                             String.format("按“%s”早于该时间过滤，null代表无需过滤", item.getTitle()), null);
                     itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
@@ -121,35 +122,33 @@ public class ListApiServiceImpl implements ListApiService {
         }
 
         // 创建时间
-        itemField = StaticJavaParser.parseBodyDeclaration("java.time.LocalDateTime createdAtStart;")
-                .asFieldDeclaration();
+        itemField = parseFieldDeclaration("java.time.LocalDateTime createdAtStart;");
         JavadocUtils.setJavadoc(itemField, "按创建时间晚于该时间过滤，null代表无需过滤", null);
-        AnnotationExpr jsonFormat = StaticJavaParser.parseAnnotation(
+        AnnotationExpr jsonFormat = parseAnnotation(
                 "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"" + TimeFormat.DATE_TIME.getPattern()
                         + "\", timezone = " + "\"Asia/Shanghai\")");
         itemField.addAnnotation(jsonFormat);
         reqCoid.addMember(itemField);
-        itemField = StaticJavaParser.parseBodyDeclaration("LocalDateTime createdAtEnd;").asFieldDeclaration();
+        itemField = parseFieldDeclaration("LocalDateTime createdAtEnd;");
         JavadocUtils.setJavadoc(itemField, "按创建时间早于该时间过滤，null代表无需过滤", null);
         itemField.addAnnotation(jsonFormat);
         reqCoid.addMember(itemField);
 
         // 分页参数
-        FieldDeclaration pageNum = StaticJavaParser.parseBodyDeclaration("Integer pageNum = 1;").asFieldDeclaration();
+        FieldDeclaration pageNum = parseFieldDeclaration("Integer pageNum = 1;");
         JavadocUtils.setJavadoc(pageNum, "分页页码", null);
         reqCoid.addMember(pageNum);
-        FieldDeclaration pageSize = StaticJavaParser.parseBodyDeclaration("Integer pageSize = 10;")
-                .asFieldDeclaration();
+        FieldDeclaration pageSize = parseFieldDeclaration("Integer pageSize = 10;");
         JavadocUtils.setJavadoc(pageSize, "分页条数", null);
         reqCoid.addMember(pageSize);
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
 
         // 排序方式 TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
-//        itemField = StaticJavaParser.parseBodyDeclaration(form.getName() + "SortItemEnum sortItem;")
+//        itemField = StaticJavaParserUtils.parseFieldDeclaration(form.getName() + "SortItemEnum sortItem;")
 //                .asFieldDeclaration();
 //        JavadocUtils.setJavadoc(itemField, "排序字段，null代表更新时间", null);
 //        reqCoid.addMember(itemField);
-//        itemField = StaticJavaParser.parseBodyDeclaration("Boolean isSortAsc;")
+//        itemField = StaticJavaParserUtils.parseFieldDeclaration("Boolean isSortAsc;")
 //                .asFieldDeclaration();
 //        JavadocUtils.setJavadoc(itemField, "true代表正序，否则代表倒序", null);
 //        reqCoid.addMember(itemField);
@@ -160,8 +159,8 @@ public class ListApiServiceImpl implements ListApiService {
             if (item.getType() == SECRET) {
                 continue;
             }
-            itemField = StaticJavaParser.parseBodyDeclaration(
-                    itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
+            itemField = parseFieldDeclaration(
+                    itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
             JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
             itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
             respCoid.addMember(itemField);
@@ -235,23 +234,23 @@ public class ListApiServiceImpl implements ListApiService {
         }
         designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         designChain += ".page(req.getPageNum(),req.getPageSize());";
-        body.addStatement(StaticJavaParser.parseStatement(
+        body.addStatement(parseStatement(
                 "List<" + form.getName() + "> " + English.plural(form.getVarName()) + " = " + designChain));
 
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
-                        config.getPageTemplates().getPageResultEmptyConstruction())));
+        body.addStatement(parseStatement(
+                "if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
+                config.getPageTemplates().getPageResultEmptyConstruction()));
 
-        body.addStatement(StaticJavaParser.parseStatement(
+        body.addStatement(parseStatement(
                 "List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
         ForEachStmt forEachStmt = new ForEachStmt();
-        forEachStmt.setVariable(StaticJavaParser.parseVariableDeclarationExpr(
+        forEachStmt.setVariable(parseVariableDeclarationExpr(
                 String.format("%s %s", form.getName(), form.getVarName())));
         forEachStmt.setIterable(new NameExpr(English.plural(form.getVarName())));
         BlockStmt forEachBody = new BlockStmt();
-        forEachBody.addStatement(StaticJavaParser.parseStatement(
-                String.format("List%sResp dto = new List%sResp();", English.plural(form.getName()),
-                        English.plural(form.getName()))));
+        forEachBody.addStatement(parseStatement(
+                "List%sResp dto = new List%sResp();", English.plural(form.getName()),
+                English.plural(form.getName())));
         for (ItemDef item : form.getItems()) {
             if (item.getType() == SECRET) {
                 continue;
@@ -266,7 +265,7 @@ public class ListApiServiceImpl implements ListApiService {
         forEachStmt.setBody(forEachBody);
         body.addStatement(forEachStmt);
         body.addStatement(
-                StaticJavaParser.parseStatement("return " + config.getPageTemplates().getPageResultConstruction()
+                parseStatement("return " + config.getPageTemplates().getPageResultConstruction()
                 .replace("${total}", "query" + form.getName() + "Total").replace("${dtos}", "dtos") + ";"));
         return body;
     }
@@ -299,8 +298,8 @@ public class ListApiServiceImpl implements ListApiService {
                 }
             }
         }
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("dto.set%s(%s);", StringUtils.capitalize(item.getName()), getterWithConvert)));
+        body.addStatement(parseStatement(
+                "dto.set%s(%s);", StringUtils.capitalize(item.getName()), getterWithConvert));
     }
 
 }

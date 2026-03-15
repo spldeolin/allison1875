@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -44,122 +45,122 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
 
     @Override
     public AnnotationExpr lombokData() {
-        return StaticJavaParser.parseAnnotation("@lombok.Data").clone();
+        return parseAnnotation("@lombok.Data").clone();
     }
 
     @Override
     public AnnotationExpr lombokAccessors() {
-        return StaticJavaParser.parseAnnotation("@lombok.experimental.Accessors(chain = true)").clone();
+        return parseAnnotation("@lombok.experimental.Accessors(chain = true)").clone();
     }
 
     @Override
     public AnnotationExpr lombokFieldDefaultsPrivate() {
-        return StaticJavaParser.parseAnnotation(
+        return parseAnnotation(
                 "@lombok.experimental.FieldDefaults(level = lombok.AccessLevel.PRIVATE)").clone();
     }
 
     @Override
     public AnnotationExpr lombokGetter() {
-        return StaticJavaParser.parseAnnotation("@lombok.Getter").clone();
+        return parseAnnotation("@lombok.Getter").clone();
     }
 
     @Override
     public AnnotationExpr lombokAllArgsConstructor() {
-        return StaticJavaParser.parseAnnotation("@lombok.AllArgsConstructor").clone();
+        return parseAnnotation("@lombok.AllArgsConstructor").clone();
     }
 
     @Override
     public AnnotationExpr springService() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.stereotype.Service").clone();
+        return parseAnnotation("@org.springframework.stereotype.Service").clone();
     }
 
     @Override
     public AnnotationExpr lombokSlf4J() {
-        return StaticJavaParser.parseAnnotation("@lombok.extern.slf4j.Slf4j").clone();
+        return parseAnnotation("@lombok.extern.slf4j.Slf4j").clone();
     }
 
     @Override
     public AnnotationExpr javaOverride() {
-        return StaticJavaParser.parseAnnotation("@Override").clone();
+        return parseAnnotation("@Override").clone();
     }
 
     @Override
     public AnnotationExpr springRestController() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RestController").clone();
+        return parseAnnotation("@org.springframework.web.bind.annotation.RestController").clone();
     }
 
     @Override
     public AnnotationExpr springRequestMapping() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestMapping").clone();
+        return parseAnnotation("@org.springframework.web.bind.annotation.RequestMapping").clone();
     }
 
     @Override
     public AnnotationExpr springRequestMapping(String path) {
-        return StaticJavaParser.parseAnnotation(
+        return parseAnnotation(
                 String.format("@org.springframework.web.bind.annotation.RequestMapping(\"%s\")", path)).clone();
     }
 
     @Override
     public AnnotationExpr springRequestBody() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestBody").clone();
+        return parseAnnotation("@org.springframework.web.bind.annotation.RequestBody").clone();
     }
 
     @Override
     public MarkerAnnotationExpr springRequestParamWithoutProperty() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam")
+        return parseAnnotation("@org.springframework.web.bind.annotation.RequestParam")
                 .asMarkerAnnotationExpr().clone();
     }
 
     @Override
     public NormalAnnotationExpr springRequestParamWithProperty() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.RequestParam()")
+        return parseAnnotation("@org.springframework.web.bind.annotation.RequestParam()")
                 .asNormalAnnotationExpr().clone();
     }
 
     @Override
     public AnnotationExpr springResponseBody() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.web.bind.annotation.ResponseBody").clone();
+        return parseAnnotation("@org.springframework.web.bind.annotation.ResponseBody").clone();
     }
 
     @Override
     public AnnotationExpr springDateTimeFormat() {
-        return StaticJavaParser.parseAnnotation(
+        return parseAnnotation(
                 "@org.springframework.format.annotation.DateTimeFormat(pattern=\"yyyy-MM-dd HH:mm:ss\")").clone();
     }
 
     @Override
     public AnnotationExpr javaxValid() {
         if (config.getEnableJavaxMoveToJakarta()) {
-            return StaticJavaParser.parseAnnotation("@jakarta.validation.Valid").clone();
+            return parseAnnotation("@jakarta.validation.Valid").clone();
         } else {
-            return StaticJavaParser.parseAnnotation("@javax.validation.Valid").clone();
+            return parseAnnotation("@javax.validation.Valid").clone();
         }
     }
 
     @Override
     public AnnotationExpr notNull() {
         if (config.getEnableJavaxMoveToJakarta()) {
-            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotNull").clone();
+            return parseAnnotation("@jakarta.validation.constraints.NotNull").clone();
         } else {
-            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotNull").clone();
+            return parseAnnotation("@javax.validation.constraints.NotNull").clone();
         }
     }
 
     @Override
     public AnnotationExpr notEmpty() {
         if (config.getEnableJavaxMoveToJakarta()) {
-            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotEmpty").clone();
+            return parseAnnotation("@jakarta.validation.constraints.NotEmpty").clone();
         } else {
-            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotEmpty").clone();
+            return parseAnnotation("@javax.validation.constraints.NotEmpty").clone();
         }
     }
 
     @Override
     public AnnotationExpr notBlank() {
         if (config.getEnableJavaxMoveToJakarta()) {
-            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.NotBlank").clone();
+            return parseAnnotation("@jakarta.validation.constraints.NotBlank").clone();
         } else {
-            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.NotBlank").clone();
+            return parseAnnotation("@javax.validation.constraints.NotBlank").clone();
         }
     }
 
@@ -171,30 +172,30 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
         }
         args += "max=" + max + ")";
         if (config.getEnableJavaxMoveToJakarta()) {
-            return StaticJavaParser.parseAnnotation("@jakarta.validation.constraints.Size" + args).clone();
+            return parseAnnotation("@jakarta.validation.constraints.Size" + args).clone();
         } else {
-            return StaticJavaParser.parseAnnotation("@javax.validation.constraints.Size" + args).clone();
+            return parseAnnotation("@javax.validation.constraints.Size" + args).clone();
         }
     }
 
     @Override
     public AnnotationExpr springAutowired() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.beans.factory.annotation.Autowired").clone();
+        return parseAnnotation("@org.springframework.beans.factory.annotation.Autowired").clone();
     }
 
     @Override
     public AnnotationExpr lombokEqualsAndHashCode() {
-        return StaticJavaParser.parseAnnotation("@lombok.EqualsAndHashCode(callSuper = true)").clone();
+        return parseAnnotation("@lombok.EqualsAndHashCode(callSuper = true)").clone();
     }
 
     @Override
     public AnnotationExpr springController() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.stereotype.Controller").clone();
+        return parseAnnotation("@org.springframework.stereotype.Controller").clone();
     }
 
     @Override
     public AnnotationExpr springTransactional() {
-        return StaticJavaParser.parseAnnotation("@org.springframework.transaction.annotation.Transactional").clone();
+        return parseAnnotation("@org.springframework.transaction.annotation.Transactional").clone();
     }
 
 }

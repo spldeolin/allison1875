@@ -2,6 +2,10 @@ package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -54,22 +58,22 @@ public class SaveApiServiceImpl implements SaveApiService {
     public InitializerDeclaration generateSaveInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
         // handler, desc声明部分
-        bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"save%s\", desc = \"创建%s\", form=\"%s\", type=\"%s\";",
-                        form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
-                        ApiType.SAVE.getCode())));
+        bs.addStatement(parseStatement(
+                "String handler = \"save%s\", desc = \"创建%s\", form=\"%s\", type=\"%s\";",
+                form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
+                ApiType.SAVE.getCode()));
 
         // req声明
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req");
-        FieldDeclaration bizIdField = StaticJavaParser.parseBodyDeclaration(
-                "String " + StringUtils.uncapitalize(form.getName()) + "Code;").asFieldDeclaration();
+        FieldDeclaration bizIdField = parseFieldDeclaration(
+                "String " + StringUtils.uncapitalize(form.getName()) + "Code;");
         JavadocUtils.setJavadoc(bizIdField, form.getTitle() + "的业务ID", null);
         reqCoid.addMember(bizIdField);
         for (ItemDef item : form.getItems()) {
             if (item.getInitPattern() == InitOrEditPattern.USER_INPUT
                     || item.getEditPattern() == InitOrEditPattern.USER_INPUT) {
-                FieldDeclaration itemField = StaticJavaParser.parseBodyDeclaration(
-                        itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
+                FieldDeclaration itemField = parseFieldDeclaration(
+                        itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
                 JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
                 itemService.getJavaValidAnnotations(item).forEach(itemField::addAnnotation);
                 itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
@@ -87,10 +91,10 @@ public class SaveApiServiceImpl implements SaveApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("boolean toCreate = req.%s() == null;", form.getBizIdGetterName())));
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s %s;", form.getEntityName(config), form.getVarName())));
+        body.addStatement(parseStatement(
+                "boolean toCreate = req.%s() == null;", form.getBizIdGetterName()));
+        body.addStatement(parseStatement(
+                "%s %s;", form.getEntityName(config), form.getVarName()));
         IfStmt ifStmt = new IfStmt();
         ifStmt.setCondition(new NameExpr("toCreate"));
         ifStmt.setThenStmt(generateIfThenBody(form));
@@ -107,48 +111,48 @@ public class SaveApiServiceImpl implements SaveApiService {
                 generatorSetterToGetter(form, item, body);
             }
         }
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s.setUpdatedAt(LocalDateTime.now());", form.getVarName())));
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
-                        form.getVarName(), form.getVarName(), form.getVarName(), form.getVarName())));
+        body.addStatement(parseStatement(
+                "%s.setUpdatedAt(LocalDateTime.now());", form.getVarName()));
+        body.addStatement(parseStatement(
+                "if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
+                form.getVarName(), form.getVarName(), form.getVarName(), form.getVarName()));
 
         // 删除、重新创建关联实体
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
-                Statement stmt = StaticJavaParser.parseStatement(
-                        String.format("%sMapper.deleteBy%s(%s.%s());", associationForm.getVarName(),
-                                StringUtils.capitalize(associationForm.getBizIdName()), form.getVarName(),
-                                associationForm.getBizIdGetterName()));
+                Statement stmt = parseStatement(
+                        "%sMapper.deleteBy%s(%s.%s());", associationForm.getVarName(),
+                        StringUtils.capitalize(associationForm.getBizIdName()), form.getVarName(),
+                        associationForm.getBizIdGetterName());
                 stmt.setLineComment(String.format("重建与%s的关联（先删除，后创建）", item.getTitle()));
                 body.addStatement(stmt);
                 ForEachStmt forEachStmt = new ForEachStmt();
-                forEachStmt.setVariable(StaticJavaParser.parseVariableDeclarationExpr(
+                forEachStmt.setVariable(parseVariableDeclarationExpr(
                         String.format("%s %s", MoreStringUtils.toUpperCamel(item.getName()) + "Enum", item.getName())));
-                forEachStmt.setIterable(StaticJavaParser.parseExpression(
+                forEachStmt.setIterable(parseExpression(
                         String.format("req.get%s()", StringUtils.capitalize(item.getName()))));
                 BlockStmt forEachBody = new BlockStmt();
-                forEachBody.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s %s = new %s();", associationForm.getName(), associationForm.getVarName(),
-                                associationForm.getName())));
-                forEachBody.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s.%s(%s.%s());", associationForm.getVarName(),
-                                associationForm.getBizIdSetterName(), form.getVarName(), form.getBizIdGetterName())));
-                forEachBody.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s.set%s(%s.getCode());", associationForm.getVarName(),
-                                StringUtils.capitalize(item.getName()), item.getName())));
-                forEachBody.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%s.setCreatedAt(LocalDateTime.now());", associationForm.getVarName())));
-                forEachBody.addStatement(StaticJavaParser.parseStatement(
-                        String.format("%sMapper.insert(%s);", associationForm.getVarName(),
-                                associationForm.getVarName())));
+                forEachBody.addStatement(parseStatement(
+                        "%s %s = new %s();", associationForm.getName(), associationForm.getVarName(),
+                        associationForm.getName()));
+                forEachBody.addStatement(parseStatement(
+                        "%s.%s(%s.%s());", associationForm.getVarName(),
+                        associationForm.getBizIdSetterName(), form.getVarName(), form.getBizIdGetterName()));
+                forEachBody.addStatement(parseStatement(
+                        "%s.set%s(%s.getCode());", associationForm.getVarName(),
+                        StringUtils.capitalize(item.getName()), item.getName()));
+                forEachBody.addStatement(parseStatement(
+                        "%s.setCreatedAt(LocalDateTime.now());", associationForm.getVarName()));
+                forEachBody.addStatement(parseStatement(
+                        "%sMapper.insert(%s);", associationForm.getVarName(),
+                        associationForm.getVarName()));
                 forEachStmt.setBody(forEachBody);
                 body.addStatement(forEachStmt);
             }
         }
 
-        body.addStatement(StaticJavaParser.parseStatement(
+        body.addStatement(parseStatement(
                 "return new Save" + form.getName() + "Resp()." + form.getBizIdSetterName() + "(" + form.getVarName()
                         + "." + form.getBizIdGetterName() + "());"));
         return body;
@@ -156,11 +160,11 @@ public class SaveApiServiceImpl implements SaveApiService {
 
     private Statement generateIfThenBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s = new %s();", form.getVarName(), form.getEntityName(config))));
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
-                        config.getShortUuidGeneration())));
+        body.addStatement(parseStatement(
+                "%s = new %s();", form.getVarName(), form.getEntityName(config)));
+        body.addStatement(parseStatement(
+                "%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
+                config.getShortUuidGeneration()));
         // initPattern!=userInput添加此处
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
@@ -171,9 +175,9 @@ public class SaveApiServiceImpl implements SaveApiService {
                 generatorSetterToGetter(form, item, body);
             }
             if (item.getInitPattern() == InitOrEditPattern.TODO) {
-                Statement stmt = StaticJavaParser.parseStatement(
-                        String.format("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
-                                itemService.getTodoValue(item)));
+                Statement stmt = parseStatement(
+                        "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
+                        itemService.getTodoValue(item));
                 if (item.getInitPattern() == InitOrEditPattern.TODO) {
                     stmt.setLineComment("TODO 请补充初始值");
                 }
@@ -183,19 +187,19 @@ public class SaveApiServiceImpl implements SaveApiService {
                 // nothing to do
             }
         }
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s.setCreatedAt(LocalDateTime.now());", form.getVarName())));
+        body.addStatement(parseStatement(
+                "%s.setCreatedAt(LocalDateTime.now());", form.getVarName()));
         return body;
     }
 
     private Statement generateElseBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s = %sMapper.queryBy%s(req.%s());", form.getVarName(), form.getVarName(),
-                        StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName())));
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
-                        form.getVarName(), form.getTitle())));
+        body.addStatement(parseStatement(
+                "%s = %sMapper.queryBy%s(req.%s());", form.getVarName(), form.getVarName(),
+                StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName()));
+        body.addStatement(parseStatement(
+                "if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
+                form.getVarName(), form.getTitle()));
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
@@ -205,9 +209,9 @@ public class SaveApiServiceImpl implements SaveApiService {
                 generatorSetterToGetter(form, item, body);
             }
             if (item.getEditPattern() == InitOrEditPattern.TODO) {
-                Statement stmt = StaticJavaParser.parseStatement(
-                        String.format("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
-                                itemService.getTodoValue(item)));
+                Statement stmt = parseStatement(
+                        "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
+                        itemService.getTodoValue(item));
                 if (item.getEditPattern() == InitOrEditPattern.TODO) {
                     stmt.setLineComment("TODO 请补充更新值");
                 }
@@ -237,9 +241,9 @@ public class SaveApiServiceImpl implements SaveApiService {
                 getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 0, 0), %s)", getterWithConvert);
             }
         }
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
-                        getterWithConvert)));
+        body.addStatement(parseStatement(
+                "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
+                getterWithConvert));
     }
 
 }

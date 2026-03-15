@@ -2,6 +2,8 @@ package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -44,14 +46,14 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
     @Override
     public InitializerDeclaration generateGetDetailInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
-        bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"get%sDetail\", desc = \"%s详情\", form=\"%s\", type=\"%s\";",
-                        form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
-                        ApiType.GET_DETAIL.getCode())));
+        bs.addStatement(parseStatement(
+                "String handler = \"get%sDetail\", desc = \"%s详情\", form=\"%s\", type=\"%s\";",
+                form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
+                ApiType.GET_DETAIL.getCode()));
 
         // req声明
-        FieldDeclaration bizIdField = StaticJavaParser.parseBodyDeclaration(
-                "String " + StringUtils.uncapitalize(form.getName()) + "Code;").asFieldDeclaration();
+        FieldDeclaration bizIdField = parseFieldDeclaration(
+                "String " + StringUtils.uncapitalize(form.getName()) + "Code;");
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req")
                 .addMember(bizIdField.clone().addAnnotation(annotationExprService.notNull()));
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
@@ -62,8 +64,8 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
             if (item.getType() == ItemType.SECRET) {
                 continue;
             }
-            FieldDeclaration itemField = StaticJavaParser.parseBodyDeclaration(
-                    itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";").asFieldDeclaration();
+            FieldDeclaration itemField = parseFieldDeclaration(
+                    itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
             JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
             itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
             respCoid.addMember(itemField);
@@ -75,33 +77,33 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        Statement stmt = StaticJavaParser.parseStatement(
-                String.format("%s %s = %sMapper.queryBy%s(req.%s());", form.getName(), form.getVarName(),
-                        form.getVarName(), StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName()));
+        Statement stmt = parseStatement(
+                "%s %s = %sMapper.queryBy%s(req.%s());", form.getName(), form.getVarName(),
+                form.getVarName(), StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName());
         stmt.setLineComment("查询" + form.getTitle());
         body.addStatement(stmt);
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
-                        form.getVarName(), form.getTitle())));
+        body.addStatement(parseStatement(
+                "if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
+                form.getVarName(), form.getTitle()));
 
         // 为每个多选字段查询关联表单
         form.getItems().stream().filter(item -> item.getType() == ItemType.MULTI_SELECT)
                 .map(item -> ((MultiSelectItemDef) item)).forEach(multiSelectItem -> {
                     FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
                     String enumName = StringUtils.capitalize(multiSelectItem.getName()) + "Enum";
-                    Statement statement = StaticJavaParser.parseStatement(String.format(
+                    Statement statement = parseStatement(
                             "List<%s> %s = %sMapper.queryBy%s(%s.%s()).stream().map(%s::get%s).map(%s::of).collect"
                                     + "(Collectors.toList());", enumName, multiSelectItem.getName(),
                             associationForm.getVarName(), StringUtils.capitalize(form.getBizIdName()),
                             form.getVarName(),
                             form.getBizIdGetterName(), associationForm.getName(),
-                            StringUtils.capitalize(multiSelectItem.getName()), enumName));
+                            StringUtils.capitalize(multiSelectItem.getName()), enumName);
                     statement.setLineComment("查询" + associationForm.getTitle());
                     body.addStatement(statement);
                 });
 
-        stmt = StaticJavaParser.parseStatement(
-                String.format("Get%sDetailResp result = new Get%sDetailResp();", form.getName(), form.getName()));
+        stmt = parseStatement(
+                "Get%sDetailResp result = new Get%sDetailResp();", form.getName(), form.getName());
         stmt.setLineComment("构建返回值");
         body.addStatement(stmt);
         for (ItemDef item : form.getItems()) {
@@ -110,13 +112,13 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
                 continue;
             }
             if (item.getType() == ItemType.MULTI_SELECT) {
-                body.addStatement(StaticJavaParser.parseStatement(
-                        String.format("result.set%s(%s);", StringUtils.capitalize(item.getName()), item.getName())));
+                body.addStatement(parseStatement(
+                        "result.set%s(%s);", StringUtils.capitalize(item.getName()), item.getName()));
                 continue;
             }
             generatorSetterToGetter(form, item, body);
         }
-        body.addStatement(StaticJavaParser.parseStatement("return result;"));
+        body.addStatement(parseStatement("return result;"));
         return body;
     }
 
@@ -148,8 +150,8 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
                 }
             }
         }
-        body.addStatement(StaticJavaParser.parseStatement(
-                String.format("result.set%s(%s);", StringUtils.capitalize(item.getName()), getterWithConvert)));
+        body.addStatement(parseStatement(
+                "result.set%s(%s);", StringUtils.capitalize(item.getName()), getterWithConvert));
     }
 
 }

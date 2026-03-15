@@ -1,8 +1,5 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import static com.github.javaparser.StaticJavaParser.parseAnnotation;
-import static com.github.javaparser.StaticJavaParser.parseParameter;
-import static com.github.javaparser.StaticJavaParser.parseType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,6 +7,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseParameter;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -127,7 +127,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
-        insert.addParameter(StaticJavaParser.parseParameter(
+        insert.addParameter(parseParameter(
                 "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
                         .getDtoQualifier() + "> entities"));
         insert.setBody(null);
@@ -143,7 +143,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
         insert.setJavadocComment(comment);
         insert.setType(PrimitiveType.intType());
         insert.setName(methodName);
-        insert.addParameter(StaticJavaParser.parseParameter(
+        insert.addParameter(parseParameter(
                 "@org.apache.ibatis.annotations.Param(\"entities\") List<" + args.getEntityGeneration()
                         .getDtoQualifier() + "> entities"));
         insert.setBody(null);
@@ -173,7 +173,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             methodName = antiDuplicationService.getNewMethodNameIfExist("listAll", args.getMapper());
             MethodDeclaration listAll = new MethodDeclaration();
             String comment = concatMapperMethodComment(args.getTableAnalysisDTO(), "获取全部");
-            listAll.setType(StaticJavaParser.parseType("List<" + args.getEntityGeneration().getDtoQualifier() + ">"));
+            listAll.setType(parseType("List<" + args.getEntityGeneration().getDtoQualifier() + ">"));
             listAll.setName(methodName);
             listAll.setJavadocComment(comment);
             listAll.setBody(null);

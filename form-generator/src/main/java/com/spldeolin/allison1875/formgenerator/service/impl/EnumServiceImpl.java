@@ -5,7 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseMethodDeclaration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -80,22 +81,20 @@ public class EnumServiceImpl implements EnumService {
                 }
 
                 // 枚举其他成员
-                ed.addMember(StaticJavaParser.parseBodyDeclaration(
+                ed.addMember(parseBodyDeclaration(
                         "@com.fasterxml.jackson.annotation.JsonValue private final String code;"));
-                ed.addMember(StaticJavaParser.parseBodyDeclaration("private final String title;"));
-                ed.addMember(StaticJavaParser.parseBodyDeclaration(
-                                "public static boolean valid(String code) { return Arrays.stream(values())" +
-                                        ".anyMatch"
-                                        + "(anEnum -> anEnum.getCode().equals(code)); }").asMethodDeclaration()
+                ed.addMember(parseBodyDeclaration("private final String title;"));
+                ed.addMember(parseMethodDeclaration(
+                        "public static boolean valid(String code) { return Arrays.stream(values())"
+                                + ".anyMatch(anEnum -> anEnum.getCode().equals(code)); }")
                         .setJavadocComment("判断参数code是否是一个有效的枚举"));
-                ed.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
-                                "@com.fasterxml.jackson.annotation.JsonCreator public static %s of(String code) { "
-                                        + "return Arrays" + ".stream(values()).filter(anEnum -> anEnum.getCode()"
-                                        + ".equals(code))" + ".findFirst().orElse(null); }", enumName)).asMethodDeclaration()
+                ed.addMember(parseMethodDeclaration(
+                        "@com.fasterxml.jackson.annotation.JsonCreator public static %s of(String code) { "
+                                + "return Arrays.stream(values()).filter(anEnum -> anEnum.getCode()"
+                                + ".equals(code)).findFirst().orElse(null); }", enumName)
                         .setJavadocComment("获取code对应的枚举"));
-                ed.addMember(
-                        StaticJavaParser.parseBodyDeclaration("@Override public String toString() { return code; }")
-                                .asMethodDeclaration());
+                ed.addMember(parseMethodDeclaration(
+                        "@Override public String toString() { return code; }"));
                 cu.addType(ed);
                 cu.setStorage(absulutePath);
                 importExprService.extractQualifiedTypeToImport(cu);
@@ -132,21 +131,20 @@ public class EnumServiceImpl implements EnumService {
             }
 
             // 枚举其他成员
-            ed.addMember(StaticJavaParser.parseBodyDeclaration(
+            ed.addMember(parseBodyDeclaration(
                     "@com.fasterxml.jackson.annotation.JsonValue private final String code;"));
-            ed.addMember(StaticJavaParser.parseBodyDeclaration("private final String title;"));
-            ed.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public static boolean valid(String code) { return Arrays.stream(values())" + ".anyMatch"
-                                    + "(anEnum -> anEnum.getCode().equals(code)); }").asMethodDeclaration()
+            ed.addMember(parseBodyDeclaration("private final String title;"));
+            ed.addMember(parseMethodDeclaration(
+                    "public static boolean valid(String code) { return Arrays.stream(values())"
+                            + ".anyMatch(anEnum -> anEnum.getCode().equals(code)); }")
                     .setJavadocComment("判断参数code是否是一个有效的枚举"));
-            ed.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
-                            "@com.fasterxml.jackson.annotation.JsonCreator public static %s of(String code) { "
-                                    + "return Arrays" + ".stream(values()).filter(anEnum -> anEnum.getCode()" +
-                                    ".equals(code))"
-                                    + ".findFirst().orElse(null); }", enumName)).asMethodDeclaration()
+            ed.addMember(parseMethodDeclaration(
+                    "@com.fasterxml.jackson.annotation.JsonCreator public static %s of(String code) { "
+                            + "return Arrays.stream(values()).filter(anEnum -> anEnum.getCode().equals(code))"
+                            + ".findFirst().orElse(null); }", enumName)
                     .setJavadocComment("获取code对应的枚举"));
-            ed.addMember(StaticJavaParser.parseBodyDeclaration("@Override public String toString() { return code; }")
-                    .asMethodDeclaration());
+            ed.addMember(parseMethodDeclaration(
+                    "@Override public String toString() { return code; }"));
             cu.addType(ed);
             cu.setStorage(absulutePath);
             importExprService.extractQualifiedTypeToImport(cu);

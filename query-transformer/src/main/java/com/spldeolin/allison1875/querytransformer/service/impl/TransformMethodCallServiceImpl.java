@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.querytransformer.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
@@ -50,17 +50,17 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
         String paramDTOVarName = MoreStringUtils.toLowerCamel(
                 MoreStringUtils.splitAndGetLastPart(paramDTOTypeQualifier, "."));
         List<Statement> result = Lists.newArrayList();
-        result.add(StaticJavaParser.parseStatement(
+        result.add(parseStatement(
                 "final " + paramDTOTypeQualifier + " " + paramDTOVarName + " = new " + paramDTOTypeQualifier + "();"));
         for (Binary binariesAsArg : chainAnalysis.getBinariesAsArgs()) {
-            result.add(StaticJavaParser.parseStatement(
+            result.add(parseStatement(
                     paramDTOVarName + ".set" + MoreStringUtils.toUpperCamel(binariesAsArg.getVarName()) + "("
                             + binariesAsArg.getArgument() + ");"));
         }
         if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
-            result.add(StaticJavaParser.parseStatement(
+            result.add(parseStatement(
                     paramDTOVarName + ".setOffset(" + chainAnalysis.getOffsetExpr() + ");"));
-            result.add(StaticJavaParser.parseStatement(
+            result.add(parseStatement(
                     paramDTOVarName + ".setLimit(" + chainAnalysis.getLimitExpr() + ");"));
         }
         return result;

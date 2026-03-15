@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBlock;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -110,11 +111,11 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
         }
 
         if (arg.getIsDataModelSerializable()) {
-            coid.getMembers().addFirst(StaticJavaParser.parseBodyDeclaration(
+            coid.getMembers().addFirst(parseBodyDeclaration(
                     "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
         }
         if (arg.getIsDataModelCloneable()) {
-            coid.getMembers().addLast(StaticJavaParser.parseBodyDeclaration(
+            coid.getMembers().addLast(parseBodyDeclaration(
                     "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));
         }
 
@@ -139,7 +140,7 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
             }
             getter.setPublic(true).setType(fieldArg.getTypeQualifier())
                     .setName("get" + StringUtils.capitalize(fieldArg.getFieldName()));
-            getter.setBody(StaticJavaParser.parseBlock(String.format("{ return %s; }", fieldArg.getFieldName())));
+            getter.setBody(parseBlock("{ return %s; }", fieldArg.getFieldName()));
             coid.addMember(getter);
         }
 
@@ -152,8 +153,8 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
             setter.setPublic(true).setType(coid.getNameAsString())
                     .setName("set" + StringUtils.capitalize(fieldArg.getFieldName()))
                     .addParameter(fieldArg.getTypeQualifier(), fieldArg.getFieldName());
-            setter.setBody(StaticJavaParser.parseBlock(
-                    String.format("{ this.%s = %s; return this; }", fieldArg.getFieldName(), fieldArg.getFieldName())));
+            setter.setBody(parseBlock(
+                    "{ this.%s = %s; return this; }", fieldArg.getFieldName(), fieldArg.getFieldName()));
             coid.addMember(setter);
         }
 
@@ -169,7 +170,7 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
         String toStringBody = String.format(
                 "{ return new java.util.StringJoiner(\", \", %s.class.getSimpleName() + \"(\", \")\")%s.toString(); }",
                 coid.getName(), addMces);
-        toString.setBody(StaticJavaParser.parseBlock(toStringBody));
+        toString.setBody(parseBlock(toStringBody));
         coid.addMember(toString);
 
         // add equals and hashcode

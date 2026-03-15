@@ -7,6 +7,7 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN
 import java.util.List;
 import java.util.Optional;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -68,7 +69,7 @@ public class TimeItemService implements ItemService<TimeItemDef> {
 
     @Override
     public Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(TimeItemDef itemDef) {
-        return Optional.of(StaticJavaParser.parseAnnotation(
+        return Optional.of(parseAnnotation(
                 "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"" + itemDef.getFormat().getPattern()
                         + "\", timezone = " + "\"Asia/Shanghai\")"));
     }

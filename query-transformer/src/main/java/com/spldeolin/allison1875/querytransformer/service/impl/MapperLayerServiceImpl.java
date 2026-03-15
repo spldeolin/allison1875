@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -112,7 +113,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         }
         // 增加Mybatis @MapKey注解
         if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
-            method.addAnnotation(StaticJavaParser.parseAnnotation(
+            method.addAnnotation(parseAnnotation(
                     String.format("@org.apache.ibatis.annotations.MapKey(\"%s\")",
                             chainAnalysis.getMapOrGroupKeyProperty().getPropertyName())));
         }

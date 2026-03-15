@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -34,14 +36,14 @@ public class DeleteApiServiceImpl implements DeleteApiService {
     @Override
     public InitializerDeclaration generateDeleteInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
-        bs.addStatement(StaticJavaParser.parseStatement(
-                String.format("String handler = \"delete%s\", desc = \"删除%s\", form=\"%s\", type=\"%s\";",
-                        form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
-                        ApiType.DELETE.getCode())));
+        bs.addStatement(parseStatement(
+                "String handler = \"delete%s\", desc = \"删除%s\", form=\"%s\", type=\"%s\";",
+                form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
+                ApiType.DELETE.getCode()));
 
         // req声明
-        FieldDeclaration bizIdField = StaticJavaParser.parseBodyDeclaration(
-                "java.util.List<String> " + form.getBizIdName() + "s;").asFieldDeclaration();
+        FieldDeclaration bizIdField = parseFieldDeclaration(
+                "java.util.List<String> " + form.getBizIdName() + "s;");
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req")
                 .addMember(bizIdField.clone().addAnnotation(annotationExprService.notEmpty()));
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
@@ -51,16 +53,16 @@ public class DeleteApiServiceImpl implements DeleteApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(StaticJavaParser.parseStatement(
+        body.addStatement(parseStatement(
                 form.getName() + "Design.delete().where()." + form.getBizIdName() + ".in(req."
                         + form.getBizIdGetterName() + "s()).over();"));
         form.getItems().stream().filter(item -> item.getType() == ItemType.MULTI_SELECT)
                 .map(item -> ((MultiSelectItemDef) item)).forEach(multiSelectItem -> {
                     FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
-                    body.addStatement(StaticJavaParser.parseStatement(
-                            String.format("%sDesign.delete().where().%s.in(req.%ss()).over();",
-                                    associationForm.getName(),
-                                    associationForm.getBizIdName(), associationForm.getBizIdGetterName())));
+                    body.addStatement(parseStatement(
+                            "%sDesign.delete().where().%s.in(req.%ss()).over();",
+                            associationForm.getName(),
+                            associationForm.getBizIdName(), associationForm.getBizIdGetterName()));
                 });
         return body;
     }

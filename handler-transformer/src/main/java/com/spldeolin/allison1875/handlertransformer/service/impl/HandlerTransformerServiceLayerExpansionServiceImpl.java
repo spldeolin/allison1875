@@ -2,7 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.util.Collections;
 import java.util.List;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -27,7 +27,7 @@ public class HandlerTransformerServiceLayerExpansionServiceImpl implements Servi
             String reqBodyDTOType, List<VariableDeclarator> reqParams, String respBodyDTOType) {
         BlockStmt body = new BlockStmt();
         if (respBodyDTOType != null) {
-            body.addStatement(StaticJavaParser.parseStatement("return null;"));
+            body.addStatement(parseStatement("return null;"));
         }
         return new BuildServiceImplMethodBodyRetval().setBody(body);
     }

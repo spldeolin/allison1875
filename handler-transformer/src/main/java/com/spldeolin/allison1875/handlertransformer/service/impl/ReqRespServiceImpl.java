@@ -9,6 +9,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -166,7 +167,7 @@ public class ReqRespServiceImpl implements ReqRespService {
                     field.addAnnotation(annotationExprService.javaxValid());
                 }
                 this.moveAnnotations(dto, field);
-                field.addVariable(new VariableDeclarator(StaticJavaParser.parseType(calcType(dto, dtoQualifier)),
+                field.addVariable(new VariableDeclarator(parseType(calcType(dto, dtoQualifier)),
                         standardizeNestDTOFieldName(dto)));
                 parentCoid.replace(dto, field);
             }

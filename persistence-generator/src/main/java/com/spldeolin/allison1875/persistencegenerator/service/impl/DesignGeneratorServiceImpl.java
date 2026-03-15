@@ -8,6 +8,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseMethodDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -89,12 +94,12 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                 ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
                 JavadocComment javadoc = new JavadocComment(concatJoinChainDescription(args.getTableAnalysis()));
                 designCoid.setJavadocComment(javadoc);
-                designCoid.addAnnotation(StaticJavaParser.parseAnnotation("@SuppressWarnings(\"all\")"));
+                designCoid.addAnnotation(parseAnnotation("@SuppressWarnings(\"all\")"));
                 designCoid.setPublic(true).setInterface(false).setName("JoinChain").setTypeParameters(typeParams);
-                designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                designCoid.addMember(parseBodyDeclaration(
                         "private final static UnsupportedOperationException e = new UnsupportedOperationException"
                                 + "();"));
-                designCoid.addMember(StaticJavaParser.parseBodyDeclaration("private JoinChain() {}"));
+                designCoid.addMember(parseBodyDeclaration("private JoinChain() {}"));
                 designCu.addType(designCoid);
                 designCu.addOrphanComment(new LineComment(""));
                 CompilationUnitUtils.writeJava(designCu);
@@ -104,22 +109,22 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         TypeDeclaration<?> design = cu.getPrimaryType()
                 .orElseThrow(() -> new Allison1875Exception("JoinChain PrimaryType absent"));
 
-        FieldDeclaration joinedEntityField = StaticJavaParser.parseBodyDeclaration(
-                String.format("public Join%s<MQCM, ME> %s = %s.ett;", entityName, entityName,
-                        args.getDesignQualifier().replace('.', '_'))).asFieldDeclaration();
+        FieldDeclaration joinedEntityField = parseFieldDeclaration(
+                "public Join%s<MQCM, ME> %s = %s.ett;", entityName, entityName,
+                args.getDesignQualifier().replace('.', '_'));
         design.getFieldByName(entityName).ifPresent(Node::remove);
         design.addMember(joinedEntityField);
 
         ClassOrInterfaceDeclaration joinEntityCoid = new ClassOrInterfaceDeclaration();
         joinEntityCoid.setPublic(true).setStatic(true).setName("Join" + entityName).setTypeParameters(typeParams);
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            joinEntityCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public Join%s<MQCM, ME> %s;", entityName, property.getPropertyName())));
+            joinEntityCoid.addMember(parseBodyDeclaration(
+                    "public Join%s<MQCM, ME> %s;", entityName, property.getPropertyName()));
         }
-        joinEntityCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public Join%sOn<MQCM, ME> on() { throw e; }", entityName)));
+        joinEntityCoid.addMember(parseBodyDeclaration(
+                "public Join%sOn<MQCM, ME> on() { throw e; }", entityName));
         joinEntityCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration(String.format("private Join%s(Object o) {}", entityName)));
+                parseBodyDeclaration("private Join%s(Object o) {}", entityName));
         design.getMembers().stream().filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                 .filter(coid -> coid.getName().equals(joinEntityCoid.getName())).findAny().ifPresent(Node::remove);
@@ -129,15 +134,15 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         joinEntityOnCoid.setPublic(true).setStatic(true).setName("Join" + entityName + "On")
                 .setTypeParameters(typeParams).addImplementedType(args.getDesignQualifier().replace('.', '_'));
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            joinEntityOnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public OnChainComparison<MQCM, %s, PropertyName<ME, %s>> %s;",
-                            property.getJavaType().getQualifier(), property.getJavaType().getQualifier(),
-                            property.getPropertyName())));
+            joinEntityOnCoid.addMember(parseBodyDeclaration(
+                    "public OnChainComparison<MQCM, %s, PropertyName<ME, %s>> %s;",
+                    property.getJavaType().getQualifier(), property.getJavaType().getQualifier(),
+                    property.getPropertyName()));
         }
-        joinEntityOnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public Join%sOnOpened<MQCM, ME> open() { throw e; }", entityName)));
+        joinEntityOnCoid.addMember(parseBodyDeclaration(
+                "public Join%sOnOpened<MQCM, ME> open() { throw e; }", entityName));
         joinEntityOnCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration(String.format("private Join%sOn(Object o) {}", entityName)));
+                parseBodyDeclaration("private Join%sOn(Object o) {}", entityName));
         design.getMembers().stream().filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                 .filter(coid -> coid.getName().equals(joinEntityOnCoid.getName())).findAny().ifPresent(Node::remove);
@@ -147,10 +152,10 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         joinEntityOnOpenedCoid.setPublic(true).setStatic(true).setName("Join" + entityName + "OnOpened")
                 .setTypeParameters(typeParams).addImplementedType(args.getDesignQualifier().replace('.', '_'));
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            joinEntityOnOpenedCoid.addMember(StaticJavaParser.parseBodyDeclaration(String.format(
+            joinEntityOnOpenedCoid.addMember(parseBodyDeclaration(
                     "public OnChainComparison<Join%sOnOpenedClosable<MQCM, ME>, %s, PropertyName<ME, %s>> %s;",
                     entityName, property.getJavaType().getQualifier(), property.getJavaType().getQualifier(),
-                    property.getPropertyName())));
+                    property.getPropertyName()));
         }
         design.getMembers().stream().filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
@@ -163,7 +168,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                 .setTypeParameters(typeParams).addExtendedType("Join" + entityName + "OnOpened<MQCM, ME>")
                 .addImplementedType(args.getDesignQualifier().replace('.', '_'));
         joinEntityOnOpenedClosableCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration("public MQCM close() { throw e; }"));
+                parseBodyDeclaration("public MQCM close() { throw e; }"));
         design.getMembers().stream().filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                 .filter(coid -> coid.getName().equals(joinEntityOnOpenedClosableCoid.getName())).findAny()
@@ -174,7 +179,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         designQualifierMarker.setPrivate(true).setStatic(true).setInterface(true)
                 .setName(args.getDesignQualifier().replace('.', '_'));
         designQualifierMarker.addMember(
-                StaticJavaParser.parseBodyDeclaration(String.format("Join%s ett = null;", entityName)));
+                parseBodyDeclaration("Join%s ett = null;", entityName));
         design.getMembers().stream().filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                 .filter(coid -> coid.getName().equals(designQualifierMarker.getName())).findAny()
@@ -216,79 +221,79 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
         Javadoc javadoc = entityGeneration.getCoid().getJavadoc().orElse(new Javadoc(new JavadocDescription()));
         designCoid.setJavadocComment(javadoc);
-        designCoid.addAnnotation(StaticJavaParser.parseAnnotation("@SuppressWarnings(\"all\")"));
+        designCoid.addAnnotation(parseAnnotation("@SuppressWarnings(\"all\")"));
         designCoid.setPublic(true).setInterface(false).setName(designName);
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration(
                 "private final static UnsupportedOperationException e = new UnsupportedOperationException();"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration("private " + designName + "() {}"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration("private " + designName + "() {}"));
+        designCoid.addMember(parseBodyDeclaration(
                 "public static QueryChain " + ChainInitialMethod.SELECT.getCode() + "(String methodName) {throw e;}"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration(
                 "public static QueryChain " + ChainInitialMethod.SELECT.getCode() + "() {throw e;}"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration(
                 "public static UpdateChain " + ChainInitialMethod.UPDATE.getCode() + "(String methodName) {throw e;}"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration(
                 "public static UpdateChain " + ChainInitialMethod.UPDATE.getCode() + "() {throw e;}"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration(
                 "public static DropChain " + ChainInitialMethod.DELETE.getCode() + "(String methodName) {throw e;}"));
-        designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        designCoid.addMember(parseBodyDeclaration(
                 "public static DropChain " + ChainInitialMethod.DELETE.getCode() + "() {throw e;}"));
 
         ClassOrInterfaceDeclaration queryChainMethodsCoid = new ClassOrInterfaceDeclaration();
         queryChainMethodsCoid.setPublic(true).setStatic(true).setName("QueryChainMethods");
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
                 "public ByChainReturn<NextableByChainReturn> " + KeywordConstant.WHERE_METHOD_NAME
                         + "() { throw e; }"));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public ByChainReturn<NextableByChainReturn> %s() { throw e; }",
-                        KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME)));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                "public ByChainReturn<NextableByChainReturn> %s() { throw e; }",
+                KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME));
         queryChainMethodsCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+                parseBodyDeclaration("public OrderChain order() { throw e; }"));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
                 "public java.util.List<" + entityGeneration.getDtoQualifier() + "> list() { throw e; }"));
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public java.util.Map<%s, %s> mapBy%s() { throw e; }",
-                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
-                            StringUtils.capitalize(property.getPropertyName()))));
+            queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                    "public java.util.Map<%s, %s> mapBy%s() { throw e; }",
+                    property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                    StringUtils.capitalize(property.getPropertyName())));
         }
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
-                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
-                            StringUtils.capitalize(property.getPropertyName()))));
+            queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                    "public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
+                    property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                    StringUtils.capitalize(property.getPropertyName())));
         }
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public %s one() { throw e; }", entityGeneration.getDtoName())));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                "public %s one() { throw e; }", entityGeneration.getDtoName()));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration("public int count() { throw e; }"));
         String pageParamName1 =
                 config.getPageParamStyle() == PageParamStyleEnum.PAGE_NO_PAGE_SIZE ? "pageNo" : "offset";
         String pageParamName2 =
                 config.getPageParamStyle() == PageParamStyleEnum.PAGE_NO_PAGE_SIZE ? "pageSize" : "limit";
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
                 "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
                         + pageParamName2 + ") { throw e; }"));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public JoinChain<QueryChainMethods, %s> leftJoin() { throw e; }",
-                        entityGeneration.getDtoName())));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public JoinChain<QueryChainMethods, %s> rightJoin() { throw e; }",
-                        entityGeneration.getDtoName())));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public JoinChain<QueryChainMethods, %s> innerJoin() { throw e; }",
-                        entityGeneration.getDtoName())));
-        queryChainMethodsCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("public JoinChain<QueryChainMethods, %s> outerJoin() { throw e; }",
-                        entityGeneration.getDtoName())));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                "public JoinChain<QueryChainMethods, %s> leftJoin() { throw e; }",
+                entityGeneration.getDtoName()));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                "public JoinChain<QueryChainMethods, %s> rightJoin() { throw e; }",
+                entityGeneration.getDtoName()));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                "public JoinChain<QueryChainMethods, %s> innerJoin() { throw e; }",
+                entityGeneration.getDtoName()));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration(
+                "public JoinChain<QueryChainMethods, %s> outerJoin() { throw e; }",
+                entityGeneration.getDtoName()));
         designCoid.addMember(queryChainMethodsCoid);
 
         ClassOrInterfaceDeclaration queryChainCoid = new ClassOrInterfaceDeclaration();
         queryChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("QueryChain")
                 .addExtendedType("QueryChainMethods");
-        queryChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("private QueryChain () {}"));
+        queryChainCoid.addMember(parseBodyDeclaration("private QueryChain () {}"));
         for (PropertyDTO property : properties) {
-            FieldDeclaration field = StaticJavaParser.parseBodyDeclaration(
-                    "public QueryChain " + property.getPropertyName() + ";").asFieldDeclaration();
+            FieldDeclaration field = parseFieldDeclaration(
+                    "public QueryChain " + property.getPropertyName() + ";");
             field.setJavadocComment(property.getDescription());
             queryChainCoid.addMember(field);
         }
@@ -297,9 +302,9 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration updateChainCoid = new ClassOrInterfaceDeclaration();
         updateChainCoid.setPublic(true).setInterface(true).setName("UpdateChain");
         for (PropertyDTO property : properties) {
-            updateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getQualifier()
-                                    + " " + property.getPropertyName() + ");").asMethodDeclaration()
+            updateChainCoid.addMember(parseMethodDeclaration(
+                    "NextableUpdateChain " + property.getPropertyName() + "(" + property.getJavaType().getQualifier()
+                            + " " + property.getPropertyName() + ");")
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(updateChainCoid);
@@ -307,31 +312,31 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration nextableUpdateChainCoid = new ClassOrInterfaceDeclaration();
         nextableUpdateChainCoid.setPublic(true).setInterface(true).setName("NextableUpdateChain")
                 .addExtendedType("UpdateChain");
-        nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
-        nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableUpdateChainCoid.addMember(parseBodyDeclaration("int over();"));
+        nextableUpdateChainCoid.addMember(parseBodyDeclaration(
                 "ByChainReturn<NextableByChainVoid> " + KeywordConstant.WHERE_METHOD_NAME + "();"));
-        nextableUpdateChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("ByChainReturn<NextableByChainVoid> %s();",
-                        KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME)));
+        nextableUpdateChainCoid.addMember(parseBodyDeclaration(
+                "ByChainReturn<NextableByChainVoid> %s();",
+                KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME));
         designCoid.addMember(nextableUpdateChainCoid);
 
         ClassOrInterfaceDeclaration dropChainCoid = new ClassOrInterfaceDeclaration();
         dropChainCoid.setPublic(true).setInterface(true).setName("DropChain");
-        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("int over();"));
-        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        dropChainCoid.addMember(parseBodyDeclaration("int over();"));
+        dropChainCoid.addMember(parseBodyDeclaration(
                 "ByChainReturn<NextableByChainVoid> " + KeywordConstant.WHERE_METHOD_NAME + "();"));
-        dropChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                String.format("ByChainReturn<NextableByChainVoid> %s();",
-                        KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME)));
+        dropChainCoid.addMember(parseBodyDeclaration(
+                "ByChainReturn<NextableByChainVoid> %s();",
+                KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME));
         designCoid.addMember(dropChainCoid);
 
         ClassOrInterfaceDeclaration byChainReturnCode = new ClassOrInterfaceDeclaration();
         byChainReturnCode.setPublic(true).setStatic(true).setInterface(false).setName("ByChainReturn")
                 .addTypeParameter("NEXT");
         for (PropertyDTO property : properties) {
-            byChainReturnCode.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public com.spldeolin.allison1875.support.WhereChainComparison<NEXT, " + property.getJavaType()
-                                    .getSimpleName() + "> " + property.getPropertyName() + ";").asFieldDeclaration()
+            byChainReturnCode.addMember(parseFieldDeclaration(
+                    "public com.spldeolin.allison1875.support.WhereChainComparison<NEXT, " + property.getJavaType()
+                            .getSimpleName() + "> " + property.getPropertyName() + ";")
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(byChainReturnCode);
@@ -339,52 +344,52 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration nextableByChainReturnCoid = new ClassOrInterfaceDeclaration();
         nextableByChainReturnCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainReturn");
         for (PropertyDTO property : properties) {
-            nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public WhereChainComparison<NextableByChainReturn, " + property.getJavaType().getSimpleName()
-                                    + "> " + property.getPropertyName() + ";").asFieldDeclaration()
+            nextableByChainReturnCoid.addMember(parseFieldDeclaration(
+                    "public WhereChainComparison<NextableByChainReturn, " + property.getJavaType().getSimpleName()
+                            + "> " + property.getPropertyName() + ";")
                     .setJavadocComment(property.getDescription()));
         }
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableByChainReturnCoid.addMember(parseBodyDeclaration(
                 "public java.util.List<" + entityGeneration.getDtoQualifier() + "> list() { throw e; }"));
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public java.util.Map<%s, %s> mapBy%s() { throw e; }",
-                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
-                            StringUtils.capitalize(property.getPropertyName()))));
+            nextableByChainReturnCoid.addMember(parseBodyDeclaration(
+                    "public java.util.Map<%s, %s> mapBy%s() { throw e; }",
+                    property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                    StringUtils.capitalize(property.getPropertyName())));
         }
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
-                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
-                            StringUtils.capitalize(property.getPropertyName()))));
+            nextableByChainReturnCoid.addMember(parseBodyDeclaration(
+                    "public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
+                    property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                    StringUtils.capitalize(property.getPropertyName())));
         }
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableByChainReturnCoid.addMember(parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
-        nextableByChainReturnCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableByChainReturnCoid.addMember(parseBodyDeclaration("public int count() { throw e; }"));
+        nextableByChainReturnCoid.addMember(parseBodyDeclaration(
                 "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
                         + pageParamName2 + ") { throw e; }"));
         nextableByChainReturnCoid.addMember(
-                StaticJavaParser.parseBodyDeclaration("public OrderChain order() { throw e; }"));
+                parseBodyDeclaration("public OrderChain order() { throw e; }"));
         designCoid.addMember(nextableByChainReturnCoid);
 
         ClassOrInterfaceDeclaration nextableByChainVoidCoid = new ClassOrInterfaceDeclaration();
         nextableByChainVoidCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableByChainVoid");
         for (PropertyDTO property : properties) {
-            nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public WhereChainComparison<NextableByChainVoid, " + property.getJavaType().getSimpleName() + "> "
-                                    + property.getPropertyName() + ";").asFieldDeclaration()
+            nextableByChainVoidCoid.addMember(parseFieldDeclaration(
+                    "public WhereChainComparison<NextableByChainVoid, " + property.getJavaType().getSimpleName() + "> "
+                            + property.getPropertyName() + ";")
                     .setJavadocComment(property.getDescription()));
         }
-        nextableByChainVoidCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int over() { throw e; }"));
+        nextableByChainVoidCoid.addMember(parseBodyDeclaration("public int over() { throw e; }"));
         designCoid.addMember(nextableByChainVoidCoid);
 
         ClassOrInterfaceDeclaration orderChainCoid = new ClassOrInterfaceDeclaration();
         orderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("OrderChain");
         for (PropertyDTO property : properties) {
-            orderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                            "public com.spldeolin.allison1875.support.OrderByChainSequence<NextableOrderChain> "
-                                    + property.getPropertyName() + ";").asFieldDeclaration()
+            orderChainCoid.addMember(parseFieldDeclaration(
+                    "public com.spldeolin.allison1875.support.OrderByChainSequence<NextableOrderChain> "
+                            + property.getPropertyName() + ";")
                     .setJavadocComment(property.getDescription()));
         }
         designCoid.addMember(orderChainCoid);
@@ -392,24 +397,24 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration nextableOrderChainCoid = new ClassOrInterfaceDeclaration();
         nextableOrderChainCoid.setPublic(true).setStatic(true).setInterface(false).setName("NextableOrderChain")
                 .addExtendedType("OrderChain");
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableOrderChainCoid.addMember(parseBodyDeclaration(
                 "public java.util.List<" + entityGeneration.getDtoQualifier() + "> list() { throw e; }"));
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public java.util.Map<%s, %s> mapBy%s() { throw e; }",
-                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
-                            StringUtils.capitalize(property.getPropertyName()))));
+            nextableOrderChainCoid.addMember(parseBodyDeclaration(
+                    "public java.util.Map<%s, %s> mapBy%s() { throw e; }",
+                    property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                    StringUtils.capitalize(property.getPropertyName())));
         }
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
-                            property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
-                            StringUtils.capitalize(property.getPropertyName()))));
+            nextableOrderChainCoid.addMember(parseBodyDeclaration(
+                    "public java.util.Map<%s, List<%s>> groupBy%s() { throw e; }",
+                    property.getJavaType().getQualifier(), entityGeneration.getDtoName(),
+                    StringUtils.capitalize(property.getPropertyName())));
         }
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableOrderChainCoid.addMember(parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration("public int count() { throw e; }"));
-        nextableOrderChainCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+        nextableOrderChainCoid.addMember(parseBodyDeclaration("public int count() { throw e; }"));
+        nextableOrderChainCoid.addMember(parseBodyDeclaration(
                 "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
                         + pageParamName2 + ") { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
@@ -417,24 +422,24 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
         eachCoid.setPublic(true).setStatic(false).setInterface(true).setName("Each").addTypeParameter("P");
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            eachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("Each<%s> %s = (Each<%s>) new Object();", property.getJavaType().getSimpleName(),
-                            property.getPropertyName(), property.getJavaType().getSimpleName())));
+            eachCoid.addMember(parseBodyDeclaration(
+                    "Each<%s> %s = (Each<%s>) new Object();", property.getJavaType().getSimpleName(),
+                    property.getPropertyName(), property.getJavaType().getSimpleName()));
         }
         designCoid.addMember(eachCoid);
 
         ClassOrInterfaceDeclaration multiEachCoid = new ClassOrInterfaceDeclaration();
         multiEachCoid.setPublic(true).setStatic(false).setInterface(true).setName("MultiEach").addTypeParameter("P");
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            multiEachCoid.addMember(StaticJavaParser.parseBodyDeclaration(
-                    String.format("MultiEach<%s> %s = (MultiEach<%s>) new Object();",
-                            property.getJavaType().getSimpleName(), property.getPropertyName(),
-                            property.getJavaType().getSimpleName())));
+            multiEachCoid.addMember(parseBodyDeclaration(
+                    "MultiEach<%s> %s = (MultiEach<%s>) new Object();",
+                    property.getJavaType().getSimpleName(), property.getPropertyName(),
+                    property.getJavaType().getSimpleName()));
         }
         designCoid.addMember(multiEachCoid);
 
         for (PropertyDTO property : tableAnalysis.getProperties()) {
-            designCoid.addMember(StaticJavaParser.parseBodyDeclaration(
+            designCoid.addMember(parseBodyDeclaration(
                     "public static com.spldeolin.allison1875.support.PropertyName<" + entityGeneration.getDtoName()
                             + "," + property.getJavaType().getSimpleName() + "> " + property.getPropertyName() + ";"));
         }
@@ -458,7 +463,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         meta.setPageParamStyle(config.getPageParamStyle());
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", KeywordConstant.META_FIELD_NAME,
-                StaticJavaParser.parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
+                parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
         cu.addType(designCoid);
 
         importExprService.extractQualifiedTypeToImport(cu);

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -133,9 +135,9 @@ public class DesignServiceImpl implements DesignService {
 
         // 分页
         if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
-            MethodCallExpr callCountMce = StaticJavaParser.parseExpression(mceCode).asMethodCallExpr();
+            MethodCallExpr callCountMce = parseExpression(mceCode).asMethodCallExpr();
             callCountMce.setName(chainAnalysis.getCountMethodNameForPage());
-            replacementStatements.add(StaticJavaParser.parseStatement(
+            replacementStatements.add(parseStatement(
                     "long " + calcAssignVarName(chainAnalysis) + "Total = " + callCountMce + ";"));
         }
 
@@ -143,12 +145,12 @@ public class DesignServiceImpl implements DesignService {
             // parent是ExpressionStmt的情况，例如：Design.query("a").one();，则替换整个ancestorStatement（ExpressionStmt是Statement的一种）
             if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.GROUP) {
                 String propertyTypeName = chainAnalysis.getMapOrGroupKeyProperty().getJavaType().getQualifier();
-                replacementStatements.add(StaticJavaParser.parseStatement(
+                replacementStatements.add(parseStatement(
                         "java.util.Map<" + propertyTypeName + ", java.util.List<"
                                 + generateReturnTypeRetval.getElementTypeQualifier() + ">> " + calcAssignVarName(
                                 chainAnalysis) + " = " + mceCode + ";"));
             } else {
-                replacementStatements.add(StaticJavaParser.parseStatement(
+                replacementStatements.add(parseStatement(
                         generateReturnTypeRetval.getResultType() + " " + calcAssignVarName(chainAnalysis) + " = "
                                 + mceCode + ";"));
             }
@@ -157,11 +159,11 @@ public class DesignServiceImpl implements DesignService {
             // parent是VariableDeclarator的情况，例如：Entity a = Design.query("a").one();
             // 或是AssignExpr的情况，例如：a = Design.query("a").one();
             // 则将chain替换成转化出的mce（chain是mce类型）
-            replacementStatements.add(StaticJavaParser.parseStatement(
+            replacementStatements.add(parseStatement(
                     ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
         } else {
             // 以外的情况，往往是继续调用mce返回值，例如：if (0 == Design.update("a").id(-1).over()) { }，则将chain替换成转化出的mce（chain是mce类型）
-            replacementStatements.add(StaticJavaParser.parseStatement(
+            replacementStatements.add(parseStatement(
                     ancestorStatementCode.replace(TokenRangeUtils.getRawCode(chainAnalysis.getChain()), mceCode)));
         }
 
