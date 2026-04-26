@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.mojo;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -68,8 +69,12 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             fileSnapshot.cleanup();
         } catch (Throwable e) {
 
-            // 任何异常回滚整个maven project
-//            FileSnapshotUtils.rollback(fileSnapshot);
+            // 任何异常回滚整个maven project（mvnDebug模式下不回滚，以便调试问题）
+            if (!isMavenDebugMode()) {
+                FileSnapshotUtils.rollback(fileSnapshot);
+            } else {
+                log.warn("mvnDebug模式，跳过项目文件快照回滚");
+            }
             throw new MojoExecutionException(e);
         }
     }
@@ -106,6 +111,23 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             urls[i] = new File(classpathElements.get(i)).toURL();
         }
         return new URLClassLoader(urls, this.getClass().getClassLoader());
+    }
+
+    /**
+     * 检测当前Maven是否通过mvnDebug执行
+     * <p>
+     * mvnDebug会在JVM启动参数中添加JDWP（Java Debug Wire Protocol）相关参数，
+     * 如 -agentlib:jdwp=... 或 -Xrunjdwp:...
+     *
+     * @return true表示当前为mvnDebug模式
+     */
+    private boolean isMavenDebugMode() {
+        for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+            if (arg.contains("jdwp")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected File getCanonicalFileRelativeToBasedir(File file) {
