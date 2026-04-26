@@ -1,7 +1,8 @@
 package com.spldeolin.allison1875.common.service.impl;
 
-import java.util.List;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
+
+import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -55,11 +56,17 @@ public class ImportExprServiceImpl implements ImportExprService {
         // 2024-07-28：methodDec的Type不同于其他Coit，需要特殊处理
         for (MethodDeclaration md : cu.findAll(MethodDeclaration.class)) {
             Type type = md.getType();
-            if (type.toString().contains(".")) {
+            String typeStr = type.toString();
+            if (typeStr.contains(".")) {
                 log.debug("Qualified Type '{}' in '{}' extract to Import", type,
                         CompilationUnitUtils.getCuAbsolutePath(cu));
-                cu.addImport(type.toString());
-                type.replace(parseType(MoreStringUtils.splitAndGetLastPart(type.toString(), ".")));
+                // 去除泛型参数后再作为import，避免 com.aa.bb.MyType<DataType1> 这样的情况
+                int genericIdx = typeStr.indexOf('<');
+                String rawTypeStr = genericIdx >= 0 ? typeStr.substring(0, genericIdx) : typeStr;
+                String genericSuffix = genericIdx >= 0 ? typeStr.substring(genericIdx) : "";
+                cu.addImport(rawTypeStr);
+                String simpleRawName = MoreStringUtils.splitAndGetLastPart(rawTypeStr, ".");
+                type.replace(parseType(simpleRawName + genericSuffix));
             }
         }
 

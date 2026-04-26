@@ -5,6 +5,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.config.Config.CodeSnippet;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
 
 /**
@@ -79,6 +80,35 @@ public class ConfigValidator implements ConstraintValidator<ConfigValid, Config>
                 if (config.getEnableResponseBodySample() == null) {
                     errmsgs.add(
                             "enableResponseBodySample must not be null when flushTo contains 'MARKDOWN' or 'SHOWDOC'");
+                }
+            }
+        }
+
+        // ---- codeTemplate 相关校验 ----
+        if (config.getCodeSnippet() != null) {
+            CodeSnippet cs = config.getCodeSnippet();
+            boolean hasQualifier = StringUtils.isNotEmpty(cs.getRequestResultQualifier());
+            boolean hasTypeDecl = StringUtils.isNotEmpty(cs.getRequestResultTypeDeclaration());
+            boolean hasSuccessNoData = StringUtils.isNotEmpty(cs.getRequestResultSuccessNoData());
+            boolean hasSuccessWithData = StringUtils.isNotEmpty(cs.getRequestResultSuccessWithData());
+            boolean anyPresent = hasQualifier || hasTypeDecl || hasSuccessNoData || hasSuccessWithData;
+            boolean allPresent = hasQualifier && hasTypeDecl && hasSuccessNoData && hasSuccessWithData;
+            if (anyPresent && !allPresent) {
+                if (!hasQualifier) {
+                    errmsgs.add("codeSnippet.requestResultQualifier must not be empty when any other codeSnippet field "
+                            + "is specified");
+                }
+                if (!hasTypeDecl) {
+                    errmsgs.add("codeSnippet.requestResultTypeDeclaration must not be empty when any other codeSnippet "
+                            + "field is specified");
+                }
+                if (!hasSuccessNoData) {
+                    errmsgs.add("codeSnippet.requestResultSuccessNoData must not be empty when any other codeSnippet "
+                            + "field is specified");
+                }
+                if (!hasSuccessWithData) {
+                    errmsgs.add("codeSnippet.requestResultSuccessWithData must not be empty when any other codeSnippet "
+                            + "field is specified");
                 }
             }
         }

@@ -1,11 +1,11 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.DELETE;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.SAVE;
 
 import java.util.Collections;
 import java.util.List;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -115,7 +115,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         String mapperName = form.getVarName() + "Mapper";
                 FieldDeclaration field = parseFieldDeclaration(
                         "private %s %s;", mapperType, mapperName);
-        field.addAnnotation(annotationExprService.springAutowired());
+        field.addAnnotation(annotationExprService.javaxResource());
         List<FieldDeclaration> retval = Lists.newArrayList(field);
 
         // 加入关联表单Mapper
@@ -126,7 +126,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
                 mapperName = associationForm.getVarName() + "Mapper";
                         FieldDeclaration associationFormMapperField = parseFieldDeclaration(
                                 "private %s %s;", mapperType, mapperName);
-                associationFormMapperField.addAnnotation(annotationExprService.springAutowired());
+                associationFormMapperField.addAnnotation(annotationExprService.javaxResource());
                 retval.add(associationFormMapperField);
             }
         }

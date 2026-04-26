@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
@@ -9,13 +11,13 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -123,11 +125,56 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setIsDataModelCloneable(config.getIsDataModelCloneable());
             arg.setMoreOperation((tempCu, dataModel) -> {
                 // copy fields
-                for (FieldDeclaration field : dto.getFields()) {
-                    fieldService.more4SpecialTypeField(field, dtoTypeEnum);
-                }
                 importExprService.copyImports(initDecAnalysis.getMvcControllerCu(), tempCu);
                 dataModel.setMembers(dto.getMembers());
+                // 处理field
+                for (FieldDeclaration field : dto.getFields()) {
+                    // 时间类字段增加JsonFormat
+                    ResolvedType fieldType;
+                    try {
+                        fieldType = field.getCommonType().resolve();
+                    } catch (Exception ignore) {
+                        // 类型如果是新生成的Enum，会无法解析，这里忽略
+                        continue;
+                    }
+                    if (fieldType.isReferenceType()) {
+                        String qualifiedName = fieldType.asReferenceType().getQualifiedName();
+                        if (Lists.newArrayList("java.util.Date", "java.time.LocalDateTime").contains(qualifiedName)) {
+                            if (!field.getAnnotationByName("JsonFormat").isPresent()) {
+                                field.addAnnotation(StaticJavaParser.parseAnnotation(
+                                        "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"yyyy-MM-dd "
+                                                + "HH:mm:ss\", " + "timezone = \"Asia/Shanghai\")"));
+                            }
+                        }
+                        if ("java.time.LocalDate".equalsIgnoreCase(qualifiedName)) {
+                            if (!field.getAnnotationByName("JsonFormat").isPresent()) {
+                                field.addAnnotation(StaticJavaParser.parseAnnotation(
+                                        "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"yyyy-MM-dd\", "
+                                                + "timezone = " + "\"Asia/Shanghai\")"));
+                            }
+                        }
+                        if ("java.time.LocalTime".equalsIgnoreCase(qualifiedName)) {
+                            if (!field.getAnnotationByName("JsonFormat").isPresent()) {
+                                field.addAnnotation(StaticJavaParser.parseAnnotation(
+                                        "@com.fasterxml.jackson.annotation.JsonFormat(pattern = \"HH:mm:ss\", "
+                                                + "timezone = " + "\"Asia/Shanghai\")"));
+                            }
+                        }
+                    }
+                    // Req或者ReqDTO中的Long类型增加JsonSerialize
+                    if (Lists.newArrayList(DTOTypeEnum.REQ_DTO, DTOTypeEnum.NEST_DTO_IN_REQ).contains(dtoTypeEnum)) {
+                        if (fieldType.isReferenceType() && fieldType.asReferenceType().getQualifiedName()
+                                .equalsIgnoreCase("java.lang.Long")) {
+                            if (!field.getAnnotationByName("JsonSerialize").isPresent()) {
+                                field.addAnnotation(StaticJavaParser.parseAnnotation(
+                                        "@com.fasterxml.jackson.databind.annotation.JsonSerialize(using = com"
+                                                + ".fasterxml.jackson.databind.ser.std.ToStringSerializer.class)"));
+                            }
+                        }
+                    }
+                    // 可拓展的More Operation
+                    fieldService.more4SpecialTypeField(field, dtoTypeEnum);
+                }
                 // generate getters, setters
                 if (config.getIsDataModelWithoutLombok()) {
                     List<FieldArg> fieldArgs = Lists.newArrayList();

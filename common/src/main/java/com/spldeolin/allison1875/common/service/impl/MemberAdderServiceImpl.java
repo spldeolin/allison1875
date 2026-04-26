@@ -49,7 +49,7 @@ public class MemberAdderServiceImpl implements MemberAdderService {
         // 连名称一致的field都找不到，直接添加到coid并返回
         if (sameVarNameVd == null) {
             FieldDeclaration field = this.lastAddField(typeQualifier, varName, coid);
-            field.addAnnotation(annotationExprService.springAutowired());
+            field.addAnnotation(annotationExprService.javaxResource());
             log.info("add @Autowired FieldVar [{}] to {} [{}].", varName, coid.isInterface() ? "Interface" : "Class",
                     coid.getNameAsString());
             return new AddInjectFieldRetval().setField(field).setFieldVarName(varName);

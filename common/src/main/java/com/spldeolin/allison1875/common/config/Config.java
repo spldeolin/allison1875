@@ -345,6 +345,18 @@ public class Config {
      */
     List<String> mvcHandlerQualifierWildcards;
 
+    /**
+     * 获取枚举Code的方法名
+     */
+    @NotNull
+    String getEnumCodeMethodName = "getCode";
+
+    /**
+     * 获取枚举Title的方法名
+     */
+    @NotNull
+    String getEnumTitleMethodName = "getTitle";
+
     // ==================== form-generator 配置 ====================
 
     /**
@@ -354,52 +366,82 @@ public class Config {
     File dslPath = new File("./forms.yml");
 
     /**
-     * 使用doc-analyzer生成接口文档
+     * form-generator使用doc-analyzer生成接口文档
      */
     @NotNull
     Boolean enableDocAnalyzer = false;
 
     /**
-     * Controller类@RequestMapping路径的代码片段（占位符${formName}代表表单名称）
-     */
-    @NotEmpty
-    String controllerRequestMapping = "/api/v1/${formName}";
-
-    /**
-     * 生成短UUID的代码片段
-     */
-    @NotEmpty
-    String shortUuidGeneration = "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()";
-
-    /**
-     * 判断列表是否为empty的代码片段（占位符${list}代表列表）
-     */
-    @NotEmpty
-    String collectionEmptyCheck = "CollectionUtils.isEmpty(${list})";
-
-    /**
-     * 分页相关代码模板配置
+     * 代码模板配置
      */
     @NotNull
     @Valid
-    PageTemplates pageTemplates = new PageTemplates();
+    CodeSnippet codeSnippet = new CodeSnippet();
 
     /**
-     * 分页相关代码模板配置（form-generator 使用）
+     * 代码片段
      */
     @Data
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class PageTemplates {
+    public static class CodeSnippet {
+
+        /**
+         * Spring MVC 请求方法统一返回类的全限定名。
+         * <p>
+         * 例如：com.company.project.common.RequestResult
+         */
+        String requestResultQualifier;
+
+        /**
+         * Spring MVC 请求方法统一返回类型声明的代码片段，其中 ${dataType} 为业务返回数据类型的固定占位符
+         * <p>
+         * 例如：RequestResult&lt;${dataType}&gt;
+         */
+        String requestResultTypeDeclaration;
+
+        /**
+         * 构造统一返回对象（无业务数据，成功场景）的代码片段
+         * <p>
+         * 例如：RequestResult.success()
+         */
+        String requestResultSuccessNoData;
+
+        /**
+         * 构造统一返回对象（有业务数据，成功场景）的代码片段，其中 ${data} 为业务返回数据对象的固定占位符
+         * <p>
+         * 例如：RequestResult.success(${data})
+         */
+        String requestResultSuccessWithData;
+
+        /**
+         * Controller类@RequestMapping路径的代码片段（占位符${formName}代表form-generator的表单名称）
+         */
+        @NotEmpty
+        String controllerRequestMapping = "/api/v1/${formName}";
+
+        /**
+         * 生成短UUID的代码片段
+         */
+        @NotEmpty
+        String shortUuidGeneration = "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()";
+
+        /**
+         * 判断列表是否为empty的代码片段（占位符${list}代表列表）
+         */
+        @NotEmpty
+        String collectionEmptyCheck = "${list} == null || ${list}.isEmpty()";
 
         /**
          * 构造分页返回值的代码片段（占位符${total}代表总条数，${dtos}代表当前页数据列表）
          */
-        String pageResultConstruction;
+        @NotEmpty
+        String constructPageResult;
 
         /**
          * 构造空的分页返回值的代码片段
          */
-        String pageResultEmptyConstruction;
+        @NotEmpty
+        String constructEmptyPageResult;
 
     }
 

@@ -1,5 +1,7 @@
 package com.spldeolin.allison1875.common.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
+
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
@@ -8,7 +10,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomUtils;
 import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -76,7 +77,7 @@ public class DataModelServiceImpl implements DataModelService {
             }
         }
 
-        CompilationUnit cu = new CompilationUnit();
+        CompilationUnit cu = StaticJavaParser.parse(""); // 采用parse("")的方式初始化empty cu，目的是设置符号解析器
         cu.setStorage(absulutePath);
         cu.setPackageDeclaration(packageName);
 

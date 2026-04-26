@@ -204,7 +204,7 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
         if (StringUtils.containsIgnoreCase(columnType, "tinyint(1)")) {
             return new JavaTypeDTO().setClass(Boolean.class);
         }
-        if (StringUtils.equalsAnyIgnoreCase(dataType, "varchar", "char", "text", "longtext")) {
+        if (StringUtils.equalsAnyIgnoreCase(dataType, "varchar", "char", "text", "mediumtext", "longtext")) {
             return new JavaTypeDTO().setClass(String.class);
         }
         if ("tinyint".equalsIgnoreCase(dataType)) {
@@ -230,6 +230,9 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
         }
         if ("decimal".equalsIgnoreCase(dataType)) {
             return new JavaTypeDTO().setClass(BigDecimal.class);
+        }
+        if ("double".equalsIgnoreCase(dataType)) {
+            return new JavaTypeDTO().setClass(Double.class);
         }
         return null;
     }

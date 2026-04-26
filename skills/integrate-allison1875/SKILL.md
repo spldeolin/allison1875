@@ -137,6 +137,9 @@ markdownDir: api-docs
 # 接口DSL 输出目录。固定为`api-dsls`。
 dslDir: api-dsls
 
+# ShowDoc 开放 API 基础目录名。固定为`doc-analyzer`。
+showdocBaseCatName: doc-analyzer
+
 # YApi 地址与 Token。仅当 `flushTo` 含 `YAPI` 时询问。
 yapiUrl: null
 yapiToken: null
@@ -145,6 +148,15 @@ yapiToken: null
 showdocUrl: null
 showdocApiKey: null
 showdocApiToken: null
+
+# 文档输出到markdown或ShowDoc时，每个Endpoint是否输出到单个markdown文件。根据项目需求推断，默认false
+singleEndpointPerMarkdown: false
+
+# 文档输出到markdown或ShowDoc时，是否启用cURL命令的输出。默认false
+enableCurl: false
+
+# 文档输出到markdown或ShowDoc时，是否启用Response Body示例的输出。默认false
+enableResponseBodySample: false
 
 # 仅分析匹配的 Handler 方法全限定名（支持 `*`/`?`）。仅当Controller非常多时询问。
 mvcHandlerQualifierWildcards: [ ]
@@ -221,23 +233,35 @@ dslPath: ./forms.yml
 # 是否用 doc-analyzer 生成接口文档。本次配置固定为 `true`
 enableDocAnalyzer: true
 
-# Controller 上 @RequestMapping 路径模板。占位符 `${formName}`代表表单名，根据其他 Cotroller 推断
-controllerRequestMapping: /api/v1/${formName}
+# 代码片段配置（嵌套对象，对应 Java 中 Config.CodeSnippet 内部类）
+codeSnippet:
 
-# 短 UUID 生成代码片段。本次配置固定为下方的示例值
-shortUuidGeneration: UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()
+  # Spring MVC 请求方法统一返回类的全限定名。在项目中找返回值包装类
+  requestResultQualifier: com.company.proj.common.RequestResult
 
-# 判断集合为空的代码片段。本次配置固定为下方的示例值
-collectionEmptyCheck: CollectionUtils.isEmpty(${list})
+  # 统一返回类型声明，${dataType} 为业务数据类型占位符
+  requestResultTypeDeclaration: RequestResult<${dataType}>
 
-# 分页构造方式。需要询问
-pageTemplates:
+  # 构造无业务数据的成功返回值的代码片段
+  requestResultSuccessNoData: RequestResult.success()
 
-  # 分页对象构造方式
-  pageResultConstruction: "new PageResult<>(${total}, ${dtos})"
+  # 构造有业务数据的成功返回值的代码片段，${data} 为数据对象占位符
+  requestResultSuccessWithData: RequestResult.success(${data})
 
-  # 空的分页对象构造方式
-  pageResultEmptyConstruction: "new PageResult<>()"
+  # Controller 上 @RequestMapping 路径模板。占位符 `${formName}` 代表表单名，根据其他 Controller 推断
+  controllerRequestMapping: /api/v1/${formName}
+
+  # 短 UUID 生成代码片段。建议搜索UUID相关的工具类或者使用默认值
+  shortUuidGeneration: UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()
+
+  # 判断集合为空的代码片段（${list} 为列表占位符）。建议使用commons-collection4提供的CollectionUtils或者使用默认值
+  collectionEmptyCheck: ${list} == null || ${list}.isEmpty()
+
+  # 构造分页返回值的代码片段（${total} 总条数，${dtos} 当前页列表）。需要询问
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+
+  # 构造空的分页返回值的代码片段。需要询问
+  constructEmptyPageResult: "new PageResult<>()"
 
 # -- 自定义 Module 绑定 （需要再<plugin>的<dependencies>标签中加入对应的 artifact） -- #
 

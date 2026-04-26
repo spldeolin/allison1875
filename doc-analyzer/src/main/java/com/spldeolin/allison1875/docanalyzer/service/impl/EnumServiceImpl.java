@@ -1,14 +1,18 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
 import java.util.List;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedArrayType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.service.EnumService;
 import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
@@ -20,6 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class EnumServiceImpl implements EnumService {
+
+    @Inject
+    private Config config;
 
     @Override
     public List<AnalyzeEnumConstantsRetval> analyzeEnumConstants(VariableDeclarator fieldVar) {
@@ -81,7 +88,22 @@ public class EnumServiceImpl implements EnumService {
     }
 
     protected AnalyzeEnumConstantsRetval analyzeEnumConstant(Object enumConstant) {
-        return null;
+        if (MethodUtils.getAccessibleMethod(enumConstant.getClass(), config.getGetEnumCodeMethodName()) == null
+                || MethodUtils.getAccessibleMethod(enumConstant.getClass(), config.getGetEnumTitleMethodName())
+                == null) {
+            log.info("EnumConstant '{}' has no method named '{}' nor {}", enumConstant,
+                    config.getGetEnumCodeMethodName(), config.getGetEnumTitleMethodName());
+            return null;
+        }
+        try {
+            AnalyzeEnumConstantsRetval retval = new AnalyzeEnumConstantsRetval();
+            retval.setCode(MethodUtils.invokeMethod(enumConstant, config.getGetEnumCodeMethodName()).toString());
+            retval.setTitle(MethodUtils.invokeMethod(enumConstant, config.getGetEnumTitleMethodName()).toString());
+            return retval;
+        } catch (Exception e) {
+            log.error("EnumConstant '{}' cannot invoke method", enumConstant, e);
+            throw new Allison1875Exception(e);
+        }
     }
 
 }

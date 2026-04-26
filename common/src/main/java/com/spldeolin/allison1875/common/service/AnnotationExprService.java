@@ -60,7 +60,7 @@ public interface AnnotationExprService {
 
     AnnotationExpr size(int min, int max);
 
-    AnnotationExpr springAutowired();
+    AnnotationExpr javaxResource();
 
     AnnotationExpr lombokEqualsAndHashCode();
 

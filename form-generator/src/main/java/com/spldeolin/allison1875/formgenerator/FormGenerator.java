@@ -137,7 +137,7 @@ public class FormGenerator implements Allison1875MainService {
             JavadocUtils.setJavadoc(coid, form.getTitle(), config.getAuthor());
             coid.addAnnotation(annotationExprService.springRestController());
             coid.addAnnotation(annotationExprService.springRequestMapping(
-                    config.getControllerRequestMapping().replace("${formName}", form.getVarName())));
+                    config.getCodeSnippet().getControllerRequestMapping().replace("${formName}", form.getVarName())));
             coid.setPublic(true).setName(controllerName);
             cu.addType(coid);
             coid.addMember(saveApiService.generateSaveInitDec(form));

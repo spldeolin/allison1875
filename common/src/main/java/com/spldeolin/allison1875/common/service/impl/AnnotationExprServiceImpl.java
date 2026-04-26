@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.common.service.impl;
 
-import java.util.Optional;
-import com.github.javaparser.StaticJavaParser;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+
+import java.util.Optional;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -179,8 +179,12 @@ public class AnnotationExprServiceImpl implements AnnotationExprService {
     }
 
     @Override
-    public AnnotationExpr springAutowired() {
-        return parseAnnotation("@org.springframework.beans.factory.annotation.Autowired").clone();
+    public AnnotationExpr javaxResource() {
+        if (config.getEnableJavaxMoveToJakarta()) {
+            return parseAnnotation("@jakarta.annotation.Resource").clone();
+        } else {
+            return parseAnnotation("@javax.annotation.Resource").clone();
+        }
     }
 
     @Override

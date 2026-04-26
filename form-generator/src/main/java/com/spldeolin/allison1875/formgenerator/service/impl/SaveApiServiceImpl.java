@@ -1,11 +1,11 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
+
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -164,7 +164,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 "%s = new %s();", form.getVarName(), form.getEntityName(config)));
         body.addStatement(parseStatement(
                 "%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
-                config.getShortUuidGeneration()));
+                config.getCodeSnippet().getShortUuidGeneration()));
         // initPattern!=userInput添加此处
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {

@@ -1,15 +1,14 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType.MULTI_SELECT;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType.SECRET;
 
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
-import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -182,7 +181,7 @@ public class ListApiServiceImpl implements ListApiService {
                     continue;
                 case NUMBER:
                 case ON_OFF:
-                    String emptyToNull = config.getCollectionEmptyCheck()
+                    String emptyToNull = config.getCodeSnippet().getCollectionEmptyCheck()
                             .replace("${list}", "req.get" + StringUtils.capitalize(item.getName()) + "()")
                             + " ? null : req.get" + StringUtils.capitalize(item.getName()) + "()";
                     designChain += "." + item.getName() + ".in(" + emptyToNull + ")";
@@ -239,7 +238,7 @@ public class ListApiServiceImpl implements ListApiService {
 
         body.addStatement(parseStatement(
                 "if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
-                config.getPageTemplates().getPageResultEmptyConstruction()));
+                config.getCodeSnippet().getConstructEmptyPageResult()));
 
         body.addStatement(parseStatement(
                 "List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
@@ -264,8 +263,7 @@ public class ListApiServiceImpl implements ListApiService {
         forEachBody.addStatement("dtos.add(dto);");
         forEachStmt.setBody(forEachBody);
         body.addStatement(forEachStmt);
-        body.addStatement(
-                parseStatement("return " + config.getPageTemplates().getPageResultConstruction()
+        body.addStatement(parseStatement("return " + config.getCodeSnippet().getConstructPageResult()
                 .replace("${total}", "query" + form.getName() + "Total").replace("${dtos}", "dtos") + ";"));
         return body;
     }
