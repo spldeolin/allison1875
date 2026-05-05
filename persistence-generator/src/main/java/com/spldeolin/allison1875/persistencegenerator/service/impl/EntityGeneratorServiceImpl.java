@@ -70,6 +70,10 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         if (defaultValue == null) {
             return Optional.empty();
         }
+        // Druid解析DDL时，DEFAULT '...' 中的值会保留单引号，需要去除
+        if (defaultValue.length() >= 2 && defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
+            defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+        }
         String typeQualifier = property.getJavaType().getQualifier();
         if (Boolean.class.getName().equals(typeQualifier)) {
             return Optional.of(new BooleanLiteralExpr(BooleanUtils.toBoolean(defaultValue)));

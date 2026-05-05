@@ -1,0 +1,60 @@
+# persistence-generator multi-table integration test config
+domains:
+  - name: basic
+    controllerPackage: com.example.controller
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_user` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+    `username` varchar(50) NOT NULL COMMENT '用户名',
+    `email` varchar(100) NOT NULL COMMENT '邮箱',
+    `created_at` datetime NOT NULL COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_username` (`username`)
+  ) ENGINE=InnoDB COMMENT='用户表';
+
+  CREATE TABLE `t_product` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '商品ID',
+    `product_name` varchar(200) NOT NULL COMMENT '商品名称',
+    `price` decimal(10,2) NOT NULL COMMENT '价格',
+    `stock` int NOT NULL DEFAULT '0' COMMENT '库存',
+    `category_id` bigint NOT NULL COMMENT '分类ID',
+    PRIMARY KEY (`id`),
+    KEY `idx_category_id` (`category_id`)
+  ) ENGINE=InnoDB COMMENT='商品表';
+
+  CREATE TABLE `t_order_item` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `order_id` bigint NOT NULL COMMENT '订单ID',
+    `product_id` bigint NOT NULL COMMENT '商品ID',
+    `quantity` int NOT NULL COMMENT '数量',
+    `unit_price` decimal(10,2) NOT NULL COMMENT '单价',
+    PRIMARY KEY (`id`),
+    KEY `idx_order_id` (`order_id`),
+    KEY `idx_product_id` (`product_id`)
+  ) ENGINE=InnoDB COMMENT='订单项表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

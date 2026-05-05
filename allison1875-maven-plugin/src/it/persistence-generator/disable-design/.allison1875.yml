@@ -1,0 +1,38 @@
+# persistence-generator disable-design integration test config
+domains:
+  - name: basic
+    controllerPackage: com.example.controller
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: false
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_simple` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name` varchar(100) NOT NULL COMMENT '名称',
+    `value` varchar(200) COMMENT '值',
+    PRIMARY KEY (`id`),
+    KEY `idx_name` (`name`)
+  ) ENGINE=InnoDB COMMENT='简单表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

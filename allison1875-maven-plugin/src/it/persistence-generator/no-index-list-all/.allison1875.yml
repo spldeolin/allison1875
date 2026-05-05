@@ -1,0 +1,38 @@
+# persistence-generator no-index-list-all integration test config
+domains:
+  - name: basic
+    controllerPackage: com.example.controller
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_config` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `config_key` varchar(100) NOT NULL COMMENT '配置键',
+    `config_value` varchar(500) NOT NULL COMMENT '配置值',
+    `description` varchar(200) COMMENT '描述',
+    PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB COMMENT='系统配置表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

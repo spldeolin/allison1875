@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.TPaymentMapper">
+
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
+    <!-- old generated content that should be replaced -->
+    <select id="oldMethod" resultType="int">
+        SELECT 1
+    </select>
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+
+    <!-- 以下是自定义SQL，不应被修改 -->
+    <select id="customQueryByStatus" resultType="com.example.entity.TPaymentEntity">
+        SELECT * FROM t_payment WHERE status = #{status}
+    </select>
+
+</mapper>
