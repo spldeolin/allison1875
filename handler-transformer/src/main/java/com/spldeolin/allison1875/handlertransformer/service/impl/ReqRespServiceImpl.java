@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -121,8 +120,6 @@ public class ReqRespServiceImpl implements ReqRespService {
             arg.setClassName(dtoName);
             arg.setDescription(concatDTODescription(initDecAnalysis));
             arg.setAuthor(config.getAuthor());
-            arg.setIsDataModelSerializable(config.getIsDataModelSerializable());
-            arg.setIsDataModelCloneable(config.getIsDataModelCloneable());
             arg.setMoreOperation((tempCu, dataModel) -> {
                 // copy fields
                 importExprService.copyImports(initDecAnalysis.getMvcControllerCu(), tempCu);
@@ -312,12 +309,7 @@ public class ReqRespServiceImpl implements ReqRespService {
     }
 
     private String concatDTODescription(InitDecAnalysisDTO initDecAnalysis) {
-        String result = "";
-        if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
-                    + initDecAnalysis.getLotNo();
-        }
-        return result;
+        return "";
     }
 
     private static IllegalArgumentException buildException(BlockStmt initBody) {

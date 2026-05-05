@@ -19,8 +19,6 @@ public interface BaseConstant {
 
     String NEW_LINE_FOR_MATCHING = "[\\r\\n]+";
 
-    String LOT_NO_ANNOUNCE_PREFIXION = "Allison 1875 Lot No: ";
-
     String NO_MODIFY_ANNOUNCE = "Any modifications may be overwritten by future code generations.";
 
     String[] JAVA_EXTENSIONS = new String[]{"java"};

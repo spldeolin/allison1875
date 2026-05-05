@@ -54,6 +54,4 @@ public class TableAnalysisDTO {
      */
     Boolean isAllPropertiesNotNull;
 
-    String lotNo;
-
 }

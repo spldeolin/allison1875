@@ -110,18 +110,6 @@ public class Config {
     String author = "Allison 1875";
 
     /**
-     * 生成的DataModel是否实现java.io.Serializable接口
-     */
-    @NotNull
-    Boolean isDataModelSerializable = false;
-
-    /**
-     * 生成的DataModel是否实现java.lang.Cloneable接口
-     */
-    @NotNull
-    Boolean isDataModelCloneable = false;
-
-    /**
      * 生成的DataModel是否使用Lombok
      */
     @NotNull
@@ -132,12 +120,6 @@ public class Config {
      */
     @NotNull
     Boolean enableNoModifyAnnounce = true;
-
-    /**
-     * 是否在该生成的地方生成诸如 Allison 1875 Lot No: DA1000S-967D9357 的声明
-     */
-    @NotNull
-    Boolean enableLotNoAnnounce = false;
 
     /**
      * 将javax命名空间移动到jakarta，兼容Spring Boot 3+的项目

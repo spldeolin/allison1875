@@ -16,11 +16,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.constant.YApiConstant;
@@ -329,22 +327,9 @@ public class YApiServiceImpl implements YApiService {
         code += endpoint.getSourceCode();
 
         String allison1875Announce = "";
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
+        if (config.getEnableNoModifyAnnounce()) {
             allison1875Announce += BaseConstant.NEW_LINE + "---";
-            if (config.getEnableNoModifyAnnounce()) {
-                allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
-            }
-            if (config.getEnableLotNoAnnounce()) {
-                if (config.getEnableNoModifyAnnounce()) {
-                    allison1875Announce += " ";
-                } else {
-                    allison1875Announce += BaseConstant.NEW_LINE;
-                }
-                String hash = StringUtils.upperCase(HashingUtils.hashString(endpoint.toString()));
-                allison1875Announce +=
-                        BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + String.format("DA%s-%s", Allison1875.SHORT_VERSION,
-                                hash);
-            }
+            allison1875Announce += BaseConstant.NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
 
         return Joiner.on('\n').skipNulls().join(deprecatedNode, since, comment, developer, code, allison1875Announce)

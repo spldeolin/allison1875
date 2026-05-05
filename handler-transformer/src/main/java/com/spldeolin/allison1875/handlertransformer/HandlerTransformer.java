@@ -133,12 +133,7 @@ public class HandlerTransformer implements Allison1875MainService {
                     // 创建mvcHandler
                     GenerateMvcHandlerArgs gmhArgs = new GenerateMvcHandlerArgs();
                     gmhArgs.setMvcHandlerUrl(initDecAnalysis.getMvcHandlerUrl());
-                    String description = initDecAnalysis.getMvcHandlerDescription();
-                    if (config.getEnableLotNoAnnounce()) {
-                        description += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
-                                + initDecAnalysis.getLotNo();
-                    }
-                    gmhArgs.setDescription(description);
+                    gmhArgs.setDescription(initDecAnalysis.getMvcHandlerDescription());
                     gmhArgs.setReqBodyDTOType(generateDTOsRetval.getReqBodyDTOType());
                     gmhArgs.setRespBodyDTOType(generateDTOsRetval.getRespBodyDTOType());
                     gmhArgs.setInjectedServiceVarName(addInjectFieldRetval.getFieldVarName());

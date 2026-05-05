@@ -25,13 +25,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.constant.KeywordConstant;
@@ -377,8 +375,6 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         result.setMapOrGroupKeyProperty(mapOrGroupKeyProperty);
         result.setChain(designChain);
         result.setIsByForced(chainCode.contains("." + KeywordConstant.WHERE_EVEN_NULL_METHOD_NAME + "()"));
-        String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
-        result.setLotNo(String.format("QT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
     }
 

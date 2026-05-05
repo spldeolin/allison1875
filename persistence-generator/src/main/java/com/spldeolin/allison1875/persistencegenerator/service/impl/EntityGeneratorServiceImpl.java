@@ -55,8 +55,6 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthor(config.getAuthor());
-        arg.setIsDataModelSerializable(config.getIsDataModelSerializable());
-        arg.setIsDataModelCloneable(config.getIsDataModelCloneable());
         arg.setMoreOperation((cu, dataModel) -> {
             // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
             if (config.getSuperEntity() != null) {
@@ -127,14 +125,9 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
 
     private String concatEntityDescription(TableAnalysisDTO persistence) {
         String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE;
-        }
         if (config.getEnableNoModifyAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
-        }
-        if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;
     }

@@ -35,10 +35,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.dto.IndexDTO;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
@@ -100,9 +98,6 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             }
             tableAnalysis.setIndices(flattenIndices);
 
-            // 设置LotNo
-            tableAnalysis.setLotNo(String.format("PG%s-%s", Allison1875.SHORT_VERSION,
-                    StringUtils.upperCase(HashingUtils.hashString(tableAnalysis.toString()))));
         }
         return tableAnalyses;
     }

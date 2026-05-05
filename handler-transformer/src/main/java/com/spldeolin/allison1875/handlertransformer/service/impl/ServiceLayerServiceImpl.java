@@ -18,7 +18,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
@@ -261,12 +260,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     }
 
     private String concatServiceDescription(InitDecAnalysisDTO initDecAnalysis) {
-        String result = "";
-        if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION
-                    + initDecAnalysis.getLotNo();
-        }
-        return result;
+        return "";
     }
 
 }

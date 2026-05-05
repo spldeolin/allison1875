@@ -104,20 +104,11 @@ javaVersion: 21
 # 是否将 javax 迁移到 jakarta。从 Spring Boot 版本推断，Spring Boot 3.x 设为 `true`，2.x 设为 `false`
 enableJavaxMoveToJakarta: false
 
-# DataModel 是否需要实现 `Serializable`。根据项目风格推断，默认false
-isDataModelSerializable: false
-
-# DataModel 是否需要实现 `Cloneable`。根据项目风格推断，默认false
-isDataModelCloneable: false
-
 # DataModel 是否不使用 Lombok。根据项目风格推断，默认false
 isDataModelWithoutLombok: false
 
 # 是否生成「Any modifications may be overwritten」声明，一律 true
 enableNoModifyAnnounce: true
-
-# 是否生成 Lot No 声明，一律 false
-enableLotNoAnnounce: false
 
 # -- doc-analyzer 工具的配置 -- #
 

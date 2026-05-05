@@ -1,15 +1,15 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseParameter;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.atteo.evo.inflector.English;
-import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseParameter;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -29,11 +29,11 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
-import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.dto.DeleteByIndexMethodDTO;
@@ -113,12 +113,7 @@ public class MapperCoidServiceImpl implements MapperCoidService {
     }
 
     private String concatMapperDescription(TableAnalysisDTO persistence) {
-        String result = persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
-        if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE;
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
-        }
-        return result;
+        return persistence.getDescrption() + BaseConstant.JAVA_DOC_NEW_LINE + persistence.getTableName();
     }
 
     @Override
@@ -433,14 +428,9 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
     private String concatMapperMethodComment(TableAnalysisDTO persistence, String methodDescription) {
         String result = methodDescription;
-        if (config.getEnableNoModifyAnnounce() || config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE;
-        }
         if (config.getEnableNoModifyAnnounce()) {
+            result += BaseConstant.JAVA_DOC_NEW_LINE;
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
-        }
-        if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;
     }

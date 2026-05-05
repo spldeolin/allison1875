@@ -31,6 +31,4 @@ public class ChainAnalysisDTO {
 
     String wholeDTOName;
 
-    String lotNo;
-
 }

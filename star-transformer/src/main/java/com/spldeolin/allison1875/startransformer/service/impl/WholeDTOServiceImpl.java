@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -36,12 +35,7 @@ public class WholeDTOServiceImpl implements WholeDTOService {
         dataModelArg.setSourceRoot(AstForestContext.get().getSourceRoot());
         dataModelArg.setPackageName(config.getWholeDTOPackage());
         dataModelArg.setClassName(analysis.getWholeDTOName());
-        if (config.getEnableLotNoAnnounce()) {
-            dataModelArg.setDescription(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + analysis.getLotNo());
-        }
         dataModelArg.setAuthor(config.getAuthor());
-        dataModelArg.setIsDataModelSerializable(config.getIsDataModelSerializable());
-        dataModelArg.setIsDataModelCloneable(config.getIsDataModelCloneable());
         FieldArg cftFieldArg = new FieldArg();
         cftFieldArg.setTypeQualifier(analysis.getCftEntityQualifier());
         cftFieldArg.setFieldName(this.entityNameToVarName(analysis.getCftEntityName()));

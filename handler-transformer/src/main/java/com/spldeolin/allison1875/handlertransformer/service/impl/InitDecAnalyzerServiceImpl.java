@@ -8,8 +8,6 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.Allison1875;
-import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.InitDecAnalyzerService;
@@ -72,8 +70,6 @@ public class InitDecAnalyzerServiceImpl implements InitDecAnalyzerService {
         result.setMvcHandlerMethodName(MoreStringUtils.toLowerCamel(result.getMvcHandlerUrl()));
         result.setMvcControllerCu(mvcControllerCu);
         result.setMvcController(mvcController);
-        String hash = StringUtils.upperCase(HashingUtils.hashString(result.toString()));
-        result.setLotNo(String.format("HT%s-%s", Allison1875.SHORT_VERSION, hash));
         return result;
     }
 

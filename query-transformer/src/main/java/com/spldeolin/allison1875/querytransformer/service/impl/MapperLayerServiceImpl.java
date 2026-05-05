@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.querytransformer.service.impl;
 import static com.spldeolin.allison1875.common.constant.BaseConstant.DOUBLE_INDENT;
 import static com.spldeolin.allison1875.common.constant.BaseConstant.SINGLE_INDENT;
 import static com.spldeolin.allison1875.common.constant.BaseConstant.TREBLE_INDENT;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -12,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -27,7 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
@@ -90,9 +88,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             chainAnalysis.setCountMethodNameForPage(methodName);
 
             MethodDeclaration method = new MethodDeclaration();
-            if (config.getEnableLotNoAnnounce()) {
-                method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
-            }
             method.setType("long");
             method.setName(methodName);
             method.setParameters(new NodeList<>(args.getCloneParameters()));
@@ -108,9 +103,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         chainAnalysis.setMethodName(methodName);
 
         MethodDeclaration method = new MethodDeclaration();
-        if (config.getEnableLotNoAnnounce()) {
-            method.setJavadocComment(BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo());
-        }
         // 增加Mybatis @MapKey注解
         if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.MAP) {
             method.addAnnotation(parseAnnotation(
@@ -151,7 +143,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
                 if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                     // 分页场景除了query还需要生成count方法
-                    xmlLines.add(concatLotNoComment(chainAnalysis));
                     String startTag = this.concatSelectStartTag(null, chainAnalysis.getCountMethodNameForPage(),
                             generateParamRetval,
                             new GenerateReturnTypeRetval().setResultType(PrimitiveType.longType()));
@@ -168,7 +159,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     xmlLines.add("</select>");
                 }
 
-                xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = this.concatSelectStartTag(designMeta.getEntityQualifier(),
                         chainAnalysis.getMethodName(), generateParamRetval, generateReturnTypeRetval);
                 xmlLines.add(startTag);
@@ -236,7 +226,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 xmlLines.add("</select>");
             } else if (chainAnalysis.getChainInitialMethod() == ChainInitialMethod.UPDATE) {
                 // UPDATE
-                xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatUpdateStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + "UPDATE " + designMeta.getTableName());
@@ -252,7 +241,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                 xmlLines.add("</update>");
             } else if (chainAnalysis.getChainInitialMethod() == ChainInitialMethod.DELETE) {
                 // DROP
-                xmlLines.add(concatLotNoComment(chainAnalysis));
                 String startTag = concatDeleteStartTag(chainAnalysis, generateParamRetval);
                 xmlLines.add(startTag);
                 xmlLines.add(SINGLE_INDENT + "DELETE FROM " + designMeta.getTableName());
@@ -575,13 +563,6 @@ public class MapperLayerServiceImpl implements MapperLayerService {
             return Lists.newArrayList();
         }
         return xmlLines;
-    }
-
-    private String concatLotNoComment(ChainAnalysisDTO chainAnalysis) {
-        if (config.getEnableLotNoAnnounce()) {
-            return "<!-- " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + chainAnalysis.getLotNo() + " -->";
-        }
-        return "";
     }
 
     private String concatSelectStartTag(String entityQualifier, String methodName, GenerateParamRetval paramGeneration,

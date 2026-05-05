@@ -1,15 +1,14 @@
 package com.spldeolin.allison1875.common.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBlock;
+
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBlock;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -84,12 +83,6 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
 
         ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
         coid.setPublic(true).setInterface(false).setName(className);
-        if (arg.getIsDataModelSerializable()) {
-            coid.addImplementedType("java.io.Serializable");
-        }
-        if (arg.getIsDataModelCloneable()) {
-            coid.addImplementedType("Cloneable");
-        }
         JavadocUtils.setJavadoc(coid, description, arg.getAuthor().trim() + " " + LocalDate.now());
         cu.addType(coid);
 
@@ -108,15 +101,6 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
         // more for DataModel
         if (arg.getMoreOperation() != null) {
             arg.getMoreOperation().accept(cu, coid);
-        }
-
-        if (arg.getIsDataModelSerializable()) {
-            coid.getMembers().addFirst(parseBodyDeclaration(
-                    "private static final long serialVersionUID = " + RandomUtils.nextLong() + "L;"));
-        }
-        if (arg.getIsDataModelCloneable()) {
-            coid.getMembers().addLast(parseBodyDeclaration(
-                    "@Override public Object clone() throws CloneNotSupportedException { return super.clone(); }"));
         }
 
         importExprService.extractQualifiedTypeToImport(cu);

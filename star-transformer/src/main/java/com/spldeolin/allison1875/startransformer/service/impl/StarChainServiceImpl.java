@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.startransformer.service.impl;
 
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
@@ -12,13 +11,11 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.HashingUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.startransformer.dto.PhraseDTO;
@@ -141,8 +138,6 @@ public class StarChainServiceImpl implements StarChainService {
             analysis.setPhrases(phrases);
             String wholeDTOName = this.buildWholeDTOName(analysis.getCftEntityName());
             analysis.setWholeDTOName(wholeDTOName);
-            String hash = StringUtils.upperCase(HashingUtils.hashString(analysis.toString()));
-            analysis.setLotNo(String.format("ST%s-%s", Allison1875.SHORT_VERSION, hash));
             return analysis;
         }
         if (mce.getScope().filter(Expression::isMethodCallExpr).isPresent()) {

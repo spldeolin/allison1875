@@ -72,6 +72,4 @@ public class ChainAnalysisDTO {
 
     Boolean isByForced;
 
-    String lotNo;
-
 }

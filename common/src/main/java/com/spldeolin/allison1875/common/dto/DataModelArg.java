@@ -45,16 +45,4 @@ public class DataModelArg {
     @NotNull
     FileExistenceResolutionEnum dataModelExistenceResolution;
 
-    /**
-     * 生成的DataModel是否实现java.io.Serializable接口
-     */
-    @NotNull
-    Boolean isDataModelSerializable;
-
-    /**
-     * 生成的DataModel是否实现java.lang.Cloneable接口
-     */
-    @NotNull
-    Boolean isDataModelCloneable;
-
 }

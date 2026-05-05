@@ -487,9 +487,6 @@ public class MapperXmlServiceImpl implements MapperXmlService {
         if (config.getEnableNoModifyAnnounce()) {
             result += " " + BaseConstant.NO_MODIFY_ANNOUNCE;
         }
-        if (config.getEnableLotNoAnnounce()) {
-            result += " " + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
-        }
         result += " -->";
         return result;
     }

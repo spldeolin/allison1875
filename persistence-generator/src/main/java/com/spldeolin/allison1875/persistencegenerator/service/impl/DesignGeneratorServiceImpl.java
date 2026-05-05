@@ -1,5 +1,11 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseMethodDeclaration;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -7,12 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseBodyDeclaration;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseMethodDeclaration;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -484,9 +484,6 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         String result = "";
         if (config.getEnableNoModifyAnnounce()) {
             result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.NO_MODIFY_ANNOUNCE;
-        }
-        if (config.getEnableLotNoAnnounce()) {
-            result += BaseConstant.JAVA_DOC_NEW_LINE + BaseConstant.LOT_NO_ANNOUNCE_PREFIXION + persistence.getLotNo();
         }
         return result;
     }

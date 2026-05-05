@@ -28,8 +28,6 @@ public class InitDecAnalysisDTO {
 
     ClassOrInterfaceDeclaration mvcController;
 
-    String lotNo;
-
     Map<String, String> expansion = Maps.newHashMap();
 
     @Override

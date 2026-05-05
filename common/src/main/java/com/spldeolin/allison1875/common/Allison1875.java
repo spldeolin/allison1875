@@ -27,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Allison1875 {
 
-    public static String SHORT_VERSION;
-
     public static void hello() {
         try (Reader reader = Resources.asCharSource(Resources.getResource("allison1875-git.properties"),
                 StandardCharsets.UTF_8).openStream()) {
@@ -44,12 +42,6 @@ public class Allison1875 {
             // replace placeholders
             String version = properties.getProperty("git.build.version");
             banner = banner.replace("${buildVersion}", version);
-
-            // abbreviate version
-            String[] components = version.split("-")[0].split("\\.");
-            String prefix = String.format("%02d", Integer.parseInt(components[0]));
-            String suffix = String.format("%02d", Integer.parseInt(components.length > 1 ? components[1] : "0"));
-            SHORT_VERSION = prefix + suffix + (version.endsWith("-SNAPSHOT") ? "S" : "R");
 
             // print banner
             log.info(banner);
