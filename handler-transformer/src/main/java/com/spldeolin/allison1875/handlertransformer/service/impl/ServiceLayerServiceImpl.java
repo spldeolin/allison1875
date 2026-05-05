@@ -1,9 +1,7 @@
 package com.spldeolin.allison1875.handlertransformer.service.impl;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -16,8 +14,8 @@ import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
@@ -130,9 +128,9 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             serviceName =
                     MoreStringUtils.toUpperCamel(args.getInitDecAnalysisDTO().getMvcHandlerMethodName()) + "Service";
         }
-        Path serviceSourceRoot = Optional.ofNullable(config.getServiceSourcePath()).map(File::toPath)
-                .orElse(AstForestContext.get().getSourceRoot());
-        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(serviceSourceRoot, config.getServicePackage(),
+        Path serviceSourceRoot = DomainContext.get().getServiceSourceRoot();
+        Path absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(serviceSourceRoot,
+                DomainContext.get().getServicePackage(),
                 serviceName + ".java");
 
         // 查找或生成service和cu
@@ -143,7 +141,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             if (config.getEnableOneService()) {
                 // 单service模式下直接查找
                 serviceCu = CompilationUnitUtils.tryFindCu(serviceSourceRoot,
-                                config.getServicePackage() + "." + serviceName)
+                                DomainContext.get().getServicePackage() + "." + serviceName)
                         .orElseThrow(() -> new Allison1875Exception("fail to parse cu"));
                 service = serviceCu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
                         .orElseThrow(() -> new Allison1875Exception("")).asClassOrInterfaceDeclaration();
@@ -161,10 +159,9 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         }
 
         String serviceImplName = serviceName + "Impl";
-        Path serviceImplSourceRoot = Optional.ofNullable(config.getServiceImplSourcePath()).map(File::toPath)
-                .orElse(AstForestContext.get().getSourceRoot());
+        Path serviceImplSourceRoot = DomainContext.get().getServiceImplSourceRoot();
         absolutePath = CodeGenerationUtils.fileInPackageAbsolutePath(serviceImplSourceRoot,
-                config.getServiceImplPackage(), serviceImplName + ".java");
+                DomainContext.get().getServiceImplPackage(), serviceImplName + ".java");
 
         // 查找或生成serviceImpl和cu
         CompilationUnit serviceImplCu;
@@ -174,7 +171,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             if (config.getEnableOneService()) {
                 // 单service模式下直接查找
                 serviceImplCu = CompilationUnitUtils.tryFindCu(serviceImplSourceRoot,
-                                config.getServiceImplPackage() + "." + serviceImplName)
+                                DomainContext.get().getServiceImplPackage() + "." + serviceImplName)
                         .orElseThrow(() -> new Allison1875Exception("fail to parse cu"));
                 serviceImpl = serviceImplCu.getPrimaryType().filter(TypeDeclaration::isClassOrInterfaceDeclaration)
                         .orElseThrow(() -> new Allison1875Exception("")).asClassOrInterfaceDeclaration();
@@ -201,7 +198,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         retval.setServiceImpl(serviceImpl);
         retval.setServiceImplCu(serviceImplCu);
         retval.setServiceVarName(MoreStringUtils.toLowerCamel(service.getNameAsString()));
-        retval.setServiceQualifier(config.getServicePackage() + "." + serviceName);
+        retval.setServiceQualifier(DomainContext.get().getServicePackage() + "." + serviceName);
         return retval;
     }
 
@@ -212,7 +209,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         String serviceImplName = FilenameUtils.getBaseName(absolutePath.toString());
 
         CompilationUnit serviceImplCu = new CompilationUnit();
-        serviceImplCu.setPackageDeclaration(config.getServiceImplPackage());
+        serviceImplCu.setPackageDeclaration(DomainContext.get().getServiceImplPackage());
         importExprService.copyImports(args.getControllerCu(), serviceImplCu);
         ClassOrInterfaceDeclaration serviceImpl = new ClassOrInterfaceDeclaration();
         JavadocUtils.setJavadoc(serviceImpl, concatServiceDescription(args.getInitDecAnalysisDTO()),
@@ -234,7 +231,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         String serviceName = FilenameUtils.getBaseName(absolutePath.toString());
 
         CompilationUnit serviceCu = new CompilationUnit();
-        serviceCu.setPackageDeclaration(config.getServicePackage());
+        serviceCu.setPackageDeclaration(DomainContext.get().getServicePackage());
         importExprService.copyImports(args.getControllerCu(), serviceCu);
         ClassOrInterfaceDeclaration service = new ClassOrInterfaceDeclaration();
         String comment = concatServiceDescription(args.getInitDecAnalysisDTO());

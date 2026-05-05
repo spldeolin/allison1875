@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -32,8 +32,8 @@ public class WholeDTOServiceImpl implements WholeDTOService {
     @Override
     public DataModelGeneration generateWholeDTO(ChainAnalysisDTO analysis) {
         DataModelArg dataModelArg = new DataModelArg();
-        dataModelArg.setSourceRoot(AstForestContext.get().getSourceRoot());
-        dataModelArg.setPackageName(config.getWholeDTOPackage());
+        dataModelArg.setSourceRoot(DomainContext.get().getWholeDTOSourceRoot());
+        dataModelArg.setPackageName(DomainContext.get().getWholeDTOPackage());
         dataModelArg.setClassName(analysis.getWholeDTOName());
         dataModelArg.setAuthor(config.getAuthor());
         FieldArg cftFieldArg = new FieldArg();

@@ -1,13 +1,12 @@
 package com.spldeolin.allison1875.querytransformer.service.impl;
 
-import java.io.File;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseExpression;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -24,8 +23,8 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -58,8 +57,7 @@ public class DesignServiceImpl implements DesignService {
 
     @Override
     public ClassOrInterfaceDeclaration findCoidWithChecksum(String qualifier) {
-        Path sourceRoot = Optional.ofNullable(queryTransformerConfig.getPersistenceSourcePath()).map(File::toPath)
-                .orElse(AstForestContext.get().getSourceRoot());
+        Path sourceRoot = DomainContext.get().getPersistenceSourceRoot();
         Optional<CompilationUnit> opt = CompilationUnitUtils.tryFindCu(sourceRoot, qualifier);
 
         if (!opt.isPresent()) {

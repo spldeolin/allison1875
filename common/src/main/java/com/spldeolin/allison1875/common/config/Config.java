@@ -26,82 +26,11 @@ public class Config {
     // ==================== 公共配置 ====================
 
     /**
-     * 控制器所在包的包名
+     * 业务领域配置列表，描述各领域的代码位置
      */
     @NotEmpty
-    String controllerPackage;
-
-    /**
-     * 控制层@RequestBody类型所在包的包名
-     */
-    @NotEmpty
-    String reqDTOPackage;
-
-    /**
-     * 控制层@ResponseBody业务数据部分类型所在包的包名
-     */
-    @NotEmpty
-    String respDTOPackage;
-
-    /**
-     * 枚举所在包的包名
-     */
-    @NotEmpty
-    String enumPackage;
-
-    /**
-     * 业务层Service接口所在包的包名
-     */
-    @NotEmpty
-    String servicePackage;
-
-    /**
-     * 业务层ServiceImpl类所在包的包名
-     */
-    @NotEmpty
-    String serviceImplPackage;
-
-    /**
-     * 持久层mapper接口所在包的包名
-     */
-    @NotEmpty
-    String mapperPackage;
-
-    /**
-     * 持久层Entity类所在包的包名
-     */
-    @NotEmpty
-    String entityPackage;
-
-    /**
-     * Design类所在包的包名
-     */
-    @NotEmpty
-    String designPackage;
-
-    /**
-     * 持久层Mapper方法签名中Param类所在包的包名
-     */
-    @NotEmpty
-    String paramDTOPackage;
-
-    /**
-     * 持久层Mapper方法签名中Record类所在包的包名
-     */
-    @NotEmpty
-    String recordDTOPackage;
-
-    /**
-     * WholeDTO类所在包的包名
-     */
-    @NotEmpty
-    String wholeDTOPackage;
-
-    /**
-     * mapper.xml所在目录（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    @NotEmpty
-    List<File> mapperXmlDirs = Lists.newArrayList(new File("src/main/resources/mapper"));
+    @Valid
+    List<DomainConfig> domains = Lists.newArrayList();
 
     /**
      * 为生成的代码指定作者
@@ -140,21 +69,6 @@ public class Config {
      */
     @NotNull
     Boolean enableOneService = false;
-
-    /**
-     * Service接口所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    File serviceSourcePath;
-
-    /**
-     * ServiceImpl类所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    File serviceImplSourcePath;
-
-    /**
-     * DTO类所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    File dtoSourcePath;
 
     // ==================== persistence-generator 配置 ====================
 
@@ -221,13 +135,6 @@ public class Config {
      */
     @NotNull
     FileExistenceResolutionEnum entityExistenceResolution = FileExistenceResolutionEnum.OVERWRITE;
-
-    // ==================== query-transformer 配置 ====================
-
-    /**
-     * 持久层所在的SourcePath（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    File persistenceSourcePath;
 
     // ==================== star-transformer 配置 ====================
 

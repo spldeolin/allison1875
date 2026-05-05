@@ -26,8 +26,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -64,8 +64,8 @@ public class MapperCoidServiceImpl implements MapperCoidService {
 
         // find
         List<MethodDeclaration> customMethods = Lists.newArrayList();
-        String mapperQualifier = config.getMapperPackage() + "." + persistence.getMapperName();
-        Optional<CompilationUnit> opt = CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(),
+        String mapperQualifier = DomainContext.get().getMapperPackage() + "." + persistence.getMapperName();
+        Optional<CompilationUnit> opt = CompilationUnitUtils.tryFindCu(DomainContext.get().getPersistenceSourceRoot(),
                 mapperQualifier);
         ClassOrInterfaceDeclaration mapper;
         if (opt.isPresent()) {
@@ -92,9 +92,9 @@ public class MapperCoidServiceImpl implements MapperCoidService {
             // create
             log.info("mapper is absent, create it, [{}]", mapperQualifier);
             CompilationUnit cu = new CompilationUnit();
-            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                    config.getMapperPackage(), persistence.getMapperName() + ".java"));
-            cu.setPackageDeclaration(config.getMapperPackage());
+            cu.setStorage(CodeGenerationUtils.fileInPackageAbsolutePath(DomainContext.get().getPersistenceSourceRoot(),
+                    DomainContext.get().getMapperPackage(), persistence.getMapperName() + ".java"));
+            cu.setPackageDeclaration(DomainContext.get().getMapperPackage());
             mapper = new ClassOrInterfaceDeclaration();
             String comment = concatMapperDescription(persistence);
             Javadoc javadoc = JavadocUtils.setJavadoc(mapper, comment, config.getAuthor() + " " + LocalDate.now());

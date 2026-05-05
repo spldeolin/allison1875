@@ -46,7 +46,7 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
         List<MvcHandlerDTO> result = Lists.newArrayList();
 
         for (CompilationUnit cu : AstForestContext.get()) {
-            if (!CompilationUnitUtils.getCuAbsolutePath(cu).startsWith(AstForestContext.get().getSourceRoot())) {
+            if (!CompilationUnitUtils.getCuAbsolutePath(cu).startsWith(AstForestContext.get().getPrimarySourceRoot())) {
                 // 非宿主controller
                 continue;
             }

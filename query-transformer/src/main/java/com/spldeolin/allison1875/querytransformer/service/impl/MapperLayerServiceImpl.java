@@ -24,8 +24,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
@@ -376,8 +376,7 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         if (methodAddedMappers.containsKey(mapperQualifier)) {
             return methodAddedMappers.get(mapperQualifier);
         }
-        Path sourceRoot = Optional.ofNullable(config.getPersistenceSourcePath()).map(File::toPath)
-                .orElse(AstForestContext.get().getSourceRoot());
+        Path sourceRoot = DomainContext.get().getPersistenceSourceRoot();
         Optional<CompilationUnit> cu = CompilationUnitUtils.tryFindCu(sourceRoot, mapperQualifier);
         if (!cu.isPresent()) {
             return null;
@@ -404,8 +403,8 @@ public class MapperLayerServiceImpl implements MapperLayerService {
         }
 
         File mapperXml = new File(mapperPath);
-        if (config.getPersistenceSourcePath() != null) {
-            mapperXml = config.getPersistenceSourcePath().toPath().resolve(mapperPath).toFile();
+        if (!mapperXml.isAbsolute()) {
+            mapperXml = DomainContext.get().getPersistenceSourceRoot().resolve(mapperPath).toFile();
         }
         if (!mapperXml.exists()) {
             return null;

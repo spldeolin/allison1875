@@ -103,7 +103,7 @@ public class FieldServiceImpl implements FieldService {
 
     protected Set<File> buildAnalysisScope() {
         Set<File> retval = Sets.newLinkedHashSet();
-        FileUtils.iterateFiles(AstForestContext.get().cloneWithResetting().getSourceRoot().toFile(),
+        FileUtils.iterateFiles(AstForestContext.get().cloneWithResetting().getPrimarySourceRoot().toFile(),
                 BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(retval::add);
         // dependent dirs or javas
         for (File dirOrJavaFile : config.getDependencyDirsOrJavaFilePath()) {

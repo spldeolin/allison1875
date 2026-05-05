@@ -15,7 +15,7 @@ public class LongPackageName {
 
     public static void main(String[] args) {
         AstForest astForest = new AstForestTestImpl(new File("common/src/test/java"));
-        CompilationUnitUtils.tryFindCu(astForest.getSourceRoot(),
+        CompilationUnitUtils.tryFindCu(astForest.getPrimarySourceRoot(),
                 "com.spldeolin.allison1875.common.test.packageinfo.p1.p2.p3.p4.p5.p6.LongPackageName").ifPresent(cu -> {
                     PackageDeclaration pd = cu.getPackageDeclaration()
                             .orElseThrow(() -> new RuntimeException("impossible"));

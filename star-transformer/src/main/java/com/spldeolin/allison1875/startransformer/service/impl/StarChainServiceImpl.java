@@ -11,8 +11,8 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -108,7 +108,7 @@ public class StarChainServiceImpl implements StarChainService {
             phrase.setKeys(Lists.newArrayList(keys));
             phrase.setMkeys(Lists.newArrayList(mkeys));
             if (CollectionUtils.isNotEmpty(phrase.getKeys()) || CollectionUtils.isNotEmpty(phrase.getMkeys())) {
-                CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(),
+                CompilationUnitUtils.tryFindCu(DomainContext.get().getPersistenceSourceRoot(),
                         phrase.getDtEntityQualifier()).ifPresent(cu -> {
                     for (VariableDeclarator vd : cu.findAll(VariableDeclarator.class)) {
                         phrase.getEntityFieldTypesEachFieldName()

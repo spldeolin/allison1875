@@ -2,10 +2,7 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +18,8 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -113,9 +110,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             }
 
             DataModelArg arg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(config.getDtoSourcePath()).map(File::toPath)
-                    .orElse(AstForestContext.get().getSourceRoot());
-            arg.setSourceRoot(sourceRoot);
+            arg.setSourceRoot(DomainContext.get().getDtoSourceRoot());
             arg.setPackageName(packageName);
             arg.setClassName(dtoName);
             arg.setDescription(concatDTODescription(initDecAnalysis));
@@ -226,13 +221,13 @@ public class ReqRespServiceImpl implements ReqRespService {
     private String estimatePackageName(DTOTypeEnum dtoType) {
         String packageName;
         if (dtoType == DTOTypeEnum.REQ_DTO) {
-            packageName = config.getReqDTOPackage();
+            packageName = DomainContext.get().getReqDTOPackage();
         } else if (dtoType == DTOTypeEnum.RESP_DTO) {
-            packageName = config.getRespDTOPackage();
+            packageName = DomainContext.get().getRespDTOPackage();
         } else if (dtoType == DTOTypeEnum.NEST_DTO_IN_REQ) {
-            packageName = config.getReqDTOPackage();
+            packageName = DomainContext.get().getReqDTOPackage();
         } else {
-            packageName = config.getRespDTOPackage();
+            packageName = DomainContext.get().getRespDTOPackage();
         }
         return packageName;
     }

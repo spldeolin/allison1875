@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -111,7 +112,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         log.info("form={}", form);
 
         // 加入主表单Mapper
-        String mapperType = config.getMapperPackage() + "." + form.getName() + "Mapper";
+        String mapperType = DomainContext.get().getMapperPackage() + "." + form.getName() + "Mapper";
         String mapperName = form.getVarName() + "Mapper";
                 FieldDeclaration field = parseFieldDeclaration(
                         "private %s %s;", mapperType, mapperName);
@@ -122,7 +123,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         for (ItemDef item : form.getItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
-                mapperType = config.getMapperPackage() + "." + associationForm.getName() + "Mapper";
+                mapperType = DomainContext.get().getMapperPackage() + "." + associationForm.getName() + "Mapper";
                 mapperName = associationForm.getVarName() + "Mapper";
                         FieldDeclaration associationFormMapperField = parseFieldDeclaration(
                                 "private %s %s;", mapperType, mapperName);

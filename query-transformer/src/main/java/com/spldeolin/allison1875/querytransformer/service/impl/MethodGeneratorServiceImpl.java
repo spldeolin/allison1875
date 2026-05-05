@@ -3,10 +3,7 @@ package com.spldeolin.allison1875.querytransformer.service.impl;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseType;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -15,8 +12,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -59,10 +56,8 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
         if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE)) {
             DataModelArg dataModelArg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(config.getPersistenceSourcePath()).map(File::toPath)
-                    .orElse(AstForestContext.get().getSourceRoot());
-            dataModelArg.setSourceRoot(sourceRoot);
-            dataModelArg.setPackageName(config.getParamDTOPackage());
+            dataModelArg.setSourceRoot(DomainContext.get().getPersistenceSourceRoot());
+            dataModelArg.setPackageName(DomainContext.get().getParamDTOPackage());
             dataModelArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Param");
             dataModelArg.setAuthor(config.getAuthor());
             for (Binary binary : binaries) {
@@ -164,10 +159,8 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         Set<VariableProperty> returnProps = chainAnalysis.getPropertiesAsResult();
         if (returnProps.size() > 1) {
             DataModelArg dataModelArg = new DataModelArg();
-            Path sourceRoot = Optional.ofNullable(config.getPersistenceSourcePath()).map(File::toPath)
-                    .orElse(AstForestContext.get().getSourceRoot());
-            dataModelArg.setSourceRoot(sourceRoot);
-            dataModelArg.setPackageName(config.getRecordDTOPackage());
+            dataModelArg.setSourceRoot(DomainContext.get().getPersistenceSourceRoot());
+            dataModelArg.setPackageName(DomainContext.get().getRecordDTOPackage());
             dataModelArg.setClassName(MoreStringUtils.toUpperCamel(chainAnalysis.getMethodName()) + "Record");
             dataModelArg.setAuthor(config.getAuthor());
             for (VariableProperty returnProp : returnProps) {

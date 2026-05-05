@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
@@ -168,7 +169,7 @@ public class PersistenceGenerator implements Allison1875MainService {
                     mapperXmlService.generateListAllMethod(tableAnalysis, listAllMethodName));
 
             // 基础方法替换到MapperXml中
-            for (File mapperXmlDirectory : config.getMapperXmlDirs()) {
+            for (File mapperXmlDirectory : DomainContext.get().getMapperXmlDirs()) {
                 if (!mapperXmlDirectory.exists()) {
                     log.debug("mapperXmlDirectory.mkdirs()={}", mapperXmlDirectory.mkdirs());
                 }

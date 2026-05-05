@@ -12,8 +12,8 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
@@ -41,8 +41,8 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     @Override
     public DataModelGeneration generateEntity(TableAnalysisDTO persistence) {
         DataModelArg arg = new DataModelArg();
-        arg.setSourceRoot(AstForestContext.get().getSourceRoot());
-        arg.setPackageName(config.getEntityPackage());
+        arg.setSourceRoot(DomainContext.get().getPersistenceSourceRoot());
+        arg.setPackageName(DomainContext.get().getEntityPackage());
         arg.setClassName(persistence.getEntityName());
         arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthor(config.getAuthor());

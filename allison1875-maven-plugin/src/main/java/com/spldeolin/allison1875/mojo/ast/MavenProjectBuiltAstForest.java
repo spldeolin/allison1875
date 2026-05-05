@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.StaticJavaParser;
@@ -25,36 +27,54 @@ public class MavenProjectBuiltAstForest implements AstForest {
 
     private final ClassLoader classLoader;
 
-    private final File sourceRoot;
+    private final Set<File> sourceRoots;
 
-    public MavenProjectBuiltAstForest(ClassLoader classLoader, File sourceRoot) {
+    private final File primarySourceRoot;
+
+    public MavenProjectBuiltAstForest(ClassLoader classLoader, Set<File> sourceRoots, File primarySourceRoot) {
         Preconditions.checkNotNull(classLoader, "required Argument 'classLoader' must not be null");
-        Preconditions.checkNotNull(sourceRoot, "required Argument 'sourceRoot' must not be null");
+        Preconditions.checkNotNull(sourceRoots, "required Argument 'sourceRoots' must not be null");
+        Preconditions.checkArgument(!sourceRoots.isEmpty(), "sourceRoots must not be empty");
+        Preconditions.checkNotNull(primarySourceRoot, "required Argument 'primarySourceRoot' must not be null");
+        Set<File> canonicalRoots = new LinkedHashSet<>();
+        for (File sr : sourceRoots) {
+            try {
+                canonicalRoots.add(sr.getCanonicalFile());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        this.sourceRoots = canonicalRoots;
         try {
-            sourceRoot = sourceRoot.getCanonicalFile();
+            this.primarySourceRoot = primarySourceRoot.getCanonicalFile();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         this.classLoader = classLoader;
-        this.sourceRoot = sourceRoot;
         StaticJavaParser.getParserConfiguration().setLanguageLevel(LanguageLevel.JAVA_17)
                 .setSymbolResolver(new JavaSymbolSolver(new ClassLoaderTypeSolver(classLoader)));
         Thread.currentThread().setContextClassLoader(classLoader);
-        log.info("AstForest created, sourceRoot={}", sourceRoot);
+        log.info("AstForest created, sourceRoots={}", this.sourceRoots);
     }
 
     @Override
     public Iterator<CompilationUnit> iterator() {
-        // java files
-        Iterator<File> javaFilesItr = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
-        // cus
-        Iterator<CompilationUnit> cusItr = Iterators.transform(javaFilesItr, CompilationUnitUtils::parseJava);
-        return cusItr;
+        Iterator<CompilationUnit> combined = Iterators.concat();
+        for (File sourceRoot : sourceRoots) {
+            if (!sourceRoot.exists()) {
+                log.warn("sourceRoot does not exist, skip: {}", sourceRoot);
+                continue;
+            }
+            Iterator<File> javaFilesItr = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
+            Iterator<CompilationUnit> cusItr = Iterators.transform(javaFilesItr, CompilationUnitUtils::parseJava);
+            combined = Iterators.concat(combined, cusItr);
+        }
+        return combined;
     }
 
     @Override
     public AstForest cloneWithResetting() {
-        return new MavenProjectBuiltAstForest(classLoader, sourceRoot);
+        return new MavenProjectBuiltAstForest(classLoader, sourceRoots, primarySourceRoot);
     }
 
     @Override
@@ -63,8 +83,17 @@ public class MavenProjectBuiltAstForest implements AstForest {
     }
 
     @Override
-    public Path getSourceRoot() {
-        return sourceRoot.toPath();
+    public Set<Path> getSourceRoots() {
+        Set<Path> paths = new LinkedHashSet<>();
+        for (File sr : sourceRoots) {
+            paths.add(sr.toPath());
+        }
+        return paths;
+    }
+
+    @Override
+    public Path getPrimarySourceRoot() {
+        return primarySourceRoot.toPath();
     }
 
 }

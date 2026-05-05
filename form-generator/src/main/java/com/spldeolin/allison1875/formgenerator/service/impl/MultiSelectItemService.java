@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -62,7 +63,8 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
 
     @Override
     public String getJavaTypeInDTO(MultiSelectItemDef itemDef) {
-        return "java.util.List<" + config.getEnumPackage() + "." + MoreStringUtils.toUpperCamel(itemDef.getName())
+        return "java.util.List<" + DomainContext.get().getEnumPackage() + "." + MoreStringUtils.toUpperCamel(
+                itemDef.getName())
                 + "Enum" + ">";
     }
 

@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.StaticJavaParser;
@@ -51,7 +53,12 @@ public class AstForestTestImpl implements AstForest {
     }
 
     @Override
-    public Path getSourceRoot() {
+    public Set<Path> getSourceRoots() {
+        return Collections.singleton(sourceRoot.toPath());
+    }
+
+    @Override
+    public Path getPrimarySourceRoot() {
         return sourceRoot.toPath();
     }
 

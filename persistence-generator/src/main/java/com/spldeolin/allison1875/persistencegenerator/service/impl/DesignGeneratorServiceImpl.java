@@ -30,8 +30,8 @@ import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
@@ -81,14 +81,15 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
 
         CompilationUnit cu = args.getJoinChainCu();
         if (cu == null) {
-            cu = CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(),
-                    config.getDesignPackage() + ".JoinChain").orElseGet(() -> {
+            cu = CompilationUnitUtils.tryFindCu(DomainContext.get().getPersistenceSourceRoot(),
+                    DomainContext.get().getDesignPackage() + ".JoinChain").orElseGet(() -> {
                 CompilationUnit designCu = new CompilationUnit();
-                Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                        config.getDesignPackage(), "JoinChain.java");
+                Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(
+                        DomainContext.get().getPersistenceSourceRoot(), DomainContext.get().getDesignPackage(),
+                        "JoinChain.java");
                 log.info("Join Design absent, create it, path={}", designPath);
                 designCu.setStorage(designPath);
-                designCu.setPackageDeclaration(config.getDesignPackage());
+                designCu.setPackageDeclaration(DomainContext.get().getDesignPackage());
                 designCu.addImport(OnChainComparison.class.getName());
                 designCu.addImport(PropertyName.class.getName());
                 designCu.addOrphanComment(new LineComment("@formatter:" + "off"));
@@ -206,15 +207,15 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
 
         String designName = concatDesignName(tableAnalysis);
-        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                config.getDesignPackage(), designName + ".java");
+        Path designPath = CodeGenerationUtils.fileInPackageAbsolutePath(DomainContext.get().getPersistenceSourceRoot(),
+                DomainContext.get().getDesignPackage(), designName + ".java");
 
         List<PropertyDTO> properties = tableAnalysis.getProperties();
         LinkedHashMap<String, PropertyDTO> propertiesByName = Maps.newLinkedHashMap();
 
         CompilationUnit cu = new CompilationUnit();
         cu.setStorage(designPath);
-        cu.setPackageDeclaration(config.getDesignPackage());
+        cu.setPackageDeclaration(DomainContext.get().getDesignPackage());
         for (PropertyDTO property : properties) {
             propertiesByName.put(property.getPropertyName(), property);
         }
@@ -446,14 +447,14 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
 
         DesignMetaDTO meta = new DesignMetaDTO();
-        meta.setDesignQualifier(config.getDesignPackage() + "." + designName);
+        meta.setDesignQualifier(DomainContext.get().getDesignPackage() + "." + designName);
         meta.setDesignName(designName);
         meta.setEntityQualifier(entityGeneration.getDtoQualifier());
         meta.setEntityName(entityGeneration.getDtoName());
         meta.setMapperQualifier(args.getMapper().getFullyQualifiedName().orElseThrow(
                 () -> new Allison1875Exception("Node '" + args.getMapper().getName() + "' has no Qualifier")));
         meta.setMapperName(args.getMapper().getNameAsString());
-        meta.setMapperPaths(config.getMapperXmlDirs().stream()
+        meta.setMapperPaths(DomainContext.get().getMapperXmlDirs().stream()
                 .map(one -> one + File.separator + tableAnalysis.getMapperName() + ".xml")
                 .collect(Collectors.toList()));
         if (tableAnalysis.getIsDeleteFlagExist()) {
@@ -472,7 +473,7 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         CompilationUnitUtils.writeJava(cu);
 
         return new GenerateDesignRetval().setDesignCu(cu)
-                .setDesignQualifer(config.getDesignPackage() + "." + designName);
+                .setDesignQualifer(DomainContext.get().getDesignPackage() + "." + designName);
     }
 
     @Override

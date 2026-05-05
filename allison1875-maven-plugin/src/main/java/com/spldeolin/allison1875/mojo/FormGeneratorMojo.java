@@ -39,9 +39,6 @@ public class FormGeneratorMojo extends Allison1875Mojo {
         if (config.getDslPath() != null) {
             config.setDslPath(super.getCanonicalFileRelativeToBasedir(config.getDslPath()));
         }
-        if (config.getPersistenceSourcePath() != null) {
-            config.setPersistenceSourcePath(super.getCanonicalFileRelativeToBasedir(config.getPersistenceSourcePath()));
-        }
 
         // 构造CompileFacade实现类
         CompileFacade compileFacade = new CompileFacadeImpl(project, mavenSession, pluginManager);

@@ -130,7 +130,7 @@ public class DataModelServiceImpl implements DataModelService {
             String qualifier = type.asReferenceType().getQualifiedName();
 
             // 如果能找到源码……
-            CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(), qualifier)
+            CompilationUnitUtils.tryFindCu(AstForestContext.get().getPrimarySourceRoot(), qualifier)
                     .flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
                 CompilationUnit previousCu = collector.putIfAbsent(qualifier, pt.findCompilationUnit()
                         .orElseThrow(() -> new Allison1875Exception("cannot find cu for " + pt.getName())));
@@ -156,7 +156,7 @@ public class DataModelServiceImpl implements DataModelService {
                     String qualifier = typeParamter.asReferenceType().getQualifiedName();
 
                     // 如果能找到源码……
-                    CompilationUnitUtils.tryFindCu(AstForestContext.get().getSourceRoot(), qualifier)
+                    CompilationUnitUtils.tryFindCu(AstForestContext.get().getPrimarySourceRoot(), qualifier)
                             .flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
                                 CompilationUnit previousCu = collector.putIfAbsent(qualifier, pt.findCompilationUnit()
                                         .orElseThrow(

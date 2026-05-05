@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.querytransformer.service.QueryChainDetectorService;
 
 /**
@@ -30,7 +31,7 @@ public class QueryChainDetectorServiceImpl implements QueryChainDetectorService 
             if ((StringUtils.equalsAny(mce.getNameAsString(), "list", "one", "over", "count", "page")
                     || StringUtils.startsWithAny(mce.getNameAsString(), "mapBy", "groupBy")) && mce.getParentNode()
                     .isPresent()) {
-                if (this.finalNameExprRecursively(mce, config.getDesignPackage())) {
+                if (this.finalNameExprRecursively(mce, DomainContext.get().getDesignPackage())) {
                     mces.add(mce);
                 }
             }

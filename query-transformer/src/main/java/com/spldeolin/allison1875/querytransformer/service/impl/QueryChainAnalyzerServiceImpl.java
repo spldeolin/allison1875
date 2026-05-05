@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
@@ -149,7 +150,7 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
         List<String> propertyVarNamesInRecord = Lists.newArrayList();
 
         ClassOrInterfaceDeclaration joinChain = designService.findCoidWithChecksum(
-                config.getDesignPackage() + ".JoinChain");
+                DomainContext.get().getDesignPackage() + ".JoinChain");
         List<String> propertyNamesFromJoinChain = joinChain.getMembers().stream()
                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration).flatMap(coid -> coid.getFields().stream())

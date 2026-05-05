@@ -17,7 +17,7 @@ public class FieldTypeCollectorTest {
     public static void main(String[] args) {
         AstForest astForest = new AstForestTestImpl(new File("common/src/test/java"));
         AstForestContext.set(astForest);
-        CompilationUnitUtils.tryFindCu(astForest.getSourceRoot(), SchoolDTO.class.getName())
+        CompilationUnitUtils.tryFindCu(astForest.getPrimarySourceRoot(), SchoolDTO.class.getName())
                 .flatMap(CompilationUnit::getPrimaryType).ifPresent(pt -> {
 
             Map<String, CompilationUnit> dtos = Guice.createInjector().getInstance(DataModelServiceImpl.class)

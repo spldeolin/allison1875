@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
@@ -102,7 +104,7 @@ public class FormGenerator implements Allison1875MainService {
 
         // 生成DDL
         String ddl = ddlService.generateDdl(forms);
-        Path ddlSql = AstForestContext.get().getSourceRoot().resolve("../../../sql/ddl.sql");
+        Path ddlSql = Paths.get(DomainContext.get().getPersistenceModule()).resolve("sql/ddl.sql");
         log.info("build ddl.sql, path={}", ddlSql.normalize());
         try {
             FileUtils.writeStringToFile(ddlSql.toFile(), ddl, StandardCharsets.UTF_8);
@@ -124,13 +126,14 @@ public class FormGenerator implements Allison1875MainService {
         for (FormDef form : forms) {
             CompilationUnit cu = new CompilationUnit();
             String controllerName = MoreStringUtils.toUpperCamel(form.getName()) + "Controller";
-            Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(AstForestContext.get().getSourceRoot(),
-                    config.getControllerPackage(), controllerName + ".java");
+            Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(
+                    DomainContext.get().getControllerSourceRoot(), DomainContext.get().getControllerPackage(),
+                    controllerName + ".java");
             cu.setStorage(absulutePath);
-            cu.setPackageDeclaration(config.getControllerPackage());
-            cu.addImport(config.getDesignPackage() + ".*");
-            cu.addImport(config.getEntityPackage() + ".*");
-            cu.addImport(config.getEnumPackage() + ".*");
+            cu.setPackageDeclaration(DomainContext.get().getControllerPackage());
+            cu.addImport(DomainContext.get().getDesignPackage() + ".*");
+            cu.addImport(DomainContext.get().getEntityPackage() + ".*");
+            cu.addImport(DomainContext.get().getEnumPackage() + ".*");
             cu.addImport("java.util.stream.*");
             cu.addImport("org.springframework.util.*");
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
@@ -145,7 +148,7 @@ public class FormGenerator implements Allison1875MainService {
             coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
             coid.addMember(deleteApiService.generateDeleteInitDec(form));
             CompilationUnitUtils.writeJava(cu);
-            controllerQualifiers.add(config.getControllerPackage() + "." + controllerName + ".*");
+            controllerQualifiers.add(DomainContext.get().getControllerPackage() + "." + controllerName + ".*");
         }
 
         // 调用handler-transformer转换initDec

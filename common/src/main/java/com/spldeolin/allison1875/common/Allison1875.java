@@ -14,6 +14,8 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.config.DomainConfig;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.guice.ValidationModule;
@@ -51,7 +53,7 @@ public class Allison1875 {
         }
     }
 
-    public static void letsGo(Allison1875Module allison1875Module, AstForest astForest) {
+    public static void letsGo(Allison1875Module allison1875Module, AstForest astForest, DomainConfig domainConfig) {
         // append built-in guice modules
         List<Module> guiceModules = Lists.newArrayList(allison1875Module, new ValidationModule());
 
@@ -68,6 +70,7 @@ public class Allison1875 {
 
         // process main service
         AstForestContext.set(astForest);
+        DomainContext.set(domainConfig);
         try {
             injector.getInstance(allison1875Module.declareMainService()).process();
         } catch (Throwable e) {
