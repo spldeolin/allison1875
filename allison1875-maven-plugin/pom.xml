@@ -112,8 +112,12 @@
             <!--
                 Ant task：生成跨模块覆盖率报告。
                 jacoco:report 只能分析当前模块的 classes，
-                使用 JaCoCo 的 Ant task 可以将 common、doc-analyzer 等模块的 classes 和源码一并纳入报告。
+                使用 JaCoCo 的 Ant task 可以将 common、doc-analyzer、handler-transformer 等模块的
+                classes 和源码一并纳入报告。
                 报告输出到 target/site/jacoco-it-full/
+
+                【扩展指南】为新 tool 添加覆盖率：
+                  只需在 <classfiles> 和 <sourcefiles> 各追加一行 fileset 即可。
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -134,16 +138,26 @@
                                     <executiondata>
                                         <file file="${project.build.directory}/jacoco-it.exec"/>
                                     </executiondata>
-                                    <structure name="allison1875 doc-analyzer IT Coverage">
+                                    <structure name="allison1875 IT Coverage">
                                         <classfiles>
                                             <fileset dir="${project.build.outputDirectory}"/>
                                             <fileset dir="${project.basedir}/../common/target/classes"/>
+                                            <!-- doc-analyzer -->
                                             <fileset dir="${project.basedir}/../doc-analyzer/target/classes"/>
+                                            <!-- handler-transformer -->
+                                            <fileset dir="${project.basedir}/../handler-transformer/target/classes"/>
+                                            <fileset
+                                                dir="${project.basedir}/../handler-transformer-facade/target/classes"/>
                                         </classfiles>
                                         <sourcefiles encoding="UTF-8">
                                             <fileset dir="${project.basedir}/src/main/java"/>
                                             <fileset dir="${project.basedir}/../common/src/main/java"/>
+                                            <!-- doc-analyzer -->
                                             <fileset dir="${project.basedir}/../doc-analyzer/src/main/java"/>
+                                            <!-- handler-transformer -->
+                                            <fileset dir="${project.basedir}/../handler-transformer/src/main/java"/>
+                                            <fileset
+                                                dir="${project.basedir}/../handler-transformer-facade/src/main/java"/>
                                         </sourcefiles>
                                     </structure>
                                     <html destdir="${project.build.directory}/site/jacoco-it-full"/>
@@ -163,12 +177,25 @@
                 </dependencies>
             </plugin>
 
+            <!--
+                maven-invoker-plugin：统一管理所有 tool 的集成测试。
+                所有 IT case 统一放在 src/it/ 下，按 tool 名分子目录：
+                  src/it/doc-analyzer/{case-name}/
+                  src/it/handler-transformer/{case-name}/
+                  src/it/{future-tool}/{case-name}/
+                每个 case 通过 invoker.properties 指定自己的 invoker.goals。
+
+                【扩展指南】为新 tool 添加 IT：
+                  1. 在 src/it/{tool-name}/ 下创建 case 目录
+                  2. 每个 case 放 invoker.properties 写 invoker.goals=allison1875:{tool-name}
+                  3. 如有 Java 17+ 限定 case，在 it-java17 的 pomIncludes 中追加
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-invoker-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <projectsDirectory>src/it/doc-analyzer</projectsDirectory>
+                    <projectsDirectory>src/it</projectsDirectory>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
                     <postBuildHookScript>verify</postBuildHookScript>
                     <addTestClassPath>true</addTestClassPath>
@@ -180,9 +207,7 @@
                         形如 -javaagent:/path/to/jacocoagent.jar=destfile=...,append=true
                     -->
                     <mavenOpts>${jacoco.agent.argLine}</mavenOpts>
-                    <goals>
-                        <goal>allison1875:doc-analyzer</goal>
-                    </goals>
+                    <!-- 不设置默认 goals，每个 case 通过 invoker.properties 指定 -->
                     <filterProperties>
                         <allison1875.version>${project.version}</allison1875.version>
                     </filterProperties>
@@ -206,8 +231,9 @@
                         <artifactId>maven-invoker-plugin</artifactId>
                         <configuration>
                             <pomExcludes>
-                                <pomExclude>java-record/pom.xml</pomExclude>
-                                <pomExclude>jakarta-validation/pom.xml</pomExclude>
+                                <!-- Java 17+ 限定 case，排除在 Java 8 IT 之外 -->
+                                <pomExclude>doc-analyzer/java-record/pom.xml</pomExclude>
+                                <pomExclude>doc-analyzer/jakarta-validation/pom.xml</pomExclude>
                             </pomExcludes>
                         </configuration>
                         <executions>
@@ -238,8 +264,8 @@
                         <artifactId>maven-invoker-plugin</artifactId>
                         <configuration>
                             <pomIncludes>
-                                <pomInclude>java-record/pom.xml</pomInclude>
-                                <pomInclude>jakarta-validation/pom.xml</pomInclude>
+                                <pomInclude>doc-analyzer/java-record/pom.xml</pomInclude>
+                                <pomInclude>doc-analyzer/jakarta-validation/pom.xml</pomInclude>
                             </pomIncludes>
                         </configuration>
                         <executions>
