@@ -70,6 +70,133 @@
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                 </configuration>
             </plugin>
+
+            <!--
+                JaCoCo：采集集成测试覆盖率。
+                原理：prepare-agent 将 JaCoCo agent jar 路径写入 ${jacoco.agent.argLine}，
+                invoker-plugin 通过 mavenOpts 将该 argLine 注入到每个 IT 子进程的 JVM，
+                所有子进程的覆盖率数据追加写入同一个 .exec 文件（append=true），
+                最后 report goal 基于合并后的 .exec 文件生成 HTML/XML 报告。
+            -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <configuration>
+                    <!-- 覆盖率数据文件，所有 IT 子进程追加写入同一个文件 -->
+                    <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                    <dataFile>${project.build.directory}/jacoco-it.exec</dataFile>
+                    <propertyName>jacoco.agent.argLine</propertyName>
+                    <append>true</append>
+                </configuration>
+                <executions>
+                    <!-- pre-integration-test 阶段准备 agent -->
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- post-integration-test 阶段生成当前模块的覆盖率报告 -->
+                    <execution>
+                        <id>post-integration-test-report</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                Ant task：生成跨模块覆盖率报告。
+                jacoco:report 只能分析当前模块的 classes，
+                使用 JaCoCo 的 Ant task 可以将 common、doc-analyzer 等模块的 classes 和源码一并纳入报告。
+                报告输出到 target/site/jacoco-it-full/
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-it-full-report</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <taskdef name="report" classname="org.jacoco.ant.ReportTask"
+                                    classpathref="maven.plugin.classpath"/>
+                                <report>
+                                    <executiondata>
+                                        <file file="${project.build.directory}/jacoco-it.exec"/>
+                                    </executiondata>
+                                    <structure name="allison1875 doc-analyzer IT Coverage">
+                                        <classfiles>
+                                            <fileset dir="${project.build.outputDirectory}"/>
+                                            <fileset dir="${project.basedir}/../common/target/classes"/>
+                                            <fileset dir="${project.basedir}/../doc-analyzer/target/classes"/>
+                                        </classfiles>
+                                        <sourcefiles encoding="UTF-8">
+                                            <fileset dir="${project.basedir}/src/main/java"/>
+                                            <fileset dir="${project.basedir}/../common/src/main/java"/>
+                                            <fileset dir="${project.basedir}/../doc-analyzer/src/main/java"/>
+                                        </sourcefiles>
+                                    </structure>
+                                    <html destdir="${project.build.directory}/site/jacoco-it-full"/>
+                                    <xml destfile="${project.build.directory}/site/jacoco-it-full/jacoco.xml"/>
+                                    <csv destfile="${project.build.directory}/site/jacoco-it-full/jacoco.csv"/>
+                                </report>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>org.jacoco.ant</artifactId>
+                        <version>0.8.12</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-invoker-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <projectsDirectory>src/it</projectsDirectory>
+                    <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                    <postBuildHookScript>verify</postBuildHookScript>
+                    <addTestClassPath>true</addTestClassPath>
+                    <streamLogs>true</streamLogs>
+                    <timeoutInSeconds>300</timeoutInSeconds>
+                    <!--
+                        关键：将 JaCoCo agent 注入到每个 IT 子进程的 JVM。
+                        ${jacoco.agent.argLine} 由 jacoco:prepare-agent 生成，
+                        形如 -javaagent:/path/to/jacocoagent.jar=destfile=...,append=true
+                    -->
+                    <mavenOpts>${jacoco.agent.argLine}</mavenOpts>
+                    <goals>
+                        <goal>allison1875:doc-analyzer</goal>
+                    </goals>
+                    <filterProperties>
+                        <allison1875.version>${project.version}</allison1875.version>
+                    </filterProperties>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>install</goal>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

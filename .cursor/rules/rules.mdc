@@ -445,6 +445,140 @@ public class XxxServiceImpl implements XxxService {
 }
 ```
 
+### 5.6 Integration Testing (maven-invoker-plugin)
+
+**Overview:**
+Integration tests for the Maven plugin live in `allison1875-maven-plugin/src/it/`.
+Each subdirectory is an independent "fake Maven project" that exercises a specific tool scenario.
+The `maven-invoker-plugin` clones each project to `target/it/{name}/`, invokes the plugin goal,
+then runs a `verify.groovy` script to assert on the output.
+
+**Technology stack:**
+- `maven-invoker-plugin 3.8.0` — orchestrates IT lifecycle
+- `jacoco-maven-plugin 0.8.12` — coverage collection via agent injection into invoker subprocesses
+- `maven-antrun-plugin 3.1.0` + `org.jacoco.ant` — cross-module coverage report generation
+- Groovy scripts (`verify.groovy`) — post-build assertions
+
+**Directory layout per test case:**
+```
+allison1875-maven-plugin/src/it/{test-case-name}/
+├── pom.xml                    # Uses @allison1875.version@ placeholder
+├── .allison1875.yml           # Tool configuration (must include domains + codeSnippet stubs)
+├── verify.groovy              # Post-build assertion script
+└── src/main/java/             # Fake source code for the tool to analyze/transform
+    └── com/example/
+        ├── controller/        # @RestController classes
+        ├── dto/req/           # Request DTOs
+        └── dto/resp/          # Response DTOs
+```
+
+**Creating a new IT case (step-by-step):**
+
+1. **Create directory:** `mkdir -p allison1875-maven-plugin/src/it/{case-name}/src/main/java/...`
+
+2. **Create `pom.xml`** — minimal Maven project referencing the plugin:
+   ```xml
+   <project>
+       <modelVersion>4.0.0</modelVersion>
+       <groupId>com.spldeolin.allison1875.it</groupId>
+       <artifactId>{case-name}</artifactId>
+       <version>1.0-SNAPSHOT</version>
+       <properties>
+           <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+           <maven.compiler.source>1.8</maven.compiler.source>
+           <maven.compiler.target>1.8</maven.compiler.target>
+       </properties>
+       <dependencies>
+           <!-- Add whatever the fake project needs to compile: spring-webmvc, validation-api, etc. -->
+       </dependencies>
+       <build>
+           <plugins>
+               <plugin>
+                   <groupId>com.spldeolin.allison1875</groupId>
+                   <artifactId>allison1875-maven-plugin</artifactId>
+                   <version>@allison1875.version@</version>
+               </plugin>
+           </plugins>
+       </build>
+   </project>
+   ```
+   - `@allison1875.version@` is replaced at runtime by invoker's `filterProperties`.
+
+3. **Create `.allison1875.yml`** — must include at minimum:
+   - A `domains` list with one entry containing all `*Package` fields
+   - `author`, `javaVersion`, `enableNoModifyAnnounce`, `enableJavaxMoveToJakarta`
+   - `codeSnippet.constructPageResult` and `codeSnippet.constructEmptyPageResult` (required by Config validation)
+   - Tool-specific settings (e.g., `flushTo`, `markdownDir`, `dslDir` for doc-analyzer)
+
+4. **Create fake Java sources** under `src/main/java/` — these are what the tool will analyze.
+   The package names must match the `*Package` fields in `.allison1875.yml`.
+
+5. **Create `verify.groovy`** — post-build assertions using Groovy. Available variables:
+   - `basedir` (`File`) — the cloned project root (e.g., `target/it/{case-name}/`)
+   - Script must return `true` on success or throw/assert on failure.
+   ```groovy
+   // Example: verify markdown files were generated
+   File apiDocsDir = new File(basedir, "api-docs")
+   assert apiDocsDir.exists() : "api-docs directory should exist"
+
+   def mdFiles = []
+   apiDocsDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+       if (file.name.endsWith(".md")) { mdFiles << file }
+   }
+   assert mdFiles.size() > 0 : "At least one .md file should be generated"
+
+   String content = mdFiles.collect { it.text }.join("\n")
+   assert content.contains("POST") : "Should contain HTTP method POST"
+
+   println "[{case-name}] All assertions passed."
+   return true
+   ```
+
+**Running IT:**
+```bash
+# Full build including IT + coverage
+mvn verify -pl allison1875-maven-plugin -am
+
+# Run all IT cases (skip JaCoCo if only want functional check)
+mvn invoker:run -pl allison1875-maven-plugin
+
+# Run a single IT case
+mvn invoker:run -pl allison1875-maven-plugin -Dinvoker.test={case-name}
+```
+
+**IT output locations:**
+```
+allison1875-maven-plugin/target/
+├── it/{case-name}/              # Cloned project + generated output (md, json, etc.)
+│   ├── build.log                # Full Maven log of the IT subprocess
+│   ├── api-docs/                # Example: doc-analyzer markdown output
+│   └── api-dsls/                # Example: doc-analyzer DSL/JSON output
+├── jacoco-it.exec               # Merged coverage data from all IT subprocesses
+└── site/
+    ├── jacoco/                  # Coverage report (plugin module classes only)
+    └── jacoco-it-full/          # Cross-module coverage report (plugin + common + doc-analyzer)
+        ├── index.html           # Open this for the full HTML report
+        ├── jacoco.xml
+        └── jacoco.csv
+```
+
+**Coverage mechanism:**
+- `jacoco:prepare-agent` runs at `pre-integration-test`, producing `${jacoco.agent.argLine}`
+- Invoker passes this argLine via `<mavenOpts>` to every IT subprocess JVM
+- All subprocesses append coverage data to a single `jacoco-it.exec` (via `append=true`)
+- `jacoco:report` generates a report for the plugin module's own classes
+- `maven-antrun-plugin` invokes JaCoCo's Ant `ReportTask` to produce a cross-module report
+  covering `allison1875-maven-plugin`, `common`, and `doc-analyzer` classes
+
+**Key rules for IT development:**
+- The invoker goal configured in `pom.xml` (`<goals>`) determines which tool is tested;
+  to test a different tool, either change the global `<goals>` or add `invoker.properties`
+  in the case directory with `invoker.goals=allison1875:{tool-name}`.
+- IT subprocesses use local `~/.m2/settings.xml` and `~/.m2/repository` directly (no isolated repo).
+- Always run `mvn install -DskipTests` from root before running IT if plugin code has changed.
+- `verify.groovy` failures show as `FAILED` in the invoker Build Summary; check `target/it/{case-name}/build.log` for details.
+- `mvn clean` removes all IT output under `target/`.
+
 ---
 
 ## 6. Critical Rules for AI Agents
