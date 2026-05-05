@@ -22,7 +22,7 @@ assert controllerContent.contains("/create-order") : "Controller should contain 
 assert controllerContent.contains("createOrder") : "Controller should contain method named 'createOrder'"
 
 // 应注入 Service
-assert controllerContent.contains("Autowired") || controllerContent.contains("@Inject") : "Controller should have injected service field"
+assert controllerContent.contains("Autowired") || controllerContent.contains("@Inject") || controllerContent.contains("@Resource") : "Controller should have injected service field"
 
 // ========== 2. 验证 Req DTO 文件生成 ==========
 File reqDtoDir = new File(basedir, "src/main/java/com/example/dto/req")

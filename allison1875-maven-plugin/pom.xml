@@ -71,26 +71,19 @@
                 </configuration>
             </plugin>
 
-            <!--
-                JaCoCo：采集集成测试覆盖率。
-                原理：prepare-agent 将 JaCoCo agent jar 路径写入 ${jacoco.agent.argLine}，
-                invoker-plugin 通过 mavenOpts 将该 argLine 注入到每个 IT 子进程的 JVM，
-                所有子进程的覆盖率数据追加写入同一个 .exec 文件（append=true），
-                最后 report goal 基于合并后的 .exec 文件生成 HTML/XML 报告。
-            -->
+            <!-- JaCoCo：采集 IT 覆盖率 -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
                 <configuration>
-                    <!-- 覆盖率数据文件，所有 IT 子进程追加写入同一个文件 -->
                     <destFile>${project.build.directory}/jacoco-it.exec</destFile>
                     <dataFile>${project.build.directory}/jacoco-it.exec</dataFile>
                     <propertyName>jacoco.agent.argLine</propertyName>
                     <append>true</append>
                 </configuration>
                 <executions>
-                    <!-- pre-integration-test 阶段准备 agent -->
+                    <!-- prepare-agent 生成 ${jacoco.agent.argLine} 供 invoker 注入子进程 -->
                     <execution>
                         <id>pre-integration-test</id>
                         <phase>pre-integration-test</phase>
@@ -98,98 +91,18 @@
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <!-- post-integration-test 阶段生成当前模块的覆盖率报告 -->
+                    <!-- report-aggregate 自动从 Maven 依赖图收集所有模块的 classes/sources，生成汇总报告 -->
                     <execution>
                         <id>post-integration-test-report</id>
                         <phase>post-integration-test</phase>
                         <goals>
-                            <goal>report</goal>
+                            <goal>report-aggregate</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
 
-            <!--
-                Ant task：生成跨模块覆盖率报告。
-                jacoco:report 只能分析当前模块的 classes，
-                使用 JaCoCo 的 Ant task 可以将 common、doc-analyzer、handler-transformer 等模块的
-                classes 和源码一并纳入报告。
-                报告输出到 target/site/jacoco-it-full/
-
-                【扩展指南】为新 tool 添加覆盖率：
-                  只需在 <classfiles> 和 <sourcefiles> 各追加一行 fileset 即可。
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>jacoco-it-full-report</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <taskdef name="report" classname="org.jacoco.ant.ReportTask"
-                                    classpathref="maven.plugin.classpath"/>
-                                <report>
-                                    <executiondata>
-                                        <file file="${project.build.directory}/jacoco-it.exec"/>
-                                    </executiondata>
-                                    <structure name="allison1875 IT Coverage">
-                                        <classfiles>
-                                            <fileset dir="${project.build.outputDirectory}"/>
-                                            <fileset dir="${project.basedir}/../common/target/classes"/>
-                                            <!-- doc-analyzer -->
-                                            <fileset dir="${project.basedir}/../doc-analyzer/target/classes"/>
-                                            <!-- handler-transformer -->
-                                            <fileset dir="${project.basedir}/../handler-transformer/target/classes"/>
-                                            <fileset
-                                                dir="${project.basedir}/../handler-transformer-facade/target/classes"/>
-                                        </classfiles>
-                                        <sourcefiles encoding="UTF-8">
-                                            <fileset dir="${project.basedir}/src/main/java"/>
-                                            <fileset dir="${project.basedir}/../common/src/main/java"/>
-                                            <!-- doc-analyzer -->
-                                            <fileset dir="${project.basedir}/../doc-analyzer/src/main/java"/>
-                                            <!-- handler-transformer -->
-                                            <fileset dir="${project.basedir}/../handler-transformer/src/main/java"/>
-                                            <fileset
-                                                dir="${project.basedir}/../handler-transformer-facade/src/main/java"/>
-                                        </sourcefiles>
-                                    </structure>
-                                    <html destdir="${project.build.directory}/site/jacoco-it-full"/>
-                                    <xml destfile="${project.build.directory}/site/jacoco-it-full/jacoco.xml"/>
-                                    <csv destfile="${project.build.directory}/site/jacoco-it-full/jacoco.csv"/>
-                                </report>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>org.jacoco.ant</artifactId>
-                        <version>0.8.12</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <!--
-                maven-invoker-plugin：统一管理所有 tool 的集成测试。
-                所有 IT case 统一放在 src/it/ 下，按 tool 名分子目录：
-                  src/it/doc-analyzer/{case-name}/
-                  src/it/handler-transformer/{case-name}/
-                  src/it/{future-tool}/{case-name}/
-                每个 case 通过 invoker.properties 指定自己的 invoker.goals。
-
-                【扩展指南】为新 tool 添加 IT：
-                  1. 在 src/it/{tool-name}/ 下创建 case 目录
-                  2. 每个 case 放 invoker.properties 写 invoker.goals=allison1875:{tool-name}
-                  3. 如有 Java 17+ 限定 case，在 it-java17 的 pomIncludes 中追加
-            -->
+            <!-- Invoker：运行 src/it/ 下所有 IT case，排除需要 Java 17+ 的用例 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-invoker-plugin</artifactId>
@@ -199,87 +112,39 @@
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
                     <postBuildHookScript>verify</postBuildHookScript>
                     <addTestClassPath>true</addTestClassPath>
-                    <streamLogs>true</streamLogs>
+                    <streamLogs>false</streamLogs>
                     <timeoutInSeconds>300</timeoutInSeconds>
-                    <!--
-                        关键：将 JaCoCo agent 注入到每个 IT 子进程的 JVM。
-                        ${jacoco.agent.argLine} 由 jacoco:prepare-agent 生成，
-                        形如 -javaagent:/path/to/jacocoagent.jar=destfile=...,append=true
-                    -->
                     <mavenOpts>${jacoco.agent.argLine}</mavenOpts>
-                    <!-- 不设置默认 goals，每个 case 通过 invoker.properties 指定 -->
+                    <pomIncludes>
+                        <pomInclude>**/pom.xml</pomInclude>
+                    </pomIncludes>
+                    <pomExcludes>
+                        <!-- Java 17+ 限定 case，在 Java 8 环境中排除 -->
+                        <pomExclude>doc-analyzer/java-record/pom.xml</pomExclude>
+                        <pomExclude>doc-analyzer/jakarta-validation/pom.xml</pomExclude>
+                    </pomExcludes>
                     <filterProperties>
                         <allison1875.version>${project.version}</allison1875.version>
                     </filterProperties>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>invoker-install</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>invoker-run</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
-    <profiles>
-        <!--
-            Java 8 IT：运行除 java-record、jakarta-validation 之外的所有 IT 用例。
-            这些用例使用 Java 8 即可编译运行。
-            用法：mvn verify -pl allison1875-maven-plugin -am -Pit-java8
-        -->
-        <profile>
-            <id>it-java8</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-invoker-plugin</artifactId>
-                        <configuration>
-                            <pomExcludes>
-                                <!-- Java 17+ 限定 case，排除在 Java 8 IT 之外 -->
-                                <pomExclude>doc-analyzer/java-record/pom.xml</pomExclude>
-                                <pomExclude>doc-analyzer/jakarta-validation/pom.xml</pomExclude>
-                            </pomExcludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integration-test-java8</id>
-                                <goals>
-                                    <goal>install</goal>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!--
-            Java 17+ IT：仅运行 java-record、jakarta-validation 用例。
-            这些用例需要 JDK 17 或更高版本（如 JDK 21）。
-            用法：jenv shell 21 && mvn verify -pl allison1875-maven-plugin -am -Pit-java17
-        -->
-        <profile>
-            <id>it-java17</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-invoker-plugin</artifactId>
-                        <configuration>
-                            <pomIncludes>
-                                <pomInclude>doc-analyzer/java-record/pom.xml</pomInclude>
-                                <pomInclude>doc-analyzer/jakarta-validation/pom.xml</pomInclude>
-                            </pomIncludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integration-test-java17</id>
-                                <goals>
-                                    <goal>install</goal>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

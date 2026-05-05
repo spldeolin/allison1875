@@ -455,8 +455,7 @@ then runs a `verify.groovy` script to assert on the output.
 
 **Technology stack:**
 - `maven-invoker-plugin 3.8.0` — orchestrates IT lifecycle
-- `jacoco-maven-plugin 0.8.12` — coverage collection via agent injection into invoker subprocesses
-- `maven-antrun-plugin 3.1.0` + `org.jacoco.ant` — cross-module coverage report generation
+- `jacoco-maven-plugin 0.8.12` — coverage collection via agent injection into invoker subprocesses + `report-aggregate` for cross-module report
 - Groovy scripts (`verify.groovy`) — post-build assertions
 
 **Directory layout per test case:**
@@ -536,13 +535,14 @@ allison1875-maven-plugin/src/it/{test-case-name}/
 
 **Running IT:**
 ```bash
-# Full build including IT + coverage
+# Via wrapper script (install + IT + coverage, recommended)
+./run-it.sh
+
+# Or manually: install first, then verify
+mvn install -DskipTests
 mvn verify -pl allison1875-maven-plugin -am
 
-# Run all IT cases (skip JaCoCo if only want functional check)
-mvn invoker:run -pl allison1875-maven-plugin
-
-# Run a single IT case
+# Run a single IT case (skip JaCoCo)
 mvn invoker:run -pl allison1875-maven-plugin -Dinvoker.test={case-name}
 ```
 
@@ -555,29 +555,23 @@ allison1875-maven-plugin/target/
 │   └── api-dsls/                # Example: doc-analyzer DSL/JSON output
 ├── jacoco-it.exec               # Merged coverage data from all IT subprocesses
 └── site/
-    ├── jacoco/                  # Coverage report (plugin module classes only)
-    └── jacoco-it-full/          # Cross-module coverage report (plugin + common + doc-analyzer)
+    └── jacoco-aggregate/        # Cross-module coverage report (all modules via Maven dependency graph)
         ├── index.html           # Open this for the full HTML report
         ├── jacoco.xml
         └── jacoco.csv
 ```
 
 **Coverage mechanism:**
-- `jacoco:prepare-agent` runs at `pre-integration-test`, producing `${jacoco.agent.argLine}`
-- Invoker passes this argLine via `<mavenOpts>` to every IT subprocess JVM
-- All subprocesses append coverage data to a single `jacoco-it.exec` (via `append=true`)
-- `jacoco:report` generates a report for the plugin module's own classes
-- `maven-antrun-plugin` invokes JaCoCo's Ant `ReportTask` to produce a cross-module report
-  covering `allison1875-maven-plugin`, `common`, and `doc-analyzer` classes
+- `jacoco:prepare-agent` produces `${jacoco.agent.argLine}`, invoker injects it into IT subprocess JVMs via `<mavenOpts>`
+- All subprocesses append coverage data to `jacoco-it.exec`
+- `jacoco:report-aggregate` automatically collects classes/sources from all Maven dependency modules and generates a single aggregated report
 
 **Key rules for IT development:**
-- The invoker goal configured in `pom.xml` (`<goals>`) determines which tool is tested;
-  to test a different tool, either change the global `<goals>` or add `invoker.properties`
-  in the case directory with `invoker.goals=allison1875:{tool-name}`.
+- Each IT case uses `invoker.properties` to specify `invoker.goals=allison1875:{tool-name}`.
+- Java 17+ cases (`java-record`, `jakarta-validation`) are excluded by default in `pomExcludes`.
 - IT subprocesses use local `~/.m2/settings.xml` and `~/.m2/repository` directly (no isolated repo).
 - Always run `mvn install -DskipTests` from root before running IT if plugin code has changed.
 - `verify.groovy` failures show as `FAILED` in the invoker Build Summary; check `target/it/{case-name}/build.log` for details.
-- `mvn clean` removes all IT output under `target/`.
 
 ---
 

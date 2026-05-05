@@ -157,7 +157,43 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
         toString.setBody(parseBlock(toStringBody));
         coid.addMember(toString);
 
-        // add equals and hashcode
+        // add equals and hashCode
+        MethodDeclaration equals = new MethodDeclaration();
+        equals.addAnnotation(annotationExprService.javaOverride()).setPublic(true).setType("boolean").setName("equals")
+                .addParameter("Object", "o");
+        StringBuilder equalsBody = new StringBuilder(256);
+        equalsBody.append("{ if (this == o) return true; ");
+        equalsBody.append("if (o == null || getClass() != o.getClass()) return false; ");
+        equalsBody.append(coid.getNameAsString()).append(" that = (").append(coid.getNameAsString()).append(") o; ");
+        equalsBody.append("return ");
+        if (fieldArgs.isEmpty()) {
+            equalsBody.append("true");
+        } else {
+            for (int i = 0; i < fieldArgs.size(); i++) {
+                if (i > 0) {
+                    equalsBody.append(" && ");
+                }
+                equalsBody.append("java.util.Objects.equals(this.").append(fieldArgs.get(i).getFieldName())
+                        .append(", that.").append(fieldArgs.get(i).getFieldName()).append(")");
+            }
+        }
+        equalsBody.append("; }");
+        equals.setBody(parseBlock(equalsBody.toString()));
+        coid.addMember(equals);
+
+        MethodDeclaration hashCode = new MethodDeclaration();
+        hashCode.addAnnotation(annotationExprService.javaOverride()).setPublic(true).setType("int").setName("hashCode");
+        StringBuilder hashCodeBody = new StringBuilder(128);
+        hashCodeBody.append("{ return java.util.Objects.hash(");
+        for (int i = 0; i < fieldArgs.size(); i++) {
+            if (i > 0) {
+                hashCodeBody.append(", ");
+            }
+            hashCodeBody.append(fieldArgs.get(i).getFieldName());
+        }
+        hashCodeBody.append("); }");
+        hashCode.setBody(parseBlock(hashCodeBody.toString()));
+        coid.addMember(hashCode);
     }
 
     @Override
