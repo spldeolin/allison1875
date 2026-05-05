@@ -168,7 +168,7 @@
                 <artifactId>maven-invoker-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <projectsDirectory>src/it</projectsDirectory>
+                    <projectsDirectory>src/it/doc-analyzer</projectsDirectory>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
                     <postBuildHookScript>verify</postBuildHookScript>
                     <addTestClassPath>true</addTestClassPath>
@@ -187,16 +187,73 @@
                         <allison1875.version>${project.version}</allison1875.version>
                     </filterProperties>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>install</goal>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+            Java 8 IT：运行除 java-record、jakarta-validation 之外的所有 IT 用例。
+            这些用例使用 Java 8 即可编译运行。
+            用法：mvn verify -pl allison1875-maven-plugin -am -Pit-java8
+        -->
+        <profile>
+            <id>it-java8</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <configuration>
+                            <pomExcludes>
+                                <pomExclude>java-record/pom.xml</pomExclude>
+                                <pomExclude>jakarta-validation/pom.xml</pomExclude>
+                            </pomExcludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test-java8</id>
+                                <goals>
+                                    <goal>install</goal>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!--
+            Java 17+ IT：仅运行 java-record、jakarta-validation 用例。
+            这些用例需要 JDK 17 或更高版本（如 JDK 21）。
+            用法：jenv shell 21 && mvn verify -pl allison1875-maven-plugin -am -Pit-java17
+        -->
+        <profile>
+            <id>it-java17</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <configuration>
+                            <pomIncludes>
+                                <pomInclude>java-record/pom.xml</pomInclude>
+                                <pomInclude>jakarta-validation/pom.xml</pomInclude>
+                            </pomIncludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test-java17</id>
+                                <goals>
+                                    <goal>install</goal>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

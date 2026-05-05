@@ -1,0 +1,34 @@
+# vertical-modules integration test config
+# 垂直划分：controller 在当前模块 src/main/java，DTO 在 dto-api 子模块
+domains:
+  - name: shop
+    controllerPackage: com.example.shop.controller
+    dtoModule: dto-api
+    reqDTOPackage: com.example.shop.dto.req
+    respDTOPackage: com.example.shop.dto.resp
+    enumModule: dto-api
+    enumPackage: com.example.shop.enums
+    servicePackage: com.example.shop.service
+    serviceImplPackage: com.example.shop.service.impl
+    mapperPackage: com.example.shop.mapper
+    entityPackage: com.example.shop.entity
+    designPackage: com.example.shop.design
+    paramDTOPackage: com.example.shop.dto.param
+    recordDTOPackage: com.example.shop.dto.record
+    wholeDTOModule: dto-api
+    wholeDTOPackage: com.example.shop.dto
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+
+flushTo:
+  - MARKDOWN
+markdownDir: api-docs
+globalUrlPrefix: ""
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

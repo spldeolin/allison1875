@@ -1,0 +1,54 @@
+# mixed-module-domains integration test config
+# 混合划分：多 domain + 垂直拆分
+# user domain: controller 在 user-web/，DTO 在 user-api/
+# order domain: controller 在 order-web/，DTO 在 order-api/
+# 使用 -Ddomain=order 运行 order 领域
+# controller 都在 src/main/java 中（不同包），DTO 在各自的子模块
+domains:
+  - name: user
+    controllerPackage: com.example.user.controller
+    dtoModule: user-api
+    reqDTOPackage: com.example.user.dto.req
+    respDTOPackage: com.example.user.dto.resp
+    enumModule: user-api
+    enumPackage: com.example.user.enums
+    servicePackage: com.example.user.service
+    serviceImplPackage: com.example.user.service.impl
+    mapperPackage: com.example.user.mapper
+    entityPackage: com.example.user.entity
+    designPackage: com.example.user.design
+    paramDTOPackage: com.example.user.dto.param
+    recordDTOPackage: com.example.user.dto.record
+    wholeDTOModule: user-api
+    wholeDTOPackage: com.example.user.dto
+  - name: order
+    controllerPackage: com.example.order.controller
+    dtoModule: order-api
+    reqDTOPackage: com.example.order.dto.req
+    respDTOPackage: com.example.order.dto.resp
+    enumModule: order-api
+    enumPackage: com.example.order.enums
+    servicePackage: com.example.order.service
+    serviceImplPackage: com.example.order.service.impl
+    mapperPackage: com.example.order.mapper
+    entityPackage: com.example.order.entity
+    designPackage: com.example.order.design
+    paramDTOPackage: com.example.order.dto.param
+    recordDTOPackage: com.example.order.dto.record
+    wholeDTOModule: order-api
+    wholeDTOPackage: com.example.order.dto
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+
+flushTo:
+  - MARKDOWN
+markdownDir: api-docs
+globalUrlPrefix: ""
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

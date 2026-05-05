@@ -1,0 +1,44 @@
+# horizontal-domains integration test config
+# 水平划分：两个独立的业务领域（user & order），各自拥有独立的controller和DTO包
+domains:
+  - name: user
+    controllerPackage: com.example.user.controller
+    reqDTOPackage: com.example.user.dto.req
+    respDTOPackage: com.example.user.dto.resp
+    enumPackage: com.example.user.enums
+    servicePackage: com.example.user.service
+    serviceImplPackage: com.example.user.service.impl
+    mapperPackage: com.example.user.mapper
+    entityPackage: com.example.user.entity
+    designPackage: com.example.user.design
+    paramDTOPackage: com.example.user.dto.param
+    recordDTOPackage: com.example.user.dto.record
+    wholeDTOPackage: com.example.user.dto
+  - name: order
+    controllerPackage: com.example.order.controller
+    reqDTOPackage: com.example.order.dto.req
+    respDTOPackage: com.example.order.dto.resp
+    enumPackage: com.example.order.enums
+    servicePackage: com.example.order.service
+    serviceImplPackage: com.example.order.service.impl
+    mapperPackage: com.example.order.mapper
+    entityPackage: com.example.order.entity
+    designPackage: com.example.order.design
+    paramDTOPackage: com.example.order.dto.param
+    recordDTOPackage: com.example.order.dto.record
+    wholeDTOPackage: com.example.order.dto
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+
+flushTo:
+  - MARKDOWN
+markdownDir: api-docs
+globalUrlPrefix: ""
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"
