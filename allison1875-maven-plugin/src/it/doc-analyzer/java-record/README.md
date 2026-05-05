@@ -1,40 +1,17 @@
-# java-record 集成测试
+# doc-analyzer / java-record
 
-## 概述
+## 本用例在验证什么
 
-验证 Java Record 类型作为 Request Body / Response Body 时，record component 及其 Javadoc `@param` 注释
-能被正确解析为 API 文档字段。**需要 JDK 17+**。
+在 **Java 17 + `record`** 语法下，请求体与响应体使用 **紧凑数据载体（Record）** 而非普通 class/Lombok DTO 时，doc-analyzer 能否把 **record 分量（component）** 当作 API 字段展开，并从 **Record 上的 Javadoc `@param`** 取出中文说明写入 Markdown。
 
-## 覆盖的功能
+## 功能点与分支关注点（逐条）
 
-### 1. Record 类型作为 Request Body（FieldServiceImpl / JsgBuilderServiceImpl）
+- **运行与栈版本**：子工程以 **Java 17** 编译；Spring **6.x**、**Jakarta Validation** 命名空间，与配置里 **`javaVersion: "17"`**、**`enableJavaxMoveToJakarta: true`** 一致（该 IT 通常走 **`invoker-it-java17`** 一类 profile，需在 **JDK 17+** 环境执行）。
+- **请求体为 Record**：`CreateAddressReq` 的 **`title` / `city` / `zipCode`** 出现在 Request Body 区块；说明文字来自 **`@param` 行**（如「地址标题」「城市」「邮编」）。
+- **响应体为 Record**：`AddressResp` 的 **`id`** 等分量出现在 Response Body 区块；**`@param id` →「ID」** 等注释同样被采信。
+- **接口元数据**：单文件 **`地址管理.md`**；**`POST /api/addresses`**；方法说明「创建地址」。
+- **章节骨架**：文档中仍包含约定的 **`### Request Body (application/json)`** 与 **`### Response Body (application/json)`** 标题，与普通 DTO 用例版面一致。
 
-- `CreateAddressReq` 是一个 Java Record，包含 `title`、`city`、`zipCode` 三个 component
-- Record 的 Javadoc `@param` 注释（地址标题、城市、邮编）被正确提取为字段描述
+## 小结
 
-### 2. Record 类型作为 Response Body（ResponseBodyServiceImpl）
-
-- `AddressResp` 是一个 Java Record，包含 `id` 等 component
-- Response Body 的字段文档从 record component 的 `@param` 注释中提取
-
-### 3. Markdown 输出结构
-
-- 生成 1 个 md 文件：`地址管理.md`
-- 包含 `### Request Body (application/json)` 和 `### Response Body (application/json)` 区域
-- endpoint: `POST /api/addresses`（创建地址）
-
-### 4. 配置
-
-- `javaVersion: "17"`
-- `enableJavaxMoveToJakarta: true`（Spring 6+ / Jakarta 场景）
-- `maven.compiler.source/target: 17`（pom.xml）
-- `flushTo: [MARKDOWN]`
-- `markdownDir: api-docs`
-
-## 前置条件
-
-运行此 IT 用例前需切换到 JDK 17 或更高版本：
-
-```bash
-jenv shell 21  # 或 export JENV_VERSION=21
-```
+本用例覆盖 **AST/字段模型对 `record` 的分支**，以及 **Record Javadoc 用 `@param` 描述分量** 这一常见写法；与 Java 8 IT 用的 class + Lombok 路径形成互补。

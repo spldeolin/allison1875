@@ -1,45 +1,19 @@
-# enum-and-validation 集成测试
+# doc-analyzer / enum-and-validation
 
-## 概述
+## 本用例在验证什么
 
-验证 doc-analyzer 对**枚举字段类型的分析**和**更多校验注解**的处理。
+检查 doc-analyzer 在 Markdown 中能否同时做好两件事：**枚举型字段的可读展开**（码值 + 文案），以及 **javax 校验里常见的 `@Size` / `@Min` / `@Max` / `@Pattern`** 等与 **`@NotBlank` / `@NotNull`** 的文档化。
 
-## 覆盖的功能
+## 功能点与分支关注点（逐条）
 
-### 1. 枚举分析（EnumServiceImpl.analyzeEnumConstants）
+- **枚举展示与配置约定**：业务枚举通过配置指定的 **`getCode` / `getTitle`**（或等价访问器名）取「编码」与「展示标题」；文档中枚举取值以 **`编码 : 标题`** 形式列出，且 **四个枚举常量**（待处理、处理中、已完成、已取消及对应数字码）均需出现。
+- **请求与响应双处枚举**：`TaskStatusEnum` 既出现在 **请求体**（创建任务）又出现在 **响应体**（`TaskResp`）时，**Response Body** 段落之后的内容里仍需带同样的枚举项说明（避免只在 Request 一侧展开）。
+- **`@Size` 的 min/max 与仅 max**：字符串上 **`@NotBlank` + `@Size(min,max)`** 与另一字段上 **仅 `@Size(max)`** 分别生成对应的长度约束说明（含 **1 / 200** 与 **2000** 等边界信息）。
+- **整型范围 `@Min` / `@Max`**：在 **`@NotNull`** 前提下，`Integer` 上的上下限需反映为文档中的 **最小值 / 最大值** 表述（本例 **1～10** 优先级）。
+- **`@Pattern`**：正则约束需有 **「正则表达式」** 类引导说明，且应能让读者看到模式中的 **关键片段**（本例编号前缀 **`TASK-`**）。
+- **普通标量与大数**：`BigDecimal`（预算）等字段名与 Javadoc 正常落表，与枚举、校验列并存。
+- **产物与路由**：单文件 **`任务管理.md`**，接口 **`POST /api/tasks`**，方法说明「创建任务」。
 
-- TaskStatusEnum 枚举类型字段（CreateTaskReq.status, TaskResp.status）
-- 通过反射调用 `getCode()` / `getTitle()` 获取枚举项
-- 枚举项输出到 Markdown 表格"其他"列：`1 : 待处理`、`2 : 处理中`、`3 : 已完成`、`4 : 已取消`
+## 小结
 
-### 2. 配置项 getEnumCodeMethodName / getEnumTitleMethodName
-
-- `getEnumCodeMethodName: getCode`
-- `getEnumTitleMethodName: getTitle`
-
-### 3. 校验注解分析（JsgBuilderServiceImpl.analyzeValid）
-
-- `@NotBlank`（title）
-- `@Size(min = 1, max = 200)`（title）→ ValidatorTypeEnum.MIN_SIZE / MAX_SIZE
-- `@Size(max = 2000)`（description）
-- `@NotNull`（status, priority）
-- `@Min(1)` / `@Max(10)`（priority）→ ValidatorTypeEnum.MIN_NUMBER / MAX_NUMBER
-- `@Pattern(regexp = "^TASK-\\d{6}$")`（taskCode）→ ValidatorTypeEnum.REGEX
-
-### 4. BigDecimal 字段类型
-
-- `budget` 字段为 `BigDecimal` 类型，验证 JsonSchema 能正确处理数值类型
-
-### 5. Endpoint 基本信息
-
-- 生成 1 个 md 文件：`任务管理.md`
-- handler: `创建任务`
-- URL: `POST /api/tasks`
-
-### 6. Request Body 字段
-
-- title（任务标题）、description（任务描述）、status（任务状态）、priority、budget（预算金额）、taskCode（任务编号）
-
-### 7. Response Body 枚举验证
-
-- Response Body 的 status 字段同样包含枚举项（`1 : 待处理` 等）
+本用例把 **「枚举 = 配置驱动的 code/title 展开」** 与 **「一组典型 Bean Validation 组合」** 绑在同一条创建任务接口上，并强制校验 **响应里的枚举也要展开**。

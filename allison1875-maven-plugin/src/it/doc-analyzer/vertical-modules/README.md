@@ -1,36 +1,16 @@
-# vertical-modules 集成测试
+# doc-analyzer / vertical-modules
 
-## 概述
+## 本用例在验证什么
 
-验证垂直模块拆分场景（controller 在主模块，DTO 在子模块 dto-api）下，
-AstForest 能跨多个 sourceRoot 解析 controller 和 DTO 的 AST。
+在 **垂直拆分** 布局下：**`@RestController` 位于主模块 `src/main/java`**，而 **请求/响应 DTO 位于子目录模块 `dto-api`**（通过 **`dtoModule` / `wholeDTOModule` / `enumModule`** 指向该模块名）时，doc-analyzer 能否把 **多个 source root** 并入同一座 AST 森林，从而 **跨目录解析 DTO 字段与 Javadoc** 并写入 Markdown。
 
-## 覆盖的功能
+## 功能点与分支关注点（逐条）
 
-### 1. dtoModule 配置与多 sourceRoot 解析
+- **多源码根可见**：构建日志中应出现 **`dto-api`** 路径，表示 DTO 子树已被纳入 **全部 source root** 列表（与根 `pom` 里 **`build-helper-maven-plugin` 追加 `dto-api/src/main/java`** 的布局一致）。
+- **Controller → DTO 跨根引用**：主模块里的 **`ProductController`** 使用 **`dto-api`** 中的 **`CreateProductReq` / `ProductResp`** 时，文档中需出现 **`productName`、`price`、`description`** 及响应 **`id`** 等字段说明。
+- **接口与产物**：**`POST /api/products`**（「创建商品」）；生成 **`商品管理.md`**。
+- **与「水平多 domain」区别**：本例为 **单 domain（shop）** + **DTO 外置子模块**，不依赖 **`-Ddomain`**；重点在 **垂直 `dtoModule` 接线** 与 **跨模块 AST**。
 
-- controller 在主模块 `src/main/java`（`com.example.shop.controller`）
-- DTO 在子模块 `dto-api/src/main/java`（`com.example.shop.dto.req` / `com.example.shop.dto.resp`）
-- `dtoModule: dto-api` 配置使 `allSourceRoots` 包含 dto-api 的 sourceRoot
-- build.log 中确认 `dto-api` 路径被纳入
+## 小结
 
-### 2. 跨模块 controller → DTO 关联
-
-- `ProductController`（主模块）引用 `CreateProductReq` 和 `ProductResp`（dto-api 模块）
-- AST 跨 sourceRoot 解析时能正确找到 DTO 类的字段定义和 Javadoc
-
-### 3. DTO 字段文档提取
-
-- Request Body 字段：productName、price、description（来自 dto-api 模块的 `CreateProductReq`）
-- Response Body 字段：id（来自 dto-api 模块的 `ProductResp`）
-
-### 4. Markdown 输出
-
-- 生成 `商品管理.md`
-- endpoint: `POST /api/products`（创建商品）
-
-### 5. 配置
-
-- `domains`: shop（dtoModule: dto-api, wholeDTOModule: dto-api, enumModule: dto-api）
-- `flushTo: [MARKDOWN]`
-- `markdownDir: api-docs`
+本用例验证 **「控制器与 DTO 分仓」** 时文档仍完整；与 **`mixed-module-domains`** 相比，本仓库布局是 **controller 在根、`dto-api` 外挂**，更贴近「Web 与 API 分包编译」的常见 Maven 技巧。

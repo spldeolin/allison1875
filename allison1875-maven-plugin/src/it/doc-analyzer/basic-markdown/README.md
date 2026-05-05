@@ -1,91 +1,19 @@
-# basic-markdown 集成测试
+# doc-analyzer / basic-markdown
 
-## 概述
+## 本用例在验证什么
 
-验证 doc-analyzer 在最基本的 **MARKDOWN** 输出模式下的工作流程。
+在 **仅导出 Markdown** 时，doc-analyzer 能否把「带 GET（查询参数 + 列表返回）与 POST（JSON 请求体）」的常见用户接口，整理成 **可读、结构固定的 `.md` 文档**，并正确带出 **字段注释、基础校验、可选 Query 参数** 等信息。
 
-## 覆盖的功能
+## 功能点与分支关注点（逐条）
 
-### 1. MVC Handler 检测（MvcHandlerDetectorServiceImpl）
+- **输出形态**：在 `api-docs` 下生成 Markdown；本例控制器对应 **单个** 文件，文件名取自类级 Javadoc 首行主题（「用户管理」→ `用户管理.md`）。
+- **双端点 GET + POST**：文档中同时出现 **GET**、**POST** 与 **`/api/users`** 路径；分别对应「查询用户列表」与「创建用户」两条 handler 的语义。
+- **多行 Javadoc 描述**：主标题行与后续说明行（如「根据关键字搜索用户」）都应进入文档，用于验证 **方法说明不止一行** 时的合并/展示。
+- **Query Param 与必填语义**：`@RequestParam(required = false)` 的查询参数名（`keyword`）出现在 Query Param 区块；**非必填** 在文档中需有明确体现（本例用中文「否」等表述与 `required=false` 对应）。
+- **Request Body**：POST 的 JSON 请求体区块存在；请求 DTO 字段名（`username`、`age`、`email`）及 Javadoc（如「用户名」）写入文档；**`@NotBlank` / `@NotNull`** 等常见约束有对应中文说明。
+- **Response Body 与集合返回**：GET 返回 **`List<UserResp>`** 时，文档需能表达 **列表/数组语义**（本例断言中出现「Object Array」类表述，覆盖「元素类型为对象的列表」这一展示分支）；列表元素类型上的字段（如 `id`）及 Javadoc（如「用户ID」）仍应出现。
+- **Markdown 版面骨架**：包含约定的 **小节标题**（如 URL、Query Param、Request Body、Response Body 的 `###` 标题）以及 **分隔线**（`---`），保证多接口在同文件内排版一致。
 
-- 扫描 `@RestController` 类（UserController）
-- 识别 `@GetMapping` 和 `@PostMapping` 标注的 handler 方法
-- 反射 controller 类并匹配 AST MethodDeclaration
+## 小结
 
-### 2. MVC Handler 分析（MvcHandlerAnalyzerServiceImpl）
-
-- 从 controller 的 Javadoc 提取 `directCategory`（"用户管理"）
-- 从 handler 方法的 Javadoc 提取 `descriptionLines`（"查询用户列表"、"创建用户"）
-- 多行描述：listUsers 的 Javadoc 包含第2行描述"根据关键字搜索用户"
-
-### 3. RequestMapping 分析（RequestMappingServiceImpl）
-
-- controller 级 `@RequestMapping("/api/users")` 与 handler 级 `@GetMapping` / `@PostMapping` 的 URL 合并
-- HTTP 动词推导：GET、POST
-
-### 4. Query Param 分析（UrlParamServiceImpl.analyzeQueryParams）
-
-- `@RequestParam(required = false) String keyword` 参数识别
-- `required = false` 解析（NormalAnnotationExpr 分支）
-- String 类型推导为 ValueTypeEnum.STRING
-
-### 5. Request Body 分析（RequestBodyServiceImpl）
-
-- `@RequestBody CreateUserReq req` 参数识别
-- CreateUserReq 的字段解析（username, age, email）
-- JsonSchema 生成与转换
-
-### 6. Response Body 分析（ResponseBodyServiceImpl）
-
-- `@RestController` 下 handler 方法自动作为 ResponseBody
-- `UserResp` 返回类型解析（id, username, age, email）
-- `List<UserResp>` 泛型返回类型解析（listUsers 方法）
-
-### 7. 字段分析（FieldServiceImpl.analyzeFieldVars）
-
-- 从 Javadoc 提取字段注释
-- 扫描 primarySourceRoot 下的所有 Java 文件
-
-### 8. 校验注解分析（JsgBuilderServiceImpl.analyzeValid）
-
-- `@NotBlank`（username）
-- `@NotNull`（age）
-- 无校验注解的字段（email）
-
-### 9. Markdown 输出（MarkdownServiceImpl.flushToMarkdown）
-
-- 按 `directCategory` 分组生成 markdown 文件
-- URL 区域：HTTP 方法 + URL
-- Query Param 表格
-- Request Body 表格
-- Response Body 表格
-
-### 10. 配置
-
-- `flushTo: [MARKDOWN]`
-- `markdownDir: api-docs`
-- `globalUrlPrefix: ""`（空字符串，不添加前缀）
-- `enableNoModifyAnnounce: true`
-- `enableJavaxMoveToJakarta: false`
-
-## 未覆盖的分支
-
-- `@PathVariable` 参数 → Path Param 分析
-- `@PutMapping` / `@DeleteMapping` HTTP 动词
-- `void` 返回类型（无 Response Body）
-- `@Deprecated` / `@since` 标签 → 兼容性说明
-- `globalUrlPrefix` 非空时的 URL 前缀拼接
-- `singleEndpointPerMarkdown = true` 时每个 endpoint 独立 markdown
-- `mvcHandlerQualifierWildcards` 过滤
-- 嵌套 DTO（List<XxxReq>）字段遍历
-- 枚举字段类型分析
-- DSL 输出模式
-- `hierarchicalCategories`（package-info.java 层级分类）
-- `@RequestParam` 的 `name` / `value` 别名
-- `@RequestParam` 的 `defaultValue`
-- `@Valid` 级联校验
-- `@Size` / `@Min` / `@Max` / `@Length` / `@Pattern` 等校验注解
-- `@JsonFormat` 格式标注
-- `@JsonProperty.Access` READ_ONLY / WRITE_ONLY 字段过滤
-- `#API-DOC-IGNORE#` 字段忽略标记
-- `dependencyDirsOrJavaFilePath` 外部依赖目录
+本用例是 doc-analyzer **Markdown 模式的最小闭环**：路由与动词、可选 Query、POST 请求体与校验、**List 包裹的响应 DTO** 的文档化，以及固定章节结构。

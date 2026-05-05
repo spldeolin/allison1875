@@ -1,30 +1,18 @@
-# deprecated-and-since 集成测试
+# doc-analyzer / deprecated-and-since
 
-## 概述
+## 本用例在验证什么
 
-验证 doc-analyzer 对 `@deprecated` 和 `@since` Javadoc 标签的处理，包括 handler 级和字段级的兼容性说明。
+检查 doc-analyzer 能否把 Javadoc 里的 **`@since` / `@deprecated`** 转成 Markdown 中的 **「兼容性说明」类固定话术**，并区分 **接口级（handler）** 与 **请求体字段级** 两套粒度。
 
-## 覆盖的功能
+## 功能点与分支关注点（逐条）
 
-### 1. Handler 级 @since 标签（MvcHandlerAnalyzerServiceImpl.analyzeSinceVersion）
+- **多接口同文件**：一个控制器、三条 handler（查最新、创建、查过期），合并为 **单个** `公告管理.md`，且三条的标题与路径分别为 **`GET /api/notices/latest`**、**`POST /api/notices`**、**`GET /api/notices/expired`**。
+- **Handler 级 `@since`**：各 handler 在方法 Javadoc 上声明不同引入版本；文档的兼容性区块中需出现 **「本接口加入版本」** 及 **v1.0.0、v2.0.0** 等对应文案（本例含多条接口、多版本号并存）；控制器类上亦可带 `@since`，用于与真实项目里「类级 + 方法级」标签混写的情况共存。
+- **Handler 级 `@deprecated`**：废弃接口的说明正文需进入文档，包含 **不建议调用**、**过时原因** 等前缀式表述，且应保留原文中的关键信息（如替代方法名 **`getLatest`**、计划移除版本 **`v4.0`**）。
+- **字段级 `@since`**：请求 DTO 中某字段单独标注引入版本时，文档中需有 **「本字段加入版本」** 类表述（本例 **`priority` / v3.0.0**）。
+- **字段级 `@deprecated`**：请求字段被标记废弃时，文档中需有 **「本字段已过时」** 及原因引导语，并体现说明里提到的替代概念（本例 **`category`** 与文案中的 **`tags`**）。
+- **与普通文档内容共存**：除兼容性信息外，常规 **Request Body** 字段名与 Javadoc（如 `title` / 公告标题、`content` / 公告内容等）仍应正常出现，避免「只渲兼容块、丢字段表」。
 
-- handler 方法声明 `@since v1.0.0`
-- handler 方法未声明 `@since` 时回退到 controller 级 `@since v2.0.0`
+## 小结
 
-### 2. Handler 级 @deprecated 标签（MvcHandlerAnalyzerServiceImpl.analyzeDeprecatedDescription）
-
-- handler 方法声明 `@deprecated 请使用 getLatest 替代，本接口将在 v4.0 移除`
-- Markdown 中输出"兼容性说明"区域
-
-### 3. 字段级 @since 标签（FieldServiceImpl.analyzeSinceVersion）
-
-- CreateNoticeReq.priority 字段的 `@since v3.0.0`
-
-### 4. 字段级 @deprecated 标签（FieldServiceImpl.analyzeDeprecatedDescription）
-
-- CreateNoticeReq.category 字段的 `@deprecated 请使用 tags 字段替代`
-
-### 5. Markdown 兼容性说明区域（MarkdownServiceImpl.generateEndpointDoc）
-
-- `sinceVersion != null` 时生成"本接口加入版本：xxx"
-- `deprecatedDescription != null` 时生成"本接口已过时，不建议调用"
+本用例覆盖 **接口生命周期（since / deprecated）** 与 **DTO 字段生命周期** 在 Markdown 中的双线展示，并验证 **三端点 + POST 请求体** 场景下章节仍完整。

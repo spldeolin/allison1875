@@ -1,78 +1,19 @@
-# basic-dsl 集成测试
+# doc-analyzer / basic-dsl
 
-## 概述
+## 本用例在验证什么
 
-验证 doc-analyzer 在 **DSL（JSON）** 输出模式下的工作流程。
+在 **仅开启 DSL（JSON）输出** 时，doc-analyzer 能否为典型 REST 控制器产出 **结构正确、可被下游消费的接口 DSL 文件**，且 **不生成 Markdown 目录**（两种输出模式互斥的基本约定）。
 
-## 覆盖的功能
+## 功能点与分支关注点（逐条）
 
-### 1. MVC Handler 检测（MvcHandlerDetectorServiceImpl）
+- **输出目录与格式**：在配置的 `api-dsls` 下生成 **合法 JSON**；根节点为 **数组**，每个元素表示一个 HTTP 接口端点。
+- **「只出 DSL」时的副作用**：工作目录下 **不应出现** `api-docs`，避免在纯 DSL 场景误写 Markdown。
+- **按业务分类落盘**：同一控制器 Javadoc 所代表的模块名（本例为「商品管理」）对应 **唯一一个** JSON 文件名（`商品管理.json`），用于多控制器/多模块时的文件分桶策略。
+- **类级 + 方法级路径拼接**：`@RequestMapping("/api/products")` 与 `@GetMapping("/{id}")` / `@PostMapping` 合并后，DSL 中的 URL 列表需能体现 **`/api/products` 前缀**；GET 场景带路径变量模板。
+- **HTTP 动词覆盖**：同一控制器内 **GET 与 POST** 各一条，DSL 中 `httpMethod` 分别为 `get`、`post`，且数组长度为 **2**。
+- **GET 端点**：方法 Javadoc「根据ID查询商品」进入描述；**单个路径参数** `id`（来自 `@PathVariable`）被结构化到 `pathParams`。
+- **POST 端点**：方法 Javadoc「创建商品」进入描述；**请求体**绑定到请求 DTO 的 **全限定类名**；**响应体**绑定到响应 DTO 的 **全限定类名**；POST 还需带有 **请求体的 JSON Schema** 字段（供工具链或文档生成器消费）。
 
-- 扫描 `@RestController` 类（ProductController）
-- 识别 `@GetMapping("/{id}")` 和 `@PostMapping` 标注的 handler 方法
+## 小结
 
-### 2. MVC Handler 分析（MvcHandlerAnalyzerServiceImpl）
-
-- 从 controller 的 Javadoc 提取 `directCategory`（"商品管理"）
-- 从 handler 方法的 Javadoc 提取 `descriptionLines`（"根据ID查询商品"、"创建商品"）
-
-### 3. RequestMapping 分析（RequestMappingServiceImpl）
-
-- controller 级 `@RequestMapping("/api/products")` 与 handler 级 `@GetMapping("/{id}")` 的 URL 合并
-- URL 路径模板（`/api/products/{id}`）
-
-### 4. Path Param 分析（UrlParamServiceImpl.analyzePathParams）
-
-- `@PathVariable Long id` 参数识别（MarkerAnnotationExpr 分支 — 无属性的标记注解）
-- Long 类型推导为 ValueTypeEnum.INTEGER
-
-### 5. Request Body 分析（RequestBodyServiceImpl）
-
-- `@RequestBody CreateProductReq req` 参数识别
-- CreateProductReq 的字段解析（productName, price）
-
-### 6. Response Body 分析（ResponseBodyServiceImpl）
-
-- `ProductResp` 返回类型解析（id, productName, price）
-
-### 7. 校验注解分析（JsgBuilderServiceImpl.analyzeValid）
-
-- `@NotBlank`（productName）
-- `@NotNull`（price）
-
-### 8. DSL 输出（EndpointDslServiceImpl.flushToEndpointDsl）
-
-- 将 EndpointDTO 列表序列化为 JSON
-- 按 `directCategory` 分类生成 .json 文件
-- 文件名清理（sanitizeFileName）
-
-### 9. 配置
-
-- `flushTo: [DSL]`
-- `dslDir: api-dsls`
-- `globalUrlPrefix: ""`
-
-### 10. 验证互斥性
-
-- DSL 模式下**不生成** markdown 目录（api-docs 不存在）
-
-## 未覆盖的分支
-
-- `@RequestParam` Query Param 分析
-- `@PutMapping` / `@DeleteMapping` HTTP 动词
-- `void` 返回类型
-- `@Deprecated` / `@since` 标签
-- `globalUrlPrefix` 非空
-- `singleEndpointPerMarkdown`
-- `mvcHandlerQualifierWildcards` 过滤
-- 嵌套 DTO 字段遍历
-- 枚举字段类型分析
-- MARKDOWN / YAPI / SHOWDOC 输出模式
-- `hierarchicalCategories`
-- `@PathVariable` 的 `name` / `value` 别名（SingleMemberAnnotationExpr / NormalAnnotationExpr 分支）
-- `@Valid` 级联校验
-- `@Size` / `@Min` / `@Max` / `@Length` / `@Pattern` 等校验注解
-- `@JsonFormat` 格式标注
-- `@JsonProperty.Access` 字段过滤
-- `#API-DOC-IGNORE#` 字段忽略标记
-- `dependencyDirsOrJavaFilePath` 外部依赖目录
+本用例是 doc-analyzer **DSL 输出的最小闭环**：路由合并、两种动词、PathVariable、RequestBody/返回类型在 JSON 中的字段落位，以及 **DSL-only 不产 Markdown** 的配置行为。
