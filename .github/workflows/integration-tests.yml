@@ -11,27 +11,35 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - java-version: '8'
+            invoker-profile: invoker-it-java8
+          - java-version: '17'
+            invoker-profile: invoker-it-java17
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 8
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
           cache: 'maven'
 
       - name: Run integration tests
         run: |
           chmod +x run-it.sh
-          ./run-it.sh
+          ./run-it.sh ${{ matrix.invoker-profile }}
 
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-coverage-report
+          name: jacoco-coverage-report-java-${{ matrix.java-version }}
           path: allison1875-maven-plugin/target/site/jacoco-aggregate/
           retention-days: 30

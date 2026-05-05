@@ -559,16 +559,22 @@ allison1875-maven-plugin/src/it/{test-case-name}/
    ```
 
 **Running IT:**
+`maven-invoker-plugin` 与 IT 用 JaCoCo 仅在 Maven profile 激活时绑定 `verify` 生命周期；默认 `mvn install` / `mvn verify` 不执行 IT。
+- `invoker-it-java8`：`src/it` 下全部 case，排除 `java-record`、`jakarta-validation`（需 JDK 8+ 跑 fork 子工程）。
+- `invoker-it-java17`：仅上述两个 Java 17+ case（需 JDK 17+）。
+
 ```bash
-# Via wrapper script (install + IT + coverage, recommended)
+# 脚本：参数或环境变量 INVOKER_IT_PROFILE（默认 invoker-it-java8）
 ./run-it.sh
+./run-it.sh invoker-it-java17
 
-# Or manually: install first, then verify
+# 手动：先 install，再带 profile verify
 mvn install -DskipTests
-mvn verify -pl allison1875-maven-plugin -am
+mvn verify -pl allison1875-maven-plugin -am -Pinvoker-it-java8
+mvn verify -pl allison1875-maven-plugin -am -Pinvoker-it-java17
 
-# Run a single IT case (skip JaCoCo)
-mvn invoker:run -pl allison1875-maven-plugin -Dinvoker.test={case-name}
+# Run a single IT case（需先激活对应 profile，使 invoker 插件在 reactor 中可用）
+mvn verify -pl allison1875-maven-plugin -am -Pinvoker-it-java8 -Dinvoker.test={case-name}
 ```
 
 **IT output locations:**
