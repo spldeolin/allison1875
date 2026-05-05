@@ -3,16 +3,11 @@ package com.spldeolin.allison1875.docanalyzer.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.IntegerSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
@@ -25,11 +20,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeEnumConstantsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeValidRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.CategorizedMarkdownDTO;
@@ -39,7 +31,6 @@ import com.spldeolin.allison1875.docanalyzer.dto.PathParamDTO;
 import com.spldeolin.allison1875.docanalyzer.dto.QueryParamDTO;
 import com.spldeolin.allison1875.docanalyzer.service.MarkdownService;
 import com.spldeolin.allison1875.docanalyzer.util.JsonSchemaTraverseUtils;
-import com.spldeolin.allison1875.docanalyzer.util.LoadClassUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -49,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MarkdownServiceImpl implements MarkdownService {
 
-    private static final EasyRandom er = initEasyRandom();
 
     private static final String illegalChars = "\\/:*?\"<>|";
 
@@ -172,12 +162,6 @@ public class MarkdownServiceImpl implements MarkdownService {
             result.append(this.generateReqOrRespDoc(endpoint, false));
         }
 
-        // 生成cURL
-        result.append(this.generateCurlSample(endpoint));
-
-        // 生成返回值示例
-        result.append(this.generateRespSample(endpoint));
-
         // 可拓展的更多文档内容
         result.append(this.generateMoreDoc(endpoint));
 
@@ -220,51 +204,6 @@ public class MarkdownServiceImpl implements MarkdownService {
         return result;
     }
 
-    private String generateRespSample(EndpointDTO endpoint) {
-        if (!config.getEnableResponseBodySample() || endpoint.getResponseBodyDescribe() == null) {
-            return "";
-        }
-        try {
-            String mockRespJson = mockJsonByDescribe(endpoint.getResponseBodyDescribe());
-            if (mockRespJson == null) {
-                return "";
-            }
-            return "### Response Body的示例\n" + "```json\n" + mockRespJson + "\n```\n";
-        } catch (Exception e) {
-            log.warn("fail to mock DTO, describe={}", endpoint.getRequestBodyDescribe(), e);
-            return "";
-        }
-    }
-
-    private String generateCurlSample(EndpointDTO endpoint) {
-        if (!config.getEnableCurl() || endpoint.getRequestBodyDescribe() == null) {
-            return "";
-        }
-        StringBuilder result = new StringBuilder(64);
-        result.append("### cURL\n");
-        try {
-            String mockReqJson = mockJsonByDescribe(endpoint.getRequestBodyDescribe());
-            result.append("```shell\n");
-            result.append(String.format(
-                    "curl --request %s --url 'http://localhost:8080%s' --header " + "'content-type:application/json' "
-                            + "--data '", endpoint.getHttpMethod().toUpperCase(), endpoint.getUrls().get(0)));
-            result.append(mockReqJson);
-            result.append("'\n```\n");
-        } catch (Exception e) {
-            log.warn("fail to mock DTO, describe={}", endpoint.getRequestBodyDescribe(), e);
-            return "";
-        }
-        return result.toString();
-    }
-
-    private String mockJsonByDescribe(String describe) {
-        try {
-            Object mockDTO = er.nextObject(LoadClassUtils.loadClass(describe, AstForestContext.get().getClassLoader()));
-            return JsonUtils.toJsonPrettily(mockDTO);
-        } catch (Exception e) {
-            throw new Allison1875Exception(e);
-        }
-    }
 
     protected StringBuilder generateReqOrRespDoc(EndpointDTO endpoint, boolean isReqBody) {
         JsonSchema rootJsonSchema;
@@ -394,20 +333,6 @@ public class MarkdownServiceImpl implements MarkdownService {
         return content;
     }
 
-    private static EasyRandom initEasyRandom() {
-        EasyRandomParameters erp = new EasyRandomParameters();
-        erp.collectionSizeRange(2, 2);
-        erp.stringLengthRange(1, 8);
-        erp.randomizationDepth(5);
-        erp.ignoreRandomizationErrors(true);
-        erp.randomize(String.class, () -> RandomStringUtils.randomAlphanumeric(8));
-        erp.randomize(Integer.class, () -> RandomUtils.nextInt(0, 99999));
-        erp.randomize(Long.class, () -> RandomUtils.nextLong(1000000000L, 9999999999L));
-        erp.randomize(BigDecimal.class,
-                () -> new BigDecimal(RandomStringUtils.randomNumeric(5) + "." + RandomStringUtils.randomNumeric(2)));
-        erp.randomize(Object.class, () -> "x");
-        return new EasyRandom(erp);
-    }
 
     protected String generateMoreDoc(EndpointDTO endpoint) {
         return "";

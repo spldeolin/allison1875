@@ -40,11 +40,6 @@
             <artifactId>okhttp</artifactId>
         </dependency>
 
-        <!-- easy-random -->
-        <dependency>
-            <groupId>org.jeasy</groupId>
-            <artifactId>easy-random-core</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

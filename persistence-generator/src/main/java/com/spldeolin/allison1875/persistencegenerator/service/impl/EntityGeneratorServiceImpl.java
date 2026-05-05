@@ -1,12 +1,8 @@
 package com.spldeolin.allison1875.persistencegenerator.service.impl;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.Expression;
@@ -14,7 +10,6 @@ import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
@@ -24,7 +19,6 @@ import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.PropertyDTO;
@@ -44,9 +38,6 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
     @Inject
     private DataModelService dataModelGeneratorService;
 
-    @Inject
-    private AnnotationExprService annotationExprService;
-
     @Override
     public DataModelGeneration generateEntity(TableAnalysisDTO persistence) {
         DataModelArg arg = new DataModelArg();
@@ -56,17 +47,8 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         arg.setDescription(concatEntityDescription(persistence));
         arg.setAuthor(config.getAuthor());
         arg.setMoreOperation((cu, dataModel) -> {
-            // 追加父类，并追加EqualsAndHashCode注解（如果需要的话）
-            if (config.getSuperEntity() != null) {
-                dataModel.addExtendedType(config.getSuperEntity().getName());
-                dataModel.addAnnotation(annotationExprService.lombokEqualsAndHashCode());
-                dataModel.getAnnotations().removeIf(anno -> anno.getNameAsString().equals("Accessors"));
-            }
         });
         for (PropertyDTO property : persistence.getProperties()) {
-            if (getSuperEntityFieldNames().contains(property.getColumnName())) {
-                continue;
-            }
             FieldArg fieldArg = new FieldArg();
             fieldArg.setDescription(cancatPropertyDescription(property));
             fieldArg.setTypeQualifier(property.getJavaType().getQualifier());
@@ -113,14 +95,6 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
         }
 
         return Optional.empty();
-    }
-
-    private List<String> getSuperEntityFieldNames() {
-        if (config.getSuperEntity() == null) {
-            return Lists.newArrayList();
-        }
-        return Arrays.stream(config.getSuperEntity().getDeclaredFields()).map(Field::getName)
-                .collect(Collectors.toList());
     }
 
     private String concatEntityDescription(TableAnalysisDTO persistence) {

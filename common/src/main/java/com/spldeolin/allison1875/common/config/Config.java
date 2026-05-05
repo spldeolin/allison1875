@@ -136,11 +136,6 @@ public class Config {
     // ==================== handler-transformer 配置 ====================
 
     /**
-     * 分页对象的全限定名（handler-transformer 使用）
-     */
-    String pageTypeQualifier;
-
-    /**
      * 启用「一个Controller均调用同一个Service」的模式（handler-transformer 使用）
      */
     @NotNull
@@ -220,11 +215,6 @@ public class Config {
      * 如果有逻辑删除，怎么样算作"数据未被删"，非必填，只支持等式SQL
      */
     String notDeletedSql;
-
-    /**
-     * 如果生成的Entity需要指定父类，指定父类的Class对象
-     */
-    Class<?> superEntity;
 
     /**
      * 生成Entity时，文件已存在的解决方式
@@ -313,16 +303,6 @@ public class Config {
     Boolean singleEndpointPerMarkdown = false;
 
     /**
-     * 文档输出到markdown或ShowDoc时，是否启用cURL命令的输出
-     */
-    Boolean enableCurl = false;
-
-    /**
-     * 文档输出到markdown或ShowDoc时，是否启用Response Body示例的输出
-     */
-    Boolean enableResponseBodySample = false;
-
-    /**
      * 多个方法全限定名，只有能够匹配这些的MVC Handler方法才会被分析并输出文档，支持*和?通配符的
      */
     List<String> mvcHandlerQualifierWildcards;
@@ -366,6 +346,13 @@ public class Config {
     @Data
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class CodeSnippet {
+
+        /**
+         * 分页对象的全限定名
+         * <p>
+         * 例如：com.company.project.common.PageInfo
+         */
+        String pageTypeQualifier;
 
         /**
          * Spring MVC 请求方法统一返回类的全限定名。

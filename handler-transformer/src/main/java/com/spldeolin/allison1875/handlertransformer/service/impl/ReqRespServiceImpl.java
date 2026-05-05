@@ -303,7 +303,7 @@ public class ReqRespServiceImpl implements ReqRespService {
             return "java.util.List<" + dtoQualifier + ">";
         }
         if (dto.getAnnotationByName("P").isPresent()) {
-            return String.format("%s<%s>", config.getPageTypeQualifier(), dtoQualifier);
+            return String.format("%s<%s>", config.getCodeSnippet().getPageTypeQualifier(), dtoQualifier);
         }
         return dtoQualifier;
     }

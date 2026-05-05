@@ -143,19 +143,10 @@ showdocApiToken: null
 # 文档输出到markdown或ShowDoc时，每个Endpoint是否输出到单个markdown文件。根据项目需求推断，默认false
 singleEndpointPerMarkdown: false
 
-# 文档输出到markdown或ShowDoc时，是否启用cURL命令的输出。默认false
-enableCurl: false
-
-# 文档输出到markdown或ShowDoc时，是否启用Response Body示例的输出。默认false
-enableResponseBodySample: false
-
 # 仅分析匹配的 Handler 方法全限定名（支持 `*`/`?`）。仅当Controller非常多时询问。
 mvcHandlerQualifierWildcards: [ ]
 
 # -- handler-transformer 工具的配置 -- #
-
-# 分页对象全限定类名。在 Controller/Service 中搜索分页返回类型（如 `PageResult`、`Page`）
-pageTypeQualifier: com.company.proj.biz.common.Pageinfo
 
 # 是否「一个 Controller 对应一个 Service」。观察 Controller 是否共用一个 Service 接口；不确定则询问
 enableOneService: true
@@ -200,9 +191,6 @@ deletedSql: 'delete_flag = 1'
 # 逻辑删除的“未删”条件。本次配置固定为 `delete_flag = 0`
 notDeletedSql: 'delete_flag = 0'
 
-# Entity 父类全限定名。根据现有 Entity 进行推断。
-superEntity: null
-
 # 生成 Entity 时文件已存在的策略。本次配置固定为 `OVERWRITE`
 entityExistenceResolution: OVERWRITE
 
@@ -226,6 +214,9 @@ enableDocAnalyzer: true
 
 # 代码片段配置（嵌套对象，对应 Java 中 Config.CodeSnippet 内部类）
 codeSnippet:
+
+  # 分页对象全限定类名。在 Controller/Service 中搜索分页返回类型（如 `PageResult`、`Page`）
+  pageTypeQualifier: com.company.proj.biz.common.Pageinfo
 
   # Spring MVC 请求方法统一返回类的全限定名。在项目中找返回值包装类
   requestResultQualifier: com.company.proj.common.RequestResult

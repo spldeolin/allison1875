@@ -72,16 +72,6 @@ public class ConfigValidator implements ConstraintValidator<ConfigValid, Config>
                 }
             }
 
-            if (config.getFlushTo().contains(FlushToEnum.MARKDOWN) || config.getFlushTo()
-                    .contains(FlushToEnum.SHOWDOC)) {
-                if (config.getEnableCurl() == null) {
-                    errmsgs.add("enableCurl must not be null when flushTo contains 'MARKDOWN' or 'SHOWDOC'");
-                }
-                if (config.getEnableResponseBodySample() == null) {
-                    errmsgs.add(
-                            "enableResponseBodySample must not be null when flushTo contains 'MARKDOWN' or 'SHOWDOC'");
-                }
-            }
         }
 
         // ---- codeTemplate 相关校验 ----
