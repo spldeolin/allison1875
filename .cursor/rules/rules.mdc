@@ -335,6 +335,31 @@ public class XxxDTO { ... }
 
 Naming: `*Arg` for inputs, `*Retval` for outputs, `*DTO` for data transfer.
 
+### 4.7 Query-Transformer DSL Assignment Rules
+
+The `query-transformer` operates on Design chain DSL written in Service classes. The DSL has
+a critical compile-time vs transform-time type distinction:
+
+**Compile-time type:** Design chain methods (e.g. `.list()`) always return `List<TXxxEntity>`
+regardless of selected properties. This is because the Design class is a compile-time stub.
+
+**Transform-time type:** The query-transformer resolves the actual return type based on selected
+properties during AST transformation.
+
+**Rules for writing DSL in IT cases and target projects:**
+
+| Scenario | DSL Code | Compile-time Type | Transform Result |
+|----------|----------|-------------------|------------------|
+| No assignment (single property) | `TOrderDesign.select("xxx").orderNo.list();` | `List<TOrderEntity>` (discarded) | `List<String>` |
+| No assignment (multi property) | `TOrderDesign.select("xxx").orderNo.userId.list();` | `List<TOrderEntity>` (discarded) | `List<XxxRecord>` (generated DTO) |
+| With assignment | `List<TOrderEntity> r = TOrderDesign.select("xxx").orderNo.list();` | `List<TOrderEntity>` ✓ | `List<TOrderEntity>` (kept as-is) |
+| **INVALID** | `List<String> r = TOrderDesign.select("xxx").orderNo.list();` | ❌ Compilation error | — |
+
+**Key takeaway:** If the developer wants the transformer to resolve a non-Entity return type
+(e.g. `List<String>` for single property, or `List<Record>` for multi properties), the DSL
+statement MUST be written **without assignment**. Assigning to a variable forces the compile-time
+type `List<TXxxEntity>`, which the transformer will preserve.
+
 ---
 
 ## 5. Developer Workflows
