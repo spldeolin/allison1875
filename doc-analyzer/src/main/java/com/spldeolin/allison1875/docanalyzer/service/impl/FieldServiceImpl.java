@@ -103,7 +103,7 @@ public class FieldServiceImpl implements FieldService {
 
     protected Set<File> buildAnalysisScope() {
         Set<File> retval = Sets.newLinkedHashSet();
-        File primarySourceRoot = AstForestContext.get().cloneWithResetting().getPrimarySourceRoot().toFile();
+        File primarySourceRoot = AstForestContext.get().getSourceRoot().toFile();
         if (!primarySourceRoot.exists()) {
             return retval;
         }

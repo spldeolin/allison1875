@@ -68,6 +68,7 @@ public class EnumServiceImpl implements EnumService {
             return Lists.newArrayList();
         }
 
+        // 类加载枚举，用于调用getCode、getTitle方法
         Class<?> enumClass;
         try {
             enumClass = LoadClassUtils.loadClass(referenceTypeDeclaration.getQualifiedName(),

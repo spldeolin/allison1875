@@ -14,13 +14,8 @@ public interface AstForest extends Iterable<CompilationUnit> {
     ClassLoader getClassLoader();
 
     /**
-     * 获取所有的SourceRoot路径
+     * 获取SourceRoot路径
      */
-    Set<Path> getSourceRoots();
-
-    /**
-     * 获取主SourceRoot路径（当前执行module的SourceRoot）
-     */
-    Path getPrimarySourceRoot();
+    Path getSourceRoot();
 
 }

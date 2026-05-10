@@ -81,7 +81,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             Set<File> allSourceRoots = collectSourceRoots(domainConfig);
             File primarySourceRoot = getPrimarySourceRoot();
             log.info("allSourceRoots={}", allSourceRoots);
-            AstForest astForest = new MavenProjectBuiltAstForest(classLoader, allSourceRoots, primarySourceRoot);
+            AstForest astForest = new MavenProjectBuiltAstForest(classLoader, primarySourceRoot);
             Allison1875.letsGo(allison1875Module, astForest, domainConfig);
 
             // 成功时清理快照

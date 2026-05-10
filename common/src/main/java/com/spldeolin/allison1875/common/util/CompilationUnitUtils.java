@@ -11,11 +11,7 @@ import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import lombok.extern.slf4j.Slf4j;
 

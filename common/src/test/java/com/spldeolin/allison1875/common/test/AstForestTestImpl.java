@@ -53,12 +53,7 @@ public class AstForestTestImpl implements AstForest {
     }
 
     @Override
-    public Set<Path> getSourceRoots() {
-        return Collections.singleton(sourceRoot.toPath());
-    }
-
-    @Override
-    public Path getPrimarySourceRoot() {
+    public Path getSourceRoot() {
         return sourceRoot.toPath();
     }
 
