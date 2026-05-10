@@ -163,7 +163,6 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         domainConfig.setServiceSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getServiceModule()));
         domainConfig.setServiceImplSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getServiceImplModule()));
         domainConfig.setPersistenceSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getPersistenceModule()));
-        domainConfig.setWholeDTOSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getWholeDTOModule()));
 
         // 将mapperXmlDirs转换为基于持久层module basedir的绝对路径
         File persistenceBasedir = resolvePersistenceBasedir(basedir, domainConfig.getPersistenceModule());
@@ -205,7 +204,6 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         addIfNotNull(roots, domainConfig.getServiceSourceRoot());
         addIfNotNull(roots, domainConfig.getServiceImplSourceRoot());
         addIfNotNull(roots, domainConfig.getPersistenceSourceRoot());
-        addIfNotNull(roots, domainConfig.getWholeDTOSourceRoot());
         return roots;
     }
 

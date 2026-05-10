@@ -28,9 +28,9 @@ public class DomainConfig {
     // ==================== 控制层 ====================
 
     /**
-     * Controller类所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
+     * Controller类所在Maven模块的绝对路径
      */
+    @NotEmpty
     String controllerModule;
 
     /**
@@ -42,9 +42,9 @@ public class DomainConfig {
     // ==================== DTO层（reqDTO + respDTO 共用module） ====================
 
     /**
-     * reqDTO和respDTO类所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
+     * reqDTO和respDTO类所在Maven模块的绝对路径
      */
+    @NotEmpty
     String dtoModule;
 
     /**
@@ -62,9 +62,9 @@ public class DomainConfig {
     // ==================== 枚举层 ====================
 
     /**
-     * 枚举类所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
+     * 枚举类所在Maven模块的绝对路径
      */
+    @NotEmpty
     String enumModule;
 
     /**
@@ -76,9 +76,9 @@ public class DomainConfig {
     // ==================== 业务层 Service ====================
 
     /**
-     * Service接口所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
+     * Service接口所在Maven模块的绝对路径
      */
+    @NotEmpty
     String serviceModule;
 
     /**
@@ -90,9 +90,9 @@ public class DomainConfig {
     // ==================== 业务层 ServiceImpl ====================
 
     /**
-     * ServiceImpl类所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
+     * ServiceImpl类所在Maven模块的绝对路径
      */
+    @NotEmpty
     String serviceImplModule;
 
     /**
@@ -105,9 +105,9 @@ public class DomainConfig {
     // ====================
 
     /**
-     * 持久层代码所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
+     * 持久层代码所在Maven模块的绝对路径
      */
+    @NotEmpty
     String persistenceModule;
 
     /**
@@ -146,14 +146,6 @@ public class DomainConfig {
     @NotEmpty
     List<File> mapperXmlDirs = Lists.newArrayList(new File("src/main/resources/mapper"));
 
-    // ==================== WholeDTO层 ====================
-
-    /**
-     * WholeDTO类所在的Maven子模块路径（相对于parent pom.xml），
-     * 为null时使用当前执行的module
-     */
-    String wholeDTOModule;
-
     /**
      * WholeDTO类所在包的包名
      */
@@ -191,10 +183,5 @@ public class DomainConfig {
      * 持久层的SourceRoot绝对路径
      */
     transient Path persistenceSourceRoot;
-
-    /**
-     * WholeDTO的SourceRoot绝对路径
-     */
-    transient Path wholeDTOSourceRoot;
 
 }

@@ -9,8 +9,14 @@ import com.github.javaparser.ast.CompilationUnit;
  */
 public interface AstForest extends Iterable<CompilationUnit> {
 
+    /**
+     * clone本对象，一般用于从头开始遍历AstForest
+     */
     AstForest cloneWithResetting();
 
+    /**
+     * 获取类加载器
+     */
     ClassLoader getClassLoader();
 
     /**

@@ -32,7 +32,7 @@ public class WholeDTOServiceImpl implements WholeDTOService {
     @Override
     public DataModelGeneration generateWholeDTO(ChainAnalysisDTO analysis) {
         DataModelArg dataModelArg = new DataModelArg();
-        dataModelArg.setSourceRoot(DomainContext.get().getWholeDTOSourceRoot());
+        dataModelArg.setSourceRoot(DomainContext.get().getDtoSourceRoot());
         dataModelArg.setPackageName(DomainContext.get().getWholeDTOPackage());
         dataModelArg.setClassName(analysis.getWholeDTOName());
         dataModelArg.setAuthor(config.getAuthor());
