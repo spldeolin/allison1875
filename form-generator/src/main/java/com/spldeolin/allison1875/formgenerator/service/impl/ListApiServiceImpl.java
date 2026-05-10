@@ -234,7 +234,7 @@ public class ListApiServiceImpl implements ListApiService {
         designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         designChain += ".page(req.getPageNum(),req.getPageSize());";
         body.addStatement(parseStatement(
-                "List<" + form.getName() + "> " + English.plural(form.getVarName()) + " = " + designChain));
+                "List<" + form.getEntityName(config) + "> " + English.plural(form.getVarName()) + " = " + designChain));
 
         body.addStatement(parseStatement(
                 "if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
@@ -244,7 +244,7 @@ public class ListApiServiceImpl implements ListApiService {
                 "List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
         ForEachStmt forEachStmt = new ForEachStmt();
         forEachStmt.setVariable(parseVariableDeclarationExpr(
-                String.format("%s %s", form.getName(), form.getVarName())));
+                String.format("%s %s", form.getEntityName(config), form.getVarName())));
         forEachStmt.setIterable(new NameExpr(English.plural(form.getVarName())));
         BlockStmt forEachBody = new BlockStmt();
         forEachBody.addStatement(parseStatement(

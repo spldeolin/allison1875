@@ -133,9 +133,8 @@ public class SaveApiServiceImpl implements SaveApiService {
                 forEachStmt.setIterable(parseExpression(
                         String.format("req.get%s()", StringUtils.capitalize(item.getName()))));
                 BlockStmt forEachBody = new BlockStmt();
-                forEachBody.addStatement(parseStatement(
-                        "%s %s = new %s();", associationForm.getName(), associationForm.getVarName(),
-                        associationForm.getName()));
+                forEachBody.addStatement(parseStatement("%s %s = new %s();", associationForm.getEntityName(config),
+                        associationForm.getVarName(), associationForm.getEntityName(config)));
                 forEachBody.addStatement(parseStatement(
                         "%s.%s(%s.%s());", associationForm.getVarName(),
                         associationForm.getBizIdSetterName(), form.getVarName(), form.getBizIdGetterName()));

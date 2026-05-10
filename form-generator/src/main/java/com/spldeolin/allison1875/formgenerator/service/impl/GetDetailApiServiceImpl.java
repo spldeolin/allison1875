@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import com.github.javaparser.StaticJavaParser;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
+
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
@@ -13,6 +13,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.StringEscapeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -42,6 +43,9 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
+
+    @Inject
+    private Config config;
 
     @Override
     public InitializerDeclaration generateGetDetailInitDec(FormDef form) {
@@ -77,8 +81,8 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        Statement stmt = parseStatement(
-                "%s %s = %sMapper.queryBy%s(req.%s());", form.getName(), form.getVarName(),
+        Statement stmt = parseStatement("%s %s = %sMapper.queryBy%s(req.%s());", form.getEntityName(config),
+                form.getVarName(),
                 form.getVarName(), StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName());
         stmt.setLineComment("查询" + form.getTitle());
         body.addStatement(stmt);
@@ -95,8 +99,7 @@ public class GetDetailApiServiceImpl implements GetDetailApiService {
                             "List<%s> %s = %sMapper.queryBy%s(%s.%s()).stream().map(%s::get%s).map(%s::of).collect"
                                     + "(Collectors.toList());", enumName, multiSelectItem.getName(),
                             associationForm.getVarName(), StringUtils.capitalize(form.getBizIdName()),
-                            form.getVarName(),
-                            form.getBizIdGetterName(), associationForm.getName(),
+                            form.getVarName(), form.getBizIdGetterName(), associationForm.getEntityName(config),
                             StringUtils.capitalize(multiSelectItem.getName()), enumName);
                     statement.setLineComment("查询" + associationForm.getTitle());
                     body.addStatement(statement);
