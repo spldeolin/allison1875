@@ -24,43 +24,40 @@ public class Bootstrap {
 
         // 解析CLI参数
         CliArgs cliArgs = parseArgs(args);
-        log.info("toolName={} domainName={} configFile={}", cliArgs.toolName, cliArgs.domainName, cliArgs.configFile);
-
-        // 解析工具名为ToolEnum
-        ToolEnum tool = ToolEnum.fromToolName(cliArgs.toolName);
+        log.info("toolName={} domainName={} configFile={}", cliArgs.tool, cliArgs.domainName, cliArgs.configFile);
 
         // 读取.allison1875配置文件并反序列化
         Config config = loadConfig(cliArgs.configFile);
         log.info("config={}", config);
 
         // 执行allison1875
-        Allison1875.letsGo(tool, config, cliArgs.domainName);
+        Allison1875.letsGo(cliArgs.tool, config, cliArgs.domainName);
     }
 
     /**
      * 解析CLI参数，提取 --tool、--domain、--config
      */
     private static CliArgs parseArgs(String[] args) {
-        String toolName = null;
+        String tool = null;
         String domainName = null;
         String configFilePath = null;
         for (String arg : args) {
             if (arg.startsWith("--tool=")) {
-                toolName = arg.substring("--tool=".length());
+                tool = arg.substring("--tool=".length());
             } else if (arg.startsWith("--domain=")) {
                 domainName = arg.substring("--domain=".length());
             } else if (arg.startsWith("--config=")) {
                 configFilePath = arg.substring("--config=".length());
             }
         }
-        if (toolName == null || toolName.isEmpty()) {
+        if (tool == null || tool.isEmpty()) {
             throw new Allison1875Exception("必须通过 --tool=<toolName> 指定工具名（如 doc-analyzer）");
         }
         if (configFilePath == null || configFilePath.isEmpty()) {
             throw new Allison1875Exception("必须通过 --config=<path> 指定 .allison1875.yml 配置文件路径");
         }
         CliArgs cliArgs = new CliArgs();
-        cliArgs.toolName = toolName;
+        cliArgs.tool = ToolEnum.of(tool);
         cliArgs.domainName = domainName;
         cliArgs.configFile = configFilePath;
         return cliArgs;
@@ -87,7 +84,7 @@ public class Bootstrap {
      */
     private static class CliArgs {
 
-        String toolName;
+        ToolEnum tool;
 
         String domainName;
 

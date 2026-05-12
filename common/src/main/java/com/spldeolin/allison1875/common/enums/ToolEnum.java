@@ -51,7 +51,7 @@ public enum ToolEnum {
      * @return 对应的 ToolEnum
      * @throws Allison1875Exception 如果工具名不合法
      */
-    public static ToolEnum fromToolName(String toolName) {
+    public static ToolEnum of(String toolName) {
         for (ToolEnum tool : values()) {
             if (tool.toolName.equals(toolName)) {
                 return tool;

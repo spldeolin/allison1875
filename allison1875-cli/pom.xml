@@ -39,6 +39,7 @@
     </dependencies>
 
     <build>
+        <finalName>allison1875</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -62,6 +63,9 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -73,9 +73,7 @@ build_project() {
 
 find_fat_jar() {
     # maven-shade-plugin 会将原始 jar 重命名为 original-xxx.jar，shade 后的 fat jar 为 xxx.jar
-    local version
-    version=$(mvn help:evaluate -Dexpression=project.version -pl "${CLI_MODULE}" -q -DforceStdout)
-    FAT_JAR="${CLI_MODULE}/target/${CLI_ARTIFACT_ID}-${version}.jar"
+    FAT_JAR="${CLI_MODULE}/target/allison1875.jar"
 
     if [ ! -f "${FAT_JAR}" ]; then
         error "未找到 fat jar: ${FAT_JAR}"
