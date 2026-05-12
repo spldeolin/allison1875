@@ -62,6 +62,26 @@ public class Config {
     @NotNull
     String javaVersion = "21";
 
+    // ==================== Guice Module 配置 ====================
+
+    /** doc-analyzer 功能所使用的 Guice Module 实现类全限定名 */
+    String docAnalyzerModule = "com.spldeolin.allison1875.docanalyzer.DocAnalyzerModule";
+
+    /** handler-transformer 功能所使用的 Guice Module 实现类全限定名 */
+    String handlerTransformerModule = "com.spldeolin.allison1875.handlertransformer.HandlerTransformerModule";
+
+    /** persistence-generator 功能所使用的 Guice Module 实现类全限定名 */
+    String persistenceGeneratorModule = "com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule";
+
+    /** query-transformer 功能所使用的 Guice Module 实现类全限定名 */
+    String queryTransformerModule = "com.spldeolin.allison1875.querytransformer.QueryTransformerModule";
+
+    /** star-transformer 功能所使用的 Guice Module 实现类全限定名 */
+    String starTransformerModule = "com.spldeolin.allison1875.startransformer.StarTransformerModule";
+
+    /** form-generator 功能所使用的 Guice Module 实现类全限定名 */
+    String formGeneratorModule = "com.spldeolin.allison1875.formgenerator.FormGeneratorModule";
+
     // ==================== handler-transformer 配置 ====================
 
     /**

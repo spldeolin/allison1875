@@ -89,9 +89,6 @@ public class FormGenerator implements Allison1875MainService {
     @Inject
     private SaveApiService saveApiService;
 
-    @Inject
-    private CompileFacade compileFacade;
-
     @Override
     public void process() {
         List<FormDef> forms = deserializeDSL();

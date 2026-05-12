@@ -4,12 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -18,9 +12,9 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import com.spldeolin.allison1875.common.Allison1875;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
-import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import com.spldeolin.allison1875.common.guice.Allison1875Module;
+import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils.FileSystemSnapshot;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -59,21 +53,17 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             // banner
             Allison1875.hello();
 
-            // 构造guice module
-            MojoConfig config = initParam();
-            ClassLoader classLoader = getClassLoader(project);
+            // 加载配置
+            Config config = loadConfig();
 
-            // 解析domain
-            DomainConfig domainConfig = resolveDomain(config);
-            log.info("domain={}", domainConfig.getName());
+            // Mojo层特有的basedir路径解析
+            resolveBasedirPaths(config);
 
-            // 解析domain中各层的sourceRoot
-            resolveSourceRoots(domainConfig);
+            // 解析domain中各层的sourceRoot（Mojo模式下基于basedir的相对路径）
+            resolveDomainSourceRootsForMojo(config);
 
-            // 构造guice module
-            Allison1875Module allison1875Module = newAllison1875Module(config, classLoader);
-
-            Allison1875.letsGo(allison1875Module, domainConfig);
+            // 执行
+            Allison1875.letsGo(getTool(), config, domain);
 
             // 成功时清理快照
             fileSnapshot.cleanup();
@@ -90,11 +80,21 @@ public abstract class Allison1875Mojo extends AbstractMojo {
     }
 
     /**
+     * 返回当前Mojo对应的工具枚举
+     */
+    protected abstract ToolEnum getTool();
+
+    /**
+     * 供子类覆写：对config中需要基于basedir解析的文件路径字段进行处理。
+     * 默认空实现。
+     */
+    protected void resolveBasedirPaths(Config config) {
+    }
+
+    /**
      * 检查当前module是否允许执行Allison 1875。
      */
     private void checkParentModule() throws MojoExecutionException {
-        // 没有本地聚合parent → 允许执行；有本地聚合parent → 说明是被聚合的子module，不允许执行。
-        // POM继承中的远程parent（如spring-boot-starter-parent）的basedir为null，不算本地聚合parent。
         boolean hasLocalAggregatorParent = project.getParent() != null && project.getParent().getBasedir() != null;
         if (hasLocalAggregatorParent) {
             throw new MojoExecutionException("Allison 1875 必须在parent module或单模块工程中执行，当前module存在本地聚合parent: "
@@ -102,15 +102,14 @@ public abstract class Allison1875Mojo extends AbstractMojo {
         }
     }
 
-    private MojoConfig initParam() throws IOException {
+    private Config loadConfig() throws IOException {
         log.info("project={}", project);
         log.info("basedir={}", project.getBasedir());
 
-        // 从 YAML 文件反序列化 MojoConfig
         File configFile = getCanonicalFileRelativeToBasedir(new File(configYmlPath));
         log.info("configYmlPath={}", configFile);
-        Yaml yaml = new Yaml(new Constructor(MojoConfig.class, new LoaderOptions()));
-        MojoConfig config;
+        Yaml yaml = new Yaml(new Constructor(Config.class, new LoaderOptions()));
+        Config config;
         try (FileInputStream fis = new FileInputStream(configFile)) {
             config = yaml.load(fis);
         }
@@ -120,91 +119,35 @@ public abstract class Allison1875Mojo extends AbstractMojo {
     }
 
     /**
-     * 根据 -Ddomain 参数解析出目标 DomainConfig。
-     * 仅有一个domain时，-Ddomain可省略；多个domain时，-Ddomain必须指定。
+     * Mojo模式下，DomainConfig中的*Module字段是相对basedir的相对路径，需要解析为绝对路径。
+     * 因为 Allison1875.letsGo 内部的 resolveSourceRoots 直接 Paths.get(modulePath, "src/main/java")，
+     * 所以这里把 *Module 从相对路径转为绝对路径。
      */
-    private DomainConfig resolveDomain(MojoConfig config) {
-        List<DomainConfig> domains = config.getDomains();
-        if (domains == null || domains.isEmpty()) {
-            throw new Allison1875Exception("配置文件中未定义任何domain");
-        }
-        if (domain == null || domain.isEmpty()) {
-            if (domains.size() == 1) {
-                return domains.get(0);
-            }
-            throw new Allison1875Exception("配置文件中定义了多个domain，必须通过 -Ddomain=<name> 指定要处理的业务领域。可选值: "
-                    + domains.stream().map(DomainConfig::getName).collect(Collectors.joining(", ")));
-        }
-        return domains.stream().filter(d -> domain.equals(d.getName())).findFirst().orElseThrow(
-                () -> new Allison1875Exception(
-                        "未找到名为 '" + domain + "' 的domain。可选值: " + domains.stream().map(DomainConfig::getName)
-                                .collect(Collectors.joining(", "))));
-    }
-
-    /**
-     * 解析 DomainConfig 中各 *Module 字段到对应的 *SourceRoot 路径，
-     * 同时将 mapperXmlDirs 转换为绝对路径。
-     */
-    private void resolveSourceRoots(DomainConfig domainConfig) {
+    private void resolveDomainSourceRootsForMojo(Config config) {
         File basedir = project.getBasedir();
-
-        domainConfig.setControllerSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getControllerModule()));
-        domainConfig.setDtoSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getDtoModule()));
-        domainConfig.setEnumSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getEnumModule()));
-        domainConfig.setServiceSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getServiceModule()));
-        domainConfig.setServiceImplSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getServiceImplModule()));
-        domainConfig.setPersistenceSourceRoot(resolveModuleSourceRoot(basedir, domainConfig.getPersistenceModule()));
-
-        // 将mapperXmlDirs转换为基于持久层module basedir的绝对路径
-        File persistenceBasedir = resolvePersistenceBasedir(basedir, domainConfig.getPersistenceModule());
-        domainConfig.setMapperXmlDirs(domainConfig.getMapperXmlDirs().stream()
-                .map(dir -> getCanonicalFile(persistenceBasedir.toPath().resolve(dir.toPath()).toFile()))
-                .collect(Collectors.toList()));
-        log.info("resolved mapperXmlDirs={}", domainConfig.getMapperXmlDirs());
+        for (DomainConfig domainConfig : config.getDomains()) {
+            domainConfig.setControllerModule(resolveModuleAbsolutePath(basedir, domainConfig.getControllerModule()));
+            domainConfig.setDtoModule(resolveModuleAbsolutePath(basedir, domainConfig.getDtoModule()));
+            domainConfig.setEnumModule(resolveModuleAbsolutePath(basedir, domainConfig.getEnumModule()));
+            domainConfig.setServiceModule(resolveModuleAbsolutePath(basedir, domainConfig.getServiceModule()));
+            domainConfig.setServiceImplModule(resolveModuleAbsolutePath(basedir, domainConfig.getServiceImplModule()));
+            domainConfig.setPersistenceModule(resolveModuleAbsolutePath(basedir, domainConfig.getPersistenceModule()));
+        }
     }
 
     /**
-     * 将 *Module 路径解析为 sourceRoot 的绝对路径。
-     * 如果 modulePath 为 null，则使用当前执行module的 src/main/java。
+     * 将modulePath解析为绝对路径。
+     * 如果modulePath为null或空，则使用basedir本身。
      */
-    private Path resolveModuleSourceRoot(File basedir, String modulePath) {
+    private String resolveModuleAbsolutePath(File basedir, String modulePath) {
         if (modulePath == null || modulePath.isEmpty()) {
-            return getCanonicalFile(new File(basedir, "src/main/java")).toPath();
+            return getCanonicalFile(basedir).getAbsolutePath();
         }
-        return getCanonicalFile(new File(basedir, modulePath + "/src/main/java")).toPath();
-    }
-
-    /**
-     * 解析持久层module的basedir
-     */
-    private File resolvePersistenceBasedir(File basedir, String persistenceModule) {
-        if (persistenceModule == null || persistenceModule.isEmpty()) {
-            return basedir;
-        }
-        return getCanonicalFile(new File(basedir, persistenceModule));
-    }
-
-    public abstract Allison1875Module newAllison1875Module(MojoConfig config, ClassLoader classLoader) throws Exception;
-
-    private ClassLoader getClassLoader(MavenProject project) throws Exception {
-        List<String> classpathElements = new ArrayList<>(project.getCompileClasspathElements());
-        log.debug("classpathElements={}", JsonUtils.toJson(classpathElements));
-        classpathElements.add(project.getBuild().getOutputDirectory());
-        classpathElements.add(project.getBuild().getTestOutputDirectory());
-        URL[] urls = new URL[classpathElements.size()];
-        for (int i = 0; i < classpathElements.size(); ++i) {
-            urls[i] = new File(classpathElements.get(i)).toURL();
-        }
-        return new URLClassLoader(urls, this.getClass().getClassLoader());
+        return getCanonicalFile(new File(basedir, modulePath)).getAbsolutePath();
     }
 
     /**
      * 检测当前Maven是否通过mvnDebug执行
-     * <p>
-     * mvnDebug会在JVM启动参数中添加JDWP（Java Debug Wire Protocol）相关参数，
-     * 如 -agentlib:jdwp=... 或 -Xrunjdwp:...
-     *
-     * @return true表示当前为mvnDebug模式
      */
     private boolean isMavenDebugMode() {
         for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {

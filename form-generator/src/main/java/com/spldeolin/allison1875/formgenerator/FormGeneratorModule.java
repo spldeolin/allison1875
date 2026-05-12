@@ -18,11 +18,8 @@ public class FormGeneratorModule extends Allison1875Module {
 
     private final Config config;
 
-    private final CompileFacade compileFacade;
-
-    public FormGeneratorModule(Config config, CompileFacade compileFacade) {
+    public FormGeneratorModule(Config config) {
         this.config = config;
-        this.compileFacade = compileFacade;
     }
 
     @Override
@@ -34,7 +31,6 @@ public class FormGeneratorModule extends Allison1875Module {
     protected void configure() {
         bind(ServiceLayerExpansionService.class).toInstance(new FormGeneratorServiceLayerExpansionServiceImpl());
         bind(Config.class).toInstance(config);
-        bind(CompileFacade.class).toInstance(compileFacade);
         if (config.getIsDataModelWithoutLombok()) {
             bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());
         } else {
