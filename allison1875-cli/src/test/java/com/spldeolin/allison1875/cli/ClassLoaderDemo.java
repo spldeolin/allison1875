@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.cli;
 
 import java.io.File;
+import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
 import lombok.extern.slf4j.Slf4j;
-import com.spldeolin.allison1875.cli.util.MavenProjectClassLoaderUtils;
 
 /**
  * 演示为指定的Maven模块项目路径构建ClassLoader，并尝试加载类来验证功能正确性。

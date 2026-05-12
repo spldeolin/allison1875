@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.handlertransformer;
 
+import java.io.File;
 import java.util.List;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -8,7 +9,10 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainConfig;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.dto.GenerateMvcHandlerArgs;
@@ -18,6 +22,7 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
+import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
@@ -71,6 +76,12 @@ public class HandlerTransformer implements Allison1875MainService {
 
     @Override
     public void process() {
+
+        // 构造AstForest
+        DomainConfig domainConfig = DomainContext.get();
+        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+                new File(domainConfig.getControllerModule()));
+        AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getControllerSourceRoot().toFile()));
 
         boolean anyTransformedForAll = false;
         for (CompilationUnit cu : AstForestContext.get()) {

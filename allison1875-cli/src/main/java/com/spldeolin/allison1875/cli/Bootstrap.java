@@ -11,11 +11,7 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import com.spldeolin.allison1875.cli.config.Allison1875ModuleConfig;
-import com.spldeolin.allison1875.cli.util.MavenProjectClassLoaderUtils;
 import com.spldeolin.allison1875.common.Allison1875;
-import com.spldeolin.allison1875.common.ast.AstForest;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
-import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -45,22 +41,11 @@ public class Bootstrap {
         resolveSourceRoots(domainConfig);
         log.info("domain={}", domainConfig);
 
-        // 根据工具名确定sourceRoot和对应的module目录
-        Path sourceRoot = getSourceRootByTool(cliArgs.toolName, domainConfig);
-        String modulePath = getModulePathByTool(cliArgs.toolName, domainConfig);
-        log.info("sourceRoot={} modulePath={}", sourceRoot, modulePath);
-
-        // 构造ClassLoader
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(new File(modulePath));
-
         // 构造allison1875 module
         Allison1875Module allison1875Module = buildAllison1875Module(cliArgs.toolName, config);
 
-        // 构造AstForest
-        AstForest astForest = buildAstForest(classLoader, sourceRoot);
-
         // 执行allison1875
-        Allison1875.letsGo(allison1875Module, astForest, domainConfig);
+        Allison1875.letsGo(allison1875Module, domainConfig);
     }
 
     /**
@@ -148,46 +133,6 @@ public class Bootstrap {
     }
 
     /**
-     * 根据工具名获取对应的sourceRoot
-     */
-    private static Path getSourceRootByTool(String toolName, DomainConfig domainConfig) {
-        switch (toolName) {
-            case "doc-analyzer":
-            case "handler-transformer":
-            case "form-generator":
-                return domainConfig.getControllerSourceRoot();
-            case "persistence-generator":
-                return domainConfig.getPersistenceSourceRoot();
-            case "query-transformer":
-            case "star-transformer":
-                return domainConfig.getServiceImplSourceRoot();
-            default:
-                throw new Allison1875Exception("不支持的工具名: " + toolName
-                        + "，可选值: doc-analyzer, handler-transformer, persistence-generator, query-transformer, "
-                        + "star-transformer, form-generator");
-        }
-    }
-
-    /**
-     * 根据工具名获取对应的module目录路径（用于构建ClassLoader）
-     */
-    private static String getModulePathByTool(String toolName, DomainConfig domainConfig) {
-        switch (toolName) {
-            case "doc-analyzer":
-            case "handler-transformer":
-            case "form-generator":
-                return domainConfig.getControllerModule();
-            case "persistence-generator":
-                return domainConfig.getPersistenceModule();
-            case "query-transformer":
-            case "star-transformer":
-                return domainConfig.getServiceImplModule();
-            default:
-                throw new Allison1875Exception("不支持的工具名: " + toolName);
-        }
-    }
-
-    /**
      * 根据工具名构造对应的Allison1875Module实例
      */
     private static Allison1875Module buildAllison1875Module(String toolName, Allison1875ModuleConfig config) {
@@ -220,15 +165,6 @@ public class Bootstrap {
             default:
                 throw new Allison1875Exception("不支持的工具名: " + toolName);
         }
-    }
-
-    /**
-     * 构造AstForest
-     */
-    private static AstForest buildAstForest(ClassLoader classLoader, Path sourceRoot) {
-        DefaultAstForest astForest = new DefaultAstForest(classLoader, sourceRoot.toFile());
-        AstForestContext.set(astForest);
-        return astForest;
     }
 
     /**

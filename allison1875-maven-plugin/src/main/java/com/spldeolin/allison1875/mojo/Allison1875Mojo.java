@@ -8,9 +8,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -20,14 +18,12 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import com.spldeolin.allison1875.common.Allison1875;
-import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils.FileSystemSnapshot;
 import com.spldeolin.allison1875.common.util.JsonUtils;
-import com.spldeolin.allison1875.mojo.ast.MavenProjectBuiltAstForest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -77,12 +73,7 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             // 构造guice module
             Allison1875Module allison1875Module = newAllison1875Module(config, classLoader);
 
-            // 收集所有sourceRoot并构造AstForest
-            Set<File> allSourceRoots = collectSourceRoots(domainConfig);
-            File primarySourceRoot = getPrimarySourceRoot();
-            log.info("allSourceRoots={}", allSourceRoots);
-            AstForest astForest = new MavenProjectBuiltAstForest(classLoader, primarySourceRoot);
-            Allison1875.letsGo(allison1875Module, astForest, domainConfig);
+            Allison1875.letsGo(allison1875Module, domainConfig);
 
             // 成功时清理快照
             fileSnapshot.cleanup();
@@ -191,39 +182,6 @@ public abstract class Allison1875Mojo extends AbstractMojo {
             return basedir;
         }
         return getCanonicalFile(new File(basedir, persistenceModule));
-    }
-
-    /**
-     * 收集 DomainConfig 中所有不重复的 sourceRoot
-     */
-    private Set<File> collectSourceRoots(DomainConfig domainConfig) {
-        Set<File> roots = new LinkedHashSet<>();
-        addIfNotNull(roots, domainConfig.getControllerSourceRoot());
-        addIfNotNull(roots, domainConfig.getDtoSourceRoot());
-        addIfNotNull(roots, domainConfig.getEnumSourceRoot());
-        addIfNotNull(roots, domainConfig.getServiceSourceRoot());
-        addIfNotNull(roots, domainConfig.getServiceImplSourceRoot());
-        addIfNotNull(roots, domainConfig.getPersistenceSourceRoot());
-        return roots;
-    }
-
-    private void addIfNotNull(Set<File> roots, Path path) {
-        if (path != null) {
-            roots.add(path.toFile());
-        }
-    }
-
-    /**
-     * 获取当前执行module的主sourceRoot
-     */
-    private File getPrimarySourceRoot() {
-        List<String> compileSourceRoots = project.getCompileSourceRoots();
-        for (String root : compileSourceRoots) {
-            if (!root.endsWith("generated-sources/annotations")) {
-                return getCanonicalFile(new File(root));
-            }
-        }
-        return getCanonicalFile(new File(project.getBasedir(), "src/main/java"));
     }
 
     public abstract Allison1875Module newAllison1875Module(MojoConfig config, ClassLoader classLoader) throws Exception;

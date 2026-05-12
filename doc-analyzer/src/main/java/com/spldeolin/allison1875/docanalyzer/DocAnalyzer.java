@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.docanalyzer;
 
+import java.io.File;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -8,10 +9,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainConfig;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
+import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeBodyRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeMvcHandlerRetval;
@@ -83,6 +89,12 @@ public class DocAnalyzer implements Allison1875MainService {
 
     @Override
     public void process() {
+        // 构造AstForest
+        DomainConfig domainConfig = DomainContext.get();
+        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+                new File(domainConfig.getControllerModule()));
+        AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getControllerSourceRoot().toFile()));
+
         // 分析所有fieldVars
         Table<String, String, AnalyzeFieldVarsRetval> analyzeFieldVarsRetvals = fieldService.analyzeFieldVars();
 

@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.formgenerator;
 
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern.TODO;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +19,6 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
@@ -26,6 +26,7 @@ import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
+import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -152,20 +153,17 @@ public class FormGenerator implements Allison1875MainService {
         }
 
         // 调用handler-transformer转换initDec
-        AstForestContext.set(AstForestContext.get().cloneWithResetting());
         handlerTransformer.process();
 
-        // 编译
-        log.info("call compileFacade.compile");
-        compileFacade.compile(AstForestContext.get(), config.getJavaVersion());
+        // 编译controllerModule
+        log.info("call MavenProjectClassLoaderUtils.compile for controllerModule");
+        MavenProjectClassLoaderUtils.compile(new File(DomainContext.get().getControllerModule()));
 
         // 调用query-transformer转换Design Chain
-        AstForestContext.set(AstForestContext.get().cloneWithResetting());
         queryTransformer.process();
 
         // 调用doc-analyzer分析接口文档
         if (config.getEnableDocAnalyzer()) {
-            AstForestContext.set(AstForestContext.get().cloneWithResetting());
             config.setMvcHandlerQualifierWildcards(controllerQualifiers);
             docAnalyzer.process();
         }

@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.cli.util;
+package com.spldeolin.allison1875.common.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,6 +26,55 @@ public class MavenProjectClassLoaderUtils {
 
     private MavenProjectClassLoaderUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
+    }
+
+    /**
+     * 对指定的Maven模块执行 mvn compile
+     *
+     * @param mavenModuleDir Maven模块的根目录（包含pom.xml的目录）
+     */
+    public static void compile(File mavenModuleDir) {
+        if (mavenModuleDir == null) {
+            throw new Allison1875Exception("mavenModuleDir must not be null");
+        }
+        if (!mavenModuleDir.isDirectory()) {
+            throw new Allison1875Exception("mavenModuleDir is not a directory: " + mavenModuleDir);
+        }
+
+        List<String> command = new ArrayList<>();
+        command.add(detectMvnCommand());
+        command.add("compile");
+        command.add("-q");
+
+        log.info("executing: {} (in {})", String.join(" ", command), mavenModuleDir);
+
+        try {
+            ProcessBuilder pb = new ProcessBuilder(command);
+            pb.directory(mavenModuleDir);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                log.error("mvn compile failed with exit code {}, output:\n{}", exitCode, output);
+                throw new Allison1875Exception(
+                        "mvn compile failed with exit code " + exitCode + ", output:\n" + output);
+            }
+            log.info("mvn compile succeeded for: {}", mavenModuleDir);
+        } catch (Allison1875Exception e) {
+            throw e;
+        } catch (Exception e) {
+            throw new Allison1875Exception("failed to execute mvn compile", e);
+        }
     }
 
     /**

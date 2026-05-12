@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.querytransformer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +19,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.ast.DefaultAstForest;
+import com.spldeolin.allison1875.common.config.DomainConfig;
+import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.AddInjectFieldRetval;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
@@ -26,6 +30,7 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
+import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
@@ -73,6 +78,12 @@ public class QueryTransformer implements Allison1875MainService {
 
     @Override
     public void process() {
+
+        // 构造AstForest
+        DomainConfig domainConfig = DomainContext.get();
+        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+                new File(domainConfig.getServiceImplModule()));
+        AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getServiceImplSourceRoot().toFile()));
 
         // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml
         Map<String, ClassOrInterfaceDeclaration> methodAddedMappers = Maps.newHashMap();
