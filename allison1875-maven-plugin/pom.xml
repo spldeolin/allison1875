@@ -126,10 +126,6 @@
                             <pomIncludes>
                                 <pomInclude>**/pom.xml</pomInclude>
                             </pomIncludes>
-                            <pomExcludes>
-                                <pomExclude>doc-analyzer/java-record/pom.xml</pomExclude>
-                                <pomExclude>doc-analyzer/jakarta-validation/pom.xml</pomExclude>
-                            </pomExcludes>
                             <filterProperties>
                                 <allison1875.version>${project.version}</allison1875.version>
                             </filterProperties>

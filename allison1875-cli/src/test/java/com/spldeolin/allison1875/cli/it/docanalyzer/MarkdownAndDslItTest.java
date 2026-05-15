@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.cli.it;
+package com.spldeolin.allison1875.cli.it.docanalyzer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

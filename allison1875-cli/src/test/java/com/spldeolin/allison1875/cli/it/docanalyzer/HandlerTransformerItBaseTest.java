@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.cli.it;
+package com.spldeolin.allison1875.cli.it.docanalyzer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,23 +17,22 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.cli.Bootstrap;
 
 /**
- * doc-analyzer集成测试基类。
+ * handler-transformer集成测试基类。
  *
  * <p>封装了通用流程：
- * ①将 test/resources/it/doc-analyzer/{caseName}/ 下的测试资源递归拷贝到 target/it/{caseName}/ 临时工作目录；
- * ②读取 .allison1875.yml 并将所有相对路径（*Module、markdownDir、dslDir、dependencyDirs）解析为绝对路径后回写yml；
- * ③组装CLI参数并调用 {@link Bootstrap#main(String[])} 执行doc-analyzer；
+ * ①将 test/resources/it/handler-transformer/{caseName}/ 下的测试资源递归拷贝到 target/it/{caseName}/ 临时工作目录；
+ * ②读取 .allison1875.yml 并将所有相对路径（*Module）解析为绝对路径后回写yml；
+ * ③组装CLI参数并调用 {@link Bootstrap#main(String[])} 执行handler-transformer；
  * ④子类通过 {@link #basedir} 引用临时工作目录，在 @Test 方法中编写断言。
  *
  * @author Deolin 2026-05-13
  */
-public abstract class DocAnalyzerItBaseTest {
+public abstract class HandlerTransformerItBaseTest {
 
     /**
      * 临时工作目录（target/it/{caseName}/），子类用此引用做断言
@@ -41,16 +40,16 @@ public abstract class DocAnalyzerItBaseTest {
     protected File basedir;
 
     /**
-     * 执行doc-analyzer，子类在 @BeforeEach 或 @Test 中调用
+     * 执行handler-transformer，子类在 @BeforeEach 或 @Test 中调用
      */
-    protected void runDocAnalyzer(String caseName) {
-        runDocAnalyzer(caseName, null);
+    protected void runHandlerTransformer(String caseName) {
+        runHandlerTransformer(caseName, null);
     }
 
     /**
-     * 执行doc-analyzer（指定domainName），子类在 @BeforeEach 或 @Test 中调用
+     * 执行handler-transformer（指定domainName），子类在 @BeforeEach 或 @Test 中调用
      */
-    protected void runDocAnalyzer(String caseName, String domainName) {
+    protected void runHandlerTransformer(String caseName, String domainName) {
         // 1. 复制测试资源到临时工作目录
         basedir = copyResourceToWorkDir(caseName);
 
@@ -59,7 +58,7 @@ public abstract class DocAnalyzerItBaseTest {
 
         // 3. 组装CLI参数并调用Bootstrap.main()
         List<String> args = new ArrayList<>();
-        args.add("--tool=doc-analyzer");
+        args.add("--tool=handler-transformer");
         args.add("--config=" + configFile.getAbsolutePath());
         if (domainName != null && !domainName.isEmpty()) {
             args.add("--domain=" + domainName);
@@ -76,10 +75,10 @@ public abstract class DocAnalyzerItBaseTest {
     }
 
     /**
-     * 将 classpath 下 it/doc-analyzer/{caseName}/ 整个目录递归拷贝到 target/it/{caseName}/
+     * 将 classpath 下 it/handler-transformer/{caseName}/ 整个目录递归拷贝到 target/it/{caseName}/
      */
     private File copyResourceToWorkDir(String caseName) {
-        String resourcePrefix = "it/doc-analyzer/" + caseName;
+        String resourcePrefix = "it/handler-transformer/" + caseName;
         // 通过ClassLoader获取资源目录的物理路径
         URL resourceUrl = getClass().getClassLoader().getResource(resourcePrefix);
         if (resourceUrl == null) {
@@ -124,6 +123,9 @@ public abstract class DocAnalyzerItBaseTest {
      * 回写后的yml可以直接被 Bootstrap.main() 加载并正确执行。
      *
      * <p>使用Map模式加载和回写，避免 SnakeYAML 的 JavaBean 序列化问题（类型标签、File无参构造器等）。
+     *
+     * <p>与 DocAnalyzerItBaseTest 的区别：handler-transformer 没有 markdownDir/dslDir/dependencyDirsOrJavaFilePath
+     * 等额外路径字段需要解析，只需处理 DomainConfig 中的 *Module 字段。
      */
     @SuppressWarnings("unchecked")
     private File resolveAndRewriteConfig(File basedir) {
@@ -151,24 +153,6 @@ public abstract class DocAnalyzerItBaseTest {
             }
         }
 
-        // 解析doc-analyzer特有的相对路径字段为绝对路径
-        Object depDirs = configMap.get("dependencyDirsOrJavaFilePath");
-        if (depDirs instanceof List) {
-            List<String> resolved = ((List<Object>) depDirs).stream()
-                    .map(d -> resolveFileRelativeToBasedir(basedir, new File(d.toString())).getPath())
-                    .collect(Collectors.toList());
-            configMap.put("dependencyDirsOrJavaFilePath", resolved);
-        }
-        Object markdownDir = configMap.get("markdownDir");
-        if (markdownDir != null) {
-            configMap.put("markdownDir",
-                    resolveFileRelativeToBasedir(basedir, new File(markdownDir.toString())).getPath());
-        }
-        Object dslDir = configMap.get("dslDir");
-        if (dslDir != null) {
-            configMap.put("dslDir", resolveFileRelativeToBasedir(basedir, new File(dslDir.toString())).getPath());
-        }
-
         // 回写yml到磁盘
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -191,17 +175,6 @@ public abstract class DocAnalyzerItBaseTest {
             return basedirAbsPath;
         }
         return getCanonicalPath(new File(basedirAbsPath, modulePath));
-    }
-
-    /**
-     * 将相对路径的File解析为基于basedir的绝对路径
-     */
-    private File resolveFileRelativeToBasedir(File basedir, File file) {
-        try {
-            return basedir.toPath().resolve(file.toPath()).toFile().getCanonicalFile();
-        } catch (IOException e) {
-            return file;
-        }
     }
 
     private String getCanonicalPath(File file) {

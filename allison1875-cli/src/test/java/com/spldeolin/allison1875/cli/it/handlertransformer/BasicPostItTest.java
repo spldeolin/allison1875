@@ -1,4 +1,4 @@
-package com.spldeolin.allison1875.cli.it;
+package com.spldeolin.allison1875.cli.it.handlertransformer;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
+import com.spldeolin.allison1875.cli.it.docanalyzer.HandlerTransformerItBaseTest;
 
 /**
  * basic-post 集成测试。

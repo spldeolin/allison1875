@@ -15,7 +15,7 @@ It targets **Spring Boot + MyBatis** projects, generating boilerplate Controller
 from lightweight Java DSL or database schema.
 
 **Technology Stack:**
-- Java 8 (source/target 1.8), Maven multi-module
+- Java 21 (source/target 21), Maven multi-module
 - JavaParser 3.25.10 for AST parsing & manipulation
 - Google Guice 5.1.0 for dependency injection (NOT Spring inside the tool itself)
 - Lombok 1.18.30
@@ -130,7 +130,7 @@ com.spldeolin.allison1875.<toolname>/
 - **Chinese comments** are used extensively for inline and Javadoc descriptions.
 - Javadoc is expected on all public interfaces and important methods.
 - Validation annotations (`@NotNull`, `@NotEmpty`, `@NotBlank`, `@Valid`) serve as type contracts on `Config` and DTO fields.
-- Always use `javax.validation` annotations (not `jakarta`) within this tool itself (target 1.8).
+- Always use `javax.validation` annotations (not `jakarta`) within this tool itself.
 
 ### 2.6 Utility Class Pattern
 
@@ -509,8 +509,8 @@ allison1875-maven-plugin/src/it/{test-case-name}/
        <version>1.0-SNAPSHOT</version>
        <properties>
            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-           <maven.compiler.source>1.8</maven.compiler.source>
-           <maven.compiler.target>1.8</maven.compiler.target>
+           <maven.compiler.source>21</maven.compiler.source>
+           <maven.compiler.target>21</maven.compiler.target>
        </properties>
        <dependencies>
            <!-- Add whatever the fake project needs to compile: spring-webmvc, validation-api, etc. -->
@@ -560,8 +560,8 @@ allison1875-maven-plugin/src/it/{test-case-name}/
 
 **Running IT:**
 `maven-invoker-plugin` 与 IT 用 JaCoCo 仅在 Maven profile 激活时绑定 `verify` 生命周期；默认 `mvn install` / `mvn verify` 不执行 IT。
-- `invoker-it-java8`：`src/it` 下全部 case，排除 `java-record`、`jakarta-validation`（需 JDK 8+ 跑 fork 子工程）。
-- `invoker-it-java17`：仅上述两个 Java 17+ case（需 JDK 17+）。
+- `invoker-it-java8`：`src/it` 下全部 case（包括 `java-record`、`jakarta-validation`，统一 Java 21）。
+- `invoker-it-java17`：仅 `java-record`、`jakarta-validation` 两个 case（与 `invoker-it-java8` 重复覆盖，保留兼容性）。
 
 ```bash
 # 脚本：参数或环境变量 INVOKER_IT_PROFILE（默认 invoker-it-java8）
@@ -599,7 +599,7 @@ allison1875-maven-plugin/target/
 
 **Key rules for IT development:**
 - Each IT case uses `invoker.properties` to specify `invoker.goals=allison1875:{tool-name}`.
-- Java 17+ cases (`java-record`, `jakarta-validation`) are excluded by default in `pomExcludes`.
+- All IT cases now use Java 21; `java-record` and `jakarta-validation` are no longer excluded from `invoker-it-java8`.
 - IT subprocesses use local `~/.m2/settings.xml` and `~/.m2/repository` directly (no isolated repo).
 - Always run `mvn install -DskipTests` from root before running IT if plugin code has changed.
 - `verify.groovy` failures show as `FAILED` in the invoker Build Summary; check `target/it/{case-name}/build.log` for details.
