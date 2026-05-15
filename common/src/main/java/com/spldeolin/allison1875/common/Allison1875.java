@@ -24,6 +24,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.guice.ValidationModule;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -59,11 +60,9 @@ public class Allison1875 {
     }
 
     public static void letsGo(ToolEnum tool, Config config, String domainName) {
-        log.info("tool={}", tool.getToolName());
-
         // 解析domain
         DomainConfig domainConfig = resolveDomain(config, domainName);
-        log.info("domain={}", domainConfig.getName());
+        log.info("targetDomain={}", JsonUtils.toJson(domainConfig));
 
         // 解析domain中各层的sourceRoot
         resolveSourceRoots(domainConfig);
@@ -152,7 +151,7 @@ public class Allison1875 {
      */
     private static Allison1875Module buildSimpleModule(ToolEnum tool, Config config) {
         String moduleClassName = tool.getModuleClassNameGetter().apply(config);
-        log.info("moduleClassName={}", moduleClassName);
+        log.info("allison1875Model={}", moduleClassName);
         try {
             return (Allison1875Module) Class.forName(moduleClassName).getConstructor(Config.class).newInstance(config);
         } catch (Exception e) {

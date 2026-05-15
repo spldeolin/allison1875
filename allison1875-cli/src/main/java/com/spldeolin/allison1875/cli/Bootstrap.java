@@ -10,6 +10,7 @@ import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
+import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -28,7 +29,7 @@ public class Bootstrap {
 
         // 读取.allison1875配置文件并反序列化
         Config config = loadConfig(cliArgs.configFile);
-        log.info("config={}", config);
+        log.info("config={}", JsonUtils.toJson(config));
 
         // 执行allison1875
         Allison1875.letsGo(cliArgs.tool, config, cliArgs.domainName);
