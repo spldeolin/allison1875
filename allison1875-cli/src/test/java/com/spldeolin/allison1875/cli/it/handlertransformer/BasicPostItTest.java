@@ -60,6 +60,11 @@ public class BasicPostItTest extends HandlerTransformerItBaseTest {
         assertTrue(reqContent.contains("amount"), "Req DTO should contain field 'amount'");
         assertTrue(reqContent.contains("NotBlank"), "Req DTO should preserve @NotBlank annotation");
         assertTrue(reqContent.contains("NotNull"), "Req DTO should preserve @NotNull annotation");
+        // Long 字段应自动添加 @JsonSerialize(using = ToStringSerializer.class)
+        assertTrue(reqContent.contains("JsonSerialize"),
+                "Req DTO should contain @JsonSerialize for Long field 'amount'");
+        assertTrue(reqContent.contains("ToStringSerializer"),
+                "Req DTO should use ToStringSerializer for Long field 'amount'");
 
         // ========== 3. 验证 Resp DTO 文件生成 ==========
         File respDtoDir = new File(basedir, "src/main/java/com/example/dto/resp");
@@ -73,6 +78,9 @@ public class BasicPostItTest extends HandlerTransformerItBaseTest {
         String respContent = new String(Files.readAllBytes(respFiles[0].toPath()), StandardCharsets.UTF_8);
         assertTrue(respContent.contains("orderId"), "Resp DTO should contain field 'orderId'");
         assertTrue(respContent.contains("status"), "Resp DTO should contain field 'status'");
+        // Resp DTO 不应含有 @JsonSerialize（仅 Req 侧添加）
+        assertFalse(respContent.contains("JsonSerialize"),
+                "Resp DTO should NOT contain @JsonSerialize (only Req side)");
 
         // ========== 4. 验证 Service 接口生成 ==========
         File serviceDir = new File(basedir, "src/main/java/com/example/service");

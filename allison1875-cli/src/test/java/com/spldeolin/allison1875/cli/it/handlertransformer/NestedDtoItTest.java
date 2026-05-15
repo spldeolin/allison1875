@@ -77,6 +77,17 @@ public class NestedDtoItTest extends HandlerTransformerItBaseTest {
         String logisticsContent = new String(Files.readAllBytes(logisticsFiles[0].toPath()), StandardCharsets.UTF_8);
         assertTrue(logisticsContent.contains("company"), "LogisticsDTO should contain 'company'");
         assertTrue(logisticsContent.contains("trackingNo"), "LogisticsDTO should contain 'trackingNo'");
+
+        // ========== 4. 验证 Resp DTO 中嵌套字段不应有 @Valid（仅 Req 侧添加） ==========
+        File[] respFiles = respDtoDir.listFiles(
+                (dir, name) -> name.endsWith(".java") && name.contains("CreateShipping") && name.contains("Resp"));
+        assertTrue(respFiles != null && respFiles.length == 1, "Should generate CreateShippingResp DTO");
+
+        String respContent = new String(Files.readAllBytes(respFiles[0].toPath()), StandardCharsets.UTF_8);
+        assertTrue(respContent.contains("shippingId"), "Resp should contain 'shippingId'");
+        // Resp 侧嵌套字段不应有 @Valid
+        assertFalse(respContent.contains("Valid"),
+                "Nested DTO field in Resp should NOT have @Valid annotation (only Req side)");
     }
 
 }

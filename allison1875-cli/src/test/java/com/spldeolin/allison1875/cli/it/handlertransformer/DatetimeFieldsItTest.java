@@ -46,8 +46,9 @@ public class DatetimeFieldsItTest extends HandlerTransformerItBaseTest {
         assertTrue(reqContent.contains("JsonFormat"), "Req DTO should contain @JsonFormat annotation");
         assertTrue(reqContent.contains("yyyy-MM-dd HH:mm:ss"),
                 "Date/LocalDateTime field should have pattern 'yyyy-MM-dd HH:mm:ss'");
-        // LocalDate 字段应有 @JsonFormat(pattern = "yyyy-MM-dd")
-        assertTrue(reqContent.contains("yyyy-MM-dd"), "LocalDate field should have pattern 'yyyy-MM-dd'");
+        // 已有 @JsonFormat 的 LocalDate 字段应保持原有 pattern（yyyy/MM/dd），不被覆盖为 yyyy-MM-dd
+        assertTrue(reqContent.contains("yyyy/MM/dd"),
+                "Pre-existing @JsonFormat 'yyyy/MM/dd' should be preserved, not overwritten");
         // LocalTime 字段应有 @JsonFormat(pattern = "HH:mm:ss")
         assertTrue(reqContent.contains("HH:mm:ss"), "LocalTime field should have pattern 'HH:mm:ss'");
 

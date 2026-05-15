@@ -26,7 +26,8 @@ public class EventController {
             Date createTime;
             /** 开始时间 (LocalDateTime) */
             LocalDateTime startTime;
-            /** 事件日期 (LocalDate) */
+            /** 事件日期 (LocalDate) — 已有 @JsonFormat，不应被覆盖 */
+            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy/MM/dd")
             LocalDate eventDate;
             /** 提醒时刻 (LocalTime) */
             LocalTime remindTime;
