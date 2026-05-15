@@ -22,7 +22,7 @@ domains:
 
 author: test-author
 javaVersion: "17"
-javaHome: "/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home"
+#javaHome: "/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: true
 isDataModelWithoutLombok: false

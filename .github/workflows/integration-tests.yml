@@ -45,7 +45,7 @@ jobs:
           cache: 'maven'
 
       - name: Run integration tests
-        run: mvn clean verify -Dmysql.host=${{ env.MYSQL_HOST }} -Dmysql.port=${{ env.MYSQL_PORT }} -Dmysql.user=${{ env.MYSQL_USER }} -Dmysql.password=${{ env.MYSQL_PASSWORD }} -Dmysql.database=${{ env.MYSQL_DATABASE }}
+        run: mvn clean install verify -Dmysql.host=${{ env.MYSQL_HOST }} -Dmysql.port=${{ env.MYSQL_PORT }} -Dmysql.user=${{ env.MYSQL_USER }} -Dmysql.password=${{ env.MYSQL_PASSWORD }} -Dmysql.database=${{ env.MYSQL_DATABASE }}
 
       - name: Upload coverage report
         if: always()

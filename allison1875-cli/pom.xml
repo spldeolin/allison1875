@@ -53,6 +53,14 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/dto/**</exclude>
+                        <exclude>**/enums/**</exclude>
+                        <exclude>**/exception/**</exclude>
+                        <exclude>**/*Def.java</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <!--
                         prepare-agent: 在 initialize 阶段注入 JaCoCo agent 到 surefire 的 argLine，
