@@ -92,7 +92,7 @@ public class DocAnalyzer implements Allison1875MainService {
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
         ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
-                new File(domainConfig.getControllerModule()));
+                new File(domainConfig.getControllerModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getControllerSourceRoot().toFile()));
 
         // 分析所有fieldVars

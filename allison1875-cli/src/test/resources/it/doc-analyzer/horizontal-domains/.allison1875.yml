@@ -1,0 +1,56 @@
+# horizontal-domains integration test config
+# 水平划分：两个独立的业务领域（user & order），各自拥有独立的controller和DTO包
+domains:
+  - name: user
+    controllerModule: "."
+    controllerPackage: com.example.user.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.user.dto.req
+    respDTOPackage: com.example.user.dto.resp
+    enumModule: "."
+    enumPackage: com.example.user.enums
+    serviceModule: "."
+    servicePackage: com.example.user.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.user.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.user.mapper
+    entityPackage: com.example.user.entity
+    designPackage: com.example.user.design
+    paramDTOPackage: com.example.user.dto.param
+    recordDTOPackage: com.example.user.dto.record
+    wholeDTOPackage: com.example.user.dto
+  - name: order
+    controllerModule: "."
+    controllerPackage: com.example.order.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.order.dto.req
+    respDTOPackage: com.example.order.dto.resp
+    enumModule: "."
+    enumPackage: com.example.order.enums
+    serviceModule: "."
+    servicePackage: com.example.order.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.order.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.order.mapper
+    entityPackage: com.example.order.entity
+    designPackage: com.example.order.design
+    paramDTOPackage: com.example.order.dto.param
+    recordDTOPackage: com.example.order.dto.record
+    wholeDTOPackage: com.example.order.dto
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+
+flushTo:
+  - MARKDOWN
+markdownDir: api-docs
+globalUrlPrefix: ""
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

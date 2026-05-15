@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -107,7 +106,14 @@ public class MvcHandlerDetectorServiceImpl implements MvcHandlerDetectorService 
     }
 
     private boolean isNotMvcHandler(Method method) {
-        return AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class) == null;
+        try {
+            Class aClass = AstForestContext.get().getClassLoader()
+                    .loadClass("org.springframework.web.bind.annotation.RequestMapping");
+            return AnnotatedElementUtils.findMergedAnnotation(method, aClass) == null;
+        } catch (ClassNotFoundException e) {
+            log.error("cannot load class [{}]", "org.springframework.web.bind.annotation.RequestMapping", e);
+            return false;
+        }
     }
 
     private LinkedHashMap<String, MethodDeclaration> listMethods(ClassOrInterfaceDeclaration mvcControllerCoid) {

@@ -1,0 +1,38 @@
+# enum-and-validation integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+
+flushTo:
+  - MARKDOWN
+markdownDir: api-docs
+globalUrlPrefix: ""
+getEnumCodeMethodName: getCode
+getEnumTitleMethodName: getTitle
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

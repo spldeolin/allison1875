@@ -154,7 +154,7 @@ public class FormGenerator implements Allison1875MainService {
 
         // 编译controllerModule
         log.info("call MavenProjectClassLoaderUtils.compile for controllerModule");
-        MavenProjectClassLoaderUtils.compile(new File(DomainContext.get().getControllerModule()));
+        MavenProjectClassLoaderUtils.compile(new File(DomainContext.get().getControllerModule()), config.getJavaHome());
 
         // 调用query-transformer转换Design Chain
         queryTransformer.process();

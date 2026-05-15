@@ -62,6 +62,14 @@ public class Config {
     @NotNull
     String javaVersion = "21";
 
+    /**
+     * 执行mvn命令时使用的JDK安装目录路径，为null时使用系统默认的JDK
+     *
+     * <p>配置后，在执行mvn子进程时会通过{@code JAVA_HOME}环境变量指定该JDK路径，
+     * 例如配置为{@code /Users/xxx/.jenv/versions/1.8}
+     */
+    String javaHome;
+
     // ==================== Guice Module 配置 ====================
 
     /** doc-analyzer 功能所使用的 Guice Module 实现类全限定名 */

@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.DefaultAstForest;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
@@ -76,13 +77,16 @@ public class QueryTransformer implements Allison1875MainService {
     @Inject
     private MemberAdderService memberAdderService;
 
+    @Inject
+    private Config config;
+
     @Override
     public void process() {
 
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
         ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
-                new File(domainConfig.getServiceImplModule()));
+                new File(domainConfig.getServiceImplModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getServiceImplSourceRoot().toFile()));
 
         // 本次query-transformer每个queryChain处理中所增加方法的mapper和mapperxml

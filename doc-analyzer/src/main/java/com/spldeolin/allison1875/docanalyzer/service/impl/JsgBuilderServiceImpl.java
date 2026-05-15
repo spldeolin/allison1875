@@ -8,26 +8,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Negative;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.PastOrPresent;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -38,6 +21,7 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
@@ -151,8 +135,15 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
                 }
 
                 // jpdv 格式
-                JsonFormat jsonFormat = AnnotatedElementUtils.findMergedAnnotation(field, JsonFormat.class);
-                jpdv.setFormatPattern(Optional.ofNullable(jsonFormat).map(JsonFormat::pattern).orElse(""));
+                Annotation jsonFormat = find(field, "com.fasterxml.jackson.annotation.JsonFormat");
+                String formatPattern = "";
+                if (jsonFormat != null) {
+                    Object patternObj = invokeAnnoMethod(jsonFormat, "pattern");
+                    if (patternObj instanceof String) {
+                        formatPattern = (String) patternObj;
+                    }
+                }
+                jpdv.setFormatPattern(formatPattern);
 
                 // jpdv 更多分析后生成的文档
                 if (afvRetval != null) {
@@ -223,155 +214,134 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
 
     protected List<AnalyzeValidRetval> analyzeValid(AnnotatedElement annotatedElement) {
         List<AnalyzeValidRetval> valids = Lists.newArrayList();
-        if (find(annotatedElement, NotNull.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.NotNull.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.NotNull") != null
+                || find(annotatedElement, "jakarta.validation.constraints.NotNull") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_NULL.getValue()));
         }
 
-        if (find(annotatedElement, javax.validation.constraints.NotEmpty.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.NotEmpty.class) != null
-                || find(annotatedElement, org.hibernate.validator.constraints.NotEmpty.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.NotEmpty") != null
+                || find(annotatedElement, "jakarta.validation.constraints.NotEmpty") != null
+                || find(annotatedElement, "org.hibernate.validator.constraints.NotEmpty") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_EMPTY.getValue()));
         }
 
-        if (find(annotatedElement, javax.validation.constraints.NotBlank.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.NotBlank.class) != null
-                || find(annotatedElement, org.hibernate.validator.constraints.NotBlank.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.NotBlank") != null
+                || find(annotatedElement, "jakarta.validation.constraints.NotBlank") != null
+                || find(annotatedElement, "org.hibernate.validator.constraints.NotBlank") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NOT_BLANK.getValue()));
         }
 
-        Size size = find(annotatedElement, Size.class);
+        // Size (javax + jakarta)
+        Annotation size = find(annotatedElement, "javax.validation.constraints.Size");
+        if (size == null) {
+            size = find(annotatedElement, "jakarta.validation.constraints.Size");
+        }
         if (size != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue())
-                    .setNote(String.valueOf(size.min())));
+                    .setNote(String.valueOf(invokeAnnoMethod(size, "min"))));
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
-                    .setNote(String.valueOf(size.max())));
+                    .setNote(String.valueOf(invokeAnnoMethod(size, "max"))));
         }
 
-        jakarta.validation.constraints.Size size2 = find(annotatedElement, jakarta.validation.constraints.Size.class);
-        if (size2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue())
-                    .setNote(String.valueOf(size2.min())));
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
-                    .setNote(String.valueOf(size2.max())));
-        }
-
-        Length length = find(annotatedElement, Length.class);
+        // Length (hibernate)
+        Annotation length = find(annotatedElement, "org.hibernate.validator.constraints.Length");
         if (length != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_SIZE.getValue())
-                    .setNote(String.valueOf(length.min())));
+                    .setNote(String.valueOf(invokeAnnoMethod(length, "min"))));
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_SIZE.getValue())
-                    .setNote(String.valueOf(length.max())));
+                    .setNote(String.valueOf(invokeAnnoMethod(length, "max"))));
         }
 
-        Min min = find(annotatedElement, Min.class);
+        // Min (javax + jakarta)
+        Annotation min = find(annotatedElement, "javax.validation.constraints.Min");
+        if (min == null) {
+            min = find(annotatedElement, "jakarta.validation.constraints.Min");
+        }
         if (min != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
-                    .setNote(String.valueOf(min.value())));
+                    .setNote(String.valueOf(invokeAnnoMethod(min, "value"))));
         }
 
-        jakarta.validation.constraints.Min min2 = find(annotatedElement, jakarta.validation.constraints.Min.class);
-        if (min2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
-                    .setNote(String.valueOf(min2.value())));
+        // DecimalMin (javax + jakarta)
+        Annotation decimalMin = find(annotatedElement, "javax.validation.constraints.DecimalMin");
+        if (decimalMin == null) {
+            decimalMin = find(annotatedElement, "jakarta.validation.constraints.DecimalMin");
         }
-
-        DecimalMin decimalMin = find(annotatedElement, DecimalMin.class);
         if (decimalMin != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
-                    .setNote(decimalMin.value()));
+                    .setNote(String.valueOf(invokeAnnoMethod(decimalMin, "value"))));
         }
 
-        jakarta.validation.constraints.DecimalMin decimalMin2 = find(annotatedElement,
-                jakarta.validation.constraints.DecimalMin.class);
-        if (decimalMin2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MIN_NUMBER.getValue())
-                    .setNote(decimalMin2.value()));
+        // Max (javax + jakarta)
+        Annotation max = find(annotatedElement, "javax.validation.constraints.Max");
+        if (max == null) {
+            max = find(annotatedElement, "jakarta.validation.constraints.Max");
         }
-
-        Max max = find(annotatedElement, Max.class);
         if (max != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
-                    .setNote(String.valueOf(max.value())));
+                    .setNote(String.valueOf(invokeAnnoMethod(max, "value"))));
         }
 
-        jakarta.validation.constraints.Max max2 = find(annotatedElement, jakarta.validation.constraints.Max.class);
-        if (max2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
-                    .setNote(String.valueOf(max2.value())));
+        // DecimalMax (javax + jakarta)
+        Annotation decimalMax = find(annotatedElement, "javax.validation.constraints.DecimalMax");
+        if (decimalMax == null) {
+            decimalMax = find(annotatedElement, "jakarta.validation.constraints.DecimalMax");
         }
-
-        DecimalMax decimalMax = find(annotatedElement, DecimalMax.class);
         if (decimalMax != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
-                    .setNote(decimalMax.value()));
+                    .setNote(String.valueOf(invokeAnnoMethod(decimalMax, "value"))));
         }
 
-        jakarta.validation.constraints.DecimalMax decimalMax2 = find(annotatedElement,
-                jakarta.validation.constraints.DecimalMax.class);
-        if (decimalMax2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_NUMBER.getValue())
-                    .setNote(decimalMax2.value()));
-        }
-
-        if (find(annotatedElement, Future.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.Future.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.Future") != null
+                || find(annotatedElement, "jakarta.validation.constraints.Future") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.FUTURE.getValue()));
         }
 
-        if (find(annotatedElement, FutureOrPresent.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.FutureOrPresent.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.FutureOrPresent") != null
+                || find(annotatedElement, "jakarta.validation.constraints.FutureOrPresent") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.FUTURE_OR_PRESENT.getValue()));
         }
 
-        if (find(annotatedElement, Past.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.Past.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.Past") != null
+                || find(annotatedElement, "jakarta.validation.constraints.Past") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.PAST.getValue()));
         }
 
-        if (find(annotatedElement, PastOrPresent.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.PastOrPresent.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.PastOrPresent") != null
+                || find(annotatedElement, "jakarta.validation.constraints.PastOrPresent") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.PAST_OR_PRESENT.getValue()));
         }
 
-        Digits digits = find(annotatedElement, Digits.class);
+        // Digits (javax + jakarta)
+        Annotation digits = find(annotatedElement, "javax.validation.constraints.Digits");
+        if (digits == null) {
+            digits = find(annotatedElement, "jakarta.validation.constraints.Digits");
+        }
         if (digits != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_INTEGRAL_DIGITS.getValue())
-                    .setNote(String.valueOf(digits.integer())));
+                    .setNote(String.valueOf(invokeAnnoMethod(digits, "integer"))));
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_FRACTIONAL_DIGITS.getValue())
-                    .setNote(String.valueOf(digits.fraction())));
+                    .setNote(String.valueOf(invokeAnnoMethod(digits, "fraction"))));
         }
 
-        jakarta.validation.constraints.Digits digits2 = find(annotatedElement,
-                jakarta.validation.constraints.Digits.class);
-        if (digits2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_INTEGRAL_DIGITS.getValue())
-                    .setNote(String.valueOf(digits2.integer())));
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.MAX_FRACTIONAL_DIGITS.getValue())
-                    .setNote(String.valueOf(digits2.fraction())));
-        }
-
-        if (find(annotatedElement, Positive.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.Positive.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.Positive") != null
+                || find(annotatedElement, "jakarta.validation.constraints.Positive") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.POSITIVE.getValue()));
         }
 
-        if (find(annotatedElement, Negative.class) != null
-                || find(annotatedElement, jakarta.validation.constraints.Negative.class) != null) {
+        if (find(annotatedElement, "javax.validation.constraints.Negative") != null
+                || find(annotatedElement, "jakarta.validation.constraints.Negative") != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.NEGATIVE.getValue()));
         }
 
-        Pattern pattern = find(annotatedElement, Pattern.class);
+        // Pattern (javax + jakarta)
+        Annotation pattern = find(annotatedElement, "javax.validation.constraints.Pattern");
+        if (pattern == null) {
+            pattern = find(annotatedElement, "jakarta.validation.constraints.Pattern");
+        }
         if (pattern != null) {
             valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.REGEX.getValue())
-                    .setNote(pattern.regexp()));
-        }
-
-        jakarta.validation.constraints.Pattern pattern2 = find(annotatedElement,
-                jakarta.validation.constraints.Pattern.class);
-        if (pattern2 != null) {
-            valids.add(new AnalyzeValidRetval().setValidatorType(ValidatorTypeEnum.REGEX.getValue())
-                    .setNote(pattern2.regexp()));
+                    .setNote(String.valueOf(invokeAnnoMethod(pattern, "regexp"))));
         }
 
         valids.forEach(valid -> {
@@ -382,8 +352,37 @@ public class JsgBuilderServiceImpl implements JsgBuilderService {
         return valids;
     }
 
-    private <A extends Annotation> A find(AnnotatedElement field, Class<A> annotationType) {
-        return AnnotatedElementUtils.findMergedAnnotation(field, annotationType);
+    /**
+     * 通过注解全限定名从目标项目的ClassLoader动态加载注解类，再用{@link AnnotatedElementUtils}查找注解实例
+     *
+     * <p>使用字符串全限定名而非硬编码{@code .class}引用，避免因Allison 1875自身的ClassLoader与目标项目的ClassLoader
+     * 不同导致同名注解类的{@code Class}对象不相等的问题。
+     *
+     * @param element 被注解的元素（Field、Method等）
+     * @param annotationClassName 注解的全限定名
+     * @return 找到的注解实例，未找到或注解类不在目标项目classpath中时返回null
+     */
+    private Annotation find(AnnotatedElement element, String annotationClassName) {
+        try {
+            Class<? extends Annotation> annotationType = (Class<? extends Annotation>) AstForestContext.get()
+                    .getClassLoader().loadClass(annotationClassName);
+            return AnnotatedElementUtils.findMergedAnnotation(element, annotationType);
+        } catch (ClassNotFoundException e) {
+            // 目标项目classpath中没有该注解类，属于正常情况（如项目只用javax不用jakarta）
+            return null;
+        }
+    }
+
+    /**
+     * 通过反射调用注解实例的属性方法
+     */
+    private Object invokeAnnoMethod(Annotation annotation, String methodName) {
+        try {
+            return annotation.annotationType().getMethod(methodName).invoke(annotation);
+        } catch (Exception e) {
+            log.warn("fail to invoke {}() on annotation {}", methodName, annotation.annotationType().getName(), e);
+            return null;
+        }
     }
 
 }

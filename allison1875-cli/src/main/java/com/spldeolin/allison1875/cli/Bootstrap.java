@@ -14,7 +14,7 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author yanshaowei01 2026-05-10
+ * @author Deolin 2026-05-10
  */
 @Slf4j
 public class Bootstrap {

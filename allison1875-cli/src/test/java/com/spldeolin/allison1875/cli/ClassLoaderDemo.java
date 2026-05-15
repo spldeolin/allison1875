@@ -30,7 +30,7 @@ public class ClassLoaderDemo {
 
         // 构建ClassLoader
         log.info("building ClassLoader...");
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(moduleDir);
+        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(moduleDir, null);
         log.info("ClassLoader built successfully: {}", classLoader);
 
         // 尝试加载类

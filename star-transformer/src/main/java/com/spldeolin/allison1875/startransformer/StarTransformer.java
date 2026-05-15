@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.DefaultAstForest;
+import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
@@ -44,12 +45,15 @@ public class StarTransformer implements Allison1875MainService {
     @Inject
     private ImportExprService importExprService;
 
+    @Inject
+    private Config config;
+
     @Override
     public void process() {
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
         ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
-                new File(domainConfig.getServiceImplModule()));
+                new File(domainConfig.getServiceImplModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getServiceImplSourceRoot().toFile()));
 
         boolean anyTransformedForAll = false;
