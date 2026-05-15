@@ -38,7 +38,7 @@ public enum ValidatorTypeEnum {
 
     POSITIVE("必须是正数"),
 
-    NEGATIVE("必须是小数"),
+    NEGATIVE("必须是负数"),
 
     REGEX("正则表达式："),
 

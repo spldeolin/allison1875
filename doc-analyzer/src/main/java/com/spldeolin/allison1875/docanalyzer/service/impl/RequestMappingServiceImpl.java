@@ -240,10 +240,10 @@ public class RequestMappingServiceImpl implements RequestMappingService {
                     combinedUrls.add(pathMatcher.combine(cPath, mPath));
                 }
             }
-        } else if (ArrayUtils.isEmpty(cPaths)) {
-            combinedUrls.addAll(Arrays.asList(mPaths));
-        } else if (ArrayUtils.isEmpty(mPaths)) {
+        } else if (ArrayUtils.isNotEmpty(cPaths)) {
             combinedUrls.addAll(Arrays.asList(cPaths));
+        } else if (ArrayUtils.isNotEmpty(mPaths)) {
+            combinedUrls.addAll(Arrays.asList(mPaths));
         } else {
             combinedUrls.add("/");
         }

@@ -57,7 +57,7 @@ public class EnumServiceImpl implements EnumService {
         }
         ResolvedReferenceTypeDeclaration referenceTypeDeclaration = referenceType.getTypeDeclaration().get();
 
-        if (referenceTypeDeclaration.getAncestors().stream()
+        if (referenceTypeDeclaration.getAllAncestors().stream()
                 .anyMatch(ancestor -> ancestor.getId().equals("java.util.Collection"))
                 && referenceType.getTypeParametersMap().size() == 1) {
             ResolvedType typeParameterOfCollection = referenceType.getTypeParametersMap().get(0).b;
