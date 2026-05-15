@@ -11,35 +11,46 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - java-version: '8'
-            invoker-profile: invoker-it-java8
-          - java-version: '17'
-            invoker-profile: invoker-it-java17
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: allison1875_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -u root -proot"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: allison1875_test
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ matrix.java-version }}
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java-version }}
+          java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
 
       - name: Run integration tests
-        run: |
-          chmod +x run-it.sh
-          ./run-it.sh ${{ matrix.invoker-profile }}
+        run: mvn clean verify -Dmysql.host=${{ env.MYSQL_HOST }} -Dmysql.port=${{ env.MYSQL_PORT }} -Dmysql.user=${{ env.MYSQL_USER }} -Dmysql.password=${{ env.MYSQL_PASSWORD }} -Dmysql.database=${{ env.MYSQL_DATABASE }}
 
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-coverage-report-java-${{ matrix.java-version }}
-          path: allison1875-maven-plugin/target/site/jacoco-aggregate/
+          name: jacoco-coverage-report
+          path: allison1875-cli/target/site/jacoco-aggregate/
           retention-days: 30
