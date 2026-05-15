@@ -50,6 +50,45 @@
         <finalName>allison1875</finalName>
         <plugins>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <!--
+                        prepare-agent: 在 initialize 阶段注入 JaCoCo agent 到 surefire 的 argLine，
+                        使得 surefire 跑 JUnit 5 IT 时自动收集覆盖率数据到 target/jacoco.exec
+                    -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!--
+                        report: 在 test 阶段后生成单模块覆盖率报告到 target/site/jacoco/
+                    -->
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <!--
+                        report-aggregate: 在 verify 阶段聚合所有 Maven 依赖模块的覆盖率，
+                        生成跨模块报告到 target/site/jacoco-aggregate/
+                        （包含 common、doc-analyzer、handler-transformer 等模块的代码覆盖率）
+                    -->
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>

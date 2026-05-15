@@ -1,0 +1,50 @@
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    enumModule: "."
+    serviceModule: "."
+    serviceImplModule: "."
+    persistenceModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+pageParamStyle: PAGE_NO_PAGE_SIZE
+
+ddl: |
+  CREATE TABLE `t_order` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `order_no` varchar(64) NOT NULL COMMENT '订单编号',
+    `user_id` bigint NOT NULL COMMENT '用户ID',
+    `amount` decimal(10,2) NOT NULL COMMENT '订单金额',
+    `status` tinyint NOT NULL DEFAULT '0' COMMENT '订单状态',
+    `remark` varchar(255) DEFAULT NULL COMMENT '备注',
+    `created_at` datetime NOT NULL COMMENT '创建时间',
+    `updated_at` datetime NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_order_no` (`order_no`),
+    KEY `idx_user_id` (`user_id`)
+  ) ENGINE=InnoDB COMMENT='订单表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

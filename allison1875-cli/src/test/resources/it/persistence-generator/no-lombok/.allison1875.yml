@@ -1,0 +1,43 @@
+# persistence-generator no-lombok integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    enumModule: "."
+    serviceModule: "."
+    serviceImplModule: "."
+    persistenceModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: true
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_item` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `item_name` varchar(100) NOT NULL COMMENT '物品名称',
+    `quantity` int NOT NULL COMMENT '数量',
+    PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB COMMENT='物品表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

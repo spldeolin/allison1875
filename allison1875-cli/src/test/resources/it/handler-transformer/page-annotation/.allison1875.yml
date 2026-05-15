@@ -1,0 +1,33 @@
+# basic-post integration test config
+domains:
+  - name: basic
+    controllerPackage: com.example.controller
+    controllerModule: "."
+    reqDTOPackage: com.example.dto.req
+    dtoModule: "."
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableOneService: false
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"
+  pageTypeQualifier: com.example.common.PageResult

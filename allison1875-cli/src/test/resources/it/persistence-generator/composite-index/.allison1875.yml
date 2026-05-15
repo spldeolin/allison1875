@@ -1,0 +1,48 @@
+# persistence-generator composite-index integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    enumModule: "."
+    serviceModule: "."
+    serviceImplModule: "."
+    persistenceModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_inventory` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `warehouse_id` bigint NOT NULL COMMENT '仓库ID',
+    `product_id` bigint NOT NULL COMMENT '商品ID',
+    `sku_code` varchar(50) NOT NULL COMMENT 'SKU编码',
+    `quantity` int NOT NULL COMMENT '库存数量',
+    `updated_at` datetime NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_warehouse_product_sku` (`warehouse_id`, `product_id`, `sku_code`),
+    KEY `idx_product_sku` (`product_id`, `sku_code`)
+  ) ENGINE=InnoDB COMMENT='库存表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

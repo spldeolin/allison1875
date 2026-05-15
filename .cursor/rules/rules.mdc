@@ -604,6 +604,64 @@ allison1875-maven-plugin/target/
 - Always run `mvn install -DskipTests` from root before running IT if plugin code has changed.
 - `verify.groovy` failures show as `FAILED` in the invoker Build Summary; check `target/it/{case-name}/build.log` for details.
 
+### 5.7 allison1875-cli Integration Testing & JaCoCo Coverage
+
+**Overview:**
+`allison1875-cli` 的 IT 测试使用 **JUnit 5 + maven-surefire-plugin**，测试在同一 JVM 内直接调用
+`Bootstrap.main()`。JaCoCo agent 通过 surefire 的 `argLine` 注入，在 `mvn test` / `mvn verify`
+时**默认生效**，无需额外 profile。
+
+**Test structure:**
+```
+allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/
+├── docanalyzer/
+│   ├── DocAnalyzerItBaseTest.java       # 基类：拷贝资源、改写yml、调用Bootstrap
+│   ├── BasicMarkdownItTest.java         # 具体 IT case
+│   └── ...
+├── handlertransformer/
+│   ├── HandlerTransformerItBaseTest.java
+│   └── ...
+└── persistencegenerator/
+    ├── PersistenceGeneratorItBaseTest.java
+    └── ...
+```
+
+测试资源位于 `src/test/resources/it/{tool-name}/{case-name}/`，运行时被拷贝到 `target/it/{case-name}/`。
+
+**JaCoCo 配置 (allison1875-cli/pom.xml):**
+- `jacoco-maven-plugin 0.8.12` 直接配置在 `<build><plugins>` 中（不放 profile）
+- `prepare-agent`：默认绑定 `initialize` 阶段，自动向 surefire 注入 agent
+- `report`：绑定 `test` 阶段，生成单模块覆盖率报告
+- `report-aggregate`：绑定 `verify` 阶段，聚合所有 Maven 依赖模块（common、doc-analyzer、handler-transformer 等）的覆盖率
+
+**Running:**
+```bash
+# 编译 + 测试 + 覆盖率（单模块报告）
+mvn test -pl allison1875-cli -am
+
+# 编译 + 测试 + 覆盖率（含跨模块聚合报告）
+mvn verify -pl allison1875-cli -am
+```
+
+**Output locations:**
+```
+allison1875-cli/target/
+├── jacoco.exec                          # 覆盖率原始数据
+├── site/
+│   ├── jacoco/                          # 单模块报告（仅 allison1875-cli 自身代码）
+│   │   └── index.html
+│   └── jacoco-aggregate/                # 跨模块聚合报告（含 common、doc-analyzer 等所有依赖模块）
+│       ├── index.html                   # 打开此文件查看完整 HTML 报告
+│       ├── jacoco.xml
+│       └── jacoco.csv
+└── it/{case-name}/                      # 各 IT case 的临时工作目录
+```
+
+**Coverage mechanism:**
+- `jacoco:prepare-agent` 产生 `-javaagent:...` 参数，surefire 3.2.5 自动拾取 `${argLine}` 属性
+- 因为 IT 在同一 JVM 内执行（`Bootstrap.main()` 是 in-process 调用），覆盖率数据天然包含所有被调用模块的代码路径
+- `jacoco:report-aggregate` 通过 Maven 依赖图自动收集所有依赖模块的 classes 和 sources，生成聚合报告
+
 ---
 
 ## 6. Critical Rules for AI Agents

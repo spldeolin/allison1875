@@ -14,9 +14,9 @@
 
 + JUnit 5 驱动集成测试。
 
-### 已完成的模板
+### 迁移进度
 
-`basic-post` 已作为模板 case 迁移并验证通过。剩余 17 个 case 需按本指南迁移。
+全部 18 个 handler-transformer IT case 已完成迁移，全部 18 个测试通过。
 
 ---
 
@@ -37,13 +37,13 @@ JUnit 5 Test (@Test)
 
 ### 2.2 关键文件位置
 
-| 文件            | 路径                                                                                                 | 说明                  |
-|---------------|----------------------------------------------------------------------------------------------------|---------------------|
-| **基类**        | `allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/HandlerTransformerItBaseTest.java` | 封装通用流程，所有 test 继承此类 |
-| **模板测试**      | `allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/BasicPostItTest.java`              | 参照此文件编写新 test       |
-| **测试资源**      | `allison1875-cli/src/test/resources/it/handler-transformer/{caseName}/`                            | 每个 case 的资源目录       |
-| **原 IT 源**    | `allison1875-maven-plugin/src/it/handler-transformer/{caseName}/`                                  | 原始 IT case 目录       |
-| **Bootstrap** | `allison1875-cli/src/main/java/com/spldeolin/allison1875/cli/Bootstrap.java`                       | CLI 入口              |
+| 文件            | 路径                                                                                                             | 说明                          |
+|---------------|----------------------------------------------------------------------------------------------------------------|-----------------------------|
+| **基类**        | `allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/docanalyzer/HandlerTransformerItBaseTest.java` | 封装通用流程，所有 test 继承此类         |
+| **测试类**       | `allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/handlertransformer/XxxItTest.java`             | 参照 BasicPostItTest 编写新 test |
+| **测试资源**      | `allison1875-cli/src/test/resources/it/handler-transformer/{caseName}/`                                        | 每个 case 的资源目录               |
+| **原 IT 源**    | `allison1875-maven-plugin/src/it/handler-transformer/{caseName}/`                                              | 原始 IT case 目录               |
+| **Bootstrap** | `allison1875-cli/src/main/java/com/spldeolin/allison1875/cli/Bootstrap.java`                                   | CLI 入口                      |
 
 ### 2.3 HandlerTransformerItBaseTest 基类功能
 
@@ -54,7 +54,7 @@ JUnit 5 Test (@Test)
 private void runHandlerTransformer(String caseName)
 
 // 多 domain 场景（需要指定处理哪个 domain）
-protected void runHandlerTransformer(String caseName, String domainNam
+private void runHandlerTransformer(String caseName, String domainNam
 ```
 
 基类内部流程：
@@ -213,21 +213,23 @@ domains:
 
 ### Step 4 — 创建 JUnit 5 测试类
 
-在 `allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/` 下创建测试类，
+在 `allison1875-cli/src/test/java/com/spldeolin/allison1875/cli/it/handlertransformer/` 下创建测试类，
 类名建议用 `{UpperCamelCaseName}ItTest`（如 `basic-post` → `BasicPostItTest`）。
 
 **模板**：
 
 ```java
-package com.spldeolin.allison1875.cli.it;
+package com.spldeolin.allison1875.cli.it.handlertransformer;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.spldeolin.allison1875.cli.it.docanalyzer.HandlerTransformerItBaseTest;
 
 /**
  * {case-name} 集成测试。
@@ -303,27 +305,27 @@ mvn clean test
 |----|----------------------|--------------------------|------|-------|
 | 1  | `basic-post`         | `BasicPostItTest`        | 无    | ✅ 已完成 |
 | 2  | `basic-get`          | `BasicGetItTest`         | 无    | ✅ 已完成 |
-| 3  | `resp-only`          | `RespOnlyItTest`         | 无    | 待迁移   |
-| 4  | `req-only`           | `ReqOnlyItTest`          | 无    | 待迁移   |
-| 5  | `no-req-no-resp`     | `NoReqNoRespItTest`      | 无    | 待迁移   |
-| 6  | `no-desc`            | `NoDescItTest`           | 无    | 待迁移   |
-| 7  | `multiple-init-decs` | `MultipleInitDecsItTest` | 无    | 待迁移   |
-| 8  | `nested-dto`         | `NestedDtoItTest`        | 无    | 待迁移   |
-| 9  | `nest-dto-list`      | `NestDtoListItTest`      | 无    | 待迁移   |
-| 10 | `multi-controller`   | `MultiControllerItTest`  | 无    | 待迁移   |
-| 11 | `no-handler-skip`    | `NoHandlerSkipItTest`    | 无    | 待迁移   |
-| 12 | `datetime-fields`    | `DatetimeFieldsItTest`   | 无    | 待迁移   |
+| 3  | `resp-only`          | `RespOnlyItTest`         | 无    | ✅ 已完成 |
+| 4  | `req-only`           | `ReqOnlyItTest`          | 无    | ✅ 已完成 |
+| 5  | `no-req-no-resp`     | `NoReqNoRespItTest`      | 无    | ✅ 已完成 |
+| 6  | `no-desc`            | `NoDescItTest`           | 无    | ✅ 已完成 |
+| 7  | `multiple-init-decs` | `MultipleInitDecsItTest` | 无    | ✅ 已完成 |
+| 8  | `nested-dto`         | `NestedDtoItTest`        | 无    | ✅ 已完成 |
+| 9  | `nest-dto-list`      | `NestDtoListItTest`      | 无    | ✅ 已完成 |
+| 10 | `multi-controller`   | `MultiControllerItTest`  | 无    | ✅ 已完成 |
+| 11 | `no-handler-skip`    | `NoHandlerSkipItTest`    | 无    | ✅ 已完成 |
+| 12 | `datetime-fields`    | `DatetimeFieldsItTest`   | 无    | ✅ 已完成 |
 
 ### 4.2 特殊配置 case
 
-| #  | Case 名                  | 测试类名建议                       | 特殊配置说明                                                   | 状态  |
-|----|-------------------------|------------------------------|----------------------------------------------------------|-----|
-| 13 | `enable-one-service`    | `EnableOneServiceItTest`     | yml 中 `enableOneService: true`                           | 待迁移 |
-| 14 | `handler-alias`         | `HandlerAliasItTest`         | Controller init 块使用别名 URL                                | 待迁移 |
-| 15 | `controller-annotation` | `ControllerAnnotationItTest` | Controller 使用 `@Controller` 而非 `@RestController`         | 待迁移 |
-| 16 | `page-annotation`       | `PageAnnotationItTest`       | init 块中含分页相关注解                                           | 待迁移 |
-| 17 | `list-annotation`       | `ListAnnotationItTest`       | init 块中含 `@L` 注解（列表返回）                                   | 待迁移 |
-| 18 | `no-lombok`             | `NoLombokItTest`             | yml 中 `isDataModelWithoutLombok: true`，生成 DTO 不使用 Lombok | 待迁移 |
+| #  | Case 名                  | 测试类名建议                       | 特殊配置说明                                                   | 状态    |
+|----|-------------------------|------------------------------|----------------------------------------------------------|-------|
+| 13 | `enable-one-service`    | `EnableOneServiceItTest`     | yml 中 `enableOneService: true`                           | ✅ 已完成 |
+| 14 | `handler-alias`         | `HandlerAliasItTest`         | Controller init 块使用别名 URL                                | ✅ 已完成 |
+| 15 | `controller-annotation` | `ControllerAnnotationItTest` | Controller 使用 `@Controller` 而非 `@RestController`         | ✅ 已完成 |
+| 16 | `page-annotation`       | `PageAnnotationItTest`       | init 块中含分页相关注解                                           | ✅ 已完成 |
+| 17 | `list-annotation`       | `ListAnnotationItTest`       | init 块中含 `@L` 注解（列表返回）                                   | ✅ 已完成 |
+| 18 | `no-lombok`             | `NoLombokItTest`             | yml 中 `isDataModelWithoutLombok: true`，生成 DTO 不使用 Lombok | ✅ 已完成 |
 
 ### 4.3 特殊 case 说明
 
@@ -398,15 +400,17 @@ handler-transformer 的输出直接写回 source tree（即 `target/it/{caseName
 ### `BasicPostItTest.java`（已验证通过）
 
 ```java
-package com.spldeolin.allison1875.cli.it;
+package com.spldeolin.allison1875.cli.it.handlertransformer;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.spldeolin.allison1875.cli.it.docanalyzer.HandlerTransformerItBaseTest;
 
 public class BasicPostItTest extends HandlerTransformerItBaseTest {
 
@@ -616,3 +620,76 @@ doc-analyzer 专用字段（例如 `basic-get`）。这些字段对 handler-tran
 3. **统一修改 pom.xml**：删除 `<build>` 节点 + 替换版本占位符
 4. **逐个翻译 verify.groovy → Java Test**：这是唯一需要逐 case 细看的步骤
 5. **批量运行测试**：`mvn clean test`
+
+### 7.6 第二批迁移（12 个 case）的新总结
+
+#### 7.6.1 测试类的包名统一
+
+12 个新测试类全部放在 `com.spldeolin.allison1875.cli.it.handlertransformer` 子包下，与
+`handler-transformer` 独立子包对应。基类 `HandlerTransformerItBaseTest` 位于 `docanalyzer`
+包下，通过 `import com.spldeolin.allison1875.cli.it.docanalyzer.HandlerTransformerItBaseTest` 引用。
+
+#### 7.6.2 Python 脚本批量修改 yml 的策略
+
+使用 Python 的正则替换可以高效批量修改 yml：
+
+- **移除 `flushTo`/`markdownDir`/`dslDir`**：正则匹配 `\nflushTo:.*(\n  -.*)+` 块删除
+- **补齐 6 个 `*Module` 字段**：按 `DomainConfig` 中字段的出现顺序逐个在对应 `*Package`
+  行后插入 `*Module: "."`
+- **保留特殊字段**：如 `pageTypeQualifier`（`codeSnippet` 的子字段）是合法配置，不应移除
+
+#### 7.6.3 Groovy findAll → Java FilenameFilter 的精确翻译
+
+Groovy 的 `dir.listFiles().findAll { it.name.endsWith(".java") && it.name.contains("Xxx") }`
+翻译为 Java 时使用匿名 `FilenameFilter`：
+
+```java
+File[] files = dir.listFiles((dir, name) -> name.endsWith(".java") && name.contains("Xxx"));
+```
+
+Groovy 中 `files.size()` 对应 Java 中 `files.length`。当 `dir` 不存在且用 `listFiles` 时
+Groovy 返回 `[]`（空列表），Java 返回 `null`，因此 Java 断言需要用 `files != null && files.length == N`。
+
+#### 7.6.4 page-annotation 的 `pageTypeQualifier` 是合法配置
+
+`pageTypeQualifier: com.example.common.PageResult` 位于 `codeSnippet` 节点下，是
+`Config.CodeSnippet` 类的合法字段，handler-transformer 在处理 `@P` 注解时会读取该字段。
+迁移时应保留，不应误删。
+
+#### 7.6.5 `NoHandlerSkipItTest` 的断言逻辑
+
+`no-handler-skip` case 验证 init 块不包含 `handler` 变量时工具**不处理**该 init 块。
+因此迁移后的断言应验证：
+
+- Controller 原文中的 init 块内容**保持不变**（而非被移除）
+- 无 handler 方法生成（无 `@PostMapping`/`@GetMapping`）
+- 无 Service/DTO 文件生成
+
+这与所有其他 case 的"验证 init 块被移除"方向相反，翻译时需特别注意。
+
+#### 7.6.6 `NoDescItTest` 验证默认描述
+
+`no-desc` case 的 init 块不声明 `desc` 变量。handler-transformer 会自动填充默认描述
+`"未指定描述"`，并出现在生成的 handler 方法的 Javadoc 中。断言中验证 `controllerContent.contains("未指定描述")`。
+
+#### 7.6.7 Service 文件命名模式
+
+非 `enableOneService` 模式下，每个 handler 生成独立的 Service 接口+Impl 文件。
+文件名基于 handler URL 的 UpperCamelCase 形式 + `Service`/`ServiceImpl` 后缀。
+例如 handler `/clear-log` → `ClearLogService`、`ClearLogServiceImpl`。
+
+在 `enableOneService` 模式下，所有 handler 共享一个 Service 接口，文件名基于
+Controller 类名而非 handler URL。例如 `AccountController` → `AccountService`。
+
+#### 7.6.8 测试类命名不需要 `Case` 后缀
+
+doc-analyzer 迁移的测试类使用了 `*CaseItTest` 命名（如 `BasicMarkdownCaseItTest`），
+handler-transformer 迁移的测试类统一使用 `*{UpperCamelName}ItTest` 命名
+（如 `NoDescItTest`），更简洁且与 Groovy 中的目录名直接对应。
+
+#### 7.6.9 ContextClassLoader 恢复的必要性
+
+`HandlerTransformerItBaseTest.runHandlerTransformer()` 在 `Bootstrap.main()` 前后
+保存并恢复 `Thread.currentThread().getContextClassLoader()`。这是因为 `Bootstrap` →
+`MavenProjectClassLoaderUtils` 会将 context CL 替换为 IT case 项目的 `URLClassLoader`，
+如果不在 finally 中恢复，后续测试中的 classpath 资源加载（如 `allison1875-git.properties`）会失败。

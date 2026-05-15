@@ -1,0 +1,46 @@
+# persistence-generator offset-limit-page-style integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    enumModule: "."
+    serviceModule: "."
+    serviceImplModule: "."
+    persistenceModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+pageParamStyle: OFFSET_LIMIT
+
+ddl: |
+  CREATE TABLE `t_message` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `sender_id` bigint NOT NULL COMMENT '发送者ID',
+    `content` varchar(500) NOT NULL COMMENT '消息内容',
+    `sent_at` datetime NOT NULL COMMENT '发送时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_sender_id` (`sender_id`)
+  ) ENGINE=InnoDB COMMENT='消息表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

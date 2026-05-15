@@ -1,0 +1,55 @@
+# persistence-generator all-column-types integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_all_types` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `col_boolean` tinyint(1) NOT NULL DEFAULT '0' COMMENT '布尔类型',
+    `col_tinyint` tinyint NOT NULL COMMENT 'tinyint类型',
+    `col_int` int NOT NULL COMMENT 'int类型',
+    `col_bigint` bigint NOT NULL COMMENT 'bigint类型',
+    `col_double` double NOT NULL COMMENT 'double类型',
+    `col_decimal` decimal(12,4) NOT NULL COMMENT 'decimal类型',
+    `col_varchar` varchar(255) NOT NULL COMMENT 'varchar类型',
+    `col_char` char(10) NOT NULL COMMENT 'char类型',
+    `col_text` text COMMENT 'text类型',
+    `col_mediumtext` mediumtext COMMENT 'mediumtext类型',
+    `col_date` date NOT NULL COMMENT 'date类型',
+    `col_time` time NOT NULL COMMENT 'time类型',
+    `col_datetime` datetime NOT NULL COMMENT 'datetime类型',
+    `col_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp类型',
+    PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB COMMENT='全类型测试表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"
