@@ -82,7 +82,7 @@ public abstract class PersistenceGeneratorItBaseTest {
     /**
      * 将 classpath 下 it/persistence-generator/{caseName}/ 整个目录递归拷贝到 target/it/{caseName}/
      */
-    private File copyResourceToWorkDir(String caseName) {
+    protected File copyResourceToWorkDir(String caseName) {
         String resourcePrefix = "it/persistence-generator/" + caseName;
         // 通过ClassLoader获取资源目录的物理路径
         URL resourceUrl = getClass().getClassLoader().getResource(resourcePrefix);
@@ -133,7 +133,7 @@ public abstract class PersistenceGeneratorItBaseTest {
      * 将其中的相对路径解析为基于 basedir 的绝对路径。
      */
     @SuppressWarnings("unchecked")
-    private File resolveAndRewriteConfig(File basedir) {
+    protected File resolveAndRewriteConfig(File basedir) {
         File configFile = new File(basedir, ".allison1875.yml");
         Yaml yaml = new Yaml();
         Map<String, Object> configMap;

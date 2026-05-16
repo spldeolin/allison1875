@@ -137,6 +137,38 @@ SQL 语句）、Design 文件。
 
 ---
 
+## MySQL jdbcUrl 直连
+
+以下两个测试用例通过 `Config.jdbcUrl` 直连 MySQL 数据库，查询 `information_schema` 获取表结构（替代 DDL 内存 H2 方式），
+验证 persistence-generator 的 jdbcUrl 数据源路径。
+
+这些测试依赖系统属性 `-Dmysql.host` / `-Dmysql.port` / `-Dmysql.user` / `-Dmysql.password` / `-Dmysql.database`，
+参数不全时自动跳过（`Assumptions`）。测试由 `PersistenceGeneratorMySqlItBaseTest` 驱动，在测试前自动创建表、测试后自动清理。
+
+### BasicJdbcUrlMysqlItTest
+
+- 验证通过 jdbcUrl 直连 MySQL 的单表完整流程
+- 测试表：`t_order`（含主键、唯一索引 `uk_order_no`、普通索引 `idx_user_id`）
+- 生成的 Entity/Mapper/XML/Design 与 BasicDdlItTest 的断言一致
+- 类型映射：`bigint` → `Long`，`varchar` → `String`，`decimal` → `BigDecimal`，`datetime` → `LocalDateTime`，`tinyint` → `Byte`
+
+### JdbcUrlMysqlItTest
+
+- 验证通过 jdbcUrl 直连 MySQL 的多表独立生成能力
+- 测试表：`t_user`（唯一索引）、`t_product`（普通索引）、`t_order_item`（多索引）
+- 各表独立生成 Entity、Mapper、XML、Design 文件，互不干扰
+- 断言每表的字段、类型、索引查询方法和 Design 文件
+
+### 实现架构
+
+- 基类 `PersistenceGeneratorMySqlItBaseTest extends PersistenceGeneratorItBaseTest`：
+  - 读取系统属性构建 `jdbcUrl`，参数不全时通过 `Assumptions.assumeTrue` 跳过
+  - 子类通过 `ddls()` 返回 DDL 列表，基类负责创建表 / 注入配置 / 清理表
+  - 将 `jdbcUrl`、`userName`、`password`、`schema` 注入 `.allison1875.yml`，同时移除 `ddl` 字段
+- `MysqlConnectionItTest`（独立连接验证）：验证 GitHub workflow 中 MySQL 服务可用
+
+---
+
 ## 当前覆盖率概况（JaCoCo）
 
 | 类                          | 指令覆盖率   | 分支覆盖率   |
