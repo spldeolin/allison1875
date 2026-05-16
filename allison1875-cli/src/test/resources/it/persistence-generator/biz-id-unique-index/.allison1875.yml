@@ -1,0 +1,44 @@
+# persistence-generator biz-id-unique-index integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_coupon` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `coupon_code` varchar(32) NOT NULL COMMENT '优惠券码',
+    `amount` decimal(10,2) NOT NULL COMMENT '面额',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_coupon_code` (`coupon_code`)
+  ) ENGINE=InnoDB COMMENT='优惠券表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

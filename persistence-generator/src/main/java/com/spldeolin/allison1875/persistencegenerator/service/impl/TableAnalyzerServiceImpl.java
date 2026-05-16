@@ -78,6 +78,8 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
         // 统一处理
         for (TableAnalysisDTO tableAnalysis : tableAnalyses) {
 
+            removeUnsupportedProperties(tableAnalysis);
+
             // 将索引进行平铺（防止idx_1(col_1, col_2)和idx_2(col_1)重复生成queryByCol1方法；提前进行subList处理，简化生成的逻辑）
             List<IndexDTO> flattenIndices = Lists.newArrayList();
             for (IndexDTO index : tableAnalysis.getIndices()) {
@@ -317,12 +319,6 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
                             tableAnalysis.getIndices().add(index);
                         }
                     }
-                    for (PropertyDTO prop : tableAnalysis.getProperties()) {
-                        if (prop.getJavaType() == null) {
-                            log.warn("unsupport jbdcType, column={}.{}", tableAnalysis.getTableName(),
-                                    prop.getColumnName());
-                        }
-                    }
                     tableAnalyses.add(tableAnalysis);
                 });
         return tableAnalyses;
@@ -337,6 +333,21 @@ public class TableAnalyzerServiceImpl implements TableAnalyzerService {
             }
         }
         return null;
+    }
+
+    private void removeUnsupportedProperties(TableAnalysisDTO tableAnalysis) {
+        for (PropertyDTO prop : tableAnalysis.getProperties()) {
+            if (prop.getJavaType() == null) {
+                log.warn("unsupport jbdcType, column={}.{}", tableAnalysis.getTableName(), prop.getColumnName());
+            }
+        }
+        tableAnalysis.getProperties().removeIf(p -> p.getJavaType() == null);
+        tableAnalysis.getIdProperties().removeIf(p -> p.getJavaType() == null);
+        tableAnalysis.getNonIdProperties().removeIf(p -> p.getJavaType() == null);
+        for (IndexDTO index : tableAnalysis.getIndices()) {
+            index.getProperties().removeIf(p -> p == null || p.getJavaType() == null);
+        }
+        tableAnalysis.getIndices().removeIf(index -> index.getProperties().isEmpty());
     }
 
     private String getDeleteFlagName() {

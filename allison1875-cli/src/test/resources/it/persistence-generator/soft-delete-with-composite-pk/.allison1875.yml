@@ -1,0 +1,46 @@
+# persistence-generator soft-delete-with-composite-pk integration test config
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+deletedSql: "is_deleted = 1"
+notDeletedSql: "is_deleted = 0"
+
+ddl: |
+  CREATE TABLE `t_user_role_sd` (
+    `user_id` bigint NOT NULL COMMENT '用户ID',
+    `role_id` bigint NOT NULL COMMENT '角色ID',
+    `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '是否删除',
+    PRIMARY KEY (`user_id`, `role_id`)
+  ) ENGINE=InnoDB COMMENT='软删除复合主键测试表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"
