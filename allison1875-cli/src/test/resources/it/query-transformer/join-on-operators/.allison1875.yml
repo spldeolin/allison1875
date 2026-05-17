@@ -1,0 +1,55 @@
+domains:
+  - name: basic
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    enumModule: "."
+    serviceModule: "."
+    serviceImplModule: "."
+    persistenceModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumPackage: com.example.enums
+    servicePackage: com.example.service
+    serviceImplPackage: com.example.service.impl
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "8"
+enableNoModifyAnnounce: true
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+ddl: |
+  CREATE TABLE `t_order` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `order_no` varchar(64) NOT NULL COMMENT '订单编号',
+    `user_id` bigint NOT NULL COMMENT '用户ID',
+    `amount` decimal(10,2) NOT NULL COMMENT '订单金额',
+    `status` tinyint NOT NULL DEFAULT '0' COMMENT '订单状态',
+    `created_at` datetime NOT NULL COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`)
+  ) ENGINE=InnoDB COMMENT='订单表';
+
+  CREATE TABLE `t_user` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户主键',
+    `user_name` varchar(64) NOT NULL COMMENT '用户名',
+    `email` varchar(128) DEFAULT NULL COMMENT '邮箱',
+    `phone` varchar(20) DEFAULT NULL COMMENT '手机号',
+    `created_at` datetime NOT NULL COMMENT '创建时间',
+    PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB COMMENT='用户表';
+
+codeSnippet:
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

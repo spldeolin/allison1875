@@ -270,9 +270,9 @@
 
 以下 3 个 Service 在 JaCoCo 报告中覆盖率接近 0%，但**不计划通过常规集成测试覆盖**：
 
-- **YApiServiceImpl**（指令覆盖 0.7%，分支覆盖 0%）
-- **YApiOpenApiServiceImpl**（指令覆盖 1.5%，分支覆盖 0%）
-- **ShowdocServiceImpl**（指令覆盖 5.5%，分支覆盖 0%）
+- **YApiServiceImpl**（指令覆盖 0%，分支覆盖 0%）
+- **YApiOpenApiServiceImpl**（指令覆盖 1%，分支覆盖 0%）
+- **ShowdocServiceImpl**（指令覆盖 5%，分支覆盖 0%）
 
 **原因：**
 
