@@ -1,0 +1,14 @@
+- name: Feature
+  title: 功能开关
+  desc: 功能开关管理
+  items:
+    - type: text
+      name: featureName
+      title: 功能名称
+      isNonVoid: true
+      maxLength: 100
+    - type: onOff
+      name: isEnabled
+      title: 是否启用
+      isNonVoid: true
+  indices: []

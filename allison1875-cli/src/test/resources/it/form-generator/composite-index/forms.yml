@@ -1,0 +1,22 @@
+- name: Order
+  title: 订单
+  desc: 订单管理
+  items:
+    - type: text
+      name: orderNo
+      title: 订单编号
+      isNonVoid: true
+      maxLength: 50
+    - type: text
+      name: customerId
+      title: 客户ID
+      isNonVoid: true
+      maxLength: 36
+    - type: number
+      name: amount
+      title: 金额
+      isNonVoid: true
+      canBeDecimal: true
+  indices:
+    - itemNames: [orderNo, customerId]
+      isUnique: true

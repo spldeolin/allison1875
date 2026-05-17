@@ -1,0 +1,22 @@
+- name: Config
+  title: 配置
+  desc: 配置管理
+  items:
+    - type: text
+      name: veryLongFieldNameOne
+      title: 长字段一
+      isNonVoid: true
+      maxLength: 50
+    - type: text
+      name: veryLongFieldNameTwo
+      title: 长字段二
+      isNonVoid: true
+      maxLength: 50
+    - type: text
+      name: veryLongFieldNameThree
+      title: 长字段三
+      isNonVoid: true
+      maxLength: 50
+  indices:
+    - itemNames: [veryLongFieldNameOne, veryLongFieldNameTwo, veryLongFieldNameThree]
+      isUnique: true

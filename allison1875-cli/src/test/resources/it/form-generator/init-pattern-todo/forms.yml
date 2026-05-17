@@ -1,0 +1,17 @@
+- name: Task
+  title: 任务
+  desc: 任务管理
+  items:
+    - type: text
+      name: taskName
+      title: 任务名称
+      isNonVoid: true
+      maxLength: 100
+    - type: text
+      name: assigneeId
+      title: 负责人ID
+      isNonVoid: false
+      maxLength: 36
+      initPattern: todo
+      editPattern: doNot
+  indices: []

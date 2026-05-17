@@ -1,0 +1,37 @@
+- name: Book
+  title: 图书
+  desc: 图书管理
+  items:
+    - type: text
+      name: bookName
+      title: 书名
+      isNonVoid: true
+      maxLength: 100
+    - type: number
+      name: price
+      title: 价格
+      isNonVoid: true
+      canBeDecimal: true
+  indices: []
+
+- name: Author
+  title: 作者
+  desc: 作者管理
+  items:
+    - type: text
+      name: authorName
+      title: 作者名
+      isNonVoid: true
+      maxLength: 64
+    - type: select
+      name: nationality
+      title: 国籍
+      isNonVoid: true
+      options:
+        - code: cn
+          title: 中国
+        - code: us
+          title: 美国
+        - code: jp
+          title: 日本
+  indices: []

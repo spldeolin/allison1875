@@ -1,0 +1,22 @@
+- name: Document
+  title: 文档
+  desc: 文档管理
+  items:
+    - type: text
+      name: title
+      title: 标题
+      isNonVoid: true
+      maxLength: 200
+    - type: text
+      name: content
+      title: 内容
+      isNonVoid: true
+      isMultilineOrRich: true
+    - type: text
+      name: authorName
+      title: 作者
+      isNonVoid: true
+      maxLength: 50
+      initPattern: userInput
+      editPattern: doNot
+  indices: []

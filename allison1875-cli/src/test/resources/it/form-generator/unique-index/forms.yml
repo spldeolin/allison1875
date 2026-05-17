@@ -1,0 +1,17 @@
+- name: User
+  title: 用户
+  desc: 用户管理
+  items:
+    - type: text
+      name: userName
+      title: 用户名
+      isNonVoid: true
+      maxLength: 50
+    - type: text
+      name: email
+      title: 邮箱
+      isNonVoid: true
+      maxLength: 200
+  indices:
+    - itemNames: [email]
+      isUnique: true

@@ -92,62 +92,88 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 - List API 的 Req 过滤条件中**不包含**该字段
 - 实现日期：2026-05-17
 
-### OnOffItemItTest
+### OnOffItemItTest ✅ 已完成
 
 - 验证 onOff 类型字段的处理
 - DDL 中列类型为 `TINYINT(1)`
-- DTO 中字段类型为 `Boolean`
-- List API 的 Req 中该字段为 `List<Boolean>` 列表过滤
+- DTO 中字段类型为 `Boolean`（SaveReq / GetDetailResp / ListResp）
+- `isNonVoid=true` 时 SaveReq 中附加 `@NotNull`
+- List API 的 Req 中该字段为 `List<Boolean>` 列表过滤（与 NUMBER 共用 IN 过滤路径）
+- 实现日期：2026-05-17
 
 ---
 
 ## 索引生成
 
-### UniqueIndexItTest
+### UniqueIndexItTest ✅ 已完成
 
 - 验证 `isUnique=true` 的索引在 DDL 中生成 `UNIQUE KEY`
-- persistence-generator 基于唯一索引生成 `queryByXxx` 单条查询方法
+- persistence-generator 基于唯一索引生成 `queryByXxx` 单条查询方法（返回单个 Entity，非 `List<Entity>`）
+- Mapper XML 中包含对应的 `<select id="queryByXxx">` 精确匹配语句
+- Save ServiceImpl 编辑分支使用 `userMapper.queryByUserCode(...)` 查询已有记录
+- 实现日期：2026-05-17
 
-### CompositeIndexItTest
+### CompositeIndexItTest ✅ 已完成
 
-- 验证多字段联合索引（`itemNames` 包含多个字段）的 DDL 生成
-- 索引名为 `uk_col1_col2_col3`（唯一）或 `idx_col1_col2`（普通）
-- persistence-generator 基于联合索引生成最左前缀查询方法
+- 验证多字段联合唯一索引（`itemNames: [orderNo, customerId], isUnique: true`）的完整处理
+- DDL 中生成 `UNIQUE KEY \`uk_order_no_customer_id\` (\`order_no\`, \`customer_id\`)`
+- persistence-generator 将联合索引平铺为最左前缀：`queryByOrderNo`（非唯一 → `List<OrderEntity>`）和 `queryByOrderNoCustomerId`（唯一 → `OrderEntity`）
+- Mapper XML 中包含对应的多列精确匹配 `<select>` 语句
+- 实现日期：2026-05-17
 
-### IndexNameTruncationItTest
+### IndexNameTruncationItTest ✅ 已完成
 
-- 验证索引名超过 64 字符时被自动截断
-- DSL 中使用多个长字段名组成索引
+- 验证索引名超过 64 字符时被自动截断（79 → 64 字符）
+- DSL 中使用 3 个长字段名组成唯一索引，完整名 `uk_very_long_field_name_one_very_long_field_name_two_very_long_field_name_three` 被截断为 `uk_very_long_field_name_one_very_long_field_name_two_very_long_f`
+- 原始完整索引名不出现在 DDL 中，截断后的 64 字符名以 `UNIQUE KEY` 出现
+- Mapper 方法名（`queryByVeryLongFieldNameOneVeryLongFieldNameTwoVeryLongFieldNameThree` 等）不受截断影响
+- 实现日期：2026-05-17
 
 ---
 
 ## 初始化/编辑模式（InitOrEditPattern）
 
-### InitPatternTodoItTest
+### InitPatternTodoItTest ✅ 已完成
 
-- 验证 `initPattern=todo` 的字段在 Save API 的 Service 中生成 `// TODO 请补充初始值` 注释
-- 该字段不出现在 Save Req DTO 中（非用户输入）
+- 验证 `initPattern=todo` / `editPattern=doNot` 字段的生成行为
+- 该字段不出现在 SaveReq DTO 中（非 `userInput`，不进入 Req）
+- Save ServiceImpl 的 `if (toCreate)` 分支中生成 `task.setAssigneeId(""); // TODO 请补充初始值`
+- TODO 注释位于 `setTaskCode` 之后、`setCreatedAt` 之前（创建分支内部）
+- 编辑分支（else）中不包含该字段的 setter 调用（editPattern=doNot）
+- 实现日期：2026-05-17
 
-### EditPatternDoNotItTest
+### EditPatternDoNotItTest ✅ 已完成
 
-- 验证 `editPattern=doNot` 的字段在编辑时不被更新
-- Save API 的 Service 中，编辑分支不包含该字段的 setter 调用
+- 验证 `editPattern=doNot` 字段在编辑时不被更新
+- 该字段仍出现在 SaveReq 中（initPattern=userInput，创建时仍可输入）
+- 创建（toCreate）分支中正常设置该字段
+- common 节中不设置（editPattern != userInput），else/edit 分支中不设置（editPattern=doNot）
+- 同一表单中普通字段（title/content）仍在 common 节正常设置，不受影响
+- 实现日期：2026-05-17
 
-### MixedInitEditPatternItTest
+### MixedInitEditPatternItTest ✅ 已完成
 
 - 验证 `initPattern=userInput` + `editPattern=doNot` 组合
-- 该字段仅在创建时由用户输入，编辑时不可修改
-- Save API 的 Service 中，该字段 setter 仅出现在 `if (toCreate)` 分支内
+- 该字段（skuCode）出现在 SaveReq 中，用户可在创建时输入
+- skuCode 的 setter 仅出现在 `if (toCreate)` 分支内（validated via `firstSkuSet == lastSkuSet`）
+- common 节和 else/edit 分支中均不设置该字段
+- 同一表单中普通字段（productName/remark）在 common 节正常设置，互不干扰
+- 实现日期：2026-05-17
 
 ---
 
 ## 多表单
 
-### MultiFormItTest
+### MultiFormItTest ✅ 已完成
 
-- 验证 DSL 包含多个 FormDef 时，每个表单独立生成全套文件
-- 各表单的 DDL、Entity、Mapper、Controller、Service、DTO、枚举互不干扰
-- 每个 Controller 的 `@RequestMapping` 路径使用各自表单的 `varName`
+- 验证 DSL 包含多个 FormDef（Book + Author）时，每个表单独立生成全套文件
+- 两个表单（Book、Author）均独立生成 DDL、Entity、Mapper、Mapper XML、Controller、Service（4 个 API）、DTO、Design
+- DDL 中包含两个 `<code>CREATE TABLE</code>` 语句，分别对应 `book` 和 `author` 表
+- Book 的实体/Service/DTO 不包含 Author 表单的字段（authorName、nationality），反之亦然
+- BookController 的 `@RequestMapping` 路径为 `/api/v1/book`，AuthorController 为 `/api/v1/author`
+- Author 中的 select 字段生成了 `NationalityEnum` 枚举，Book 无枚举生成
+- 修复了 1 处断言过严问题：SaveAuthorServiceImpl 不直接包含 `NationalityEnum` 字符串（通过通配符 import），改为断言 `.getCode()` 调用
+- 实现日期：2026-05-17
 
 ---
 
