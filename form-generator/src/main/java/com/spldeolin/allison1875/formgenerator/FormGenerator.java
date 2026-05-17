@@ -31,7 +31,9 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
+import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
@@ -131,7 +133,14 @@ public class FormGenerator implements Allison1875MainService {
             cu.setPackageDeclaration(DomainContext.get().getControllerPackage());
             cu.addImport(DomainContext.get().getDesignPackage() + ".*");
             cu.addImport(DomainContext.get().getEntityPackage() + ".*");
-            cu.addImport(DomainContext.get().getEnumPackage() + ".*");
+            if (hasSelectItem(form)) {
+                // 因没有选择字段而不生成枚举时，这个包可能是不存在的，会导致编译错误，也无需导入，所以此处基于是否有选择字段进行判断
+                cu.addImport(DomainContext.get().getEnumPackage() + ".*");
+            }
+            cu.addImport("java.util.*");
+            cu.addImport("java.time.*");
+            cu.addImport("java.math.*");
+            cu.addImport("com.fasterxml.jackson.annotation.*");
             cu.addImport("java.util.stream.*");
             cu.addImport("org.springframework.util.*");
             ClassOrInterfaceDeclaration coid = new ClassOrInterfaceDeclaration();
@@ -196,8 +205,20 @@ public class FormGenerator implements Allison1875MainService {
             IndexDef index = new IndexDef();
             index.setItemNames(Lists.newArrayList(bizId.getName()));
             index.setIsUnique(true);
-            form.getIndices().add(0, index);
+            if (form.getIndices() == null) {
+                form.setIndices(Lists.newArrayList());
+            }
+            form.getIndices().addFirst(index);
         }
+    }
+
+    private boolean hasSelectItem(FormDef form) {
+        for (ItemDef item : form.getItems()) {
+            if (item.getType() == ItemType.SELECT || item.getType() == ItemType.MULTI_SELECT) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<FormDef> deserializeDSL() {

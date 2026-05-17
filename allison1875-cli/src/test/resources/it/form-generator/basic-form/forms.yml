@@ -1,0 +1,15 @@
+- name: Book
+  title: 图书
+  desc: 图书管理
+  items:
+    - type: text
+      name: bookName
+      title: 书名
+      isNonVoid: true
+      maxLength: 100
+    - type: number
+      name: price
+      title: 价格
+      isNonVoid: true
+      canBeDecimal: true
+  indices: []
