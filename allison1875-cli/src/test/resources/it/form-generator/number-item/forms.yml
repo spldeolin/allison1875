@@ -1,0 +1,25 @@
+- name: Product
+  title: 商品
+  desc: 商品管理
+  items:
+    - type: number
+      name: price
+      title: 价格
+      isNonVoid: true
+      canBeDecimal: true
+    - type: number
+      name: stock
+      title: 库存
+      isNonVoid: true
+      canBeDecimal: false
+    - type: number
+      name: discount
+      title: 折扣率
+      isNonVoid: false
+      canBeDecimal: true
+    - type: number
+      name: sortOrder
+      title: 排序
+      isNonVoid: false
+      canBeDecimal: false
+  indices: []

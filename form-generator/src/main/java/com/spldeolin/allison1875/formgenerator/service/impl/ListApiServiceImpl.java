@@ -281,18 +281,16 @@ public class ListApiServiceImpl implements ListApiService {
                 if (item.getIsNonVoid()) {
                     getterWithConvert = String.format("%s.toLocalDate()", getterWithConvert);
                 } else {
-                    getterWithConvert = String.format(
-                            getterWithConvert + String.format("!=null ? %s.toLocalDate() : null",
-                                    StringUtils.capitalize(item.getName())));
+                    getterWithConvert = String.format(getterWithConvert + "!=null ? %s.get%s().toLocalDate() : null",
+                            form.getVarName(), StringUtils.capitalize(item.getName()));
                 }
             }
             if (itemItem.getFormat() == TimeFormat.TIME) {
                 if (item.getIsNonVoid()) {
                     getterWithConvert = String.format("%s.toLocalTime()", getterWithConvert);
                 } else {
-                    getterWithConvert = String.format(
-                            getterWithConvert + String.format("!=null ? %s.toLocalTime() : null",
-                                    StringUtils.capitalize(item.getName())));
+                    getterWithConvert = String.format(getterWithConvert + "!=null ? %s.get%s().toLocalTime() : null",
+                            form.getVarName(), StringUtils.capitalize(item.getName()));
                 }
             }
         }

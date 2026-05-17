@@ -1,0 +1,20 @@
+- name: Note
+  title: 笔记
+  desc: 笔记管理
+  items:
+    - type: text
+      name: noteTitle
+      title: 标题
+      isNonVoid: true
+      maxLength: 200
+    - type: text
+      name: noteContent
+      title: 内容
+      isNonVoid: false
+      isMultilineOrRich: true
+    - type: text
+      name: noteTag
+      title: 标签
+      isNonVoid: false
+      maxLength: 50
+  indices: []

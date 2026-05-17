@@ -1,0 +1,43 @@
+# form-generator time-item integration test config
+domains:
+  - name: time-item
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+
+author: test-author
+javaVersion: "21"
+enableNoModifyAnnounce: false
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+
+# form-generator 专用
+dslPath: forms.yml
+enableDocAnalyzer: false
+
+codeSnippet:
+  pageTypeQualifier: "com.example.common.PageResult"
+  controllerRequestMapping: "/api/v1/${formName}"
+  shortUuidGeneration: "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()"
+  collectionEmptyCheck: "${list} == null || ${list}.isEmpty()"
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

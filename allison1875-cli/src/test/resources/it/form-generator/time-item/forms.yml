@@ -1,0 +1,20 @@
+- name: Event
+  title: 活动
+  desc: 活动管理
+  items:
+    - type: time
+      name: eventDate
+      title: 活动日期
+      isNonVoid: true
+      format: date
+    - type: time
+      name: eventTime
+      title: 活动时刻
+      isNonVoid: false
+      format: time
+    - type: time
+      name: publishTime
+      title: 发布时间
+      isNonVoid: true
+      format: dateTime
+  indices: []

@@ -29,29 +29,34 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 
 ## 字段类型覆盖
 
-### TextItemItTest
+### TextItemItTest ✅ 已完成
 
 - 验证 text 类型字段的全路径处理
-- DDL 中生成 `VARCHAR(n)` 列，n 取自 `maxLength`
-- Req DTO 中字段类型为 `String`，附加 `@NotBlank`（当 `isNonVoid=true`）
-- List API 的 Req 中该字段为模糊匹配过滤条件（单值 `String`）
-- GetDetail API 的 Resp 中该字段正常返回
+- DDL 中生成 `VARCHAR(n)` 列，n 取自 `maxLength`；多行文本生成 `LONGTEXT`
+- SaveReq DTO 中字段类型为 `String`，`isNonVoid=true` 时附加 `@NotBlank`，所有 text 字段附加 `@Size(min=0, max=n)`
+- ListReq 中该字段为模糊匹配过滤条件（单值 `String`），Design Chain 被 query-transformer 转换为 Mapper 调用
+- GetDetailResp 中该字段正常返回
+- 实现日期：2026-05-17
 
-### NumberItemItTest
+### NumberItemItTest ✅ 已完成
 
 - 验证 number 类型字段的完整处理
-- `canBeDecimal=false` + `canBeNegative=false` → DDL 中 `INT`，DTO 中 `Integer` / `Long`
-- `canBeDecimal=true` → DDL 中 `DECIMAL`，DTO 中 `BigDecimal`
-- `canBeNegative=false` → 校验注解包含 `@Min(0)` 或 `@PositiveOrZero`
-- List API 的 Req 中该字段为 `List<Integer>` 列表过滤
+- `canBeDecimal=false` → DDL 中 `BIGINT`，DTO 中 `Long`（`isNonVoid` 时附加 `@NotNull`）
+- `canBeDecimal=true` → DDL 中 `DECIMAL(14, 4)`，DTO 中 `BigDecimal`
+- `canBeDecimal=false` 的字段在 DTO 中附加 `@JsonSerialize(using = ToStringSerializer.class)`（Long → String 防前端精度丢失）
+- ListReq 中为 `List<BigDecimal>` 或 `List<Long>` 列表过滤（`.in()`）
+- 实现日期：2026-05-17
 
-### TimeItemItTest
+### TimeItemItTest ✅ 已完成
 
-- 验证 time 类型字段在不同 `pattern` 下的处理
-- `pattern=date` → DDL 中 `DATETIME`（存储统一为 LocalDateTime），DTO 中 `LocalDate`，附加 `@JsonFormat(pattern="yyyy-MM-dd")`
-- `pattern=dateTime` → DTO 中 `LocalDateTime`，附加 `@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")`
-- `pattern=time` → DTO 中 `LocalTime`，附加 `@JsonFormat(pattern="HH:mm:ss")`
-- List API 的 Req 中生成 `xxxStart` 和 `xxxEnd` 两个范围过滤字段
+- 验证 time 类型字段在不同 `format` 下的处理
+- `format=date` → DDL 中 `DATETIME`（存储统一为 LocalDateTime），DTO 中 `LocalDate`，附加 `@JsonFormat(pattern="yyyy-MM-dd")`
+- `format=dateTime` → DTO 中 `LocalDateTime`，附加 `@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")`
+- `format=time` → DTO 中 `LocalTime`，附加 `@JsonFormat(pattern="HH:mm:ss")`
+- ListReq 中生成 `xxxStart` 和 `xxxEnd` 两个范围过滤字段；query-transformer 将其映射为 Param 中的 `xxx`/`xxxEx`（统一 LocalDateTime 转换）
+- Entity 中 time 字段始终为 `LocalDateTime`（存储层统一）；GetDetailResp / ListResp 通过 `.toLocalDate()` / `.toLocalTime()` 转换
+- 修复了 2 处程序 BUG：`isNonVoid=false` + `format=time/date` 时 null 检查表达式错误使用类名 `EventTime` 而非 getter `event.getEventTime()`
+- 实现日期：2026-05-17
 
 ### SelectItemItTest
 
