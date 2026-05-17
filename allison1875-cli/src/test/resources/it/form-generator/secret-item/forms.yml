@@ -1,0 +1,14 @@
+- name: ApiKey
+  title: API密钥
+  desc: API密钥管理
+  items:
+    - type: text
+      name: apiKeyName
+      title: 密钥名称
+      isNonVoid: true
+      maxLength: 100
+    - type: secret
+      name: apiKeySecret
+      title: 密钥值
+      isNonVoid: true
+  indices: []

@@ -1,0 +1,21 @@
+- name: Student
+  title: 学生
+  desc: 学生管理
+  items:
+    - type: text
+      name: studentName
+      title: 学生姓名
+      isNonVoid: true
+      maxLength: 50
+    - type: multiSelect
+      name: hobbies
+      title: 兴趣爱好
+      isNonVoid: true
+      options:
+        - code: reading
+          title: 阅读
+        - code: sports
+          title: 运动
+        - code: music
+          title: 音乐
+  indices: []

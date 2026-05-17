@@ -1,0 +1,25 @@
+- name: Product
+  title: 产品
+  desc: 产品管理
+  items:
+    - type: select
+      name: productStatus
+      title: 产品状态
+      isNonVoid: true
+      options:
+        - code: draft
+          title: 草稿
+        - code: published
+          title: 已发布
+        - code: archived
+          title: 已归档
+    - type: select
+      name: productCategory
+      title: 产品分类
+      isNonVoid: false
+      options:
+        - code: electronics
+          title: 电子产品
+        - code: clothing
+          title: 服装
+  indices: []

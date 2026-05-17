@@ -58,32 +58,39 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 - 修复了 2 处程序 BUG：`isNonVoid=false` + `format=time/date` 时 null 检查表达式错误使用类名 `EventTime` 而非 getter `event.getEventTime()`
 - 实现日期：2026-05-17
 
-### SelectItemItTest
+### SelectItemItTest ✅ 已完成
 
 - 验证 select 类型字段的枚举生成和引用
 - 生成 `XxxEnum.java` 枚举文件，包含 `code`、`title` 字段和 `of()`、`valid()` 方法
 - DTO 中字段类型引用生成的枚举类型
-- DDL 中列类型为 `VARCHAR`（存储枚举 code）
-- Save API 的 Service 逻辑中包含 `.getCode()` 转换（枚举 → String）
-- GetDetail/List API 的 Service 逻辑中包含 `XxxEnum.of()` 转换（String → 枚举）
+- DDL 中列类型为 `VARCHAR(64)`（存储枚举 code）
+- Save API 的 Service 逻辑中包含 `.getCode()` 转换（枚举 → String）；`isNonVoid=false` 时包含 null 安全判断
+- GetDetail API 的 Service 逻辑中包含 `XxxEnum.of()` 转换（String → 枚举）
+- ListReq 中 select 字段生成 `List<EnumType>` 列表过滤
+- 实现日期：2026-05-17
 
-### MultiSelectItemItTest
+### MultiSelectItemItTest ✅ 已完成
 
 - 验证 multiSelect 类型字段的关联表生成
-- 生成额外的关联表（association form）DDL：`CREATE TABLE xxx_yyy`，包含主表业务主键列和选项 code 列
-- 关联表生成独立的 Entity/Mapper/XML
-- Save API 的 Service 逻辑中包含「先删后建」关联实体的 forEach 循环
-- Delete API 的 Service 逻辑中包含关联表的级联删除
-- GetDetail API 的 Service 逻辑中包含关联表查询 + stream map 转枚举
+- 生成额外的关联表（association form）DDL：`CREATE TABLE student_hobbies`，包含主表业务主键列（`student_code`）和选项 code 列（`hobbies`）
+- 关联表生成独立的 Entity（`StudentHobbiesEntity`）、Mapper（`StudentHobbiesMapper`）、XML
+- Save API 的 Service 逻辑中包含「先删后建」关联实体的 forEach 循环（`studentHobbiesMapper.deleteByStudentCode` → `req.getHobbies().forEach` → `studentHobbiesMapper.insert`）
+- Delete API 的 Service 逻辑中包含关联表的级联删除（Design Chain 被 query-transformer 转为 `studentHobbiesMapper.deleteStudentHobbies` 调用）
+- GetDetail API 的 Service 逻辑中包含关联表查询 + stream map 转枚举（`queryByStudentCode → stream → map(StudentHobbiesEntity::getHobbies) → map(HobbiesEnum::of) → collect`）
+- DTO 中包含 `List<HobbiesEnum>` 类型的字段（SaveReq / GetDetailResp / ListReq），`@NotEmpty` 校验
+- 修复了 1 处断言问题：Delete ServiceImpl 中 Design Chain 已被 query-transformer 转换为 Mapper 调用
+- 实现日期：2026-05-17
 
-### SecretItemItTest
+### SecretItemItTest ✅ 已完成
 
 - 验证 secret 类型字段的特殊处理
-- DDL 中列类型为 `VARCHAR`
-- Save API 的 Req 中包含该字段（供创建时设置）
+- DDL 中列类型为 `VARCHAR(255)`
+- Save API 的 Req 中包含该字段（`String apiKeySecret` + `@NotEmpty`），供创建/编辑时设置
+- Save ServiceImpl 中正常执行 `entity.setApiKeySecret(req.getApiKeySecret())`
 - List API 的 Resp 中**不包含**该字段（secret 不在列表中展示）
 - GetDetail API 的 Resp 中**不包含**该字段（secret 不返回）
 - List API 的 Req 过滤条件中**不包含**该字段
+- 实现日期：2026-05-17
 
 ### OnOffItemItTest
 
