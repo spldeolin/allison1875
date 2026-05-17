@@ -1,0 +1,15 @@
+- name: Note
+  title: 笔记
+  desc: 笔记管理
+  items:
+    - type: text
+      name: title
+      title: 标题
+      isNonVoid: true
+      maxLength: 100
+    - type: text
+      name: content
+      title: 内容
+      isNonVoid: false
+      maxLength: 2000
+  indices: []

@@ -251,25 +251,36 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 
 ## doc-analyzer 集成
 
-### EnableDocAnalyzerItTest
+### EnableDocAnalyzerItTest ✅ 已完成
 
-- 验证 `enableDocAnalyzer=true` 配置时，form-generator 在最后阶段调用 doc-analyzer
-- 生成 API 文档（Markdown 或 DSL），文档内容涵盖 save/list/getDetail/delete 四个 API
-- `mvcHandlerQualifierWildcards` 被自动设置为生成的 Controller 的 handler 范围
+- 验证 `enableDocAnalyzer=true` + `flushTo: [MARKDOWN]` + `markdownDir: api-docs` 配置时，form-generator 在最后阶段调用 doc-analyzer
+- api-docs 目录和 Markdown 文件被正确生成（日志显示 `create markdown file. file=.../api-docs/笔记.md`）
+- 文档包含 4 个 endpoint（日志显示 `endpoints.size=4`），涵盖 saveNote/listNotes/getNoteDetail/deleteNote 四个 API
+- 文档内容包含 HTTP 方法（POST）、请求路径（`/api/v1/note`）、Markdown heading
+- form-generator 主体流程不受影响：DDL/Entity/Controller 等代码文件仍然正常生成
+- 修改了 FormGeneratorItBaseTest 基类，增加了 `markdownDir` 路径解析支持
+- 测试一次通过，无需修复
+- 实现日期：2026-05-17
 
-### DisableDocAnalyzerItTest
+### DisableDocAnalyzerItTest ✅ 已完成
 
-- 验证 `enableDocAnalyzer=false`（或未配置）时，不调用 doc-analyzer
-- 不生成 api-docs / api-dsls 目录
+- 验证 `enableDocAnalyzer=false` 显式配置时，不调用 doc-analyzer
+- api-docs 目录不被生成，但 DDL/Entity/Controller 等代码文件仍然正常生成
+- 测试一次通过
+- 实现日期：2026-05-17
 
 ---
 
 ## 空 DSL 与边界
 
-### EmptyFormsItTest
+### EmptyFormsItTest ✅ 已完成
 
-- 验证 DSL 文件中表单列表为空时，工具正常结束并输出 warn（"no form definitions detected"）
-- 不生成任何文件
+- 验证 DSL 文件中表单列表为空（`[]`）时，工具正常结束不生成文件
+- DDL 文件不被生成
+- Entity/Controller 目录不生成任何实体文件
+- api-docs 目录不被生成
+- 测试一次通过
+- 实现日期：2026-05-17
 
 ---
 

@@ -161,6 +161,13 @@ public abstract class FormGeneratorItBaseTest {
                     resolveFileRelativeToBasedir(basedir, new File(dslPathObj.toString())).getPath());
         }
 
+        // 当 enableDocAnalyzer=true 时，解析 markdownDir 为绝对路径
+        Object markdownDirObj = configMap.get("markdownDir");
+        if (markdownDirObj != null) {
+            configMap.put("markdownDir",
+                    resolveFileRelativeToBasedir(basedir, new File(markdownDirObj.toString())).getPath());
+        }
+
         // 回写yml到磁盘
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
