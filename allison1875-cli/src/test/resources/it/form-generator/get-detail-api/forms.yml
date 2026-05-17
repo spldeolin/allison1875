@@ -1,0 +1,40 @@
+- name: Item
+  title: 物品
+  desc: 物品管理
+  items:
+    - type: text
+      name: itemName
+      title: 物品名称
+      isNonVoid: true
+      maxLength: 80
+    - type: number
+      name: quantity
+      title: 数量
+      isNonVoid: false
+      canBeDecimal: false
+    - type: number
+      name: unitPrice
+      title: 单价
+      isNonVoid: false
+      canBeDecimal: true
+    - type: select
+      name: category
+      title: 分类
+      isNonVoid: true
+      options:
+        - code: food
+          title: 食品
+        - code: electronics
+          title: 电子产品
+        - code: clothing
+          title: 服装
+    - type: onOff
+      name: isActive
+      title: 是否启用
+      isNonVoid: false
+    - type: text
+      name: remark
+      title: 备注
+      isNonVoid: false
+      maxLength: 500
+  indices: []

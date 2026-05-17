@@ -1,0 +1,15 @@
+- name: Product
+  title: 产品
+  desc: 产品管理
+  items:
+    - type: text
+      name: productName
+      title: 产品名
+      isNonVoid: true
+      maxLength: 100
+    - type: number
+      name: stock
+      title: 库存
+      isNonVoid: true
+      canBeDecimal: false
+  indices: []

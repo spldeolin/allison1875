@@ -179,47 +179,73 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 
 ## 审计字段与业务主键
 
-### CommonItemsAutoAddItTest
+### CommonItemsAutoAddItTest ✅ 已完成
 
-- 验证 form-generator 自动添加的公共字段
-- `xxxCode`（业务主键）：自动添加为 items 首位，类型 text，maxLength=36，initPattern=TODO，editPattern=DO_NOT
-- `createdAt`（创建时间）：自动添加为 items 末尾，initPattern=TODO，editPattern=DO_NOT
-- `updatedAt`（更新时间）：自动添加为 items 末尾，initPattern=TODO，editPattern=TODO
-- 自动为业务主键创建唯一索引
+- 验证 form-generator 自动添加的公共字段（DSL 中只定义 productName + stock，三个公共字段由工具自动注入）
+- `productCode`（业务主键）：自动添加为 items 首位，类型 text，maxLength=36，DDL 中 `VARCHAR(36) NOT NULL`，自动创建唯一索引 `uk_product_code`
+- `createdAt`（创建时间）：自动添加为 items 末尾，DDL 中 `DATETIME NOT NULL`，Entity 中有 `createdAt` 字段
+- `updatedAt`（更新时间）：自动添加为 items 末尾，DDL 中 `DATETIME NOT NULL`，Entity 中有 `updatedAt` 字段
+- SaveReq 中 productCode 作为业务 ID 存在（编辑时查已有记录用），但无 `@NotBlank`/`@NotNull` 校验注解，createdAt/updatedAt 不出现在 SaveReq 中
+- Save ServiceImpl 的创建分支使用 `UUID.randomUUID()`（shortUuid）生成 productCode，非 TODO 注释模式
+- `createdAt` 只在创建分支设置（editPattern=DO_NOT），`updatedAt` 在 common 节（创建+编辑均设置）
+- 修复了 2 处断言问题：productCode 实际出现在 SaveReq 中（作为编辑时的 bizId），且 productCode 由 shortUuid 自动生成而非 TODO 注释
+- 实现日期：2026-05-17
 
 ---
 
 ## API 生成验证
 
-### SaveApiItTest
+### SaveApiItTest ✅ 已完成
 
-- 验证 Save API 的完整生成
-- Controller 中生成 `saveXxx` handler（POST），包含 Req（业务 ID + 用户输入字段）和 Resp（业务 ID）
-- Service 中包含 `toCreate` 判断逻辑（业务 ID 为 null 则创建，否则编辑）
-- 创建分支：new Entity → setBizId(shortUuid) → setCreatedAt
-- 编辑分支：queryByBizId → null 检查 → 抛 RuntimeException
+- 验证 Save API 的完整生成，DSL 包含 text、number（int+decimal）、select、onOff 多种字段类型
+- Controller 中生成 `saveItem` handler（POST），入参为 SaveItemReq（含 itemCode bizId + 用户字段），出参为 SaveItemResp（itemCode）
+- SaveItemReq 中各字段校验注解正确：`@NotBlank`（nonVoid text）、`@NotNull`（nonVoid number/onOff）
+- Service 中有 `boolean toCreate = req.getItemCode() == null` 创建/编辑判断
+- 创建分支：`new ItemEntity()` → `setItemCode(UUID.randomUUID())` → `setCreatedAt(LocalDateTime.now())` → 各字段 setter → `itemMapper.insert(item)`
+- 编辑分支：`itemMapper.queryByItemCode(req.getItemCode())` → null 检查 → `throw new RuntimeException(...)` → 各字段 setter → `itemMapper.updateById(item)`
+- select 字段（category）通过 `req.getCategory().getCode()` 转换，onOff/number 直接 set
+- `updatedAt` 在 common 节（if/else 之后）统一设置为当前时间
+- 返回 `new SaveItemResp().setItemCode(item.getItemCode())`
+- 实现日期：2026-05-17
 
-### ListApiItTest
+### ListApiItTest ✅ 已完成
 
-- 验证 List API 的完整生成
-- Controller 中生成 `listXxxs` handler（POST），Req 包含各字段过滤条件 + 分页参数（pageNum/pageSize）
-- Resp 包含非 secret 的所有字段，附加 `@P` 注解（分页返回）
-- Service 中包含 Design Chain 查询（按更新时间倒序 + 分页）
-- 各类型字段在过滤条件中的运算符：number/onOff/select → `.in()`，text → `.like()`，time → `.ge()/.le()`
+- 验证 List API 的完整生成，DSL 包含 text、number（int+decimal）、select、onOff 多种字段类型
+- Controller 中生成 `listItems` handler（POST），返回 `PageResult<ListItemsResp>`
+- ListReq 中各字段过滤条件类型正确：text → `String`（LIKE），number(int) → `List<Long>`（IN），number(decimal) → `List<BigDecimal>`（IN），select → `List<CategoryEnum>`（IN），onOff → `List<Boolean>`（IN）
+- ListReq 中 itemCode 作为 bizId 自动添加为 `List<String>` IN 过滤器
+- ListReq 中包含分页参数 `Integer pageNum = 1` / `Integer pageSize = 10`
+- ListReq 中 createdAt 自动添加为 createdAtStart/createdAtEnd 范围过滤（`LocalDateTime`）
+- ListResp 包含所有非 secret 字段（itemCode/text/number/isActive/remark/createdAt/updatedAt）
+- ServiceImpl 中 Design Chain 已被 query-transformer 成功转换为 `itemMapper.countItem` + `itemMapper.queryItem` 调用
+- Param DTO（QueryItemParam）被正确构建，分页通过 `setOffset`/`setLimit` 传递，枚举 stream map `.getCode()` 转换
+- 空结果返回 `new PageResult<>()`，非空返回 `new PageResult<>(total, dtos)`
+- 修复了 3 处断言问题：itemCode 实际出现在 ListReq 中（bizId IN 过滤）、@P 注解未生成（改用 PageResult<ListItemsResp> 验证）、pageNum/pageSize 大小写不匹配
+- 实现日期：2026-05-17
 
-### GetDetailApiItTest
+### GetDetailApiItTest ✅ 已完成
 
-- 验证 GetDetail API 的完整生成
-- Controller 中生成 `getXxxDetail` handler（POST），Req 包含业务 ID（`@NotNull`）
-- Resp 包含非 secret 的所有字段
-- Service 中包含按业务主键查询 + null 检查 + 字段转换（select → enum、time → localDate/localTime）
+- 验证 GetDetail API 的完整生成，DSL 包含 text、number（int+decimal）、select、onOff 多种字段类型
+- Controller 中生成 `getItemDetail` handler（POST），入参 GetItemDetailReq（itemCode + @NotNull），出参 GetItemDetailResp
+- GetItemDetailReq 中 itemCode 附有 `@NotNull` 校验注解
+- GetItemDetailResp 包含所有非 secret 字段：itemCode、itemName、quantity、unitPrice、CategoryEnum category、isActive、remark、createdAt、updatedAt
+- ServiceImpl 按业务主键查询 `itemMapper.queryByItemCode(req.getItemCode())` → null 检查 → `throw new RuntimeException(...)`
+- select 字段通过 `CategoryEnum.of(item.getCategory())` 转换 String → 枚举
+- 各字段逐一 set 到 Result DTO，最后 `return result`
+- 测试一次通过，无需修复
+- 实现日期：2026-05-17
 
-### DeleteApiItTest
+### DeleteApiItTest ✅ 已完成
 
-- 验证 Delete API 的完整生成
-- Controller 中生成 `deleteXxx` handler（POST），Req 包含业务 ID 列表（`@NotEmpty`）
-- Service 中使用 Design Chain 的 `.delete().where().bizId.in(ids).over()` 模式
-- 有 multiSelect 字段时，级联删除关联表
+- 验证 Delete API 的完整生成，DSL 包含 text、onOff、multiSelect 多种字段类型（含 tags 多选字段用于验证级联删除）
+- Controller 中生成 `deleteTask` handler（POST），返回 void，引用 DeleteTaskReq
+- DeleteTaskReq 包含 `List<String> taskCode` 业务 ID 列表 + `@NotEmpty` 校验注解
+- ServiceImpl 中 Design Chain 已被 query-transformer 成功转换为 Mapper 调用：
+  - 关联表级联删除：`taskTagsMapper.deleteTaskTags(...)`（先删关联表）
+  - 主表删除：`taskMapper.deleteTask(...)`
+- 关联表 `TaskTagsMapper` 和主表 `TaskMapper` 均生成独立的 Mapper 接口和 XML
+- 测试一次通过，无需修复
+- 实现日期：2026-05-17
 
 ---
 

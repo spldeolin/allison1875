@@ -1,0 +1,30 @@
+- name: Task
+  title: 任务
+  desc: 任务管理
+  items:
+    - type: text
+      name: taskName
+      title: 任务名称
+      isNonVoid: true
+      maxLength: 100
+    - type: text
+      name: description
+      title: 任务描述
+      isNonVoid: false
+      maxLength: 500
+    - type: onOff
+      name: isCompleted
+      title: 是否完成
+      isNonVoid: false
+    - type: multiSelect
+      name: tags
+      title: 标签
+      isNonVoid: false
+      options:
+        - code: urgent
+          title: 紧急
+        - code: important
+          title: 重要
+        - code: low
+          title: 低优先级
+  indices: []
