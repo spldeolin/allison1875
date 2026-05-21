@@ -175,7 +175,7 @@ public class MavenProjectClassLoaderUtils {
 
             // 从临时文件中读取 classpath 字符串
             String classpath = Files.readString(cpOutputFile.toPath(), StandardCharsets.UTF_8).trim();
-            log.debug("resolved classpath:\n{}", classpath);
+            log.debug("resolved classpath: {}", classpath);
 
             if (classpath.isEmpty()) {
                 log.warn("dependency:build-classpath returned empty classpath for: {}", mavenModuleDir);
