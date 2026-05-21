@@ -35,7 +35,7 @@ database schema, or YAML form DSL.
 allison1875/                            (parent POM, version 14.0-SNAPSHOT)
 ├── common/                             Core: AST forest, config, DI, utilities, base services
 ├── allison1875-support/                Runtime dependency for target projects (@L, @P annotations)
-├── allison1875-cli/                    CLI entry point (Bootstrap.main + JUnit 5 IT host)
+├── allison1875-cli/                    CLI entry point (Entrypoint.main + JUnit 5 IT host)
 ├── handler-transformer/                DSL → Controller + Service + DTO
 ├── persistence-generator/              DB table → Entity + Mapper + Mapper XML + Design
 ├── query-transformer/                  QueryChain DSL → MyBatis CRUD + SQL
@@ -46,7 +46,7 @@ allison1875/                            (parent POM, version 14.0-SNAPSHOT)
 
 ### 1.2 Application Entry Points & Main Loop
 
-**CLI Entry (`allison1875-cli/.../Bootstrap.java`):**
+**CLI Entry (`allison1875-cli/.../Entrypoint.java`):**
 ```bash
 allison1875 --tool=<toolName> [--domain=<domainName>] --config=<path/to/.allison1875.yml>
 ```
@@ -61,7 +61,7 @@ Allison1875.letsGo(ToolEnum tool, Config config, String domainName)
     → injector.getInstance(MainService).process()
 ```
 
-**Bootstrap CLI argument format** (parsed by `Bootstrap.parseArgs`, prefix-based, order-agnostic):
+**Entrypoint CLI argument format** (parsed by `Entrypoint.parseArgs`, prefix-based, order-agnostic):
 - `--tool=<toolName>` — required. Resolved via `ToolEnum.of(...)`. Valid names:
   `doc-analyzer`, `handler-transformer`, `persistence-generator`, `query-transformer`,
   `star-transformer`, `form-generator`.
@@ -71,7 +71,7 @@ Allison1875.letsGo(ToolEnum tool, Config config, String domainName)
   required when multiple are defined. Matches `DomainConfig.name`.
 
 **Lifecycle (per CLI invocation):**
-1. `Bootstrap.main` parses args → resolves `ToolEnum`, loads `Config` from YAML.
+1. `Entrypoint.main` parses args → resolves `ToolEnum`, loads `Config` from YAML.
 2. `Allison1875.letsGo` resolves the target `DomainConfig` from `config.domains`.
 3. Each `*Module` field on the `DomainConfig` (controllerModule, dtoModule, enumModule,
    serviceModule, serviceImplModule, persistenceModule) is converted into a `*SourceRoot`
@@ -110,7 +110,7 @@ per-domain package/source-root metadata needed at every step.
 | **Guice Modules**    | Tool name + `Module`           | `HandlerTransformerModule`, `PersistenceGeneratorModule`                  |
 | **Config classes**   | Descriptive + `Config`         | `Config`, `DomainConfig`                                                  |
 | **Context classes**  | Descriptive + `Context`        | `AstForestContext`, `DomainContext` (ThreadLocal holders)                 |
-| **CLI / Entry**      | Short noun                     | `Bootstrap` (CLI main class)                                              |
+| **CLI / Entry**      | Short noun                     | `Entrypoint` (CLI main class)                                              |
 | **Utility classes**  | Plural noun + `Utils`          | `JsonUtils`, `CompilationUnitUtils`, `MoreStringUtils`, `CollectionUtils`|
 | **Constants**        | `UPPER_SNAKE_CASE`             | `SINGLE_INDENT`, `NEW_LINE`, `LOT_NO_ANNOUNCE_PREFIXION`                |
 | **Variables/Fields** | lowerCamelCase                 | `mvcControllerService`, `astForest`, `initDecAnalysis`                   |
@@ -139,7 +139,7 @@ com.spldeolin.allison1875.<toolname>/
 └── util/                              # Module-specific utilities (if any)
 ```
 
-`allison1875-cli` is the only module without a `MainService`; it owns just `Bootstrap` plus the
+`allison1875-cli` is the only module without a `MainService`; it owns just `Entrypoint` plus the
 `it/<toolname>/` JUnit 5 IT trees.
 
 ### 2.3 Header/Footer Standards
@@ -346,7 +346,7 @@ into proper import statements.
 - Any `Throwable` from `MainService.process()` is logged at `error` and wrapped in
   `Allison1875Exception`.
 - IO errors: wrap `IOException` in `UncheckedIOException` or `Allison1875Exception`.
-- Bootstrap-level argument errors: throw `Allison1875Exception` with a Chinese user-facing message.
+- Entrypoint-level argument errors: throw `Allison1875Exception` with a Chinese user-facing message.
 
 ### 4.4 File Snapshot & Rollback
 
@@ -448,7 +448,7 @@ mvn verify
 ```
 
 The `allison1875-cli` module produces a fat jar (`allison1875-cli/target/allison1875.jar`)
-via `maven-shade-plugin` with `Bootstrap` as the manifest `Main-Class`.
+via `maven-shade-plugin` with `Entrypoint` as the manifest `Main-Class`.
 
 ### 5.2 Installing the CLI Globally
 
@@ -586,7 +586,7 @@ public class Xxx implements Allison1875MainService {
 //        with a default value pointing at the new Module FQN.
 //    (b) Add an entry to ToolEnum:
 //          XXX("xxx", Config::getXxxModule, false)
-//    (c) Add the new Maven module to allison1875-cli's <dependencies> so Bootstrap can
+//    (c) Add the new Maven module to allison1875-cli's <dependencies> so Entrypoint can
 //        Class.forName the new Module.
 //    (d) (Optional) Add an IT base class XxxItBaseTest under
 //        allison1875-cli/src/test/java/.../it/xxx/, mirroring DocAnalyzerItBaseTest.
@@ -627,7 +627,7 @@ class extends a tool-specific base (`<Tool>ItBaseTest`) which:
    (`*Module`, `markdownDir`, `dslDir`, `dependencyDirs`, `mapperXmlDirs`, …) into an absolute
    path under `basedir`, then writes the YAML back.
 3. Builds CLI args (`--tool=...`, `--config=...`, optional `--domain=...`) and calls
-   `Bootstrap.main(args)` in the same JVM.
+   `Entrypoint.main(args)` in the same JVM.
 4. Saves and restores the thread context ClassLoader because `DefaultAstForest` swaps it for an
    IT-scoped `URLClassLoader` and the post-test assertions need the original to load
    classpath resources (`allison1875-git.properties` etc.).
@@ -666,7 +666,7 @@ allison1875-cli/src/test/resources/it/<tool>/<caseName>/
   (covers `common`, `doc-analyzer`, `handler-transformer`, `persistence-generator`,
   `query-transformer`, `star-transformer`, `form-generator` because they are all Maven
   dependencies of `allison1875-cli`).
-- Because every IT case calls `Bootstrap.main(...)` in the same JVM as the JUnit runner, all
+- Because every IT case calls `Entrypoint.main(...)` in the same JVM as the JUnit runner, all
   tool code paths are covered without subprocess instrumentation.
 
 **Output locations:**
@@ -690,10 +690,10 @@ particular, they describe how the `DomainConfig.*Module` fields must be set up.
 **Key rules for IT development:**
 - `*Module` paths in `.allison1875.yml` MUST be relative inside the resource case dir —
   the base class converts them to absolute. Never check in absolute paths.
-- Always restore the thread context ClassLoader after `Bootstrap.main` (the base class does this
-  for you; do not call `Bootstrap.main` directly without the wrapper).
+- Always restore the thread context ClassLoader after `Entrypoint.main` (the base class does this
+  for you; do not call `Entrypoint.main` directly without the wrapper).
 - `target/it/<caseName>/` is regenerated on every test run; never reference it from another test.
-- New ITs must extend the appropriate `<Tool>ItBaseTest`, not invoke `Bootstrap` ad hoc.
+- New ITs must extend the appropriate `<Tool>ItBaseTest`, not invoke `Entrypoint` ad hoc.
 - Run `mvn install -DskipTests` from the repo root after touching tool source code, otherwise
   the cli-side IT will reflect on stale Module class bytes in your local Maven repo.
 
@@ -716,7 +716,7 @@ particular, they describe how the `DomainConfig.*Module` fields must be set up.
 - The tool GENERATES code for Spring projects but does NOT run on Spring itself.
 
 ### 6.3 Safety Rules
-- NEVER modify `Allison1875.java`, `Allison1875Module.java`, or `Bootstrap.java` without
+- NEVER modify `Allison1875.java`, `Allison1875Module.java`, or `Entrypoint.java` without
   understanding the full Guice + DomainContext lifecycle.
 - NEVER bypass `importExprService.extractQualifiedTypeToImport(cu)` before calling
   `CompilationUnitUtils.writeJava(cu)`.

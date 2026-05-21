@@ -14,10 +14,12 @@ import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * CLI 主入口。
+ *
  * @author Deolin 2026-05-10
  */
 @Slf4j
-public class Bootstrap {
+public class Entrypoint {
 
     public static void main(String[] args) {
         // 打印banner

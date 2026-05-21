@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import com.spldeolin.allison1875.cli.Bootstrap;
+import com.spldeolin.allison1875.cli.Entrypoint;
 
 /**
  * query-transformer集成测试基类。
@@ -28,9 +28,9 @@ import com.spldeolin.allison1875.cli.Bootstrap;
  * <p>封装了通用流程：
  * ①将 test/resources/it/query-transformer/{caseName}/ 下的测试资源递归拷贝到 target/it/qt-{caseName}/ 临时工作目录；
  * ②读取 .allison1875.yml 并将所有相对路径（*Module、mapperXmlDirs）解析为绝对路径后回写yml；
- * ③调用 {@link Bootstrap#main(String[])} 先执行persistence-generator生成Entity/Design/Mapper/XML；
+ * ③调用 {@link Entrypoint#main(String[])} 先执行persistence-generator生成Entity/Design/Mapper/XML；
  * ④将 src/main/java-qt/ 下的源码拷贝到 src/main/java/（模拟原invoker中maven-resources-plugin的copy-qt-sources）；
- * ⑤调用 {@link Bootstrap#main(String[])} 再执行query-transformer解析Design DSL链并转换为Mapper调用；
+ * ⑤调用 {@link Entrypoint#main(String[])} 再执行query-transformer解析Design DSL链并转换为Mapper调用；
  * ⑥子类通过 {@link #basedir} 引用临时工作目录，在 @Test 方法中编写断言。
  *
  * <p>与 PersistenceGeneratorItBaseTest 的区别：
@@ -73,7 +73,7 @@ public abstract class QueryTransformerItBaseTest {
             if (domainName != null && !domainName.isEmpty()) {
                 pgArgs.add("--domain=" + domainName);
             }
-            Bootstrap.main(pgArgs.toArray(new String[0]));
+            Entrypoint.main(pgArgs.toArray(new String[0]));
 
             // 4. 将 java-qt/ 下的源码拷贝到 src/main/java/（模拟maven-resources-plugin的copy-qt-sources）
             copyJavaQtToJava(basedir);
@@ -89,7 +89,7 @@ public abstract class QueryTransformerItBaseTest {
             if (domainName != null && !domainName.isEmpty()) {
                 qtArgs.add("--domain=" + domainName);
             }
-            Bootstrap.main(qtArgs.toArray(new String[0]));
+            Entrypoint.main(qtArgs.toArray(new String[0]));
         } finally {
             Thread.currentThread().setContextClassLoader(originalClassLoader);
         }

@@ -15,7 +15,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assumptions;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import com.spldeolin.allison1875.cli.Bootstrap;
+import com.spldeolin.allison1875.cli.Entrypoint;
 
 /**
  * persistence-generator MySQL 集成测试基类。
@@ -61,7 +61,7 @@ public abstract class PersistenceGeneratorMySqlItBaseTest extends PersistenceGen
      * ②在 MySQL 中创建测试表；
      * ③拷贝测试资源到临时目录；
      * ④解析 yml 路径并注入 MySQL 连接配置；
-     * ⑤调用 Bootstrap 执行 persistence-generator；
+     * ⑤调用 Entrypoint 执行 persistence-generator；
      * ⑥清理测试表。
      */
     @Override
@@ -102,7 +102,7 @@ public abstract class PersistenceGeneratorMySqlItBaseTest extends PersistenceGen
             File configFile = resolveAndRewriteConfig(basedir);
             injectMySqlConfig(configFile);
 
-            // 5. 组装CLI参数并调用Bootstrap.main()
+            // 5. 组装CLI参数并调用Entrypoint.main()
             List<String> args = new ArrayList<>();
             args.add("--tool=persistence-generator");
             args.add("--config=" + configFile.getAbsolutePath());
@@ -112,7 +112,7 @@ public abstract class PersistenceGeneratorMySqlItBaseTest extends PersistenceGen
 
             ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
             try {
-                Bootstrap.main(args.toArray(new String[0]));
+                Entrypoint.main(args.toArray(new String[0]));
             } finally {
                 Thread.currentThread().setContextClassLoader(originalClassLoader);
             }

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import com.spldeolin.allison1875.cli.Bootstrap;
+import com.spldeolin.allison1875.cli.Entrypoint;
 
 /**
  * doc-analyzer集成测试基类。
@@ -28,7 +28,7 @@ import com.spldeolin.allison1875.cli.Bootstrap;
  * <p>封装了通用流程：
  * ①将 test/resources/it/doc-analyzer/{caseName}/ 下的测试资源递归拷贝到 target/it/{caseName}/ 临时工作目录；
  * ②读取 .allison1875.yml 并将所有相对路径（*Module、markdownDir、dslDir、dependencyDirs）解析为绝对路径后回写yml；
- * ③组装CLI参数并调用 {@link Bootstrap#main(String[])} 执行doc-analyzer；
+ * ③组装CLI参数并调用 {@link Entrypoint#main(String[])} 执行doc-analyzer；
  * ④子类通过 {@link #basedir} 引用临时工作目录，在 @Test 方法中编写断言。
  *
  * @author Deolin 2026-05-13
@@ -57,7 +57,7 @@ public abstract class DocAnalyzerItBaseTest {
         // 2. 解析yml中的相对路径为绝对路径并回写
         File configFile = resolveAndRewriteConfig(basedir);
 
-        // 3. 组装CLI参数并调用Bootstrap.main()
+        // 3. 组装CLI参数并调用Entrypoint.main()
         List<String> args = new ArrayList<>();
         args.add("--tool=doc-analyzer");
         args.add("--config=" + configFile.getAbsolutePath());
@@ -65,11 +65,11 @@ public abstract class DocAnalyzerItBaseTest {
             args.add("--domain=" + domainName);
         }
 
-        // 保存当前线程的context classloader，Bootstrap→DefaultAstForest会替换它为IT case的URLClassLoader，
+        // 保存当前线程的context classloader，Entrypoint→DefaultAstForest会替换它为IT case的URLClassLoader，
         // 导致后续测试中Resources.getResource()找不到allison1875-git.properties等classpath资源
         ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            Bootstrap.main(args.toArray(new String[0]));
+            Entrypoint.main(args.toArray(new String[0]));
         } finally {
             Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
@@ -121,7 +121,7 @@ public abstract class DocAnalyzerItBaseTest {
 
     /**
      * 读取 .allison1875.yml（以Map模式），将所有相对路径解析为绝对路径后回写到磁盘。
-     * 回写后的yml可以直接被 Bootstrap.main() 加载并正确执行。
+     * 回写后的yml可以直接被 Entrypoint.main() 加载并正确执行。
      *
      * <p>使用Map模式加载和回写，避免 SnakeYAML 的 JavaBean 序列化问题（类型标签、File无参构造器等）。
      */
