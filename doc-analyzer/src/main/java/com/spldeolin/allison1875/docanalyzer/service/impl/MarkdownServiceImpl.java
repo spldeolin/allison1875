@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.IntegerSchema;
@@ -62,7 +62,8 @@ public class MarkdownServiceImpl implements MarkdownService {
             }
             File md = new File(dirPath + File.separator + sanitizeFileName(categorizedMd.getDirectCategory()) + ".md");
             try {
-                FileUtils.writeStringToFile(md, categorizedMd.getContent(), StandardCharsets.UTF_8);
+                Files.createDirectories(md.toPath().getParent());
+                Files.writeString(md.toPath(), categorizedMd.getContent(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

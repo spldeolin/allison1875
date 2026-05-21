@@ -2,26 +2,14 @@ package com.spldeolin.allison1875.common.service.impl;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclaration;
-import com.github.javaparser.resolution.types.ResolvedReferenceType;
-import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.CodeGenerationUtils;
-import com.github.javaparser.utils.Pair;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
@@ -31,7 +19,6 @@ import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
-import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +54,7 @@ public class DataModelServiceImpl implements DataModelService {
                 String oldClassName = className;
                 log.info("Entity [{}] is exist, use [rename] resolution", oldClassName);
                 absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
-                className = FilenameUtils.getBaseName(absulutePath.toString());
+                className = absulutePath.getFileName().toString().replaceFirst("\\.[^.]+$", "");
             } else {
                 throw new Allison1875Exception(
                         "unknown FileExistenceResolutionEnum [" + arg.getDataModelExistenceResolution() + "]");

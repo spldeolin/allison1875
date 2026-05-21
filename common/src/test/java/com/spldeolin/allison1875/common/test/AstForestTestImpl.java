@@ -3,18 +3,15 @@ package com.spldeolin.allison1875.common.test;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
-import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -60,10 +57,13 @@ public class AstForestTestImpl implements AstForest {
     @Override
     public Iterator<CompilationUnit> iterator() {
         // java files
-        Iterator<File> javaFilesItr = FileUtils.iterateFiles(sourceRoot, new String[]{"java"}, true);
-        // cus
-        Iterator<CompilationUnit> cusItr = Iterators.transform(javaFilesItr, CompilationUnitUtils::parseJava);
-        return cusItr;
+        try (var walk = Files.walk(sourceRoot.toPath())) {
+            var cus = walk.filter(p -> p.getFileName().toString().endsWith(".java"))
+                    .map(p -> CompilationUnitUtils.parseJava(p.toFile())).toList();
+            return cus.iterator();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 }

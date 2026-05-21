@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -107,7 +107,8 @@ public class FormGenerator implements Allison1875MainService {
         Path ddlSql = Paths.get(DomainContext.get().getPersistenceModule()).resolve("sql/ddl.sql");
         log.info("build ddl.sql, path={}", ddlSql.normalize());
         try {
-            FileUtils.writeStringToFile(ddlSql.toFile(), ddl, StandardCharsets.UTF_8);
+            Files.createDirectories(ddlSql.getParent());
+            Files.writeString(ddlSql, ddl, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -223,7 +224,7 @@ public class FormGenerator implements Allison1875MainService {
 
     private List<FormDef> deserializeDSL() {
         try {
-            return new YAMLMapper().readValue(FileUtils.readFileToString(config.getDslPath(), StandardCharsets.UTF_8),
+            return new YAMLMapper().readValue(Files.readString(config.getDslPath().toPath(), StandardCharsets.UTF_8),
                     new TypeReference<List<FormDef>>() {
                     });
         } catch (IOException e) {

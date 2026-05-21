@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import lombok.extern.slf4j.Slf4j;
 
@@ -174,7 +174,7 @@ public class MavenProjectClassLoaderUtils {
             }
 
             // 从临时文件中读取 classpath 字符串
-            String classpath = FileUtils.readFileToString(cpOutputFile, StandardCharsets.UTF_8).trim();
+            String classpath = Files.readString(cpOutputFile.toPath(), StandardCharsets.UTF_8).trim();
             log.debug("resolved classpath:\n{}", classpath);
 
             if (classpath.isEmpty()) {
@@ -277,7 +277,7 @@ public class MavenProjectClassLoaderUtils {
             }
             // 检查父目录的pom.xml是否是聚合模块（包含<modules>标签）
             try {
-                String pomContent = FileUtils.readFileToString(parentPom, StandardCharsets.UTF_8);
+                String pomContent = Files.readString(parentPom.toPath(), StandardCharsets.UTF_8);
                 if (!pomContent.contains("<modules>")) {
                     break;
                 }

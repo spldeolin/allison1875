@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -26,10 +26,15 @@ public class XmlSourceFile {
     public XmlSourceFile(File file) {
         this.file = file;
         try {
-            this.contentLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
+            this.contentLines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public XmlSourceFile(File file, List<String> list) {
+        this.file = file;
+        this.contentLines = list;
     }
 
 }

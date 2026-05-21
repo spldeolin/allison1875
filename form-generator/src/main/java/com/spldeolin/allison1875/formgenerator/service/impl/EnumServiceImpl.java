@@ -6,7 +6,6 @@ import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseM
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
@@ -62,7 +61,7 @@ public class EnumServiceImpl implements EnumService {
                         enumName + ".java");
                 // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
 //                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
-                enumName = FilenameUtils.getBaseName(absulutePath.toString());
+                enumName = absulutePath.getFileName().toString().replaceFirst("\\.[^.]+$", "");
 
                 // 枚举
                 CompilationUnit cu = new CompilationUnit();
@@ -111,7 +110,7 @@ public class EnumServiceImpl implements EnumService {
                     DomainContext.get().getEnumPackage(), enumName + ".java");
             // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
 //                absulutePath = antiDuplicationService.getNewPathIfExist(absulutePath);
-            enumName = FilenameUtils.getBaseName(absulutePath.toString());
+            enumName = absulutePath.getFileName().toString().replaceFirst("\\.[^.]+$", "");
 
             // 枚举
             CompilationUnit cu = new CompilationUnit();

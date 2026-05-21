@@ -1,10 +1,13 @@
 package com.spldeolin.allison1875.docanalyzer.service.impl;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
+import java.util.stream.Stream;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -21,7 +24,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
@@ -107,16 +109,22 @@ public class FieldServiceImpl implements FieldService {
         if (!primarySourceRoot.exists()) {
             return retval;
         }
-        FileUtils.iterateFiles(primarySourceRoot,
-                BaseConstant.JAVA_EXTENSIONS, true).forEachRemaining(retval::add);
+        try (Stream<Path> walk = Files.walk(primarySourceRoot.toPath())) {
+            walk.filter(p -> p.getFileName().toString().endsWith(".java")).forEach(p -> retval.add(p.toFile()));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         // dependent dirs or javas
         for (File dirOrJavaFile : config.getDependencyDirsOrJavaFilePath()) {
             if (dirOrJavaFile.exists()) {
                 if (dirOrJavaFile.isDirectory()) {
-                    FileUtils.iterateFiles(dirOrJavaFile, BaseConstant.JAVA_EXTENSIONS, true)
-                            .forEachRemaining(retval::add);
-                }
-                if (FilenameUtils.getExtension(dirOrJavaFile.getPath()).equals(BaseConstant.JAVA_EXTENSIONS[0])) {
+                    try (Stream<Path> walk = Files.walk(dirOrJavaFile.toPath())) {
+                        walk.filter(p -> p.getFileName().toString().endsWith(".java"))
+                                .forEach(p -> retval.add(p.toFile()));
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                } else if (dirOrJavaFile.getName().endsWith(".java")) {
                     retval.add(dirOrJavaFile);
                 }
             }

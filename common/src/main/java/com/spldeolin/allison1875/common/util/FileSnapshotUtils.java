@@ -7,12 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -148,7 +148,7 @@ public class FileSnapshotUtils {
                                         log.debug("删除新增目录: {}", relativePath);
                                     } catch (IOException e) {
                                         // 如果目录不为空，使用递归删除
-                                        FileUtils.deleteDirectory(fullPath.toFile());
+                                        deleteDirectory(fullPath);
                                         log.debug("递归删除新增目录: {}", relativePath);
                                     }
                                 } else {
@@ -189,7 +189,7 @@ public class FileSnapshotUtils {
                                 } else {
                                     // 检查文件是否被修改
                                     String currentHash = calculateFileHash(currentPath);
-                                    if (!originalInfo.getHash().equals(currentHash)) {
+                                    if (!originalInfo.hash().equals(currentHash)) {
                                         needRestore = true;
                                         log.debug("恢复被修改的文件: {}", relativePath);
                                     }
@@ -226,6 +226,21 @@ public class FileSnapshotUtils {
      */
     public static void rollback(FileSystemSnapshot snapshot) {
         rollback(snapshot, true);
+    }
+
+    /**
+     * 递归删除目录
+     */
+    private static void deleteDirectory(Path dir) throws IOException {
+        try (Stream<Path> walk = Files.walk(dir)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.delete(p);
+                } catch (IOException e) {
+                    throw new RuntimeException("无法删除: " + p, e);
+                }
+            });
+        }
     }
 
     /**
@@ -305,7 +320,7 @@ public class FileSnapshotUtils {
         public void cleanup() {
             try {
                 if (Files.exists(snapshotDir)) {
-                    FileUtils.deleteDirectory(snapshotDir.toFile());
+                    deleteDirectory(snapshotDir);
                     log.debug("快照临时目录已清理: {}", snapshotDir);
                 }
             } catch (IOException e) {
@@ -323,49 +338,20 @@ public class FileSnapshotUtils {
 
     /**
      * 文件信息类，记录文件的元数据和内容哈希
+     *
+     * @param hash 文件内容哈希，目录为null
      */
-    public static class FileInfo {
-
-        private final boolean isDirectory;
-
-        private final String hash; // 文件内容哈希，目录为null
-
-        private final long lastModified;
-
-        private final long size;
-
-        public FileInfo(boolean isDirectory, String hash, long lastModified, long size) {
-            this.isDirectory = isDirectory;
-            this.hash = hash;
-            this.lastModified = lastModified;
-            this.size = size;
-        }
-
-        public boolean isDirectory() {
-            return isDirectory;
-        }
-
-        public String getHash() {
-            return hash;
-        }
-
-        public long getLastModified() {
-            return lastModified;
-        }
-
-        public long getSize() {
-            return size;
-        }
+        public record FileInfo(boolean isDirectory, String hash, long lastModified, long size) {
 
         @Override
-        public String toString() {
-            if (isDirectory) {
-                return String.format("Directory{lastModified=%d}", lastModified);
-            } else {
-                return String.format("File{hash='%s', size=%d, lastModified=%d}", hash, size, lastModified);
+            public String toString() {
+                if (isDirectory) {
+                    return String.format("Directory{lastModified=%d}", lastModified);
+                } else {
+                    return String.format("File{hash='%s', size=%d, lastModified=%d}", hash, size, lastModified);
+                }
             }
-        }
 
-    }
+        }
 
 }

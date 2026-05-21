@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node.TreeTraversal;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -174,7 +175,9 @@ public class QueryTransformer implements Allison1875MainService {
                     mapperLayerService.generateMethodToMapperXml(gmtmxArgs);
                     methodAddedMapperXmls.values().forEach(o -> {
                         try {
-                            FileUtils.writeStringToFile(o.getFile(),
+                            Path xmlPath = o.getFile().toPath();
+                            Files.createDirectories(xmlPath.getParent());
+                            Files.writeString(xmlPath,
                                     Joiner.on(BaseConstant.NEW_LINE).join(o.getContentLines()), StandardCharsets.UTF_8);
                         } catch (IOException e) {
                             throw new UncheckedIOException(e);

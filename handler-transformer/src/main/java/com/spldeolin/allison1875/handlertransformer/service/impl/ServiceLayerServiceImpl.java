@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.handlertransformer.service.impl;
 
 import java.nio.file.Path;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -206,7 +205,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
             ClassOrInterfaceDeclaration service) {
         // anti-duplication
         absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
-        String serviceImplName = FilenameUtils.getBaseName(absolutePath.toString());
+        String serviceImplName = absolutePath.getFileName().toString().replaceFirst("\\.[^.]+$", "");
 
         CompilationUnit serviceImplCu = new CompilationUnit();
         serviceImplCu.setPackageDeclaration(DomainContext.get().getServiceImplPackage());
@@ -228,7 +227,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
     private CuAndCoid generateEmptyService(GenerateServiceAndImplArgs args, Path absolutePath) {
         // anti-duplication
         absolutePath = antiDuplicationService.getNewPathIfExist(absolutePath);
-        String serviceName = FilenameUtils.getBaseName(absolutePath.toString());
+        String serviceName = absolutePath.getFileName().toString().replaceFirst("\\.[^.]+$", "");
 
         CompilationUnit serviceCu = new CompilationUnit();
         serviceCu.setPackageDeclaration(DomainContext.get().getServicePackage());
@@ -243,16 +242,7 @@ public class ServiceLayerServiceImpl implements ServiceLayerService {
         return new CuAndCoid(serviceCu, service);
     }
 
-    private static class CuAndCoid {
-
-        private final CompilationUnit cu;
-
-        private final ClassOrInterfaceDeclaration coid;
-
-        private CuAndCoid(CompilationUnit serviceCu, ClassOrInterfaceDeclaration service) {
-            this.cu = serviceCu;
-            this.coid = service;
-        }
+    private record CuAndCoid(CompilationUnit cu, ClassOrInterfaceDeclaration coid) {
 
     }
 

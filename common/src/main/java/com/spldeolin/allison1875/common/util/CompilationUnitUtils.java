@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import org.apache.commons.io.FileUtils;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -79,7 +79,9 @@ public class CompilationUnitUtils {
             content = cu.toString();
         }
         try {
-            FileUtils.writeStringToFile(getCuAbsolutePath(cu).toFile(), content, StandardCharsets.UTF_8);
+            Path path = getCuAbsolutePath(cu);
+            Files.createDirectories(path.getParent());
+            Files.writeString(path, content, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,9 +51,11 @@ public class EndpointDslServiceImpl implements EndpointDslService {
             File json = new File(
                     dirPath + File.separator + sanitizeFileName(categorizedMd.getDirectCategory()) + ".json");
             try {
-                FileUtils.writeStringToFile(new File(
+                Path dslPath = new File(
                                 dirPath + File.separator + sanitizeFileName(categorizedMd.getDirectCategory()) +
-                                        ".json"),
+                                        ".json").toPath();
+                Files.createDirectories(dslPath.getParent());
+                Files.writeString(dslPath,
                         JsonUtils.toJsonPrettily(categorizedMd.getEndpointGroup()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);

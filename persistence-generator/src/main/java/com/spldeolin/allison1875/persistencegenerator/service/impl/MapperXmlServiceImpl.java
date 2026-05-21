@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import com.google.common.base.Joiner;
@@ -302,12 +302,13 @@ public class MapperXmlServiceImpl implements MapperXmlService {
                         .orElseThrow(() -> new Allison1875Exception(
                                 "Node '" + args.getMapper().getName() + "' has no Qualifier"))));
                 sourceCodeLines.add("</mapper>");
-                FileUtils.writeLines(mapperXmlFile, StandardCharsets.UTF_8.name(), sourceCodeLines);
+                Files.createDirectories(mapperXmlFile.toPath().getParent());
+                Files.write(mapperXmlFile.toPath(), sourceCodeLines, StandardCharsets.UTF_8);
             }
 
             List<String> newLines = Lists.newArrayList();
 
-            String content = FileUtils.readFileToString(mapperXmlFile, StandardCharsets.UTF_8);
+            String content = Files.readString(mapperXmlFile.toPath(), StandardCharsets.UTF_8);
             List<String> lines = MoreStringUtils.splitLineByLine(content);
             List<String> generatedLines = getGeneratedLines(args.getSourceCodes(), args.getTableAnalysis());
 
@@ -343,7 +344,8 @@ public class MapperXmlServiceImpl implements MapperXmlService {
 
             // writeXml
             try {
-                FileUtils.writeStringToFile(mapperXmlFile, Joiner.on(BaseConstant.NEW_LINE).join(newLines),
+                Files.createDirectories(mapperXmlFile.toPath().getParent());
+                Files.writeString(mapperXmlFile.toPath(), Joiner.on(BaseConstant.NEW_LINE).join(newLines),
                         StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
