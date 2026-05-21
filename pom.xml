@@ -139,15 +139,8 @@
             <!-- spring mvc -->
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>5.3.31</version>
-            </dependency>
-
-            <!-- flexmark -->
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark</artifactId>
-                <version>0.62.2</version>
+                <artifactId>spring-web</artifactId>
+                <version>6.1.12</version>
             </dependency>
 
             <!-- okhttp3 -->

@@ -22,16 +22,10 @@
             <artifactId>jackson-module-jsonSchema</artifactId>
         </dependency>
 
-        <!-- spring mvc -->
+        <!-- spring web -->
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-
-        <!-- flexmark -->
-        <dependency>
-            <groupId>com.vladsch.flexmark</groupId>
-            <artifactId>flexmark</artifactId>
+            <artifactId>spring-web</artifactId>
         </dependency>
 
         <!-- okhttp3 -->
