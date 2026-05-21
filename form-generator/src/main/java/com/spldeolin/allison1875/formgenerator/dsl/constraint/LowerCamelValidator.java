@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.formgenerator.dsl.constraint;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * 校验 lowerCamel 格式：首字母小写，后续单词首字母大写，如 studentName

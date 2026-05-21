@@ -1,8 +1,8 @@
 package com.spldeolin.allison1875.formgenerator.dsl.item;
 
-import javax.validation.constraints.NotNull;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

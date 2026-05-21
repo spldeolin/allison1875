@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.common.dto;
 
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;

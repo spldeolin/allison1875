@@ -2,13 +2,13 @@ package com.spldeolin.allison1875.common.config;
 
 import java.io.File;
 import java.util.List;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
 import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

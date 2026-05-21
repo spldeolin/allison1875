@@ -1,14 +1,14 @@
 package com.spldeolin.allison1875.formgenerator.dsl;
 
 import java.util.List;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.FormDefValid;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.UpperCamel;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

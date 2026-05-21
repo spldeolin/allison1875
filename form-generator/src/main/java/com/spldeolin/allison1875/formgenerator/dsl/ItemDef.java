@@ -2,8 +2,6 @@ package com.spldeolin.allison1875.formgenerator.dsl;
 
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern.USER_INPUT;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -18,6 +16,8 @@ import com.spldeolin.allison1875.formgenerator.dsl.item.SecretItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.SelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

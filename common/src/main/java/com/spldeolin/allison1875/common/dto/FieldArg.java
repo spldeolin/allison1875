@@ -1,9 +1,9 @@
 package com.spldeolin.allison1875.common.dto;
 
 import java.util.function.BiConsumer;
-import javax.validation.constraints.NotBlank;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;

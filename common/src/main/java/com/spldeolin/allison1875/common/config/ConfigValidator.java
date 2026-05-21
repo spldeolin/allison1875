@@ -1,12 +1,12 @@
 package com.spldeolin.allison1875.common.config;
 
 import java.util.List;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.config.Config.CodeSnippet;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * 统一校验类，整合 DocAnalyzerConfig 和 PersistenceGeneratorConfig 的校验逻辑。
