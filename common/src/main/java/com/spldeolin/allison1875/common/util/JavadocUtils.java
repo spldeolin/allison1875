@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.comments.TraditionalJavadocComment;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
@@ -33,7 +33,7 @@ public class JavadocUtils {
      * 基于提供description和author，为参数node设置简单的Javadoc
      */
     public static Javadoc setJavadoc(NodeWithJavadoc<?> node, String description, String author) {
-        Javadoc javadoc = new JavadocComment(description).parse();
+        Javadoc javadoc = new TraditionalJavadocComment(description).parse();
         if (StringUtils.isNotBlank(author)) {
             javadoc.addBlockTag(new JavadocBlockTag(JavadocBlockTag.Type.AUTHOR, author));
         }
@@ -124,7 +124,7 @@ public class JavadocUtils {
                 // 只有javadoc符合标准，ifBlockComment和ifLineComment不予考虑
                 comment.ifJavadocComment(jc -> {
                     List<String> lines = MoreStringUtils.splitLineByLine(
-                            StaticJavaParser.parseJavadoc(jc.getContent()).getDescription().toText());
+                            StaticJavaParser.parseJavadoc(jc.getContent(), false).getDescription().toText());
                     if (!lines.isEmpty()) {
                         retval.put(finalPackageName, lines.get(0));
                     }

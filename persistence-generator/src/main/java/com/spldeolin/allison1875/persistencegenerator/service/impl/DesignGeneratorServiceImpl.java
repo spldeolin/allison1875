@@ -22,6 +22,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
+import com.github.javaparser.ast.comments.TraditionalJavadocComment;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
@@ -94,7 +95,8 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
                 designCu.addImport(PropertyName.class.getName());
                 designCu.addOrphanComment(new LineComment("@formatter:" + "off"));
                 ClassOrInterfaceDeclaration designCoid = new ClassOrInterfaceDeclaration();
-                JavadocComment javadoc = new JavadocComment(concatJoinChainDescription(args.getTableAnalysis()));
+                JavadocComment javadoc = new TraditionalJavadocComment(
+                        concatJoinChainDescription(args.getTableAnalysis()));
                 designCoid.setJavadocComment(javadoc);
                 designCoid.addAnnotation(parseAnnotation("@SuppressWarnings(\"all\")"));
                 designCoid.setPublic(true).setInterface(false).setName("JoinChain").setTypeParameters(typeParams);

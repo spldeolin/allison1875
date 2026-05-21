@@ -10,7 +10,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.comments.TraditionalJavadocComment;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -113,7 +113,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
             mvcHandler.addParameter(param);
         }
         if (!args.getReqParams().isEmpty()) {
-            Javadoc javadoc = mvcHandler.getJavadoc().orElse(new JavadocComment().parse());
+            Javadoc javadoc = mvcHandler.getJavadoc().orElse(new TraditionalJavadocComment().parse());
             for (VariableDeclarator vd : args.getReqParams()) {
                 Optional<FieldDeclaration> fdOpt = vd.getParentNode().filter(p -> p instanceof FieldDeclaration)
                         .map(p -> (FieldDeclaration) p);
