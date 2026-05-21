@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>persistence-generator-facade</artifactId>
+            <artifactId>persistence-generator</artifactId>
         </dependency>
     </dependencies>
 

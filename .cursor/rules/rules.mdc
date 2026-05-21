@@ -30,9 +30,7 @@ allison1875/                            (parent POM, version 14.0-SNAPSHOT)
 ├── allison1875-support/                Runtime dependency for target projects (@L, @P annotations)
 ├── allison1875-maven-plugin/           Maven Mojo entry points (one Mojo per tool)
 ├── handler-transformer/                DSL → Controller + Service + DTO
-├── handler-transformer-facade/         Handler-transformer public API types
 ├── persistence-generator/              DB table → Entity + Mapper + Mapper XML + Design
-├── persistence-generator-facade/       Persistence-generator public API types
 ├── query-transformer/                  QueryChain DSL → MyBatis CRUD + SQL
 ├── star-transformer/                   StarChain DSL → join queries + data assembly
 ├── doc-analyzer/                       Spring MVC Controller → API documentation

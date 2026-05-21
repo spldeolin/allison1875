@@ -14,6 +14,6 @@ public class GenerateServiceAndImplArgs {
 
     CompilationUnit controllerCu;
 
-    com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO initDecAnalysisDTO;
+    InitDecAnalysisDTO initDecAnalysisDTO;
 
 }

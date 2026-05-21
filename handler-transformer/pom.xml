@@ -15,10 +15,6 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.spldeolin.allison1875</groupId>
-            <artifactId>handler-transformer-facade</artifactId>
-        </dependency>
 
         <!-- spring mvc -->
         <dependency>
