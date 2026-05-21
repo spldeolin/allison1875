@@ -32,7 +32,7 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.persistencegenerator.facade.dto.DesignMetaDTO;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
@@ -86,7 +86,7 @@ public class QueryTransformer implements Allison1875MainService {
 
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+        ClassLoader classLoader = MavenUtils.buildClassLoader(
                 new File(domainConfig.getServiceImplModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getServiceImplSourceRoot().toFile()));
 

@@ -2,6 +2,7 @@ package com.spldeolin.allison1875.common.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -9,26 +10,29 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import com.github.javaparser.ast.CompilationUnit;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 为指定的Maven模块项目路径构建ClassLoader的工具类。
- *
- * <p>通过调用 {@code mvn dependency:build-classpath} 命令解析出目标项目编译时的所有依赖路径（包含第三方、第二方依赖），
- * 再加上该模块自身的 {@code target/classes} 目录，最终构造出一个能够加载该项目编译期所有可见类的 {@link URLClassLoader}。
- *
- * <p>注意：目标路径无需事先执行过 {@code mvn compile}，但目标机器上必须有可用的 Maven 环境（{@code mvn} 命令在 PATH 中可访问）。
- * 如果目标项目要求特定的Java版本编译，用户可在{@code .allison1875.yml}中通过{@code javaHome}配置项
- * 指定JDK安装目录路径，执行mvn子进程时会自动设置{@code JAVA_HOME}环境变量。
+ * Maven工具类，主要用途如下：
+ * 1. 对一个maven项目执行mvn compile
+ * 2. 基于mvn dependency:build-classpath，为一个maven项目构建classloader
+ * 3. 基于mvn source:jar install dependency:sources，为一个maven项目遍历他所依赖的源码并将源码转化为CU
+ * <p>
+ * 使用前需要确保环境安装了maven
  *
  * @author Deolin 2026-05-09
  */
 @Slf4j
-public class MavenProjectClassLoaderUtils {
+public class MavenUtils {
 
-    private MavenProjectClassLoaderUtils() {
+    private MavenUtils() {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
@@ -125,6 +129,243 @@ public class MavenProjectClassLoaderUtils {
         return new URLClassLoader(urlArray, null);
     }
 
+    /**
+     * 解析指定Maven模块所有compile范围依赖的源码，通过Consumer逐个消费每个CompilationUnit以避免OOM
+     *
+     * <p>处理步骤：
+     * <ol>
+     *     <li>从输入目录向上递归查找根module（最上层包含pom.xml的目录）</li>
+     *     <li>在根module目录执行 {@code mvn source:jar install -DskipTests -q}</li>
+     *     <li>通过 {@code mvn help:evaluate} 获取本地仓库路径，通过 {@code mvn dependency:list} 获取所有依赖的GAV</li>
+     *     <li>对每个依赖的 -sources.jar 中的 .java 文件调用 {@link CompilationUnitUtils#parseJava(InputStream, String)}
+     *         解析为CU，解析完成后立即通过cuConsumer消费，不在内存中积累</li>
+     * </ol>
+     *
+     * @param mavenModuleDir Maven模块的根目录（包含pom.xml的目录）
+     * @param javaHome JDK安装目录路径，为null时使用系统默认的JDK
+     * @param cuConsumer 消费每个解析出的CompilationUnit的回调
+     */
+    public static void consumeDependencySourceCus(File mavenModuleDir, String javaHome,
+            Consumer<CompilationUnit> cuConsumer) {
+        if (mavenModuleDir == null) {
+            throw new Allison1875Exception("mavenModuleDir must not be null");
+        }
+        if (!mavenModuleDir.isDirectory()) {
+            throw new Allison1875Exception("mavenModuleDir is not a directory: " + mavenModuleDir);
+        }
+        if (cuConsumer == null) {
+            throw new Allison1875Exception("cuConsumer must not be null");
+        }
+
+        // 1. 向上递归查找根module
+        File rootModuleDir = findTopLevelProjectDir(mavenModuleDir);
+        log.info("root module dir: {}", rootModuleDir);
+
+        // 2. 在根module目录执行 mvn source:jar install -DskipTests -q
+        executeSourceJarInstall(rootModuleDir, javaHome);
+
+        // 3. 获取本地仓库路径和所有compile范围依赖的GAV
+        String localRepoPath = resolveLocalRepoPath(mavenModuleDir, javaHome);
+        List<String> gavs = resolveDependencyGavs(mavenModuleDir, javaHome);
+        log.info("resolved {} compile-scope dependencies, localRepo: {}", gavs.size(), localRepoPath);
+
+        // 4. 逐个解析sources.jar中的.java文件并消费CU
+        int parsedCount = 0;
+        int skippedCount = 0;
+        for (String gav : gavs) {
+            File sourcesJar = gavToSourcesJarFile(localRepoPath, gav);
+            if (!sourcesJar.exists()) {
+                log.debug("sources.jar not found for {}, skipping", gav);
+                skippedCount++;
+                continue;
+            }
+            parsedCount += parseAndConsumeSourcesJar(sourcesJar, gav, cuConsumer);
+        }
+        log.info(
+                "consumeDependencySourceCus completed. parsed {} CUs from {} dependencies ({} skipped, no sources.jar)",
+                parsedCount, gavs.size(), skippedCount);
+    }
+
+    private static void executeSourceJarInstall(File rootModuleDir, String javaHome) {
+        StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
+        commandLine.append(" source:jar install dependency:sources -DskipTests");
+
+        log.info("executing: {} (in {})", commandLine, rootModuleDir);
+
+        try {
+            ProcessBuilder pb = createShellProcessBuilder(commandLine.toString(), rootModuleDir);
+            Process process = pb.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                log.error("mvn source:jar install failed with exit code {}, output:\n{}", exitCode, output);
+                throw new Allison1875Exception(
+                        "mvn source:jar install failed with exit code " + exitCode + ", output:\n" + output);
+            }
+            log.info("mvn source:jar install succeeded for: {}", rootModuleDir);
+        } catch (Allison1875Exception e) {
+            throw e;
+        } catch (Exception e) {
+            throw new Allison1875Exception("failed to execute mvn source:jar install", e);
+        }
+    }
+
+    private static String resolveLocalRepoPath(File mavenModuleDir, String javaHome) {
+        StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
+        commandLine.append(" help:evaluate -Dexpression=settings.localRepository -DforceStdout -q");
+
+        log.info("executing: {} (in {})", commandLine, mavenModuleDir);
+
+        try {
+            ProcessBuilder pb = createShellProcessBuilder(commandLine.toString(), mavenModuleDir);
+            Process process = pb.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                log.error("mvn help:evaluate failed with exit code {}, output:\n{}", exitCode, output);
+                throw new Allison1875Exception(
+                        "mvn help:evaluate failed with exit code " + exitCode + ", output:\n" + output);
+            }
+
+            String localRepo = output.toString().trim();
+            if (localRepo.isEmpty()) {
+                throw new Allison1875Exception("mvn help:evaluate returned empty localRepository");
+            }
+            return localRepo;
+        } catch (Allison1875Exception e) {
+            throw e;
+        } catch (Exception e) {
+            throw new Allison1875Exception("failed to execute mvn help:evaluate", e);
+        }
+    }
+
+    private static List<String> resolveDependencyGavs(File mavenModuleDir, String javaHome) {
+        File gavOutputFile;
+        try {
+            gavOutputFile = File.createTempFile("allison1875-deps-", ".txt");
+            gavOutputFile.deleteOnExit();
+        } catch (Exception e) {
+            throw new Allison1875Exception("failed to create temp file for dependency:list output", e);
+        }
+
+        StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
+        commandLine.append(" dependency:list -DincludeScope=compile -DoutputAbsoluteArtifactFilename=false");
+        commandLine.append(" -DoutputFile=").append(gavOutputFile.getAbsolutePath());
+
+        log.info("executing: {} (in {})", commandLine, mavenModuleDir);
+
+        try {
+            ProcessBuilder pb = createShellProcessBuilder(commandLine.toString(), mavenModuleDir);
+            Process process = pb.start();
+
+            // 消费stdout避免进程阻塞
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                log.error("mvn dependency:list failed with exit code {}, output:\n{}", exitCode, output);
+                throw new Allison1875Exception(
+                        "mvn dependency:list failed with exit code " + exitCode + ", output:\n" + output);
+            }
+
+            // 从输出文件中逐行解析GAV
+            // -DoutputFile 格式形如: "   groupId:artifactId:type:version:scope"
+            List<String> gavs = new ArrayList<>();
+            List<String> lines = Files.readAllLines(gavOutputFile.toPath(), StandardCharsets.UTF_8);
+            for (String line : lines) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split(":");
+                if (parts.length >= 4) {
+                    // groupId:artifactId:type:version[:scope]
+                    String groupId = parts[0];
+                    String artifactId = parts[1];
+                    // parts[2] is type (jar/pom/etc.)
+                    String version = parts[3];
+                    gavs.add(groupId + ":" + artifactId + ":" + version);
+                }
+            }
+
+            return gavs;
+        } catch (Allison1875Exception e) {
+            throw e;
+        } catch (Exception e) {
+            throw new Allison1875Exception("failed to execute mvn dependency:list", e);
+        } finally {
+            gavOutputFile.delete();
+        }
+    }
+
+    /**
+     * 将GAV字符串转换为对应的-sources.jar文件路径
+     *
+     * @param localRepoPath 本地Maven仓库路径
+     * @param gav GAV字符串，格式为 "groupId:artifactId:version"
+     * @return 对应的-sources.jar文件
+     */
+    private static File gavToSourcesJarFile(String localRepoPath, String gav) {
+        String[] parts = gav.split(":");
+        String groupId = parts[0];
+        String artifactId = parts[1];
+        String version = parts[2];
+        // e.g.: /repo/com/google/guava/guava/33.4.0-jre/guava-33.4.0-jre-sources.jar
+        String path =
+                localRepoPath + File.separator + groupId.replace('.', File.separatorChar) + File.separator + artifactId
+                        + File.separator + version + File.separator + artifactId + "-" + version + "-sources.jar";
+        return new File(path);
+    }
+
+    private static int parseAndConsumeSourcesJar(File sourcesJar, String gav, Consumer<CompilationUnit> cuConsumer) {
+        int count = 0;
+        try (JarFile jarFile = new JarFile(sourcesJar)) {
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.isDirectory() || !entry.getName().endsWith(".java")) {
+                    continue;
+                }
+                try (InputStream is = jarFile.getInputStream(entry)) {
+                    String sourceName = gav + "!/" + entry.getName();
+                    CompilationUnit cu = CompilationUnitUtils.parseJava(is, sourceName);
+                    cuConsumer.accept(cu);
+                    count++;
+                } catch (Exception e) {
+                    log.warn("failed to parse {} in {}, skipping", entry.getName(), gav, e);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("failed to read sources.jar for {}: {}", gav, e.getMessage());
+        }
+        return count;
+    }
+
     private static String executeBuildClasspath(File mavenModuleDir, String javaHome) {
         // 使用 -DincludeScope=compile 确保获取编译期所有依赖
         // 使用 -DmdOutputFile 将 classpath 输出到临时文件，避免解析标准输出中的噪音
@@ -205,11 +446,12 @@ public class MavenProjectClassLoaderUtils {
      */
     private static StringBuilder buildMvnCommandPrefix(String javaHome) {
         StringBuilder sb = new StringBuilder();
+        sb.append(detectMvnCommand());
         if (javaHome != null && !javaHome.isEmpty()) {
-            sb.append("JAVA_HOME=").append(javaHome).append(' ');
+            sb.append(" -Dmaven.compiler.fork=true").append(" -Dmaven.compiler.executable=\"").append(javaHome)
+                    .append("/bin/javac").append("\"");
             log.info("using specified JAVA_HOME: {}", javaHome);
         }
-        sb.append(detectMvnCommand());
         return sb;
     }
 

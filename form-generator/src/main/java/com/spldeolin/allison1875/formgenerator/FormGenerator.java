@@ -26,7 +26,7 @@ import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
-import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -164,7 +164,7 @@ public class FormGenerator implements Allison1875MainService {
 
         // 编译controllerModule
         log.info("call MavenProjectClassLoaderUtils.compile for controllerModule");
-        MavenProjectClassLoaderUtils.compile(new File(DomainContext.get().getControllerModule()), config.getJavaHome());
+        MavenUtils.compile(new File(DomainContext.get().getControllerModule()), config.getJavaHome());
 
         // 调用query-transformer转换Design Chain
         queryTransformer.process();

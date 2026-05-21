@@ -18,7 +18,7 @@ import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.startransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.startransformer.dto.TransformStarChainArgs;
 import com.spldeolin.allison1875.startransformer.service.StarChainService;
@@ -52,7 +52,7 @@ public class StarTransformer implements Allison1875MainService {
     public void process() {
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+        ClassLoader classLoader = MavenUtils.buildClassLoader(
                 new File(domainConfig.getServiceImplModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getServiceImplSourceRoot().toFile()));
 

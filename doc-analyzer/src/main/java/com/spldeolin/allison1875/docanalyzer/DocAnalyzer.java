@@ -17,7 +17,7 @@ import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
-import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeBodyRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeFieldVarsRetval;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeMvcHandlerRetval;
@@ -91,7 +91,7 @@ public class DocAnalyzer implements Allison1875MainService {
     public void process() {
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+        ClassLoader classLoader = MavenUtils.buildClassLoader(
                 new File(domainConfig.getControllerModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getControllerSourceRoot().toFile()));
 

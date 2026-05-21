@@ -3,6 +3,7 @@ package com.spldeolin.allison1875.common.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -34,6 +35,36 @@ public class CompilationUnitUtils {
             throw new Allison1875Exception(String.format("javaFile '%s' not exists", javaFile));
         } catch (ParseProblemException e) {
             throw new Allison1875Exception(String.format("fail to parse [%s]", javaFile), e);
+        }
+    }
+
+    /**
+     * 从InputStream中解析Java源码为CompilationUnit
+     *
+     * <p>适用于从jar包条目等非文件来源解析Java源码的场景，解析后的CU不包含Storage信息。
+     * 内部先将InputStream读为String再解析，避免StaticJavaParser直接读取InputStream时的潜在兼容性问题。
+     *
+     * @param inputStream Java源码输入流
+     * @param sourceName 来源描述（用于日志和异常信息），例如jar条目路径
+     * @return 解析后的CompilationUnit
+     */
+    public static CompilationUnit parseJava(InputStream inputStream, String sourceName) {
+        String sourceCode;
+        try {
+            sourceCode = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new Allison1875Exception(String.format("fail to read [%s]", sourceName), e);
+        }
+        if (sourceCode.isBlank()) {
+            log.warn("empty source content from: {}", sourceName);
+            return new CompilationUnit();
+        }
+        try {
+            CompilationUnit cu = StaticJavaParser.parse(sourceCode);
+            log.debug("SourceCode parsed from stream: {}", sourceName);
+            return cu;
+        } catch (ParseProblemException e) {
+            throw new Allison1875Exception(String.format("fail to parse [%s]", sourceName), e);
         }
     }
 

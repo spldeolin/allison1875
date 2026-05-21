@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.cli;
 
 import java.io.File;
-import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,7 +30,7 @@ public class ClassLoaderDemo {
 
         // 构建ClassLoader
         log.info("building ClassLoader...");
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(moduleDir, null);
+        ClassLoader classLoader = MavenUtils.buildClassLoader(moduleDir, null);
         log.info("ClassLoader built successfully: {}", classLoader);
 
         // 尝试加载类

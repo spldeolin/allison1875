@@ -22,7 +22,7 @@ import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.service.MemberAdderService;
 import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
-import com.spldeolin.allison1875.common.util.MavenProjectClassLoaderUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.handlertransformer.dto.AddMethodToServiceArgs;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateServiceAndImplArgs;
@@ -79,7 +79,7 @@ public class HandlerTransformer implements Allison1875MainService {
 
         // 构造AstForest
         DomainConfig domainConfig = DomainContext.get();
-        ClassLoader classLoader = MavenProjectClassLoaderUtils.buildClassLoader(
+        ClassLoader classLoader = MavenUtils.buildClassLoader(
                 new File(domainConfig.getControllerModule()), config.getJavaHome());
         AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getControllerSourceRoot().toFile()));
 
