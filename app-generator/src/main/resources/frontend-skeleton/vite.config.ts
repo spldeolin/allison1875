@@ -1,0 +1,30 @@
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import path from 'path'
+import formDslPlugin from './plugins/vite-plugin-form-dsl'
+import mockApiPlugin from './plugins/vite-plugin-mock-api'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    formDslPlugin(path.resolve(__dirname, 'src/dsl')),
+    mockApiPlugin()
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src')
+    }
+  },
+  server: {
+    port: 5180,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
+  },
+  test: {
+    environment: 'happy-dom'
+  }
+})

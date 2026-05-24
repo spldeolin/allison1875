@@ -1,0 +1,183 @@
+forms:
+  - name: StudentBasicInfo
+    title: 学生基本信息
+    desc: 学生身份信息管理
+    group: 学生管理
+    icon: PersonOutline
+    order: 1
+    items:
+      # text: 普通文本，有maxLength
+      - type: text
+        name: studentName
+        title: 学生姓名
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+        maxLength: 50
+      # text: 学号，编辑时不可修改
+      - type: text
+        name: studentId
+        title: 学号
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: doNot
+      # text: 多行文本
+      - type: text
+        name: remark
+        title: 备注
+        isNonVoid: false
+        initPattern: userInput
+        editPattern: userInput
+        isMultilineOrRich: true
+        maxLength: 500
+      # text: 带正则校验
+      - type: text
+        name: email
+        title: 邮箱
+        isNonVoid: false
+        initPattern: userInput
+        editPattern: userInput
+        maxLength: 100
+        regex: "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$"
+      # number: 整数
+      - type: number
+        name: age
+        title: 年龄
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+        canBeDecimal: false
+      # number: 小数
+      - type: number
+        name: gpa
+        title: GPA
+        isNonVoid: false
+        initPattern: userInput
+        editPattern: userInput
+        canBeDecimal: true
+      # select: 单选
+      - type: select
+        name: grade
+        title: 年级
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+        options:
+          - code: grade1
+            title: 一年级
+          - code: grade2
+            title: 二年级
+          - code: grade3
+            title: 三年级
+      # multiSelect: 多选
+      - type: multiSelect
+        name: hobbies
+        title: 兴趣爱好
+        isNonVoid: false
+        initPattern: userInput
+        editPattern: userInput
+        options:
+          - code: sports
+            title: 体育运动
+          - code: music
+            title: 音乐
+          - code: reading
+            title: 阅读
+          - code: coding
+            title: 编程
+      # time: date格式
+      - type: time
+        name: enrollmentDate
+        title: 入学日期
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: doNot
+        format: date
+      # time: dateTime格式
+      - type: time
+        name: lastLoginTime
+        title: 最近登录时间
+        isNonVoid: false
+        initPattern: doNot
+        editPattern: doNot
+        format: dateTime
+      # time: time格式（搜索栏不显示）
+      - type: time
+        name: dailyCheckInTime
+        title: 每日签到时间
+        isNonVoid: false
+        initPattern: userInput
+        editPattern: userInput
+        format: time
+      # onOff: 布尔开关
+      - type: onOff
+        name: isActive
+        title: 是否在读
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+      # secret: 脱敏字段（搜索栏不显示）
+      - type: secret
+        name: idCardNumber
+        title: 身份证号
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: doNot
+      # initPattern=todo 场景（MVP等同userInput）
+      - type: text
+        name: emergencyContact
+        title: 紧急联系人
+        isNonVoid: false
+        initPattern: todo
+        editPattern: userInput
+    indices:
+      - itemNames: [studentId]
+        isUnique: true
+      - itemNames: [studentName, grade]
+        isUnique: false
+
+  # 第二个表单：测试不同分组、无desc、无indices
+  - name: CourseSchedule
+    title: 课程安排
+    group: 教务管理
+    icon: CalendarOutline
+    order: 2
+    items:
+      - type: text
+        name: courseName
+        title: 课程名称
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+        maxLength: 100
+      - type: select
+        name: semester
+        title: 学期
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: doNot
+        options:
+          - code: spring
+            title: 春季学期
+          - code: fall
+            title: 秋季学期
+      - type: number
+        name: credits
+        title: 学分
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+        canBeDecimal: true
+      - type: time
+        name: startDate
+        title: 开课日期
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
+        format: date
+      - type: onOff
+        name: isElective
+        title: 是否选修
+        isNonVoid: true
+        initPattern: userInput
+        editPattern: userInput
