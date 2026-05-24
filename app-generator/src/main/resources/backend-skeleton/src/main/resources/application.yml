@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: __APP_NAME__
+  datasource:
+    url: jdbc:mysql://localhost:3306/__APP_NAME__?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+logging:
+  config: classpath:logback-spring.xml
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    default-enum-type-handler: __NAMESPACE__.mybatis.EnumTypeHandlerEx
+
+snow-flake:
+  machine-id: 0
