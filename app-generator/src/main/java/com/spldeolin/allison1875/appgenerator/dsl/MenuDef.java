@@ -1,6 +1,8 @@
 package com.spldeolin.allison1875.appgenerator.dsl;
 
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -18,11 +20,13 @@ public class MenuDef {
 
     String icon;
 
-    String order;
+    Integer order;
 
     /**
      * 关联的表单
      */
+    @NotNull
+    @Valid
     FormDef form;
 
 }
