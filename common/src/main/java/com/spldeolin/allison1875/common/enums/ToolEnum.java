@@ -27,6 +27,8 @@ public enum ToolEnum {
 
     FORM_GENERATOR("form-generator", Config::getFormGeneratorModule, true),
 
+    APP_GENERATOR("app-generator", Config::getAppGeneratorModule, false),
+
     ;
 
     /**

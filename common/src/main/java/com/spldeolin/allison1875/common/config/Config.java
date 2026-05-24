@@ -90,6 +90,9 @@ public class Config {
     /** form-generator 功能所使用的 Guice Module 实现类全限定名 */
     String formGeneratorModule = "com.spldeolin.allison1875.formgenerator.FormGeneratorModule";
 
+    /** app-generator 功能所使用的 Guice Module 实现类全限定名 */
+    String appGeneratorModule = "com.spldeolin.allison1875.appgenerator.AppGeneratorModule";
+
     // ==================== handler-transformer 配置 ====================
 
     /**
@@ -253,6 +256,20 @@ public class Config {
      */
     @NotNull
     String getEnumTitleMethodName = "getTitle";
+
+    // ==================== app-generator 配置 ====================
+
+    /**
+     * App DSL 文件路径
+     */
+    @NotNull
+    File appDslPath = new File("./app.yml");
+
+    /**
+     * app-generator 输出目录
+     */
+    @NotNull
+    File appGeneratorOutputDir = new File("./output");
 
     // ==================== form-generator 配置 ====================
 
