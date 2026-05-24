@@ -15,11 +15,16 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
+import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
+import com.spldeolin.allison1875.common.config.DomainConfig;
+import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
+import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import lombok.extern.slf4j.Slf4j;
@@ -97,6 +102,9 @@ public class AppGenerator implements Allison1875MainService {
                 .map(MenuDef::getForm)
                 .collect(Collectors.toList());
         log.info("extracted {} forms for form-generator delegation", forms.size());
+
+        // Delegate to form-generator for CRUD code generation
+        invokeFormGenerator(appDef, output, forms);
     }
 
     private void generateFrontend(AppDef appDef, Path output) {
@@ -204,6 +212,80 @@ public class AppGenerator implements Allison1875MainService {
                     break;
                 }
             }
+        }
+    }
+
+    private void invokeFormGenerator(AppDef appDef, Path backendOutput, List<FormDef> forms) {
+        // Serialize forms to a temp YAML for form-generator to read
+        Path tempDsl = writeTempFormsDsl(forms);
+
+        // Construct config for form-generator
+        Config fgConfig = new Config();
+        fgConfig.setDslPath(tempDsl.toFile());
+        fgConfig.setJavaVersion("1.8");
+        fgConfig.setAuthor("app-generator");
+        fgConfig.setEnableDocAnalyzer(false);
+        fgConfig.setJdbcUrl(null);
+        fgConfig.setEnableGenerateDesign(true);
+        fgConfig.setIsEntityEndWithEntity(true);
+        fgConfig.setEnableJavaxMoveToJakarta(false);
+        fgConfig.setPageParamStyle(PageParamStyleEnum.PAGE_NO_PAGE_SIZE);
+
+        // Set code snippets for the generated backend
+        Config.CodeSnippet cs = new Config.CodeSnippet();
+        String ns = appDef.getNamespace();
+        cs.setRequestResultQualifier(ns + ".common.RequestResult");
+        cs.setRequestResultTypeDeclaration("RequestResult<${dataType}>");
+        cs.setRequestResultSuccessNoData("RequestResult.success()");
+        cs.setRequestResultSuccessWithData("RequestResult.success(${data})");
+        cs.setConstructPageResult("new PageResult<>(${total}, ${dtos})");
+        cs.setConstructEmptyPageResult("new PageResult<>(0L, Collections.emptyList())");
+        fgConfig.setCodeSnippet(cs);
+
+        // Construct DomainConfig pointing to the generated backend
+        String absPath = backendOutput.toAbsolutePath().toString();
+        DomainConfig dc = new DomainConfig();
+        dc.setName("default");
+        dc.setControllerModule(absPath);
+        dc.setControllerPackage(ns + ".controller");
+        dc.setDtoModule(absPath);
+        dc.setReqDTOPackage(ns + ".controller");
+        dc.setRespDTOPackage(ns + ".controller");
+        dc.setEnumModule(absPath);
+        dc.setEnumPackage(ns + ".enums");
+        dc.setServiceModule(absPath);
+        dc.setServicePackage(ns + ".service");
+        dc.setServiceImplModule(absPath);
+        dc.setServiceImplPackage(ns + ".service.impl");
+        dc.setPersistenceModule(absPath);
+        dc.setMapperPackage(ns + ".mapper");
+        dc.setEntityPackage(ns + ".entity");
+        dc.setDesignPackage(ns + ".design");
+        dc.setParamDTOPackage(ns + ".mapper");
+        dc.setRecordDTOPackage(ns + ".mapper");
+        dc.setWholeDTOPackage(ns + ".controller");
+        fgConfig.setDomains(Lists.newArrayList(dc));
+
+        // Invoke form-generator via Allison1875 framework
+        log.info("invoking form-generator for {} forms...", forms.size());
+        Allison1875.letsGo(ToolEnum.FORM_GENERATOR, fgConfig, null);
+        log.info("form-generator completed");
+
+        // Cleanup temp file
+        try {
+            Files.deleteIfExists(tempDsl);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private Path writeTempFormsDsl(List<FormDef> forms) {
+        try {
+            Path temp = Files.createTempFile("app-generator-forms-", ".yml");
+            String yaml = new YAMLMapper().writeValueAsString(forms);
+            Files.writeString(temp, yaml, StandardCharsets.UTF_8);
+            return temp;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
