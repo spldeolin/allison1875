@@ -67,9 +67,20 @@ export interface FormDef {
   name: string
   title: string
   desc?: string
+  items: ItemDef[]
+  indices?: IndexDef[]
+}
+
+export interface MenuDef {
   group?: string
   icon?: string
   order?: number
-  items: ItemDef[]
-  indices?: IndexDef[]
+  form: FormDef
+}
+
+export interface AppDef {
+  namespace: string
+  name: string
+  title: string
+  menus: MenuDef[]
 }

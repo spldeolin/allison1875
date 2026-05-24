@@ -1,0 +1,27 @@
+{
+  "namespace": "com.example.demo",
+  "name": "DemoApp",
+  "title": "示例应用",
+  "menus": [
+    {
+      "group": "示例管理",
+      "icon": "GridOutline",
+      "order": 1,
+      "form": {
+        "name": "DemoForm",
+        "title": "示例表单",
+        "items": [
+          {
+            "type": "text",
+            "name": "demoField",
+            "title": "示例字段",
+            "isNonVoid": true,
+            "initPattern": "userInput",
+            "editPattern": "userInput",
+            "maxLength": 100
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import formDefs from 'virtual:form-dsl'
+import appDef from '@/app.json'
+import type { AppDef } from '@/schema/types'
 import { upperCamelToKebab } from '@/utils/naming'
 import { useAuthStore } from '@/stores/auth'
 
@@ -8,12 +9,14 @@ const CrudPage = () => import('@/core/CrudPage.vue')
 const DashboardLayout = () => import('@/layouts/DashboardLayout.vue')
 const Login = () => import('@/views/Login.vue')
 
-const dslRoutes: RouteRecordRaw[] = formDefs.map(def => ({
-  path: `/${upperCamelToKebab(def.name)}`,
-  name: def.name,
+const app = appDef as AppDef
+
+const dslRoutes: RouteRecordRaw[] = app.menus.map(menu => ({
+  path: `/${upperCamelToKebab(menu.form.name)}`,
+  name: menu.form.name,
   component: CrudPage,
-  props: { schema: def },
-  meta: { title: def.title, group: def.group, icon: def.icon, order: def.order }
+  props: { schema: menu.form },
+  meta: { title: menu.form.title, group: menu.group, icon: menu.icon, order: menu.order }
 }))
 
 const routes: RouteRecordRaw[] = [

@@ -4,6 +4,10 @@ import { useRouter, useRoute } from 'vue-router'
 import { NLayout, NLayoutSider, NMenu, NIcon, type MenuOption } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import * as icons from '@vicons/ionicons5'
+import appDef from '@/app.json'
+import type { AppDef } from '@/schema/types'
+
+const app = appDef as AppDef
 
 const router = useRouter()
 const route = useRoute()
@@ -76,7 +80,7 @@ function handleLogout() {
             <component :is="icons.GridOutline" />
           </NIcon>
         </div>
-        <span class="logo-text">Form Web</span>
+        <span class="logo-text">{{ app.title }}</span>
       </div>
 
       <NMenu
