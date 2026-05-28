@@ -4,7 +4,7 @@
 
 **Goal:** 让 `app-generator` 的 `frontend-skeleton` 在调用 list / save / delete / getDetail 四个接口时（URL、请求体、响应体），与 `form-generator` 实际生成的后端 Spring Boot 代码严格对齐，并且 SearchForm 的查询参数严格遵循后端 list 入参 DTO（含 `FilterPattern` 衍生形式）。
 
-**Architecture:** 在 `frontend-skeleton/src/core/protocol/` 新增 4 个文件（endpoints / request-builder / response-parser / field-policy），形成"分发器 + 规则表"形态的 protocol 层，集中所有"前端 schema ↔ 后端 DTO"的翻译；现有 vue 组件（CrudPage / SearchForm / EditModal / DataTable）改造为通过 protocol 层调用接口。`schema/types.ts` 扩 `filterPatterns?: FilterPattern[]` 字段。
+**Architecture:** 在 `frontend-skeleton/src/core/protocol/` 新增 4 个文件（endpoints / request-builder / response-parser / field-policy），形成"分发器 + 规则表"形态的 protocol 层，集中所有"前端 schema ↔ 后端 DTO"的翻译；现有 vue 组件（CrudPage / SearchForm / EditModal / DataTable）改造为通过 protocol 层调用接口。`schema/types.ts` 新增 `FilterPattern` 类型；`field-policy.ts` 维护 `FILTER_PATTERNS_BY_TYPE` 常量表（mirror 后端 ItemService#getFilterPatterns 的固定映射，不通过 schema 传递）。
 
 **Tech Stack:** TypeScript / Vue 3 / Naive UI / axios (frontend-skeleton 现有栈)；YAML（DSL 输入）；Java（form-generator，本计划只**读**它的产物，不改其源码）。
 
@@ -43,7 +43,7 @@ docs/superpowers/specs/2026-05-28-aligning-frontend-with-form-generator/
 app-generator/src/main/resources/frontend-skeleton/
   src/
     schema/
-      types.ts               # 修改：扩 filterPatterns、新增 FilterPattern 类型
+      types.ts               # 修改：新增 FilterPattern 类型（ItemDefBase 不加 filterPatterns 字段）
     core/
       protocol/              # 新增目录
         endpoints.ts         # 新增
@@ -61,10 +61,7 @@ app-generator/src/main/resources/frontend-skeleton/
 
 ### Phase C 改动（app-generator java 端）
 
-```
-app-generator/src/main/java/com/spldeolin/allison1875/appgenerator/AppGenerator.java
-  # 仅"验证"app.json 序列化是否带 filterPatterns；预期不需改代码，若需改则修。
-```
+无需改动。
 
 ---
 
@@ -430,14 +427,22 @@ git commit -m "docs(aligning): contract Phase B1 — URL table"
 - Read-only: 用户路径下的 list 入参 DTO（类名待 B1 确认，可能形如 `Page${FormName}ReqDto.java`）
 - Modify: `contract.md`
 
+**背景**：form-generator 按 ItemType 固定分配 FilterPatterns（不经 DSL 配置）：
+- text → IN, LIKE；number → IN, GE, GT, LE, LT；time → IN, DATE_RANGE, DATE_TIME_RANGE；
+- select/multiSelect/onOff → IN；secret → 无（不参与查询）
+
+观察的核心问题是：**这些 FilterPattern 在 DTO 里是以何种字段名规则体现的**。
+
 - [ ] **Step 1: 对每个 form 的 list 入参 DTO Read**
 
 观察：
-- DSL 里 `filter_patterns: [like]` 的 text 字段，DTO 里字段名叫什么？类型？
-- DSL 里 `filter_patterns: [in]` 的 select 字段，DTO 里是 `String list` 还是单值？字段名后缀？
-- `[ge, le]` / `[gt, lt]` 的 number 字段在 DTO 里产出几个字段、命名规则？
-- `[dateRange]` / `[dateTimeRange]` 的 time 字段产出 begin/end 还是 start/end？类型是 String 还是 LocalDate？
-- 没有声明 filterPatterns 的字段（如 onOff `needDormitory`、time `examStartTime`、text 多行 `bio`）——它们是否出现在 DTO？以什么形式？
+- text 字段（形如 LIKE）在 DTO 里字段名叫什么？类型？
+- select 字段（IN）在 DTO 里是 `List<String>` 还是单值？字段名后缀？
+- number 字段（GE/LE 等）在 DTO 里产出几个字段、命名规则？
+- time 字段（DATE_RANGE / DATE_TIME_RANGE）产出 begin/end 还是 start/end？类型是 String 还是 LocalDate？
+- secret 字段是否出现在 DTO？（预期不出现）
+- 分页参数字段名（pageNo + pageSize？pageNum？current + size？）— 与 `app-generator` 里 `setPageParamStyle(PAGE_NO_PAGE_SIZE)` 对照。
+- 没有 FilterPattern（secret）字段——它们是否出现在 DTO？以什么形式？（预期不出现）
 - 分页参数（pageNo、pageSize 还是 pageNum、pageSize？current、size？）— 与 `app-generator` 里 `setPageParamStyle(PAGE_NO_PAGE_SIZE)` 对照。
 
 - [ ] **Step 2: 写 contract.md 的"list 入参规则节"**
@@ -463,8 +468,8 @@ git commit -m "docs(aligning): contract Phase B1 — URL table"
 | time | dateRange | begin/end 字段名 | String/LocalDate | 例：examDate → examDateBegin, examDateEnd |
 | time | dateTimeRange | ... | | |
 
-### 未声明 filterPatterns 的字段
-（实际观察：是否出现在 DTO；若不出现则前端 SearchForm 隐藏；若出现则记录其形式）
+### secret 字段
+（预期不出现在 list 入参 DTO；若出现则记录）
 ```
 
 填入实际值。**所有"字段名规则"只能基于 3 个 form 的数据点**——若 ItemType×FilterPattern 的某个组合在 super-dsl 里没出现（例如 select+like），表格里写"未覆盖，本计划范围外"，不脑补。
@@ -563,12 +568,11 @@ git commit -m "docs(aligning): contract Phase B4 — enum encoding"
 
 至少包括：
 1. **secret 在 list vs detail 是否切换明文/脱敏**：观察实际 java，记录事实，给"前端如何处理 secret 字段的展示"建议。
-2. **secret display_type=hidden 在 list/detail 是否完全不返回**：影响"明文显示按钮"是否存在的前端决策。
-3. **init_pattern=todo 字段在 save 入参里是必填还是可选**：影响 EditModal 的 required 规则。
-4. **multiSelect 在 DTO 是 `List<String>` 还是逗号分隔字符串**：影响 response-parser 是否要做拆分。
-5. **DSL 里没声明 filter_patterns 的字段是否出现在 list 入参 DTO**：影响 SearchForm 是否能渲染该字段。
-6. **base path 派生规则**（如果 B1 里三行不形成清晰规则）：影响 endpoints.ts 的实现。
-7. **delete 接口的入参业务主键字段名是不是 `${formName}Code`**（design 默认假设是，但需事实验证）。
+2. **secret initPattern=todo / editPattern=doNot 字段在 save 入参里是必填还是可选**：影响 EditModal 的 required 规则。
+3. **multiSelect 在 DTO 是 `List<String>` 还是逗号分隔字符串**：影响 response-parser 是否要做拆分。
+4. **base path 派生规则**（如果 B1 里三行不形成清晰规则）：影响 endpoints.ts 的实现。
+5. **delete 接口的入参业务主键字段名是不是 `${formName}Code`**（design 默认假设是，但需事实验证）。
+6. **FormDef getter 污染 app.json**（C0 发现时从那里提过来）：若 `getVarName` / `getBizIdName` 等没有 `@JsonIgnore`，需决策改哪一侧。
 
 每条记录格式：
 
@@ -625,39 +629,24 @@ git commit -m "docs(aligning): record user decisions on gaps"
 
 > 进入此阶段的前置条件：contract.md / gaps.md 用户已审阅 + 缺口决策已记录。
 
-## Task C0: 验证 app.json 是否携带 filterPatterns
+## Task C0: 验证 app.json 不含污染字段
 
 **Files:**
 - Read-only: `app-generator/src/main/java/com/spldeolin/allison1875/appgenerator/AppGenerator.java`
-- Possibly Modify: 同上
 
-- [ ] **Step 1: 读 AppGenerator.generateFrontend 序列化逻辑**
+背景：`AppGenerator.generateFrontend` 用 `new ObjectMapper().writeValueAsString(appDef)` 序列化整个 AppDef。`FormDef` 上有若干计算 getter（`varName`, `bizIdName`, `bizIdGetterName`, `bizIdSetterName`, `entityName`），Jackson 默认会把这些 getter 序列化进 app.json，污染前端 schema。
 
-文件 line 110-123。当前实现是 `new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(appDef)`。`AppDef` 持有 `List<MenuDef>`，`MenuDef.getForm()` 返回 form-generator 的 `FormDef`，`FormDef.items` 是 `List<ItemDef>`，每个 ItemDef 子类（如 TextItemDef）有 `filterPatterns` 字段。
+- [ ] **Step 1: 检查 FormDef 的 @JsonIgnore 覆盖情况**
 
-理论上 Jackson 默认会序列化所有非 transient 字段，所以 filterPatterns 应该自然带上。但需要验证：
-- ItemDef 上的 `@JsonTypeInfo` / `@JsonSubTypes` 是否会影响序列化（已知 form-generator/dsl/ItemDef.java line 30 有 `@JsonTypeInfo(use=NAME, property="type", visible=true)`，这会在 json 里加 `"type": "text"` 字段，确认前端 types.ts 已能消费）；
-- `FormDef.getNonAuditedItems()` 加了 `@JsonIgnore`，是好事；
-- `FormDef.bizIdName/bizIdGetterName/bizIdSetterName`/`getEntityName` 这些 getter 默认会被序列化，污染前端 schema —— 需要检查并可能改 java。
+Read `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/FormDef.java`（已知 `getNonAuditedItems` 有 `@JsonIgnore`；检查 `getVarName` / `getBizIdName` / `getBizIdGetterName` / `getBizIdSetterName` / `getEntityName` 是否也有）。
 
-- [ ] **Step 2: 跑一次 AppGenerator 验证（如果用户方便）或人工 review**
+- [ ] **Step 2: 如有污染 getter，提为 gap**
 
-最简验证：在 frontend-skeleton 当前的 `src/app.json` 上看是否已经有 `filterPatterns` 字段（取决于 `app-generator/src/main/resources/frontend-skeleton/src/app.json` 是手写的还是某次跑出来的产物）。Read 现有 app.json：line 1-27，是手写的最小例子（只有 demoField），不含 filterPatterns 也不奇怪。
+若这些 getter 没有 `@JsonIgnore`，在 `gaps.md` 里新增一条 Gap，建议：改 form-generator FormDef 给这些 getter 加 `@JsonIgnore`，或改 AppGenerator 用自定义 ObjectMapper 排除。等用户拍板后再改。
 
-判断：**如果 Phase B1-B4 的过程中用户跑 form-generator 时也把整个 app-generator 跑了一遍**（不太可能，B 阶段只跑 form-generator），就有真实 app.json 可看。否则需要在 Phase C 实施前由用户跑一次 AppGenerator 输出真实 app.json，本会话再 verify。**这一步如果不方便，跳过：默认 Jackson 会序列化所有字段，先按假设推进 C1，C8 联调阶段会暴露问题。**
+如果全都有 `@JsonIgnore`，跳过。
 
-- [ ] **Step 3: 如果发现 FormDef getter 污染**
-
-例如发现 app.json 里包含 `"varName"` / `"bizIdName"` 等不该出现的字段，给 form-generator 的 FormDef 那些 getter 加 `@JsonIgnore`。**这是改 form-generator 源码**——超出了本计划"不动 form-generator"的范围，需要把这条提为新的 gap 让用户决策。
-
-- [ ] **Step 4: 视情况 commit 或不动**
-
-如果有改动：
-```bash
-git add app-generator/src/main/java/com/spldeolin/allison1875/appgenerator/AppGenerator.java
-git commit -m "fix(app-generator): ensure filterPatterns are serialized to app.json"
-```
-如果无改动：跳过。
+- [ ] **Step 3: 视情况 commit 或跳过**
 
 ## Task C1: 扩 schema/types.ts，新增 FilterPattern 类型
 
@@ -666,7 +655,7 @@ git commit -m "fix(app-generator): ensure filterPatterns are serialized to app.j
 
 - [ ] **Step 1: 加 FilterPattern union type**
 
-把 form-generator 已知的 8 个 FilterPattern 取值（in / ge / gt / le / lt / like / dateRange / dateTimeRange，**以 contract.md 实际确认为准**）翻译成 ts union。在 types.ts 顶部、`InitOrEditPattern` 之后插入：
+把 form-generator 已知的 8 个 FilterPattern 取值（**以 contract.md 实际确认为准**）翻译成 ts union。在 types.ts 顶部、`InitOrEditPattern` 之后插入：
 
 ```ts
 export type FilterPattern =
@@ -680,32 +669,18 @@ export type FilterPattern =
   | 'dateTimeRange'
 ```
 
-- [ ] **Step 2: 在 ItemDefBase 加 filterPatterns**
+**注意**：`ItemDefBase` **不加** `filterPatterns` 字段。FilterPattern 映射由 `field-policy.ts` 里的常量表维护（Task C5），不走 schema 传递。
 
-修改现有 line 14-20：
-
-```ts
-interface ItemDefBase {
-  name: string
-  title: string
-  isNonVoid: boolean
-  initPattern: InitOrEditPattern
-  editPattern: InitOrEditPattern
-  filterPatterns?: FilterPattern[]
-}
-```
-
-- [ ] **Step 3: 跑 vue-tsc 确认类型不破**
+- [ ] **Step 2: 跑 vue-tsc 确认类型不破**
 
 Run: `cd app-generator/src/main/resources/frontend-skeleton && npx vue-tsc --noEmit`
-Expected: 通过（不报已有代码因新增可选字段而引入的错误）。
-**Note**：如果项目还没装依赖，先 `npm install`。
+Expected: 通过。**Note**：如果项目还没装依赖，先 `npm install`。
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
 git add app-generator/src/main/resources/frontend-skeleton/src/schema/types.ts
-git commit -m "feat(frontend-skeleton): extend ItemDefBase with filterPatterns and FilterPattern type"
+git commit -m "feat(frontend-skeleton): add FilterPattern type to schema/types.ts"
 ```
 
 ## Task C2: 创建 protocol/endpoints.ts
@@ -764,6 +739,7 @@ git commit -m "feat(frontend-skeleton): add protocol/endpoints.ts"
 // app-generator/src/main/resources/frontend-skeleton/src/core/protocol/request-builder.ts
 
 import type { ItemDef, FilterPattern } from '@/schema/types'
+import { getFilterPatternsByItemType } from './field-policy'
 
 interface PaginationInput {
   pageNo: number      // ← 字段名按 contract.md §3 分页字段
@@ -810,7 +786,7 @@ export function buildListRequest(
     pageSize: pagination.pageSize
   }
   for (const item of items) {
-    const patterns = item.filterPatterns ?? []
+    const patterns = getFilterPatternsByItemType(item.type)
     for (const p of patterns) {
       const rule = filterPatternListRules[p]
       Object.assign(out, rule(item, formState[item.name]))
@@ -818,7 +794,6 @@ export function buildListRequest(
   }
   if (sort) {
     // ⚠️ 后端尚未支持 sort（design 已预留参数），具体字段名待后续 contract 更新
-    // 当前实现：透传到一个占位字段，避免现在就硬编码错误的字段名
     out.sortField = sort.field
     out.sortDirection = sort.direction
   }
@@ -943,24 +918,38 @@ git commit -m "feat(frontend-skeleton): add protocol/response-parser.ts"
 **Files:**
 - Create: `app-generator/src/main/resources/frontend-skeleton/src/core/protocol/field-policy.ts`
 
-- [ ] **Step 1: 写 isVisible / isReadonly**
+- [ ] **Step 1: 写 FILTER_PATTERNS_BY_TYPE + isVisible / isReadonly**
 
-按 design §Data Flow + gaps 决议实现。要把 SearchForm.vue 当前 line 19-24 的硬编码（`secret 不可搜 / time:time 不可搜`）抽到这里。
+按 design §FilterPattern Inference 的固定映射表实现。
 
 ```ts
 // app-generator/src/main/resources/frontend-skeleton/src/core/protocol/field-policy.ts
 
-import type { ItemDef } from '@/schema/types'
+import type { ItemDef, FilterPattern } from '@/schema/types'
+
+// Mirror 后端 ItemService#getFilterPatterns 的固定映射
+// 当后端新增 ItemType 时，这里加一条
+const FILTER_PATTERNS_BY_TYPE: Record<ItemDef['type'], FilterPattern[]> = {
+  text:        ['in', 'like'],
+  number:      ['in', 'ge', 'gt', 'le', 'lt'],
+  time:        ['in', 'dateRange', 'dateTimeRange'],
+  select:      ['in'],
+  multiSelect: ['in'],
+  onOff:       ['in'],
+  secret:      []   // secret 不参与查询
+}
+
+export function getFilterPatternsByItemType(type: ItemDef['type']): FilterPattern[] {
+  return FILTER_PATTERNS_BY_TYPE[type]
+}
 
 export type FieldMode = 'search' | 'table' | 'edit-create' | 'edit-update' | 'detail'
 
 export function isVisible(item: ItemDef, mode: FieldMode): boolean {
   switch (mode) {
     case 'search':
-      // 没声明 filterPatterns 的字段不参与搜索（与 contract.md §3 "未声明字段" 节的事实一致）
-      // 同时排除 secret —— 安全敏感字段不暴露在 URL 查询参数
-      if (item.type === 'secret') return false
-      return (item.filterPatterns?.length ?? 0) > 0
+      // secret 不参与搜索；其余有 FilterPattern 的类型才显示搜索项
+      return getFilterPatternsByItemType(item.type).length > 0
     case 'table':
       // 默认全部显示；若 contract.md / gaps 决议某类字段不在 list 返回，下面加规则
       return true

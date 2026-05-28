@@ -138,15 +138,24 @@ DataTable 行操作 → CrudPage.handleEdit
 - protocol 层不包装错误，原样冒泡。
 - getDetail 失败时编辑流程中断，不打开 modal —— 避免用户在空表单上编辑。
 
-### Schema Type Extension
+### FilterPattern Inference
 
-`src/schema/types.ts` 的 `ItemDefBase` 新增可选字段：
+form-generator 已将 `filterPatterns` 从 DSL 中移除，改为按 ItemType 在 `ItemService#getFilterPatterns` 里固定返回：
 
-```ts
-filterPatterns?: FilterPattern[]
-```
+| ItemType    | 支持的 FilterPatterns（后端固定）                 |
+|-------------|--------------------------------------------------|
+| text        | `in`, `like`                                     |
+| number      | `in`, `ge`, `gt`, `le`, `lt`                     |
+| time        | `in`, `dateRange`, `dateTimeRange`               |
+| select      | `in`                                             |
+| multiSelect | `in`                                             |
+| onOff       | `in`                                             |
+| secret      | 无（不可作为过滤条件）                            |
 
-`FilterPattern` 类型从 form-generator 的 enum 翻译过来；具体取值集合以阶段 2 contract.md 为准。`AppGenerator.java` 序列化 `AppDef` 时 form-generator 的 `FormDef` 子树天然带 filterPatterns —— 阶段 3 第 0 步先验证一次序列化结果，只在确认 app.json 缺字段时才动 java。
+因此：
+- **`src/schema/types.ts` 不需要新增 `filterPatterns` 字段**；app.json 中也不含此字段。
+- **前端 `field-policy.ts` 维护一份 `FILTER_PATTERNS_BY_TYPE` 常量表**，与上表一致，替代从 schema 读取。
+- SearchForm 里判断某 item 是否显示为搜索条件，直接查 `FILTER_PATTERNS_BY_TYPE[item.type]` 是否非空。
 
 ## Changes
 
@@ -159,7 +168,7 @@ filterPatterns?: FilterPattern[]
 - `src/core/protocol/field-policy.ts`
 
 **修改**
-- `src/schema/types.ts`：扩 `filterPatterns?: FilterPattern[]`；新增 `FilterPattern` 类型。
+- `src/schema/types.ts`：新增 `FilterPattern` 类型（从后端 enum 翻译，固定集合）。`ItemDefBase` **不加** `filterPatterns` 字段。
 - `src/core/CrudPage.vue`：4 个接口调用走 protocol 层；handleEdit 改 async + detailLoading + 失败不开 modal；handleDelete 改用 bizKey。
 - `src/core/SearchForm.vue`：去掉对 secret/time 类型的 filter 硬编码 (line 19-24)，改走 `field-policy.isVisible(item, 'search')`；提交查询时不直接用 modelValue，而是经 `buildListRequest`（在 CrudPage 里）。
 - `src/core/EditModal.vue`：可见性/只读规则走 `field-policy.isVisible(item, mode)` / `isReadonly(item, mode)`。
@@ -169,7 +178,7 @@ filterPatterns?: FilterPattern[]
 
 ### app-generator/src/main/java/
 
-- `AppGenerator.java`：阶段 3 第 0 步**验证** app.json 序列化是否带上 filterPatterns。**预期不需要改**（FormDef 子树自然包含）；若验证失败再修。
+无需改动。`filterPatterns` 已从 form-generator DSL 移除，前端从 ItemType 直接推导，不依赖序列化结果。
 
 ## Verification
 
