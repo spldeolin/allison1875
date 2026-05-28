@@ -4,12 +4,14 @@ import { NDataTable, NButton, NSpace, NPopconfirm } from 'naive-ui'
 import type { DataTableColumn, PaginationProps } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
+import { isVisible } from './protocol/field-policy'
 
 const props = defineProps<{
   items: ItemDef[]
   data: Record<string, any>[]
   loading: boolean
   pagination: PaginationProps
+  detailLoading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -18,11 +20,15 @@ const emit = defineEmits<{
   'update:pagination': [pagination: PaginationProps]
 }>()
 
+const visibleItems = computed(() =>
+  props.items.filter(item => isVisible(item, 'table'))
+)
+
 const columns = computed<DataTableColumn[]>(() => {
-  const totalItems = props.items.length
+  const totalItems = visibleItems.value.length
   const shouldFreeze = totalItems > 4
 
-  const cols: DataTableColumn[] = props.items.map((item, index) => ({
+  const cols: DataTableColumn[] = visibleItems.value.map((item, index) => ({
     title: item.title,
     key: item.name,
     ellipsis: { tooltip: true },
@@ -46,7 +52,7 @@ const columns = computed<DataTableColumn[]>(() => {
     render(row: Record<string, any>) {
       return h(NSpace, null, {
         default: () => [
-          h(NButton, { size: 'small', quaternary: true, type: 'primary', onClick: () => emit('edit', row) }, { default: () => '编辑' }),
+          h(NButton, { size: 'small', quaternary: true, type: 'primary', loading: props.detailLoading, onClick: () => emit('edit', row) }, { default: () => '编辑' }),
           h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
             trigger: () => h(NButton, { size: 'small', quaternary: true, type: 'error' }, { default: () => '删除' }),
             default: () => '确定要删除吗？'
@@ -60,8 +66,8 @@ const columns = computed<DataTableColumn[]>(() => {
 })
 
 const scrollX = computed(() => {
-  if (props.items.length > 4) {
-    return props.items.length * 150 + 150
+  if (visibleItems.value.length > 4) {
+    return visibleItems.value.length * 150 + 150
   }
   return undefined
 })

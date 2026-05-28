@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { NForm, NFormItem, NButton, NSpace } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
+import { isVisible } from './protocol/field-policy'
 
 const props = defineProps<{
   items: ItemDef[]
@@ -16,11 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const searchableItems = computed(() =>
-  props.items.filter(item => {
-    if (item.type === 'secret') return false
-    if (item.type === 'time' && item.format === 'time') return false
-    return true
-  })
+  props.items.filter(item => isVisible(item, 'search'))
 )
 
 function updateField(name: string, value: any) {

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { NModal, NCard, NForm, NFormItem, NButton, NSpace, type FormInst, type FormRules } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
+import { isVisible } from './protocol/field-policy'
 
 const props = defineProps<{
   visible: boolean
@@ -20,11 +21,12 @@ const emit = defineEmits<{
 
 const formRef = ref<FormInst | null>(null)
 
+const editMode = computed<'edit-create' | 'edit-update'>(() =>
+  props.mode === 'create' ? 'edit-create' : 'edit-update'
+)
+
 const visibleItems = computed(() =>
-  props.items.filter(item => {
-    const pattern = props.mode === 'create' ? item.initPattern : item.editPattern
-    return pattern !== 'doNot'
-  })
+  props.items.filter(item => isVisible(item, editMode.value))
 )
 
 const rules = computed<FormRules>(() => {
