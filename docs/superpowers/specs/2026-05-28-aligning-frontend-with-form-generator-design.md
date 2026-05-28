@@ -23,7 +23,7 @@
 ## Non-Goals
 
 - 不读 `form-generator` 源码以推断接口契约（上下文成本过高，已废弃）。改用"超级 DSL → form-generator 实际生成 java → 读生成代码"的取证方式。
-- 不为 vue 组件写单测，不做 e2e。
+- 不为 frontend-skeleton 写任何单测；联调即验证手段。
 - 不引入构建期插件或代码生成。frontend-skeleton 维持"运行时 schema 驱动"的现状。
 - 不重构当前 frontend-skeleton 已有的组件分层（CrudPage / SearchForm / EditModal / DataTable / fields/*）。
 
@@ -82,7 +82,7 @@ const filterPatternRules: Record<FilterPattern, (item, value) => Record<string, 
 ```
 
 - 对象字面量：新增 ItemType / FilterPattern 时 TypeScript 在编译期会强制提示漏掉的规则；
-- 纯函数：易测试，每条规则一个单测 case；
+- 纯函数：无副作用、易调试，组件层调用点也保持简单；
 - 不引入 class、注册中心、插件机制 —— 规则条目数小且固定，不需要这种灵活性。
 
 ### Sustainability for Future form-generator Iterations
@@ -157,10 +157,6 @@ filterPatterns?: FilterPattern[]
 - `src/core/protocol/request-builder.ts`
 - `src/core/protocol/response-parser.ts`
 - `src/core/protocol/field-policy.ts`
-- `tests/protocol/endpoints.test.ts`
-- `tests/protocol/request-builder.test.ts`
-- `tests/protocol/response-parser.test.ts`
-- `tests/protocol/field-policy.test.ts`
 
 **修改**
 - `src/schema/types.ts`：扩 `filterPatterns?: FilterPattern[]`；新增 `FilterPattern` 类型。
@@ -175,23 +171,13 @@ filterPatterns?: FilterPattern[]
 
 - `AppGenerator.java`：阶段 3 第 0 步**验证** app.json 序列化是否带上 filterPatterns。**预期不需要改**（FormDef 子树自然包含）；若验证失败再修。
 
-## Testing
+## Verification
 
-只为 `src/core/protocol/` 写 vitest 单测，目录 `tests/protocol/`：
+不为 frontend-skeleton 写任何单测。验证手段：
 
-- `endpoints.test.ts`：每个 action 的 URL 派生。
-- `request-builder.test.ts`：每种 FilterPattern 在 list 路径各 1 个 case；每种 init/edit pattern 在 save 路径各 1 个 case。
-- `response-parser.test.ts`：每种 ItemType 在 listRow 路径和 detailDto 路径各 1 个 case，重点 secret 和 time。
-- `field-policy.test.ts`：每种 mode × 每种 specialItemType 的关键组合。
-
-**不做**：
-
-- 不写 vue 组件单测（@vue/test-utils）；
-- 不写 e2e / 集成测试（联调即集成测试）；
-- 不测 schema/types.ts（编译期保证）；
-- 不测 axios 拦截器（未变更）。
-
-测试规模与产品代码大致 1:1 量级 —— 规则表每条规则各一个 case，不追求边界 case 完整覆盖（那是后端的责任）。
+- TypeScript 编译期类型检查（`Record<FilterPattern, ...>` 等规则表会在编译期强制提示漏项）；
+- 用户跑前后端联调，反馈 mismatch；
+- protocol 层规则的正确性以阶段 2 的 `contract.md` 为准，contract.md 由读真实生成代码得到，不靠运行时断言。
 
 ## Open Questions
 
