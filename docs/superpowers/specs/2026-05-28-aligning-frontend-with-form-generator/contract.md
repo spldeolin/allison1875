@@ -290,20 +290,42 @@ form-generator 自动注入的业务主键（第一个字段）命名为 `${lowe
 `StudentDormitory.facilities` (type=multiSelect, isNonVoid=false)
 
 - List 入参：`facilities: List<FacilitiesEnum>`
-- List 出参：`facilities: ???` (预期 List<FacilitiesEnum> 或 String with comma separator) **待观察**
-- Save 入参：`facilities: List<String>` 或 `String`（根据后端实际）
+- List 出参：`facilities: List<FacilitiesEnum>` ✅ （已确认）
+- Detail 出参：`facilities: List<FacilitiesEnum>` ✅ （已确认）
+- Save 入参：`facilities: List<FacilitiesEnum>` 或 可选
 
 ---
 
-## 14. InitPattern / EditPattern 的后端语义
+## 14. Secret 字段处理
 
-- **doNot**：create 或 edit 时该字段不传，后端也不接受；前端应隐藏或 readonly
-- **userInput**：前端可以传值
-- **todo**：后端期望什么行为（是否必填、是否可传）？**待 gap 决议**
+**后端行为（已确认）**：
+- secret 字段（doorPassword、emergencyContact）**完全不出现在任何 list/detail 响应 DTO 中**
+- save 入参时，仅 doorPassword (initPattern=userInput, editPattern=userInput) 可在表单中指定
+- emergencyContact (initPattern=todo, editPattern=doNot) 在任何表单中都不应出现（前端隐藏）
+
+**前端处理**：
+- SearchForm：secret 无 FilterPattern，自动隐藏
+- DataTable：secret 不出现在后端响应，自动不显示
+- EditModal：
+  - doorPassword (userInput/userInput)：create 和 edit 时都可显示可编辑
+  - emergencyContact (todo/doNot)：完全隐藏（create 时因 initPattern=todo，edit 时因 editPattern=doNot）
+- Save 请求：doorPassword 可传，emergencyContact 不需要在 DTO 中
 
 ---
 
-## 15. 索引信息
+## 15. InitPattern / EditPattern 的后端语义
+
+**用户确认**：
+- **initPattern=todo**：create 时**用户不需要提供**；后端代码中由开发者手动初始化，前端应完全隐藏该字段
+- **editPattern=doNot**：edit 时字段**不可修改**；结合 initPattern，确定字段在 save 入参 DTO 中的出现情况
+- 例：`emergencyContact` (initPattern=todo, editPattern=doNot)
+  - create 时：隐藏（initPattern=todo）
+  - edit 时：隐藏（editPattern=doNot）
+  - save 请求：该字段不需要在 DTO 中
+
+---
+
+## 16. 索引信息
 
 3 个 form 的索引定义（仅供参考，前端无需感知）：
 
@@ -318,5 +340,6 @@ form-generator 自动注入的业务主键（第一个字段）命名为 `${lowe
 ## 备注
 
 - 所有日期时间在请求/响应中均为字符串，前端需要用相应的日期组件（Naive UI DatePicker / TimePicker）处理
-- MultiSelect 的实际序列化形式（List vs 逗号分隔）需要在实际集成时验证
-- Secret 字段的完整行为（list/detail 中的可见性、save 入参的必填性）需要在联调时验证并更新 gaps.md
+- Secret 字段完全由后端隐藏，前端通过 initPattern/editPattern 决定在表单中是否允许用户指定
+- InitPattern=todo 的字段（如 emergencyContact）由后端开发者手动初始化，前端应完全隐藏
+- EditPattern=doNot 的字段不允许编辑，对应的字段值不需要在 save 入参 DTO 中出现
