@@ -1,4 +1,13 @@
 export type InitOrEditPattern = 'doNot' | 'userInput' | 'todo'
+export type FilterPattern =
+  | 'in'
+  | 'ge'
+  | 'gt'
+  | 'le'
+  | 'lt'
+  | 'like'
+  | 'dateRange'
+  | 'dateTimeRange'
 export type TimeFormat = 'date' | 'time' | 'dateTime'
 
 export interface OptionDef {
