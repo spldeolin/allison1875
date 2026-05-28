@@ -5,7 +5,7 @@ import { NCard, NForm, NFormItem, NInput, NButton, NIcon, useMessage, type FormI
 import { GridOutline } from '@vicons/ionicons5'
 import { useAuthStore } from '@/stores/auth'
 import request from '@/utils/request'
-import type { ApiBaseResult } from '@/utils/request'
+import type { RequestResult } from '@/utils/request'
 
 interface LoginResp {
   token: string
@@ -42,8 +42,8 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    const { data } = await request.post<ApiBaseResult<LoginResp>>('/api/v1/login', formData.value)
-    const { token, userInfo, permissions } = data.result
+    const { data } = await request.post<RequestResult<LoginResp>>('/api/v1/login', formData.value)
+    const { token, userInfo, permissions } = data.data
     authStore.setAuth(token, userInfo, permissions)
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)

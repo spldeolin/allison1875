@@ -1,14 +1,17 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
-export interface ApiBaseResult<T = unknown> {
-  code: number
-  msg: string
-  result: T
+// Backend RequestResult<T> shape (from backend-skeleton/common/RequestResult.java)
+export interface RequestResult<T = unknown> {
+  errorCode: string | null
+  data: T
+  errorMsg: string | null
+  traceId: string
 }
 
+// Keep this for list responses
 export interface PageResult<T> {
-  count: number
+  total: number
   list: T[]
 }
 
@@ -28,17 +31,17 @@ request.interceptors.request.use(config => {
 
 request.interceptors.response.use(
   response => {
-    const data = response.data as ApiBaseResult
-    if (data.code === 200) {
+    const data = response.data as RequestResult
+    if (data.errorCode === null) {
       return response
     }
-    if (data.code === 401) {
+    if (data.errorCode === '401') {
       const authStore = useAuthStore()
       authStore.logout()
       window.location.hash = '#/login'
       return Promise.reject(new Error('认证已过期'))
     }
-    return Promise.reject(new Error(data.msg || '请求失败'))
+    return Promise.reject(new Error(data.errorMsg || '请求失败'))
   },
   error => Promise.reject(error)
 )

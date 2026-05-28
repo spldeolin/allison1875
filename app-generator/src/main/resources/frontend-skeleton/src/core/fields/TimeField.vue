@@ -41,6 +41,8 @@ function formatDisplay(val: number | [number, number] | null): string {
       clearable
       @update:value="emit('update:value', $event)"
     />
+    <!-- time-format range search not yet implemented; field hidden in search -->
+    <template v-else-if="item.format === 'time'" />
   </template>
   <template v-else>
     <NDatePicker
