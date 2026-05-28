@@ -733,7 +733,11 @@ git commit -m "feat(frontend-skeleton): add protocol/endpoints.ts"
 
 - [ ] **Step 1: 写 buildListRequest**
 
-按 contract.md §3"List 入参 DTO 规则"实现。下面给骨架——**所有键名后缀必须按 contract.md 实际值替换**：
+按 contract.md §3"List 入参 DTO 规则"实现。**已确认事实（gaps.md Gap1/Gap7）**：
+- 字段名无任何后缀（不是 `idCardLike` 或 `ageList`，直接用 `item.name`）
+- IN 过滤：字段类型为 `List<T>`，前端传数组即可
+- dateRange/dateTimeRange：后缀为 `Start` / `End`（不是 Begin/End）
+- 分页字段：`pageNum` / `pageSize`（不是 pageNo）
 
 ```ts
 // app-generator/src/main/resources/frontend-skeleton/src/core/protocol/request-builder.ts
@@ -742,7 +746,7 @@ import type { ItemDef, FilterPattern } from '@/schema/types'
 import { getFilterPatternsByItemType } from './field-policy'
 
 interface PaginationInput {
-  pageNo: number      // ← 字段名按 contract.md §3 分页字段
+  pageNum: number    // contract.md §3: 后端用 pageNum
   pageSize: number
 }
 
@@ -754,23 +758,23 @@ interface SortInput {
 // 每条规则：给定 item 和 formState 中该字段的当前值，返回若干键值对
 type ListRule = (item: ItemDef, value: any) => Record<string, any>
 
+// Gap1 决议：字段名无后缀，直接用 item.name；dateRange 用 Start/End
 const filterPatternListRules: Record<FilterPattern, ListRule> = {
-  // ⚠️ 以下规则来自 contract.md §3 衍生表，键名后缀按实际替换
-  like:          (item, v) => v ? { [`${item.name}Like`]: v } : {},
-  in:            (item, v) => Array.isArray(v) && v.length ? { [`${item.name}List`]: v } : {},
-  ge:            (item, v) => v != null ? { [`${item.name}Ge`]: v } : {},
-  gt:            (item, v) => v != null ? { [`${item.name}Gt`]: v } : {},
-  le:            (item, v) => v != null ? { [`${item.name}Le`]: v } : {},
-  lt:            (item, v) => v != null ? { [`${item.name}Lt`]: v } : {},
-  dateRange:     (item, v) => buildDateRange(item, v, 'Begin', 'End'),
-  dateTimeRange: (item, v) => buildDateRange(item, v, 'Begin', 'End')
+  like:          (item, v) => v ? { [item.name]: v } : {},
+  in:            (item, v) => Array.isArray(v) && v.length ? { [item.name]: v } : {},
+  ge:            (item, v) => v != null ? { [item.name]: v } : {},
+  gt:            (item, v) => v != null ? { [item.name]: v } : {},
+  le:            (item, v) => v != null ? { [item.name]: v } : {},
+  lt:            (item, v) => v != null ? { [item.name]: v } : {},
+  dateRange:     (item, v) => buildDateRange(item, v, 'Start', 'End'),
+  dateTimeRange: (item, v) => buildDateRange(item, v, 'Start', 'End')
 }
 
-function buildDateRange(item: ItemDef, v: any, beginSuffix: string, endSuffix: string) {
+function buildDateRange(item: ItemDef, v: any, startSuffix: string, endSuffix: string) {
   if (!Array.isArray(v) || v.length !== 2) return {}
-  const [begin, end] = v
+  const [start, end] = v
   const out: Record<string, any> = {}
-  if (begin != null) out[`${item.name}${beginSuffix}`] = begin
+  if (start != null) out[`${item.name}${startSuffix}`] = start
   if (end != null) out[`${item.name}${endSuffix}`] = end
   return out
 }
@@ -782,7 +786,7 @@ export function buildListRequest(
   sort?: SortInput
 ): Record<string, any> {
   const out: Record<string, any> = {
-    pageNo: pagination.pageNo,
+    pageNum: pagination.pageNum,   // Gap7 决议：后端用 pageNum
     pageSize: pagination.pageSize
   }
   for (const item of items) {
@@ -793,7 +797,7 @@ export function buildListRequest(
     }
   }
   if (sort) {
-    // ⚠️ 后端尚未支持 sort（design 已预留参数），具体字段名待后续 contract 更新
+    // 后端尚未支持 sort，仅预留占位；后端实装后按当时 contract 调整
     out.sortField = sort.field
     out.sortDirection = sort.direction
   }
@@ -801,13 +805,13 @@ export function buildListRequest(
 }
 ```
 
-**关于 sort**：design 明确说 buildListRequest 预留 sort 参数。当前后端不支持，所以代码里**只是把入参展开成两个字段**作为占位；调用方暂不传 sort，后端实装后这里再按当时的 contract 调整。在代码里加注释说明。
-
 - [ ] **Step 2: 写 buildSaveRequest**
 
-按 contract.md §4"字段出现矩阵 / save in"列实现。规则：
-- 当前 mode = 'create'：`initPattern == 'doNot'` 的字段不传；`initPattern == 'todo'` 的字段是否传由 contract / gaps 决议；其余传 formState[name]。
-- 当前 mode = 'edit'：`editPattern == 'doNot'` 的字段不传；其余传；业务主键 (`${formName}Code`) 必须传——但**业务主键的具体名称由调用方传入**，因为 buildSaveRequest 拿不到 formName。
+按 contract.md §5 + gaps.md Gap3/Gap4 决议实现：
+- `initPattern === 'doNot'`：create 时不传
+- `initPattern === 'todo'`：**前端隐藏且不传**（Gap4 决议：todo 字段由后端开发者手动初始化，前端完全隐藏）
+- `editPattern === 'doNot'`：edit 时不传（包括 emergencyContact）
+- 其余（userInput）：传 formState[name]
 
 ```ts
 export function buildSaveRequest(
@@ -818,20 +822,16 @@ export function buildSaveRequest(
   const out: Record<string, any> = {}
   for (const item of items) {
     const pattern = mode === 'create' ? item.initPattern : item.editPattern
+    // doNot: 不允许传（create 不应出现 / edit 不允许修改）
     if (pattern === 'doNot') continue
-    if (pattern === 'todo') {
-      // ⚠️ todo 字段的传输规则按 contract.md / gaps 决议；下例假设也传
-      out[item.name] = formState[item.name] ?? null
-      continue
-    }
-    // pattern === 'userInput'
+    // todo: 前端隐藏，不传值；后端开发者手动初始化（Gap4 决议）
+    if (pattern === 'todo') continue
+    // userInput: 正常传
     out[item.name] = formState[item.name] ?? null
   }
   return out
 }
 ```
-
-**关于 todo 字段、bizKey**：必须在写完 contract.md 后回来修改这段代码，使其严格符合 contract+gaps 决议。
 
 - [ ] **Step 3: 跑 vue-tsc**
 
@@ -870,12 +870,11 @@ const itemTypeParseRules: Record<ItemDef['type'], ParseRule> = {
   time:         (_item, raw) => raw, // 后端通常返回 ISO 字符串；naive-ui 时间组件能消费
   select:       (_item, raw) => raw, // 单 code 字符串
   multiSelect:  (_item, raw) => {
-    // ⚠️ 按 contract.md §4 决定：若后端是 List<String> 则原样；若是逗号字符串则 split
+    // Gap2 决议：后端 list/detail 出参均为 List<Enum>，前端直接透传（不需要 split）
     if (Array.isArray(raw)) return raw
-    if (typeof raw === 'string') return raw.split(',').filter(Boolean)
     return []
   },
-  secret:       (_item, raw, _mode) => raw  // 后端返回什么就用什么；细则按 gaps 决议
+  secret:       (_item, raw) => raw  // Gap3 决议：secret 完全不出现在后端响应，此规则不会触发
 }
 
 function parseRow(items: ItemDef[], dto: Record<string, any>, mode: Mode): Record<string, any> {
@@ -948,15 +947,22 @@ export type FieldMode = 'search' | 'table' | 'edit-create' | 'edit-update' | 'de
 export function isVisible(item: ItemDef, mode: FieldMode): boolean {
   switch (mode) {
     case 'search':
-      // secret 不参与搜索；其余有 FilterPattern 的类型才显示搜索项
+      // secret 不参与搜索（FilterPatterns 为空数组）；其余有 FilterPattern 的类型才显示
       return getFilterPatternsByItemType(item.type).length > 0
     case 'table':
-      // 默认全部显示；若 contract.md / gaps 决议某类字段不在 list 返回，下面加规则
-      return true
+      // Gap3 决议：secret 字段不出现在后端 list 响应，table 也不显示
+      return item.type !== 'secret'
     case 'edit-create':
-      return item.initPattern !== 'doNot'
+      // Gap4 决议：todo 字段由后端初始化，前端完全隐藏
+      // doNot 字段 create 时不显示
+      if (item.initPattern === 'doNot') return false
+      if (item.initPattern === 'todo') return false
+      return true
     case 'edit-update':
-      return item.editPattern !== 'doNot'
+      // doNot 字段 edit 时不显示
+      if (item.editPattern === 'doNot') return false
+      // todo+doNot 组合（如 emergencyContact）在 edit 时隐藏（editPattern=doNot）
+      return true
     case 'detail':
       return true
   }
@@ -1039,14 +1045,14 @@ async function fetchData() {
     const reqBody = buildListRequest(
       props.schema.items,
       searchParams.value,
-      { pageNo: pagination.page!, pageSize: pagination.pageSize! }
+      { pageNum: pagination.page!, pageSize: pagination.pageSize! }  // Gap7: pageNum
     )
     const { data } = await request.post<ApiBaseResult<PageResult<Record<string, any>>>>(
       endpointOf(props.schema.name, 'list'),
       reqBody
     )
     tableData.value = data.result.list.map(dto => parseListRow(props.schema.items, dto))
-    pagination.itemCount = data.result.count
+    pagination.itemCount = data.result.total  // contract.md §4.3: total 字段
   } catch (e: any) {
     message.error(e.message || '查询失败')
   } finally {
@@ -1096,9 +1102,11 @@ async function handleEdit(row: Record<string, any>) {
 
 async function handleDelete(row: Record<string, any>) {
   try {
+    // Gap6 决议：delete 支持批量，入参为 { ${bizKey}s: List<String> }
+    const pluralBizKey = `${bizKey}s`
     await request.post<ApiBaseResult>(
       endpointOf(props.schema.name, 'delete'),
-      { [bizKey]: row[bizKey] }
+      { [pluralBizKey]: [row[bizKey]] }
     )
     message.success('删除成功')
     fetchData()
