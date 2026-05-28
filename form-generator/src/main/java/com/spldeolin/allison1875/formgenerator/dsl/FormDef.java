@@ -61,18 +61,22 @@ public class FormDef {
         }
     }
 
+    @JsonIgnore
     public String getVarName() {
         return StringUtils.uncapitalize(this.getName());
     }
 
+    @JsonIgnore
     public String getBizIdName() {
         return this.getItems().get(0).getName();
     }
 
+    @JsonIgnore
     public String getBizIdGetterName() {
         return "get" + StringUtils.capitalize(this.getBizIdName());
     }
 
+    @JsonIgnore
     public String getBizIdSetterName() {
         return "set" + StringUtils.capitalize(this.getBizIdName());
     }

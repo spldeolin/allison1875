@@ -36,6 +36,10 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>form-generator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.spldeolin.allison1875</groupId>
+            <artifactId>app-generator</artifactId>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>

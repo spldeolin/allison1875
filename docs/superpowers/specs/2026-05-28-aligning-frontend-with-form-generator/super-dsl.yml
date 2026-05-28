@@ -14,193 +14,207 @@
 #   Coverage: time (date / time / dateTime) + select (standard) + number (decimal)
 #             composite unique index on 3 fields
 
-- name: StudentProfile
-  title: 学生档案
-  desc: 学生基本档案信息表单
-  items:
-    # text/short + regex, isNonVoid=true, both patterns=userInput
-    - type: text
-      name: idCard
-      title: 身份证号
-      isNonVoid: true
-      maxLength: 18
-      regex: '^\d{18}$'
-      initPattern: userInput
-      editPattern: userInput
+namespace: com.example
+name: super-dsl-example
+title: 超级DSL示例
 
-    # text/short, isNonVoid=true
-    - type: text
-      name: studentName
-      title: 学生姓名
-      isNonVoid: true
-      maxLength: 50
-      initPattern: userInput
-      editPattern: userInput
+menus:
+  - group: 学生
+    icon: 1
+    order: 1
+    form:
+      name: StudentProfile
+      title: 学生档案
+      desc: 学生基本档案信息表单
+      items:
+        # text/short + regex, isNonVoid=true, both patterns=userInput
+        - type: text
+          name: idCard
+          title: 身份证号
+          isNonVoid: true
+          maxLength: 18
+          regex: '^\d{18}$'
+          initPattern: userInput
+          editPattern: userInput
 
-    # text/multiline, isNonVoid=false
-    - type: text
-      name: bio
-      title: 个人简介
-      isNonVoid: false
-      isMultilineOrRich: true
-      maxLength: 2000
-      initPattern: userInput
-      editPattern: userInput
+        # text/short, isNonVoid=true
+        - type: text
+          name: studentName
+          title: 学生姓名
+          isNonVoid: true
+          maxLength: 50
+          initPattern: userInput
+          editPattern: userInput
 
-    # number/integer, isNonVoid=true
-    - type: number
-      name: age
-      title: 年龄
-      isNonVoid: true
-      canBeDecimal: false
-      initPattern: userInput
-      editPattern: userInput
+        # text/multiline, isNonVoid=false
+        - type: text
+          name: bio
+          title: 个人简介
+          isNonVoid: false
+          isMultilineOrRich: true
+          maxLength: 2000
+          initPattern: userInput
+          editPattern: userInput
 
-    # select, isNonVoid=true, editPattern=doNot (demonstrates readonly-after-create)
-    - type: select
-      name: gender
-      title: 性别
-      isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
-      options:
-        - code: 'M'
-          title: 男
-        - code: 'F'
-          title: 女
+        # number/integer, isNonVoid=true
+        - type: number
+          name: age
+          title: 年龄
+          isNonVoid: true
+          canBeDecimal: false
+          initPattern: userInput
+          editPattern: userInput
 
-  indices:
-    - itemNames: [idCard]
-      isUnique: true
+        # select, isNonVoid=true, editPattern=doNot (demonstrates readonly-after-create)
+        - type: select
+          name: gender
+          title: 性别
+          isNonVoid: true
+          initPattern: userInput
+          editPattern: doNot
+          options:
+            - code: 'M'
+              title: 男
+            - code: 'F'
+              title: 女
+      indices:
+        - itemNames: [ idCard ]
+          isUnique: true
 
-- name: StudentDormitory
-  title: 学生宿舍信息
-  desc: 学生宿舍分配与管理表单
-  items:
-    # number/integer, isNonVoid=true
-    - type: number
-      name: studentId
-      title: 学生ID
-      isNonVoid: true
-      canBeDecimal: false
-      initPattern: userInput
-      editPattern: userInput
+  - group: 学生
+    icon: 2
+    order: 2
+    form:
+      name: StudentDormitory
+      title: 学生宿舍信息
+      desc: 学生宿舍分配与管理表单
+      items:
+        # number/integer, isNonVoid=true
+        - type: number
+          name: studentId
+          title: 学生ID
+          isNonVoid: true
+          canBeDecimal: false
+          initPattern: userInput
+          editPattern: userInput
 
-    # onOff, isNonVoid=true
-    - type: onOff
-      name: hasAllergy
-      title: 是否有过敏史
-      isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+        # onOff, isNonVoid=true
+        - type: onOff
+          name: hasAllergy
+          title: 是否有过敏史
+          isNonVoid: true
+          initPattern: userInput
+          editPattern: userInput
 
-    # multiSelect, isNonVoid=false
-    - type: multiSelect
-      name: facilities
-      title: 需要的设施
-      isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
-      options:
-        - code: 'AC'
-          title: 空调
-        - code: 'HEATER'
-          title: 暖气
-        - code: 'DESK'
-          title: 书桌
+        # multiSelect, isNonVoid=false
+        - type: multiSelect
+          name: facilities
+          title: 需要的设施
+          isNonVoid: false
+          initPattern: userInput
+          editPattern: userInput
+          options:
+            - code: 'AC'
+              title: 空调
+            - code: 'HEATER'
+              title: 暖气
+            - code: 'DESK'
+              title: 书桌
 
-    # secret, initPattern=userInput, editPattern=userInput
-    - type: secret
-      name: doorPassword
-      title: 门禁密码
-      isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+        # secret, initPattern=userInput, editPattern=userInput
+        - type: secret
+          name: doorPassword
+          title: 门禁密码
+          isNonVoid: true
+          initPattern: userInput
+          editPattern: userInput
 
-    # secret, initPattern=todo, editPattern=doNot (demonstrates todo+doNot combo)
-    - type: secret
-      name: emergencyContact
-      title: 紧急联系人密保
-      isNonVoid: true
-      initPattern: todo
-      editPattern: doNot
+        # secret, initPattern=todo, editPattern=doNot (demonstrates todo+doNot combo)
+        - type: secret
+          name: emergencyContact
+          title: 紧急联系人密保
+          isNonVoid: true
+          initPattern: todo
+          editPattern: doNot
 
-    # number/decimal, isNonVoid=true
-    - type: number
-      name: monthlyRent
-      title: 月租金
-      isNonVoid: true
-      canBeDecimal: true
-      initPattern: userInput
-      editPattern: userInput
+        # number/decimal, isNonVoid=true
+        - type: number
+          name: monthlyRent
+          title: 月租金
+          isNonVoid: true
+          canBeDecimal: true
+          initPattern: userInput
+          editPattern: userInput
+      indices:
+        - itemNames: [ studentId ]
+          isUnique: true
 
-  indices:
-    - itemNames: [studentId]
-      isUnique: true
+  - group: 学生
+    icon: 3
+    order: 3
+    form:
+      name: StudentExam
+      title: 学生考试记录
+      desc: 学生考试成绩与时间记录表单
+      items:
+        # number/integer, isNonVoid=true
+        - type: number
+          name: studentId
+          title: 学生ID
+          isNonVoid: true
+          canBeDecimal: false
+          initPattern: userInput
+          editPattern: userInput
 
-- name: StudentExam
-  title: 学生考试记录
-  desc: 学生考试成绩与时间记录表单
-  items:
-    # number/integer, isNonVoid=true
-    - type: number
-      name: studentId
-      title: 学生ID
-      isNonVoid: true
-      canBeDecimal: false
-      initPattern: userInput
-      editPattern: userInput
+        # select, isNonVoid=true
+        - type: select
+          name: subject
+          title: 考试科目
+          isNonVoid: true
+          initPattern: userInput
+          editPattern: userInput
+          options:
+            - code: 'MATH'
+              title: 数学
+            - code: 'ENG'
+              title: 英语
 
-    # select, isNonVoid=true
-    - type: select
-      name: subject
-      title: 考试科目
-      isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
-      options:
-        - code: 'MATH'
-          title: 数学
-        - code: 'ENG'
-          title: 英语
+        # number/decimal, isNonVoid=true
+        - type: number
+          name: score
+          title: 考试成绩
+          isNonVoid: true
+          canBeDecimal: true
+          initPattern: userInput
+          editPattern: userInput
 
-    # number/decimal, isNonVoid=true
-    - type: number
-      name: score
-      title: 考试成绩
-      isNonVoid: true
-      canBeDecimal: true
-      initPattern: userInput
-      editPattern: userInput
+        # time/date, isNonVoid=true
+        - type: time
+          name: examDate
+          title: 考试日期
+          isNonVoid: true
+          format: date
+          initPattern: userInput
+          editPattern: userInput
 
-    # time/date, isNonVoid=true
-    - type: time
-      name: examDate
-      title: 考试日期
-      isNonVoid: true
-      format: date
-      initPattern: userInput
-      editPattern: userInput
+        # time/time, isNonVoid=true
+        - type: time
+          name: examTime
+          title: 考试时间
+          isNonVoid: true
+          format: time
+          initPattern: userInput
+          editPattern: userInput
 
-    # time/time, isNonVoid=true
-    - type: time
-      name: examTime
-      title: 考试时间
-      isNonVoid: true
-      format: time
-      initPattern: userInput
-      editPattern: userInput
-
-    # time/dateTime, isNonVoid=true
-    - type: time
-      name: submittedAt
-      title: 提交时间
-      isNonVoid: true
-      format: dateTime
-      initPattern: userInput
-      editPattern: userInput
-
-  indices:
-    # Composite unique index on 3 fields
-    - itemNames: [studentId, subject, examDate]
-      isUnique: true
+        # time/dateTime, isNonVoid=true
+        - type: time
+          name: submittedAt
+          title: 提交时间
+          isNonVoid: true
+          format: dateTime
+          initPattern: userInput
+          editPattern: userInput
+      indices:
+        # Composite unique index on 3 fields
+        - itemNames: [ studentId, subject, examDate ]
+          isUnique: true

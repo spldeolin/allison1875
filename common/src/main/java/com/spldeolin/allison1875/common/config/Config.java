@@ -304,6 +304,7 @@ public class Config {
          * <p>
          * 例如：com.company.project.common.PageInfo
          */
+        @NotEmpty
         String pageTypeQualifier;
 
         /**

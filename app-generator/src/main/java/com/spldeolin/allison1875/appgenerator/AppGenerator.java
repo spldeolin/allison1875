@@ -26,6 +26,7 @@ import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,14 +53,26 @@ public class AppGenerator implements Allison1875MainService {
         Path backendOutput = outputRoot.resolve(appName + "-backend");
         Path frontendOutput = outputRoot.resolve(appName + "-frontend");
 
-        // 3. Generate backend
-        generateBackend(appDef, backendOutput);
+        try {
+            // 3. Generate backend
+            generateBackend(appDef, backendOutput);
 
-        // 4. Generate frontend
-        generateFrontend(appDef, frontendOutput);
+            // 4. Generate frontend
+            generateFrontend(appDef, frontendOutput);
 
-        // 5. Generate README.md
-        generateReadme(appDef, outputRoot);
+            // 5. Generate README.md
+            generateReadme(appDef, outputRoot);
+        } catch (Exception e) {
+            log.warn("generation failed, deleting outputRoot: {}", outputRoot.toAbsolutePath());
+            try {
+                if (Files.exists(outputRoot)) {
+                    FileSnapshotUtils.deleteDirectory(outputRoot);
+                }
+            } catch (IOException ex) {
+                log.error("failed to delete outputRoot after generation failure", ex);
+            }
+            throw e;
+        }
 
         log.info("app-generator completed. output={}", outputRoot.toAbsolutePath());
     }
@@ -222,8 +235,8 @@ public class AppGenerator implements Allison1875MainService {
         // Construct config for form-generator
         Config fgConfig = new Config();
         fgConfig.setDslPath(tempDsl.toFile());
-        fgConfig.setJavaVersion("1.8");
-        fgConfig.setAuthor("app-generator");
+        fgConfig.setJavaVersion("1.8"); // 当前只有java8的后端骨架
+        fgConfig.setAuthor(config.getAuthor());
         fgConfig.setEnableDocAnalyzer(false);
         fgConfig.setJdbcUrl(null);
         fgConfig.setEnableGenerateDesign(true);
@@ -234,12 +247,13 @@ public class AppGenerator implements Allison1875MainService {
         // Set code snippets for the generated backend
         Config.CodeSnippet cs = new Config.CodeSnippet();
         String ns = appDef.getNamespace();
+        cs.setPageTypeQualifier(ns + ".common.PageResult");
         cs.setRequestResultQualifier(ns + ".common.RequestResult");
         cs.setRequestResultTypeDeclaration("RequestResult<${dataType}>");
         cs.setRequestResultSuccessNoData("RequestResult.success()");
         cs.setRequestResultSuccessWithData("RequestResult.success(${data})");
-        cs.setConstructPageResult("new PageResult<>(${total}, ${dtos})");
-        cs.setConstructEmptyPageResult("new PageResult<>(0L, Collections.emptyList())");
+        cs.setConstructPageResult("PageResult.of(${total}, ${dtos})");
+        cs.setConstructEmptyPageResult("PageResult.empty()");
         fgConfig.setCodeSnippet(cs);
 
         // Construct DomainConfig pointing to the generated backend
@@ -249,8 +263,8 @@ public class AppGenerator implements Allison1875MainService {
         dc.setControllerModule(absPath);
         dc.setControllerPackage(ns + ".controller");
         dc.setDtoModule(absPath);
-        dc.setReqDTOPackage(ns + ".controller");
-        dc.setRespDTOPackage(ns + ".controller");
+        dc.setReqDTOPackage(ns + ".dto.req");
+        dc.setRespDTOPackage(ns + ".dto.resp");
         dc.setEnumModule(absPath);
         dc.setEnumPackage(ns + ".enums");
         dc.setServiceModule(absPath);
@@ -263,7 +277,7 @@ public class AppGenerator implements Allison1875MainService {
         dc.setDesignPackage(ns + ".design");
         dc.setParamDTOPackage(ns + ".mapper");
         dc.setRecordDTOPackage(ns + ".mapper");
-        dc.setWholeDTOPackage(ns + ".controller");
+        dc.setWholeDTOPackage(ns + ".dto");
         fgConfig.setDomains(Lists.newArrayList(dc));
 
         // Invoke form-generator via Allison1875 framework

@@ -231,7 +231,7 @@ public class FileSnapshotUtils {
     /**
      * 递归删除目录
      */
-    private static void deleteDirectory(Path dir) throws IOException {
+    public static void deleteDirectory(Path dir) throws IOException {
         try (Stream<Path> walk = Files.walk(dir)) {
             walk.sorted(Comparator.reverseOrder()).forEach(p -> {
                 try {
