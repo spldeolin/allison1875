@@ -1,0 +1,200 @@
+forms:
+  # Form 1: StudentProfile
+  # Coverage: text variants + select single + initPattern/editPattern variants
+  - name: StudentProfile
+    title: 学生档案
+    desc: 学生基本档案信息表单
+    items:
+      # text/short + regex for ID card, is_non_void=true
+      - type: text
+        name: idCard
+        title: 身份证号
+        is_non_void: true
+        max_length: 18
+        regex: '^\d{18}$'
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # text/short + max_length=50, is_non_void=true
+      - type: text
+        name: studentName
+        title: 学生姓名
+        is_non_void: true
+        max_length: 50
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # text/multiline, max_length=2000, is_non_void=false
+      - type: text
+        name: bio
+        title: 个人简介
+        is_non_void: false
+        is_multiline_or_rich: true
+        max_length: 2000
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # number/integer, is_non_void=true
+      - type: number
+        name: age
+        title: 年龄
+        is_non_void: true
+        can_be_decimal: false
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # select single, is_non_void=true, 2 options
+      # Using edit_pattern=doNot to demonstrate pattern variant
+      - type: select
+        name: gender
+        title: 性别
+        is_non_void: true
+        init_pattern: userInput
+        edit_pattern: doNot
+        options:
+          - code: 'M'
+            title: 男
+          - code: 'F'
+            title: 女
+
+    indices:
+      # Unique index on idCard
+      - item_names: [idCard]
+        is_unique: true
+
+  # Form 2: StudentDormitory
+  # Coverage: multiSelect + onOff + secret variants + todo pattern
+  - name: StudentDormitory
+    title: 学生宿舍信息
+    desc: 学生宿舍分配与管理表单
+    items:
+      # number/integer as relation ID, is_non_void=true
+      - type: number
+        name: studentId
+        title: 学生ID
+        is_non_void: true
+        can_be_decimal: false
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # onOff, is_non_void=true
+      - type: onOff
+        name: hasAllergy
+        title: 是否有过敏史
+        is_non_void: true
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # multiSelect with 3 options, is_non_void=false
+      - type: multiSelect
+        name: facilities
+        title: 需要的设施
+        is_non_void: false
+        init_pattern: userInput
+        edit_pattern: userInput
+        options:
+          - code: 'AC'
+            title: 空调
+          - code: 'HEATER'
+            title: 暖气
+          - code: 'DESK'
+            title: 书桌
+
+      # secret field #1 - demonstrating userInput pattern for both init and edit
+      - type: secret
+        name: doorPassword
+        title: 门禁密码
+        is_non_void: true
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # secret field #2 - demonstrating todo + doNot pattern combination
+      - type: secret
+        name: emergencyContact
+        title: 紧急联系人密保
+        is_non_void: true
+        init_pattern: todo
+        edit_pattern: doNot
+
+      # number/decimal, is_non_void=true
+      - type: number
+        name: monthlyRent
+        title: 月租金
+        is_non_void: true
+        can_be_decimal: true
+        init_pattern: userInput
+        edit_pattern: userInput
+
+    indices:
+      # Unique index on studentId
+      - item_names: [studentId]
+        is_unique: true
+
+  # Form 3: StudentExam
+  # Coverage: time variants (date/time/dateTime) + composite unique index
+  - name: StudentExam
+    title: 学生考试记录
+    desc: 学生考试成绩与时间记录表单
+    items:
+      # number/integer, is_non_void=true
+      - type: number
+        name: studentId
+        title: 学生ID
+        is_non_void: true
+        can_be_decimal: false
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # select single with 2 options, is_non_void=true
+      - type: select
+        name: subject
+        title: 考试科目
+        is_non_void: true
+        init_pattern: userInput
+        edit_pattern: userInput
+        options:
+          - code: 'MATH'
+            title: 数学
+          - code: 'ENG'
+            title: 英语
+
+      # number/decimal (score can be decimal), is_non_void=true
+      - type: number
+        name: score
+        title: 考试成绩
+        is_non_void: true
+        can_be_decimal: true
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # time/date, is_non_void=true
+      - type: time
+        name: examDate
+        title: 考试日期
+        is_non_void: true
+        format: date
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # time/time, is_non_void=true
+      - type: time
+        name: examTime
+        title: 考试时间
+        is_non_void: true
+        format: time
+        init_pattern: userInput
+        edit_pattern: userInput
+
+      # time/dateTime, is_non_void=true
+      - type: time
+        name: submittedAt
+        title: 提交时间
+        is_non_void: true
+        format: dateTime
+        init_pattern: userInput
+        edit_pattern: userInput
+
+    indices:
+      # Composite unique index on studentId + subject + examDate
+      - item_names: [studentId, subject, examDate]
+        is_unique: true
