@@ -141,7 +141,7 @@
 **字段说明**：
 - `${formName}Code`：业务主键，自动注入
 - `createdAt` / `updatedAt`：审计字段
-- secret 字段（如果 editPattern=userInput）**也不出现**在 list 出参中（预期后端脱敏或隐藏）
+- secret 字段（如果 canInputOnEdit=true）**也不出现**在 list 出参中（预期后端脱敏或隐藏）
 
 ---
 
@@ -152,12 +152,12 @@
 | Form | 必填字段 | 可选字段 | 说明 |
 |---|---|---|---|
 | StudentProfile | idCard, studentName, age, gender | bio | 业务主键 studentProfileCode 不传（后端自动生成） |
-| StudentDormitory | studentId, hasAllergy, monthlyRent | facilities | initPattern=todo 的字段（doorPassword, emergencyContact）根据后续 gap 决议 |
+| StudentDormitory | studentId, hasAllergy, monthlyRent | facilities | canInputOnInit=false 的字段（doorPassword, emergencyContact）根据后续 gap 决议 |
 | StudentExam | studentId, subject, score, examDate, examTime, submittedAt | — | — |
 
 ### 5.2 入参（编辑）
 
-append `studentProfileCode` 等业务主键字段（后端用来识别哪条记录），其余规则同新建但遵守 editPattern。
+append `studentProfileCode` 等业务主键字段（后端用来识别哪条记录），其余规则同新建但遵守 canInputOnEdit。
 
 ### 5.3 出参
 
@@ -265,13 +265,13 @@ form-generator 自动注入的业务主键（第一个字段）命名为 `${lowe
 ## 11. Secret 字段观察
 
 当前 super-dsl.yml 中：
-- `StudentDormitory.doorPassword`：initPattern=userInput, editPattern=userInput
-- `StudentDormitory.emergencyContact`：initPattern=todo, editPattern=doNot
+- `StudentDormitory.doorPassword`：canInputOnInit=true, canInputOnEdit=true
+- `StudentDormitory.emergencyContact`：canInputOnInit=false, canInputOnEdit=false
 
 **后端行为（实际未观察，待联调验证）**：
 - secret 字段是否出现在 list 出参？（预期：不出现或脱敏）
 - secret 字段是否出现在 detail 出参？（预期：出现且明文）
-- secret 字段在 save 入参中是否必填？（取决于 initPattern=todo 的后端语义）
+- secret 字段在 save 入参中是否必填？（取决于 canInputOnInit=false 的后端语义）
 
 ---
 
@@ -300,15 +300,15 @@ form-generator 自动注入的业务主键（第一个字段）命名为 `${lowe
 
 **后端行为（已确认）**：
 - secret 字段（doorPassword、emergencyContact）**完全不出现在任何 list/detail 响应 DTO 中**
-- save 入参时，仅 doorPassword (initPattern=userInput, editPattern=userInput) 可在表单中指定
-- emergencyContact (initPattern=todo, editPattern=doNot) 在任何表单中都不应出现（前端隐藏）
+- save 入参时，仅 doorPassword (canInputOnInit=true, canInputOnEdit=true) 可在表单中指定
+- emergencyContact (canInputOnInit=false, canInputOnEdit=false) 在任何表单中都不应出现（前端隐藏）
 
 **前端处理**：
 - SearchForm：secret 无 FilterPattern，自动隐藏
 - DataTable：secret 不出现在后端响应，自动不显示
 - EditModal：
-  - doorPassword (userInput/userInput)：create 和 edit 时都可显示可编辑
-  - emergencyContact (todo/doNot)：完全隐藏（create 时因 initPattern=todo，edit 时因 editPattern=doNot）
+  - doorPassword (true/true)：create 和 edit 时都可显示可编辑
+  - emergencyContact (false/false)：完全隐藏（create 时因 canInputOnInit=false，edit 时因 canInputOnEdit=false）
 - Save 请求：doorPassword 可传，emergencyContact 不需要在 DTO 中
 
 ---
@@ -316,11 +316,11 @@ form-generator 自动注入的业务主键（第一个字段）命名为 `${lowe
 ## 15. InitPattern / EditPattern 的后端语义
 
 **用户确认**：
-- **initPattern=todo**：create 时**用户不需要提供**；后端代码中由开发者手动初始化，前端应完全隐藏该字段
-- **editPattern=doNot**：edit 时字段**不可修改**；结合 initPattern，确定字段在 save 入参 DTO 中的出现情况
-- 例：`emergencyContact` (initPattern=todo, editPattern=doNot)
-  - create 时：隐藏（initPattern=todo）
-  - edit 时：隐藏（editPattern=doNot）
+- **canInputOnInit=false**：create 时**用户不需要提供**；后端代码中由开发者手动初始化，前端应完全隐藏该字段
+- **canInputOnEdit=false**：edit 时字段**不可修改**；结合 canInputOnInit，确定字段在 save 入参 DTO 中的出现情况
+- 例：`emergencyContact` (canInputOnInit=false, canInputOnEdit=false)
+  - create 时：隐藏（canInputOnInit=false）
+  - edit 时：隐藏（canInputOnEdit=false）
   - save 请求：该字段不需要在 DTO 中
 
 ---
@@ -340,6 +340,6 @@ form-generator 自动注入的业务主键（第一个字段）命名为 `${lowe
 ## 备注
 
 - 所有日期时间在请求/响应中均为字符串，前端需要用相应的日期组件（Naive UI DatePicker / TimePicker）处理
-- Secret 字段完全由后端隐藏，前端通过 initPattern/editPattern 决定在表单中是否允许用户指定
+- Secret 字段完全由后端隐藏，前端通过 canInputOnInit/canInputOnEdit 决定在表单中是否允许用户指定
 - InitPattern=todo 的字段（如 emergencyContact）由后端开发者手动初始化，前端应完全隐藏
 - EditPattern=doNot 的字段不允许编辑，对应的字段值不需要在 save 入参 DTO 中出现

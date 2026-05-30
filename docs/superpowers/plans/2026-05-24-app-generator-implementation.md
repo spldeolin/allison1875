@@ -376,8 +376,8 @@ git commit -m "feat(app-generator): create backend-skeleton based on satisficing
             "name": "demoField",
             "title": "示例字段",
             "isNonVoid": true,
-            "initPattern": "userInput",
-            "editPattern": "userInput",
+            "canInputOnInit": "userInput",
+            "canInputOnEdit": "userInput",
             "maxLength": 100
           }
         ]
@@ -390,7 +390,7 @@ git commit -m "feat(app-generator): create backend-skeleton based on satisficing
 - [ ] **Step 2: Update src/schema/types.ts — add AppDef, MenuDef; remove group/icon/order from FormDef**
 
 ```typescript
-export type InitOrEditPattern = 'doNot' | 'userInput' | 'todo'
+export type Boolean = 'doNot' | 'userInput' | 'todo'
 export type TimeFormat = 'date' | 'time' | 'dateTime'
 
 export interface OptionDef {
@@ -407,8 +407,8 @@ interface ItemDefBase {
   name: string
   title: string
   isNonVoid: boolean
-  initPattern: InitOrEditPattern
-  editPattern: InitOrEditPattern
+  canInputOnInit: Boolean
+  canInputOnEdit: Boolean
 }
 
 export interface TextItemDef extends ItemDefBase {

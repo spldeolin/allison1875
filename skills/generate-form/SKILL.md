@@ -49,32 +49,32 @@ YAML 的形式如下，通过一个覆盖常见类型和索引场景的示例来
   # 表单字段列表，至少1个元素，且每个item.name必须唯一。不要在 items 中定义主键字段（如 xxxCode）或审计字段（如 createdAt、updatedAt），这些由 form-generator 自动添加。
   items:
 
-    # 文本字段，单行，带最大长度与正则校验；不写 initPattern/editPattern 即默认 userInput
+    # 文本字段，单行，带最大长度与正则校验；不写 canInputOnInit/canInputOnEdit 即默认 userInput
     - type: text
       name: employeeName        # 字段名，lowerCamel
       title: 员工姓名
       isNonVoid: true           # 是否非空，必须显式 true/false
       maxLength: 50             # 可选，默认 255；不超过 65535
       regex: "^[\\u4e00-\\u9fa5A-Za-z\\s]+$"  # 可选，正则约束
-      # initPattern / editPattern：不写时默认为 userInput（用户输入）。可选 doNot（不初始化/不可编辑）、todo（生成 TODO 由开发者实现）。
+      # canInputOnInit / canInputOnEdit：不写时默认为 userInput（用户输入）。可选 doNot（不初始化/不可编辑）、todo（生成 TODO 由开发者实现）。
 
-    # 入职日期：创建时用户填写，保存后不可再改（editPattern: doNot）
+    # 入职日期：创建时用户填写，保存后不可再改（canInputOnEdit: false）
     - type: time
       name: hireDate
       title: 入职日期
       isNonVoid: true
       format: date
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
 
-    # 内部备注：不对外展示，生成 TODO 由开发者自行实现逻辑（initPattern/editPattern: todo）
+    # 内部备注：不对外展示，生成 TODO 由开发者自行实现逻辑（canInputOnInit/canInputOnEdit: false）
     - type: text
       name: internalNote
       title: 内部备注
       isNonVoid: false
       maxLength: 500
-      initPattern: todo
-      editPattern: todo
+      canInputOnInit: false
+      canInputOnEdit: false
 
     # 文本字段，多行备注
     - type: text

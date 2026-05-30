@@ -279,13 +279,13 @@ describe('FormDef types', () => {
       icon: 'PersonOutline',
       order: 1,
       items: [
-        { type: 'text', name: 'studentName', title: '学生姓名', isNonVoid: true, initPattern: 'userInput', editPattern: 'userInput', maxLength: 50 },
-        { type: 'number', name: 'score', title: '分数', isNonVoid: false, initPattern: 'userInput', editPattern: 'userInput', canBeDecimal: true },
-        { type: 'select', name: 'grade', title: '年级', isNonVoid: true, initPattern: 'userInput', editPattern: 'userInput', options: [{ code: 'g1', title: '一年级' }] },
-        { type: 'multiSelect', name: 'tags', title: '标签', isNonVoid: false, initPattern: 'userInput', editPattern: 'userInput', options: [{ code: 't1', title: '标签1' }] },
-        { type: 'time', name: 'enrollDate', title: '入学日期', isNonVoid: true, initPattern: 'userInput', editPattern: 'userInput', format: 'date' },
-        { type: 'onOff', name: 'isActive', title: '是否激活', isNonVoid: true, initPattern: 'userInput', editPattern: 'userInput' },
-        { type: 'secret', name: 'idCard', title: '身份证号', isNonVoid: true, initPattern: 'userInput', editPattern: 'doNot' },
+        { type: 'text', name: 'studentName', title: '学生姓名', isNonVoid: true, canInputOnInit: 'true', canInputOnEdit: 'true', maxLength: 50 },
+        { type: 'number', name: 'score', title: '分数', isNonVoid: false, canInputOnInit: 'true', canInputOnEdit: 'true', canBeDecimal: true },
+        { type: 'select', name: 'grade', title: '年级', isNonVoid: true, canInputOnInit: 'true', canInputOnEdit: 'true', options: [{ code: 'g1', title: '一年级' }] },
+        { type: 'multiSelect', name: 'tags', title: '标签', isNonVoid: false, canInputOnInit: 'true', canInputOnEdit: 'true', options: [{ code: 't1', title: '标签1' }] },
+        { type: 'time', name: 'enrollDate', title: '入学日期', isNonVoid: true, canInputOnInit: 'true', canInputOnEdit: 'true', format: 'date' },
+        { type: 'onOff', name: 'isActive', title: '是否激活', isNonVoid: true, canInputOnInit: 'true', canInputOnEdit: 'true' },
+        { type: 'secret', name: 'idCard', title: '身份证号', isNonVoid: true, canInputOnInit: 'true', canInputOnEdit: 'false' },
       ],
       indices: [{ itemNames: ['studentName'], isUnique: true }]
     }
@@ -300,7 +300,7 @@ describe('FormDef types', () => {
       name: 'Minimal',
       title: '最小表单',
       items: [
-        { type: 'text', name: 'field1', title: '字段1', isNonVoid: true, initPattern: 'userInput', editPattern: 'userInput' }
+        { type: 'text', name: 'field1', title: '字段1', isNonVoid: true, canInputOnInit: 'true', canInputOnEdit: 'true' }
       ]
     }
     expect(form.desc).toBeUndefined()
@@ -320,7 +320,7 @@ Expected: FAIL — cannot resolve `@/schema/types`
 ```typescript
 // src/schema/types.ts
 
-export type InitOrEditPattern = 'doNot' | 'userInput' | 'todo'
+export type Boolean = 'doNot' | 'userInput' | 'todo'
 export type TimeFormat = 'date' | 'time' | 'dateTime'
 
 export interface OptionDef {
@@ -337,8 +337,8 @@ interface ItemDefBase {
   name: string
   title: string
   isNonVoid: boolean
-  initPattern: InitOrEditPattern
-  editPattern: InitOrEditPattern
+  canInputOnInit: Boolean
+  canInputOnEdit: Boolean
 }
 
 export interface TextItemDef extends ItemDefBase {
@@ -533,22 +533,22 @@ forms:
         name: studentName
         title: 学生姓名
         isNonVoid: true
-        initPattern: userInput
-        editPattern: userInput
+        canInputOnInit: true
+        canInputOnEdit: true
         maxLength: 50
       - type: number
         name: studentId
         title: 学号
         isNonVoid: true
-        initPattern: userInput
-        editPattern: doNot
+        canInputOnInit: true
+        canInputOnEdit: false
         canBeDecimal: false
       - type: select
         name: grade
         title: 年级
         isNonVoid: true
-        initPattern: userInput
-        editPattern: userInput
+        canInputOnInit: true
+        canInputOnEdit: true
         options:
           - code: grade1
             title: 一年级
@@ -560,21 +560,21 @@ forms:
         name: enrollmentDate
         title: 入学日期
         isNonVoid: true
-        initPattern: userInput
-        editPattern: doNot
+        canInputOnInit: true
+        canInputOnEdit: false
         format: date
       - type: onOff
         name: isActive
         title: 是否在读
         isNonVoid: true
-        initPattern: userInput
-        editPattern: userInput
+        canInputOnInit: true
+        canInputOnEdit: true
       - type: secret
         name: idCardNumber
         title: 身份证号
         isNonVoid: true
-        initPattern: userInput
-        editPattern: doNot
+        canInputOnInit: true
+        canInputOnEdit: false
     indices:
       - itemNames: [studentId]
         isUnique: true
@@ -1744,7 +1744,7 @@ const formRef = ref<FormInst | null>(null)
 
 const visibleItems = computed(() =>
   props.items.filter(item => {
-    const pattern = props.mode === 'create' ? item.initPattern : item.editPattern
+    const pattern = props.mode === 'create' ? item.canInputOnInit : item.canInputOnEdit
     return pattern !== 'doNot'
   })
 )

@@ -31,36 +31,36 @@
 
 **事实**：
 - secret 字段（doorPassword、emergencyContact）完全不出现在 list/detail 响应 DTO 中（已确认）
-- save 入参时，initPattern/editPattern 决定是否允许用户指定
+- save 入参时，canInputOnInit/canInputOnEdit 决定是否允许用户指定
 
 **用户决议**：
-- secret 字段不返回，最多允许在新增、编辑表单时指定（取决于 initPattern 和 editPattern）
+- secret 字段不返回，最多允许在新增、编辑表单时指定（取决于 canInputOnInit 和 canInputOnEdit）
 
 **实施**：✅ 
 - SearchForm：secret 字段因为无 FilterPattern，自动隐藏（不参与查询）
 - DataTable：secret 字段不出现在后端响应中，自动不显示
 - EditModal：
-  - create 模式：只有 doorPassword (initPattern=userInput) 可显示可编辑；emergencyContact (initPattern=todo) 隐藏
-  - edit 模式：doorPassword (editPattern=userInput) 可显示可编辑；emergencyContact (editPattern=doNot) 隐藏
-- Save 请求：doorPassword 可传值，emergencyContact 不传（因为 editPattern=doNot）
+  - create 模式：只有 doorPassword (canInputOnInit=true) 可显示可编辑；emergencyContact (canInputOnInit=false) 隐藏
+  - edit 模式：doorPassword (canInputOnEdit=true) 可显示可编辑；emergencyContact (canInputOnEdit=false) 隐藏
+- Save 请求：doorPassword 可传值，emergencyContact 不传（因为 canInputOnEdit=false）
 
 ---
 
-## Gap 4: InitPattern=todo 字段在 Save 入参的必填性
+## Gap 4: InitPattern=false 字段在 Save 入参的必填性
 
 **用户决议**：
-- initPattern=todo 表示"create 时用户不用提供，后端会在 controller/service 代码中由开发者手动初始化"
-- emergencyContact：initPattern=todo（create 时隐藏），editPattern=doNot（edit 时隐藏）
+- canInputOnInit=false 表示"create 时用户不用提供，后端会在 controller/service 代码中由开发者手动初始化"
+- emergencyContact：canInputOnInit=false（create 时隐藏），canInputOnEdit=false（edit 时隐藏）
 - 结合两者，save 入参 DTO 中**不需要 emergencyContact 字段**
 
 **实施**：✅ 
 - plan C5 field-policy.ts：
-  - `isVisible(item, 'edit-create')` → 检查 `item.initPattern !== 'doNot'`（todo 和 userInput 都显示）
-  - `isReadonly(item, 'edit-create')` → 检查 `item.initPattern === 'todo'`（todo 字段 readonly，或在 isVisible 中改为隐藏）
-  - 前端可选：todo 字段完全隐藏 vs todo 字段 readonly
-- plan C3 buildSaveRequest：todo 字段也传值给后端，后端自行处理（或后端 DTO 中不包含该字段）
+  - `isVisible(item, 'edit-create')` → 检查 `item.canInputOnInit !== 'false'`（true 都显示）
+  - `isReadonly(item, 'edit-create')` → 检查 `item.canInputOnInit === 'false'`（false 字段 readonly，或在 isVisible 中改为隐藏）
+  - 前端可选：false 字段完全隐藏 vs false 字段 readonly
+- plan C3 buildSaveRequest：false 字段也传值给后端，后端自行处理（或后端 DTO 中不包含该字段）
 
-**建议**：前端隐藏 todo 字段（更简洁），避免用户误操作。
+**建议**：前端隐藏 false 字段（更简洁），避免用户误操作。
 
 ---
 
@@ -105,7 +105,7 @@
 - **C2**（endpoints.ts）：URL 推导规则已确认
 - **C3**（request-builder.ts）：FilterPattern 规则改无后缀；分页字段改 pageNum/pageSize；buildSaveRequest 处理 todo 字段（隐藏）；delete 改 List
 - **C4**（response-parser.ts）：multiSelect 直接透传
-- **C5**（field-policy.ts）：FILTER_PATTERNS_BY_TYPE 常量表；isVisible 按 initPattern/editPattern 判断；isReadonly 判断 todo
+- **C5**（field-policy.ts）：FILTER_PATTERNS_BY_TYPE 常量表；isVisible 按 canInputOnInit/canInputOnEdit 判断；isReadonly 判断 todo
 - **C6**（CrudPage.vue）：delete 改 List；getDetail 按合并后的 bizKey 逻辑
 - **C7**（SearchForm/EditModal/DataTable）：用 field-policy 的 isVisible / isReadonly
 - **C8**（app.json）：示例 schema 跟随 types.ts 更新（无需 filterPatterns）

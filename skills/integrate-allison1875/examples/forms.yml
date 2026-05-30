@@ -14,8 +14,8 @@
       name: studentName
       title: 学生姓名
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 50
       regex: ^[\u4e00-\u9fa5]{2,10}$  # 2-10个中文字符
 
@@ -24,8 +24,8 @@
       name: personalProfile
       title: 个人简介
       isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       isMultilineOrRich: true
       maxLength: 2000
 
@@ -34,8 +34,8 @@
       name: studentNo
       title: 学号
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot  # 学号一旦创建不可修改
+      canInputOnInit: true
+      canInputOnEdit: false  # 学号一旦创建不可修改
       canBeDecimal: false
 
     # NUMBER 类型 - 小数
@@ -43,8 +43,8 @@
       name: gpa
       title: 平均绩点
       isNonVoid: false
-      initPattern: doNot  # 不在初始化时填写
-      editPattern: todo   # 编辑时需要开发者自定义逻辑
+      canInputOnInit: false  # 不在初始化时填写
+      canInputOnEdit: false   # 编辑时需要开发者自定义逻辑
       canBeDecimal: true
 
     # SELECT 类型 - 单选
@@ -52,8 +52,8 @@
       name: grade
       title: 年级
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: grade1
           title: 一年级
@@ -73,8 +73,8 @@
       name: gender
       title: 性别
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: male
           title: 男
@@ -86,8 +86,8 @@
       name: hobbies
       title: 兴趣爱好
       isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: reading
           title: 阅读
@@ -107,8 +107,8 @@
       name: birthDate
       title: 出生日期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       format: date
 
     # TIME 类型 - 日期时间
@@ -116,8 +116,8 @@
       name: enrollmentTime
       title: 入学时间
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       format: dateTime
 
     # ON_OFF 类型 - 布尔开关
@@ -125,32 +125,32 @@
       name: isActive
       title: 是否在校
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # ON_OFF 类型 - 布尔开关（另一个例子）
     - type: onOff
       name: hasDormitory
       title: 是否住宿
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # SECRET 类型 - 密码/密钥
     - type: secret
       name: guardianPhone
       title: 监护人电话
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # TEXT 类型 - 带正则验证的文本（邮箱）
     - type: text
       name: email
       title: 电子邮箱
       isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 100
       regex: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
 
@@ -182,8 +182,8 @@
       name: teacherName
       title: 教师姓名
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 50
 
     # NUMBER 类型 - 工号
@@ -191,8 +191,8 @@
       name: employeeNo
       title: 工号
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       canBeDecimal: false
 
     # SELECT 类型 - 职称
@@ -200,8 +200,8 @@
       name: professionalTitle
       title: 职称
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: assistant
           title: 助教
@@ -217,8 +217,8 @@
       name: department
       title: 所属学院
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: computerScience
           title: 计算机学院
@@ -236,8 +236,8 @@
       name: teachingSubjects
       title: 任教科目
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: math
           title: 数学
@@ -261,8 +261,8 @@
       name: yearsOfService
       title: 工作年限
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       canBeDecimal: false
 
     # NUMBER 类型 - 月薪（小数）
@@ -270,8 +270,8 @@
       name: monthlySalary
       title: 月薪
       isNonVoid: false
-      initPattern: todo
-      editPattern: todo
+      canInputOnInit: false
+      canInputOnEdit: false
       canBeDecimal: true
 
     # TIME 类型 - 入职日期
@@ -279,8 +279,8 @@
       name: hireDate
       title: 入职日期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       format: date
 
     # TIME 类型 - 最后考核时间
@@ -288,8 +288,8 @@
       name: lastEvaluationTime
       title: 最后考核时间
       isNonVoid: false
-      initPattern: doNot
-      editPattern: todo
+      canInputOnInit: false
+      canInputOnEdit: false
       format: dateTime
 
     # ON_OFF 类型 - 是否在职
@@ -297,32 +297,32 @@
       name: isActive
       title: 是否在职
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # ON_OFF 类型 - 是否班主任
     - type: onOff
       name: isClassAdvisor
       title: 是否担任班主任
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # SECRET 类型 - 工作证密码
     - type: secret
       name: workCardPassword
       title: 工作证密码
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # TEXT 类型 - 办公室地点
     - type: text
       name: officeLocation
       title: 办公室地点
       isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 200
 
     # TEXT 类型 - 个人简介（多行文本）
@@ -330,8 +330,8 @@
       name: biography
       title: 个人简介
       isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       isMultilineOrRich: true
       maxLength: 5000
 
@@ -340,8 +340,8 @@
       name: contactPhone
       title: 联系电话
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 20
       regex: ^1[3-9]\d{9}$  # 手机号正则
 
@@ -350,8 +350,8 @@
       name: email
       title: 电子邮箱
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 100
       regex: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
 
@@ -389,8 +389,8 @@
       name: studentNo
       title: 学号
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       canBeDecimal: false
 
     # SELECT 类型 - 科目
@@ -398,8 +398,8 @@
       name: subject
       title: 科目
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       options:
         - code: math
           title: 数学
@@ -417,8 +417,8 @@
       name: semester
       title: 学期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       options:
         - code: 2024Spring
           title: 2024春季
@@ -434,8 +434,8 @@
       name: score
       title: 成绩分数
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       canBeDecimal: true
 
     # SELECT 类型 - 成绩等级
@@ -443,8 +443,8 @@
       name: gradeLevel
       title: 成绩等级
       isNonVoid: false
-      initPattern: todo
-      editPattern: todo
+      canInputOnInit: false
+      canInputOnEdit: false
       options:
         - code: A
           title: 优秀
@@ -462,8 +462,8 @@
       name: examDate
       title: 考试日期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       format: date
 
     # ON_OFF 类型 - 是否补考
@@ -471,16 +471,16 @@
       name: isMakeupExam
       title: 是否补考
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
     # TEXT 类型 - 备注
     - type: text
       name: remark
       title: 备注
       isNonVoid: false
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 500
 
   # 索引定义
@@ -511,8 +511,8 @@
       name: employeeNo
       title: 教师工号
       isNonVoid: true
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
       canBeDecimal: false
 
     # SELECT 类型 - 课程
@@ -520,8 +520,8 @@
       name: courseName
       title: 课程名称
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: advancedMath
           title: 高等数学
@@ -539,8 +539,8 @@
       name: dayOfWeek
       title: 星期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: monday
           title: 星期一
@@ -558,8 +558,8 @@
       name: period
       title: 节次
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       options:
         - code: period1
           title: 第1-2节
@@ -575,8 +575,8 @@
       name: classroom
       title: 教室
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       maxLength: 50
 
     # NUMBER 类型 - 学时
@@ -584,8 +584,8 @@
       name: creditHours
       title: 学时
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       canBeDecimal: false
 
     # TIME 类型 - 开课日期
@@ -593,8 +593,8 @@
       name: startDate
       title: 开课日期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       format: date
 
     # TIME 类型 - 结课日期
@@ -602,8 +602,8 @@
       name: endDate
       title: 结课日期
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
       format: date
 
     # ON_OFF 类型 - 是否有效
@@ -611,8 +611,8 @@
       name: isActive
       title: 是否有效
       isNonVoid: true
-      initPattern: userInput
-      editPattern: userInput
+      canInputOnInit: true
+      canInputOnEdit: true
 
   # 索引定义
   indices:

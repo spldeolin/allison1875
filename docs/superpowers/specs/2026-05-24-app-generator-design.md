@@ -26,8 +26,8 @@ menus:
           name: studentName
           title: 学生姓名
           isNonVoid: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
           maxLength: 50
       indices:
         - itemNames: [studentId]
@@ -44,8 +44,8 @@ menus:
           name: courseName
           title: 课程名称
           isNonVoid: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
           maxLength: 100
 ```
 

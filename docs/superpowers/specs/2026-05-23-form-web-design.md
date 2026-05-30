@@ -93,8 +93,8 @@ forms:
         name: studentName        # lowerCamel，必填
         title: 学生姓名           # 必填，字段标签
         isNonVoid: true          # 是否必填
-        initPattern: userInput   # 新建时：doNot|userInput|todo
-        editPattern: userInput   # 编辑时：doNot|userInput|todo
+        canInputOnInit: true   # 新建时：false|true|false
+        canInputOnEdit: true   # 编辑时：false|true|false
         maxLength: 50            # text 专属
         # isMultilineOrRich: false  # text 专属
         # regex: ''                 # text 专属
@@ -138,7 +138,7 @@ forms:
 | onOff | NTag(是/否) | NSelect(是/否) | NSwitch |
 | secret | 脱敏(***) | 不可搜索 | NInput[password] |
 
-**initPattern / editPattern 对编辑表单的影响：**
+**canInputOnInit / canInputOnEdit 对编辑表单的影响：**
 - `userInput`：正常显示可编辑字段
 - `doNot`：不显示该字段
 - `todo`：MVP 阶段等同 `userInput`
@@ -199,7 +199,7 @@ const dslRoutes = formDefs.map(def => ({
 
 ### EditModal.vue
 
-- 根据 modalMode 过滤字段（initPattern/editPattern 为 doNot 的不显示）
+- 根据 modalMode 过滤字段（canInputOnInit/canInputOnEdit 为 doNot 的不显示）
 - 字段验证：isNonVoid 的字段设为 required
 - 提交时调用约定的 save API
 

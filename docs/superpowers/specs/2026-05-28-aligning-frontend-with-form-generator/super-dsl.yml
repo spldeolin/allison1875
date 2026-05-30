@@ -3,7 +3,7 @@
 # multiSelect, onOff, secret, and composite index
 #
 # Form 1: StudentProfile
-#   Coverage: text (short+regex, short, multiline) + number (integer) + select (canInputOnEdit=doNot)
+#   Coverage: text (short+regex, short, multiline) + number (integer) + select (canInputOnEdit=false)
 #             canInputOnInit/canInputOnEdit variants across items
 #
 # Form 2: StudentDormitory
@@ -65,7 +65,7 @@ menus:
           canInputOnInit: true
           canInputOnEdit: true
 
-        # select, isNonVoid=true, canInputOnEdit=doNot (demonstrates readonly-after-create)
+        # select, isNonVoid=true, canInputOnEdit=false (demonstrates readonly-after-create)
         - type: select
           name: gender
           title: 性别
@@ -121,7 +121,7 @@ menus:
             - code: 'DESK'
               title: 书桌
 
-        # secret, canInputOnInit=userInput, canInputOnEdit=userInput
+        # secret, canInputOnInit=true, canInputOnEdit=true
         - type: secret
           name: doorPassword
           title: 门禁密码
@@ -129,7 +129,7 @@ menus:
           canInputOnInit: true
           canInputOnEdit: true
 
-        # secret, canInputOnInit=todo, canInputOnEdit=doNot (demonstrates todo+doNot combo)
+        # secret, canInputOnInit=false, canInputOnEdit=false (demonstrates false+false combo)
         - type: secret
           name: emergencyContact
           title: 紧急联系人密保

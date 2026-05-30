@@ -81,17 +81,17 @@ Read 这三个文件：
 - `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/ItemDef.java`
 - `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/IndexDef.java`
 
-整理 FormDef 顶层字段（name / title / desc / items / indices）和 ItemDef 通用字段（name / title / isNonVoid / initPattern / editPattern / type / specialItemType）。
+整理 FormDef 顶层字段（name / title / desc / items / indices）和 ItemDef 通用字段（name / title / isNonVoid / canInputOnInit / canInputOnEdit / type / specialItemType）。
 
 - [ ] **Step 2: 读 7 个 ItemDef 子类，列出每个子类的特有字段**
 
 `ls form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/item/` 已知有 7 个：MultiSelectItemDef / NumberItemDef / OnOffItemDef / SecretItemDef / SelectItemDef / TextItemDef / TimeItemDef。逐个 Read，把每个子类的特有字段（含 filterPatterns、checkDuplicate、maxLength、isMultilineOrRich、regex、canBeDecimal、canBeNegative、options、isMulti、format/pattern、displayType、desensitization）列在 readme 草稿里。
 
-- [ ] **Step 3: 读 enums，确认 FilterPattern / InitOrEditPattern / TimeFormat / SpecialItemType / ApiType 的所有取值**
+- [ ] **Step 3: 读 enums，确认 FilterPattern / Boolean / TimeFormat / SpecialItemType / ApiType 的所有取值**
 
 Read：
 - `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/enums/FilterPattern.java`（已知 8 个：in / ge / gt / le / lt / like / dateRange / dateTimeRange）
-- `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/enums/InitOrEditPattern.java`
+- `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/enums/Boolean.java`
 - `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/enums/TimeFormat.java`
 - `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/enums/SpecialItemType.java`
 - `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/enums/ApiType.java`
@@ -119,7 +119,7 @@ Read：
 ### FilterPattern (8)
 in / ge / gt / le / lt / like / dateRange / dateTimeRange
 
-### InitOrEditPattern
+### Boolean
 （待 A1 Step 3 读完后填写，预期 doNot / userInput / todo 三个）
 
 ### 其他维度
@@ -138,7 +138,7 @@ in / ge / gt / le / lt / like / dateRange / dateTimeRange
 
 设计 3-4 个 form 覆盖 A1 里列的所有维度。**参考样本**是 `form-generator/src/test/resources/study-dsl.yml`——它的 yaml 顶层有 `forms:` 包装。注意：`app-generator` 在 `AppGenerator.invokeFormGenerator` 里会把 `List<FormDef>` 写成 yaml 给 form-generator 读，结构是**顶层数组**，不是 `forms:` 包装；但本任务的产物是给**form-generator 单独**跑（验证后端契约），所以使用 `forms:` 顶层包装格式（与 study-dsl.yml 一致）。
 
-- [ ] **Step 1: 设计 Form 1 — `StudentProfile`，覆盖 text 全子变体 + like + in + 部分 InitOrEditPattern**
+- [ ] **Step 1: 设计 Form 1 — `StudentProfile`，覆盖 text 全子变体 + like + in + 部分 Boolean**
 
 创建 `super-dsl.yml`，先写第一个 form。要求：
 - 含 1 个 text(短) + filterPatterns: [like] + checkDuplicate
@@ -146,7 +146,7 @@ in / ge / gt / le / lt / like / dateRange / dateTimeRange
 - 含 1 个 text(regex=`^\\d{18}$`) + filterPatterns: [in]
 - 含 1 个 number(canBeDecimal=false, canBeNegative=false) + filterPatterns: [ge, le]
 - 含 1 个 select 单选 + filterPatterns: [in]
-- initPattern/editPattern 至少出现 doNot 和 userInput
+- canInputOnInit/canInputOnEdit 至少出现 doNot 和 userInput
 
 ```yaml
 forms:
@@ -331,8 +331,8 @@ forms:
 | onOff | — | needDormitory | — |
 | secret/desensitization | — | emergencyPhone | — |
 | secret/hidden | — | doorPassword | — |
-| InitOrEditPattern.todo | — | doorPassword.init | — |
-| InitOrEditPattern.doNot | — | doorPassword.edit | — |
+| Boolean.todo | — | doorPassword.init | — |
+| Boolean.doNot | — | doorPassword.edit | — |
 | checkDuplicate | studentName | — | — |
 | 复合唯一索引 | — | — | (studentId,subject,examDate) |
 | 单字段唯一索引 | idCard | studentId | — |
@@ -568,7 +568,7 @@ git commit -m "docs(aligning): contract Phase B4 — enum encoding"
 
 至少包括：
 1. **secret 在 list vs detail 是否切换明文/脱敏**：观察实际 java，记录事实，给"前端如何处理 secret 字段的展示"建议。
-2. **secret initPattern=todo / editPattern=doNot 字段在 save 入参里是必填还是可选**：影响 EditModal 的 required 规则。
+2. **secret canInputOnInit=false / canInputOnEdit=false 字段在 save 入参里是必填还是可选**：影响 EditModal 的 required 规则。
 3. **multiSelect 在 DTO 是 `List<String>` 还是逗号分隔字符串**：影响 response-parser 是否要做拆分。
 4. **base path 派生规则**（如果 B1 里三行不形成清晰规则）：影响 endpoints.ts 的实现。
 5. **delete 接口的入参业务主键字段名是不是 `${formName}Code`**（design 默认假设是，但需事实验证）。
@@ -655,7 +655,7 @@ Read `form-generator/src/main/java/com/spldeolin/allison1875/formgenerator/dsl/F
 
 - [ ] **Step 1: 加 FilterPattern union type**
 
-把 form-generator 已知的 8 个 FilterPattern 取值（**以 contract.md 实际确认为准**）翻译成 ts union。在 types.ts 顶部、`InitOrEditPattern` 之后插入：
+把 form-generator 已知的 8 个 FilterPattern 取值（**以 contract.md 实际确认为准**）翻译成 ts union。在 types.ts 顶部、`Boolean` 之后插入：
 
 ```ts
 export type FilterPattern =
@@ -808,9 +808,9 @@ export function buildListRequest(
 - [ ] **Step 2: 写 buildSaveRequest**
 
 按 contract.md §5 + gaps.md Gap3/Gap4 决议实现：
-- `initPattern === 'doNot'`：create 时不传
-- `initPattern === 'todo'`：**前端隐藏且不传**（Gap4 决议：todo 字段由后端开发者手动初始化，前端完全隐藏）
-- `editPattern === 'doNot'`：edit 时不传（包括 emergencyContact）
+- `canInputOnInit === 'doNot'`：create 时不传
+- `canInputOnInit === 'todo'`：**前端隐藏且不传**（Gap4 决议：todo 字段由后端开发者手动初始化，前端完全隐藏）
+- `canInputOnEdit === 'doNot'`：edit 时不传（包括 emergencyContact）
 - 其余（userInput）：传 formState[name]
 
 ```ts
@@ -821,7 +821,7 @@ export function buildSaveRequest(
 ): Record<string, any> {
   const out: Record<string, any> = {}
   for (const item of items) {
-    const pattern = mode === 'create' ? item.initPattern : item.editPattern
+    const pattern = mode === 'create' ? item.canInputOnInit : item.canInputOnEdit
     // doNot: 不允许传（create 不应出现 / edit 不允许修改）
     if (pattern === 'doNot') continue
     // todo: 前端隐藏，不传值；后端开发者手动初始化（Gap4 决议）
@@ -955,13 +955,13 @@ export function isVisible(item: ItemDef, mode: FieldMode): boolean {
     case 'edit-create':
       // Gap4 决议：todo 字段由后端初始化，前端完全隐藏
       // doNot 字段 create 时不显示
-      if (item.initPattern === 'doNot') return false
-      if (item.initPattern === 'todo') return false
+      if (item.canInputOnInit === 'doNot') return false
+      if (item.canInputOnInit === 'todo') return false
       return true
     case 'edit-update':
-      // doNot 字段 edit 时不显示
-      if (item.editPattern === 'doNot') return false
-      // todo+doNot 组合（如 emergencyContact）在 edit 时隐藏（editPattern=doNot）
+      // false 字段 edit 时不显示
+      if (item.canInputOnEdit === false) return false
+      // false+false 组合（如 emergencyContact）在 edit 时隐藏（canInputOnEdit=false）
       return true
     case 'detail':
       return true
@@ -969,7 +969,7 @@ export function isVisible(item: ItemDef, mode: FieldMode): boolean {
 }
 
 export function isReadonly(item: ItemDef, mode: 'edit-create' | 'edit-update'): boolean {
-  const pattern = mode === 'edit-create' ? item.initPattern : item.editPattern
+  const pattern = mode === 'edit-create' ? item.canInputOnInit : item.canInputOnEdit
   // todo 字段表示"前端不应让用户填，后端会自动填"——前端应该 readonly 或干脆隐藏
   // ⚠️ 是 readonly 还是隐藏，按 gaps 决议。下面默认 readonly。
   return pattern === 'todo'
@@ -1329,8 +1329,8 @@ git commit -m "feat(frontend-skeleton): wire SearchForm/EditModal/DataTable to f
   "name": "demoField",
   "title": "示例字段",
   "isNonVoid": true,
-  "initPattern": "userInput",
-  "editPattern": "userInput",
+  "canInputOnInit": "userInput",
+  "canInputOnEdit": "userInput",
   "maxLength": 100,
   "filterPatterns": ["like"]
 }

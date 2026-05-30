@@ -21,8 +21,8 @@ FormDef 是表单定义的顶层类，包含以下字段：
 | name | String | 字段名称（lowCamel） | - |
 | title | String | 字段标题 | - |
 | isNonVoid | Boolean | 字段是否非空（广义） | - |
-| initPattern | InitOrEditPattern | 初始化模式 | USER_INPUT |
-| editPattern | InitOrEditPattern | 编辑模式 | USER_INPUT |
+| canInputOnInit | Boolean | 初始化模式 | USER_INPUT |
+| canInputOnEdit | Boolean | 编辑模式 | USER_INPUT |
 | type | ItemType | 字段类型（子类实现） | - |
 
 ## 三、ItemType 及其子类特有字段
@@ -84,7 +84,7 @@ OptionDef 结构：
 
 ## 五、枚举取值
 
-### 5.1 InitOrEditPattern 取值
+### 5.1 Boolean 取值
 
 初始化模式和编辑模式的可选值：
 
@@ -173,8 +173,8 @@ items:
     title: Item ID
     type: number
     isNonVoid: true
-    initPattern: doNot      # or: userInput, todo
-    editPattern: doNot
+    canInputOnInit: false      # or: true, false
+    canInputOnEdit: false
     canBeDecimal: false
 
   # Item 2: Example text field
@@ -182,8 +182,8 @@ items:
     title: Item Name
     type: text
     isNonVoid: true
-    initPattern: userInput
-    editPattern: userInput
+    canInputOnInit: true
+    canInputOnEdit: true
     isMultilineOrRich: false
     maxLength: 255
     regex: null
@@ -193,8 +193,8 @@ items:
     title: Item Status
     type: select
     isNonVoid: true
-    initPattern: userInput
-    editPattern: userInput
+    canInputOnInit: true
+    canInputOnEdit: true
     options:
       - code: active
         title: Active
@@ -206,8 +206,8 @@ items:
     title: Item Tags
     type: multiSelect
     isNonVoid: false
-    initPattern: userInput
-    editPattern: userInput
+    canInputOnInit: true
+    canInputOnEdit: true
     options:
       - code: tag1
         title: Tag 1
@@ -219,8 +219,8 @@ items:
     title: Created At
     type: time
     isNonVoid: true
-    initPattern: doNot
-    editPattern: doNot
+    canInputOnInit: false
+    canInputOnEdit: false
     format: dateTime
 
   # Item N: Updated At (audit field)
@@ -228,8 +228,8 @@ items:
     title: Updated At
     type: time
     isNonVoid: true
-    initPattern: doNot
-    editPattern: doNot
+    canInputOnInit: false
+    canInputOnEdit: false
     format: dateTime
 
 indices:
@@ -244,7 +244,7 @@ indices:
 以下维度都已被 form-generator 支持，frontend-skeleton 需要与其对齐：
 
 - ✓ 所有 7 种 ItemType 及其特有字段
-- ✓ 所有 InitOrEditPattern 取值（doNot/userInput/todo）
+- ✓ 所有 Boolean 取值（doNot/userInput/todo）
 - ✓ FilterPattern（用于搜索/过滤条件）
 - ✓ TimeFormat（用于时间字段）
 - ✓ SpecialItemType（业务主键、审计字段）
@@ -321,7 +321,7 @@ indices:
 
 ### 4. secret 的 displayType 和 desensitization 字段
 
-**未覆盖原因**: SecretItemDef 类**没有任何特有字段**，只继承 ItemDef 的通用字段（name、title、isNonVoid、initPattern、editPattern）。
+**未覆盖原因**: SecretItemDef 类**没有任何特有字段**，只继承 ItemDef 的通用字段（name、title、isNonVoid、canInputOnInit、canInputOnEdit）。
 
 - study-dsl.yml 中的 `display_type` 和 `desensitization` 字段在 Java 模型中不存在
 - secret 类型的特殊行为（不能返回、DB 加密、只能重置）是由 form-generator 的代码逻辑控制，而非 DSL 配置
@@ -357,7 +357,7 @@ indices:
 
 **结论**: super-dsl.yml 严格基于 form-generator 的实际 Java 模型创建，**只包含已验证存在的字段**：
 
-- 通用字段: name, title, isNonVoid, initPattern, editPattern
+- 通用字段: name, title, isNonVoid, canInputOnInit, canInputOnEdit
 - NumberItemDef: canBeDecimal
 - TextItemDef: isMultilineOrRich, maxLength, regex
 - TimeItemDef: format (注意是 format 不是 pattern)
