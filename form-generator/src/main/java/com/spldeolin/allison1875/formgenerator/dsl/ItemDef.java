@@ -70,6 +70,18 @@ public abstract class ItemDef {
     InitOrEditPattern editPattern = USER_INPUT;
 
     /**
+     * 创建（init）时是否允许用户输入。默认 true。
+     */
+    @NotNull
+    Boolean canInputOnInit = true;
+
+    /**
+     * 编辑（edit）时是否允许用户输入。默认 true。
+     */
+    @NotNull
+    Boolean canInputOnEdit = true;
+
+    /**
      * 字段的类型
      */
     public abstract ItemType getType();
