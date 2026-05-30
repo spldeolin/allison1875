@@ -180,6 +180,11 @@ public class AppGenerator implements Allison1875MainService {
             Files.walkFileTree(source, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    String dirName = dir.getFileName().toString();
+                    // Skip directories that should not be copied
+                    if (dirName.equals("node_modules") || dirName.equals(".git") || dirName.equals("dist") || dirName.equals(".gitkeep")) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
                     Files.createDirectories(target.resolve(source.relativize(dir)));
                     return FileVisitResult.CONTINUE;
                 }
