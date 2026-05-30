@@ -49,7 +49,7 @@ public class AppGenerator implements Allison1875MainService {
 
         // 2. Determine output paths
         String appName = appDef.getName();
-        Path outputRoot = config.getAppGeneratorOutputDir().toPath().resolve(appName);
+        Path outputRoot = determineOutputRoot(config.getAppGeneratorOutputDir().toPath(), appName);
         Path backendOutput = outputRoot.resolve(appName + "-backend");
         Path frontendOutput = outputRoot.resolve(appName + "-frontend");
 
@@ -75,6 +75,20 @@ public class AppGenerator implements Allison1875MainService {
         }
 
         log.info("app-generator completed. output={}", outputRoot.toAbsolutePath());
+    }
+
+    private Path determineOutputRoot(Path baseDir, String appName) {
+        Path candidate = baseDir.resolve(appName);
+        if (!Files.exists(candidate)) {
+            return candidate;
+        }
+        int seq = 1;
+        Path candidateWithSeq;
+        do {
+            candidateWithSeq = baseDir.resolve(appName + "-" + seq);
+            seq++;
+        } while (Files.exists(candidateWithSeq));
+        return candidateWithSeq;
     }
 
     private AppDef parseAppDef() {

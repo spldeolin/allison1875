@@ -47,7 +47,7 @@ public class DdlServiceImpl implements DdlService {
         List<FormDef> associationForms = Lists.newArrayList();
         String tableName = MoreStringUtils.camelToSnakeCase(form.getName());
         ddl.append("CREATE TABLE `").append(tableName).append("`\n(");
-        ddl.append("`id` BIGINT NOT NULL COMMENT '主键',\n");
+        ddl.append("`id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',\n");
 
         Map<String, ItemDef> nameToItem = form.getItems().stream()
                 .collect(Collectors.toMap(ItemDef::getName, Function.identity()));

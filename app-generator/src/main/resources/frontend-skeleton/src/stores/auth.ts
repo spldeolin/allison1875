@@ -40,6 +40,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function hasPermission(perm: string): boolean {
+    // Empty permissions list means no restriction — all routes are accessible
+    if (!permissions.value || permissions.value.length === 0) return true
     return permissions.value.includes(perm)
   }
 

@@ -166,6 +166,7 @@ onMounted(fetchData)
     <EditModal
       :visible="modalVisible"
       :mode="modalMode"
+      :form-title="schema.title"
       :items="schema.items"
       v-model="formData"
       :loading="submitLoading"

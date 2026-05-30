@@ -8,6 +8,7 @@ import { isVisible } from './protocol/field-policy'
 const props = defineProps<{
   visible: boolean
   mode: 'create' | 'edit'
+  formTitle: string
   items: ItemDef[]
   modelValue: Record<string, any>
   loading: boolean
@@ -33,13 +34,19 @@ const rules = computed<FormRules>(() => {
   const r: FormRules = {}
   for (const item of visibleItems.value) {
     if (item.isNonVoid) {
-      r[item.name] = [{ required: true, message: `请输入${item.title}`, trigger: 'blur' }]
+      const isNumber = item.type === 'number'
+      r[item.name] = [{
+        required: true,
+        type: isNumber ? 'number' : 'string',
+        message: `请输入${item.title}`,
+        trigger: isNumber ? ['blur', 'change'] : 'blur'
+      }]
     }
   }
   return r
 })
 
-const title = computed(() => props.mode === 'create' ? '新建' : '编辑')
+const title = computed(() => props.mode === 'create' ? `新建${props.formTitle}` : `编辑${props.formTitle}`)
 
 function updateField(name: string, value: any) {
   emit('update:modelValue', { ...props.modelValue, [name]: value })

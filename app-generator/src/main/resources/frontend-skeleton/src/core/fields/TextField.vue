@@ -28,6 +28,8 @@ const emit = defineEmits<{
       :maxlength="item.maxLength"
       show-count
       placeholder="请输入"
+      :autosize="{ minRows: 3, maxRows: 8 }"
+      style="padding-bottom: 22px"
       @update:value="emit('update:value', $event)"
     />
     <NInput
