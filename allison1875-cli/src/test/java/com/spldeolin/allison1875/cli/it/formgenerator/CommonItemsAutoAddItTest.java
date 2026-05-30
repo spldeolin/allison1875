@@ -131,7 +131,7 @@ public class CommonItemsAutoAddItTest extends FormGeneratorItBaseTest {
         // createdAt — 创建分支里出现
         assertTrue(saveContent.contains("product.setCreatedAt("),
                 "Save service should set createdAt in toCreate branch");
-        // updatedAt — common 节出现（无论创建还是编辑，editPattern=TODO）
+        // updatedAt — common 节出现（无论创建还是编辑，canInputOnEdit=false 但 SpecialItemType.UPDATED_AT 显式追加）
         assertTrue(saveContent.contains("product.setUpdatedAt("),
                 "Save service should set updatedAt in common section");
 
