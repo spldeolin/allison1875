@@ -1,10 +1,13 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
+import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -77,6 +80,13 @@ public class SelectItemService implements ItemService<SelectItemDef> {
     public String getTodoValue(SelectItemDef itemDef) {
         return MoreStringUtils.splitAndGetLastPart(getJavaTypeInDTO(itemDef), ".") + "." + itemDef.getOptions().get(0)
                 .javaEnumConstantName() + ".getCode()";
+    }
+
+    @Override
+    public Statement getValidationStatement(SelectItemDef itemDef) {
+        return parseStatement(
+                "if (req.get%s() == null) { throw new IllegalArgumentException(\"%s不能为空\"); }",
+                StringUtils.capitalize(itemDef.getName()), itemDef.getTitle());
     }
 
 }
