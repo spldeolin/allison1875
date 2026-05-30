@@ -52,8 +52,8 @@ public class CannotInputOnEditItTest extends FormGeneratorItBaseTest {
         String commonSection = saveContent.substring(insertCall);
 
         // toCreate 分支：if-throw 校验 + setter
-        assertTrue(toCreateSection.contains("StringUtils.isBlank(req.getAuthorName())"),
-                "toCreate should contain isBlank validation for authorName");
+        assertTrue(toCreateSection.contains("!StringUtils.hasText(req.getAuthorName())"),
+                "toCreate should contain hasText validation for authorName");
         assertTrue(toCreateSection.contains("throw new IllegalArgumentException(\"作者不能为空\")"),
                 "toCreate should throw IllegalArgumentException with title");
         assertTrue(toCreateSection.contains("document.setAuthorName("),
