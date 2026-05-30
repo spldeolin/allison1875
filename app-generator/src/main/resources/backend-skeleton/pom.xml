@@ -88,16 +88,6 @@
             <version>2.16.1</version>
         </dependency>
         <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>3.18.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>allison1875-support</artifactId>
             <version>13.0-SNAPSHOT</version>

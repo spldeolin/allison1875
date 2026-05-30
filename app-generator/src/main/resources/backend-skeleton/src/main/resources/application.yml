@@ -5,9 +5,9 @@ spring:
   application:
     name: __APP_NAME__
   datasource:
-    url: jdbc:mysql://localhost:3306/__APP_NAME__?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
+    url: __DATASOURCE_URL__/__DATASOURCE_SCHEMA__?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: __DATASOURCE_USERNAME__
+    password: __DATASOURCE_PASSWORD__
   mvc:
     throw-exception-if-no-handler-found: true
   web:

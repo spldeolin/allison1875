@@ -41,7 +41,7 @@ export default function mockApiPlugin(): Plugin {
     name: 'vite-plugin-mock-api',
     configureServer(server) {
       server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next) => {
-        if (req.url === '/api/v1/login' && req.method === 'POST') {
+        if (req.url === '/api/v1/authc/login' && req.method === 'POST') {
           await readBody(req)
           res.setHeader('Content-Type', 'application/json')
           res.end(JSON.stringify({

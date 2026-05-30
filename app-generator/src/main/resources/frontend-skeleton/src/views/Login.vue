@@ -3,17 +3,14 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NCard, NForm, NFormItem, NInput, NButton, NIcon, useMessage, type FormInst } from 'naive-ui'
 import { GridOutline } from '@vicons/ionicons5'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore, type UserInfo } from '@/stores/auth'
 import request from '@/utils/request'
 import type { RequestResult } from '@/utils/request'
 
 interface LoginResp {
   token: string
-  userInfo: {
-    id: string
-    username: string
-    displayName: string
-  }
+  nickName: string
+  username: string
   permissions: string[]
 }
 
@@ -42,8 +39,13 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    const { data } = await request.post<RequestResult<LoginResp>>('/api/v1/login', formData.value)
-    const { token, userInfo, permissions } = data.data
+    const { data } = await request.post<RequestResult<LoginResp>>('/api/v1/authc/login', formData.value)
+    const { token, nickName, username, permissions } = data.data
+    const userInfo: UserInfo = {
+      id: username,
+      username,
+      displayName: nickName
+    }
     authStore.setAuth(token, userInfo, permissions)
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)

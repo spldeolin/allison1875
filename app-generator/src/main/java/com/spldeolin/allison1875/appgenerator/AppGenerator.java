@@ -98,6 +98,10 @@ public class AppGenerator implements Allison1875MainService {
         replaceInAllFiles(output, "__NAMESPACE_PATH__", namespacePath);
         replaceInAllFiles(output, "__APP_NAME__", appDef.getName());
         replaceInAllFiles(output, "__APP_TITLE__", appDef.getTitle());
+        replaceInAllFiles(output, "__DATASOURCE_URL__", config.getJdbcUrl());
+        replaceInAllFiles(output, "__DATASOURCE_SCHEMA__", config.getSchema());
+        replaceInAllFiles(output, "__DATASOURCE_USERNAME__", config.getUserName());
+        replaceInAllFiles(output, "__DATASOURCE_PASSWORD__", config.getPassword());
 
         // Rename __NAMESPACE_PATH__ directory to actual namespace path
         Path placeholderDir = output.resolve("src/main/java/__NAMESPACE_PATH__");
