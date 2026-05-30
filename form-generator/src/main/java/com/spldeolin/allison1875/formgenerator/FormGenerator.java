@@ -1,7 +1,5 @@
 package com.spldeolin.allison1875.formgenerator;
 
-import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern.TODO;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,7 +30,6 @@ import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
-import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
@@ -182,8 +179,8 @@ public class FormGenerator implements Allison1875MainService {
             bizId.setName(StringUtils.uncapitalize(form.getName()) + "Code");
             bizId.setTitle("业务主键");
             bizId.setIsNonVoid(true);
-            bizId.setInitPattern(TODO);
-            bizId.setEditPattern(InitOrEditPattern.DO_NOT);
+            bizId.setCanInputOnInit(false);
+            bizId.setCanInputOnEdit(false);
             bizId.setSpecialItemType(SpecialItemType.BIZ_ID);
             bizId.setMaxLength(36);
             form.getItems().add(0, bizId);
@@ -191,16 +188,16 @@ public class FormGenerator implements Allison1875MainService {
             createdAt.setName("createdAt");
             createdAt.setTitle("创建时间");
             createdAt.setIsNonVoid(true);
-            createdAt.setInitPattern(TODO);
-            createdAt.setEditPattern(InitOrEditPattern.DO_NOT);
+            createdAt.setCanInputOnInit(false);
+            createdAt.setCanInputOnEdit(false);
             bizId.setSpecialItemType(SpecialItemType.CREATED_AT);
             form.getItems().add(createdAt);
             TimeItemDef updatedAt = new TimeItemDef();
             updatedAt.setName("updatedAt");
             updatedAt.setTitle("更新时间");
             updatedAt.setIsNonVoid(true);
-            updatedAt.setInitPattern(TODO);
-            updatedAt.setEditPattern(TODO);
+            updatedAt.setCanInputOnInit(false);
+            updatedAt.setCanInputOnEdit(false);
             bizId.setSpecialItemType(SpecialItemType.UPDATED_AT);
             form.getItems().add(updatedAt);
             IndexDef index = new IndexDef();
