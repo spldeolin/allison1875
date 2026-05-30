@@ -1,13 +1,13 @@
 # Super DSL for form-generator evidence gathering
-# Covers all ItemType variants, initPattern/editPattern combos, time formats,
+# Covers all ItemType variants, canInputOnInit/canInputOnEdit combos, time formats,
 # multiSelect, onOff, secret, and composite index
 #
 # Form 1: StudentProfile
-#   Coverage: text (short+regex, short, multiline) + number (integer) + select (editPattern=doNot)
-#             initPattern/editPattern variants across items
+#   Coverage: text (short+regex, short, multiline) + number (integer) + select (canInputOnEdit=doNot)
+#             canInputOnInit/canInputOnEdit variants across items
 #
 # Form 2: StudentDormitory
-#   Coverage: multiSelect + onOff + secret (userInput+userInput, todo+doNot) + number (decimal)
+#   Coverage: multiSelect + onOff + secret (true+true, false+false) + text (false+true) + number (decimal)
 #             composite unique index
 #
 # Form 3: StudentExam
@@ -34,8 +34,8 @@ menus:
           isNonVoid: true
           maxLength: 18
           regex: '^\d{18}$'
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # text/short, isNonVoid=true
         - type: text
@@ -43,8 +43,8 @@ menus:
           title: 学生姓名
           isNonVoid: true
           maxLength: 50
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # text/multiline, isNonVoid=false
         - type: text
@@ -53,8 +53,8 @@ menus:
           isNonVoid: false
           isMultilineOrRich: true
           maxLength: 2000
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # number/integer, isNonVoid=true
         - type: number
@@ -62,16 +62,16 @@ menus:
           title: 年龄
           isNonVoid: true
           canBeDecimal: false
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
-        # select, isNonVoid=true, editPattern=doNot (demonstrates readonly-after-create)
+        # select, isNonVoid=true, canInputOnEdit=doNot (demonstrates readonly-after-create)
         - type: select
           name: gender
           title: 性别
           isNonVoid: true
-          initPattern: userInput
-          editPattern: doNot
+          canInputOnInit: true
+          canInputOnEdit: false
           options:
             - code: 'M'
               title: 男
@@ -95,24 +95,24 @@ menus:
           title: 学生ID
           isNonVoid: true
           canBeDecimal: false
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # onOff, isNonVoid=true
         - type: onOff
           name: hasAllergy
           title: 是否有过敏史
           isNonVoid: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # multiSelect, isNonVoid=false
         - type: multiSelect
           name: facilities
           title: 需要的设施
           isNonVoid: false
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
           options:
             - code: 'AC'
               title: 空调
@@ -121,21 +121,30 @@ menus:
             - code: 'DESK'
               title: 书桌
 
-        # secret, initPattern=userInput, editPattern=userInput
+        # secret, canInputOnInit=userInput, canInputOnEdit=userInput
         - type: secret
           name: doorPassword
           title: 门禁密码
           isNonVoid: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
-        # secret, initPattern=todo, editPattern=doNot (demonstrates todo+doNot combo)
+        # secret, canInputOnInit=todo, canInputOnEdit=doNot (demonstrates todo+doNot combo)
         - type: secret
           name: emergencyContact
           title: 紧急联系人密保
           isNonVoid: true
-          initPattern: todo
-          editPattern: doNot
+          canInputOnInit: false
+          canInputOnEdit: false
+
+        # text, canInputOnInit=false, canInputOnEdit=true (assignment after creation)
+        - type: text
+          name: assignedRoom
+          title: 分配房间号
+          isNonVoid: true
+          maxLength: 32
+          canInputOnInit: false
+          canInputOnEdit: true
 
         # number/decimal, isNonVoid=true
         - type: number
@@ -143,8 +152,8 @@ menus:
           title: 月租金
           isNonVoid: true
           canBeDecimal: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
       indices:
         - itemNames: [ studentId ]
           isUnique: true
@@ -163,16 +172,16 @@ menus:
           title: 学生ID
           isNonVoid: true
           canBeDecimal: false
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # select, isNonVoid=true
         - type: select
           name: subject
           title: 考试科目
           isNonVoid: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
           options:
             - code: 'MATH'
               title: 数学
@@ -185,8 +194,8 @@ menus:
           title: 考试成绩
           isNonVoid: true
           canBeDecimal: true
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # time/date, isNonVoid=true
         - type: time
@@ -194,8 +203,8 @@ menus:
           title: 考试日期
           isNonVoid: true
           format: date
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # time/time, isNonVoid=true
         - type: time
@@ -203,8 +212,8 @@ menus:
           title: 考试时间
           isNonVoid: true
           format: time
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
 
         # time/dateTime, isNonVoid=true
         - type: time
@@ -212,8 +221,8 @@ menus:
           title: 提交时间
           isNonVoid: true
           format: dateTime
-          initPattern: userInput
-          editPattern: userInput
+          canInputOnInit: true
+          canInputOnEdit: true
       indices:
         # Composite unique index on 3 fields
         - itemNames: [ studentId, subject, examDate ]
