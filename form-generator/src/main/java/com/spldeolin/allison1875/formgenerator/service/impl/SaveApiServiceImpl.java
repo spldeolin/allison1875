@@ -26,7 +26,6 @@ import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
-import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
@@ -57,32 +56,36 @@ public class SaveApiServiceImpl implements SaveApiService {
     @Override
     public InitializerDeclaration generateSaveInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
-        // handler, desc声明部分
         bs.addStatement(parseStatement(
                 "String handler = \"save%s\", desc = \"创建%s\", form=\"%s\", type=\"%s\";",
                 form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
                 ApiType.SAVE.getCode()));
 
-        // req声明
+        // req declaration
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req");
         FieldDeclaration bizIdField = parseFieldDeclaration(
                 "String " + StringUtils.uncapitalize(form.getName()) + "Code;");
         JavadocUtils.setJavadoc(bizIdField, form.getTitle() + "的业务ID", null);
         reqCoid.addMember(bizIdField);
         for (ItemDef item : form.getItems()) {
-            if (item.getInitPattern() == InitOrEditPattern.USER_INPUT
-                    || item.getEditPattern() == InitOrEditPattern.USER_INPUT) {
+            // 字段进入 ReqDTO 当且仅当 init 或 edit 任一允许用户输入
+            if (Boolean.TRUE.equals(item.getCanInputOnInit()) || Boolean.TRUE.equals(item.getCanInputOnEdit())) {
                 FieldDeclaration itemField = parseFieldDeclaration(
                         itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
                 JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
-                itemService.getJavaValidAnnotations(item).forEach(itemField::addAnnotation);
+                // 仅在 (true,true) 组合时把 isNonVoid 校验注解放在 ReqDTO 字段上；
+                // 其他组合的 isNonVoid 校验改为分支内 if-throw（见 generateMethodBody/IfThen/Else）。
+                if (Boolean.TRUE.equals(item.getCanInputOnInit())
+                        && Boolean.TRUE.equals(item.getCanInputOnEdit())) {
+                    itemService.getJavaValidAnnotations(item).forEach(itemField::addAnnotation);
+                }
                 itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
                 reqCoid.addMember(itemField);
             }
         }
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
 
-        // resp声明
+        // resp declaration
         ClassOrInterfaceDeclaration respCoid = new ClassOrInterfaceDeclaration().setName("resp").addMember(bizIdField);
         bs.addStatement(new LocalClassDeclarationStmt(respCoid));
         return new InitializerDeclaration(false, bs);
@@ -101,13 +104,13 @@ public class SaveApiServiceImpl implements SaveApiService {
         ifStmt.setElseStmt(generateElseBody(form));
         body.addStatement(ifStmt);
 
-        // initPattern==userInput且 editPattern==userInput添加此处
+        // common section: only (canInputOnInit=true, canInputOnEdit=true) 字段在此设置
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
             }
-            if (item.getInitPattern() == InitOrEditPattern.USER_INPUT
-                    && item.getEditPattern() == InitOrEditPattern.USER_INPUT) {
+            if (Boolean.TRUE.equals(item.getCanInputOnInit())
+                    && Boolean.TRUE.equals(item.getCanInputOnEdit())) {
                 generatorSetterToGetter(form, item, body);
             }
         }
@@ -117,7 +120,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 "if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
                 form.getVarName(), form.getVarName(), form.getVarName(), form.getVarName()));
 
-        // 删除、重新创建关联实体
+        // 删除、重新创建关联实体（multiSelect 路径不变）
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
@@ -164,26 +167,26 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(parseStatement(
                 "%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
                 config.getCodeSnippet().getShortUuidGeneration()));
-        // initPattern!=userInput添加此处
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
             }
-            if (item.getInitPattern() == InitOrEditPattern.USER_INPUT && item.getEditPattern()
-                    != InitOrEditPattern.USER_INPUT) { // 只有edit不为USER_INPUT，该字段才在toCreate分支内设置值
-                generatorSetterToGetter(form, item, body);
-            }
-            if (item.getInitPattern() == InitOrEditPattern.TODO) {
-                Statement stmt = parseStatement(
-                        "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
-                        itemService.getTodoValue(item));
-                if (item.getInitPattern() == InitOrEditPattern.TODO) {
-                    stmt.setLineComment("TODO 请补充初始值");
+            boolean init = Boolean.TRUE.equals(item.getCanInputOnInit());
+            boolean edit = Boolean.TRUE.equals(item.getCanInputOnEdit());
+
+            if (init && !edit) {
+                // case (true,false): if isNonVoid → if-throw, then setter
+                if (Boolean.TRUE.equals(item.getIsNonVoid())) {
+                    body.addStatement(itemService.getValidationStatement(item));
                 }
-                body.addStatement(stmt);
-            }
-            if (item.getInitPattern() == InitOrEditPattern.DO_NOT) {
-                // nothing to do
+                generatorSetterToGetter(form, item, body);
+            } else if (!init) {
+                // case (false,true) and (false,false): non-void → default value
+                if (Boolean.TRUE.equals(item.getIsNonVoid())) {
+                    body.addStatement(parseStatement(
+                            "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
+                            itemService.getTodoValue(item)));
+                }
             }
         }
         body.addStatement(parseStatement(
@@ -203,18 +206,14 @@ public class SaveApiServiceImpl implements SaveApiService {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
             }
-            if (item.getEditPattern() == InitOrEditPattern.USER_INPUT
-                    && item.getInitPattern() != InitOrEditPattern.USER_INPUT) {
-                generatorSetterToGetter(form, item, body);
-            }
-            if (item.getEditPattern() == InitOrEditPattern.TODO) {
-                Statement stmt = parseStatement(
-                        "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
-                        itemService.getTodoValue(item));
-                if (item.getEditPattern() == InitOrEditPattern.TODO) {
-                    stmt.setLineComment("TODO 请补充更新值");
+            boolean init = Boolean.TRUE.equals(item.getCanInputOnInit());
+            boolean edit = Boolean.TRUE.equals(item.getCanInputOnEdit());
+            if (!init && edit) {
+                // case (false,true): if isNonVoid → if-throw, then setter
+                if (Boolean.TRUE.equals(item.getIsNonVoid())) {
+                    body.addStatement(itemService.getValidationStatement(item));
                 }
-                body.addStatement(stmt);
+                generatorSetterToGetter(form, item, body);
             }
         }
         return body;
