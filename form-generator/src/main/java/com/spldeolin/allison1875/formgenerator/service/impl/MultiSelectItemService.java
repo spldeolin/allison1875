@@ -2,7 +2,6 @@ package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
-import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern.DO_NOT;
 
 import java.util.List;
 import java.util.Optional;
@@ -107,16 +106,16 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
         code.setName(item.getName());
         code.setTitle(item.getTitle());
         code.setIsNonVoid(item.getIsNonVoid());
-        code.setInitPattern(DO_NOT); // 非主表单，init和edit没有意义
-        code.setEditPattern(DO_NOT);
+        code.setCanInputOnInit(false); // 非主表单，init和edit没有意义
+        code.setCanInputOnEdit(false);
         code.setOptions(item.getOptions());
         items.add(code);
         TimeItemDef createdAt = new TimeItemDef();
         createdAt.setName("createdAt");
         createdAt.setTitle("创建时间");
         createdAt.setIsNonVoid(true);
-        createdAt.setInitPattern(DO_NOT);
-        createdAt.setEditPattern(DO_NOT);
+        createdAt.setCanInputOnInit(false);
+        createdAt.setCanInputOnEdit(false);
         items.add(createdAt);
         form.setItems(items);
         List<IndexDef> indices = Lists.newArrayList();
