@@ -139,19 +139,18 @@ public class AppGenerator implements Allison1875MainService {
         String name = appDef.getName();
         try {
             String originalDsl = Files.readString(config.getAppDslPath().toPath(), StandardCharsets.UTF_8);
+            String frontendDir = name + "-frontend";
+            String backendDir = name + "-backend";
             String readme = "# " + appDef.getTitle() + "\n\n"
                     + "## 构建\n\n"
                     + "```bash\n"
-                    + "cd " + name + "-frontend\n"
-                    + "npm install\n"
-                    + "npm run build\n"
-                    + "cp -r dist/* ../" + name + "-backend/src/main/resources/static/\n"
-                    + "cd ../" + name + "-backend\n"
-                    + "mvn package\n"
+                    + "cd " + frontendDir + " && npm install && npm run build && cd ..\n"
+                    + "cp -r " + frontendDir + "/dist/* " + backendDir + "/src/main/resources/static/\n"
+                    + "mvn clean package -f " + backendDir + "\n"
                     + "```\n\n"
                     + "## 运行\n\n"
                     + "```bash\n"
-                    + "java -jar " + name + "-backend/target/" + name + "-fullstack.jar\n"
+                    + "java -jar " + backendDir + "/target/" + name + "-fullstack.jar\n"
                     + "```\n\n"
                     + "## DSL\n\n"
                     + "```yaml\n"
