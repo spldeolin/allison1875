@@ -17,6 +17,6 @@
       title: 作者
       isNonVoid: true
       maxLength: 50
-      initPattern: userInput
-      editPattern: doNot
+      canInputOnInit: true
+      canInputOnEdit: false
   indices: []

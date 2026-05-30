@@ -12,6 +12,13 @@
       title: 负责人ID
       isNonVoid: false
       maxLength: 36
-      initPattern: todo
-      editPattern: doNot
+      canInputOnInit: false
+      canInputOnEdit: true
+    - type: text
+      name: internalCode
+      title: 内部编码
+      isNonVoid: true
+      maxLength: 36
+      canInputOnInit: false
+      canInputOnEdit: false
   indices: []

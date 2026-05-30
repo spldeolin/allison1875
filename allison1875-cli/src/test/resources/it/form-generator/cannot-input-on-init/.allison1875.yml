@@ -1,6 +1,6 @@
-# form-generator init-pattern-todo integration test config
+# form-generator edit-pattern-donot integration test config
 domains:
-  - name: init-pattern-todo
+  - name: edit-pattern-donot
     controllerModule: "."
     controllerPackage: com.example.controller
     dtoModule: "."
@@ -21,7 +21,6 @@ domains:
     wholeDTOPackage: com.example.dto
     mapperXmlDirs:
       - src/main/resources/mapper
-
 author: test-author
 javaVersion: "21"
 enableNoModifyAnnounce: false
@@ -29,10 +28,8 @@ enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
 enableGenerateDesign: true
 isEntityEndWithEntity: true
-
 dslPath: forms.yml
 enableDocAnalyzer: false
-
 codeSnippet:
   pageTypeQualifier: "com.example.common.PageResult"
   controllerRequestMapping: "/api/v1/${formName}"
