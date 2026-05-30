@@ -78,7 +78,7 @@ public class SecretItemService implements ItemService<SecretItemDef> {
     @Override
     public Statement getValidationStatement(SecretItemDef itemDef) {
         return parseStatement(
-                "if (org.apache.commons.lang3.StringUtils.isBlank(req.get%s())) { throw new IllegalArgumentException(\"%s不能为空\"); }",
+                "if (!StringUtils.hasText(req.get%s())) { throw new IllegalArgumentException(\"%s不能为空\"); }",
                 StringUtils.capitalize(itemDef.getName()), itemDef.getTitle());
     }
 
