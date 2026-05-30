@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
  *
  * <p>验证 form-generator 自动添加的公共字段（业务主键 + 审计字段）行为：
  * <ul>
- *   <li>{@code productCode}：自动添加为 items 首位，类型 text，maxLength=36，initPattern=TODO，editPattern=DO_NOT，
+ *   <li>{@code productCode}：自动添加为 items 首位，类型 text，maxLength=36，canInputOnInit=false，canInputOnEdit=false，
  *       在 DDL 中为 {@code VARCHAR(36) NOT NULL}，自动创建唯一索引</li>
- *   <li>{@code createdAt}：自动添加为 items 末尾，initPattern=TODO，editPattern=DO_NOT，
+ *   <li>{@code createdAt}：自动添加为 items 末尾，canInputOnInit=false，canInputOnEdit=false，
  *       在 DDL 中为 {@code DATETIME NOT NULL}，不在 SaveReq 中</li>
- *   <li>{@code updatedAt}：自动添加为 items 末尾，initPattern=TODO，editPattern=TODO，
+ *   <li>{@code updatedAt}：自动添加为 items 末尾，canInputOnInit=false，canInputOnEdit=false，
  *       在 DDL 中为 {@code DATETIME NOT NULL}，编辑时由 Service 设置</li>
  * </ul>
  *
@@ -80,9 +80,9 @@ public class CommonItemsAutoAddItTest extends FormGeneratorItBaseTest {
 
         // ============================================================
         // === SaveReq DTO 验证：自动添加字段不应出现 ===
-        // === productCode initPattern=TODO → 不进入 SaveReq
-        // === createdAt   initPattern=TODO → 不进入 SaveReq
-        // === updatedAt   initPattern=TODO → 不进入 SaveReq
+        // === productCode canInputOn*=false → 不进入 SaveReq（但被显式追加为 bizId 字段）
+        // === createdAt   canInputOn*=false → 不进入 SaveReq
+        // === updatedAt   canInputOn*=false → 不进入 SaveReq
         // ============================================================
         File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveProductReq.java");
         assertTrue(saveReqFile.exists(), "SaveProductReq DTO should be generated");
@@ -103,9 +103,9 @@ public class CommonItemsAutoAddItTest extends FormGeneratorItBaseTest {
                 "productCode in SaveReq should NOT have @NotBlank/@NotNull (not user input)");
         // createdAt/updatedAt 不应出现在 SaveReq 中
         assertFalse(saveReqContent.contains("createdAt"),
-                "SaveReq should NOT contain createdAt (initPattern=TODO)");
+                "SaveReq should NOT contain createdAt (canInputOn*=false)");
         assertFalse(saveReqContent.contains("updatedAt"),
-                "SaveReq should NOT contain updatedAt (initPattern=TODO)");
+                "SaveReq should NOT contain updatedAt (canInputOn*=false)");
 
         // ============================================================
         // === Save ServiceImpl 验证 ===
@@ -135,11 +135,11 @@ public class CommonItemsAutoAddItTest extends FormGeneratorItBaseTest {
         assertTrue(saveContent.contains("product.setUpdatedAt("),
                 "Save service should set updatedAt in common section");
 
-        // 确保 product.setCreatedAt 只在 toCreate 分支出现（editPattern=DO_NOT）
+        // 确保 product.setCreatedAt 只在 toCreate 分支出现（canInputOnEdit=false）
         int elseIndex = saveContent.indexOf("} else {");
         String elseContent = saveContent.substring(elseIndex);
         assertFalse(elseContent.contains("product.setCreatedAt("),
-                "createdAt should NOT be set in else/edit branch (editPattern=DO_NOT)");
+                "createdAt should NOT be set in else/edit branch (canInputOnEdit=false)");
 
         // ============================================================
         // === Mapper 验证：productCode 唯一索引 → queryByProductCode ===

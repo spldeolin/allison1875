@@ -131,33 +131,24 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 
 ---
 
-## 初始化/编辑模式（InitOrEditPattern）
+## 初始化/编辑模式（canInputOnInit/canInputOnEdit）
 
-### InitPatternTodoItTest ✅ 已完成
+### CannotInputOnInitItTest ✅ 已完成
 
-- 验证 `initPattern=todo` / `editPattern=doNot` 字段的生成行为
+- 验证 `canInputOnInit=false` 字段的生成行为
 - 该字段不出现在 SaveReq DTO 中（非 `userInput`，不进入 Req）
 - Save ServiceImpl 的 `if (toCreate)` 分支中生成 `task.setAssigneeId(""); // TODO 请补充初始值`
 - TODO 注释位于 `setTaskCode` 之后、`setCreatedAt` 之前（创建分支内部）
-- 编辑分支（else）中不包含该字段的 setter 调用（editPattern=doNot）
+- 编辑分支（else）中不包含该字段的 setter 调用（canInputOnEdit=false）
 - 实现日期：2026-05-17
 
-### EditPatternDoNotItTest ✅ 已完成
+### CannotInputOnEditItTest ✅ 已完成
 
-- 验证 `editPattern=doNot` 字段在编辑时不被更新
-- 该字段仍出现在 SaveReq 中（initPattern=userInput，创建时仍可输入）
+- 验证 `canInputOnEdit=false` 字段在编辑时不被更新
+- 该字段仍出现在 SaveReq 中（canInputOnInit=true，创建时仍可输入）
 - 创建（toCreate）分支中正常设置该字段
-- common 节中不设置（editPattern != userInput），else/edit 分支中不设置（editPattern=doNot）
+- common 节中不设置（canInputOnEdit=false），else/edit 分支中不设置（canInputOnEdit=false）
 - 同一表单中普通字段（title/content）仍在 common 节正常设置，不受影响
-- 实现日期：2026-05-17
-
-### MixedInitEditPatternItTest ✅ 已完成
-
-- 验证 `initPattern=userInput` + `editPattern=doNot` 组合
-- 该字段（skuCode）出现在 SaveReq 中，用户可在创建时输入
-- skuCode 的 setter 仅出现在 `if (toCreate)` 分支内（validated via `firstSkuSet == lastSkuSet`）
-- common 节和 else/edit 分支中均不设置该字段
-- 同一表单中普通字段（productName/remark）在 common 节正常设置，互不干扰
 - 实现日期：2026-05-17
 
 ---
@@ -187,7 +178,7 @@ query-transformer（Design Chain → Mapper 调用），自动生成完整的 CR
 - `updatedAt`（更新时间）：自动添加为 items 末尾，DDL 中 `DATETIME NOT NULL`，Entity 中有 `updatedAt` 字段
 - SaveReq 中 productCode 作为业务 ID 存在（编辑时查已有记录用），但无 `@NotBlank`/`@NotNull` 校验注解，createdAt/updatedAt 不出现在 SaveReq 中
 - Save ServiceImpl 的创建分支使用 `UUID.randomUUID()`（shortUuid）生成 productCode，非 TODO 注释模式
-- `createdAt` 只在创建分支设置（editPattern=DO_NOT），`updatedAt` 在 common 节（创建+编辑均设置）
+- `createdAt` 只在创建分支设置（canInputOnEdit=false），`updatedAt` 在 common 节（创建+编辑均设置）
 - 修复了 2 处断言问题：productCode 实际出现在 SaveReq 中（作为编辑时的 bizId），且 productCode 由 shortUuid 自动生成而非 TODO 注释
 - 实现日期：2026-05-17
 
