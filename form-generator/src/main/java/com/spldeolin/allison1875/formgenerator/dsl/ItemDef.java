@@ -1,12 +1,9 @@
 package com.spldeolin.allison1875.formgenerator.dsl;
 
-import static com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern.USER_INPUT;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.LowerCamel;
-import com.spldeolin.allison1875.formgenerator.dsl.enums.InitOrEditPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
@@ -56,18 +53,6 @@ public abstract class ItemDef {
      */
     @NotNull
     Boolean isNonVoid;
-
-    /**
-     * 字段的初始化方式
-     */
-    @NotNull
-    InitOrEditPattern initPattern = USER_INPUT;
-
-    /**
-     * 字段的编辑方式
-     */
-    @NotNull
-    InitOrEditPattern editPattern = USER_INPUT;
 
     /**
      * 创建（init）时是否允许用户输入。默认 true。
