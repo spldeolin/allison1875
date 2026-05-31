@@ -28,6 +28,9 @@ export function buildListRequest(
     const v = formState[item.name]
     Object.assign(out, buildItemFilter(item, v))
   }
+  // 创建时间范围查询：SearchForm 已将 datetimerange 转换为格式化字符串写入 formState
+  if (formState.createdAtStart != null) out.createdAtStart = formState.createdAtStart
+  if (formState.createdAtEnd != null) out.createdAtEnd = formState.createdAtEnd
   if (sort) {
     out.sortField = sort.field
     out.sortDirection = sort.direction

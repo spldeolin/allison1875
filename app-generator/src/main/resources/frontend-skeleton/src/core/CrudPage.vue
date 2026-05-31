@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
-import { NButton, useMessage } from 'naive-ui'
+import { NButton, NSpace, NPopconfirm, useMessage } from 'naive-ui'
 import { useRoute } from 'vue-router'
 import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
@@ -37,6 +37,9 @@ const pagination = reactive<PaginationProps>({
   pageSizes: [10, 20, 50],
 })
 
+// 多选勾选的行 key 列表
+const checkedRowKeys = ref<(string | number)[]>([])
+
 const modalVisible = ref(false)
 const modalMode = ref<'create' | 'edit'>('create')
 const formData = ref<Record<string, unknown>>({})
@@ -44,6 +47,8 @@ const submitLoading = ref(false)
 
 async function fetchData() {
   tableLoading.value = true
+  // 切换页面时清空勾选
+  checkedRowKeys.value = []
   try {
     const reqBody = buildListRequest(
       props.schema.items,
@@ -122,6 +127,21 @@ async function handleDelete(row: Record<string, unknown>) {
   }
 }
 
+async function handleBatchDelete() {
+  if (checkedRowKeys.value.length === 0) return
+  try {
+    await request.post(
+      endpointOf(props.schema.name, 'delete'),
+      { [bizKeyPlural]: checkedRowKeys.value },
+    )
+    message.success(`已删除 ${checkedRowKeys.value.length} 条记录`)
+    checkedRowKeys.value = []
+    fetchData()
+  } catch (e: unknown) {
+    message.error((e instanceof Error ? e.message : String(e)) || '批量删除失败')
+  }
+}
+
 async function handleSubmit() {
   submitLoading.value = true
   try {
@@ -163,7 +183,23 @@ watch(() => route.path, () => {
     <div class="crud-table-card">
       <div class="crud-table-header">
         <h3 class="crud-table-title">{{ schema.title }}</h3>
-        <NButton type="primary" @click="handleCreate">新建</NButton>
+        <NSpace>
+          <NPopconfirm
+            :disabled="checkedRowKeys.length === 0"
+            @positive-click="handleBatchDelete"
+          >
+            <template #trigger>
+              <NButton
+                type="error"
+                :disabled="checkedRowKeys.length === 0"
+              >
+                批量删除{{ checkedRowKeys.length > 0 ? `（${checkedRowKeys.length}）` : '' }}
+              </NButton>
+            </template>
+            确定要删除选中的 {{ checkedRowKeys.length }} 条记录吗？
+          </NPopconfirm>
+          <NButton type="primary" @click="handleCreate">新建</NButton>
+        </NSpace>
       </div>
       <DataTable
         :items="schema.items"
@@ -172,9 +208,11 @@ watch(() => route.path, () => {
         :editing-row-key="editingRowKey"
         :biz-key="bizKey"
         :pagination="pagination"
+        :checked-row-keys="checkedRowKeys"
         @edit="handleEdit"
         @delete="handleDelete"
         @update:pagination="handlePaginationUpdate"
+        @update:checked-row-keys="checkedRowKeys = $event"
       />
     </div>
     <EditModal
