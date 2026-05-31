@@ -92,12 +92,12 @@ export function buildSaveRequest(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {}
   for (const item of items) {
-    const pattern = mode === 'create' ? item.initPattern : item.editPattern
-    // doNot: field must not be sent (not allowed in this mode)
-    if (pattern === 'doNot') continue
-    // todo: backend initializes this field; frontend hides and does not transmit (Gap4)
-    if (pattern === 'todo') continue
-    // userInput: normal case, transmit the value
+    // canInputOnInit/canInputOnEdit default to true when absent (backwards-compatible)
+    const canInput = mode === 'create'
+      ? (item.canInputOnInit !== false)
+      : (item.canInputOnEdit !== false)
+    // If user cannot input in this mode, do not transmit the field
+    if (!canInput) continue
     out[item.name] = formState[item.name] ?? null
   }
   return out

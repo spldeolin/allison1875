@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { NModal, NCard, NForm, NFormItem, NButton, NSpace, type FormInst, type FormRules } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
-import { isVisible } from './protocol/field-policy'
+import { isVisible, isEditable } from './protocol/field-policy'
 
 const props = defineProps<{
   visible: boolean
@@ -33,7 +33,8 @@ const visibleItems = computed(() =>
 const rules = computed<FormRules>(() => {
   const r: FormRules = {}
   for (const item of visibleItems.value) {
-    if (item.isNonVoid) {
+    // Only add validation rules for editable fields
+    if (item.isNonVoid && isEditable(item, editMode.value)) {
       const isNumber = item.type === 'number'
       r[item.name] = [{
         required: true,
@@ -70,12 +71,12 @@ function handleClose() {
   <NModal :show="visible" @update:show="emit('update:visible', $event)">
     <NCard :title="title" style="width: 600px; border-radius: 16px;" :bordered="false" closable @close="handleClose">
       <NForm ref="formRef" :model="modelValue" :rules="rules" label-placement="left" label-width="100px">
-        <NFormItem v-for="item in visibleItems" :key="item.name" :label="item.title" :path="item.name">
+        <NFormItem v-for="item in visibleItems" :key="item.name" :label="item.title" :path="isEditable(item, editMode) ? item.name : undefined">
           <FieldRenderer
             :item="item"
-            mode="edit"
+            :mode="isEditable(item, editMode) ? 'edit' : 'display'"
             :value="modelValue[item.name] ?? null"
-            @update:value="updateField(item.name, $event)"
+            @update:value="isEditable(item, editMode) ? updateField(item.name, $event) : undefined"
           />
         </NFormItem>
       </NForm>

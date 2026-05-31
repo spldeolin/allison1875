@@ -27,7 +27,14 @@ export type FieldMode =
   | 'edit-update'
   | 'detail'
 
+/**
+ * Returns true when the field should appear in the given mode.
+ * canInputOnInit/canInputOnEdit default to true when absent (backwards-compatible).
+ */
 export function isVisible(item: ItemDef, mode: FieldMode): boolean {
+  const canInputOnInit = item.canInputOnInit !== false  // default true
+  const canInputOnEdit = item.canInputOnEdit !== false  // default true
+
   switch (mode) {
     case 'search':
       // secret has empty FilterPatterns → hidden from search automatically
@@ -38,18 +45,14 @@ export function isVisible(item: ItemDef, mode: FieldMode): boolean {
       return item.type !== 'secret'
 
     case 'edit-create':
-      // doNot: field is not allowed on create
-      if (item.initPattern === 'doNot') return false
-      // todo: backend initializes this field; frontend hides it completely (Gap4)
-      if (item.initPattern === 'todo') return false
-      return true
+      // canInputOnInit=false: backend handles this field; hide from create form
+      return canInputOnInit
 
     case 'edit-update':
-      // doNot: field cannot be edited
-      if (item.editPattern === 'doNot') return false
-      // todo on editPattern is not expected by the DSL (todo only appears on initPattern),
-      // but guard against it defensively
-      if (item.editPattern === 'todo') return false
+      // canInputOnEdit=false: field is read-only in edit mode — still show as display-only
+      // (frontend shows it but doesn't submit it; backend ignores the field if sent)
+      // canInputOnInit=false AND canInputOnEdit=false: completely backend-managed, hide
+      if (!canInputOnInit && !canInputOnEdit) return false
       return true
 
     case 'detail':
@@ -57,8 +60,14 @@ export function isVisible(item: ItemDef, mode: FieldMode): boolean {
   }
 }
 
-// isReadonly: since todo fields are hidden (isVisible returns false for them),
-// no visible field is readonly. This function is a reserved hook for future use.
-export function isReadonly(_item: ItemDef, _mode: 'edit-create' | 'edit-update'): boolean {
-  return false
+/**
+ * Returns true when the field should be rendered as editable input (vs. read-only display)
+ * in a modal that is in create or edit mode.
+ * canInputOnInit/canInputOnEdit default to true when absent.
+ */
+export function isEditable(item: ItemDef, mode: 'edit-create' | 'edit-update'): boolean {
+  const canInputOnInit = item.canInputOnInit !== false
+  const canInputOnEdit = item.canInputOnEdit !== false
+  if (mode === 'edit-create') return canInputOnInit
+  return canInputOnEdit
 }

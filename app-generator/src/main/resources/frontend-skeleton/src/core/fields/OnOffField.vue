@@ -31,7 +31,8 @@ function handleSearchUpdate(val: string | null) {
 
 <template>
   <template v-if="mode === 'display'">
-    <NTag :type="value ? 'success' : 'default'" size="small">{{ value ? '是' : '否' }}</NTag>
+    <NTag v-if="value !== null" :type="value ? 'success' : 'default'" size="small">{{ value ? '是' : '否' }}</NTag>
+    <span v-else>-</span>
   </template>
   <template v-else-if="mode === 'search'">
     <NSelect :value="searchValue" :options="searchOptions" clearable placeholder="请选择" style="min-width: 120px;" @update:value="handleSearchUpdate" />

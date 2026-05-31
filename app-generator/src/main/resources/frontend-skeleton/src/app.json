@@ -16,8 +16,6 @@
             "name": "demoField",
             "title": "示例字段",
             "isNonVoid": true,
-            "initPattern": "userInput",
-            "editPattern": "userInput",
             "maxLength": 100
           }
         ]

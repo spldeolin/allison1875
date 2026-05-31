@@ -26,7 +26,7 @@ const bizKeyPlural = `${bizKey}s`
 const searchParams = ref<Record<string, unknown>>({})
 const tableData = ref<Record<string, unknown>[]>([])
 const tableLoading = ref(false)
-const detailLoading = ref(false)
+const editingRowKey = ref<unknown>(null)  // bizKey value of the row currently loading detail
 const pagination = reactive<PaginationProps>({
   page: 1,
   pageSize: 10,
@@ -83,7 +83,7 @@ function handleCreate() {
 }
 
 async function handleEdit(row: Record<string, unknown>) {
-  detailLoading.value = true
+  editingRowKey.value = row[bizKey]
   try {
     const res = await request.post(
       endpointOf(props.schema.name, 'getDetail'),
@@ -97,7 +97,7 @@ async function handleEdit(row: Record<string, unknown>) {
     message.error((e instanceof Error ? e.message : String(e)) || '加载详情失败')
     // Modal does not open on getDetail failure
   } finally {
-    detailLoading.value = false
+    editingRowKey.value = null
   }
 }
 
@@ -156,7 +156,8 @@ onMounted(fetchData)
         :items="schema.items"
         :data="tableData"
         :loading="tableLoading"
-        :detail-loading="detailLoading"
+        :editing-row-key="editingRowKey"
+        :biz-key="bizKey"
         :pagination="pagination"
         @edit="handleEdit"
         @delete="handleDelete"

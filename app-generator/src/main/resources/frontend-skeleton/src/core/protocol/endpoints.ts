@@ -4,12 +4,12 @@
 //
 // URL pattern:
 //   base  = /api/v1/${lowerCamelFormName}
-//   list      = base/list${FormName}s
+//   list      = base/list${pluralize(FormName)}
 //   save      = base/save${FormName}
 //   getDetail = base/get${FormName}Detail
 //   delete    = base/delete${FormName}
 
-import { upperCamelToLowerCamel } from '@/utils/naming'
+import { upperCamelToLowerCamel, pluralize } from '@/utils/naming'
 
 export type CrudAction = 'list' | 'save' | 'delete' | 'getDetail'
 
@@ -18,7 +18,7 @@ export function endpointOf(formName: string, action: CrudAction): string {
   const base = `/api/v1/${lower}`
   switch (action) {
     case 'list':
-      return `${base}/list${formName}s`
+      return `${base}/list${pluralize(formName)}`
     case 'save':
       return `${base}/save${formName}`
     case 'getDetail':

@@ -11,7 +11,10 @@ const props = defineProps<{
   data: Record<string, any>[]
   loading: boolean
   pagination: PaginationProps
-  detailLoading?: boolean
+  /** The bizKey value of the row whose detail is currently loading, or null */
+  editingRowKey?: unknown
+  /** The bizKey field name (e.g. "studentProfileCode") */
+  bizKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -34,6 +37,8 @@ const columns = computed<DataTableColumn[]>(() => {
     ellipsis: { tooltip: true },
     resizable: true,
     minWidth: 120,
+    // Multiline/rich text can be very long — cap column width so it doesn't blow out
+    ...((item.type === 'text' && (item as any).isMultilineOrRich) ? { width: 200 } : {}),
     ...(shouldFreeze && index < 4 ? { fixed: 'left' as const } : {}),
     render(row: Record<string, any>) {
       return h(FieldRenderer, {
@@ -47,14 +52,29 @@ const columns = computed<DataTableColumn[]>(() => {
   cols.push({
     title: '操作',
     key: '_actions',
-    width: 150,
+    width: 120,
     fixed: shouldFreeze ? 'right' : undefined,
     render(row: Record<string, any>) {
-      return h(NSpace, null, {
+      const isThisRowLoading = props.editingRowKey != null
+        && props.bizKey != null
+        && row[props.bizKey] === props.editingRowKey
+      return h(NSpace, { wrap: false, size: 4 }, {
         default: () => [
-          h(NButton, { size: 'small', quaternary: true, type: 'primary', loading: props.detailLoading, onClick: () => emit('edit', row) }, { default: () => '编辑' }),
+          h(NButton, {
+            size: 'small',
+            quaternary: true,
+            type: 'primary',
+            loading: isThisRowLoading,
+            disabled: props.editingRowKey != null && !isThisRowLoading,
+            onClick: () => emit('edit', row)
+          }, { default: () => '编辑' }),
           h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
-            trigger: () => h(NButton, { size: 'small', quaternary: true, type: 'error' }, { default: () => '删除' }),
+            trigger: () => h(NButton, {
+              size: 'small',
+              quaternary: true,
+              type: 'error',
+              disabled: props.editingRowKey != null
+            }, { default: () => '删除' }),
             default: () => '确定要删除吗？'
           })
         ]
@@ -67,7 +87,7 @@ const columns = computed<DataTableColumn[]>(() => {
 
 const scrollX = computed(() => {
   if (visibleItems.value.length > 4) {
-    return visibleItems.value.length * 150 + 150
+    return visibleItems.value.length * 150 + 120
   }
   return undefined
 })

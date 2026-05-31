@@ -1,4 +1,3 @@
-export type InitOrEditPattern = 'doNot' | 'userInput' | 'todo'
 export type FilterPattern =
   | 'in'
   | 'ge'
@@ -24,8 +23,10 @@ interface ItemDefBase {
   name: string
   title: string
   isNonVoid: boolean
-  initPattern: InitOrEditPattern
-  editPattern: InitOrEditPattern
+  /** 创建时是否允许用户输入。默认 true。 */
+  canInputOnInit?: boolean
+  /** 编辑时是否允许用户输入。默认 true。 */
+  canInputOnEdit?: boolean
 }
 
 export interface TextItemDef extends ItemDefBase {

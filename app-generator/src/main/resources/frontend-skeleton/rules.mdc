@@ -1,0 +1,67 @@
+# frontend-skeleton — 上下文速览
+
+## 是什么
+
+这是 `app-generator` 的前端骨架，由 `AppGenerator.java` 在生成项目时整体复制到 `{appName}-frontend/`，并写入 `src/app.json`（包含完整的 AppDef）。
+
+运行时前端读取 `src/app.json` 动态渲染所有 CRUD 页面，**无需为每个表单手写一行代码**。
+
+## 技术栈
+
+Vue 3 (setup) · Naive UI · Pinia · Vue Router · Vite · TypeScript
+
+## 关键文件
+
+```
+src/app.json                         — AppDef 配置（由 app-generator 生成）
+src/schema/types.ts                  — 所有 DSL 类型定义（ItemDef / FormDef / AppDef …）
+src/core/
+  CrudPage.vue                       — 每个菜单对应一个 CrudPage 实例，含搜索/列表/弹框
+  DataTable.vue                      — 列表表格，操作列按行追踪 loading
+  EditModal.vue                      — 新建/编辑弹框，自动区分只读与可编辑字段
+  SearchForm.vue                     — 搜索区域
+  fields/                            — 每种 ItemType 对应一个 Field 组件（display/edit/search 三态）
+  protocol/
+    endpoints.ts                     — URL 推导，list 用 pluralize() 正确复数
+    field-policy.ts                  — isVisible() / isEditable()，基于 canInputOnInit/canInputOnEdit
+    request-builder.ts               — buildListRequest / buildSaveRequest
+    response-parser.ts               — parseListRow / parseDetailDto
+src/utils/
+  naming.ts                          — upperCamelToLowerCamel / pluralize（英语标准复数规则）
+  request.ts                         — axios 封装，响应格式 {errorCode, data, errorMsg, traceId}
+src/stores/auth.ts                   — 登录态，permissions 为空时视为无限制
+src/layouts/DashboardLayout.vue      — 侧边栏菜单，从 app.json 动态生成路由
+```
+
+## DSL 字段可见性规则（field-policy.ts）
+
+| canInputOnInit | canInputOnEdit | 新建弹框 | 编辑弹框     | 发送给后端 |
+|:--------------:|:--------------:|:--------:|:------------:|:----------:|
+| true           | true           | 可编辑   | 可编辑       | 两种模式均发 |
+| true           | false          | 可编辑   | **只读展示** | 仅新建时发  |
+| false          | true           | 隐藏     | 可编辑       | 仅编辑时发  |
+| false          | false          | 隐藏     | 隐藏         | 不发        |
+
+两个字段默认都是 `true`（省略即可）。
+
+## 后端接口约定
+
+- 全部 POST，路径：`/api/v1/{lowerCamelFormName}/{action}`
+- list：`/list{PluralFormName}`（标准英语复数，如 `listStudentDormitories`）
+- save：`/save{FormName}`（新建与编辑复用）
+- getDetail：`/get{FormName}Detail`
+- delete：`/delete{FormName}`，body `{ {bizKey}s: [code] }`（复数字段，List）
+- bizKey = `{lowerCamelFormName}Code`，由后端自动注入，不在 ItemDef 中
+- 响应：`{ errorCode: null|string, data: T, errorMsg: string|null, traceId: string }`
+- 列表 data：`{ total: number, list: T[] }`
+- 时间字段：list/detail 响应返回 ISO 字符串（`"yyyy-MM-dd"` 等），搜索/保存请求发同格式字符串
+
+## 常见坑
+
+1. **list 接口 URL 拼错**：直接拼 `+s` 不行，要用 `pluralize()`，详见 `naming.ts`
+2. **NInputNumber 验证规则**：需要同时设 `type: 'number'` 和 `trigger: ['blur', 'change']`
+3. **onOff display 为 null**：值为 null 时显示 `-`，不要显示默认"否"
+4. **TimeField 收到字符串**：display 模式直接输出字符串，不要当时间戳处理
+5. **权限列表为空**：`hasPermission` 返回 `true`（无限制），不要过滤菜单
+6. **app-generator 复制骨架时会跳过** `node_modules/.git/dist`，README 里的构建命令是 `cd frontend && npm install && npm run build`
+7. **multiSelect 字段**：搜索时发 `{ [name]: [code1, code2] }`；保存时发 `[code1, code2]`；响应中也是数组直接透传

@@ -12,8 +12,10 @@ const emit = defineEmits<{
   'update:value': [val: number | [number, number] | null]
 }>()
 
-function formatDisplay(val: number | [number, number] | null): string {
-  if (val === null) return ''
+function formatDisplay(val: number | [number, number] | string | null): string {
+  if (val === null || val === undefined) return ''
+  // Backend may return ISO strings ("yyyy-MM-dd", "HH:mm:ss", "yyyy-MM-dd HH:mm:ss") — display as-is
+  if (typeof val === 'string') return val
   const ts = typeof val === 'number' ? val : val[0]
   const d = new Date(ts)
   if (props.item.format === 'date') return d.toLocaleDateString('zh-CN')

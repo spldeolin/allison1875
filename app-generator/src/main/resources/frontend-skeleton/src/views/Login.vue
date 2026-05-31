@@ -6,6 +6,7 @@ import { GridOutline } from '@vicons/ionicons5'
 import { useAuthStore, type UserInfo } from '@/stores/auth'
 import request from '@/utils/request'
 import type { RequestResult } from '@/utils/request'
+import appDef from '@/app.json'
 
 interface LoginResp {
   token: string
@@ -67,8 +68,7 @@ async function handleLogin() {
               <GridOutline />
             </NIcon>
           </div>
-          <h1 class="login-title">Form Web</h1>
-          <p class="login-subtitle">登录以继续使用管理后台</p>
+          <h1 class="login-title">{{ appDef.title }}</h1>
         </div>
 
         <NForm ref="formRef" :model="formData" :rules="rules" size="large">
@@ -100,8 +100,6 @@ async function handleLogin() {
           </NButton>
         </NForm>
       </NCard>
-
-      <p class="login-footer">Form Web Admin &copy; 2024</p>
     </div>
   </div>
 </template>
@@ -149,14 +147,8 @@ async function handleLogin() {
   font-size: 22px;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 6px;
-  letter-spacing: -0.5px;
-}
-
-.login-subtitle {
-  font-size: 14px;
-  color: #64748b;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .login-btn {
@@ -165,12 +157,5 @@ async function handleLogin() {
   font-size: 15px !important;
   font-weight: 600 !important;
   border-radius: 10px !important;
-}
-
-.login-footer {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 12px;
-  color: #94a3b8;
 }
 </style>

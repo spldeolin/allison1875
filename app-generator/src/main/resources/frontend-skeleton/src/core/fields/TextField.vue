@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NInput, NEllipsis } from 'naive-ui'
+import { NInput } from 'naive-ui'
 import type { TextItemDef } from '@/schema/types'
 
 defineProps<{
@@ -15,7 +15,8 @@ const emit = defineEmits<{
 
 <template>
   <template v-if="mode === 'display'">
-    <NEllipsis>{{ value ?? '' }}</NEllipsis>
+    <!-- Plain span: NDataTable's ellipsis column config owns truncation and tooltip -->
+    <span>{{ value ?? '' }}</span>
   </template>
   <template v-else-if="mode === 'search'">
     <NInput :value="value" clearable placeholder="请输入" @update:value="emit('update:value', $event)" />
