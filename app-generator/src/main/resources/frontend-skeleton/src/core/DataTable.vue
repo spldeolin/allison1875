@@ -31,14 +31,20 @@ const columns = computed<DataTableColumn[]>(() => {
   const totalItems = visibleItems.value.length
   const shouldFreeze = totalItems > 4
 
-  const cols: DataTableColumn[] = visibleItems.value.map((item, index) => ({
+  const cols: DataTableColumn[] = visibleItems.value.map((item, index) => {
+    const isMultiline = item.type === 'text' && (item as any).isMultilineOrRich
+    return {
     title: item.title,
     key: item.name,
-    ellipsis: { tooltip: true },
+    // Multiline fields: constrain tooltip width and allow word-wrap so a single
+    // very long line doesn't stretch the tooltip bubble across the entire screen.
+    ellipsis: isMultiline
+      ? { tooltip: { contentStyle: 'max-width: 360px; max-height: 240px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word' } as const }
+      : { tooltip: true },
     resizable: true,
     minWidth: 120,
     // Multiline/rich text can be very long — cap column width so it doesn't blow out
-    ...((item.type === 'text' && (item as any).isMultilineOrRich) ? { width: 200 } : {}),
+    ...(isMultiline ? { width: 200 } : {}),
     ...(shouldFreeze && index < 4 ? { fixed: 'left' as const } : {}),
     render(row: Record<string, any>) {
       return h(FieldRenderer, {
@@ -47,7 +53,7 @@ const columns = computed<DataTableColumn[]>(() => {
         value: row[item.name] ?? null
       })
     }
-  }))
+  }})
 
   cols.push({
     title: '操作',

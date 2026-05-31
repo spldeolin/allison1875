@@ -35,6 +35,8 @@ const rules = computed<FormRules>(() => {
   for (const item of visibleItems.value) {
     // Only add validation rules for editable fields
     if (item.isNonVoid && isEditable(item, editMode.value)) {
+      // onOff is a boolean — false is a valid non-void value, no required rule needed
+      if (item.type === 'onOff') continue
       const isNumber = item.type === 'number'
       r[item.name] = [{
         required: true,
@@ -70,8 +72,14 @@ function handleClose() {
 <template>
   <NModal :show="visible" @update:show="emit('update:visible', $event)">
     <NCard :title="title" style="width: 600px; border-radius: 16px;" :bordered="false" closable @close="handleClose">
-      <NForm ref="formRef" :model="modelValue" :rules="rules" label-placement="left" label-width="100px">
-        <NFormItem v-for="item in visibleItems" :key="item.name" :label="item.title" :path="isEditable(item, editMode) ? item.name : undefined">
+      <NForm ref="formRef" :model="modelValue" :rules="rules" label-placement="left" label-width="130px">
+        <NFormItem
+          v-for="item in visibleItems"
+          :key="item.name"
+          :label="item.title"
+          :path="isEditable(item, editMode) ? item.name : undefined"
+          :required="item.isNonVoid && isEditable(item, editMode)"
+        >
           <FieldRenderer
             :item="item"
             :mode="isEditable(item, editMode) ? 'edit' : 'display'"

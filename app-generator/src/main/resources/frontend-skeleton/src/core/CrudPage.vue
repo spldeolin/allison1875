@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { NButton, useMessage } from 'naive-ui'
+import { useRoute } from 'vue-router'
 import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
 import request from '@/utils/request'
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const message = useMessage()
+const route = useRoute()
 
 // Business key field name — form-generator auto-injects ${lowerCamelFormName}Code
 // e.g., StudentProfile → studentProfileCode
@@ -78,7 +80,12 @@ function handlePaginationUpdate(p: PaginationProps) {
 
 function handleCreate() {
   modalMode.value = 'create'
-  formData.value = {}
+  // Pre-initialize onOff fields to false so NSwitch shows "off" and submit sends a valid boolean
+  const defaults: Record<string, unknown> = {}
+  for (const item of props.schema.items) {
+    if (item.type === 'onOff') defaults[item.name] = false
+  }
+  formData.value = defaults
   modalVisible.value = true
 }
 
@@ -135,6 +142,12 @@ async function handleSubmit() {
 }
 
 onMounted(fetchData)
+// Also fetch when navigating between CrudPage routes (same component instance reused by Vue Router)
+watch(() => route.path, () => {
+  pagination.page = 1
+  searchParams.value = {}
+  fetchData()
+})
 </script>
 
 <template>
