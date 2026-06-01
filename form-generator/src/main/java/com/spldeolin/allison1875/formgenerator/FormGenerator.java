@@ -167,10 +167,8 @@ public class FormGenerator implements Allison1875MainService {
         queryTransformer.process();
 
         // 调用doc-analyzer分析接口文档
-        if (config.getEnableDocAnalyzer()) {
-            config.setMvcHandlerQualifierWildcards(controllerQualifiers);
-            docAnalyzer.process();
-        }
+        config.setMvcHandlerQualifierWildcards(controllerQualifiers);
+        docAnalyzer.process();
     }
 
     private void addCommonItems(List<FormDef> forms) {

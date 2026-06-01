@@ -253,9 +253,7 @@ public class AppGenerator implements Allison1875MainService {
         // Construct config for form-generator
         Config fgConfig = new Config();
         fgConfig.setDslPath(tempDsl.toFile());
-        fgConfig.setJavaVersion("1.8"); // 当前只有java8的后端骨架
         fgConfig.setAuthor(config.getAuthor());
-        fgConfig.setEnableDocAnalyzer(false);
         fgConfig.setJdbcUrl(null);
         fgConfig.setEnableGenerateDesign(true);
         fgConfig.setIsEntityEndWithEntity(true);

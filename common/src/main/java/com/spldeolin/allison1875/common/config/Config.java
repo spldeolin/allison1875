@@ -57,12 +57,6 @@ public class Config {
     Boolean enableJavaxMoveToJakarta = false;
 
     /**
-     * 编译版本（如：8、11、17、21），用于链式执行时Maven编译阶段的source和target版本
-     */
-    @NotNull
-    String javaVersion = "21";
-
-    /**
      * 执行mvn命令时使用的JDK安装目录路径，为null时使用系统默认的JDK
      *
      * <p>配置后，在执行mvn子进程时会通过{@code JAVA_HOME}环境变量指定该JDK路径，
@@ -160,12 +154,6 @@ public class Config {
      * 如果有逻辑删除，怎么样算作"数据未被删"，非必填，只支持等式SQL
      */
     String notDeletedSql;
-
-    /**
-     * 生成Entity时，文件已存在的解决方式
-     */
-    @NotNull
-    FileExistenceResolutionEnum entityExistenceResolution = FileExistenceResolutionEnum.OVERWRITE;
 
     // ==================== star-transformer 配置 ====================
 
@@ -278,12 +266,6 @@ public class Config {
      */
     @NotNull
     File dslPath = new File("./forms.yml");
-
-    /**
-     * form-generator使用doc-analyzer生成接口文档
-     */
-    @NotNull
-    Boolean enableDocAnalyzer = false;
 
     /**
      * 代码模板配置

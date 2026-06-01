@@ -18,6 +18,7 @@ import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelArg;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.dto.FieldArg;
+import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.persistencegenerator.dto.TableAnalysisDTO;
@@ -61,7 +62,7 @@ public class EntityGeneratorServiceImpl implements EntityGeneratorService {
             });
             arg.getFieldArgs().add(fieldArg);
         }
-        arg.setDataModelExistenceResolution(config.getEntityExistenceResolution());
+        arg.setDataModelExistenceResolution(FileExistenceResolutionEnum.OVERWRITE);
         return dataModelGeneratorService.generateDataModel(arg);
     }
 
