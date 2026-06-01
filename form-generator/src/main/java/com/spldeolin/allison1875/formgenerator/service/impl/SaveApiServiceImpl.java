@@ -5,6 +5,7 @@ import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseF
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
 
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -24,6 +25,7 @@ import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
@@ -103,6 +105,20 @@ public class SaveApiServiceImpl implements SaveApiService {
         ifStmt.setThenStmt(generateIfThenBody(form));
         ifStmt.setElseStmt(generateElseBody(form));
         body.addStatement(ifStmt);
+
+        // unique-index existence check（仅处理新建和编辑都需要校验的索引，其余已合并进 if/else 分支）
+        if (form.getIndices() != null) {
+            for (IndexDef index : form.getIndices()) {
+                if (!Boolean.TRUE.equals(index.getIsUnique())) {
+                    continue;
+                }
+                boolean allCanInit = allCanInput(form, index, true);
+                boolean allCanEdit = allCanInput(form, index, false);
+                if (allCanInit && allCanEdit) {
+                    body.addStatement(generateCheckExistStatement(form, index));
+                }
+            }
+        }
 
         // common section: only (canInputOnInit=true, canInputOnEdit=true) 字段在此设置
         for (ItemDef item : form.getNonAuditedItems()) {
@@ -191,6 +207,15 @@ public class SaveApiServiceImpl implements SaveApiService {
         }
         body.addStatement(parseStatement(
                 "%s.setCreatedAt(LocalDateTime.now());", form.getVarName()));
+        // unique-index existence check for init-only fields
+        if (form.getIndices() != null) {
+            for (IndexDef index : form.getIndices()) {
+                if (Boolean.TRUE.equals(index.getIsUnique()) && allCanInput(form, index, true) && !allCanInput(form,
+                        index, false)) {
+                    body.addStatement(generateCheckExistStatement(form, index));
+                }
+            }
+        }
         return body;
     }
 
@@ -214,6 +239,15 @@ public class SaveApiServiceImpl implements SaveApiService {
                     body.addStatement(itemService.getValidationStatement(item));
                 }
                 generatorSetterToGetter(form, item, body);
+            }
+        }
+        // unique-index existence check for edit-only fields
+        if (form.getIndices() != null) {
+            for (IndexDef index : form.getIndices()) {
+                if (Boolean.TRUE.equals(index.getIsUnique()) && !allCanInput(form, index, true) && allCanInput(form,
+                        index, false)) {
+                    body.addStatement(generateCheckExistStatement(form, index));
+                }
             }
         }
         return body;
@@ -242,6 +276,50 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(parseStatement(
                 "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
                 getterWithConvert));
+    }
+
+    private Statement generateCheckExistStatement(FormDef form, IndexDef index) {
+        // 构造标题：由 index.itemNames 对应的字段 title 拼接而成
+        List<String> fieldTitles = index.getItemNames().stream()
+                .map(itemName -> form.getItems().stream().filter(item -> item.getName().equals(itemName)).findFirst()
+                        .map(ItemDef::getTitle).orElse(itemName)).collect(java.util.stream.Collectors.toList());
+        String conflictDesc = String.join("、", fieldTitles) + "已存在";
+
+        // 构造 Design chain：
+        //   {Entity}Design.select().where()
+        //     .ne(req.getBizId())          ← 排除自身（编辑场景），bizId 可能为 null 所以用 ne
+        //     .eq(field1, req.getField1()) ← 每个 index 字段
+        //     .one();
+        StringBuilder chain = new StringBuilder();
+        chain.append(form.getName()).append("Design.select().where()");
+        chain.append(".").append(form.getBizIdName()).append(".ne(req.").append(form.getBizIdGetterName())
+                .append("())");
+        for (String itemName : index.getItemNames()) {
+            chain.append(".").append(itemName).append(".eq(req.get").append(StringUtils.capitalize(itemName))
+                    .append("())");
+        }
+        chain.append(".one()");
+
+        String varName = "exist" + form.getName() + "For" + index.getItemNames().stream().map(StringUtils::capitalize)
+                .collect(java.util.stream.Collectors.joining());
+
+        BlockStmt checkBody = new BlockStmt();
+        checkBody.addStatement(parseStatement("%s %s = %s;", form.getEntityName(config), varName, chain));
+        checkBody.addStatement(
+                parseStatement("if (%s != null) { throw new RuntimeException(\"%s\"); }", varName, conflictDesc));
+        return checkBody;
+    }
+
+    /**
+     * 判断 index 中所有字段在指定场景下是否均可被用户输入
+     *
+     * @param onInit true=新建场景，false=编辑场景
+     */
+    private boolean allCanInput(FormDef form, IndexDef index, boolean onInit) {
+        return index.getItemNames().stream().allMatch(
+                n -> form.getItems().stream().filter(i -> i.getName().equals(n)).findFirst()
+                        .map(i -> onInit ? Boolean.TRUE.equals(i.getCanInputOnInit())
+                                : Boolean.TRUE.equals(i.getCanInputOnEdit())).orElse(false));
     }
 
 }
