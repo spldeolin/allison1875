@@ -272,6 +272,7 @@ public class AppGenerator implements Allison1875MainService {
         cs.setRequestResultSuccessWithData("RequestResult.success(${data})");
         cs.setConstructPageResult("PageResult.of(${total}, ${dtos})");
         cs.setConstructEmptyPageResult("PageResult.empty()");
+        cs.setBizExceptionQualifier(ns + ".common.BizException");
         fgConfig.setCodeSnippet(cs);
 
         // Construct DomainConfig pointing to the generated backend

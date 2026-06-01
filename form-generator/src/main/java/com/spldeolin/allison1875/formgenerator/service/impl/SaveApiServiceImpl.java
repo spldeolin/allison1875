@@ -224,9 +224,8 @@ public class SaveApiServiceImpl implements SaveApiService {
         body.addStatement(parseStatement(
                 "%s = %sMapper.queryBy%s(req.%s());", form.getVarName(), form.getVarName(),
                 StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName()));
-        body.addStatement(parseStatement(
-                "if (%s == null) { throw new RuntimeException(\"%s不存在或是已被删除\"); }",
-                form.getVarName(), form.getTitle()));
+        body.addStatement(parseStatement("if (%s == null) { throw new %s(\"%s不存在或是已被删除\"); }",
+                form.getVarName(), config.getCodeSnippet().getBizExceptionQualifier(), form.getTitle()));
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
@@ -305,8 +304,8 @@ public class SaveApiServiceImpl implements SaveApiService {
 
         BlockStmt checkBody = new BlockStmt();
         checkBody.addStatement(parseStatement("%s %s = %s;", form.getEntityName(config), varName, chain));
-        checkBody.addStatement(
-                parseStatement("if (%s != null) { throw new RuntimeException(\"%s\"); }", varName, conflictDesc));
+        checkBody.addStatement(parseStatement("if (%s != null) { throw new %s(\"%s\"); }", varName,
+                config.getCodeSnippet().getBizExceptionQualifier(), conflictDesc));
         return checkBody;
     }
 

@@ -365,6 +365,16 @@ public class Config {
         @NotEmpty
         String constructEmptyPageResult;
 
+        /**
+         * 业务逻辑异常的全限定名
+         * <p>
+         * form-generator 生成的 SaveApiService 等会在唯一键冲突或记录不存在时抛出该异常。
+         * <p>
+         * 例如：com.example.common.BizException
+         */
+        @NotEmpty
+        String bizExceptionQualifier = "java.lang.RuntimeException";
+
     }
 
 }
