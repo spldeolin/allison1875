@@ -68,9 +68,9 @@ public class IndexNameTruncationItTest extends FormGeneratorItBaseTest {
         assertTrue(mapperContent.contains("queryByVeryLongFieldNameOneVeryLongFieldNameTwoVeryLongFieldNameThree"),
                 "Mapper should contain full 3-col unique method (not affected by truncation)");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

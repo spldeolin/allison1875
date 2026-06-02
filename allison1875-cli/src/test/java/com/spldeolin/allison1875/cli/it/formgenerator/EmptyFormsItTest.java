@@ -40,8 +40,7 @@ public class EmptyFormsItTest extends FormGeneratorItBaseTest {
         }
 
         // === api-docs 不应生成 ===
-        assertFalse(new File(basedir, "api-docs").exists(),
-                "api-docs directory should NOT be generated");
+        assertFalse(new File(basedir, "api-docs").exists(), "api-docs directory should be generated");
     }
 
 }

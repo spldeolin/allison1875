@@ -110,9 +110,9 @@ public class SecretItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listRespContent.contains("apiKeyName"),
                 "ListResp should contain apiKeyName (non-secret field)");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证生成了 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

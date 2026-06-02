@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.cli.it.formgenerator;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -139,9 +138,9 @@ public class BasicFormItTest extends FormGeneratorItBaseTest {
         String designContent = new String(Files.readAllBytes(designFile.toPath()), StandardCharsets.UTF_8);
         assertTrue(designContent.contains("class BookDesign"), "Design should declare class BookDesign");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

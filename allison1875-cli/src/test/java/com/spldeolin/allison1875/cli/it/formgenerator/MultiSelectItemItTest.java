@@ -192,9 +192,9 @@ public class MultiSelectItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listReqContent.contains("List<HobbiesEnum> hobbies"),
                 "ListReq should contain List<HobbiesEnum> for multiSelect in-filter");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

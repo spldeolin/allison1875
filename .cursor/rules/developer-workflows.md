@@ -68,7 +68,6 @@ java -jar allison1875-cli/target/allison1875.jar --tool=doc-analyzer --config=./
 
 ```yaml
 author: Deolin
-javaVersion: "21"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: false
 

@@ -1,6 +1,5 @@
 package com.spldeolin.allison1875.cli.it.formgenerator;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -97,9 +96,9 @@ public class OnOffItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listRespContent.contains("Boolean isEnabled"),
                 "ListResp should contain Boolean isEnabled");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

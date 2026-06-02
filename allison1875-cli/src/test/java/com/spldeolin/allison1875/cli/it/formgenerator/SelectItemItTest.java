@@ -166,9 +166,9 @@ public class SelectItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listServiceImplContent.contains("productMapper.queryProduct("),
                 "List service should call productMapper.queryProduct");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

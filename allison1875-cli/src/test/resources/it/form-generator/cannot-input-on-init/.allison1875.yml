@@ -22,14 +22,12 @@ domains:
     mapperXmlDirs:
       - src/main/resources/mapper
 author: test-author
-javaVersion: "21"
 enableNoModifyAnnounce: false
 enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
 enableGenerateDesign: true
 isEntityEndWithEntity: true
 dslPath: forms.yml
-enableDocAnalyzer: false
 codeSnippet:
   pageTypeQualifier: "com.example.common.PageResult"
   controllerRequestMapping: "/api/v1/${formName}"

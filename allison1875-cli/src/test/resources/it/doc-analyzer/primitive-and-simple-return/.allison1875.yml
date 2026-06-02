@@ -21,7 +21,6 @@ domains:
     wholeDTOPackage: com.example.dto
 
 author: test-author
-javaVersion: "8"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
@@ -32,6 +31,7 @@ markdownDir: api-docs
 globalUrlPrefix: ""
 
 codeSnippet:
+  pageTypeQualifier: com.example.common.PageResult
   constructPageResult: "new PageResult<>(${total}, ${dtos})"
   constructEmptyPageResult: "new PageResult<>()"
 

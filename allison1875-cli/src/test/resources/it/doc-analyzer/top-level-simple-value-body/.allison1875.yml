@@ -20,11 +20,13 @@ domains:
     recordDTOPackage: com.example.dto.record
     wholeDTOPackage: com.example.dto
 author: test-author
-javaVersion: "8"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
 flushTo: [ MARKDOWN ]
 markdownDir: api-docs
 globalUrlPrefix: ""
-codeSnippet: { constructPageResult: "new PageResult<>(${total}, ${dtos})", constructEmptyPageResult: "new PageResult<>()" }
+codeSnippet:
+  pageTypeQualifier: com.example.common.PageResult
+  constructPageResult: "new PageResult<>(${total}, ${dtos})"
+  constructEmptyPageResult: "new PageResult<>()"

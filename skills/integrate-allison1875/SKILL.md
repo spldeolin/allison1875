@@ -34,7 +34,6 @@ pom.xml → 源码目录结构 → Controller → application.properties → Map
 
 | 关注点                       | 推理目标                                          |
 |---------------------------|-----------------------------------------------|
-| `<maven.compiler.source>` | → `javaVersion`                               |
 | 子模块列表                     | → 识别 api/application/domain/infrastructure 分层 |
 | lombok 依赖                 | → `isDataModelWithoutLombok`                  |
 | Spring Boot 版本            | → 3.x 则 `enableJavaxMoveToJakarta: true`      |
@@ -200,7 +199,6 @@ domains:
 
 # ==================== 公共配置 ====================
 author: Allister                    # git config user.name 或代码中常见 @author
-javaVersion: '21'                   # pom 的 maven.compiler.source
 enableJavaxMoveToJakarta: false     # Spring Boot 3.x → true
 isDataModelWithoutLombok: false     # 项目是否不用 Lombok
 enableNoModifyAnnounce: true        # 一律 true
@@ -222,7 +220,6 @@ pageParamStyle: PAGE_NO_PAGE_SIZE   # PAGE_NO_PAGE_SIZE | OFFSET_LIMIT
 isEntityEndWithEntity: true
 deletedSql: 'delete_flag = 1'       # 逻辑删除已删条件
 notDeletedSql: 'delete_flag = 0'    # 逻辑删除未删条件
-entityExistenceResolution: OVERWRITE  # OVERWRITE | RENAME
 
 # ==================== star-transformer ====================
 wholeDTONamePostfix: WholeDTO
@@ -247,7 +244,6 @@ getEnumTitleMethodName: getTitle
 
 # ==================== form-generator ====================
 dslPath: ./forms.yml
-enableDocAnalyzer: true
 
 # ==================== codeSnippet ====================
 codeSnippet:
@@ -288,7 +284,6 @@ codeSnippet:
 - [ ] 所有 `*Module` 字段是绝对路径且目录存在
 - [ ] 所有 `*Package` 字段与实际源码包名一致
 - [ ] `enableJavaxMoveToJakarta` 与项目实际 import 一致
-- [ ] `javaVersion` 与 pom 的 compiler source 一致
 - [ ] `codeSnippet.constructPageResult` 和 `constructEmptyPageResult` 不为空
 - [ ] `jdbcUrl` 可连通目标数据库（如果配了 persistence-generator）
 - [ ] `deletedSql` / `notDeletedSql` 与 Mapper XML 写法一致

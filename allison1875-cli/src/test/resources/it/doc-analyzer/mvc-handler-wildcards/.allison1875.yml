@@ -21,7 +21,6 @@ domains:
     wholeDTOPackage: com.example.dto
 
 author: test-author
-javaVersion: "8"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
@@ -37,5 +36,6 @@ mvcHandlerQualifierWildcards:
   - "*.get{ById,Detail}"
 
 codeSnippet:
+  pageTypeQualifier: com.example.common.PageResult
   constructPageResult: "new PageResult<>(${total}, ${dtos})"
   constructEmptyPageResult: "new PageResult<>()"

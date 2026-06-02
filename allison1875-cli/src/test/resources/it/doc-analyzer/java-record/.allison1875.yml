@@ -21,7 +21,6 @@ domains:
     wholeDTOPackage: com.example.dto
 
 author: test-author
-javaVersion: "17"
 #javaHome: "/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: true
@@ -33,5 +32,6 @@ markdownDir: api-docs
 globalUrlPrefix: ""
 
 codeSnippet:
+  pageTypeQualifier: com.example.common.PageResult
   constructPageResult: "new PageResult<>(${total}, ${dtos})"
   constructEmptyPageResult: "new PageResult<>()"

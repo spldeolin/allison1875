@@ -23,7 +23,6 @@ domains:
       - src/main/resources/mapper
 
 author: test-author
-javaVersion: "21"
 enableNoModifyAnnounce: false
 enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
@@ -32,7 +31,6 @@ isEntityEndWithEntity: true
 
 # form-generator 专用
 dslPath: forms.yml
-enableDocAnalyzer: true
 flushTo:
   - MARKDOWN
 markdownDir: api-docs

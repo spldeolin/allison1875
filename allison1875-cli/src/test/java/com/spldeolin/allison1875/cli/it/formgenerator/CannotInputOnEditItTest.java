@@ -78,6 +78,6 @@ public class CannotInputOnEditItTest extends FormGeneratorItBaseTest {
                 "Generated code should not contain // TODO 请补充 comment");
 
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs should NOT be generated");
+        assertTrue(apiDocsDir.exists(), "api-docs should be generated");
     }
 }

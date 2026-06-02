@@ -133,9 +133,9 @@ public class NumberItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listServiceImplContent.contains("setSortOrder("),
                 "Param should set sortOrder from req (number field)");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }

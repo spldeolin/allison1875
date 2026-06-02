@@ -162,7 +162,7 @@ public abstract class FormGeneratorItBaseTest {
         }
 
         // 当 enableDocAnalyzer=true 时，解析 markdownDir 为绝对路径
-        Object markdownDirObj = configMap.get("markdownDir");
+        Object markdownDirObj = configMap.getOrDefault("markdownDir", new File("api-docs"));
         if (markdownDirObj != null) {
             configMap.put("markdownDir",
                     resolveFileRelativeToBasedir(basedir, new File(markdownDirObj.toString())).getPath());

@@ -23,7 +23,6 @@ domains:
       - src/main/resources/mapper
 
 author: test-author
-javaVersion: "17"
 enableNoModifyAnnounce: true
 enableJavaxMoveToJakarta: true
 isDataModelWithoutLombok: false
@@ -38,5 +37,6 @@ ddl: |
   ) ENGINE=InnoDB COMMENT='会员表';
 
 codeSnippet:
+  pageTypeQualifier: com.example.common.PageResult
   constructPageResult: "new PageResult<>(${total}, ${dtos})"
   constructEmptyPageResult: "new PageResult<>()"

@@ -119,9 +119,9 @@ public class TextItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listServiceImplContent.contains("setNoteTag(req.getNoteTag())"),
                 "Param should set noteTag from req (text field)");
 
-        // === 验证没有生成 api-docs 目录（enableDocAnalyzer=false） ===
+        // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");
-        assertFalse(apiDocsDir.exists(), "api-docs directory should NOT be generated when enableDocAnalyzer=false");
+        assertTrue(apiDocsDir.exists(), "api-docs directory should be generated");
     }
 
 }
