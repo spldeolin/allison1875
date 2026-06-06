@@ -38,7 +38,3 @@ ddl: |
     UNIQUE KEY `uk_coupon_code` (`coupon_code`)
   ) ENGINE=InnoDB COMMENT='优惠券表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

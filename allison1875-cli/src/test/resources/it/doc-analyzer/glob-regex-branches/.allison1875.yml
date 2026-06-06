@@ -40,7 +40,3 @@ mvcHandlerQualifierWildcards:
   - "*Controller.list*"
   - "com.example.controller.{Order,User}Controller.get?rder*"
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

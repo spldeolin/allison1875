@@ -274,14 +274,6 @@ public class Config {
     public static class CodeSnippet {
 
         /**
-         * 分页对象的全限定名
-         * <p>
-         * 例如：com.company.project.common.PageInfo
-         */
-        @NotEmpty
-        String pageTypeQualifier;
-
-        /**
          * Spring MVC 请求方法统一返回类的全限定名。
          * <p>
          * 例如：com.company.project.common.RequestResult
@@ -326,18 +318,6 @@ public class Config {
          */
         @NotEmpty
         String collectionEmptyCheck = "${list} == null || ${list}.isEmpty()";
-
-        /**
-         * 构造分页返回值的代码片段（占位符${total}代表总条数，${dtos}代表当前页数据列表）
-         */
-        @NotEmpty
-        String constructPageResult;
-
-        /**
-         * 构造空的分页返回值的代码片段
-         */
-        @NotEmpty
-        String constructEmptyPageResult;
 
         /**
          * 业务逻辑异常的全限定名

@@ -30,7 +30,3 @@ flushTo:
   - MARKDOWN
 markdownDir: api-docs
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

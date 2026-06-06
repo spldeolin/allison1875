@@ -33,6 +33,7 @@ import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
+import com.spldeolin.allison1875.common.util.PageResultGenerator;
 import com.spldeolin.allison1875.handlertransformer.dto.GenerateDTOsRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.enums.DTOTypeEnum;
@@ -298,7 +299,8 @@ public class ReqRespServiceImpl implements ReqRespService {
             return "java.util.List<" + dtoQualifier + ">";
         }
         if (dto.getAnnotationByName("P").isPresent()) {
-            return String.format("%s<%s>", config.getCodeSnippet().getPageTypeQualifier(), dtoQualifier);
+            PageResultGenerator.ensureGenerated();
+            return String.format("%s<%s>", PageResultGenerator.getQualifier(), dtoQualifier);
         }
         return dtoQualifier;
     }

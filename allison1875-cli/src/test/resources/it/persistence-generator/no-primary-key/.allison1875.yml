@@ -37,7 +37,3 @@ ddl: |
     `created_at` datetime NOT NULL COMMENT '创建时间'
   ) ENGINE=InnoDB COMMENT='日志表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

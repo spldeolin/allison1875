@@ -32,9 +32,6 @@ isEntityEndWithEntity: true
 dslPath: forms.yml
 
 codeSnippet:
-  pageTypeQualifier: "com.example.common.PageResult"
   controllerRequestMapping: "/api/v1/${formName}"
   shortUuidGeneration: "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()"
   collectionEmptyCheck: "${list} == null || ${list}.isEmpty()"
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

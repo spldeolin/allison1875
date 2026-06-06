@@ -261,13 +261,10 @@ public class AppGenerator implements Allison1875MainService {
         // Set code snippets for the generated backend
         Config.CodeSnippet cs = new Config.CodeSnippet();
         String ns = appDef.getNamespace();
-        cs.setPageTypeQualifier(ns + ".common.PageResult");
         cs.setRequestResultQualifier(ns + ".common.RequestResult");
         cs.setRequestResultTypeDeclaration("RequestResult<${dataType}>");
         cs.setRequestResultSuccessNoData("RequestResult.success()");
         cs.setRequestResultSuccessWithData("RequestResult.success(${data})");
-        cs.setConstructPageResult("PageResult.of(${total}, ${dtos})");
-        cs.setConstructEmptyPageResult("PageResult.empty()");
         cs.setBizExceptionQualifier(ns + ".common.BizException");
         fgConfig.setCodeSnippet(cs);
 

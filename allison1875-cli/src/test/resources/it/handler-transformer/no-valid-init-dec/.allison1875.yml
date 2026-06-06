@@ -27,7 +27,3 @@ enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
 enableOneService: false
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

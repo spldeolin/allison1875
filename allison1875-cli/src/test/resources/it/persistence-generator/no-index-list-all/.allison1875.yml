@@ -38,7 +38,3 @@ ddl: |
     PRIMARY KEY (`id`)
   ) ENGINE=InnoDB COMMENT='系统配置表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

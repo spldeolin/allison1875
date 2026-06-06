@@ -37,7 +37,3 @@ ddl: |
     UNIQUE KEY `uk_tag_name` (`tag_name`)
   ) ENGINE=InnoDB COMMENT='标签表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

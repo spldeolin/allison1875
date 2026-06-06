@@ -60,7 +60,3 @@ ddl: |
     KEY `idx_product_id` (`product_id`)
   ) ENGINE=InnoDB COMMENT='订单项表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

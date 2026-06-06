@@ -24,6 +24,7 @@ import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.JsonUtils;
+import com.spldeolin.allison1875.common.util.PageResultGenerator;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
@@ -55,6 +56,7 @@ public class ListApiServiceImpl implements ListApiService {
 
     @Override
     public InitializerDeclaration generateListInitDec(FormDef form) {
+        PageResultGenerator.ensureGenerated();
         BlockStmt bs = new BlockStmt();
         bs.addStatement(parseStatement(
                 "String handler = \"list%s\", desc = \"%s列表\", form=\"%s\", type=\"%s\";",
@@ -237,8 +239,7 @@ public class ListApiServiceImpl implements ListApiService {
                 "List<" + form.getEntityName(config) + "> " + English.plural(form.getVarName()) + " = " + designChain));
 
         body.addStatement(parseStatement(
-                "if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
-                config.getCodeSnippet().getConstructEmptyPageResult()));
+                "if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()), "PageResult.empty()"));
 
         body.addStatement(parseStatement(
                 "List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
@@ -263,7 +264,7 @@ public class ListApiServiceImpl implements ListApiService {
         forEachBody.addStatement("dtos.add(dto);");
         forEachStmt.setBody(forEachBody);
         body.addStatement(forEachStmt);
-        body.addStatement(parseStatement("return " + config.getCodeSnippet().getConstructPageResult()
+        body.addStatement(parseStatement("return " + "PageResult.of(${total}, ${dtos})"
                 .replace("${total}", "query" + form.getName() + "Total").replace("${dtos}", "dtos") + ";"));
         return body;
     }

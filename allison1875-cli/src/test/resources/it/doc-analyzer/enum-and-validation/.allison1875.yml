@@ -32,7 +32,3 @@ globalUrlPrefix: ""
 getEnumCodeMethodName: getCode
 getEnumTitleMethodName: getTitle
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

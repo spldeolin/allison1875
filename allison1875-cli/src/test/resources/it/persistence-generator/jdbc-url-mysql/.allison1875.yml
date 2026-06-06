@@ -31,7 +31,3 @@ isDataModelWithoutLombok: false
 enableGenerateDesign: true
 isEntityEndWithEntity: true
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

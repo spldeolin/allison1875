@@ -36,7 +36,3 @@ ddl: |
     PRIMARY KEY (`id`)
   ) ENGINE=InnoDB COMMENT='会员表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

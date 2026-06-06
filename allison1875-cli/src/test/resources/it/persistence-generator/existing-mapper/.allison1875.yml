@@ -38,7 +38,3 @@ ddl: |
     UNIQUE KEY `uk_account_name` (`account_name`)
   ) ENGINE=InnoDB COMMENT='账户表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

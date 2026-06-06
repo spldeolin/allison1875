@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
  *   <li>ListReq 包含各字段过滤条件 + 分页参数（pageNum/pageSize）</li>
  *   <li>各类型字段的过滤运算符：number/onOff/select → {@code List<T>}（IN），text → {@code String}（LIKE）</li>
  *   <li>ListResp 包含所有非 secret 字段，使用 {@code @P} 注解标记分页返回</li>
- *   <li>Service 中 Design Chain 已被 query-transformer 转换为 Mapper 调用（count + query + constructPageResult）</li>
+ *   <li>Service 中 Design Chain 已被 query-transformer 转换为 Mapper 调用（count + query + PageResult.of）</li>
  * </ul>
  *
  * @author Deolin 2026-05-17
@@ -135,7 +135,7 @@ public class ListApiItTest extends FormGeneratorItBaseTest {
                 "List service should call itemMapper.queryItem for data query");
 
         // constructPageResult / constructEmptyPageResult
-        assertTrue(listImplContent.contains("new PageResult<>("),
+        assertTrue(listImplContent.contains("PageResult.of("),
                 "List service should construct PageResult for non-empty results");
 
         // Param DTO 构建

@@ -40,7 +40,3 @@ ddl: |
     UNIQUE KEY `uk_code` (`code`)
   ) ENGINE=InnoDB COMMENT='严格表（全字段NOT NULL）';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"

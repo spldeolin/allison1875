@@ -45,7 +45,3 @@ ddl: |
     KEY `idx_author_id` (`author_id`)
   ) ENGINE=InnoDB COMMENT='文章表';
 
-codeSnippet:
-  pageTypeQualifier: com.example.common.PageResult
-  constructPageResult: "new PageResult<>(${total}, ${dtos})"
-  constructEmptyPageResult: "new PageResult<>()"
