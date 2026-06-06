@@ -177,79 +177,24 @@ public class ListApiServiceImpl implements ListApiService {
         String designChain = form.getName() + "Design.select().where()";
         designChain += "." + form.getBizIdName() + ".in(req." + form.getBizIdGetterName() + "())";
         for (ItemDef item : form.getItems().subList(1, form.getItems().size() - 1)) { // 跳过第一个业务主键和最后一个更新时间
-            switch (item.getType()) {
-                case SECRET:
-                case MULTI_SELECT:
-                    continue;
-                case NUMBER:
-                case ON_OFF:
-                    String emptyToNull = config.getCodeSnippet().getCollectionEmptyCheck()
-                            .replace("${list}", "req.get" + StringUtils.capitalize(item.getName()) + "()")
-                            + " ? null : req.get" + StringUtils.capitalize(item.getName()) + "()";
-                    designChain += "." + item.getName() + ".in(" + emptyToNull + ")";
-                    break;
-                case SELECT:
-                    designChain += "." + item.getName() + ".in(req.get" + StringUtils.capitalize(item.getName())
-                            + "() == null ? null : req.get" + StringUtils.capitalize(item.getName())
-                            + "().stream().map(" + StringUtils.capitalize(item.getName())
-                            + "Enum::getCode).collect(Collectors.toList()))";
-                    break;
-                case TEXT:
-                    designChain +=
-                            "." + item.getName() + ".like(req.get" + StringUtils.capitalize(item.getName()) + "())";
-                    break;
-                case TIME:
-                    TimeItemDef timeItem = (TimeItemDef) item;
-                    switch (timeItem.getFormat()) {
-                        case DATE:
-                            designChain += "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
-                                    + "Start() == null ? null : LocalDateTime.of(req.get" + StringUtils.capitalize(
-                                    item.getName()) + "Start(), LocalTime.of(0,0)))";
-                            designChain += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
-                                    + "End() == null ? null : LocalDateTime.of(req.get" + StringUtils.capitalize(
-                                    item.getName()) + "End(), LocalTime.of(23, 59, 59)))";
-                            break;
-                        case TIME:
-                            designChain += "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
-                                    + "Start() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
-                                    + StringUtils.capitalize(item.getName()) + "Start()))";
-                            designChain += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
-                                    + "End() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
-                                    + StringUtils.capitalize(item.getName()) + "End()))";
-                            break;
-                        case DATE_TIME:
-                            designChain += "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
-                                    + "Start() == null ? null : req.get" + StringUtils.capitalize(item.getName())
-                                    + "Start())";
-                            designChain += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
-                                    + "End() == null ? null : req.get" + StringUtils.capitalize(item.getName())
-                                    + "End())";
-                            break;
-                        default:
-                            throw new RuntimeException("impossible");
-                    }
-                    break;
-                default:
-                    throw new RuntimeException("impossible");
-            }
+            designChain += convertItemsToSearchConditions(item);
         }
         designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         designChain += ".page(req.getPageNum(),req.getPageSize());";
         body.addStatement(parseStatement(
                 "List<" + form.getEntityName(config) + "> " + English.plural(form.getVarName()) + " = " + designChain));
 
-        body.addStatement(parseStatement(
-                "if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()), "PageResult.empty()"));
+        body.addStatement(parseStatement("if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
+                "PageResult.empty()"));
 
-        body.addStatement(parseStatement(
-                "List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
+        body.addStatement(
+                parseStatement("List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
         ForEachStmt forEachStmt = new ForEachStmt();
-        forEachStmt.setVariable(parseVariableDeclarationExpr(
-                String.format("%s %s", form.getEntityName(config), form.getVarName())));
+        forEachStmt.setVariable(
+                parseVariableDeclarationExpr(String.format("%s %s", form.getEntityName(config), form.getVarName())));
         forEachStmt.setIterable(new NameExpr(English.plural(form.getVarName())));
         BlockStmt forEachBody = new BlockStmt();
-        forEachBody.addStatement(parseStatement(
-                "List%sResp dto = new List%sResp();", English.plural(form.getName()),
+        forEachBody.addStatement(parseStatement("List%sResp dto = new List%sResp();", English.plural(form.getName()),
                 English.plural(form.getName())));
         for (ItemDef item : form.getItems()) {
             if (item.getType() == SECRET) {
@@ -264,9 +209,63 @@ public class ListApiServiceImpl implements ListApiService {
         forEachBody.addStatement("dtos.add(dto);");
         forEachStmt.setBody(forEachBody);
         body.addStatement(forEachStmt);
-        body.addStatement(parseStatement("return " + "PageResult.of(${total}, ${dtos})"
-                .replace("${total}", "query" + form.getName() + "Total").replace("${dtos}", "dtos") + ";"));
+        body.addStatement(parseStatement(
+                "return " + "PageResult.of(${total}, ${dtos})".replace("${total}", "query" + form.getName() + "Total")
+                        .replace("${dtos}", "dtos") + ";"));
         return body;
+    }
+
+    private String convertItemsToSearchConditions(ItemDef item) {
+        switch (item.getType()) {
+            case SECRET:
+            case MULTI_SELECT:
+                return "";
+            case NUMBER:
+            case ON_OFF:
+                String emptyToNull = config.getCodeSnippet().getCollectionEmptyCheck()
+                        .replace("${list}", "req.get" + StringUtils.capitalize(item.getName()) + "()")
+                        + " ? null : req.get" + StringUtils.capitalize(item.getName()) + "()";
+                return "." + item.getName() + ".in(" + emptyToNull + ")";
+            case SELECT:
+                return "." + item.getName() + ".in(req.get" + StringUtils.capitalize(item.getName())
+                        + "() == null ? null : req.get" + StringUtils.capitalize(item.getName()) + "().stream().map("
+                        + StringUtils.capitalize(item.getName()) + "Enum::getCode).collect(Collectors.toList()))";
+            case TEXT:
+                return "." + item.getName() + ".like(req.get" + StringUtils.capitalize(item.getName()) + "())";
+            case TIME:
+                TimeItemDef timeItem = (TimeItemDef) item;
+                String result;
+                switch (timeItem.getFormat()) {
+                    case DATE:
+                        result = "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
+                                + "Start() == null ? null : LocalDateTime.of(req.get" + StringUtils.capitalize(
+                                item.getName()) + "Start(), LocalTime.of(0,0)))";
+                        result += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
+                                + "End() == null ? null : LocalDateTime.of(req.get" + StringUtils.capitalize(
+                                item.getName()) + "End(), LocalTime.of(23, 59, 59)))";
+                        break;
+                    case TIME:
+                        result = "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
+                                + "Start() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
+                                + StringUtils.capitalize(item.getName()) + "Start()))";
+                        result += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
+                                + "End() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
+                                + StringUtils.capitalize(item.getName()) + "End()))";
+                        break;
+                    case DATE_TIME:
+                        result = "." + item.getName() + ".ge(req.get" + StringUtils.capitalize(item.getName())
+                                + "Start() == null ? null : req.get" + StringUtils.capitalize(item.getName())
+                                + "Start())";
+                        result += "." + item.getName() + ".le(req.get" + StringUtils.capitalize(item.getName())
+                                + "End() == null ? null : req.get" + StringUtils.capitalize(item.getName()) + "End())";
+                        break;
+                    default:
+                        throw new RuntimeException("impossible");
+                }
+                return result;
+            default:
+                throw new RuntimeException("impossible");
+        }
     }
 
     private void generatorSetterToGetter(FormDef form, ItemDef item, BlockStmt body) {

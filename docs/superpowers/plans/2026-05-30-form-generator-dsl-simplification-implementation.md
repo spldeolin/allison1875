@@ -635,7 +635,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 getterWithConvert = String.format("LocalDateTime.of(%s, LocalTime.of(0, 0))", getterWithConvert);
             }
             if (itemItem.getFormat() == TimeFormat.TIME) {
-                getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 0, 0), %s)", getterWithConvert);
+                getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 1, 1), %s)", getterWithConvert);
             }
         }
         body.addStatement(parseStatement(

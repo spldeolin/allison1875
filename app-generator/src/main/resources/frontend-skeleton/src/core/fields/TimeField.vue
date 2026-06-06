@@ -2,70 +2,69 @@
 import { NDatePicker, NTimePicker } from 'naive-ui'
 import type { TimeItemDef } from '@/schema/types'
 
-const props = defineProps<{
+defineProps<{
   item: TimeItemDef
   mode: 'search' | 'edit' | 'display'
-  value: number | [number, number] | null
+  value: string | [string, string] | null
 }>()
 
 const emit = defineEmits<{
-  'update:value': [val: number | [number, number] | null]
+  'update:value': [val: string | [string, string] | null]
 }>()
 
-function formatDisplay(val: number | [number, number] | string | null): string {
-  if (val === null || val === undefined) return ''
-  // Backend may return ISO strings ("yyyy-MM-dd", "HH:mm:ss", "yyyy-MM-dd HH:mm:ss") — display as-is
-  if (typeof val === 'string') return val
-  const ts = typeof val === 'number' ? val : val[0]
-  const d = new Date(ts)
-  if (props.item.format === 'date') return d.toLocaleDateString('zh-CN')
-  if (props.item.format === 'time') return d.toLocaleTimeString('zh-CN')
-  return d.toLocaleString('zh-CN')
-}
+const FORMAT_MAP = {
+  date: 'yyyy-MM-dd',
+  time: 'HH:mm:ss',
+  dateTime: 'yyyy-MM-dd HH:mm:ss',
+} as const
 </script>
 
 <template>
   <template v-if="mode === 'display'">
-    <span>{{ formatDisplay(value) }}</span>
+    <span>{{ value ?? '' }}</span>
   </template>
   <template v-else-if="mode === 'search'">
     <NDatePicker
       v-if="item.format === 'date'"
       type="daterange"
-      :value="value as [number, number] | null"
+      :formatted-value="value as [string, string] | null"
+      :value-format="FORMAT_MAP.date"
       clearable
-      @update:value="emit('update:value', $event)"
+      @update:formatted-value="emit('update:value', $event)"
     />
     <NDatePicker
       v-else-if="item.format === 'dateTime'"
       type="datetimerange"
-      :value="value as [number, number] | null"
+      :formatted-value="value as [string, string] | null"
+      :value-format="FORMAT_MAP.dateTime"
       clearable
-      @update:value="emit('update:value', $event)"
+      @update:formatted-value="emit('update:value', $event)"
     />
-    <!-- time-format range search not yet implemented; field hidden in search -->
     <template v-else-if="item.format === 'time'" />
   </template>
   <template v-else>
     <NDatePicker
       v-if="item.format === 'date'"
       type="date"
-      :value="value as number | null"
+      :formatted-value="value as string | null"
+      :value-format="FORMAT_MAP.date"
       clearable
-      @update:value="emit('update:value', $event)"
+      @update:formatted-value="emit('update:value', $event)"
     />
     <NDatePicker
       v-else-if="item.format === 'dateTime'"
       type="datetime"
-      :value="value as number | null"
+      :formatted-value="value as string | null"
+      :value-format="FORMAT_MAP.dateTime"
       clearable
-      @update:value="emit('update:value', $event)"
+      @update:formatted-value="emit('update:value', $event)"
     />
     <NTimePicker
       v-else
-      :value="value as number | null"
+      :formatted-value="value as string | null"
+      :value-format="FORMAT_MAP.time"
       clearable
-      @update:value="emit('update:value', $event)"
+      @update:formatted-value="emit('update:value', $event)"
     />
   </template>
 </template>

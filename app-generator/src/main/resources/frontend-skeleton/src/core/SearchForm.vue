@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { NForm, NFormItem, NButton, NSpace, NDatePicker } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
@@ -20,18 +20,67 @@ const searchableItems = computed(() =>
   props.items.filter(item => isVisible(item, 'search'))
 )
 
-// 2 rows ≈ 4 fields (considering typical field widths + the fixed createdAt field)
-const VISIBLE_THRESHOLD = 4
 const expanded = ref(false)
+const needsCollapse = ref(false)
+const formItemsRef = ref<HTMLElement | null>(null)
+const collapsedHeight = ref<number>(0)
 
-const needsCollapse = computed(() => searchableItems.value.length > VISIBLE_THRESHOLD)
+function measureRows() {
+  const el = formItemsRef.value
+  if (!el) return
+  const prevMaxHeight = el.style.maxHeight
+  const prevOverflow = el.style.overflow
+  el.style.maxHeight = 'none'
+  el.style.overflow = 'visible'
 
-const displayedItems = computed(() => {
-  if (!needsCollapse.value || expanded.value) return searchableItems.value
-  return searchableItems.value.slice(0, VISIBLE_THRESHOLD)
+  const children = el.querySelectorAll(':scope > .n-form-item')
+  if (children.length < 2) {
+    el.style.maxHeight = prevMaxHeight
+    el.style.overflow = prevOverflow
+    needsCollapse.value = false
+    return
+  }
+
+  const firstTop = (children[0] as HTMLElement).offsetTop
+  const rowHeight = (children[0] as HTMLElement).offsetHeight
+  let rowCount = 1
+  let secondRowTop = firstTop
+
+  for (let i = 1; i < children.length; i++) {
+    const top = (children[i] as HTMLElement).offsetTop
+    if (top > firstTop && secondRowTop === firstTop) {
+      secondRowTop = top
+      rowCount = 2
+    } else if (top > secondRowTop && secondRowTop > firstTop) {
+      rowCount = 3
+      break
+    }
+  }
+
+  needsCollapse.value = rowCount >= 3
+  collapsedHeight.value = secondRowTop - firstTop + rowHeight + 8
+
+  el.style.maxHeight = prevMaxHeight
+  el.style.overflow = prevOverflow
+}
+
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  nextTick(() => {
+    measureRows()
+    if (formItemsRef.value) {
+      resizeObserver = new ResizeObserver(() => measureRows())
+      resizeObserver.observe(formItemsRef.value)
+    }
+  })
 })
 
-const showCreatedAt = computed(() => !needsCollapse.value || expanded.value)
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+})
+
+watch(() => props.items, () => nextTick(measureRows), { deep: true })
 
 function updateField(name: string, value: any) {
   emit('update:modelValue', { ...props.modelValue, [name]: value })
@@ -70,31 +119,63 @@ function handleReset() {
 </script>
 
 <template>
-  <NForm inline label-placement="left" style="flex-wrap: wrap; gap: 0 16px;">
-    <NFormItem v-for="item in displayedItems" :key="item.name" :label="item.title">
-      <FieldRenderer
-        :item="item"
-        mode="search"
-        :value="modelValue[item.name] ?? null"
-        @update:value="updateField(item.name, $event)"
-      />
-    </NFormItem>
-    <NFormItem v-if="showCreatedAt" label="创建时间">
-      <NDatePicker
-        type="datetimerange"
-        :value="modelValue._createdAtRange ?? null"
-        clearable
-        @update:value="updateCreatedAtRange($event as [number, number] | null)"
-      />
-    </NFormItem>
-    <NFormItem>
-      <NSpace>
-        <NButton type="primary" @click="emit('search')">查询</NButton>
-        <NButton @click="handleReset">重置</NButton>
-        <NButton v-if="needsCollapse" text type="primary" @click="expanded = !expanded">
-          {{ expanded ? '收起' : '展开' }}
-        </NButton>
-      </NSpace>
-    </NFormItem>
-  </NForm>
+  <div class="search-form-wrapper">
+    <div
+      ref="formItemsRef"
+      class="search-form-content"
+      :class="{ collapsed: needsCollapse && !expanded }"
+      :style="needsCollapse && !expanded ? { maxHeight: collapsedHeight + 'px' } : {}"
+    >
+      <NForm inline label-placement="left" style="flex-wrap: wrap; gap: 0 16px;">
+        <NFormItem v-for="item in searchableItems" :key="item.name" :label="item.title">
+          <FieldRenderer
+            :item="item"
+            mode="search"
+            :value="modelValue[item.name] ?? null"
+            @update:value="updateField(item.name, $event)"
+          />
+        </NFormItem>
+        <NFormItem label="创建时间">
+          <NDatePicker
+            type="datetimerange"
+            :value="modelValue._createdAtRange ?? null"
+            clearable
+            @update:value="updateCreatedAtRange($event as [number, number] | null)"
+          />
+        </NFormItem>
+        <NFormItem>
+          <NSpace>
+            <NButton type="primary" @click="emit('search')">查询</NButton>
+            <NButton @click="handleReset">重置</NButton>
+          </NSpace>
+        </NFormItem>
+      </NForm>
+    </div>
+    <div v-if="needsCollapse" class="search-expand-bar">
+      <NButton size="small" @click="expanded = !expanded">
+        {{ expanded ? '收起' : '展开' }}
+      </NButton>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.search-form-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-form-content {
+  transition: max-height 0.25s ease;
+}
+
+.search-form-content.collapsed {
+  overflow: hidden;
+}
+
+.search-expand-bar {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+</style>

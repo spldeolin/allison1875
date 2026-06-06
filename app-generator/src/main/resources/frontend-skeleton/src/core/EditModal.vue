@@ -42,7 +42,7 @@ const rules = computed<FormRules>(() => {
         required: true,
         type: isNumber ? 'number' : 'string',
         message: `请输入${item.title}`,
-        trigger: isNumber ? ['blur', 'change'] : 'blur'
+        trigger: ['blur', 'change']
       }]
     }
   }

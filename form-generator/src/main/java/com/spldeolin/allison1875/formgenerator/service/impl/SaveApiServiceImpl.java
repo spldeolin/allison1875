@@ -6,6 +6,8 @@ import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseS
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseVariableDeclarationExpr;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -17,6 +19,7 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.StringEscapeUtils;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
@@ -33,6 +36,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
+import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,6 +58,9 @@ public class SaveApiServiceImpl implements SaveApiService {
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
+
+    @Inject
+    private ListApiService listApiService;
 
     @Override
     public InitializerDeclaration generateSaveInitDec(FormDef form) {
@@ -115,7 +122,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 boolean allCanInit = allCanInput(form, index, true);
                 boolean allCanEdit = allCanInput(form, index, false);
                 if (allCanInit && allCanEdit) {
-                    body.addStatement(generateCheckExistStatement(form, index));
+                    generateCheckExistStatement(form, index).forEach(body::addStatement);
                 }
             }
         }
@@ -212,7 +219,7 @@ public class SaveApiServiceImpl implements SaveApiService {
             for (IndexDef index : form.getIndices()) {
                 if (Boolean.TRUE.equals(index.getIsUnique()) && allCanInput(form, index, true) && !allCanInput(form,
                         index, false)) {
-                    body.addStatement(generateCheckExistStatement(form, index));
+                    generateCheckExistStatement(form, index).forEach(body::addStatement);
                 }
             }
         }
@@ -245,7 +252,7 @@ public class SaveApiServiceImpl implements SaveApiService {
             for (IndexDef index : form.getIndices()) {
                 if (Boolean.TRUE.equals(index.getIsUnique()) && !allCanInput(form, index, true) && allCanInput(form,
                         index, false)) {
-                    body.addStatement(generateCheckExistStatement(form, index));
+                    generateCheckExistStatement(form, index).forEach(body::addStatement);
                 }
             }
         }
@@ -269,7 +276,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 getterWithConvert = String.format("LocalDateTime.of(%s, LocalTime.of(0, 0))", getterWithConvert);
             }
             if (itemItem.getFormat() == TimeFormat.TIME) {
-                getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 0, 0), %s)", getterWithConvert);
+                getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 1, 1), %s)", getterWithConvert);
             }
         }
         body.addStatement(parseStatement(
@@ -277,7 +284,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 getterWithConvert));
     }
 
-    private Statement generateCheckExistStatement(FormDef form, IndexDef index) {
+    private List<Statement> generateCheckExistStatement(FormDef form, IndexDef index) {
         // 构造标题：由 index.itemNames 对应的字段 title 拼接而成
         List<String> fieldTitles = index.getItemNames().stream()
                 .map(itemName -> form.getItems().stream().filter(item -> item.getName().equals(itemName)).findFirst()
@@ -293,20 +300,53 @@ public class SaveApiServiceImpl implements SaveApiService {
         chain.append(form.getName()).append("Design.select().where()");
         chain.append(".").append(form.getBizIdName()).append(".ne(req.").append(form.getBizIdGetterName())
                 .append("())");
+        Map<String, ItemDef> items = form.getItems().stream().collect(Collectors.toMap(ItemDef::getName, item -> item));
         for (String itemName : index.getItemNames()) {
-            chain.append(".").append(itemName).append(".eq(req.get").append(StringUtils.capitalize(itemName))
-                    .append("())");
+            chain.append(convertItemsToSearchConditions(items.get(itemName)));
         }
         chain.append(".one()");
 
         String varName = "exist" + form.getName() + "For" + index.getItemNames().stream().map(StringUtils::capitalize)
                 .collect(java.util.stream.Collectors.joining());
 
-        BlockStmt checkBody = new BlockStmt();
-        checkBody.addStatement(parseStatement("%s %s = %s;", form.getEntityName(config), varName, chain));
-        checkBody.addStatement(parseStatement("if (%s != null) { throw new %s(\"%s\"); }", varName,
+        List<Statement> statements = Lists.newArrayList();
+        statements.add(parseStatement("%s %s = %s;", form.getEntityName(config), varName, chain));
+        statements.add(parseStatement("if (%s != null) { throw new %s(\"%s\"); }", varName,
                 config.getCodeSnippet().getBizExceptionQualifier(), conflictDesc));
-        return checkBody;
+        return statements;
+    }
+
+    private String convertItemsToSearchConditions(ItemDef item) {
+        switch (item.getType()) {
+            case MULTI_SELECT:
+                return "";
+            case SECRET:
+            case NUMBER:
+            case ON_OFF:
+            case TEXT:
+                return "." + item.getName() + ".eq(req.get" + StringUtils.capitalize(item.getName()) + "())";
+            case TIME:
+                TimeItemDef timeItem = (TimeItemDef) item;
+                switch (timeItem.getFormat()) {
+                    case DATE:
+                        return "." + item.getName() + ".eq(req.get" + StringUtils.capitalize(item.getName())
+                                + "() == null ? null : LocalDateTime.of(req.get" + StringUtils.capitalize(
+                                item.getName()) + "(), LocalTime.of(0, 0)))";
+                    case TIME:
+                        return "." + item.getName() + ".eq(req.get" + StringUtils.capitalize(item.getName())
+                                + "() == null ? null : LocalDateTime.of(LocalDate.of(1970, 1, 1), req.get"
+                                + StringUtils.capitalize(item.getName()) + "()))";
+                    case DATE_TIME:
+                        return "." + item.getName() + ".eq(req.get" + StringUtils.capitalize(item.getName()) + "())";
+                    default:
+                        throw new RuntimeException("impossible");
+                }
+            case SELECT:
+                return "." + item.getName() + ".eq(req.get" + StringUtils.capitalize(item.getName())
+                        + "() == null ? null : req.get" + StringUtils.capitalize(item.getName()) + "().getCode())";
+            default:
+                throw new RuntimeException("impossible");
+        }
     }
 
     /**

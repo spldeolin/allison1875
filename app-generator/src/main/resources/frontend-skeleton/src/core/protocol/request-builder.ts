@@ -71,22 +71,11 @@ function buildDateRange(
   if (!Array.isArray(v) || v.length !== 2) return {}
   const [start, end] = v
   const out: Record<string, unknown> = {}
-  if (start != null) out[`${item.name}${startSuffix}`] = formatDateTime(start as number, (item as import('@/schema/types').TimeItemDef).format)
-  if (end != null) out[`${item.name}${endSuffix}`] = formatDateTime(end as number, (item as import('@/schema/types').TimeItemDef).format)
+  if (start != null) out[`${item.name}${startSuffix}`] = start
+  if (end != null) out[`${item.name}${endSuffix}`] = end
   return out
 }
 
-function formatDateTime(timestamp: number, format: 'date' | 'time' | 'dateTime'): string {
-  const d = new Date(timestamp)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const ymd = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-  const hms = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-  switch (format) {
-    case 'date':     return ymd
-    case 'time':     return hms
-    case 'dateTime': return `${ymd} ${hms}`
-  }
-}
 
 export function buildSaveRequest(
   items: ItemDef[],
