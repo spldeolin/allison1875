@@ -37,6 +37,7 @@ const emit = defineEmits<{
       v-else
       :value="value"
       :maxlength="item.maxLength"
+      show-count
       clearable
       placeholder="请输入"
       @update:value="emit('update:value', $event)"

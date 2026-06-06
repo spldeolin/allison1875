@@ -184,6 +184,7 @@ watch(() => route.path, () => {
       <div class="crud-table-header">
         <h3 class="crud-table-title">{{ schema.title }}</h3>
         <NSpace>
+          <NButton type="primary" @click="handleCreate">创建</NButton>
           <NPopconfirm
             :disabled="checkedRowKeys.length === 0"
             @positive-click="handleBatchDelete"
@@ -198,7 +199,6 @@ watch(() => route.path, () => {
             </template>
             确定要删除选中的 {{ checkedRowKeys.length }} 条记录吗？
           </NPopconfirm>
-          <NButton type="primary" @click="handleCreate">新建</NButton>
         </NSpace>
       </div>
       <DataTable

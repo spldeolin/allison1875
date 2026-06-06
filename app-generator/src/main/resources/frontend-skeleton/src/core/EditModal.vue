@@ -49,7 +49,7 @@ const rules = computed<FormRules>(() => {
   return r
 })
 
-const title = computed(() => props.mode === 'create' ? `新建${props.formTitle}` : `编辑${props.formTitle}`)
+const title = computed(() => props.mode === 'create' ? `创建${props.formTitle}` : `编辑${props.formTitle}`)
 
 function updateField(name: string, value: any) {
   emit('update:modelValue', { ...props.modelValue, [name]: value })
@@ -71,7 +71,7 @@ function handleClose() {
 
 <template>
   <NModal :show="visible" @update:show="emit('update:visible', $event)">
-    <NCard :title="title" style="width: 600px; border-radius: 16px;" :bordered="false" closable @close="handleClose">
+    <NCard :title="title" style="width: 600px; border-radius: 16px;" :bordered="false">
       <NForm ref="formRef" :model="modelValue" :rules="rules" label-placement="left" label-width="130px">
         <NFormItem
           v-for="item in visibleItems"

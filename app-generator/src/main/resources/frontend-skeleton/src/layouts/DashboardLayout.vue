@@ -36,11 +36,15 @@ const menuOptions = computed<MenuOption[]>(() => {
 
   const sortedGroups = [...groups.entries()].sort((a, b) => a[1].order - b[1].order)
 
+  const totalItems = sortedGroups.reduce((sum, [, { routes }]) => sum + routes.length, 0)
+  const useStaticGroup = totalItems <= 8
+
   return sortedGroups.map(([groupName, { routes }]) => {
     const sortedRoutes = routes.sort((a, b) => ((a.meta as RouteMeta).order ?? 99) - ((b.meta as RouteMeta).order ?? 99))
     return {
       label: groupName,
       key: groupName,
+      type: useStaticGroup ? 'group' as const : undefined,
       children: sortedRoutes.map(r => {
         const meta = r.meta as RouteMeta
         const iconComp = meta.icon ? (icons as any)[meta.icon] : undefined

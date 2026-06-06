@@ -167,6 +167,7 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
     :scroll-x="scrollX"
     :checked-row-keys="checkedRowKeys"
     :row-key="(row: Record<string, any>) => bizKey ? row[bizKey] : row._rowIndex"
+    striped
     flex-height
     style="flex: 1; min-height: 0;"
     remote
@@ -179,5 +180,9 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
 <style scoped>
 :deep(.n-data-table-th) {
   white-space: nowrap !important;
+}
+
+:deep(.n-data-table-tr:hover > .n-data-table-td) {
+  background-color: #e8f4f0 !important;
 }
 </style>

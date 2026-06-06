@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { NForm, NFormItem, NButton, NSpace, NDatePicker } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
@@ -19,6 +19,19 @@ const emit = defineEmits<{
 const searchableItems = computed(() =>
   props.items.filter(item => isVisible(item, 'search'))
 )
+
+// 2 rows ≈ 4 fields (considering typical field widths + the fixed createdAt field)
+const VISIBLE_THRESHOLD = 4
+const expanded = ref(false)
+
+const needsCollapse = computed(() => searchableItems.value.length > VISIBLE_THRESHOLD)
+
+const displayedItems = computed(() => {
+  if (!needsCollapse.value || expanded.value) return searchableItems.value
+  return searchableItems.value.slice(0, VISIBLE_THRESHOLD)
+})
+
+const showCreatedAt = computed(() => !needsCollapse.value || expanded.value)
 
 function updateField(name: string, value: any) {
   emit('update:modelValue', { ...props.modelValue, [name]: value })
@@ -58,7 +71,7 @@ function handleReset() {
 
 <template>
   <NForm inline label-placement="left" style="flex-wrap: wrap; gap: 0 16px;">
-    <NFormItem v-for="item in searchableItems" :key="item.name" :label="item.title">
+    <NFormItem v-for="item in displayedItems" :key="item.name" :label="item.title">
       <FieldRenderer
         :item="item"
         mode="search"
@@ -66,8 +79,7 @@ function handleReset() {
         @update:value="updateField(item.name, $event)"
       />
     </NFormItem>
-    <!-- 固定的创建时间范围搜索，对应后端 createdAtStart / createdAtEnd -->
-    <NFormItem label="创建时间">
+    <NFormItem v-if="showCreatedAt" label="创建时间">
       <NDatePicker
         type="datetimerange"
         :value="modelValue._createdAtRange ?? null"
@@ -79,6 +91,9 @@ function handleReset() {
       <NSpace>
         <NButton type="primary" @click="emit('search')">查询</NButton>
         <NButton @click="handleReset">重置</NButton>
+        <NButton v-if="needsCollapse" text type="primary" @click="expanded = !expanded">
+          {{ expanded ? '收起' : '展开' }}
+        </NButton>
       </NSpace>
     </NFormItem>
   </NForm>
