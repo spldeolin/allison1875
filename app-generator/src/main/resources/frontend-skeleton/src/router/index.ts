@@ -9,12 +9,20 @@ const CrudPage = () => import('@/core/CrudPage.vue')
 const DashboardLayout = () => import('@/layouts/DashboardLayout.vue')
 const Login = () => import('@/views/Login.vue')
 
+// Auto-discover page overrides: src/pages/{FormName}Page.vue
+const pageOverrides = import.meta.glob('../pages/*Page.vue') as Record<string, () => Promise<any>>
+
+function resolvePageComponent(formName: string) {
+  const key = `../pages/${formName}Page.vue`
+  return pageOverrides[key] || CrudPage
+}
+
 const app = appDef as AppDef
 
 const dslRoutes: RouteRecordRaw[] = app.menus.map(menu => ({
   path: `/${upperCamelToKebab(menu.form.name)}`,
   name: menu.form.name,
-  component: CrudPage,
+  component: resolvePageComponent(menu.form.name),
   props: { schema: menu.form },
   meta: { title: menu.form.title, group: menu.group, icon: menu.icon, order: menu.order }
 }))
