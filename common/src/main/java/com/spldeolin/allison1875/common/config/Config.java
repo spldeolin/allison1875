@@ -3,9 +3,7 @@ package com.spldeolin.allison1875.common.config;
 import java.io.File;
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.allison1875.common.enums.FileExistenceResolutionEnum;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
-import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -132,12 +130,6 @@ public class Config {
      */
     @NotNull
     Boolean enableGenerateDesign = true;
-
-    /**
-     * 指定Design类中的分页接口使用「pageNo + pageSize」还是「offset + limit」
-     */
-    @NotNull
-    PageParamStyleEnum pageParamStyle = PageParamStyleEnum.PAGE_NO_PAGE_SIZE;
 
     /**
      * 生成出的Entity类是否以Entity作为类名的结尾

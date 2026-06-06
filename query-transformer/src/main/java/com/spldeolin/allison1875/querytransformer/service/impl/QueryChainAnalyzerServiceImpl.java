@@ -27,7 +27,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainContext;
-import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
@@ -108,13 +107,9 @@ public class QueryChainAnalyzerServiceImpl implements QueryChainAnalyzerService 
             returnStyle = ReturnStyleEnum.COUNT;
         } else if (designChain.getNameAsString().equals("page")) {
             returnStyle = ReturnStyleEnum.PAGE;
-            if (designMeta.getPageParamStyle() == PageParamStyleEnum.OFFSET_LIMIT) {
-                offsetExpr = designChain.getArgument(0);
-            } else {
-                offsetExpr = new BinaryExpr(new EnclosedExpr(
-                        new BinaryExpr(designChain.getArgument(0), new IntegerLiteralExpr("1"), Operator.MINUS)),
-                        designChain.getArgument(1), Operator.MULTIPLY);
-            }
+            offsetExpr = new BinaryExpr(new EnclosedExpr(
+                    new BinaryExpr(designChain.getArgument(0), new IntegerLiteralExpr("1"), Operator.MINUS)),
+                    designChain.getArgument(1), Operator.MULTIPLY);
             limitExpr = designChain.getArgument(1);
         } else if (designChain.getNameAsString().startsWith("mapBy")) {
             returnStyle = ReturnStyleEnum.MAP;

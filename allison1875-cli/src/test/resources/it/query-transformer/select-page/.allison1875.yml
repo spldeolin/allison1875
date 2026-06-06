@@ -27,7 +27,6 @@ enableJavaxMoveToJakarta: false
 isDataModelWithoutLombok: false
 enableGenerateDesign: true
 isEntityEndWithEntity: true
-pageParamStyle: PAGE_NO_PAGE_SIZE
 
 ddl: |
   CREATE TABLE `t_order` (

@@ -23,7 +23,6 @@ import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
-import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875MainService;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
@@ -258,7 +257,6 @@ public class AppGenerator implements Allison1875MainService {
         fgConfig.setEnableGenerateDesign(true);
         fgConfig.setIsEntityEndWithEntity(true);
         fgConfig.setEnableJavaxMoveToJakarta(false);
-        fgConfig.setPageParamStyle(PageParamStyleEnum.PAGE_NO_PAGE_SIZE);
 
         // Set code snippets for the generated backend
         Config.CodeSnippet cs = new Config.CodeSnippet();

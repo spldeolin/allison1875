@@ -35,7 +35,6 @@ import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
-import com.spldeolin.allison1875.common.enums.PageParamStyleEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -270,13 +269,8 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         queryChainMethodsCoid.addMember(parseBodyDeclaration(
                 "public %s one() { throw e; }", entityGeneration.getDtoName()));
         queryChainMethodsCoid.addMember(parseBodyDeclaration("public int count() { throw e; }"));
-        String pageParamName1 =
-                config.getPageParamStyle() == PageParamStyleEnum.PAGE_NO_PAGE_SIZE ? "pageNo" : "offset";
-        String pageParamName2 =
-                config.getPageParamStyle() == PageParamStyleEnum.PAGE_NO_PAGE_SIZE ? "pageSize" : "limit";
-        queryChainMethodsCoid.addMember(parseBodyDeclaration(
-                "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
-                        + pageParamName2 + ") { throw e; }"));
+        queryChainMethodsCoid.addMember(parseBodyDeclaration("public List<" + entityGeneration.getDtoQualifier()
+                + "> page(Integer pageNo, Integer pageSize) { throw e; }"));
         queryChainMethodsCoid.addMember(parseBodyDeclaration(
                 "public JoinChain<QueryChainMethods, %s> leftJoin() { throw e; }",
                 entityGeneration.getDtoName()));
@@ -370,9 +364,8 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         nextableByChainReturnCoid.addMember(parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
         nextableByChainReturnCoid.addMember(parseBodyDeclaration("public int count() { throw e; }"));
-        nextableByChainReturnCoid.addMember(parseBodyDeclaration(
-                "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
-                        + pageParamName2 + ") { throw e; }"));
+        nextableByChainReturnCoid.addMember(parseBodyDeclaration("public List<" + entityGeneration.getDtoQualifier()
+                + "> page(Integer pageNo, Integer pageSize) { throw e; }"));
         nextableByChainReturnCoid.addMember(
                 parseBodyDeclaration("public OrderChain order() { throw e; }"));
         designCoid.addMember(nextableByChainReturnCoid);
@@ -418,9 +411,8 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         nextableOrderChainCoid.addMember(parseBodyDeclaration(
                 "public " + entityGeneration.getDtoName() + " one() { throw e; }"));
         nextableOrderChainCoid.addMember(parseBodyDeclaration("public int count() { throw e; }"));
-        nextableOrderChainCoid.addMember(parseBodyDeclaration(
-                "public List<" + entityGeneration.getDtoQualifier() + "> page(Integer " + pageParamName1 + ", Integer "
-                        + pageParamName2 + ") { throw e; }"));
+        nextableOrderChainCoid.addMember(parseBodyDeclaration("public List<" + entityGeneration.getDtoQualifier()
+                + "> page(Integer pageNo, Integer pageSize) { throw e; }"));
         designCoid.addMember(nextableOrderChainCoid);
 
         ClassOrInterfaceDeclaration eachCoid = new ClassOrInterfaceDeclaration();
@@ -464,7 +456,6 @@ public class DesignGeneratorServiceImpl implements DesignGeneratorService {
         }
         meta.setProperties(propertiesByName);
         meta.setTableName(tableAnalysis.getTableName());
-        meta.setPageParamStyle(config.getPageParamStyle());
         String metaJson = JsonUtils.toJson(meta);
         designCoid.addFieldWithInitializer("String", KeywordConstant.META_FIELD_NAME,
                 parseExpression("\"" + StringEscapeUtils.escapeJava(metaJson) + "\""));
