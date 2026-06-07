@@ -7,9 +7,12 @@
  *   2. 在 "自定义逻辑" 区域添加你的按钮、弹框、API 调用
  *   3. 保存即生效（路由自动发现）
  *
+ * useCrudPage 接受 getter: () => props.schema
+ *
  * useCrudPage 返回值:
  *   状态: searchParams, tableData, tableLoading, pagination,
- *         checkedRowKeys, editingRowKey, bizKey, bizKeyPlural,
+ *         checkedRowKeys, editingRowKey,
+ *         bizKey (ComputedRef), bizKeyPlural (ComputedRef),
  *         modalVisible, modalMode, formData, submitLoading
  *   方法: fetchData(), handleSearch(), handleReset(), handlePaginationUpdate(p),
  *         handleCreate(), handleEdit(row), handleDelete(row),
@@ -33,7 +36,7 @@ const {
   fetchData, handleSearch, handleReset,
   handleCreate, handleEdit, handleDelete, handleBatchDelete,
   handleSubmit, handlePaginationUpdate,
-} = useCrudPage(props.schema)
+} = useCrudPage(() => props.schema)
 
 // ─── 自定义逻辑 ─────────────────────────────────────────────
 
@@ -43,8 +46,8 @@ const {
 //     message.warning('请先选择记录')
 //     return
 //   }
-//   await request.post(`/api/v1/${bizKey.replace('Code', '')}/batchApprove`, {
-//     [bizKey + 's']: checkedRowKeys.value,
+//   await request.post(`/api/v1/${bizKey.value.replace('Code', '')}/batchApprove`, {
+//     [bizKeyPlural.value]: checkedRowKeys.value,
 //   })
 //   message.success('操作成功')
 //   fetchData()

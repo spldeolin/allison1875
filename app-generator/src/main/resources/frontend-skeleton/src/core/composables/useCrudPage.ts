@@ -1,5 +1,4 @@
-import { ref, reactive, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useMessage } from 'naive-ui'
 import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
@@ -8,12 +7,17 @@ import { endpointOf } from '../protocol/endpoints'
 import { buildListRequest, buildSaveRequest } from '../protocol/request-builder'
 import { parseListRow, parseDetailDto } from '../protocol/response-parser'
 
-export function useCrudPage(schema: FormDef) {
+/**
+ * @param getSchema - 传入 getter（如 `() => props.schema`），确保路由切换时能读取到最新的 schema
+ */
+export function useCrudPage(getSchema: () => FormDef) {
   const message = useMessage()
-  const route = useRoute()
 
-  const bizKey = `${schema.name.charAt(0).toLowerCase()}${schema.name.slice(1)}Code`
-  const bizKeyPlural = `${bizKey}s`
+  const bizKey = computed(() => {
+    const name = getSchema().name
+    return `${name.charAt(0).toLowerCase()}${name.slice(1)}Code`
+  })
+  const bizKeyPlural = computed(() => `${bizKey.value}s`)
 
   const searchParams = ref<Record<string, unknown>>({})
   const tableData = ref<Record<string, unknown>[]>([])
@@ -35,6 +39,7 @@ export function useCrudPage(schema: FormDef) {
   const submitLoading = ref(false)
 
   async function fetchData() {
+    const schema = getSchema()
     tableLoading.value = true
     checkedRowKeys.value = []
     try {
@@ -73,6 +78,7 @@ export function useCrudPage(schema: FormDef) {
 
   function handleCreate() {
     modalMode.value = 'create'
+    const schema = getSchema()
     const defaults: Record<string, unknown> = {}
     for (const item of schema.items) {
       if (item.type === 'onOff') defaults[item.name] = false
@@ -82,11 +88,12 @@ export function useCrudPage(schema: FormDef) {
   }
 
   async function handleEdit(row: Record<string, unknown>) {
-    editingRowKey.value = row[bizKey]
+    const schema = getSchema()
+    editingRowKey.value = row[bizKey.value]
     try {
       const res = await request.post(
         endpointOf(schema.name, 'getDetail'),
-        { [bizKey]: row[bizKey] },
+        { [bizKey.value]: row[bizKey.value] },
       )
       const detail = res.data.data as Record<string, unknown>
       formData.value = parseDetailDto(schema.items, detail)
@@ -100,10 +107,11 @@ export function useCrudPage(schema: FormDef) {
   }
 
   async function handleDelete(row: Record<string, unknown>) {
+    const schema = getSchema()
     try {
       await request.post(
         endpointOf(schema.name, 'delete'),
-        { [bizKeyPlural]: [row[bizKey]] },
+        { [bizKeyPlural.value]: [row[bizKey.value]] },
       )
       message.success('删除成功')
       fetchData()
@@ -114,10 +122,11 @@ export function useCrudPage(schema: FormDef) {
 
   async function handleBatchDelete() {
     if (checkedRowKeys.value.length === 0) return
+    const schema = getSchema()
     try {
       await request.post(
         endpointOf(schema.name, 'delete'),
-        { [bizKeyPlural]: checkedRowKeys.value },
+        { [bizKeyPlural.value]: checkedRowKeys.value },
       )
       message.success(`已删除 ${checkedRowKeys.value.length} 条记录`)
       checkedRowKeys.value = []
@@ -128,11 +137,12 @@ export function useCrudPage(schema: FormDef) {
   }
 
   async function handleSubmit() {
+    const schema = getSchema()
     submitLoading.value = true
     try {
       const reqBody = buildSaveRequest(schema.items, formData.value, modalMode.value)
       if (modalMode.value === 'edit') {
-        reqBody[bizKey] = formData.value[bizKey]
+        reqBody[bizKey.value] = formData.value[bizKey.value]
       }
       await request.post(endpointOf(schema.name, 'save'), reqBody)
       message.success(modalMode.value === 'create' ? '创建成功' : '更新成功')
@@ -146,7 +156,8 @@ export function useCrudPage(schema: FormDef) {
   }
 
   onMounted(fetchData)
-  watch(() => route.path, () => {
+  // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据
+  watch(() => getSchema().name, () => {
     pagination.page = 1
     searchParams.value = {}
     fetchData()

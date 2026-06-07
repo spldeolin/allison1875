@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, reactive, watch } from 'vue'
 import { NModal, NCard, NForm, NFormItem, NButton, NSpace, type FormInst, type FormRules } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
@@ -21,6 +21,18 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref<FormInst | null>(null)
+
+// Local reactive model for NForm — mutated in place so NFormItem sees updates
+// immediately when it re-validates (avoids prop round-trip timing issue)
+const localModel = reactive<Record<string, any>>({})
+
+// Sync from parent when modelValue reference changes (modal open / external reset)
+watch(() => props.modelValue, (incoming) => {
+  for (const key of Object.keys(localModel)) {
+    delete localModel[key]
+  }
+  Object.assign(localModel, incoming)
+}, { immediate: true })
 
 const editMode = computed<'edit-create' | 'edit-update'>(() =>
   props.mode === 'create' ? 'edit-create' : 'edit-update'
@@ -52,7 +64,8 @@ const rules = computed<FormRules>(() => {
 const title = computed(() => props.mode === 'create' ? `创建${props.formTitle}` : `编辑${props.formTitle}`)
 
 function updateField(name: string, value: any) {
-  emit('update:modelValue', { ...props.modelValue, [name]: value })
+  localModel[name] = value
+  emit('update:modelValue', { ...localModel })
 }
 
 async function handleSubmit() {
@@ -72,7 +85,7 @@ function handleClose() {
 <template>
   <NModal :show="visible" @update:show="emit('update:visible', $event)">
     <NCard :title="title" style="width: 600px; border-radius: 16px;" :bordered="false">
-      <NForm ref="formRef" :model="modelValue" :rules="rules" label-placement="left" label-width="130px">
+      <NForm ref="formRef" :model="localModel" :rules="rules" label-placement="left" label-width="130px">
         <NFormItem
           v-for="item in visibleItems"
           :key="item.name"
@@ -83,7 +96,7 @@ function handleClose() {
           <FieldRenderer
             :item="item"
             :mode="isEditable(item, editMode) ? 'edit' : 'display'"
-            :value="modelValue[item.name] ?? null"
+            :value="localModel[item.name] ?? null"
             @update:value="isEditable(item, editMode) ? updateField(item.name, $event) : undefined"
           />
         </NFormItem>

@@ -14,10 +14,10 @@ const {
   searchParams, tableData, tableLoading, pagination,
   checkedRowKeys, editingRowKey, bizKey,
   modalVisible, modalMode, formData, submitLoading,
-  fetchData, handleSearch, handleReset,
+  handleSearch, handleReset,
   handleCreate, handleEdit, handleDelete, handleBatchDelete,
   handleSubmit, handlePaginationUpdate,
-} = useCrudPage(props.schema)
+} = useCrudPage(() => props.schema)
 </script>
 
 <template>
