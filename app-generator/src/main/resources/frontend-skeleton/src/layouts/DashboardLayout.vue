@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed, h } from 'vue'
+import { computed, h, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NLayout, NLayoutSider, NMenu, NIcon, type MenuOption } from 'naive-ui'
+import {
+  NLayout, NLayoutSider, NMenu, NIcon, NPopconfirm, NModal, NForm, NFormItem, NInput, NButton,
+  useMessage, type MenuOption, type FormInst
+} from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import * as icons from '@vicons/ionicons5'
 import appDef from '@/app.json'
@@ -12,6 +15,7 @@ const app = appDef as AppDef
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const message = useMessage()
 
 interface RouteMeta {
   title?: string
@@ -64,9 +68,58 @@ function handleMenuUpdate(key: string) {
   router.push(key)
 }
 
-function handleLogout() {
-  authStore.logout()
+// Logout
+const loggingOut = ref(false)
+async function handleLogout() {
+  loggingOut.value = true
+  await authStore.logoutApi()
+  loggingOut.value = false
   router.push('/login')
+}
+
+// Change password
+const showPasswordModal = ref(false)
+const passwordFormRef = ref<FormInst | null>(null)
+const passwordForm = ref({ password: '', confirmPassword: '' })
+const changingPassword = ref(false)
+
+const passwordRules = {
+  password: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
+  confirmPassword: [
+    { required: true, message: '请确认新密码', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        if (value !== passwordForm.value.password) {
+          return new Error('两次输入的密码不一致')
+        }
+        return true
+      },
+      trigger: 'blur'
+    }
+  ]
+}
+
+function openPasswordModal() {
+  passwordForm.value = { password: '', confirmPassword: '' }
+  showPasswordModal.value = true
+}
+
+async function handleChangePassword() {
+  try {
+    await passwordFormRef.value?.validate()
+  } catch {
+    return
+  }
+  changingPassword.value = true
+  try {
+    await authStore.updateSelfPassword(passwordForm.value.password)
+    message.success('密码修改成功')
+    showPasswordModal.value = false
+  } catch (e: any) {
+    message.error(e.message || '修改失败')
+  } finally {
+    changingPassword.value = false
+  }
 }
 </script>
 
@@ -95,10 +148,29 @@ function handleLogout() {
       />
 
       <div class="sidebar-footer">
-        <div class="user-info" @click="handleLogout">
+        <div class="user-info">
           <div class="user-meta">
-            <span class="user-name">{{ authStore.userInfo?.displayName || '用户' }}</span>
-            <span class="user-action">退出登录</span>
+            <span class="user-name">{{ authStore.userInfo?.nickName || '用户' }}</span>
+            <span class="user-sub">{{ authStore.userInfo?.username || '' }}</span>
+          </div>
+          <div class="user-actions">
+            <div class="change-pwd-btn" @click="openPasswordModal">修改密码</div>
+            <NPopconfirm
+              :positive-button-props="{ type: 'error', size: 'small' }"
+              :negative-button-props="{ size: 'small' }"
+              positive-text="确认退出"
+              negative-text="取消"
+              @positive-click="handleLogout"
+            >
+              <template #trigger>
+                <div class="logout-btn" title="退出登录">
+                  <NIcon size="18" color="#94a3b8">
+                    <component :is="icons.LogOutOutline" />
+                  </NIcon>
+                </div>
+              </template>
+              确定要退出登录吗？
+            </NPopconfirm>
           </div>
         </div>
       </div>
@@ -115,6 +187,40 @@ function handleLogout() {
       </router-view>
     </NLayout>
   </NLayout>
+
+  <NModal
+    v-model:show="showPasswordModal"
+    preset="card"
+    title="修改密码"
+    :style="{ width: '400px' }"
+    :mask-closable="false"
+  >
+    <NForm ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-placement="top">
+      <NFormItem label="新密码" path="password">
+        <NInput
+          v-model:value="passwordForm.password"
+          type="password"
+          placeholder="请输入新密码"
+          show-password-on="click"
+        />
+      </NFormItem>
+      <NFormItem label="确认密码" path="confirmPassword">
+        <NInput
+          v-model:value="passwordForm.confirmPassword"
+          type="password"
+          placeholder="请再次输入新密码"
+          show-password-on="click"
+          @keyup.enter="handleChangePassword"
+        />
+      </NFormItem>
+    </NForm>
+    <template #footer>
+      <div style="display: flex; justify-content: flex-end; gap: 8px">
+        <NButton @click="showPasswordModal = false">取消</NButton>
+        <NButton type="primary" :loading="changingPassword" @click="handleChangePassword">确认修改</NButton>
+      </div>
+    </template>
+  </NModal>
 </template>
 
 <style scoped>
@@ -169,7 +275,6 @@ function handleLogout() {
   align-items: center;
   padding: 8px 12px;
   border-radius: 10px;
-  cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
@@ -181,25 +286,72 @@ function handleLogout() {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
 .user-name {
   font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 500;
+  color: #334155;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.user-action {
+.user-sub {
   font-size: 12px;
   color: #94a3b8;
-  transition: color 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.user-info:hover .user-action {
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.change-pwd-btn {
+  font-size: 12px;
   color: #18a058;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 0 8px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.user-info:hover .change-pwd-btn {
+  opacity: 1;
+}
+
+.change-pwd-btn:hover {
+  background: #f0fdf4;
+}
+
+.logout-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.logout-btn:hover {
+  background: #fef2f2;
+}
+
+.logout-btn:hover :deep(.n-icon) {
+  color: #ef4444 !important;
 }
 
 .main-content-layout :deep(.n-layout-scroll-container) {

@@ -32,18 +32,14 @@ public final class RequestResult<T> {
         return result;
     }
 
-    public static RequestResult<?> failure(ErrorCode errorCode) {
-        RequestResult<Void> result = new RequestResult<>();
-        result.setErrorCode(errorCode.code());
-        result.setErrorMsg(errorCode.defaultMsg());
-        result.setTraceId(MDC.get("traceId"));
-        return result;
+    public static RequestResult<?> failure(__NAMESPACE__.common.ErrorCode errorCode) {
+        return failure(errorCode, null);
     }
 
-    public static RequestResult<?> failure(ErrorCode errorCode, String errorMsg) {
+    public static RequestResult<?> failure(__NAMESPACE__.common.ErrorCode errorCode, String errorMsg) {
         RequestResult<Void> result = new RequestResult<>();
-        result.setErrorCode(errorCode.code());
-        result.setErrorMsg(errorMsg);
+        result.setErrorCode(errorCode.getCode());
+        result.setErrorMsg(errorMsg != null ? errorMsg : errorCode.getDefaultMsg());
         result.setTraceId(MDC.get("traceId"));
         return result;
     }

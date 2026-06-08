@@ -27,6 +27,8 @@ const dslRoutes: RouteRecordRaw[] = app.menus.map(menu => ({
   meta: { title: menu.form.title, group: menu.group, icon: menu.icon, order: menu.order }
 }))
 
+const firstFormPath = dslRoutes.length > 0 ? dslRoutes[0].path : '/login'
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -40,7 +42,7 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       ...dslRoutes,
-      { path: '', redirect: dslRoutes.length > 0 ? dslRoutes[0].path : '/login' }
+      { path: '', redirect: firstFormPath }
     ]
   }
 ]
@@ -50,14 +52,33 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
-  const requiresAuth = to.matched.some(r => r.meta.requiresAuth !== false)
-  if (requiresAuth) {
-    const authStore = useAuthStore()
-    if (!authStore.isAuthenticated) {
-      return { path: '/login', query: { redirect: to.fullPath } }
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
+  const isLoginPage = to.path === '/login'
+
+  if (!authStore.isAuthenticated) {
+    if (!isLoginPage) {
+      authStore.saveRedirect(to.fullPath)
+      return { path: '/login' }
     }
+    return
+  }
+
+  const ok = await authStore.fetchCurrentUser()
+  if (!ok) {
+    authStore.logout()
+    if (!isLoginPage) {
+      authStore.saveRedirect(to.fullPath)
+      return { path: '/login' }
+    }
+    return
+  }
+
+  if (isLoginPage) {
+    const saved = authStore.popRedirect()
+    return saved || firstFormPath
   }
 })
 
+export { firstFormPath }
 export default router

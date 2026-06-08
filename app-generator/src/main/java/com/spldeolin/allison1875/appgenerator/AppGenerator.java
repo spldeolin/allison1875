@@ -142,13 +142,37 @@ public class AppGenerator implements Allison1875MainService {
         Path skeleton = getSkeletonPath("frontend-skeleton");
         copyDirectory(skeleton, output);
 
-        // Write app.json with the full AppDef
+        // Merge builtin-form.yml menus into user DSL menus
+        List<MenuDef> mergedMenus = Lists.newArrayList(appDef.getMenus());
+        List<MenuDef> builtinMenus = parseBuiltinMenus();
+        mergedMenus.addAll(builtinMenus);
+        log.info("merged {} builtin menus into frontend app.json", builtinMenus.size());
+
+        // Write app.json with merged menus
         try {
             ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-            String appJson = mapper.writeValueAsString(appDef);
+            AppDef frontendAppDef = new AppDef().setNamespace(appDef.getNamespace()).setName(appDef.getName())
+                    .setTitle(appDef.getTitle()).setMenus(mergedMenus);
+            String appJson = mapper.writeValueAsString(frontendAppDef);
             Files.writeString(output.resolve("src/app.json"), appJson, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private List<MenuDef> parseBuiltinMenus() {
+        try {
+            var url = getClass().getClassLoader().getResource("frontend-skeleton/src/builtin-form.yml");
+            if (url == null) {
+                log.warn("builtin-form.yml not found in classpath");
+                return Lists.newArrayList();
+            }
+            String content = Files.readString(Paths.get(url.toURI()), StandardCharsets.UTF_8);
+            AppDef builtinDef = new YAMLMapper().readValue(content, AppDef.class);
+            return builtinDef.getMenus() != null ? builtinDef.getMenus() : Lists.newArrayList();
+        } catch (Exception e) {
+            log.warn("failed to parse builtin-form.yml", e);
+            return Lists.newArrayList();
         }
     }
 
@@ -158,11 +182,12 @@ public class AppGenerator implements Allison1875MainService {
             String originalDsl = Files.readString(config.getAppDslPath().toPath(), StandardCharsets.UTF_8);
             String frontendDir = name + "-frontend";
             String backendDir = name + "-backend";
-            String readme = "# " + appDef.getTitle() + "\n\n" + "## Quick Start\n\n"
-                    + "```bash\n" + "# 构建前端工程\n"
-                    + "cd " + frontendDir + " && npm install && npm run build && cd ..\n" + "# 构建后端工程\n"
+            String readme = "# " + appDef.getTitle() + "\n\n" + "## Quick Start\n\n" + "```bash\n" + "# 构建前端\n"
+                    + "npm ci --prefix " + frontendDir + " && npm run build --prefix " + frontendDir + "\n"
+                    + "# 构建后端（含前端产物）\n"
                     + "cp -r " + frontendDir + "/dist/* " + backendDir + "/src/main/resources/static/\n"
-                    + "mvn clean package -f " + backendDir + "\n" + "# 运行\n" + "java -jar " + backendDir + "/target/"
+                    + "mvn package -T 1C -DskipTests -f " + backendDir + "\n" + "# 运行\n" + "java -jar " + backendDir
+                    + "/target/"
                     + name + "-fullstack.jar\n"
                     + "```\n\n"
                     + "## DSL\n\n"
@@ -257,6 +282,7 @@ public class AppGenerator implements Allison1875MainService {
         fgConfig.setEnableGenerateDesign(true);
         fgConfig.setIsEntityEndWithEntity(true);
         fgConfig.setEnableJavaxMoveToJakarta(false);
+        fgConfig.setEnableOneService(true);
 
         // Set code snippets for the generated backend
         Config.CodeSnippet cs = new Config.CodeSnippet();
@@ -287,8 +313,8 @@ public class AppGenerator implements Allison1875MainService {
         dc.setMapperPackage(ns + ".mapper");
         dc.setEntityPackage(ns + ".entity");
         dc.setDesignPackage(ns + ".design");
-        dc.setParamDTOPackage(ns + ".mapper");
-        dc.setRecordDTOPackage(ns + ".mapper");
+        dc.setParamDTOPackage(ns + ".dto.param");
+        dc.setRecordDTOPackage(ns + ".dto.record");
         dc.setWholeDTOPackage(ns + ".dto");
         fgConfig.setDomains(Lists.newArrayList(dc));
 

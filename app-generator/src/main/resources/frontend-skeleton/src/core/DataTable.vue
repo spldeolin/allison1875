@@ -156,6 +156,25 @@ function handlePageSizeChange(pageSize: number) {
 function handleCheckedRowKeysChange(keys: (string | number)[]) {
   emit('update:checkedRowKeys', keys)
 }
+
+function rowProps(row: Record<string, any>) {
+  return {
+    style: 'cursor: pointer',
+    onClick: (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('button') || target.closest('.n-popconfirm') || target.closest('.n-checkbox')) return
+      const key = props.bizKey ? row[props.bizKey] : row._rowIndex
+      const keys = props.checkedRowKeys ? [...props.checkedRowKeys] : []
+      const idx = keys.indexOf(key)
+      if (idx >= 0) {
+        keys.splice(idx, 1)
+      } else {
+        keys.push(key)
+      }
+      emit('update:checkedRowKeys', keys)
+    }
+  }
+}
 </script>
 
 <template>
@@ -167,6 +186,7 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
     :scroll-x="scrollX"
     :checked-row-keys="checkedRowKeys"
     :row-key="(row: Record<string, any>) => bizKey ? row[bizKey] : row._rowIndex"
+    :row-props="rowProps"
     striped
     flex-height
     style="flex: 1; min-height: 0;"
@@ -184,5 +204,9 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
 
 :deep(.n-data-table-tr:hover > .n-data-table-td) {
   background-color: #e8f4f0 !important;
+}
+
+:deep(.n-data-table-tr--checked > .n-data-table-td) {
+  background-color: transparent !important;
 }
 </style>

@@ -1,0 +1,54 @@
+namespace: com.allison1875.appgenerator
+name: built-form
+title: 内置表单
+
+menus:
+  - group: 系统
+    icon: 1
+    order: 1
+    form:
+      name: User
+      title: 用户
+      desc: 用户
+      items:
+        - type: text
+          name: username
+          title: 用户名
+          isNonVoid: true
+          maxLength: 32
+          canInputOnInit: true
+          canInputOnEdit: false
+
+        - type: secret
+          name: password
+          title: 密码
+          isNonVoid: true
+          canInputOnInit: true
+          canInputOnEdit: false
+
+        - type: text
+          name: nickName
+          title: 用户昵称
+          isNonVoid: false
+          maxLength: 32
+          canInputOnInit: true
+          canInputOnEdit: true
+
+        - type: time
+          name: lastLoginAt
+          title: 最后登录时间
+          isNonVoid: false
+          canInputOnInit: false
+          canInputOnEdit: false
+
+        - type: secret
+          name: currentToken
+          title: 当前登录token
+          isNonVoid: false
+          canInputOnInit: false
+          canInputOnEdit: false
+      indices:
+        - itemNames: [ username ]
+          isUnique: true
+        - itemNames: [ currentToken ]
+          isUnique: true

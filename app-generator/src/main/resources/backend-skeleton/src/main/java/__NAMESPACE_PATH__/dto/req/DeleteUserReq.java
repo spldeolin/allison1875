@@ -1,25 +1,20 @@
 package __NAMESPACE__.dto.req;
 
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
+/**
+ * @author Deolin 2026-06-07
+ */
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class LoginReq {
+public class DeleteUserReq {
 
-    /**
-     * 用户名
-     */
     @NotEmpty
-    String username;
-
-    /**
-     * 密码
-     */
-    @NotEmpty
-    String password;
+    List<String> userCodes;
 
 }

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="__NAMESPACE__.mapper.UserMapper">
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
+
+    <resultMap id="all" type="__NAMESPACE__.entity.UserEntity">
+        <id column="id" property="id"/>
+        <result column="user_code" property="userCode"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="last_login_at" property="lastLoginAt"/>
+        <result column="current_token" property="currentToken"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="all">
+        id, user_code, username, password, nick_name, last_login_at, current_token, created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="__NAMESPACE__.entity.UserEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id!=null">id,</if>
+            <if test="userCode!=null">user_code,</if>
+            <if test="username!=null">username,</if>
+            <if test="password!=null">password,</if>
+            <if test="nickName!=null">nick_name,</if>
+            <if test="lastLoginAt!=null">last_login_at,</if>
+            <if test="currentToken!=null">current_token,</if>
+            <if test="createdAt!=null">created_at,</if>
+            <if test="updatedAt!=null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id!=null">#{id},</if>
+            <if test="userCode!=null">#{userCode},</if>
+            <if test="username!=null">#{username},</if>
+            <if test="password!=null">#{password},</if>
+            <if test="nickName!=null">#{nickName},</if>
+            <if test="lastLoginAt!=null">#{lastLoginAt},</if>
+            <if test="currentToken!=null">#{currentToken},</if>
+            <if test="createdAt!=null">#{createdAt},</if>
+            <if test="updatedAt!=null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert">
+        <foreach collection="entities" item="one" separator=";">
+            INSERT INTO user
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null">id,</if>
+                <if test="one.userCode!=null">user_code,</if>
+                <if test="one.username!=null">username,</if>
+                <if test="one.password!=null">password,</if>
+                <if test="one.nickName!=null">nick_name,</if>
+                <if test="one.lastLoginAt!=null">last_login_at,</if>
+                <if test="one.currentToken!=null">current_token,</if>
+                <if test="one.createdAt!=null">created_at,</if>
+                <if test="one.updatedAt!=null">updated_at,</if>
+            </trim>
+            <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null">#{one.id},</if>
+                <if test="one.userCode!=null">#{one.userCode},</if>
+                <if test="one.username!=null">#{one.username},</if>
+                <if test="one.password!=null">#{one.password},</if>
+                <if test="one.nickName!=null">#{one.nickName},</if>
+                <if test="one.lastLoginAt!=null">#{one.lastLoginAt},</if>
+                <if test="one.currentToken!=null">#{one.currentToken},</if>
+                <if test="one.createdAt!=null">#{one.createdAt},</if>
+                <if test="one.updatedAt!=null">#{one.updatedAt},</if>
+            </trim>
+        </foreach>
+        ;
+    </insert>
+
+    <insert id="batchInsertEvenNull">
+        INSERT INTO user
+        (
+        <include refid="all"/>
+        )
+        VALUES
+        <foreach collection="entities" item="one" separator=",">(
+            #{one.id}, #{one.userCode}, #{one.username}, #{one.password}, #{one.nickName}, #{one.lastLoginAt},
+            #{one.currentToken}, #{one.createdAt}, #{one.updatedAt}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateById" parameterType="__NAMESPACE__.entity.UserEntity">
+        UPDATE user
+        <set>
+            <if test="userCode!=null">user_code = #{userCode},</if>
+            <if test="username!=null">username = #{username},</if>
+            <if test="password!=null">password = #{password},</if>
+            <if test="nickName!=null">nick_name = #{nickName},</if>
+            <if test="lastLoginAt!=null">last_login_at = #{lastLoginAt},</if>
+            <if test="currentToken!=null">current_token = #{currentToken},</if>
+            <if test="createdAt!=null">created_at = #{createdAt},</if>
+            <if test="updatedAt!=null">updated_at = #{updatedAt},</if>
+        </set>
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <update id="updateByIdEvenNull" parameterType="__NAMESPACE__.entity.UserEntity">
+        UPDATE user
+        SET
+        user_code = #{userCode},
+        username = #{username},
+        password = #{password},
+        nick_name = #{nickName},
+        last_login_at = #{lastLoginAt},
+        current_token = #{currentToken},
+        created_at = #{createdAt},
+        updated_at = #{updatedAt}
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM user
+        <where>
+            AND id = #{id}
+        </where>
+    </delete>
+
+    <select id="queryById" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND id = #{id}
+        </where>
+    </select>
+
+    <select id="queryByIds" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByIdsEachId" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByUserCode" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND user_code = #{userCode}
+        </where>
+    </select>
+
+    <select id="queryByUsername" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND username = #{username}
+        </where>
+    </select>
+
+    <select id="queryByCurrentToken" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND current_token = #{currentToken}
+        </where>
+    </select>
+
+    <delete id="deleteByUserCode">
+        DELETE FROM user
+        <where>
+            AND user_code = #{userCode}
+        </where>
+    </delete>
+
+    <delete id="deleteByUsername">
+        DELETE FROM user
+        <where>
+            AND username = #{username}
+        </where>
+    </delete>
+
+    <delete id="deleteByCurrentToken">
+        DELETE FROM user
+        <where>
+            AND current_token = #{currentToken}
+        </where>
+    </delete>
+
+    <select id="queryByUserCodes" parameterType="String" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND user_code IN (<foreach collection="userCodes" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByUsernames" parameterType="String" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND username IN (<foreach collection="usernames" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByCurrentTokens" parameterType="String" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND current_token IN (<foreach collection="currentTokens" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByUserCodesEachUserCode" parameterType="String" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND user_code IN (<foreach collection="userCodes" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByUsernamesEachUsername" parameterType="String" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND username IN (<foreach collection="usernames" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByCurrentTokensEachCurrentToken" parameterType="String" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            AND current_token IN (<foreach collection="currentTokens" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+
+    <select id='queryUser' resultMap='all'>
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            <if test="userCode != null and userCode != ''">
+                AND user_code != #{userCode}
+            </if>
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id='countUser' parameterType='__NAMESPACE__.dto.param.QueryUserParam' resultType='long'>
+        SELECT COUNT(*)
+        FROM user
+        <where>
+            <if test="userCode != null">
+                <if test="userCode.size() > 0">
+                    AND user_code IN (<foreach collection='userCode' item='one' separator=','>#{one}</foreach>)
+                </if>
+                <if test="userCode.size() == 0">
+                    AND 1 != 1
+                </if>
+            </if>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="nickName != null and nickName != ''">
+                AND nick_name LIKE CONCAT('%', #{nickName}, '%')
+            </if>
+            <if test="lastLoginAt != null">
+                AND last_login_at >= #{lastLoginAt}
+            </if>
+            <if test="lastLoginAtEx != null">
+                AND last_login_at &lt;= #{lastLoginAtEx}
+            </if>
+            <if test="createdAt != null">
+                AND created_at >= #{createdAt}
+            </if>
+            <if test="createdAtEx != null">
+                AND created_at &lt;= #{createdAtEx}
+            </if>
+        </where>
+    </select>
+    <select id='queryUserEx' parameterType='__NAMESPACE__.dto.param.QueryUserParam' resultMap='all'>
+        SELECT
+        <include refid="all"/>
+        FROM user
+        <where>
+            <if test="userCode != null">
+                <if test="userCode.size() > 0">
+                    AND user_code IN (<foreach collection='userCode' item='one' separator=','>#{one}</foreach>)
+                </if>
+                <if test="userCode.size() == 0">
+                    AND 1 != 1
+                </if>
+            </if>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="nickName != null and nickName != ''">
+                AND nick_name LIKE CONCAT('%', #{nickName}, '%')
+            </if>
+            <if test="lastLoginAt != null">
+                AND last_login_at >= #{lastLoginAt}
+            </if>
+            <if test="lastLoginAtEx != null">
+                AND last_login_at &lt;= #{lastLoginAtEx}
+            </if>
+            <if test="createdAt != null">
+                AND created_at >= #{createdAt}
+            </if>
+            <if test="createdAtEx != null">
+                AND created_at &lt;= #{createdAtEx}
+            </if>
+        </where>
+        ORDER BY
+        updated_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <delete id='deleteUser'>
+        DELETE FROM user
+        <where>
+            <if test="userCode != null">
+                <if test="userCode.size() > 0">
+                    AND user_code IN (<foreach collection='userCode' item='one' separator=','>#{one}</foreach>)
+                </if>
+                <if test="userCode.size() == 0">
+                    AND 1 != 1
+                </if>
+            </if>
+        </where>
+    </delete>
+</mapper>

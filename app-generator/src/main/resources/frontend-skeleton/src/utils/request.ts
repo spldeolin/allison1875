@@ -38,7 +38,6 @@ request.interceptors.response.use(
     if (data.errorCode === '401') {
       const authStore = useAuthStore()
       authStore.logout()
-      window.location.hash = '#/login'
       return Promise.reject(new Error('认证已过期'))
     }
     return Promise.reject(new Error(data.errorMsg || '请求失败'))

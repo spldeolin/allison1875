@@ -1,4 +1,4 @@
-package __NAMESPACE__.common;
+package __NAMESPACE__.dto.resp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,6 @@ import lombok.Data;
  */
 @Data
 public class PageResult<T> {
-
-    public PageResult() {
-    }
 
     /**
      * 总条数

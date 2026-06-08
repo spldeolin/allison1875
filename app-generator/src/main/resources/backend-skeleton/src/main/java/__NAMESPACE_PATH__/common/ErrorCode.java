@@ -1,45 +1,46 @@
 package __NAMESPACE__.common;
 
-public interface ErrorCode {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    String code();
+/**
+ * 错误码
+ *
+ * @author Deolin 2026-06-08
+ */
+@AllArgsConstructor
+@Getter
+public enum ErrorCode {
 
-    String defaultMsg();
+    /**
+     * 参数非法
+     */
+    BAD_REQUEST("400", "参数非法"),
 
-    ErrorCode ILLEGAL_REQUEST = new ErrorCode() {
-        @Override
-        public String code() {
-            return "400";
-        }
+    /**
+     * 认证不通过
+     */
+    UNAUTHORIZED("401", "认证失效"),
 
-        @Override
-        public String defaultMsg() {
-            return "非法请求";
-        }
-    };
+    /**
+     * 鉴权不通过
+     */
+    FORBIDDEN("403", "未授权"),
 
-    ErrorCode SERVER_EXCEPTION = new ErrorCode() {
-        @Override
-        public String code() {
-            return "500";
-        }
+    /**
+     * 内部错误
+     */
+    INTERNAL_ERROR("500", "内部错误"),
 
-        @Override
-        public String defaultMsg() {
-            return "内部错误，请稍后重试";
-        }
-    };
+    /**
+     * 业务错误
+     */
+    BIZ_ERROR("501", "业务异常"),
 
-    ErrorCode GENERAL_BIZ_EXCEPTION = new ErrorCode() {
-        @Override
-        public String code() {
-            return "1001";
-        }
+    ;
 
-        @Override
-        public String defaultMsg() {
-            return null;
-        }
-    };
+    private final String code;
+
+    private final String defaultMsg;
 
 }

@@ -1,14 +1,22 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import request from '@/utils/request'
+import type { RequestResult } from '@/utils/request'
 
 const STORAGE_KEY_TOKEN = 'form_web_token'
 const STORAGE_KEY_USER = 'form_web_user'
 const STORAGE_KEY_PERMISSIONS = 'form_web_permissions'
+const STORAGE_KEY_REDIRECT = 'form_web_redirect'
 
 export interface UserInfo {
-  id: string
   username: string
-  displayName: string
+  nickName: string
+}
+
+interface CurrentUserResp {
+  nickName: string
+  username: string
+  permissions: string[]
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -35,17 +43,39 @@ export const useAuthStore = defineStore('auth', () => {
     return token.value
   }
 
-  function getUserInfo(): UserInfo | null {
-    return userInfo.value
-  }
-
   function hasPermission(perm: string): boolean {
-    // Empty permissions list means no restriction — all routes are accessible
     if (!permissions.value || permissions.value.length === 0) return true
     return permissions.value.includes(perm)
   }
 
-  function logout() {
+  async function fetchCurrentUser(): Promise<boolean> {
+    try {
+      const { data } = await request.post<RequestResult<CurrentUserResp>>('/api/v1/authc/getCurrentUser')
+      const resp = data.data
+      userInfo.value = { username: resp.username, nickName: resp.nickName }
+      permissions.value = resp.permissions
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userInfo.value))
+      localStorage.setItem(STORAGE_KEY_PERMISSIONS, JSON.stringify(resp.permissions))
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  async function logoutApi(): Promise<void> {
+    try {
+      await request.post('/api/v1/authc/logout')
+    } catch {
+      // ignore
+    }
+    clearLocal()
+  }
+
+  async function updateSelfPassword(password: string): Promise<void> {
+    await request.post('/api/v1/authc/updateSelfPassword', { password })
+  }
+
+  function clearLocal() {
     token.value = ''
     userInfo.value = null
     permissions.value = []
@@ -54,5 +84,24 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(STORAGE_KEY_PERMISSIONS)
   }
 
-  return { token, userInfo, permissions, isAuthenticated, setAuth, getToken, getUserInfo, hasPermission, logout }
+  function logout() {
+    clearLocal()
+  }
+
+  function saveRedirect(fullPath: string) {
+    localStorage.setItem(STORAGE_KEY_REDIRECT, fullPath)
+  }
+
+  function popRedirect(): string | null {
+    const path = localStorage.getItem(STORAGE_KEY_REDIRECT)
+    localStorage.removeItem(STORAGE_KEY_REDIRECT)
+    return path
+  }
+
+  return {
+    token, userInfo, permissions, isAuthenticated,
+    setAuth, getToken, hasPermission, logout,
+    fetchCurrentUser, logoutApi, updateSelfPassword,
+    saveRedirect, popRedirect
+  }
 })

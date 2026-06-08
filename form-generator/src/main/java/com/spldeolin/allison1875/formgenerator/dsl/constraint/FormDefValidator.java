@@ -30,18 +30,24 @@ public class FormDefValidator implements ConstraintValidator<FormDefValid, FormD
 
         // 1. name 的 upperCamel 格式由 @UpperCamel 注解校验
 
-        // 2. items[].name 必须唯一
+        // 2. name 不允许与内置实体同名
+        if (formDef.getName() != null && formDef.getName().equalsIgnoreCase("User")) {
+            buildViolation(context, "name", "name 不允许与内置实体同名");
+            return false;
+        }
+
+        // 3. items[].name 必须唯一
         if (formDef.getItems() != null && !validateItemNamesUnique(formDef, context)) {
             return false;
         }
 
-        // 3. indices[].itemNames 必须存在于 items[].name
+        // 4. indices[].itemNames 必须存在于 items[].name
         if (formDef.getItems() != null && formDef.getIndices() != null && !validateIndicesItemNamesExist(formDef,
                 context)) {
             return false;
         }
 
-        // 4. indices[].itemNames中不能包含多选
+        // 5. indices[].itemNames中不能包含多选
         if (formDef.getItems() != null && formDef.getIndices() != null) {
             for (int i = 0; i < formDef.getIndices().size(); i++) {
                 IndexDef indexDef = formDef.getIndices().get(i);

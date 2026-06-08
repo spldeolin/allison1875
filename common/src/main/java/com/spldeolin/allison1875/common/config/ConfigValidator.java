@@ -74,7 +74,7 @@ public class ConfigValidator implements ConstraintValidator<ConfigValid, Config>
 
         }
 
-        // ---- codeTemplate 相关校验 ----
+        // ---- codeSnippet 相关校验 ----
         if (config.getCodeSnippet() != null) {
             CodeSnippet cs = config.getCodeSnippet();
             boolean hasQualifier = StringUtils.isNotEmpty(cs.getRequestResultQualifier());

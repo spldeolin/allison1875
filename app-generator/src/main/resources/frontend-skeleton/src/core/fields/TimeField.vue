@@ -21,7 +21,14 @@ const FORMAT_MAP = {
 
 <template>
   <template v-if="mode === 'display'">
-    <span>{{ value ?? '' }}</span>
+    <span v-if="!value" style="color: #cbd5e1">-</span>
+    <template v-else-if="item.format === 'dateTime' && String(value).includes(' ')">
+      <div style="display: flex; flex-direction: column; gap: 2px; line-height: 1.4">
+        <span style="font-size: 13px; color: #374151">{{ String(value).split(' ')[0] }}</span>
+        <span style="font-size: 13px; color: #374151">{{ String(value).split(' ')[1] }}</span>
+      </div>
+    </template>
+    <span v-else>{{ value }}</span>
   </template>
   <template v-else-if="mode === 'search'">
     <NDatePicker

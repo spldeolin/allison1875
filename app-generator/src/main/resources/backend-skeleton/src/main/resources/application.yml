@@ -22,5 +22,8 @@ mybatis:
   configuration:
     default-enum-type-handler: __NAMESPACE__.mybatis.EnumTypeHandlerEx
 
-snow-flake:
-  machine-id: 0
+__APP_NAME__:
+  authc:
+    anonymousApiPaths: /api/v1/authc/login
+    loginExpireTime: 172800000 # millis of 2 days
+    disableMultiDeviceLogin: false
