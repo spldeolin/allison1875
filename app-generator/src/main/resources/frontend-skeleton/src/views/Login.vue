@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { NCard, NForm, NFormItem, NInput, NButton, NIcon, useMessage, type FormInst } from 'naive-ui'
 import { GridOutline } from '@vicons/ionicons5'
@@ -34,6 +34,122 @@ const rules = {
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
 
+// ==================== Canvas 沙箱长方体背景动画 ====================
+
+const bgCanvas = ref<HTMLCanvasElement | null>(null)
+let animFrameId = 0
+
+interface SandboxRow {
+  y: number
+  boxW: number
+  boxH: number
+  gap: number
+  speed: number
+  offset: number
+  color: string
+  borderColor: string
+}
+
+function initCanvas() {
+  const canvas = bgCanvas.value as HTMLCanvasElement
+  if (!canvas) return
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+  if (!ctx) return
+
+  const resize = () => {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
+  resize()
+  window.addEventListener('resize', resize)
+
+  const rowColors = [
+    { fill: 'rgba(24,160,88,0.04)',   border: 'rgba(24,160,88,0.09)'  },
+    { fill: 'rgba(32,128,240,0.03)',  border: 'rgba(32,128,240,0.07)' },
+    { fill: 'rgba(240,160,32,0.03)',  border: 'rgba(240,160,32,0.07)' },
+    { fill: 'rgba(100,180,120,0.03)', border: 'rgba(100,180,120,0.08)' },
+    { fill: 'rgba(80,120,220,0.03)',  border: 'rgba(80,120,220,0.06)' },
+    { fill: 'rgba(200,80,80,0.02)',   border: 'rgba(200,80,80,0.06)'  },
+    { fill: 'rgba(24,160,88,0.03)',   border: 'rgba(24,160,88,0.07)'  },
+  ]
+
+  const ROW_COUNT = 5
+  const rows: SandboxRow[] = Array.from({ length: ROW_COUNT }, (_, i) => {
+    const c = rowColors[i % rowColors.length]
+    const boxW = 240 + Math.random() * 180
+    const boxH = 84 + Math.random() * 42
+    const gap  = 180 + Math.random() * 120
+    const speed = (0.1 + Math.random() * 0.15) * (i % 2 === 0 ? 1 : -1)
+    return {
+      y: 0,
+      boxW, boxH, gap,
+      speed,
+      offset: Math.random() * (boxW + gap) * -1,
+      color: c.fill,
+      borderColor: c.border,
+    }
+  })
+
+  const distributeRows = () => {
+    const h = canvas.height
+    rows.forEach((row, i) => {
+      row.y = (h / (ROW_COUNT + 1)) * (i + 1)
+    })
+  }
+  distributeRows()
+  window.addEventListener('resize', distributeRows)
+
+  function drawBox(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number, fill: string, stroke: string) {
+    ctx.beginPath()
+    ctx.moveTo(x + r, y)
+    ctx.lineTo(x + w - r, y)
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+    ctx.lineTo(x + w, y + h - r)
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+    ctx.lineTo(x + r, y + h)
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+    ctx.lineTo(x, y + r)
+    ctx.quadraticCurveTo(x, y, x + r, y)
+    ctx.closePath()
+    ctx.fillStyle = fill
+    ctx.fill()
+    ctx.strokeStyle = stroke
+    ctx.lineWidth = 1
+    ctx.stroke()
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    rows.forEach(row => {
+      row.offset += row.speed
+      const unit = row.boxW + row.gap
+      if (row.speed > 0 && row.offset > unit) row.offset -= unit
+      if (row.speed < 0 && row.offset < -unit) row.offset += unit
+
+      const startX = row.offset % unit - unit
+      const count = Math.ceil(canvas.width / unit) + 2
+      for (let i = 0; i < count; i++) {
+        const x = startX + i * unit
+        const y = row.y - row.boxH / 2
+        drawBox(ctx, x, y, row.boxW, row.boxH, 6, row.color, row.borderColor)
+      }
+    })
+
+    animFrameId = requestAnimationFrame(animate)
+  }
+
+  animate()
+}
+
+onMounted(() => {
+  initCanvas()
+})
+
+onBeforeUnmount(() => {
+  if (animFrameId) cancelAnimationFrame(animFrameId)
+})
+
 async function handleLogin() {
   try {
     await formRef.value?.validate()
@@ -59,12 +175,12 @@ async function handleLogin() {
 
 <template>
   <div class="login-page">
-    <div class="login-bg-shapes">
-      <i class="s" style="--d:80s; --x:30px; --y:-40px; --r:45deg; width:160px; height:160px; top:8%; left:5%; border-radius:50%;"></i>
-      <i class="s" style="--d:100s; --x:-25px; --y:35px; --r:-30deg; width:200px; height:90px; top:18%; left:55%; border-radius:10px;"></i>
-      <i class="s" style="--d:90s; --x:20px; --y:50px; --r:60deg; width:100px; height:100px; top:60%; left:10%; border-radius:50%;"></i>
-      <i class="s" style="--d:110s; --x:-35px; --y:-30px; --r:-45deg; width:130px; height:130px; top:48%; left:65%; border-radius:14px;"></i>
-      <i class="s" style="--d:95s; --x:40px; --y:25px; --r:30deg; width:80px; height:80px; top:78%; left:38%; border-radius:50%;"></i>
+    <canvas ref="bgCanvas" class="login-bg-canvas"></canvas>
+
+    <div class="login-bg">
+      <div class="login-bg-circle circle-1"></div>
+      <div class="login-bg-circle circle-2"></div>
+      <div class="login-bg-circle circle-3"></div>
     </div>
 
     <div class="login-card-wrapper">
@@ -117,28 +233,56 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #f0f9ff 100%);
+  background: linear-gradient(135deg, #f7fbf9 0%, #f2f9f3 50%, #faf4fb 100%);
   padding: 24px;
   position: relative;
   overflow: hidden;
 }
 
-.login-bg-shapes {
+.login-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-bg {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.s {
+.login-bg-circle {
   position: absolute;
-  border: 1.5px solid rgba(24, 160, 88, 0.13);
-  background: rgba(24, 160, 88, 0.04);
-  animation: float var(--d) ease-in-out infinite alternate;
+  border-radius: 50%;
+  opacity: 0.04;
 }
 
-@keyframes float {
-  from { transform: translate(0, 0) rotate(0deg); }
-  to { transform: translate(var(--x), var(--y)) rotate(var(--r)); }
+.circle-1 {
+  width: 500px;
+  height: 500px;
+  background: #18a058;
+  top: -150px;
+  left: -150px;
+}
+
+.circle-2 {
+  width: 400px;
+  height: 400px;
+  background: #2080f0;
+  bottom: -100px;
+  right: -100px;
+}
+
+.circle-3 {
+  width: 300px;
+  height: 300px;
+  background: #f0a020;
+  top: 50%;
+  left: 60%;
+  transform: translate(-50%, -50%);
 }
 
 .login-card-wrapper {
@@ -186,9 +330,5 @@ async function handleLogin() {
   font-size: 15px !important;
   font-weight: 600 !important;
   border-radius: 10px !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .s { animation: none; }
 }
 </style>

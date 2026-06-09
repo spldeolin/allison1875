@@ -11,6 +11,8 @@ const props = defineProps<{
   data: Record<string, any>[]
   loading: boolean
   pagination: PaginationProps
+  /** Form title for display (e.g. "学生档案") */
+  formTitle?: string
   /** The bizKey value of the row whose detail is currently loading, or null */
   editingRowKey?: unknown
   /** The bizKey field name (e.g. "studentProfileCode") */
@@ -53,14 +55,23 @@ function renderTimeCell(val: unknown) {
 }
 
 const columns = computed<DataTableColumn[]>(() => {
-  const totalItems = visibleItems.value.length
-  // +2 for createdAt / updatedAt
-  const shouldFreeze = totalItems > 4
+  const cols: DataTableColumn[] = [{ type: 'selection' }]
 
-  // 最左侧勾选列（type: 'selection' 是 Naive UI 内置多选列）
-  const cols: DataTableColumn[] = [{ type: 'selection', fixed: shouldFreeze ? 'left' : undefined }]
+  if (props.bizKey) {
+    cols.push({
+      title: `${props.formTitle || ''}ID`,
+      key: props.bizKey,
+      width: 120,
+      ellipsis: { tooltip: true },
+      render(row: Record<string, any>) {
+        const val = row[props.bizKey!]
+        if (!val) return h('span', { style: 'color: #cbd5e1' }, '-')
+        return h('span', { style: 'font-size: 12px; font-family: monospace; color: #64748b' }, String(val))
+      }
+    })
+  }
 
-  cols.push(...visibleItems.value.map((item, index) => {
+  cols.push(...visibleItems.value.map((item) => {
     const isMultiline = item.type === 'text' && (item as any).isMultilineOrRich
     return {
     title: item.title,
@@ -71,7 +82,6 @@ const columns = computed<DataTableColumn[]>(() => {
     resizable: true,
     minWidth: 120,
     ...(isMultiline ? { width: 200 } : {}),
-    ...(shouldFreeze && index < 4 ? { fixed: 'left' as const } : {}),
     render(row: Record<string, any>) {
       return h(FieldRenderer, {
         item,
@@ -81,7 +91,6 @@ const columns = computed<DataTableColumn[]>(() => {
     }
   }}))
 
-  // 固定追加：创建时间、更新时间
   cols.push({
     title: '创建时间',
     key: 'createdAt',
@@ -105,7 +114,6 @@ const columns = computed<DataTableColumn[]>(() => {
     title: '操作',
     key: '_actions',
     width: 120,
-    fixed: shouldFreeze ? 'right' : undefined,
     render(row: Record<string, any>) {
       const isThisRowLoading = props.editingRowKey != null
         && props.bizKey != null
@@ -135,14 +143,6 @@ const columns = computed<DataTableColumn[]>(() => {
   })
 
   return cols
-})
-
-const scrollX = computed(() => {
-  // +2 for createdAt/updatedAt columns (150 each), +1 for checkbox column (48)
-  if (visibleItems.value.length > 4) {
-    return visibleItems.value.length * 150 + 120 + 300 + 48
-  }
-  return undefined
 })
 
 function handlePageChange(page: number) {
@@ -183,14 +183,13 @@ function rowProps(row: Record<string, any>) {
     :data="data"
     :loading="loading"
     :pagination="pagination"
-    :scroll-x="scrollX"
     :checked-row-keys="checkedRowKeys"
     :row-key="(row: Record<string, any>) => bizKey ? row[bizKey] : row._rowIndex"
     :row-props="rowProps"
-    striped
     flex-height
-    style="flex: 1; min-height: 0;"
+    striped
     remote
+    style="flex: 1; min-height: 0"
     @update:page="handlePageChange"
     @update:page-size="handlePageSizeChange"
     @update:checked-row-keys="handleCheckedRowKeysChange"

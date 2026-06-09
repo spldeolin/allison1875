@@ -55,6 +55,7 @@ const {
         :items="schema.items"
         :data="tableData"
         :loading="tableLoading"
+        :form-title="schema.title"
         :editing-row-key="editingRowKey"
         :biz-key="bizKey"
         :pagination="pagination"

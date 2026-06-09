@@ -84,23 +84,25 @@ function handleClose() {
 
 <template>
   <NModal :show="visible" @update:show="emit('update:visible', $event)">
-    <NCard :title="title" style="width: 600px; border-radius: 16px;" :bordered="false">
-      <NForm ref="formRef" :model="localModel" :rules="rules" label-placement="left" label-width="130px">
-        <NFormItem
-          v-for="item in visibleItems"
-          :key="item.name"
-          :label="item.title"
-          :path="isEditable(item, editMode) ? item.name : undefined"
-          :required="item.isNonVoid && isEditable(item, editMode)"
-        >
-          <FieldRenderer
-            :item="item"
-            :mode="isEditable(item, editMode) ? 'edit' : 'display'"
-            :value="localModel[item.name] ?? null"
-            @update:value="isEditable(item, editMode) ? updateField(item.name, $event) : undefined"
-          />
-        </NFormItem>
-      </NForm>
+    <NCard :title="title" class="edit-modal-card" :bordered="false">
+      <div class="edit-modal-body">
+        <NForm ref="formRef" :model="localModel" :rules="rules" label-placement="left" label-width="130px">
+          <NFormItem
+            v-for="item in visibleItems"
+            :key="item.name"
+            :label="item.title"
+            :path="isEditable(item, editMode) ? item.name : undefined"
+            :required="item.isNonVoid && isEditable(item, editMode)"
+          >
+            <FieldRenderer
+              :item="item"
+              :mode="isEditable(item, editMode) ? 'edit' : 'display'"
+              :value="localModel[item.name] ?? null"
+              @update:value="isEditable(item, editMode) ? updateField(item.name, $event) : undefined"
+            />
+          </NFormItem>
+        </NForm>
+      </div>
       <template #footer>
         <NSpace justify="end">
           <NButton @click="handleClose">取消</NButton>
@@ -110,3 +112,19 @@ function handleClose() {
     </NCard>
   </NModal>
 </template>
+
+<style scoped>
+.edit-modal-card {
+  width: 600px;
+  border-radius: 16px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-modal-body {
+  overflow-y: auto;
+  max-height: calc(80vh - 160px);
+  padding-right: 8px;
+}
+</style>
