@@ -33,31 +33,31 @@ public class UniqueIndexItTest extends FormGeneratorItBaseTest {
         String ddl = new String(Files.readAllBytes(ddlFile.toPath()), StandardCharsets.UTF_8);
         assertTrue(ddl.contains("CREATE TABLE"), "DDL should contain CREATE TABLE");
         // 自动添加的业务主键唯一索引
-        assertTrue(ddl.contains("UNIQUE KEY `uk_user_code`"),
+        assertTrue(ddl.contains("UNIQUE KEY `uk_user2_code`"),
                 "DDL should contain UNIQUE KEY on auto-added bizId 'user_code'");
         // 用户定义的 email 唯一索引
         assertTrue(ddl.contains("UNIQUE KEY `uk_email`"),
                 "DDL should contain UNIQUE KEY on user-defined 'email'");
 
         // === Mapper 接口验证：唯一索引 → queryByXxx 方法（返回单个 Entity） ===
-        File mapperFile = new File(basedir, "src/main/java/com/example/mapper/UserMapper.java");
+        File mapperFile = new File(basedir, "src/main/java/com/example/mapper/User2Mapper.java");
         assertTrue(mapperFile.exists(), "UserMapper should be generated");
         String mapperContent = new String(Files.readAllBytes(mapperFile.toPath()), StandardCharsets.UTF_8);
         // 业务主键唯一索引 → queryByUserCode（返回单个实体）
-        assertTrue(mapperContent.contains("queryByUserCode"),
+        assertTrue(mapperContent.contains("queryByUser2Code"),
                 "Mapper should contain queryByUserCode method from bizId unique index");
         // email 唯一索引 → queryByEmail（返回单个实体，非 List）
         assertTrue(mapperContent.contains("queryByEmail"),
                 "Mapper should contain queryByEmail method from email unique index");
         // 验证 email 方法返回类型是单实体而非 List（唯一索引特征）
-        assertTrue(mapperContent.contains("UserEntity queryByEmail"),
+        assertTrue(mapperContent.contains("User2Entity queryByEmail"),
                 "queryByEmail should return single UserEntity (unique index), not List");
 
         // === Mapper XML 验证 ===
-        File xmlFile = new File(basedir, "src/main/resources/mapper/UserMapper.xml");
+        File xmlFile = new File(basedir, "src/main/resources/mapper/User2Mapper.xml");
         assertTrue(xmlFile.exists(), "Mapper XML should be generated");
         String xmlContent = new String(Files.readAllBytes(xmlFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(xmlContent.contains("queryByUserCode"),
+        assertTrue(xmlContent.contains("queryByUser2Code"),
                 "Mapper XML should contain queryByUserCode select statement");
         assertTrue(xmlContent.contains("queryByEmail"),
                 "Mapper XML should contain queryByEmail select statement");
@@ -67,11 +67,11 @@ public class UniqueIndexItTest extends FormGeneratorItBaseTest {
 
         // === Save ServiceImpl 验证：编辑分支使用 queryByUserCode ===
         File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveUserServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveUserServiceImpl should be generated");
+                "src/main/java/com/example/service/impl/SaveUser2ServiceImpl.java");
+        assertTrue(saveServiceImplFile.exists(), "SaveUser2ServiceImpl should be generated");
         String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(saveServiceImplContent.contains("userMapper.queryByUserCode("),
+        assertTrue(saveServiceImplContent.contains("user2Mapper.queryByUser2Code("),
                 "Save service edit branch should call userMapper.queryByUserCode");
 
         // === 验证没有生成 api-docs 目录 ===
