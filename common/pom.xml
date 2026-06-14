@@ -10,6 +10,10 @@
 
     <artifactId>common</artifactId>
 
+    <properties>
+        <surefire.excludedGroups>integration</surefire.excludedGroups>
+    </properties>
+
     <dependencies>
         <!-- javaparser -->
         <dependency>
@@ -98,6 +102,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
