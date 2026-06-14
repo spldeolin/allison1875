@@ -719,55 +719,38 @@ public class MavenUtils {
         }
 
         MAVEN_INVOKE_LOCK.lock();
+        String previousMultiModuleDir = System.getProperty("maven.multiModuleProjectDirectory");
+        Thread currentThread = Thread.currentThread();
+        ClassLoader originalCl = currentThread.getContextClassLoader();
         try {
-            // Save and set maven.multiModuleProjectDirectory
-            String previousMultiModuleDir = System.getProperty("maven.multiModuleProjectDirectory");
             System.setProperty("maven.multiModuleProjectDirectory", workingDir.getAbsolutePath());
-
-            // Create captured output streams
-            ByteArrayOutputStream outBaos = new ByteArrayOutputStream();
-            ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
-            PrintStream outStream = new PrintStream(outBaos, true, StandardCharsets.UTF_8.name());
-            PrintStream errStream = new PrintStream(errBaos, true, StandardCharsets.UTF_8.name());
-
-            // Set thread context classloader
-            Thread currentThread = Thread.currentThread();
-            ClassLoader originalCl = currentThread.getContextClassLoader();
             currentThread.setContextClassLoader(mavenClassLoader);
 
-            int exitCode;
-            try {
-                exitCode = (int) mavenDoMainMethod.invoke(mavenCliInstance, args,
-                        workingDir.getAbsolutePath(), outStream, errStream);
-            } finally {
-                // Restore thread context classloader
-                currentThread.setContextClassLoader(originalCl);
-            }
+            ByteArrayOutputStream outBaos = new ByteArrayOutputStream();
+            ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
+            try (PrintStream outStream = new PrintStream(outBaos, true, StandardCharsets.UTF_8);
+                 PrintStream errStream = new PrintStream(errBaos, true, StandardCharsets.UTF_8)) {
 
-            // Restore system property
+                int exitCode = (int) mavenDoMainMethod.invoke(mavenCliInstance, args,
+                        workingDir.getAbsolutePath(), outStream, errStream);
+
+                if (exitCode != 0) {
+                    String output = outBaos.toString(StandardCharsets.UTF_8)
+                            + errBaos.toString(StandardCharsets.UTF_8);
+                    log.error("embedded Maven failed with exit code {}, output:\n{}", exitCode, output);
+                }
+                return exitCode;
+            }
+        } catch (Exception e) {
+            log.error("embedded Maven invocation failed", e);
+            return -1;
+        } finally {
+            currentThread.setContextClassLoader(originalCl);
             if (previousMultiModuleDir == null) {
                 System.clearProperty("maven.multiModuleProjectDirectory");
             } else {
                 System.setProperty("maven.multiModuleProjectDirectory", previousMultiModuleDir);
             }
-
-            // If exit code != 0, log the captured output
-            if (exitCode != 0) {
-                String stdout = outBaos.toString(StandardCharsets.UTF_8.name());
-                String stderr = errBaos.toString(StandardCharsets.UTF_8.name());
-                if (!stdout.isEmpty()) {
-                    log.error("embedded Maven stdout:\n{}", stdout);
-                }
-                if (!stderr.isEmpty()) {
-                    log.error("embedded Maven stderr:\n{}", stderr);
-                }
-            }
-
-            return exitCode;
-        } catch (Exception e) {
-            log.error("embedded Maven invocation failed", e);
-            return -1;
-        } finally {
             MAVEN_INVOKE_LOCK.unlock();
         }
     }
