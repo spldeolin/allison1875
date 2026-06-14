@@ -1,17 +1,22 @@
 package com.spldeolin.allison1875.common.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -36,6 +41,12 @@ public class MavenUtils {
         throw new UnsupportedOperationException("Never instantiate me.");
     }
 
+    private static final ReentrantLock MAVEN_INVOKE_LOCK = new ReentrantLock();
+    private static volatile ClassLoader mavenClassLoader;
+    private static volatile Method mavenDoMainMethod;
+    private static volatile Object mavenCliInstance;
+    private static volatile boolean embeddedMavenAvailable = true;
+
     /**
      * 对指定的Maven模块执行 mvn compile
      *
@@ -55,6 +66,43 @@ public class MavenUtils {
 
         File topLevelDir = findTopLevelProjectDir(mavenModuleDir);
 
+        // Build args for embedded Maven
+        List<String> argsList = new ArrayList<>();
+        argsList.add("compile");
+        argsList.add("-T");
+        argsList.add("1C");
+        if (!topLevelDir.equals(mavenModuleDir)) {
+            String relativePath = calculateRelativePath(topLevelDir, mavenModuleDir);
+            argsList.add("-pl");
+            argsList.add(relativePath);
+            argsList.add("-am");
+        }
+        if (javaHome != null && !javaHome.isEmpty()) {
+            argsList.add("-Dmaven.compiler.fork=true");
+            argsList.add("-Dmaven.compiler.executable=" + javaHome + "/bin/javac");
+        }
+        argsList.add("-q");
+
+        String[] args = argsList.toArray(new String[0]);
+        log.info("invoking embedded Maven compile with args: {} (in {})", argsList, topLevelDir);
+
+        int exitCode = invokeEmbeddedMaven(args, topLevelDir);
+
+        if (exitCode == -1) {
+            // Embedded Maven unavailable, fall back to process-based invocation
+            log.info("falling back to process-based Maven invocation for compile");
+            compileViaProcess(mavenModuleDir, javaHome, topLevelDir);
+            return;
+        }
+
+        if (exitCode != 0) {
+            throw new Allison1875Exception("mvn compile failed with exit code " + exitCode);
+        }
+
+        log.info("mvn compile succeeded for: {}", mavenModuleDir);
+    }
+
+    private static void compileViaProcess(File mavenModuleDir, String javaHome, File topLevelDir) {
         StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
         commandLine.append(" compile");
         commandLine.append(" -T 1C");
@@ -369,7 +417,7 @@ public class MavenUtils {
 
     private static String executeBuildClasspath(File mavenModuleDir, String javaHome) {
         // 使用 -DincludeScope=compile 确保获取编译期所有依赖
-        // 使用 -DmdOutputFile 将 classpath 输出到临时文件，避免解析标准输出中的噪音
+        // 使用 -Dmdep.outputFile 将 classpath 输出到临时文件，避免解析标准输出中的噪音
         File cpOutputFile;
         try {
             cpOutputFile = File.createTempFile("allison1875-cp-", ".txt");
@@ -380,6 +428,63 @@ public class MavenUtils {
 
         File topLevelDir = findTopLevelProjectDir(mavenModuleDir);
 
+        try {
+            // Build args for embedded Maven
+            List<String> argsList = new ArrayList<>();
+            argsList.add("compile");
+            argsList.add("dependency:build-classpath");
+            argsList.add("-T");
+            argsList.add("1C");
+            argsList.add("-DincludeScope=compile");
+            argsList.add("-Dmdep.outputFile=" + cpOutputFile.getAbsolutePath());
+            if (!topLevelDir.equals(mavenModuleDir)) {
+                String relativePath = calculateRelativePath(topLevelDir, mavenModuleDir);
+                argsList.add("-pl");
+                argsList.add(relativePath);
+                argsList.add("-am");
+            }
+            if (javaHome != null && !javaHome.isEmpty()) {
+                argsList.add("-Dmaven.compiler.fork=true");
+                argsList.add("-Dmaven.compiler.executable=" + javaHome + "/bin/javac");
+            }
+            argsList.add("-q");
+
+            String[] args = argsList.toArray(new String[0]);
+            log.info("invoking embedded Maven build-classpath with args: {} (in {})", argsList, topLevelDir);
+
+            int exitCode = invokeEmbeddedMaven(args, topLevelDir);
+
+            if (exitCode == -1) {
+                // Embedded Maven unavailable, fall back to process-based invocation
+                log.info("falling back to process-based Maven invocation for build-classpath");
+                return executeBuildClasspathViaProcess(mavenModuleDir, javaHome, topLevelDir, cpOutputFile);
+            }
+
+            if (exitCode != 0) {
+                throw new Allison1875Exception(
+                        "mvn dependency:build-classpath failed with exit code " + exitCode);
+            }
+
+            // Read classpath from temp file
+            String classpath = Files.readString(cpOutputFile.toPath(), StandardCharsets.UTF_8).trim();
+            log.debug("resolved classpath: {}", classpath);
+
+            if (classpath.isEmpty()) {
+                log.warn("dependency:build-classpath returned empty classpath for: {}", mavenModuleDir);
+            }
+
+            return classpath;
+        } catch (Allison1875Exception e) {
+            throw e;
+        } catch (Exception e) {
+            throw new Allison1875Exception("failed to execute mvn dependency:build-classpath", e);
+        } finally {
+            cpOutputFile.delete();
+        }
+    }
+
+    private static String executeBuildClasspathViaProcess(File mavenModuleDir, String javaHome,
+            File topLevelDir, File cpOutputFile) {
         StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
         commandLine.append(" compile");
         commandLine.append(" dependency:build-classpath");
@@ -391,7 +496,7 @@ public class MavenUtils {
             commandLine.append(" -pl ").append(relativePath);
             commandLine.append(" -am");
         }
-        commandLine.append(" -q"); // quiet mode，减少输出噪音
+        commandLine.append(" -q");
 
         log.info("executing: {} (in {})", commandLine, topLevelDir);
 
@@ -399,7 +504,6 @@ public class MavenUtils {
             ProcessBuilder pb = createShellProcessBuilder(commandLine.toString(), topLevelDir);
             Process process = pb.start();
 
-            // 读取并记录子进程输出（调试用）
             StringBuilder output = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
@@ -416,7 +520,6 @@ public class MavenUtils {
                         "mvn dependency:build-classpath failed with exit code " + exitCode + ", output:\n" + output);
             }
 
-            // 从临时文件中读取 classpath 字符串
             String classpath = Files.readString(cpOutputFile.toPath(), StandardCharsets.UTF_8).trim();
             log.debug("resolved classpath: {}", classpath);
 
@@ -429,8 +532,6 @@ public class MavenUtils {
             throw e;
         } catch (Exception e) {
             throw new Allison1875Exception("failed to execute mvn dependency:build-classpath", e);
-        } finally {
-            cpOutputFile.delete();
         }
     }
 
@@ -455,6 +556,220 @@ public class MavenUtils {
             log.info("using specified JAVA_HOME: {}", javaHome);
         }
         return sb;
+    }
+
+    // ========== Embedded Maven Invoker ==========
+
+    /**
+     * 解析Maven安装目录
+     *
+     * @return Maven安装目录，如果无法找到则返回null
+     */
+    private static File resolveMavenHome() {
+        // (a) Check MAVEN_HOME env var
+        String mavenHome = System.getenv("MAVEN_HOME");
+        if (mavenHome != null && !mavenHome.isEmpty()) {
+            File home = new File(mavenHome);
+            if (new File(home, "lib").isDirectory()) {
+                log.debug("resolveMavenHome: found via MAVEN_HOME={}", mavenHome);
+                return home;
+            }
+        }
+
+        // (b) Check M2_HOME env var
+        String m2Home = System.getenv("M2_HOME");
+        if (m2Home != null && !m2Home.isEmpty()) {
+            File home = new File(m2Home);
+            if (new File(home, "lib").isDirectory()) {
+                log.debug("resolveMavenHome: found via M2_HOME={}", m2Home);
+                return home;
+            }
+        }
+
+        // (c) Run 'which mvn', follow symlinks, navigate up from bin/mvn
+        try {
+            ProcessBuilder pb = new ProcessBuilder("which", "mvn");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            String mvnPath;
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                mvnPath = reader.readLine();
+            }
+            int exitCode = process.waitFor();
+            if (exitCode == 0 && mvnPath != null && !mvnPath.trim().isEmpty()) {
+                // Follow symlinks to real path
+                Path realPath = Paths.get(mvnPath.trim()).toRealPath();
+                // Navigate up from bin/mvn to parent (Maven home)
+                File home = realPath.getParent().getParent().toFile();
+                if (new File(home, "lib").isDirectory()) {
+                    log.debug("resolveMavenHome: found via 'which mvn' -> {}", home);
+                    return home;
+                }
+            }
+        } catch (Exception e) {
+            log.debug("resolveMavenHome: 'which mvn' failed: {}", e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * 使用双重检查锁定延迟初始化嵌入式Maven
+     */
+    private static void initEmbeddedMaven() {
+        if (mavenClassLoader != null) {
+            return;
+        }
+        if (!embeddedMavenAvailable) {
+            return;
+        }
+        synchronized (MavenUtils.class) {
+            if (mavenClassLoader != null) {
+                return;
+            }
+            if (!embeddedMavenAvailable) {
+                return;
+            }
+
+            File mavenHome = resolveMavenHome();
+            if (mavenHome == null) {
+                embeddedMavenAvailable = false;
+                log.warn("embedded Maven unavailable: cannot resolve Maven home directory, "
+                        + "falling back to process-based invocation");
+                return;
+            }
+
+            try {
+                List<URL> jarUrls = new ArrayList<>();
+
+                // Scan MAVEN_HOME/boot/*.jar
+                File bootDir = new File(mavenHome, "boot");
+                if (bootDir.isDirectory()) {
+                    File[] bootJars = bootDir.listFiles((dir, name) -> name.endsWith(".jar"));
+                    if (bootJars != null) {
+                        for (File jar : bootJars) {
+                            jarUrls.add(jar.toURI().toURL());
+                        }
+                    }
+                }
+
+                // Scan MAVEN_HOME/lib/*.jar
+                File libDir = new File(mavenHome, "lib");
+                if (libDir.isDirectory()) {
+                    File[] libJars = libDir.listFiles((dir, name) -> name.endsWith(".jar"));
+                    if (libJars != null) {
+                        for (File jar : libJars) {
+                            jarUrls.add(jar.toURI().toURL());
+                        }
+                    }
+                }
+
+                // Scan MAVEN_HOME/lib/ext/*.jar
+                File extDir = new File(mavenHome, "lib/ext");
+                if (extDir.isDirectory()) {
+                    File[] extJars = extDir.listFiles((dir, name) -> name.endsWith(".jar"));
+                    if (extJars != null) {
+                        for (File jar : extJars) {
+                            jarUrls.add(jar.toURI().toURL());
+                        }
+                    }
+                }
+
+                if (jarUrls.isEmpty()) {
+                    embeddedMavenAvailable = false;
+                    log.warn("embedded Maven unavailable: no JARs found in {}", mavenHome);
+                    return;
+                }
+
+                // Create isolated ClassLoader (null parent = full isolation)
+                URLClassLoader cl = new URLClassLoader(jarUrls.toArray(new URL[0]), null);
+
+                // Reflectively load MavenCli
+                Class<?> mavenCliClass = cl.loadClass("org.apache.maven.cli.MavenCli");
+                Object cliInstance = mavenCliClass.getDeclaredConstructor().newInstance();
+                Method doMainMethod = mavenCliClass.getMethod("doMain", String[].class, String.class,
+                        PrintStream.class, PrintStream.class);
+
+                mavenClassLoader = cl;
+                mavenCliInstance = cliInstance;
+                mavenDoMainMethod = doMainMethod;
+
+                log.info("embedded Maven initialized successfully from: {} ({} JARs loaded)",
+                        mavenHome, jarUrls.size());
+            } catch (Exception e) {
+                embeddedMavenAvailable = false;
+                log.warn("embedded Maven unavailable: initialization failed, "
+                        + "falling back to process-based invocation", e);
+            }
+        }
+    }
+
+    /**
+     * 通过嵌入式Maven调用doMain方法
+     *
+     * @param args Maven命令参数
+     * @param workingDir 工作目录
+     * @return 退出码，-1表示嵌入式Maven不可用
+     */
+    private static int invokeEmbeddedMaven(String[] args, File workingDir) {
+        initEmbeddedMaven();
+        if (!embeddedMavenAvailable) {
+            return -1;
+        }
+
+        MAVEN_INVOKE_LOCK.lock();
+        try {
+            // Save and set maven.multiModuleProjectDirectory
+            String previousMultiModuleDir = System.getProperty("maven.multiModuleProjectDirectory");
+            System.setProperty("maven.multiModuleProjectDirectory", workingDir.getAbsolutePath());
+
+            // Create captured output streams
+            ByteArrayOutputStream outBaos = new ByteArrayOutputStream();
+            ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
+            PrintStream outStream = new PrintStream(outBaos, true, StandardCharsets.UTF_8.name());
+            PrintStream errStream = new PrintStream(errBaos, true, StandardCharsets.UTF_8.name());
+
+            // Set thread context classloader
+            Thread currentThread = Thread.currentThread();
+            ClassLoader originalCl = currentThread.getContextClassLoader();
+            currentThread.setContextClassLoader(mavenClassLoader);
+
+            int exitCode;
+            try {
+                exitCode = (int) mavenDoMainMethod.invoke(mavenCliInstance, args,
+                        workingDir.getAbsolutePath(), outStream, errStream);
+            } finally {
+                // Restore thread context classloader
+                currentThread.setContextClassLoader(originalCl);
+            }
+
+            // Restore system property
+            if (previousMultiModuleDir == null) {
+                System.clearProperty("maven.multiModuleProjectDirectory");
+            } else {
+                System.setProperty("maven.multiModuleProjectDirectory", previousMultiModuleDir);
+            }
+
+            // If exit code != 0, log the captured output
+            if (exitCode != 0) {
+                String stdout = outBaos.toString(StandardCharsets.UTF_8.name());
+                String stderr = errBaos.toString(StandardCharsets.UTF_8.name());
+                if (!stdout.isEmpty()) {
+                    log.error("embedded Maven stdout:\n{}", stdout);
+                }
+                if (!stderr.isEmpty()) {
+                    log.error("embedded Maven stderr:\n{}", stderr);
+                }
+            }
+
+            return exitCode;
+        } catch (Exception e) {
+            log.error("embedded Maven invocation failed", e);
+            return -1;
+        } finally {
+            MAVEN_INVOKE_LOCK.unlock();
+        }
     }
 
     /**
