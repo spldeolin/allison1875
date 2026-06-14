@@ -20,4 +20,8 @@ public class DomainContext {
         return ctx.get();
     }
 
+    public static void remove() {
+        ctx.remove();
+    }
+
 }

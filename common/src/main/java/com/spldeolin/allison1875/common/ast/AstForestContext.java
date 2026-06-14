@@ -22,4 +22,8 @@ public class AstForestContext {
         return ctx.get() == null;
     }
 
+    public static void remove() {
+        ctx.remove();
+    }
+
 }

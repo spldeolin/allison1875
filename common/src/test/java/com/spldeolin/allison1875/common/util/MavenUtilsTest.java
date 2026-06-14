@@ -1,5 +1,10 @@
 package com.spldeolin.allison1875.common.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,12 +12,9 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import static org.junit.jupiter.api.Assertions.*;
 
-@Tag("integration")
 class MavenUtilsTest {
 
     private static Path tempDir;

@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.cli.Entrypoint;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.config.DomainContext;
 
 /**
  * star-transformer集成测试基类。
@@ -91,6 +93,8 @@ public abstract class StarTransformerItBaseTest {
             Entrypoint.main(stArgs.toArray(new String[0]));
         } finally {
             Thread.currentThread().setContextClassLoader(originalClassLoader);
+            AstForestContext.remove();
+            DomainContext.remove();
         }
     }
 

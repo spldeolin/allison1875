@@ -20,6 +20,8 @@ import java.util.Map;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import com.spldeolin.allison1875.cli.Entrypoint;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.config.DomainContext;
 
 /**
  * handler-transformer集成测试基类。
@@ -71,6 +73,8 @@ public abstract class HandlerTransformerItBaseTest {
             Entrypoint.main(args.toArray(new String[0]));
         } finally {
             Thread.currentThread().setContextClassLoader(originalClassLoader);
+            AstForestContext.remove();
+            DomainContext.remove();
         }
     }
 
