@@ -608,7 +608,32 @@ public class MavenUtils {
                 }
             }
         } catch (Exception e) {
-            log.debug("resolveMavenHome: 'which mvn' failed: {}", e.getMessage());
+            log.debug("resolveMavenHome: 'which mvn' symlink approach failed: {}", e.getMessage());
+        }
+
+        // (d) Parse 'mvn --version' output for "Maven home:" line (handles shims like jenv)
+        try {
+            ProcessBuilder pb = new ProcessBuilder("mvn", "--version");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("Maven home:")) {
+                        String homePath = line.substring("Maven home:".length()).trim();
+                        File home = new File(homePath);
+                        if (new File(home, "lib").isDirectory()) {
+                            log.debug("resolveMavenHome: found via 'mvn --version' -> {}", home);
+                            process.waitFor();
+                            return home;
+                        }
+                    }
+                }
+            }
+            process.waitFor();
+        } catch (Exception e) {
+            log.debug("resolveMavenHome: 'mvn --version' failed: {}", e.getMessage());
         }
 
         return null;
@@ -682,8 +707,10 @@ public class MavenUtils {
                     return;
                 }
 
-                // Create isolated ClassLoader (null parent = full isolation)
-                URLClassLoader cl = new URLClassLoader(jarUrls.toArray(new URL[0]), null);
+                // Create isolated ClassLoader (platform classloader parent = access to JDK classes
+                // like javax.tools.JavaCompiler, but NOT application classes — Guice isolation preserved)
+                URLClassLoader cl = new URLClassLoader(jarUrls.toArray(new URL[0]),
+                        ClassLoader.getPlatformClassLoader());
 
                 // Reflectively load MavenCli
                 Class<?> mavenCliClass = cl.loadClass("org.apache.maven.cli.MavenCli");
