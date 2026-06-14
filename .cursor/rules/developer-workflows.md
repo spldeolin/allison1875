@@ -131,7 +131,7 @@ public class XxxModule extends Allison1875Module {
     public XxxModule(Config config) { this.config = config; }
 
     @Override
-    public final Class<? extends Allison1875MainService> declareMainService() {
+    public final Class<? extends Allison1875Game> declareGameType() {
         return Xxx.class;
     }
 
@@ -144,12 +144,12 @@ public class XxxModule extends Allison1875Module {
 // 2. Create the MainService (Xxx.java)
 @Singleton
 @Slf4j
-public class Xxx implements Allison1875MainService {
+public class Xxx implements Allison1875Game {
     @Inject private Config config;
     // @Inject other services...
 
     @Override
-    public void process() {
+    public void play() {
         // DomainContext.get() gives DomainConfig (already source-root-resolved)
         for (CompilationUnit cu : AstForestContext.get()) {
             // detection → analysis → generation → write

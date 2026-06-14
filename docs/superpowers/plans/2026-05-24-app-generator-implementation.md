@@ -271,7 +271,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
@@ -634,7 +634,7 @@ git commit -m "refactor(frontend-skeleton): replace form-dsl YAML parsing with a
 package com.spldeolin.allison1875.appgenerator;
 
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import lombok.ToString;
 
@@ -648,7 +648,7 @@ public class AppGeneratorModule extends Allison1875Module {
     }
 
     @Override
-    public Class<? extends Allison1875MainService> declareMainService() {
+    public Class<? extends Allison1875Game> declareGameType() {
         return AppGenerator.class;
     }
 
@@ -683,19 +683,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class AppGenerator implements Allison1875MainService {
+public class AppGenerator implements Allison1875Game {
 
     @Inject
     private Config config;
 
     @Override
-    public void process() {
+    public void play() {
         // 1. Parse app.yml
         AppDef appDef = parseAppDef();
         log.info("parsed AppDef: name={}, title={}, menus={}", appDef.getName(), appDef.getTitle(),

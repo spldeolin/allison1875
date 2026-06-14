@@ -7,15 +7,15 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class StarTransformer implements Allison1875MainService {
+public class StarTransformer implements Allison1875Game {
 
     @Inject
     private StarChainService starChainService;
@@ -49,12 +49,15 @@ public class StarTransformer implements Allison1875MainService {
     private Config config;
 
     @Override
-    public void process() {
-        // 构造AstForest
-        DomainConfig domainConfig = DomainContext.get();
-        ClassLoader classLoader = MavenUtils.buildClassLoader(
-                new File(domainConfig.getServiceImplModule()), config.getJavaHome());
-        AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getServiceImplSourceRoot().toFile()));
+    public void play() {
+        if (AstForestContext.isEmpty()) {
+            // 若上游提供了AstForest上下文，则使用上游提供的，否则构造AstForest
+            ClassLoader classLoader = MavenUtils.buildClassLoader(new File(DomainContext.get().getControllerModule()),
+                    config.getJavaHome());
+            AstForest astForest = new DefaultAstForest(classLoader,
+                    DomainContext.get().getControllerSourceRoot().toFile());
+            AstForestContext.set(astForest);
+        }
 
         boolean anyTransformedForAll = false;
         for (CompilationUnit cu : AstForestContext.get()) {

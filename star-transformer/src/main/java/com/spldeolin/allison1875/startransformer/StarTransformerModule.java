@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.startransformer;
 
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
@@ -21,7 +21,7 @@ public class StarTransformerModule extends Allison1875Module {
     }
 
     @Override
-    public final Class<? extends Allison1875MainService> declareMainService() {
+    public final Class<? extends Allison1875Game> declareMainService() {
         return StarTransformer.class;
     }
 

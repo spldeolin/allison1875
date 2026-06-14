@@ -9,13 +9,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.docanalyzer.dto.AnalyzeBodyRetval;
@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class DocAnalyzer implements Allison1875MainService {
+public class DocAnalyzer implements Allison1875Game {
 
     @Inject
     private MvcHandlerDetectorService mvcHandlerDetectorService;
@@ -88,12 +88,15 @@ public class DocAnalyzer implements Allison1875MainService {
     private Config config;
 
     @Override
-    public void process() {
-        // 构造AstForest
-        DomainConfig domainConfig = DomainContext.get();
-        ClassLoader classLoader = MavenUtils.buildClassLoader(
-                new File(domainConfig.getControllerModule()), config.getJavaHome());
-        AstForestContext.set(new DefaultAstForest(classLoader, domainConfig.getControllerSourceRoot().toFile()));
+    public void play() {
+        if (AstForestContext.isEmpty()) {
+            // 若上游提供了AstForest上下文，则使用上游提供的，否则构造AstForest
+            ClassLoader classLoader = MavenUtils.buildClassLoader(new File(DomainContext.get().getControllerModule()),
+                    config.getJavaHome());
+            AstForest astForest = new DefaultAstForest(classLoader,
+                    DomainContext.get().getControllerSourceRoot().toFile());
+            AstForestContext.set(astForest);
+        }
 
         // 分析所有fieldVars
         Table<String, String, AnalyzeFieldVarsRetval> analyzeFieldVarsRetvals = fieldService.analyzeFieldVars();

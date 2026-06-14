@@ -57,6 +57,7 @@ public class MavenUtils {
 
         StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
         commandLine.append(" compile");
+        commandLine.append(" -T 1C");
         if (!topLevelDir.equals(mavenModuleDir)) {
             String relativePath = calculateRelativePath(topLevelDir, mavenModuleDir);
             commandLine.append(" -pl ").append(relativePath);
@@ -382,6 +383,7 @@ public class MavenUtils {
         StringBuilder commandLine = buildMvnCommandPrefix(javaHome);
         commandLine.append(" compile");
         commandLine.append(" dependency:build-classpath");
+        commandLine.append(" -T 1C");
         commandLine.append(" -DincludeScope=compile");
         commandLine.append(" -Dmdep.outputFile=").append(cpOutputFile.getAbsolutePath());
         if (!topLevelDir.equals(mavenModuleDir)) {

@@ -13,7 +13,7 @@ import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.constant.BaseConstant;
 import com.spldeolin.allison1875.common.dto.DataModelGeneration;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.service.ImportExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class PersistenceGenerator implements Allison1875MainService {
+public class PersistenceGenerator implements Allison1875Game {
 
     @Inject
     private MapperCoidService mapperCoidService;
@@ -65,7 +65,7 @@ public class PersistenceGenerator implements Allison1875MainService {
 
 
     @Override
-    public void process() {
+    public void play() {
         // 分析表结构
         List<TableAnalysisDTO> tableAnalyses = tableAnalyzerService.analyzeTable();
         if (CollectionUtils.isEmpty(tableAnalyses)) {

@@ -13,7 +13,7 @@ Each tool module follows:
 
 ```
 com.spldeolin.allison1875.<toolname>/
-├── <ToolName>.java                    # implements Allison1875MainService (the main class)
+├── <ToolName>.java                    # implements Allison1875Game (the main class)
 ├── <ToolName>Module.java              # extends Allison1875Module (Guice bindings)
 ├── dto/                               # Data transfer objects for internal use
 ├── enums/                             # Module-specific enums

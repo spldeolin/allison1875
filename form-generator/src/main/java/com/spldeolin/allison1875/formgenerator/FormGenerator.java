@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainContext;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -50,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class FormGenerator implements Allison1875MainService {
+public class FormGenerator implements Allison1875Game {
 
     @Inject
     private Config config;
@@ -88,8 +88,7 @@ public class FormGenerator implements Allison1875MainService {
     @Inject
     private SaveApiService saveApiService;
 
-    @Override
-    public void process() {
+    public void play() {
         List<FormDef> forms = deserializeDSL();
         if (CollectionUtils.isEmpty(forms)) {
             log.warn("no form definitions detected");
@@ -114,7 +113,7 @@ public class FormGenerator implements Allison1875MainService {
         config.setJdbcUrl(null);
         config.setDdl(ddl);
         config.setEnableGenerateDesign(true);
-        persistenceGenerator.process();
+        persistenceGenerator.play();
 
         // 生成枚举
         enumService.generateEnums(forms);
@@ -157,18 +156,18 @@ public class FormGenerator implements Allison1875MainService {
         }
 
         // 调用handler-transformer转换initDec
-        handlerTransformer.process();
+        handlerTransformer.play();
 
         // 编译controllerModule
         log.info("call MavenProjectClassLoaderUtils.compile for controllerModule");
         MavenUtils.compile(new File(DomainContext.get().getControllerModule()), config.getJavaHome());
 
         // 调用query-transformer转换Design Chain
-        queryTransformer.process();
+        queryTransformer.play();
 
         // 调用doc-analyzer分析接口文档
         config.setMvcHandlerQualifierWildcards(controllerQualifiers);
-        docAnalyzer.process();
+        docAnalyzer.play();
     }
 
     private void addCommonItems(List<FormDef> forms) {
@@ -220,7 +219,7 @@ public class FormGenerator implements Allison1875MainService {
     private List<FormDef> deserializeDSL() {
         try {
             return new YAMLMapper().readValue(Files.readString(config.getDslPath().toPath(), StandardCharsets.UTF_8),
-                    new TypeReference<List<FormDef>>() {
+                    new TypeReference<>() {
                     });
         } catch (IOException e) {
             throw new UncheckedIOException(e);

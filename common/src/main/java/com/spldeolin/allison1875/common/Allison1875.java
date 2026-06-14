@@ -21,7 +21,7 @@ import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -89,7 +89,7 @@ public class Allison1875 {
 
         // process main service
         try {
-            injector.getInstance(allison1875Module.declareMainService()).process();
+            injector.getInstance(allison1875Module.declareMainService()).play();
         } catch (Throwable e) {
             log.error("main process failed", e);
             throw new Allison1875Exception(e);
@@ -182,7 +182,7 @@ public class Allison1875 {
             final Module finalCombined = combined;
             return new Allison1875Module() {
                 @Override
-                public Class<? extends Allison1875MainService> declareMainService() {
+                public Class<? extends Allison1875Game> declareMainService() {
                     return mainModule.declareMainService();
                 }
 

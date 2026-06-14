@@ -18,4 +18,8 @@ public class AstForestContext {
         return ctx.get();
     }
 
+    public static boolean isEmpty() {
+        return ctx.get() == null;
+    }
+
 }

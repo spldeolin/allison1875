@@ -1,7 +1,7 @@
 package com.spldeolin.allison1875.appgenerator;
 
 import com.spldeolin.allison1875.common.config.Config;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import lombok.ToString;
 
@@ -18,7 +18,7 @@ public class AppGeneratorModule extends Allison1875Module {
     }
 
     @Override
-    public Class<? extends Allison1875MainService> declareMainService() {
+    public Class<? extends Allison1875Game> declareMainService() {
         return AppGenerator.class;
     }
 

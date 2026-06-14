@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class Allison1875Module extends AbstractModule {
 
-    public abstract Class<? extends Allison1875MainService> declareMainService();
+    public abstract Class<? extends Allison1875Game> declareMainService();
 
     @Override
     protected void configure() {

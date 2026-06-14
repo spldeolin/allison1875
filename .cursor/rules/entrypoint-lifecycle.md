@@ -60,7 +60,7 @@ Parsed by `Entrypoint.parseArgs`, prefix-based, order-agnostic:
 
 ## Tool Main Loop
 
-Each tool implements `Allison1875MainService.process()` — that is the "game loop" equivalent.
+Each tool implements `Allison1875Game.play()` — that is the "game loop" equivalent.
 Inside `process()`, the tool typically iterates `AstForestContext.get()` (an
 `Iterable<CompilationUnit>` set up per-tool from the `DomainContext`-derived source roots) and
 performs detection → analysis → code generation → file write. `DomainContext.get()` provides the

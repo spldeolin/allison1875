@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.appgenerator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -21,11 +22,15 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
 import com.spldeolin.allison1875.common.Allison1875;
+import com.spldeolin.allison1875.common.ast.AstForest;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
+import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
-import com.spldeolin.allison1875.common.guice.Allison1875MainService;
+import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
+import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,13 +39,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class AppGenerator implements Allison1875MainService {
+public class AppGenerator implements Allison1875Game {
 
     @Inject
     private Config config;
 
     @Override
-    public void process() {
+    public void play() {
         // 1. Parse app.yml
         AppDef appDef = parseAppDef();
         log.info("parsed AppDef: name={}, title={}, menus={}", appDef.getName(), appDef.getTitle(),
@@ -128,9 +133,7 @@ public class AppGenerator implements Allison1875MainService {
         }
 
         // Extract FormDefs for form-generator (to be wired in Task 5)
-        List<FormDef> forms = appDef.getMenus().stream()
-                .map(MenuDef::getForm)
-                .collect(Collectors.toList());
+        List<FormDef> forms = appDef.getMenus().stream().map(MenuDef::getForm).collect(Collectors.toList());
         log.info("extracted {} forms for form-generator delegation", forms.size());
 
         // Delegate to form-generator for CRUD code generation
@@ -184,16 +187,10 @@ public class AppGenerator implements Allison1875MainService {
             String backendDir = name + "-backend";
             String readme = "# " + appDef.getTitle() + "\n\n" + "## Quick Start\n\n" + "```bash\n" + "# 构建前端\n"
                     + "npm ci --prefix " + frontendDir + " && npm run build --prefix " + frontendDir + "\n"
-                    + "# 构建后端（含前端产物）\n"
-                    + "cp -r " + frontendDir + "/dist/* " + backendDir + "/src/main/resources/static/\n"
-                    + "mvn package -T 1C -DskipTests -f " + backendDir + "\n" + "# 运行\n" + "java -jar " + backendDir
-                    + "/target/"
-                    + name + "-fullstack.jar\n"
-                    + "```\n\n"
-                    + "## DSL\n\n"
-                    + "```yaml\n"
-                    + originalDsl
-                    + "\n```\n";
+                    + "# 构建后端（含前端产物）\n" + "cp -r " + frontendDir + "/dist/* " + backendDir
+                    + "/src/main/resources/static/\n" + "mvn package -T 1C -DskipTests -f " + backendDir + "\n"
+                    + "# 运行\n" + "java -jar " + backendDir + "/target/" + name + "-fullstack.jar\n" + "```\n\n"
+                    + "## DSL\n\n" + "```yaml\n" + originalDsl + "\n```\n";
             Files.createDirectories(outputRoot);
             Files.writeString(outputRoot.resolve("README.md"), readme, StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -220,7 +217,8 @@ public class AppGenerator implements Allison1875MainService {
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     String dirName = dir.getFileName().toString();
                     // Skip directories that should not be copied
-                    if (dirName.equals("node_modules") || dirName.equals(".git") || dirName.equals("dist") || dirName.equals(".gitkeep")) {
+                    if (dirName.equals("node_modules") || dirName.equals(".git") || dirName.equals("dist")
+                            || dirName.equals(".gitkeep") || dirName.equals("target")) {
                         return FileVisitResult.SKIP_SUBTREE;
                     }
                     Files.createDirectories(target.resolve(source.relativize(dir)));
@@ -318,7 +316,13 @@ public class AppGenerator implements Allison1875MainService {
         dc.setWholeDTOPackage(ns + ".dto");
         fgConfig.setDomains(Lists.newArrayList(dc));
 
-        // Invoke form-generator via Allison1875 framework
+
+        // 调用form-generator前，为新项目（单模块项目）生成一个AstForest，并保存到上下文
+        AstForest astForest = new DefaultAstForest(MavenUtils.buildClassLoader(new File(absPath), null),
+                new File(absPath));
+        AstForestContext.set(astForest);
+
+        // 指定AstForest调用form-generator
         log.info("invoking form-generator for {} forms...", forms.size());
         Allison1875.letsGo(ToolEnum.FORM_GENERATOR, fgConfig, null);
         log.info("form-generator completed");
