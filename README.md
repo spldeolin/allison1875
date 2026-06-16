@@ -20,16 +20,48 @@ schemas.
 
 ## Quick Start
 
-```bash
-git clone git@github.com:spldeolin/allison1875.git
-mvn install -f allison1875/pom.xml -DskipTests
-./install-cli.sh
-```
+### Prerequisites
+
+- JDK 21+
+- Maven 3.6+
+- Git
+
+### Install
 
 ```bash
-allison1875 --tool=<toolName> --config=./.allison1875.yml [--domain=<name>]
+curl -fsSL https://raw.githubusercontent.com/spldeolin/allison1875/master/install.sh | bash
 ```
 
-## For AI Coding Agents
+To install a specific branch or tag:
 
-See [`CLAUDE.md`](CLAUDE.md) for comprehensive coding rules, architecture patterns, and development workflows.
+```bash
+curl -fsSL https://raw.githubusercontent.com/spldeolin/allison1875/master/install.sh | bash -s -- --branch 13.0
+```
+
+### Usage
+
+```bash
+allison1875 --tool=<toolName> --config=/path/to/allison1875.yml [--domain=<name>]
+```
+
+### Uninstall
+
+```bash
+allison1875-uninstall
+```
+
+## Contributing
+
+```bash
+git clone https://github.com/spldeolin/allison1875.git
+cd allison1875
+mvn install -DskipTests
+```
+
+Run tests:
+
+```bash
+mvn test -pl allison1875-cli -am
+```
+
+See [`CLAUDE.md`](CLAUDE.md) for coding conventions, architecture overview, and development workflows.
