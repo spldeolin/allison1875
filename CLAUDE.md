@@ -167,6 +167,7 @@ public class XxxRetval {           // 出参: *Retval
 - 变更 IT 基础设施（base class 行为、资源目录约定）→ 更新 `allison1875-cli/CLAUDE.md`
 - 变更构建流程、测试命令、依赖版本 → 更新根 CLAUDE.md 对应段落
 - 发现新的"AI 容易犯的错"→ 追加到安全规则
+- 变更 `Config` / `DomainConfig` / `ConfigValidator` 字段 → 更新 `skills/integrate-allison1875/SKILL.md`
 
 不需要更新的：具体业务逻辑实现、单个 bug fix、不影响约定的重构。
 
@@ -176,6 +177,10 @@ public class XxxRetval {           // 出参: *Retval
 - 提交信息使用英文
 - 不提交绝对路径、IDE 配置、.DS_Store
 
+## Skills
+
+- `/integrate-allison1875` — 在目标 Spring Boot 项目中接入 allison1875：安装 CLI、分析项目结构、生成 `.allison1875.yml` 配置。当用户要求对某个项目执行 allison1875 工具时使用。
+
 ## 渐进式参考
 
 以下文件在对应目录工作时自动加载，提供更深入的上下文：
@@ -184,3 +189,4 @@ public class XxxRetval {           // 出参: *Retval
 - `form-generator/CLAUDE.md` — forms.yml DSL 完整语法参考
 - `query-transformer/CLAUDE.md` — Design chain DSL 赋值规则（编译时 vs 转换时类型）
 - `allison1875-cli/CLAUDE.md` — IT 测试开发规范与模式
+- `skills/integrate-allison1875/SKILL.md` — 接入配置指南（Config 字段参考、校验规则、推理方法论）
