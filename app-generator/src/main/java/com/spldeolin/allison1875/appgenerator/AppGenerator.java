@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
+import com.spldeolin.allison1875.appgenerator.service.PermissionEnumGenerateService;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
@@ -43,6 +44,9 @@ public class AppGenerator implements Allison1875Game {
 
     @Inject
     private Config config;
+
+    @Inject
+    private PermissionEnumGenerateService permissionEnumGenerateService;
 
     @Override
     public void play() {
@@ -131,6 +135,12 @@ public class AppGenerator implements Allison1875Game {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+
+        // Generate permission enum (fills the skeleton's empty PermissionEnum shell)
+        List<FormDef> allForms = Lists.newArrayList(appDef.getMenus().stream()
+                .map(MenuDef::getForm).collect(Collectors.toList()));
+        allForms.addAll(parseBuiltinMenus().stream().map(MenuDef::getForm).collect(Collectors.toList()));
+        permissionEnumGenerateService.generatePermissionEnum(allForms, output, appDef.getNamespace());
 
         // Extract FormDefs for form-generator (to be wired in Task 5)
         List<FormDef> forms = appDef.getMenus().stream().map(MenuDef::getForm).collect(Collectors.toList());
