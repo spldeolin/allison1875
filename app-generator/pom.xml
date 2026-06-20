@@ -19,6 +19,13 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>form-generator</artifactId>
         </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
