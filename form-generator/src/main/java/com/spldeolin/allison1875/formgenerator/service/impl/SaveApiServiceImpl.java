@@ -65,8 +65,7 @@ public class SaveApiServiceImpl implements SaveApiService {
     @Override
     public InitializerDeclaration generateSaveInitDec(FormDef form) {
         BlockStmt bs = new BlockStmt();
-        bs.addStatement(parseStatement(
-                "String handler = \"save%s\", desc = \"创建%s\", form=\"%s\", type=\"%s\";",
+        bs.addStatement(parseStatement("String handler = \"save%s\", desc = \"创建%s\", form=\"%s\", type=\"%s\";",
                 form.getName(), form.getTitle(), StringEscapeUtils.escapeJava(JsonUtils.toJson(form)),
                 ApiType.SAVE.getCode()));
 
@@ -84,8 +83,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
                 // 仅在 (true,true) 组合时把 isNonVoid 校验注解放在 ReqDTO 字段上；
                 // 其他组合的 isNonVoid 校验改为分支内 if-throw（见 generateMethodBody/IfThen/Else）。
-                if (Boolean.TRUE.equals(item.getCanInputOnInit())
-                        && Boolean.TRUE.equals(item.getCanInputOnEdit())) {
+                if (Boolean.TRUE.equals(item.getCanInputOnInit()) && Boolean.TRUE.equals(item.getCanInputOnEdit())) {
                     itemService.getJavaValidAnnotations(item).forEach(itemField::addAnnotation);
                 }
                 itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
@@ -103,10 +101,8 @@ public class SaveApiServiceImpl implements SaveApiService {
     @Override
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(parseStatement(
-                "boolean toCreate = req.%s() == null;", form.getBizIdGetterName()));
-        body.addStatement(parseStatement(
-                "%s %s;", form.getEntityName(config), form.getVarName()));
+        body.addStatement(parseStatement("boolean toCreate = req.%s() == null;", form.getBizIdGetterName()));
+        body.addStatement(parseStatement("%s %s;", form.getEntityName(config), form.getVarName()));
         IfStmt ifStmt = new IfStmt();
         ifStmt.setCondition(new NameExpr("toCreate"));
         ifStmt.setThenStmt(generateIfThenBody(form));
@@ -132,23 +128,19 @@ public class SaveApiServiceImpl implements SaveApiService {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
             }
-            if (Boolean.TRUE.equals(item.getCanInputOnInit())
-                    && Boolean.TRUE.equals(item.getCanInputOnEdit())) {
-                generatorSetterToGetter(form, item, body);
+            if (Boolean.TRUE.equals(item.getCanInputOnInit()) && Boolean.TRUE.equals(item.getCanInputOnEdit())) {
+                generateSetterToGetter(form, item, body);
             }
         }
-        body.addStatement(parseStatement(
-                "%s.setUpdatedAt(LocalDateTime.now());", form.getVarName()));
-        body.addStatement(parseStatement(
-                "if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
+        body.addStatement(parseStatement("%s.setUpdatedAt(LocalDateTime.now());", form.getVarName()));
+        body.addStatement(parseStatement("if (toCreate) { %sMapper.insert(%s); } else { %sMapper.updateById(%s); }",
                 form.getVarName(), form.getVarName(), form.getVarName(), form.getVarName()));
 
         // 删除、重新创建关联实体（multiSelect 路径不变）
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
-                Statement stmt = parseStatement(
-                        "%sMapper.deleteBy%s(%s.%s());", associationForm.getVarName(),
+                Statement stmt = parseStatement("%sMapper.deleteBy%s(%s.%s());", associationForm.getVarName(),
                         StringUtils.capitalize(associationForm.getBizIdName()), form.getVarName(),
                         associationForm.getBizIdGetterName());
                 stmt.setLineComment(String.format("重建与%s的关联（先删除，后创建）", item.getTitle()));
@@ -156,21 +148,18 @@ public class SaveApiServiceImpl implements SaveApiService {
                 ForEachStmt forEachStmt = new ForEachStmt();
                 forEachStmt.setVariable(parseVariableDeclarationExpr(
                         String.format("%s %s", MoreStringUtils.toUpperCamel(item.getName()) + "Enum", item.getName())));
-                forEachStmt.setIterable(parseExpression(
-                        String.format("req.get%s()", StringUtils.capitalize(item.getName()))));
+                forEachStmt.setIterable(
+                        parseExpression(String.format("req.get%s()", StringUtils.capitalize(item.getName()))));
                 BlockStmt forEachBody = new BlockStmt();
                 forEachBody.addStatement(parseStatement("%s %s = new %s();", associationForm.getEntityName(config),
                         associationForm.getVarName(), associationForm.getEntityName(config)));
-                forEachBody.addStatement(parseStatement(
-                        "%s.%s(%s.%s());", associationForm.getVarName(),
+                forEachBody.addStatement(parseStatement("%s.%s(%s.%s());", associationForm.getVarName(),
                         associationForm.getBizIdSetterName(), form.getVarName(), form.getBizIdGetterName()));
-                forEachBody.addStatement(parseStatement(
-                        "%s.set%s(%s.getCode());", associationForm.getVarName(),
+                forEachBody.addStatement(parseStatement("%s.set%s(%s.getCode());", associationForm.getVarName(),
                         StringUtils.capitalize(item.getName()), item.getName()));
-                forEachBody.addStatement(parseStatement(
-                        "%s.setCreatedAt(LocalDateTime.now());", associationForm.getVarName()));
-                forEachBody.addStatement(parseStatement(
-                        "%sMapper.insert(%s);", associationForm.getVarName(),
+                forEachBody.addStatement(
+                        parseStatement("%s.setCreatedAt(LocalDateTime.now());", associationForm.getVarName()));
+                forEachBody.addStatement(parseStatement("%sMapper.insert(%s);", associationForm.getVarName(),
                         associationForm.getVarName()));
                 forEachStmt.setBody(forEachBody);
                 body.addStatement(forEachStmt);
@@ -185,10 +174,8 @@ public class SaveApiServiceImpl implements SaveApiService {
 
     private Statement generateIfThenBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(parseStatement(
-                "%s = new %s();", form.getVarName(), form.getEntityName(config)));
-        body.addStatement(parseStatement(
-                "%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
+        body.addStatement(parseStatement("%s = new %s();", form.getVarName(), form.getEntityName(config)));
+        body.addStatement(parseStatement("%s.%s(%s);", form.getVarName(), form.getBizIdSetterName(),
                 config.getCodeSnippet().getShortUuidGeneration()));
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
@@ -202,18 +189,17 @@ public class SaveApiServiceImpl implements SaveApiService {
                 if (Boolean.TRUE.equals(item.getIsNonVoid())) {
                     body.addStatement(itemService.getValidationStatement(item));
                 }
-                generatorSetterToGetter(form, item, body);
+                generateSetterToGetter(form, item, body);
             } else if (!init) {
                 // case (false,true) and (false,false): non-void → default value
                 if (Boolean.TRUE.equals(item.getIsNonVoid())) {
-                    body.addStatement(parseStatement(
-                            "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
-                            itemService.getTodoValue(item)));
+                    body.addStatement(
+                            parseStatement("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
+                                    itemService.getTodoValue(item)));
                 }
             }
         }
-        body.addStatement(parseStatement(
-                "%s.setCreatedAt(LocalDateTime.now());", form.getVarName()));
+        body.addStatement(parseStatement("%s.setCreatedAt(LocalDateTime.now());", form.getVarName()));
         // unique-index existence check for init-only fields
         if (form.getIndices() != null) {
             for (IndexDef index : form.getIndices()) {
@@ -228,11 +214,11 @@ public class SaveApiServiceImpl implements SaveApiService {
 
     private Statement generateElseBody(FormDef form) {
         BlockStmt body = new BlockStmt();
-        body.addStatement(parseStatement(
-                "%s = %sMapper.queryBy%s(req.%s());", form.getVarName(), form.getVarName(),
+        body.addStatement(parseStatement("%s = %sMapper.queryBy%s(req.%s());", form.getVarName(), form.getVarName(),
                 StringUtils.capitalize(form.getBizIdName()), form.getBizIdGetterName()));
-        body.addStatement(parseStatement("if (%s == null) { throw new %s(\"%s不存在或是已被删除\"); }",
-                form.getVarName(), config.getCodeSnippet().getBizExceptionQualifier(), form.getTitle()));
+        body.addStatement(
+                parseStatement("if (%s == null) { throw new %s(\"%s不存在或是已被删除\"); }", form.getVarName(),
+                        config.getCodeSnippet().getBizExceptionQualifier(), form.getTitle()));
         for (ItemDef item : form.getNonAuditedItems()) {
             if (item.getType() == ItemType.MULTI_SELECT) {
                 continue;
@@ -244,7 +230,7 @@ public class SaveApiServiceImpl implements SaveApiService {
                 if (Boolean.TRUE.equals(item.getIsNonVoid())) {
                     body.addStatement(itemService.getValidationStatement(item));
                 }
-                generatorSetterToGetter(form, item, body);
+                generateSetterToGetter(form, item, body);
             }
         }
         // unique-index existence check for edit-only fields
@@ -259,7 +245,7 @@ public class SaveApiServiceImpl implements SaveApiService {
         return body;
     }
 
-    private void generatorSetterToGetter(FormDef form, ItemDef item, BlockStmt body) {
+    private void generateSetterToGetter(FormDef form, ItemDef item, BlockStmt body) {
         String getterWithConvert = String.format("req.get%s()", StringUtils.capitalize(item.getName()));
         if (item.getType() == ItemType.SELECT) {
             if (item.getIsNonVoid()) {
@@ -273,14 +259,25 @@ public class SaveApiServiceImpl implements SaveApiService {
         if (item.getType() == ItemType.TIME) {
             TimeItemDef itemItem = (TimeItemDef) item;
             if (itemItem.getFormat() == TimeFormat.DATE) {
-                getterWithConvert = String.format("LocalDateTime.of(%s, LocalTime.of(0, 0))", getterWithConvert);
+                if (item.getIsNonVoid()) {
+                    getterWithConvert = String.format("LocalDateTime.of(%s, LocalTime.of(0, 0))", getterWithConvert);
+                } else {
+                    getterWithConvert = String.format("%s != null ? LocalDateTime.of(%s, LocalTime.of(0, 0)) : null",
+                            getterWithConvert, getterWithConvert);
+                }
             }
             if (itemItem.getFormat() == TimeFormat.TIME) {
-                getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 1, 1), %s)", getterWithConvert);
+                if (item.getIsNonVoid()) {
+                    getterWithConvert = String.format("LocalDateTime.of(LocalDate.of(1970, 1, 1), %s)",
+                            getterWithConvert);
+                } else {
+                    getterWithConvert = String.format(
+                            "%s != null ? LocalDateTime.of(LocalDate.of(1970, 1, 1), %s) : null", getterWithConvert,
+                            getterWithConvert);
+                }
             }
         }
-        body.addStatement(parseStatement(
-                "%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
+        body.addStatement(parseStatement("%s.set%s(%s);", form.getVarName(), StringUtils.capitalize(item.getName()),
                 getterWithConvert));
     }
 

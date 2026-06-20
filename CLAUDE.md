@@ -188,5 +188,6 @@ public class XxxRetval {           // 出参: *Retval
 - `common/CLAUDE.md` — DI 模板、AST 管道模板、Config Validation、File Snapshot
 - `form-generator/CLAUDE.md` — forms.yml DSL 完整语法参考
 - `query-transformer/CLAUDE.md` — Design chain DSL 赋值规则（编译时 vs 转换时类型）
+- `app-generator/CLAUDE.md` — app.yml DSL 参考、处理流程、骨架资源与 form-generator 委托
 - `allison1875-cli/CLAUDE.md` — IT 测试开发规范与模式
 - `skills/integrate-allison1875/SKILL.md` — 接入配置指南（Config 字段参考、校验规则、推理方法论）

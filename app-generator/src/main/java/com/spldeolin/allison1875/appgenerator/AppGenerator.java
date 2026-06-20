@@ -272,6 +272,9 @@ public class AppGenerator implements Allison1875Game {
         // Serialize forms to a temp YAML for form-generator to read
         Path tempDsl = writeTempFormsDsl(forms);
 
+        // backend project absolute path
+        String absPath = backendOutput.toAbsolutePath().toString();
+
         // Construct config for form-generator
         Config fgConfig = new Config();
         fgConfig.setDslPath(tempDsl.toFile());
@@ -281,6 +284,7 @@ public class AppGenerator implements Allison1875Game {
         fgConfig.setIsEntityEndWithEntity(true);
         fgConfig.setEnableJavaxMoveToJakarta(false);
         fgConfig.setEnableOneService(true);
+        fgConfig.setMarkdownDir(new File(absPath + "/api-docs"));
 
         // Set code snippets for the generated backend
         Config.CodeSnippet cs = new Config.CodeSnippet();
@@ -293,7 +297,6 @@ public class AppGenerator implements Allison1875Game {
         fgConfig.setCodeSnippet(cs);
 
         // Construct DomainConfig pointing to the generated backend
-        String absPath = backendOutput.toAbsolutePath().toString();
         DomainConfig dc = new DomainConfig();
         dc.setName("default");
         dc.setControllerModule(absPath);
@@ -315,7 +318,6 @@ public class AppGenerator implements Allison1875Game {
         dc.setRecordDTOPackage(ns + ".dto.record");
         dc.setWholeDTOPackage(ns + ".dto");
         fgConfig.setDomains(Lists.newArrayList(dc));
-
 
         // 调用form-generator前，为新项目（单模块项目）生成一个AstForest，并保存到上下文
         AstForest astForest = new DefaultAstForest(MavenUtils.buildClassLoader(new File(absPath), null),
