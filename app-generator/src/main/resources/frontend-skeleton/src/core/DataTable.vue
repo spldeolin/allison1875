@@ -55,18 +55,19 @@ function renderTimeCell(val: unknown) {
 }
 
 const columns = computed<DataTableColumn[]>(() => {
-  const cols: DataTableColumn[] = [{ type: 'selection' }]
+  const cols: DataTableColumn[] = [{ type: 'selection', fixed: 'left' }]
 
   if (props.bizKey) {
     cols.push({
       title: `${props.formTitle || ''}ID`,
       key: props.bizKey,
       width: 120,
-      ellipsis: { tooltip: true },
+      fixed: 'left',
+      ellipsis: { tooltip: { contentStyle: 'max-width: 360px; max-height: 240px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word' } },
       render(row: Record<string, any>) {
         const val = row[props.bizKey!]
         if (!val) return h('span', { style: 'color: #cbd5e1' }, '-')
-        return h('span', { style: 'font-size: 12px; font-family: monospace; color: #64748b' }, String(val))
+        return h('span', null, String(val))
       }
     })
   }
@@ -114,6 +115,7 @@ const columns = computed<DataTableColumn[]>(() => {
     title: '操作',
     key: '_actions',
     width: 120,
+    fixed: 'right',
     render(row: Record<string, any>) {
       const isThisRowLoading = props.editingRowKey != null
         && props.bizKey != null
@@ -157,9 +159,18 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
   emit('update:checkedRowKeys', keys)
 }
 
+const scrollX = computed(() => {
+  let width = 50 // selection column
+  if (props.bizKey) width += 120
+  width += visibleItems.value.length * 120
+  width += 300 // createdAt + updatedAt
+  width += 120 // actions
+  return width
+})
+
 function rowProps(row: Record<string, any>) {
   return {
-    style: 'cursor: pointer',
+    style: 'cursor: default',
     onClick: (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (target.closest('button') || target.closest('.n-popconfirm') || target.closest('.n-checkbox')) return
@@ -186,6 +197,7 @@ function rowProps(row: Record<string, any>) {
     :checked-row-keys="checkedRowKeys"
     :row-key="(row: Record<string, any>) => bizKey ? row[bizKey] : row._rowIndex"
     :row-props="rowProps"
+    :scroll-x="scrollX"
     flex-height
     striped
     remote
