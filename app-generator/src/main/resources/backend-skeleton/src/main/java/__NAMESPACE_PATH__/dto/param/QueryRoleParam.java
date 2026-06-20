@@ -1,7 +1,7 @@
-package com.example.roletest.dto.param;
+package __NAMESPACE__.dto.param;
 
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.roletest.mapper.RoleMapper">
+<mapper namespace="__NAMESPACE__.mapper.RoleMapper">
     <!-- [START] Any modifications may be overwritten by future code generations. -->
 
-    <resultMap id="all" type="com.example.roletest.entity.RoleEntity">
+    <resultMap id="all" type="__NAMESPACE__.entity.RoleEntity">
         <id column="id" property="id"/>
         <result column="role_code" property="roleCode"/>
         <result column="role_name" property="roleName"/>
@@ -16,7 +16,7 @@
         id, role_code, role_name, description, created_at, updated_at
     </sql>
 
-    <insert id="insert" parameterType="com.example.roletest.entity.RoleEntity" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="__NAMESPACE__.entity.RoleEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO role
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id!=null"> id, </if>
@@ -67,7 +67,7 @@
             )</foreach>
     </insert>
 
-    <update id="updateById" parameterType="com.example.roletest.entity.RoleEntity">
+    <update id="updateById" parameterType="__NAMESPACE__.entity.RoleEntity">
         UPDATE role
         <set>
             <if test="roleCode!=null"> role_code = #{roleCode}, </if>
@@ -81,7 +81,7 @@
         </where>
         </update>
 
-    <update id="updateByIdEvenNull" parameterType="com.example.roletest.entity.RoleEntity">
+    <update id="updateByIdEvenNull" parameterType="__NAMESPACE__.entity.RoleEntity">
         UPDATE role
         SET
             role_code = #{roleCode},
@@ -203,7 +203,7 @@
         LIMIT 1
     </select>
 
-    <select id='countRole' parameterType='com.example.roletest.dto.param.QueryRoleParam' resultType='long'>
+    <select id='countRole' parameterType='__NAMESPACE__.dto.param.QueryRoleParam' resultType='long'>
         SELECT COUNT(*)
         FROM role
         <where>
@@ -229,7 +229,7 @@
         </if>
         </where>
     </select>
-    <select id='queryRoleEx' parameterType='com.example.roletest.dto.param.QueryRoleParam' resultMap='all'>
+    <select id='queryRoleEx' parameterType='__NAMESPACE__.dto.param.QueryRoleParam' resultMap='all'>
         SELECT <include refid="all"/>
         FROM role
         <where>

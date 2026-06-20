@@ -1,21 +1,13 @@
-package com.example.roletest.service;
+package __NAMESPACE__.service;
 
-import com.example.roletest.design.*;
-import com.example.roletest.entity.*;
-import java.util.*;
-import java.time.*;
-import java.math.*;
-import com.fasterxml.jackson.annotation.*;
-import java.util.stream.*;
-import org.springframework.util.*;
-import com.example.roletest.dto.resp.SaveRoleResp;
-import com.example.roletest.dto.req.SaveRoleReq;
-import com.example.roletest.dto.resp.PageResult;
-import com.example.roletest.dto.resp.ListRolesResp;
-import com.example.roletest.dto.req.ListRolesReq;
-import com.example.roletest.dto.resp.GetRoleDetailResp;
-import com.example.roletest.dto.req.GetRoleDetailReq;
-import com.example.roletest.dto.req.DeleteRoleReq;
+import __NAMESPACE__.dto.req.DeleteRoleReq;
+import __NAMESPACE__.dto.req.GetRoleDetailReq;
+import __NAMESPACE__.dto.req.ListRolesReq;
+import __NAMESPACE__.dto.req.SaveRoleReq;
+import __NAMESPACE__.dto.resp.GetRoleDetailResp;
+import __NAMESPACE__.dto.resp.ListRolesResp;
+import __NAMESPACE__.dto.resp.PageResult;
+import __NAMESPACE__.dto.resp.SaveRoleResp;
 
 /**
  * @author Deolin

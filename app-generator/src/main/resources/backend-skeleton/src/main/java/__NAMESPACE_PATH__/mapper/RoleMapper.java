@@ -1,11 +1,11 @@
-package com.example.roletest.mapper;
+package __NAMESPACE__.mapper;
 
-import com.example.roletest.entity.RoleEntity;
 import java.util.List;
 import java.util.Map;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.MapKey;
-import com.example.roletest.dto.param.QueryRoleParam;
+import org.apache.ibatis.annotations.Param;
+import __NAMESPACE__.dto.param.QueryRoleParam;
+import __NAMESPACE__.entity.RoleEntity;
 
 /**
  * 角色

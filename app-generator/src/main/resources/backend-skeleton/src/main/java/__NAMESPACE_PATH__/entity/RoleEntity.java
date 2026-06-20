@@ -1,4 +1,4 @@
-package com.example.roletest.entity;
+package __NAMESPACE__.entity;
 
 import java.time.LocalDateTime;
 import lombok.Data;

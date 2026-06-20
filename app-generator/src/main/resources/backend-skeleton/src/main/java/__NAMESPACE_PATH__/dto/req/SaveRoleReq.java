@@ -1,18 +1,10 @@
-package com.example.roletest.dto.req;
+package __NAMESPACE__.dto.req;
 
-import com.example.roletest.design.*;
-import com.example.roletest.entity.*;
-import java.util.*;
-import java.time.*;
-import java.math.*;
-import com.fasterxml.jackson.annotation.*;
-import java.util.stream.*;
-import org.springframework.util.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 /**
  * @author Deolin 2026-06-21

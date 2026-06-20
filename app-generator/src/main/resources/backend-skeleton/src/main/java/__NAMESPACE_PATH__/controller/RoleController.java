@@ -1,23 +1,25 @@
-package com.example.roletest.controller;
+package __NAMESPACE__.controller;
 
-import com.example.roletest.design.*;
-import com.example.roletest.entity.*;
+import __NAMESPACE__.entity.*;
 import java.util.*;
 import java.time.*;
 import java.math.*;
 import com.fasterxml.jackson.annotation.*;
 import java.util.stream.*;
 import org.springframework.util.*;
-import com.example.roletest.service.RoleService;
-import com.example.roletest.common.RequestResult;
-import com.example.roletest.dto.resp.SaveRoleResp;
-import com.example.roletest.dto.req.SaveRoleReq;
-import com.example.roletest.dto.resp.PageResult;
-import com.example.roletest.dto.resp.ListRolesResp;
-import com.example.roletest.dto.req.ListRolesReq;
-import com.example.roletest.dto.resp.GetRoleDetailResp;
-import com.example.roletest.dto.req.GetRoleDetailReq;
-import com.example.roletest.dto.req.DeleteRoleReq;
+import __NAMESPACE__.service.RoleService;
+import __NAMESPACE__.service.RoleGrantService;
+import __NAMESPACE__.common.RequestResult;
+import __NAMESPACE__.dto.resp.SaveRoleResp;
+import __NAMESPACE__.dto.req.SaveRoleReq;
+import __NAMESPACE__.dto.resp.PageResult;
+import __NAMESPACE__.dto.resp.ListRolesResp;
+import __NAMESPACE__.dto.req.ListRolesReq;
+import __NAMESPACE__.dto.resp.GetRoleDetailResp;
+import __NAMESPACE__.dto.req.GetRoleDetailReq;
+import __NAMESPACE__.dto.req.DeleteRoleReq;
+import __NAMESPACE__.dto.req.GrantPermissionsReq;
+import __NAMESPACE__.dto.req.ListRolePermissionsReq;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import javax.annotation.Resource;
@@ -36,6 +38,9 @@ public class RoleController {
 
     @Resource
     private RoleService roleService;
+
+    @Resource
+    private RoleGrantService roleGrantService;
 
     /**
      * 创建角色
