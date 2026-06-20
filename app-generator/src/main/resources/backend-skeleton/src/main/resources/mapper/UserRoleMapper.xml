@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="__NAMESPACE__.mapper.UserRoleMapper">
+
+    <insert id="batchInsert">
+        INSERT INTO user_role (user_id, role_id)
+        VALUES
+        <foreach collection="entities" item="one" separator=",">(#{one.userId}, #{one.roleId})</foreach>
+    </insert>
+
+    <delete id="deleteByUserId">
+        DELETE FROM user_role WHERE user_id = #{userId}
+    </delete>
+
+    <select id="queryRoleIdsByUserId" resultType="java.lang.Long">
+        SELECT role_id FROM user_role WHERE user_id = #{userId}
+    </select>
+
+</mapper>
