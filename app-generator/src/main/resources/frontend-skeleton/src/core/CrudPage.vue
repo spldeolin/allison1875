@@ -35,7 +35,7 @@ const {
       <div class="crud-table-header">
         <h3 class="crud-table-title">{{ schema.title }}</h3>
         <NSpace>
-          <NButton type="primary" :data-permission="permissions?.create" @click="handleCreate">创建</NButton>
+          <NButton type="primary" :func-permission="permissions?.create" @click="handleCreate">创建</NButton>
           <NPopconfirm
             :disabled="checkedRowKeys.length === 0"
             @positive-click="handleBatchDelete"
@@ -44,7 +44,7 @@ const {
               <NButton
                 type="error"
                 :disabled="checkedRowKeys.length === 0"
-                :data-permission="permissions?.delete"
+                :func-permission="permissions?.delete"
               >
                 批量删除{{ checkedRowKeys.length > 0 ? `（${checkedRowKeys.length}）` : '' }}
               </NButton>

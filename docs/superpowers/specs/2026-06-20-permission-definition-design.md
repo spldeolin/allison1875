@@ -244,13 +244,13 @@ app-generator 生成 `src/app.json` 时，为每个 menu 追加 `permissions` �
 
 ### 4.2 按钮与权限点的关联
 
-通过 `data-permission` 属性在按钮元素上声明所需权限代码：
+通过 `func-permission` 属性在按钮元素上声明所需权限代码：
 
 ```html
 <!-- DataTable.vue -->
-<n-button :data-permission="schema.permissions?.create" @click="handleCreate">新建</n-button>
-<n-button :data-permission="schema.permissions?.update" @click="handleEdit(row)">编辑</n-button>
-<n-button :data-permission="schema.permissions?.delete" @click="handleDelete(row)">删除</n-button>
+<n-button :func-permission="schema.permissions?.create" @click="handleCreate">新建</n-button>
+<n-button :func-permission="schema.permissions?.update" @click="handleEdit(row)">编辑</n-button>
+<n-button :func-permission="schema.permissions?.delete" @click="handleDelete(row)">删除</n-button>
 ```
 
 ### 4.3 菜单与权限点的关联
@@ -260,7 +260,7 @@ app-generator 生成 `src/app.json` 时，为每个 menu 追加 `permissions` �
 ### 4.4 本阶段范围
 
 - 只建立映射关系，按钮仍全部展示
-- 后续"鉴权模块"基于 `data-permission` 实现 `v-permission` 指令或组合式函数控制显隐
+- 后续"鉴权模块"基于 `func-permission` 属性实现 `v-permission` 指令或组合式函数控制显隐
 - `permissions` 从 `app.json` 通过 router props 传入 CrudPage → DataTable
 
 ## 五、里程碑提示词（写入 spec 末尾）
@@ -281,7 +281,7 @@ app-generator 生成 `src/app.json` 时，为每个 menu 追加 `permissions` �
 
 ### 前端
 - `app.json` 每个 menu 包含 `permissions: {list, create, update, delete}` 映射
-- 按钮通过 `data-permission` 属性声明所需权限代码
+- 按钮通过 `func-permission` 属性声明所需权限代码
 - 菜单项通过 `permissions.list` 标识
 
 ### 下一步：授权模块
@@ -294,5 +294,5 @@ app-generator 生成 `src/app.json` 时，为每个 menu 追加 `permissions` �
 ### 再下一步：鉴权模块
 需要实现：
 1. 后端接口鉴权拦截器（基于当前用户角色→权限判断）
-2. 前端按钮/菜单显隐（基于 data-permission + 当前用户权限列表）
+2. 前端按钮/菜单显隐（基于 func-permission + 当前用户权限列表）
 3. 前端路由守卫（基于 permissions.list 控制菜单可见性）

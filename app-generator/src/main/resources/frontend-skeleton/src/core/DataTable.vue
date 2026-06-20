@@ -136,7 +136,7 @@ const columns = computed<DataTableColumn[]>(() => {
             type: 'primary',
             loading: isThisRowLoading,
             disabled: props.editingRowKey != null && !isThisRowLoading,
-            'data-permission': props.permissions?.update,
+            'func-permission': props.permissions?.update,
             onClick: () => emit('edit', row)
           }, { default: () => '编辑' }),
           h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
@@ -145,7 +145,7 @@ const columns = computed<DataTableColumn[]>(() => {
               quaternary: true,
               type: 'error',
               disabled: props.editingRowKey != null,
-              'data-permission': props.permissions?.delete
+              'func-permission': props.permissions?.delete
             }, { default: () => '删除' }),
             default: () => '确定要删除吗？'
           })
