@@ -23,7 +23,7 @@ const dslRoutes: RouteRecordRaw[] = app.menus.map(menu => ({
   path: `/${upperCamelToKebab(menu.form.name)}`,
   name: menu.form.name,
   component: resolvePageComponent(menu.form.name),
-  props: { schema: menu.form },
+  props: { schema: menu.form, permissions: menu.permissions },
   meta: { title: menu.form.title, group: menu.group, icon: menu.icon, order: menu.order }
 }))
 

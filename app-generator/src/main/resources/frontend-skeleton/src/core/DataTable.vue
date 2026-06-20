@@ -19,6 +19,8 @@ const props = defineProps<{
   bizKey?: string
   /** Currently checked row keys for batch delete */
   checkedRowKeys?: (string | number)[]
+  /** Permission codes for the current form */
+  permissions?: { list: string; create: string; update: string; delete: string }
 }>()
 
 const emit = defineEmits<{
@@ -134,6 +136,7 @@ const columns = computed<DataTableColumn[]>(() => {
             type: 'primary',
             loading: isThisRowLoading,
             disabled: props.editingRowKey != null && !isThisRowLoading,
+            'data-permission': props.permissions?.update,
             onClick: () => emit('edit', row)
           }, { default: () => '编辑' }),
           h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
@@ -141,7 +144,8 @@ const columns = computed<DataTableColumn[]>(() => {
               size: 'small',
               quaternary: true,
               type: 'error',
-              disabled: props.editingRowKey != null
+              disabled: props.editingRowKey != null,
+              'data-permission': props.permissions?.delete
             }, { default: () => '删除' }),
             default: () => '确定要删除吗？'
           })

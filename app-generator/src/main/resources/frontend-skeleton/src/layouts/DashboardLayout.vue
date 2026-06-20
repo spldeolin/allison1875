@@ -8,7 +8,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import * as icons from '@vicons/ionicons5'
 import appDef from '@/app.json'
-import type { AppDef } from '@/schema/types'
+import type { AppDef, MenuDef } from '@/schema/types'
 
 const app = appDef as AppDef
 
@@ -31,7 +31,9 @@ const menuOptions = computed<MenuOption[]>(() => {
   for (const r of dslRoutes) {
     const meta = r.meta as RouteMeta
     const group = meta.group!
-    if (!authStore.hasPermission(r.name as string)) continue
+    const menuDef = app.menus.find(m => m.form.name === r.name)
+    const listPermission = menuDef?.permissions?.list
+    if (listPermission && !authStore.hasPermission(listPermission)) continue
     if (!groups.has(group)) {
       groups.set(group, { routes: [], order: meta.order ?? 99 })
     }
