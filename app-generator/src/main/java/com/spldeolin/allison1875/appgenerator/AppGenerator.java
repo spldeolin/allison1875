@@ -32,6 +32,7 @@ import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
+import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import lombok.extern.slf4j.Slf4j;
 
@@ -163,6 +164,16 @@ public class AppGenerator implements Allison1875Game {
 
         // Write app.json with merged menus
         try {
+            // Inject permissions into each menu
+            for (MenuDef menu : mergedMenus) {
+                String upperSnake = MoreStringUtils.camelToSnakeCase(menu.getForm().getName()).toUpperCase();
+                menu.setPermissions(new MenuDef.Permissions()
+                        .setList("LIST_" + upperSnake)
+                        .setCreate("CREATE_" + upperSnake)
+                        .setUpdate("UPDATE_" + upperSnake)
+                        .setDelete("DELETE_" + upperSnake));
+            }
+
             ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
             AppDef frontendAppDef = new AppDef().setNamespace(appDef.getNamespace()).setName(appDef.getName())
                     .setTitle(appDef.getTitle()).setMenus(mergedMenus);

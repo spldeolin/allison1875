@@ -81,11 +81,19 @@ export interface FormDef {
   indices?: IndexDef[]
 }
 
+export interface PermissionsDef {
+  list: string
+  create: string
+  update: string
+  delete: string
+}
+
 export interface MenuDef {
   group?: string
   icon?: string
   order?: number
   form: FormDef
+  permissions?: PermissionsDef
 }
 
 export interface AppDef {

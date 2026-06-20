@@ -29,4 +29,21 @@ public class MenuDef {
     @Valid
     FormDef form;
 
+    Permissions permissions;
+
+    @Data
+    @Accessors(chain = true)
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class Permissions {
+
+        String list;
+
+        String create;
+
+        String update;
+
+        String delete;
+
+    }
+
 }
