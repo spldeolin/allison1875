@@ -62,13 +62,14 @@
 - `GRANT_ROLE` — 授予角色操作，`baseOn: LIST_ROLE`
 - 均归属 `Group.ROLE("ROLE", "角色管理")`
 
-### 验收流程
+### 验收流程（分工）
 
-1. 将 Role DSL 写入 app.yml 的 menus 中
-2. 通过 app-generator 生成应用
-3. 验证 Role CRUD 功能正常（创建、列表、编辑、删除）
-4. 验收通过后，将 Role DSL 移入 `builtin-form.yml`
-5. 后端 Role 相关代码手动移入后端骨架
+1. **AI**：编写一个仅包含 Role 表单的 app.yml DSL 文件
+2. **用户**：使用 app-generator 生成应用
+3. **用户**：验收 Role CRUD 功能（创建、列表、编辑、删除）
+4. 验收通过后：
+   - **用户**：将后端 Role 相关代码移动到后端骨架
+   - **AI**：将 Role 表单 DSL 移入 `builtin-form.yml`
 
 ## 二、数据库表（后端骨架）
 
@@ -263,7 +264,7 @@ GRANT_ROLE("GRANT_ROLE", "授予角色", Group.ROLE, LIST_ROLE),
 
 ## 六、实施步骤概览
 
-1. **验收 Role 表单**：写入 app.yml → 生成 → 验证 CRUD → 通过后移入 builtin-form.yml + 骨架
+1. **验收 Role 表单**：AI 编写 app.yml → 用户生成 & 验收 → 用户移后端代码到骨架，AI 移 DSL 到 builtin-form.yml
 2. **后端骨架扩展**：新增 DDL、Entity、Mapper、Controller、Service、DTO
 3. **前端骨架扩展**：新增 RolePage.vue、UserPage.vue 覆盖文件
 4. **权限枚举生成调整**：追加 GRANT_PERMISSION、GRANT_ROLE
