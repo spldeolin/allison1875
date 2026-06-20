@@ -125,4 +125,38 @@ class PermissionEnumGenerateServiceImplTest {
         assertTrue(content.startsWith("package com.myapp.demo.enums;"));
     }
 
+    @Test
+    void generatePermissionEnum_containsGrantPermissionAndGrantRole() throws IOException {
+        FormDef roleForm = new FormDef();
+        roleForm.setName("Role");
+        roleForm.setTitle("角色");
+
+        FormDef orderForm = new FormDef();
+        orderForm.setName("Order");
+        orderForm.setTitle("订单");
+
+        service.generatePermissionEnum(Arrays.asList(orderForm, roleForm), tempDir, "com.example");
+
+        Path file = tempDir.resolve("src/main/java/com/example/enums/PermissionEnum.java");
+        String content = Files.readString(file, StandardCharsets.UTF_8);
+
+        assertTrue(content.contains("GRANT_PERMISSION(\"GRANT_PERMISSION\", \"授予权限\", Group.ROLE, LIST_ROLE)"));
+        assertTrue(content.contains("GRANT_ROLE(\"GRANT_ROLE\", \"授予角色\", Group.ROLE, LIST_ROLE)"));
+    }
+
+    @Test
+    void generatePermissionEnum_noRoleForm_noGrantPermissions() throws IOException {
+        FormDef orderForm = new FormDef();
+        orderForm.setName("Order");
+        orderForm.setTitle("订单");
+
+        service.generatePermissionEnum(Collections.singletonList(orderForm), tempDir, "com.example");
+
+        Path file = tempDir.resolve("src/main/java/com/example/enums/PermissionEnum.java");
+        String content = Files.readString(file, StandardCharsets.UTF_8);
+
+        assertFalse(content.contains("GRANT_PERMISSION"));
+        assertFalse(content.contains("GRANT_ROLE"));
+    }
+
 }

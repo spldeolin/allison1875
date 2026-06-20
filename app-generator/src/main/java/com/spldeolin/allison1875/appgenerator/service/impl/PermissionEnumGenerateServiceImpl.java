@@ -34,8 +34,9 @@ public class PermissionEnumGenerateServiceImpl implements PermissionEnumGenerate
             throw new UncheckedIOException(e);
         }
 
+        int extraPerms = allForms.stream().anyMatch(f -> "Role".equals(f.getName())) ? 2 : 0;
         log.info("generated PermissionEnum with {} permission points for {} forms",
-                allForms.size() * 4, allForms.size());
+                allForms.size() * 4 + extraPerms, allForms.size());
     }
 
     private String buildSourceCode(List<FormDef> allForms, String namespace) {
@@ -68,6 +69,13 @@ public class PermissionEnumGenerateServiceImpl implements PermissionEnumGenerate
             if (i < allForms.size() - 1) {
                 sb.append("\n");
             }
+        }
+
+        boolean hasRoleForm = allForms.stream().anyMatch(f -> "Role".equals(f.getName()));
+        if (hasRoleForm) {
+            sb.append("\n");
+            sb.append("    GRANT_PERMISSION(\"GRANT_PERMISSION\", \"授予权限\", Group.ROLE, LIST_ROLE),\n");
+            sb.append("    GRANT_ROLE(\"GRANT_ROLE\", \"授予角色\", Group.ROLE, LIST_ROLE),\n");
         }
 
         sb.append("    ;\n\n");

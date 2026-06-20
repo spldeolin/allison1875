@@ -2,12 +2,12 @@ package __NAMESPACE__.service.impl;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-import com.google.common.collect.Lists;
 import __NAMESPACE__.common.BizException;
 import __NAMESPACE__.common.CurrentUser;
 import __NAMESPACE__.dto.CurrentUserDTO;
@@ -16,6 +16,8 @@ import __NAMESPACE__.dto.resp.LoginResp;
 import __NAMESPACE__.dto.resp.UpdateSelfPasswordReq;
 import __NAMESPACE__.entity.UserEntity;
 import __NAMESPACE__.mapper.UserMapper;
+import __NAMESPACE__.mapper.UserRoleMapper;
+import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.property.AuthcProperties;
 import __NAMESPACE__.service.AuthcService;
 import __NAMESPACE__.util.SecretKeyUtils;
@@ -30,6 +32,12 @@ public class AuthcServiceImpl implements AuthcService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private RolePermissionMapper rolePermissionMapper;
 
     @Resource
     private AuthcProperties authcProperties;
@@ -53,7 +61,7 @@ public class AuthcServiceImpl implements AuthcService {
         String token = this.issueToken(user, user.getUsername());
 
         // 获取被授予的权限
-        List<String> permission = Lists.newArrayList();
+        List<String> permission = resolvePermissions(user.getId());
 
         log.info("用户登录成功, username={}", req.getUsername());
         return new LoginResp().setToken(token).setCurrentUser(
@@ -130,6 +138,14 @@ public class AuthcServiceImpl implements AuthcService {
         }
         LocalDateTime expireAt = user.getLastLoginAt().plus(Duration.ofMillis(authcProperties.getLoginExpireTime()));
         return !LocalDateTime.now().isAfter(expireAt);
+    }
+
+    private List<String> resolvePermissions(Long userId) {
+        List<Long> roleIds = userRoleMapper.queryRoleIdsByUserId(userId);
+        if (roleIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return rolePermissionMapper.queryPermissionCodesByRoleIds(roleIds);
     }
 
 }

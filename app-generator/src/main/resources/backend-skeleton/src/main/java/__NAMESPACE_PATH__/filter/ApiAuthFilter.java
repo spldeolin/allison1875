@@ -21,6 +21,8 @@ import __NAMESPACE__.common.RequestResult;
 import __NAMESPACE__.dto.CurrentUserDTO;
 import __NAMESPACE__.entity.UserEntity;
 import __NAMESPACE__.mapper.UserMapper;
+import __NAMESPACE__.mapper.UserRoleMapper;
+import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.property.AuthcProperties;
 import __NAMESPACE__.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,12 @@ public class ApiAuthFilter extends OncePerRequestFilter {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private RolePermissionMapper rolePermissionMapper;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -99,6 +107,11 @@ public class ApiAuthFilter extends OncePerRequestFilter {
                 // 构建CurrentUser并保存到线程上下文
                 CurrentUserDTO currentUser = new CurrentUserDTO().setUsername(user.getUsername())
                         .setNickName(user.getNickName());
+                List<Long> roleIds = userRoleMapper.queryRoleIdsByUserId(user.getId());
+                List<String> userPermissions = roleIds.isEmpty()
+                        ? Collections.emptyList()
+                        : rolePermissionMapper.queryPermissionCodesByRoleIds(roleIds);
+                currentUser.setPermissions(userPermissions);
                 CurrentUser.set(currentUser);
                 log.debug("认证成功, currentUser={} requestPath={}", currentUser, requestPath);
 

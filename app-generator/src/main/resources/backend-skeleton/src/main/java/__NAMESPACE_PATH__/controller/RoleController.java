@@ -74,4 +74,21 @@ public class RoleController {
         roleService.deleteRole(req);
         return RequestResult.success();
     }
+
+    /**
+     * 授予权限
+     */
+    @PostMapping("grantPermissions")
+    public RequestResult<Void> grantPermissions(@RequestBody @Valid GrantPermissionsReq req) {
+        roleGrantService.grantPermissions(req);
+        return RequestResult.success();
+    }
+
+    /**
+     * 查询角色权限
+     */
+    @PostMapping("listRolePermissions")
+    public RequestResult<List<String>> listRolePermissions(@RequestBody @Valid ListRolePermissionsReq req) {
+        return RequestResult.success(roleGrantService.listRolePermissions(req));
+    }
 }
