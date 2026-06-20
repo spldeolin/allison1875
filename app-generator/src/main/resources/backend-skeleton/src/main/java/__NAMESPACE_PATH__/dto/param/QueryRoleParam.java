@@ -1,0 +1,49 @@
+package com.example.roletest.dto.param;
+
+import java.util.List;
+import java.time.LocalDateTime;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
+
+/**
+ * @author Deolin 2026-06-21
+ */
+@Data
+@Accessors(chain = true)
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+public class QueryRoleParam {
+
+    /**
+     * 业务主键
+     */
+    List<String> roleCode;
+
+    /**
+     * 角色名称
+     */
+    String roleName;
+
+    /**
+     * 角色描述
+     */
+    String description;
+
+    /**
+     * 创建时间
+     */
+    LocalDateTime createdAt;
+
+    /**
+     * 创建时间
+     */
+    LocalDateTime createdAtEx;
+
+    /**
+     */
+    Integer offset;
+
+    /**
+     */
+    Integer limit;
+}

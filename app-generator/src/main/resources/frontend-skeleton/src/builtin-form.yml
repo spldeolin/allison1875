@@ -52,3 +52,30 @@ menus:
           isUnique: true
         - itemNames: [ currentToken ]
           isUnique: true
+
+  - group: 系统
+    icon: 1
+    order: 2
+    form:
+      name: Role
+      title: 角色
+      desc: 角色
+      items:
+        - type: text
+          name: roleName
+          title: 角色名称
+          isNonVoid: true
+          maxLength: 32
+          canInputOnInit: true
+          canInputOnEdit: true
+
+        - type: text
+          name: description
+          title: 角色描述
+          isNonVoid: false
+          maxLength: 128
+          canInputOnInit: true
+          canInputOnEdit: true
+      indices:
+        - itemNames: [ roleName ]
+          isUnique: true

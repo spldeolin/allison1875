@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.roletest.mapper.RoleMapper">
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
+
+    <resultMap id="all" type="com.example.roletest.entity.RoleEntity">
+        <id column="id" property="id"/>
+        <result column="role_code" property="roleCode"/>
+        <result column="role_name" property="roleName"/>
+        <result column="description" property="description"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="all">
+        id, role_code, role_name, description, created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.example.roletest.entity.RoleEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id!=null"> id, </if>
+            <if test="roleCode!=null"> role_code, </if>
+            <if test="roleName!=null"> role_name, </if>
+            <if test="description!=null"> description, </if>
+            <if test="createdAt!=null"> created_at, </if>
+            <if test="updatedAt!=null"> updated_at, </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id!=null"> #{id}, </if>
+            <if test="roleCode!=null"> #{roleCode}, </if>
+            <if test="roleName!=null"> #{roleName}, </if>
+            <if test="description!=null"> #{description}, </if>
+            <if test="createdAt!=null"> #{createdAt}, </if>
+            <if test="updatedAt!=null"> #{updatedAt}, </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert">
+        <foreach collection="entities" item="one" separator=";">
+            INSERT INTO role
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null"> id, </if>
+                <if test="one.roleCode!=null"> role_code, </if>
+                <if test="one.roleName!=null"> role_name, </if>
+                <if test="one.description!=null"> description, </if>
+                <if test="one.createdAt!=null"> created_at, </if>
+                <if test="one.updatedAt!=null"> updated_at, </if>
+            </trim>
+            <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null"> #{one.id}, </if>
+                <if test="one.roleCode!=null"> #{one.roleCode}, </if>
+                <if test="one.roleName!=null"> #{one.roleName}, </if>
+                <if test="one.description!=null"> #{one.description}, </if>
+                <if test="one.createdAt!=null"> #{one.createdAt}, </if>
+                <if test="one.updatedAt!=null"> #{one.updatedAt}, </if>
+            </trim>
+        </foreach>;
+    </insert>
+
+    <insert id="batchInsertEvenNull">
+        INSERT INTO role
+            ( <include refid="all"/> )
+        VALUES
+            <foreach collection="entities" item="one" separator=",">(
+                #{one.id}, #{one.roleCode}, #{one.roleName}, #{one.description}, #{one.createdAt}, #{one.updatedAt}
+            )</foreach>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.roletest.entity.RoleEntity">
+        UPDATE role
+        <set>
+            <if test="roleCode!=null"> role_code = #{roleCode}, </if>
+            <if test="roleName!=null"> role_name = #{roleName}, </if>
+            <if test="description!=null"> description = #{description}, </if>
+            <if test="createdAt!=null"> created_at = #{createdAt}, </if>
+            <if test="updatedAt!=null"> updated_at = #{updatedAt}, </if>
+        </set>
+        <where>
+            AND id = #{id}
+        </where>
+        </update>
+
+    <update id="updateByIdEvenNull" parameterType="com.example.roletest.entity.RoleEntity">
+        UPDATE role
+        SET
+            role_code = #{roleCode},
+            role_name = #{roleName},
+            description = #{description},
+            created_at = #{createdAt},
+            updated_at = #{updatedAt}
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM role
+        <where>
+            AND id = #{id}
+        </where>
+    </delete>
+
+    <select id="queryById" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND id = #{id}
+        </where>
+    </select>
+
+    <select id="queryByIds" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByIdsEachId" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByRoleCode" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND role_code = #{roleCode}
+        </where>
+    </select>
+
+    <select id="queryByRoleName" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND role_name = #{roleName}
+        </where>
+    </select>
+
+    <delete id="deleteByRoleCode">
+        DELETE FROM role
+        <where>
+            AND role_code = #{roleCode}
+        </where>
+    </delete>
+
+    <delete id="deleteByRoleName">
+        DELETE FROM role
+        <where>
+            AND role_name = #{roleName}
+        </where>
+    </delete>
+
+    <select id="queryByRoleCodes" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND role_code IN (<foreach collection="roleCodes" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByRoleNames" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND role_name IN (<foreach collection="roleNames" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByRoleCodesEachRoleCode" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND role_code IN (<foreach collection="roleCodes" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByRoleNamesEachRoleName" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+            AND role_name IN (<foreach collection="roleNames" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+
+    <select id='queryRole' resultMap='all'>
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+        <if test="roleCode != null and roleCode != ''">
+            AND role_code != #{roleCode}
+        </if>
+        <if test="roleName != null and roleName != ''">
+            AND role_name = #{roleName}
+        </if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id='countRole' parameterType='com.example.roletest.dto.param.QueryRoleParam' resultType='long'>
+        SELECT COUNT(*)
+        FROM role
+        <where>
+        <if test="roleCode != null">
+            <if test="roleCode.size() > 0">
+                AND role_code IN (<foreach collection='roleCode' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="roleCode.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="roleName != null and roleName != ''">
+            AND role_name LIKE CONCAT('%', #{roleName}, '%')
+        </if>
+        <if test="description != null and description != ''">
+            AND description LIKE CONCAT('%', #{description}, '%')
+        </if>
+        <if test="createdAt != null">
+            AND created_at >= #{createdAt}
+        </if>
+        <if test="createdAtEx != null">
+            AND created_at &lt;= #{createdAtEx}
+        </if>
+        </where>
+    </select>
+    <select id='queryRoleEx' parameterType='com.example.roletest.dto.param.QueryRoleParam' resultMap='all'>
+        SELECT <include refid="all"/>
+        FROM role
+        <where>
+        <if test="roleCode != null">
+            <if test="roleCode.size() > 0">
+                AND role_code IN (<foreach collection='roleCode' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="roleCode.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="roleName != null and roleName != ''">
+            AND role_name LIKE CONCAT('%', #{roleName}, '%')
+        </if>
+        <if test="description != null and description != ''">
+            AND description LIKE CONCAT('%', #{description}, '%')
+        </if>
+        <if test="createdAt != null">
+            AND created_at >= #{createdAt}
+        </if>
+        <if test="createdAtEx != null">
+            AND created_at &lt;= #{createdAtEx}
+        </if>
+        </where>
+        ORDER BY
+            updated_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <delete id='deleteRole'>
+        DELETE FROM role
+        <where>
+        <if test="roleCode != null">
+            <if test="roleCode.size() > 0">
+                AND role_code IN (<foreach collection='roleCode' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="roleCode.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        </where>
+    </delete>
+</mapper>
