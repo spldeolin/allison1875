@@ -21,6 +21,13 @@ const props = defineProps<{
   checkedRowKeys?: (string | number)[]
   /** Permission codes for the current form */
   permissions?: { list: string; create: string; update: string; delete: string }
+  /** Extra action buttons to render in the actions column */
+  extraActions?: Array<{
+    label: string
+    type?: 'default' | 'primary' | 'info' | 'success' | 'warning' | 'error'
+    permission?: string
+    onClick: (row: Record<string, any>) => void
+  }>
 }>()
 
 const emit = defineEmits<{
@@ -122,7 +129,7 @@ const columns = computed<DataTableColumn[]>(() => {
   cols.push({
     title: '操作',
     key: '_actions',
-    width: 120,
+    width: 120 + (props.extraActions?.length ?? 0) * 80,
     fixed: 'right',
     render(row: Record<string, any>) {
       const isThisRowLoading = props.editingRowKey != null
@@ -130,6 +137,16 @@ const columns = computed<DataTableColumn[]>(() => {
         && row[props.bizKey] === props.editingRowKey
       return h(NSpace, { wrap: false, size: 4 }, {
         default: () => [
+          ...(props.extraActions || []).map(action =>
+            h(NButton, {
+              size: 'small',
+              quaternary: true,
+              type: (action.type || 'info') as any,
+              disabled: props.editingRowKey != null,
+              'func-permission': action.permission,
+              onClick: () => action.onClick(row)
+            }, { default: () => action.label })
+          ),
           h(NButton, {
             size: 'small',
             quaternary: true,
@@ -176,7 +193,7 @@ const scrollX = computed(() => {
   if (visibleCount > 0) width += 150 // first visible column (fixed left)
   if (visibleCount > 1) width += (visibleCount - 1) * 120
   width += 300 // createdAt + updatedAt
-  width += 120 // actions
+  width += 120 + (props.extraActions?.length ?? 0) * 80 // actions
   return width
 })
 
