@@ -54,6 +54,11 @@ function renderTimeCell(val: unknown) {
   return h('span', { style: 'font-size: 13px; color: #374151' }, str)
 }
 
+const bizKeyColWidth = computed(() => {
+  const title = `${props.formTitle || ''}ID`
+  return Math.max(140, title.length * 14 + 24)
+})
+
 const columns = computed<DataTableColumn[]>(() => {
   const cols: DataTableColumn[] = [{ type: 'selection', fixed: 'left' }]
 
@@ -61,7 +66,7 @@ const columns = computed<DataTableColumn[]>(() => {
     cols.push({
       title: `${props.formTitle || ''}ID`,
       key: props.bizKey,
-      width: 120,
+      width: bizKeyColWidth.value,
       fixed: 'left',
       ellipsis: { tooltip: { contentStyle: 'max-width: 360px; max-height: 240px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word' } },
       render(row: Record<string, any>) {
@@ -72,7 +77,7 @@ const columns = computed<DataTableColumn[]>(() => {
     })
   }
 
-  cols.push(...visibleItems.value.map((item) => {
+  cols.push(...visibleItems.value.map((item, index) => {
     const isMultiline = item.type === 'text' && (item as any).isMultilineOrRich
     return {
     title: item.title,
@@ -83,6 +88,7 @@ const columns = computed<DataTableColumn[]>(() => {
     resizable: true,
     minWidth: 120,
     ...(isMultiline ? { width: 200 } : {}),
+    ...(index === 0 ? { fixed: 'left' as const, width: 150 } : {}),
     render(row: Record<string, any>) {
       return h(FieldRenderer, {
         item,
@@ -161,8 +167,10 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
 
 const scrollX = computed(() => {
   let width = 50 // selection column
-  if (props.bizKey) width += 120
-  width += visibleItems.value.length * 120
+  if (props.bizKey) width += bizKeyColWidth.value
+  const visibleCount = visibleItems.value.length
+  if (visibleCount > 0) width += 150 // first visible column (fixed left)
+  if (visibleCount > 1) width += (visibleCount - 1) * 120
   width += 300 // createdAt + updatedAt
   width += 120 // actions
   return width
