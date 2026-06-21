@@ -56,14 +56,14 @@ public class PermissionEnumGenerateServiceImpl implements PermissionEnumGenerate
 
             sb.append("    LIST_").append(upperSnake).append("(\"LIST_").append(upperSnake)
                     .append("\", \"查看").append(title).append("\", ").append(groupRef).append(", null),\n");
-            sb.append("    CREATE_").append(upperSnake).append("(\"CREATE_").append(upperSnake)
-                    .append("\", \"创建").append(title).append("\", ").append(groupRef).append(", List.of(LIST_")
+            sb.append("    CREATE_").append(upperSnake).append("(\"CREATE_").append(upperSnake).append("\", \"创建")
+                    .append(title).append("\", ").append(groupRef).append(", Lists.newArrayList(LIST_")
                     .append(upperSnake).append(")),\n");
-            sb.append("    UPDATE_").append(upperSnake).append("(\"UPDATE_").append(upperSnake)
-                    .append("\", \"编辑").append(title).append("\", ").append(groupRef).append(", List.of(LIST_")
+            sb.append("    UPDATE_").append(upperSnake).append("(\"UPDATE_").append(upperSnake).append("\", \"编辑")
+                    .append(title).append("\", ").append(groupRef).append(", Lists.newArrayList(LIST_")
                     .append(upperSnake).append(")),\n");
-            sb.append("    DELETE_").append(upperSnake).append("(\"DELETE_").append(upperSnake)
-                    .append("\", \"删除").append(title).append("\", ").append(groupRef).append(", List.of(LIST_")
+            sb.append("    DELETE_").append(upperSnake).append("(\"DELETE_").append(upperSnake).append("\", \"删除")
+                    .append(title).append("\", ").append(groupRef).append(", Lists.newArrayList(LIST_")
                     .append(upperSnake).append(")),\n");
 
             if (i < allForms.size() - 1) {

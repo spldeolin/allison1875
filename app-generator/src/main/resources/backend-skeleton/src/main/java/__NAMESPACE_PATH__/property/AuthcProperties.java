@@ -3,6 +3,8 @@ package __NAMESPACE__.property;
 import javax.annotation.PostConstruct;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import __NAMESPACE__.util.JsonUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
@@ -37,11 +39,12 @@ public class AuthcProperties {
     /**
      * 管理员初始密码
      */
+    @JsonIgnore
     String adminPassword;
 
     @PostConstruct
     public void init() {
-        log.info("__APP_NAME__.authc properties loaded, {}", this);
+        log.info("__APP_NAME__.authc properties loaded, {}", JsonUtils.toJson(this));
     }
 
 }

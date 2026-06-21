@@ -12,6 +12,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
-@Order(2) // 在RequestIdFilter之后执行
+@Order(2) // 在TraceFilter之后执行
 public class ApiAuthFilter extends OncePerRequestFilter {
 
     @Resource
@@ -116,6 +117,7 @@ public class ApiAuthFilter extends OncePerRequestFilter {
                         : rolePermissionMapper.queryPermissionCodesByRoleIds(roleIds);
                 currentUser.setPermissions(userPermissions);
                 CurrentUser.set(currentUser);
+                MDC.put("user", user.getUsername());
                 log.debug("认证成功, currentUser={} requestPath={}", currentUser, requestPath);
 
                 // ==================== 鉴权 ====================
