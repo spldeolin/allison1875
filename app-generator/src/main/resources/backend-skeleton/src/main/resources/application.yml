@@ -27,3 +27,4 @@ __APP_NAME__:
     anonymousApiPaths: /api/v1/authc/login
     loginExpireTime: 172800000 # millis of 2 days
     disableMultiDeviceLogin: false
+    adminPassword: admin

@@ -34,6 +34,11 @@ public class AuthcProperties {
      */
     Boolean disableMultiDeviceLogin;
 
+    /**
+     * 管理员初始密码
+     */
+    String adminPassword;
+
     @PostConstruct
     public void init() {
         log.info("__APP_NAME__.authc properties loaded, {}", this);

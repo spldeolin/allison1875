@@ -2,6 +2,7 @@ package __NAMESPACE__.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
 import org.mindrot.jbcrypt.BCrypt;
@@ -18,9 +19,14 @@ import __NAMESPACE__.dto.resp.GetUserDetailResp;
 import __NAMESPACE__.dto.resp.ListUsersResp;
 import __NAMESPACE__.dto.resp.PageResult;
 import __NAMESPACE__.dto.resp.SaveUserResp;
+import __NAMESPACE__.entity.RoleEntity;
 import __NAMESPACE__.entity.UserEntity;
+import __NAMESPACE__.entity.UserRoleEntity;
+import __NAMESPACE__.mapper.RoleMapper;
 import __NAMESPACE__.mapper.UserMapper;
+import __NAMESPACE__.mapper.UserRoleMapper;
 import __NAMESPACE__.service.UserService;
+import __NAMESPACE__.task.PermissionSystemInitializer;
 import __NAMESPACE__.util.UuidUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +39,12 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private RoleMapper roleMapper;
+
+    @Resource
+    private UserRoleMapper userRoleMapper;
 
     @Transactional
     @Override
@@ -121,6 +133,15 @@ public class UserServiceImpl implements UserService {
         user.setUpdatedAt(LocalDateTime.now());
         if (toCreate) {
             userMapper.insert(user);
+            // Auto-assign default role (观察员) to new users
+            RoleEntity defaultRole = roleMapper.queryByRoleName(PermissionSystemInitializer.getDefaultRoleName());
+            if (defaultRole != null) {
+                UserRoleEntity userRole = new UserRoleEntity();
+                userRole.setUserId(user.getId());
+                userRole.setRoleId(defaultRole.getId());
+                userRole.setCreatedAt(LocalDateTime.now());
+                userRoleMapper.batchInsert(Collections.singletonList(userRole));
+            }
         } else {
             userMapper.updateById(user);
         }

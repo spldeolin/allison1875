@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import __NAMESPACE__.annotation.WebApiAuth;
 import __NAMESPACE__.common.RequestResult;
 import __NAMESPACE__.dto.req.DeleteUserReq;
 import __NAMESPACE__.dto.req.GetUserDetailReq;
@@ -19,6 +20,7 @@ import __NAMESPACE__.dto.resp.ListUsersResp;
 import __NAMESPACE__.dto.resp.PageResult;
 import __NAMESPACE__.dto.resp.RoleBriefResp;
 import __NAMESPACE__.dto.resp.SaveUserResp;
+import __NAMESPACE__.enums.PermissionEnum;
 import __NAMESPACE__.service.UserGrantService;
 import __NAMESPACE__.service.UserService;
 
@@ -40,6 +42,7 @@ public class UserController {
     /**
      * 创建用户
      */
+    @WebApiAuth({PermissionEnum.CREATE_USER, PermissionEnum.UPDATE_USER})
     @PostMapping("saveUser")
     public RequestResult<SaveUserResp> saveUser(@RequestBody @Valid SaveUserReq req) {
         return RequestResult.success(userService.saveUser(req));
@@ -48,6 +51,7 @@ public class UserController {
     /**
      * 用户列表
      */
+    @WebApiAuth(PermissionEnum.LIST_USER)
     @PostMapping("listUsers")
     public RequestResult<PageResult<ListUsersResp>> listUsers(@RequestBody @Valid ListUsersReq req) {
         return RequestResult.success(userService.listUsers(req));
@@ -56,6 +60,7 @@ public class UserController {
     /**
      * 用户详情
      */
+    @WebApiAuth(PermissionEnum.LIST_USER)
     @PostMapping("getUserDetail")
     public RequestResult<GetUserDetailResp> getUserDetail(@RequestBody @Valid GetUserDetailReq req) {
         return RequestResult.success(userService.getUserDetail(req));
@@ -64,6 +69,7 @@ public class UserController {
     /**
      * 删除用户
      */
+    @WebApiAuth(PermissionEnum.DELETE_USER)
     @PostMapping("deleteUser")
     public RequestResult<Void> deleteUser(@RequestBody @Valid DeleteUserReq req) {
         userService.deleteUser(req);
@@ -73,6 +79,7 @@ public class UserController {
     /**
      * 授权角色
      */
+    @WebApiAuth(PermissionEnum.GRANT_ROLE)
     @PostMapping("grantRoles")
     public RequestResult<Void> grantRoles(@RequestBody @Valid GrantRolesReq req) {
         userGrantService.grantRoles(req);
@@ -82,6 +89,7 @@ public class UserController {
     /**
      * 查询用户角色列表
      */
+    @WebApiAuth(PermissionEnum.LIST_USER)
     @PostMapping("listUserRoles")
     public RequestResult<List<RoleBriefResp>> listUserRoles(@RequestBody @Valid ListUserRolesReq req) {
         return RequestResult.success(userGrantService.listUserRoles(req));

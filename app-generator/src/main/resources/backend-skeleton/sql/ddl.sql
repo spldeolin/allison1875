@@ -15,12 +15,6 @@ CREATE TABLE `user`
     PRIMARY KEY (`id`)
 ) COMMENT '用户';
 
-# 初始化管理员 admin / admin
-INSERT INTO user (user_code, username, password, nick_name, last_login_at, current_token, created_at,
-                                 updated_at)
-VALUES ('5291aa8f925441a093cd197c3cc6d3c5', 'admin', '$2a$10$lcN2wzbdX5gC.nBtrr9/8u/ZGhpPs7S58po.KA6CR/vq3TG.1lGvy',
-        'Admin', NULL, NULL, '2026-06-08 12:46:58', '2026-06-08 12:47:00');
-
 CREATE TABLE `role`
 (
     `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',

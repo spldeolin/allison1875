@@ -78,6 +78,18 @@ router.beforeEach(async (to) => {
     const saved = authStore.popRedirect()
     return saved || firstFormPath
   }
+
+  // Permission-based route guard
+  const menuDef = app.menus.find(m => m.form.name === to.name)
+  const listPermission = menuDef?.permissions?.list
+  if (listPermission && !authStore.hasPermission(listPermission)) {
+    const firstAccessible = dslRoutes.find(r => {
+      const md = app.menus.find(m => m.form.name === r.name)
+      const perm = md?.permissions?.list
+      return !perm || authStore.hasPermission(perm)
+    })
+    return firstAccessible ? { path: firstAccessible.path } : { path: '/login' }
+  }
 })
 
 export { firstFormPath }

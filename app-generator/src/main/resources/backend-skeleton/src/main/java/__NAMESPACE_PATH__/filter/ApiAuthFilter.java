@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -20,10 +21,12 @@ import __NAMESPACE__.common.ErrorCode;
 import __NAMESPACE__.common.RequestResult;
 import __NAMESPACE__.dto.CurrentUserDTO;
 import __NAMESPACE__.entity.UserEntity;
+import __NAMESPACE__.enums.PermissionEnum;
+import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.mapper.UserMapper;
 import __NAMESPACE__.mapper.UserRoleMapper;
-import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.property.AuthcProperties;
+import __NAMESPACE__.task.WebApiAuthRegistry;
 import __NAMESPACE__.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +54,9 @@ public class ApiAuthFilter extends OncePerRequestFilter {
 
     @Resource
     private RolePermissionMapper rolePermissionMapper;
+
+    @Resource
+    private WebApiAuthRegistry webApiAuthRegistry;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -101,9 +107,6 @@ public class ApiAuthFilter extends OncePerRequestFilter {
                     }
                 }
 
-                // 解析用户权限列表
-//                List<String> userPermissions = parsePermissions(user.getPermissions());
-
                 // 构建CurrentUser并保存到线程上下文
                 CurrentUserDTO currentUser = new CurrentUserDTO().setUsername(user.getUsername())
                         .setNickName(user.getNickName());
@@ -116,22 +119,25 @@ public class ApiAuthFilter extends OncePerRequestFilter {
                 log.debug("认证成功, currentUser={} requestPath={}", currentUser, requestPath);
 
                 // ==================== 鉴权 ====================
-//                PermissionEnum[] requiredPermissions = webApiAuthRegistry.getRequiredPermissions(requestPath);
-//                if (requiredPermissions != null && requiredPermissions.length > 0) {
-//                    // 检查用户是否拥有所有所需权限
-//                    for (PermissionEnum required : requiredPermissions) {
-//                        if (!userPermissions.contains(required.getCode())) {
-//                            log.warn("鉴权失败：用户缺少权限, username={}, missingPermission={}, path={}",
-//                                    user.getUsername(), required.getCode(), requestPath);
-//                            response.setContentType("application/json;charset=UTF-8");
-//                            response.getWriter().write(JsonUtils.toJson(
-//                                    ApiBaseResult.errorOf(ApiErrorCode.NO_AUTHZ.getStatusCode(),
-//                                            ApiErrorCode.NO_AUTHZ.getZnMessage())));
-//                            return;
-//                        }
-//                    }
-//                    log.debug("鉴权通过, username={}, path={}", user.getUsername(), requestPath);
-//                }
+                PermissionEnum[] requiredPermissions = webApiAuthRegistry.getRequiredPermissions(requestPath);
+                if (requiredPermissions != null && requiredPermissions.length > 0) {
+                    boolean hasAny = false;
+                    for (PermissionEnum required : requiredPermissions) {
+                        if (userPermissions.contains(required.getCode())) {
+                            hasAny = true;
+                            break;
+                        }
+                    }
+                    if (!hasAny) {
+                        log.warn("鉴权失败：用户缺少权限, username={}, requiredAnyOf={}, path={}", user.getUsername(),
+                                Arrays.stream(requiredPermissions).map(PermissionEnum::getCode)
+                                        .collect(Collectors.joining(",")), requestPath);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write(JsonUtils.toJson(RequestResult.failure(ErrorCode.FORBIDDEN)));
+                        return;
+                    }
+                    log.debug("鉴权通过, username={}, path={}", user.getUsername(), requestPath);
+                }
 
                 // 继续执行filter chain
                 filterChain.doFilter(request, response);
@@ -143,23 +149,6 @@ public class ApiAuthFilter extends OncePerRequestFilter {
         } finally {
             // 请求结束后清理线程上下文，避免线程复用导致的数据污染
             CurrentUser.clear();
-        }
-    }
-
-    /**
-     * 解析用户permissions字段（JSON数组字符串）为List
-     */
-    private List<String> parsePermissions(String permissionsStr) {
-        if (StringUtils.isBlank(permissionsStr)) {
-            return Collections.emptyList();
-        }
-        try {
-            // permissions字段存储格式为JSON数组，如 ["listSandboxes","destroySandboxes"]
-            List<String> list = JsonUtils.toListOfObject(permissionsStr, String.class);
-            return list != null ? list : Collections.emptyList();
-        } catch (Exception e) {
-            log.warn("解析用户权限失败, permissions={}", permissionsStr, e);
-            return Collections.emptyList();
         }
     }
 

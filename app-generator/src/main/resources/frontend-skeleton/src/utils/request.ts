@@ -40,6 +40,9 @@ request.interceptors.response.use(
       authStore.logout()
       return Promise.reject(new Error('认证已过期'))
     }
+    if (data.errorCode === '403') {
+      return Promise.reject(new Error('没有操作权限'))
+    }
     return Promise.reject(new Error(data.errorMsg || '请求失败'))
   },
   error => Promise.reject(error)

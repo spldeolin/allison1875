@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
+import com.spldeolin.allison1875.appgenerator.service.ControllerAuthAnnotateService;
 import com.spldeolin.allison1875.appgenerator.service.PermissionEnumGenerateService;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
@@ -48,6 +49,9 @@ public class AppGenerator implements Allison1875Game {
 
     @Inject
     private PermissionEnumGenerateService permissionEnumGenerateService;
+
+    @Inject
+    private ControllerAuthAnnotateService controllerAuthAnnotateService;
 
     @Override
     public void play() {
@@ -149,6 +153,9 @@ public class AppGenerator implements Allison1875Game {
 
         // Delegate to form-generator for CRUD code generation
         invokeFormGenerator(appDef, output, forms);
+
+        // Annotate generated controllers with @WebApiAuth
+        controllerAuthAnnotateService.annotateControllers(forms, output, appDef.getNamespace());
     }
 
     private void generateFrontend(AppDef appDef, Path output) {

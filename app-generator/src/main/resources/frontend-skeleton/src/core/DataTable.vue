@@ -5,6 +5,7 @@ import type { DataTableColumn, PaginationProps } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
 import { isVisible } from './protocol/field-policy'
+import { checkPermission } from '@/directives/usePermission'
 
 const props = defineProps<{
   items: ItemDef[]
@@ -137,35 +138,32 @@ const columns = computed<DataTableColumn[]>(() => {
         && row[props.bizKey] === props.editingRowKey
       return h(NSpace, { wrap: false, size: 4 }, {
         default: () => [
-          ...(props.extraActions || []).map(action =>
+          ...(props.extraActions || []).filter(action => checkPermission(action.permission)).map(action =>
             h(NButton, {
               size: 'small',
               quaternary: true,
               type: (action.type || 'info') as any,
               disabled: props.editingRowKey != null,
-              'func-permission': action.permission,
               onClick: () => action.onClick(row)
             }, { default: () => action.label })
           ),
-          h(NButton, {
+          ...(checkPermission(props.permissions?.update) ? [h(NButton, {
             size: 'small',
             quaternary: true,
             type: 'primary',
             loading: isThisRowLoading,
             disabled: props.editingRowKey != null && !isThisRowLoading,
-            'func-permission': props.permissions?.update,
             onClick: () => emit('edit', row)
-          }, { default: () => '编辑' }),
-          h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
+          }, { default: () => '编辑' })] : []),
+          ...(checkPermission(props.permissions?.delete) ? [h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
             trigger: () => h(NButton, {
               size: 'small',
               quaternary: true,
               type: 'error',
-              disabled: props.editingRowKey != null,
-              'func-permission': props.permissions?.delete
+              disabled: props.editingRowKey != null
             }, { default: () => '删除' }),
             default: () => '确定要删除吗？'
-          })
+          })] : [])
         ]
       })
     }
