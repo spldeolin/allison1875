@@ -1,6 +1,8 @@
 package __NAMESPACE__.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,6 +49,16 @@ public class RoleGrantServiceImpl implements RoleGrantService {
                 throw new BizException("无效的权限编码: " + code);
             }
         }
+
+        // Ensure baseOn permissions are also granted
+        Set<String> expandedCodes = new HashSet<>(req.getPermissionCodes());
+        for (String code : req.getPermissionCodes()) {
+            Arrays.stream(PermissionEnum.values())
+                    .filter(p -> p.getCode().equals(code) && p.getBaseOn() != null)
+                    .findFirst()
+                    .ifPresent(p -> expandedCodes.add(p.getBaseOn().getCode()));
+        }
+        req.setPermissionCodes(new ArrayList<>(expandedCodes));
 
         rolePermissionMapper.deleteByRoleId(role.getId());
 
