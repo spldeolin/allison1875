@@ -6,7 +6,7 @@ import SearchForm from '@/core/SearchForm.vue'
 import DataTable from '@/core/DataTable.vue'
 import EditModal from '@/core/EditModal.vue'
 import {
-  NButton, NSpace, NPopconfirm, NModal, NCheckbox, NCheckboxGroup, NDivider,
+  NButton, NSpace, NPopconfirm, NModal, NCheckbox, NDivider,
   useMessage
 } from 'naive-ui'
 import request from '@/utils/request'
@@ -45,6 +45,14 @@ const allPermissionGroups = ref<PermissionGroup[]>([])
 const selectedPermissionCodes = ref<string[]>([])
 const grantLoading = ref(false)
 
+function findPermission(code: string): PermissionItem | undefined {
+  for (const group of allPermissionGroups.value) {
+    const found = group.permissions.find(p => p.code === code)
+    if (found) return found
+  }
+  return undefined
+}
+
 async function handleOpenGrantModal(row: Record<string, any>) {
   grantRoleBizId.value = row[bizKey.value] as string
   grantModalTitle.value = `授予权限 — ${row.roleName}`
@@ -76,13 +84,34 @@ function isGroupPartialSelected(group: PermissionGroup): boolean {
 }
 
 function toggleGroupAll(group: PermissionGroup, checked: boolean) {
-  const codes = group.permissions.map(p => p.code)
   if (checked) {
-    const set = new Set([...selectedPermissionCodes.value, ...codes])
+    const set = new Set([...selectedPermissionCodes.value, ...group.permissions.map(p => p.code)])
     selectedPermissionCodes.value = [...set]
   } else {
-    selectedPermissionCodes.value = selectedPermissionCodes.value.filter(c => !codes.includes(c))
+    const codes = new Set(group.permissions.map(p => p.code))
+    selectedPermissionCodes.value = selectedPermissionCodes.value.filter(c => !codes.has(c))
   }
+}
+
+function handlePermissionCheck(code: string, checked: boolean) {
+  const set = new Set(selectedPermissionCodes.value)
+  if (checked) {
+    set.add(code)
+    const perm = findPermission(code)
+    if (perm?.baseOn) {
+      set.add(perm.baseOn)
+    }
+  } else {
+    set.delete(code)
+    for (const group of allPermissionGroups.value) {
+      for (const p of group.permissions) {
+        if (p.baseOn === code) {
+          set.delete(p.code)
+        }
+      }
+    }
+  }
+  selectedPermissionCodes.value = [...set]
 }
 
 async function handleGrantSubmit() {
@@ -175,28 +204,27 @@ async function handleGrantSubmit() {
         加载中...
       </div>
       <div v-else>
-        <NCheckboxGroup v-model:value="selectedPermissionCodes">
-          <div v-for="group in allPermissionGroups" :key="group.groupCode" style="margin-bottom: 16px">
-            <div style="display: flex; align-items: center; margin-bottom: 8px">
-              <NCheckbox
-                :checked="isGroupAllSelected(group)"
-                :indeterminate="isGroupPartialSelected(group)"
-                @update:checked="(v: boolean) => toggleGroupAll(group, v)"
-              >
-                <span style="font-weight: 600; font-size: 14px; color: #1e293b">{{ group.groupTitle }}</span>
-              </NCheckbox>
-            </div>
-            <div style="padding-left: 24px; display: flex; flex-wrap: wrap; gap: 8px 16px">
-              <NCheckbox
-                v-for="perm in group.permissions"
-                :key="perm.code"
-                :value="perm.code"
-                :label="perm.title"
-              />
-            </div>
-            <NDivider style="margin: 12px 0" />
+        <div v-for="group in allPermissionGroups" :key="group.groupCode" style="margin-bottom: 16px">
+          <div style="display: flex; align-items: center; margin-bottom: 8px">
+            <NCheckbox
+              :checked="isGroupAllSelected(group)"
+              :indeterminate="isGroupPartialSelected(group)"
+              @update:checked="(v: boolean) => toggleGroupAll(group, v)"
+            >
+              <span style="font-weight: 600; font-size: 14px; color: #1e293b">{{ group.groupTitle }}</span>
+            </NCheckbox>
           </div>
-        </NCheckboxGroup>
+          <div style="padding-left: 24px; display: flex; flex-wrap: wrap; gap: 8px 16px">
+            <NCheckbox
+              v-for="perm in group.permissions"
+              :key="perm.code"
+              :checked="selectedPermissionCodes.includes(perm.code)"
+              :label="perm.title"
+              @update:checked="(v: boolean) => handlePermissionCheck(perm.code, v)"
+            />
+          </div>
+          <NDivider style="margin: 12px 0" />
+        </div>
       </div>
       <template #footer>
         <div style="display: flex; justify-content: flex-end; gap: 8px">
