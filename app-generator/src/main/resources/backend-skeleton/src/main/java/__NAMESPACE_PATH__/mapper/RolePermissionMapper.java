@@ -14,4 +14,6 @@ public interface RolePermissionMapper {
 
     List<String> queryPermissionCodesByRoleIds(@Param("roleIds") List<Long> roleIds);
 
+    List<RolePermissionEntity> queryByRoleIds(@Param("roleIds") List<Long> roleIds);
+
 }

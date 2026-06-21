@@ -1,6 +1,7 @@
 package __NAMESPACE__.dto.resp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -46,5 +47,15 @@ public class ListUsersResp {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     LocalDateTime updatedAt;
+
+    /**
+     * 已授予角色
+     */
+    List<RoleBriefResp> grantedRoles;
+
+    /**
+     * 已授予权限（取并集后的 permission code 列表）
+     */
+    List<String> grantedPermissions;
 
 }

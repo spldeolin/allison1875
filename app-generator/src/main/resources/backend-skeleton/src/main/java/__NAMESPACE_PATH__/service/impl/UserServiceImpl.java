@@ -3,7 +3,11 @@ package __NAMESPACE__.service.impl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -18,11 +22,14 @@ import __NAMESPACE__.dto.req.SaveUserReq;
 import __NAMESPACE__.dto.resp.GetUserDetailResp;
 import __NAMESPACE__.dto.resp.ListUsersResp;
 import __NAMESPACE__.dto.resp.PageResult;
+import __NAMESPACE__.dto.resp.RoleBriefResp;
 import __NAMESPACE__.dto.resp.SaveUserResp;
 import __NAMESPACE__.entity.RoleEntity;
+import __NAMESPACE__.entity.RolePermissionEntity;
 import __NAMESPACE__.entity.UserEntity;
 import __NAMESPACE__.entity.UserRoleEntity;
 import __NAMESPACE__.mapper.RoleMapper;
+import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.mapper.UserMapper;
 import __NAMESPACE__.mapper.UserRoleMapper;
 import __NAMESPACE__.service.UserService;
@@ -45,6 +52,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private RolePermissionMapper rolePermissionMapper;
 
     @Transactional
     @Override
@@ -97,6 +107,46 @@ public class UserServiceImpl implements UserService {
             dto.setCreatedAt(user.getCreatedAt());
             dto.setUpdatedAt(user.getUpdatedAt());
             dtos.add(dto);
+        }
+        // Enrich with granted roles and permissions
+        List<Long> userIds = users.stream().map(UserEntity::getId).collect(Collectors.toList());
+        List<UserRoleEntity> allUserRoles = userRoleMapper.queryByUserIds(userIds);
+
+        // Build userId -> List<roleId> map
+        Map<Long, List<Long>> userRoleMap = allUserRoles.stream()
+                .collect(Collectors.groupingBy(UserRoleEntity::getUserId,
+                        Collectors.mapping(UserRoleEntity::getRoleId, Collectors.toList())));
+
+        // Collect all role IDs and batch-query role info
+        List<Long> allRoleIds = allUserRoles.stream()
+                .map(UserRoleEntity::getRoleId).distinct().collect(Collectors.toList());
+        Map<Long, RoleEntity> roleMap = Collections.emptyMap();
+        Map<Long, List<String>> rolePermMap = Collections.emptyMap();
+        if (!allRoleIds.isEmpty()) {
+            List<RoleEntity> roles = roleMapper.queryByIds(allRoleIds);
+            roleMap = roles.stream().collect(Collectors.toMap(RoleEntity::getId, r -> r));
+            rolePermMap = rolePermissionMapper.queryByRoleIds(allRoleIds).stream()
+                    .collect(Collectors.groupingBy(RolePermissionEntity::getRoleId,
+                            Collectors.mapping(RolePermissionEntity::getPermissionCode, Collectors.toList())));
+        }
+
+        // Enrich each dto
+        for (int i = 0; i < users.size(); i++) {
+            UserEntity user = users.get(i);
+            ListUsersResp dto = dtos.get(i);
+            List<Long> roleIds = userRoleMap.getOrDefault(user.getId(), Collections.emptyList());
+            List<RoleBriefResp> grantedRoles = new ArrayList<>();
+            Set<String> permSet = new LinkedHashSet<>();
+            for (Long roleId : roleIds) {
+                RoleEntity role = roleMap.get(roleId);
+                if (role != null) {
+                    grantedRoles.add(new RoleBriefResp().setBizId(role.getRoleCode()).setRoleName(role.getRoleName()));
+                }
+                List<String> perms = rolePermMap.getOrDefault(roleId, Collections.emptyList());
+                permSet.addAll(perms);
+            }
+            dto.setGrantedRoles(grantedRoles);
+            dto.setGrantedPermissions(new ArrayList<>(permSet));
         }
         return PageResult.of(queryUserTotal, dtos);
     }

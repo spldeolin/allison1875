@@ -21,4 +21,10 @@
         WHERE role_id IN (<foreach collection="roleIds" item="one" separator=",">#{one}</foreach>)
     </select>
 
+    <select id="queryByRoleIds" resultType="__NAMESPACE__.entity.RolePermissionEntity">
+        SELECT id, role_id, permission_code, created_at
+        FROM role_permission
+        WHERE role_id IN (<foreach collection="roleIds" item="one" separator=",">#{one}</foreach>)
+    </select>
+
 </mapper>
