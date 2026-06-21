@@ -1,5 +1,6 @@
 package __NAMESPACE__.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,9 +50,9 @@ public class UserGrantServiceImpl implements UserGrantService {
             }
 
             List<UserRoleEntity> entities = roles.stream()
-                    .map(role -> new UserRoleEntity().setUserId(user.getId()).setRoleId(role.getId()))
-                    .collect(Collectors.toList());
-            userRoleMapper.batchInsert(entities);
+                    .map(role -> new UserRoleEntity().setUserId(user.getId()).setRoleId(role.getId())
+                            .setCreatedAt(LocalDateTime.now())).collect(Collectors.toList());
+            userRoleMapper.batchInsertEvenNull(entities);
         }
 
         log.info("granted {} roles to user {}", req.getRoleBizIds().size(), req.getUserBizId());

@@ -1,5 +1,6 @@
 package __NAMESPACE__.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -41,8 +42,7 @@ public class RoleGrantServiceImpl implements RoleGrantService {
             throw new BizException("角色不存在或已被删除");
         }
 
-        Set<String> validCodes = Arrays.stream(PermissionEnum.values())
-                .map(PermissionEnum::getCode)
+        Set<String> validCodes = Arrays.stream(PermissionEnum.values()).map(PermissionEnum::getCode)
                 .collect(Collectors.toSet());
         for (String code : req.getPermissionCodes()) {
             if (!validCodes.contains(code)) {
@@ -53,10 +53,8 @@ public class RoleGrantServiceImpl implements RoleGrantService {
         // Ensure baseOn permissions are also granted
         Set<String> expandedCodes = new HashSet<>(req.getPermissionCodes());
         for (String code : req.getPermissionCodes()) {
-            Arrays.stream(PermissionEnum.values())
-                    .filter(p -> p.getCode().equals(code) && p.getBaseOn() != null)
-                    .findFirst()
-                    .ifPresent(p -> expandedCodes.add(p.getBaseOn().getCode()));
+            Arrays.stream(PermissionEnum.values()).filter(p -> p.getCode().equals(code) && p.getBaseOn() != null)
+                    .findFirst().ifPresent(p -> expandedCodes.add(p.getBaseOn().getCode()));
         }
         req.setPermissionCodes(new ArrayList<>(expandedCodes));
 
@@ -64,9 +62,9 @@ public class RoleGrantServiceImpl implements RoleGrantService {
 
         if (!req.getPermissionCodes().isEmpty()) {
             List<RolePermissionEntity> entities = req.getPermissionCodes().stream()
-                    .map(code -> new RolePermissionEntity().setRoleId(role.getId()).setPermissionCode(code))
-                    .collect(Collectors.toList());
-            rolePermissionMapper.batchInsert(entities);
+                    .map(code -> new RolePermissionEntity().setRoleId(role.getId()).setPermissionCode(code)
+                            .setCreatedAt(LocalDateTime.now())).collect(Collectors.toList());
+            rolePermissionMapper.batchInsertEvenNull(entities);
         }
 
         log.info("granted {} permissions to role {}", req.getPermissionCodes().size(), req.getRoleBizId());

@@ -2,7 +2,6 @@ package __NAMESPACE__.task;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,10 +40,9 @@ public class PermissionSystemInitializer {
 
     private static final InitRole SYSTEM_ADMIN = new InitRole("系统管理员", "拥有全部功能权限，不可删除");
 
-    private static final InitRole BUSINESS_OPERATOR = new InitRole("业务员",
-            "拥有所有业务表单的读写权限，新用户默认角色");
+    private static final InitRole BUSINESS_OPERATOR = new InitRole("业务读写", "拥有所有业务表单的读写权限");
 
-    private static final InitRole OBSERVER = new InitRole("观察员", "拥有所有业务表单的只读权限");
+    private static final InitRole OBSERVER = new InitRole("业务只读", "拥有所有业务表单的只读权限，新用户默认角色");
 
     @Resource
     private AuthcProperties authcProperties;
@@ -121,11 +119,10 @@ public class PermissionSystemInitializer {
         if (permissionCodes.isEmpty()) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
         List<RolePermissionEntity> entities = permissionCodes.stream()
                 .map(code -> new RolePermissionEntity().setRoleId(role.getId()).setPermissionCode(code)
-                        .setCreatedAt(now)).collect(Collectors.toList());
-        rolePermissionMapper.batchInsert(entities);
+                        .setCreatedAt(LocalDateTime.now())).collect(Collectors.toList());
+        rolePermissionMapper.batchInsertEvenNull(entities);
         log.info("Synced permissions for role '{}': {} permission codes", role.getRoleName(), permissionCodes.size());
     }
 
@@ -138,7 +135,7 @@ public class PermissionSystemInitializer {
         entity.setUserId(user.getId());
         entity.setRoleId(role.getId());
         entity.setCreatedAt(LocalDateTime.now());
-        userRoleMapper.batchInsert(Collections.singletonList(entity));
+        userRoleMapper.insert(entity);
         log.info("Bound role '{}' to user '{}'", role.getRoleName(), user.getUsername());
     }
 

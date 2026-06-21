@@ -1,22 +1,152 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="__NAMESPACE__.mapper.UserRoleMapper">
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
 
-    <insert id="batchInsert">
-        INSERT INTO user_role (user_id, role_id)
-        VALUES
-        <foreach collection="entities" item="one" separator=",">(#{one.userId}, #{one.roleId})</foreach>
+    <resultMap id="all" type="__NAMESPACE__.entity.UserRoleEntity">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="role_id" property="roleId"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <sql id="all">
+        id, user_id, role_id, created_at
+    </sql>
+
+    <insert id="insert" parameterType="__NAMESPACE__.entity.UserRoleEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id!=null">id,</if>
+            <if test="userId!=null">user_id,</if>
+            <if test="roleId!=null">role_id,</if>
+            <if test="createdAt!=null">created_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id!=null">#{id},</if>
+            <if test="userId!=null">#{userId},</if>
+            <if test="roleId!=null">#{roleId},</if>
+            <if test="createdAt!=null">#{createdAt},</if>
+        </trim>
     </insert>
 
-    <delete id="deleteByUserId">
-        DELETE FROM user_role WHERE user_id = #{userId}
+    <insert id="batchInsert">
+        <foreach collection="entities" item="one" separator=";">
+            INSERT INTO user_role
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null">id,</if>
+                <if test="one.userId!=null">user_id,</if>
+                <if test="one.roleId!=null">role_id,</if>
+                <if test="one.createdAt!=null">created_at,</if>
+            </trim>
+            <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null">#{one.id},</if>
+                <if test="one.userId!=null">#{one.userId},</if>
+                <if test="one.roleId!=null">#{one.roleId},</if>
+                <if test="one.createdAt!=null">#{one.createdAt},</if>
+            </trim>
+        </foreach>
+        ;
+    </insert>
+
+    <insert id="batchInsertEvenNull">
+        INSERT INTO user_role
+        (
+        <include refid="all"/>
+        )
+        VALUES
+        <foreach collection="entities" item="one" separator=",">(
+            #{one.id}, #{one.userId}, #{one.roleId}, #{one.createdAt}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateById" parameterType="__NAMESPACE__.entity.UserRoleEntity">
+        UPDATE user_role
+        <set>
+            <if test="userId!=null">user_id = #{userId},</if>
+            <if test="roleId!=null">role_id = #{roleId},</if>
+            <if test="createdAt!=null">created_at = #{createdAt},</if>
+        </set>
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM user_role
+        <where>
+            AND id = #{id}
+        </where>
     </delete>
 
-    <select id="queryRoleIdsByUserId" resultType="java.lang.Long">
+    <select id="queryById" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user_role
+        <where>
+            AND id = #{id}
+        </where>
+    </select>
+
+    <select id="queryByIds" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user_role
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByIdsEachId" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user_role
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByUserId" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user_role
+        <where>
+            AND user_id = #{userId}
+        </where>
+    </select>
+
+    <select id="queryByUserIdRoleId" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM user_role
+        <where>
+            AND user_id = #{userId}
+            AND role_id = #{roleId}
+        </where>
+    </select>
+
+    <delete id="deleteByUserId">
+        DELETE FROM user_role
+        <where>
+            AND user_id = #{userId}
+        </where>
+    </delete>
+
+    <delete id="deleteByUserIdRoleId">
+        DELETE FROM user_role
+        <where>
+            AND user_id = #{userId}
+            AND role_id = #{roleId}
+        </where>
+    </delete>
+
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+    <select id="queryRoleIdsByUserId" resultType="Long">
         SELECT role_id FROM user_role WHERE user_id = #{userId}
     </select>
 
-    <select id="queryByUserIds" resultType="__NAMESPACE__.entity.UserRoleEntity">
+    <select id="queryByUserIds" resultMap="all">
         SELECT id, user_id, role_id, created_at
         FROM user_role
         WHERE user_id IN (<foreach collection="userIds" item="one" separator=",">#{one}</foreach>)

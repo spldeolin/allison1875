@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
                 userRole.setUserId(user.getId());
                 userRole.setRoleId(defaultRole.getId());
                 userRole.setCreatedAt(LocalDateTime.now());
-                userRoleMapper.batchInsert(Collections.singletonList(userRole));
+                userRoleMapper.insert(userRole);
             }
         } else {
             userMapper.updateById(user);

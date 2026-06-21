@@ -32,7 +32,7 @@ CREATE TABLE `role_permission` (
     `id`              BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
     `role_id`         BIGINT      NOT NULL COMMENT '角色ID',
     `permission_code` VARCHAR(64) NOT NULL COMMENT '权限编码',
-    `created_at`      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `created_at`      DATETIME    NOT NULL COMMENT '创建时间',
     UNIQUE KEY `uk_role_permission` (`role_id`, `permission_code`),
     PRIMARY KEY (`id`)
 ) COMMENT '角色-权限关联';
@@ -41,7 +41,7 @@ CREATE TABLE `user_role` (
     `id`         BIGINT   NOT NULL AUTO_INCREMENT COMMENT '主键',
     `user_id`    BIGINT   NOT NULL COMMENT '用户ID',
     `role_id`    BIGINT   NOT NULL COMMENT '角色ID',
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `created_at` DATETIME NOT NULL COMMENT '创建时间',
     UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
     PRIMARY KEY (`id`)
 ) COMMENT '用户-角色关联';

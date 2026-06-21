@@ -1,27 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="__NAMESPACE__.mapper.RolePermissionMapper">
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
 
-    <insert id="batchInsert">
-        INSERT INTO role_permission (role_id, permission_code)
-        VALUES
-        <foreach collection="entities" item="one" separator=",">(#{one.roleId}, #{one.permissionCode})</foreach>
+    <resultMap id="all" type="__NAMESPACE__.entity.RolePermissionEntity">
+        <id column="id" property="id"/>
+        <result column="role_id" property="roleId"/>
+        <result column="permission_code" property="permissionCode"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <sql id="all">
+        id, role_id, permission_code, created_at
+    </sql>
+
+    <insert id="insert" parameterType="__NAMESPACE__.entity.RolePermissionEntity" useGeneratedKeys="true"
+        keyProperty="id">
+        INSERT INTO role_permission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id!=null">id,</if>
+            <if test="roleId!=null">role_id,</if>
+            <if test="permissionCode!=null">permission_code,</if>
+            <if test="createdAt!=null">created_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id!=null">#{id},</if>
+            <if test="roleId!=null">#{roleId},</if>
+            <if test="permissionCode!=null">#{permissionCode},</if>
+            <if test="createdAt!=null">#{createdAt},</if>
+        </trim>
     </insert>
 
-    <delete id="deleteByRoleId">
-        DELETE FROM role_permission WHERE role_id = #{roleId}
+    <insert id="batchInsert">
+        <foreach collection="entities" item="one" separator=";">
+            INSERT INTO role_permission
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null">id,</if>
+                <if test="one.roleId!=null">role_id,</if>
+                <if test="one.permissionCode!=null">permission_code,</if>
+                <if test="one.createdAt!=null">created_at,</if>
+            </trim>
+            <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null">#{one.id},</if>
+                <if test="one.roleId!=null">#{one.roleId},</if>
+                <if test="one.permissionCode!=null">#{one.permissionCode},</if>
+                <if test="one.createdAt!=null">#{one.createdAt},</if>
+            </trim>
+        </foreach>
+        ;
+    </insert>
+
+    <insert id="batchInsertEvenNull">
+        INSERT INTO role_permission
+        (
+        <include refid="all"/>
+        )
+        VALUES
+        <foreach collection="entities" item="one" separator=",">(
+            #{one.id}, #{one.roleId}, #{one.permissionCode}, #{one.createdAt}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateById" parameterType="__NAMESPACE__.entity.RolePermissionEntity">
+        UPDATE role_permission
+        <set>
+            <if test="roleId!=null">role_id = #{roleId},</if>
+            <if test="permissionCode!=null">permission_code = #{permissionCode},</if>
+            <if test="createdAt!=null">created_at = #{createdAt},</if>
+        </set>
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM role_permission
+        <where>
+            AND id = #{id}
+        </where>
     </delete>
 
-    <select id="queryPermissionCodesByRoleId" resultType="java.lang.String">
+    <select id="queryById" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM role_permission
+        <where>
+            AND id = #{id}
+        </where>
+    </select>
+
+    <select id="queryByIds" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM role_permission
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByIdsEachId" parameterType="Long" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM role_permission
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByRoleId" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM role_permission
+        <where>
+            AND role_id = #{roleId}
+        </where>
+    </select>
+
+    <select id="queryByRoleIdPermissionCode" resultMap="all">
+        SELECT
+        <include refid="all"/>
+        FROM role_permission
+        <where>
+            AND role_id = #{roleId}
+            AND permission_code = #{permissionCode}
+        </where>
+    </select>
+
+    <delete id="deleteByRoleId">
+        DELETE FROM role_permission
+        <where>
+            AND role_id = #{roleId}
+        </where>
+    </delete>
+
+    <delete id="deleteByRoleIdPermissionCode">
+        DELETE FROM role_permission
+        <where>
+            AND role_id = #{roleId}
+            AND permission_code = #{permissionCode}
+        </where>
+    </delete>
+
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+    <select id="queryPermissionCodesByRoleId" resultType="String">
         SELECT permission_code FROM role_permission WHERE role_id = #{roleId}
     </select>
 
-    <select id="queryPermissionCodesByRoleIds" resultType="java.lang.String">
+    <select id="queryPermissionCodesByRoleIds" resultType="String">
         SELECT DISTINCT permission_code FROM role_permission
         WHERE role_id IN (<foreach collection="roleIds" item="one" separator=",">#{one}</foreach>)
     </select>
 
-    <select id="queryByRoleIds" resultType="__NAMESPACE__.entity.RolePermissionEntity">
+    <select id="queryByRoleIds" resultMap="all">
         SELECT id, role_id, permission_code, created_at
         FROM role_permission
         WHERE role_id IN (<foreach collection="roleIds" item="one" separator=",">#{one}</foreach>)
