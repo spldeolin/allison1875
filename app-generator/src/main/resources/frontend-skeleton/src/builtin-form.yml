@@ -58,8 +58,8 @@ menus:
     order: 2
     form:
       name: Role
-      title: 角色
-      desc: 角色
+      title: 角色权限
+      desc: 角色权限
       items:
         - type: text
           name: roleName
