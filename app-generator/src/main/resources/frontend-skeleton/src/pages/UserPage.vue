@@ -9,7 +9,7 @@ import {
   NTag, NPopover,
   useMessage
 } from 'naive-ui'
-import type { DataTableColumn, PaginationProps } from 'naive-ui'
+import type { DataTableColumn } from 'naive-ui'
 import request from '@/utils/request'
 import { checkPermission } from '@/directives/usePermission'
 
@@ -166,7 +166,7 @@ const columns = computed<DataTableColumn[]>(() => {
       width: 200,
       fixed: 'right',
       render(row: Record<string, any>) {
-        const btns = []
+        const btns: any[] = []
         if (checkPermission('GRANT_ROLE')) {
           btns.push(h(NButton, {
             size: 'small', quaternary: true, type: 'info',
