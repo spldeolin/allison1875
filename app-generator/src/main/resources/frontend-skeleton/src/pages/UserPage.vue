@@ -6,12 +6,12 @@ import SearchForm from '@/core/SearchForm.vue'
 import EditModal from '@/core/EditModal.vue'
 import {
   NDataTable, NButton, NSpace, NPopconfirm, NModal, NCheckbox, NCheckboxGroup,
-  NTag, NPopover,
+  NTag, NPopover, NTooltip,
   useMessage
 } from 'naive-ui'
 import type { DataTableColumn } from 'naive-ui'
 import request from '@/utils/request'
-import { checkPermission } from '@/directives/usePermission'
+import { checkPermission, getPermissionTitle } from '@/directives/usePermission'
 
 const props = defineProps<{
   schema: FormDef
@@ -32,7 +32,7 @@ const {
 interface PermissionItem {
   code: string
   title: string
-  baseOn: string | null
+  baseOn: string[] | null
 }
 interface PermissionGroup {
   groupCode: string
@@ -167,21 +167,30 @@ const columns = computed<DataTableColumn[]>(() => {
       fixed: 'right',
       render(row: Record<string, any>) {
         const btns: any[] = []
-        if (checkPermission('GRANT_ROLE')) {
-          btns.push(h(NButton, {
-            size: 'small', quaternary: true, type: 'info',
-            disabled: editingRowKey.value != null,
-            onClick: () => handleOpenGrantModal(row),
-          }, { default: () => '授予角色' }))
-        }
-        if (checkPermission(props.permissions?.update)) {
-          btns.push(h(NButton, {
-            size: 'small', quaternary: true, type: 'primary',
-            disabled: editingRowKey.value != null,
-            onClick: () => handleEdit(row),
-          }, { default: () => '编辑' }))
-        }
-        if (checkPermission(props.permissions?.delete)) {
+        const hasGrantRole = checkPermission('GRANT_ROLE')
+        const grantRoleBtn = h(NButton, {
+          size: 'small', quaternary: true, type: 'info',
+          disabled: !hasGrantRole || editingRowKey.value != null,
+          onClick: hasGrantRole ? () => handleOpenGrantModal(row) : undefined,
+        }, { default: () => '授予角色' })
+        btns.push(hasGrantRole ? grantRoleBtn : h(NTooltip, null, {
+          trigger: () => grantRoleBtn,
+          default: () => `未被授予${getPermissionTitle('GRANT_ROLE')}权限`
+        }))
+
+        const hasUpdatePerm = checkPermission(props.permissions?.update)
+        const editBtn = h(NButton, {
+          size: 'small', quaternary: true, type: 'primary',
+          disabled: !hasUpdatePerm || editingRowKey.value != null,
+          onClick: hasUpdatePerm ? () => handleEdit(row) : undefined,
+        }, { default: () => '编辑' })
+        btns.push(hasUpdatePerm ? editBtn : h(NTooltip, null, {
+          trigger: () => editBtn,
+          default: () => `未被授予“${getPermissionTitle(props.permissions?.update)}”权限`
+        }))
+
+        const hasDeletePerm = checkPermission(props.permissions?.delete)
+        if (hasDeletePerm) {
           btns.push(h(NPopconfirm, {
             onPositiveClick: () => handleDelete(row),
           }, {
@@ -190,6 +199,14 @@ const columns = computed<DataTableColumn[]>(() => {
               disabled: editingRowKey.value != null,
             }, { default: () => '删除' }),
             default: () => '确定要删除该记录吗？',
+          }))
+        } else {
+          const deleteBtn = h(NButton, {
+            size: 'small', quaternary: true, type: 'error', disabled: true,
+          }, { default: () => '删除' })
+          btns.push(h(NTooltip, null, {
+            trigger: () => deleteBtn,
+            default: () => `未被授予“${getPermissionTitle(props.permissions?.delete)}”权限`
           }))
         }
         return h(NSpace, { wrap: false, size: 4 }, { default: () => btns })
@@ -268,7 +285,15 @@ async function handleGrantSubmit() {
     </div>
     <div class="crud-table-card">
       <div class="crud-table-header">
-        <h3 class="crud-table-title">{{ schema.title }}</h3>
+        <div class="crud-table-header-left">
+          <h3 class="crud-table-title">{{ schema.title }}</h3>
+          <NTooltip v-if="schema.desc" :style="{ maxWidth: '360px' }">
+            <template #trigger>
+              <span class="crud-table-desc">{{ schema.desc }}</span>
+            </template>
+            {{ schema.desc }}
+          </NTooltip>
+        </div>
         <NSpace>
           <NButton type="primary" v-permission="permissions?.create" @click="handleCreate">创建</NButton>
           <NPopconfirm
@@ -382,10 +407,27 @@ async function handleGrantSubmit() {
   justify-content: space-between;
   margin-bottom: 16px;
 }
+.crud-table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
 .crud-table-title {
   font-size: 16px;
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+  flex-shrink: 0;
+}
+.crud-table-desc {
+  font-size: 13px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 360px;
+  cursor: default;
 }
 </style>

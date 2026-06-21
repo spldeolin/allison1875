@@ -52,3 +52,27 @@ html, body {
   opacity: 0;
   transform: translateY(-4px);
 }
+
+.permission-disabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  pointer-events: auto !important;
+}
+
+.permission-disabled * {
+  cursor: not-allowed !important;
+}
+
+.permission-tooltip {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  background: #1e293b;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

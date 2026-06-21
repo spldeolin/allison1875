@@ -6,7 +6,7 @@ import SearchForm from '@/core/SearchForm.vue'
 import DataTable from '@/core/DataTable.vue'
 import EditModal from '@/core/EditModal.vue'
 import {
-  NButton, NSpace, NPopconfirm, NModal, NCheckbox, NDivider,
+  NButton, NSpace, NPopconfirm, NModal, NCheckbox, NDivider, NTooltip,
   useMessage
 } from 'naive-ui'
 import request from '@/utils/request'
@@ -30,7 +30,7 @@ const {
 interface PermissionItem {
   code: string
   title: string
-  baseOn: string | null
+  baseOn: string[] | null
 }
 interface PermissionGroup {
   groupCode: string
@@ -99,13 +99,13 @@ function handlePermissionCheck(code: string, checked: boolean) {
     set.add(code)
     const perm = findPermission(code)
     if (perm?.baseOn) {
-      set.add(perm.baseOn)
+      perm.baseOn.forEach(base => set.add(base))
     }
   } else {
     set.delete(code)
     for (const group of allPermissionGroups.value) {
       for (const p of group.permissions) {
-        if (p.baseOn === code) {
+        if (p.baseOn?.includes(code)) {
           set.delete(p.code)
         }
       }
@@ -143,7 +143,16 @@ async function handleGrantSubmit() {
     </div>
     <div class="crud-table-card">
       <div class="crud-table-header">
-        <h3 class="crud-table-title">{{ schema.title }}</h3>
+        <div class="crud-table-header-left">
+          <h3 class="crud-table-title">{{ schema.title }}</h3>
+          <NTooltip v-if="schema.desc && schema.desc.length > 20" :style="{ maxWidth: '360px' }">
+            <template #trigger>
+              <span class="crud-table-desc">{{ schema.desc }}</span>
+            </template>
+            {{ schema.desc }}
+          </NTooltip>
+          <span v-else-if="schema.desc" class="crud-table-desc crud-table-desc--short">{{ schema.desc }}</span>
+        </div>
         <NSpace>
           <NButton type="primary" v-permission="permissions?.create" @click="handleCreate">创建</NButton>
           <NPopconfirm
@@ -271,10 +280,32 @@ async function handleGrantSubmit() {
   justify-content: space-between;
   margin-bottom: 16px;
 }
+.crud-table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
 .crud-table-title {
   font-size: 16px;
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+  flex-shrink: 0;
+}
+.crud-table-desc {
+  font-size: 13px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 360px;
+  cursor: default;
+}
+.crud-table-desc--short {
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
 }
 </style>

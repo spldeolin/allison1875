@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NButton, NSpace, NPopconfirm } from 'naive-ui'
+import { NButton, NSpace, NPopconfirm, NTooltip } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
 import { useCrudPage } from './composables/useCrudPage'
 import SearchForm from './SearchForm.vue'
@@ -33,7 +33,16 @@ const {
     </div>
     <div class="crud-table-card">
       <div class="crud-table-header">
-        <h3 class="crud-table-title">{{ schema.title }}</h3>
+        <div class="crud-table-header-left">
+          <h3 class="crud-table-title">{{ schema.title }}</h3>
+          <NTooltip v-if="schema.desc && schema.desc.length > 20" :style="{ maxWidth: '360px' }">
+            <template #trigger>
+              <span class="crud-table-desc">{{ schema.desc }}</span>
+            </template>
+            {{ schema.desc }}
+          </NTooltip>
+          <span v-else-if="schema.desc" class="crud-table-desc crud-table-desc--short">{{ schema.desc }}</span>
+        </div>
         <NSpace>
           <NButton type="primary" v-permission="permissions?.create" @click="handleCreate">创建</NButton>
           <NPopconfirm
@@ -121,10 +130,35 @@ const {
   margin-bottom: 16px;
 }
 
+.crud-table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
 .crud-table-title {
   font-size: 16px;
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+  flex-shrink: 0;
+}
+
+.crud-table-desc {
+  font-size: 13px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 360px;
+  cursor: default;
+}
+
+.crud-table-desc--short {
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
 }
 </style>

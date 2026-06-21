@@ -74,6 +74,8 @@ router.beforeEach(async (to) => {
     return
   }
 
+  authStore.fetchPermissionTitles()
+
   if (isLoginPage) {
     const saved = authStore.popRedirect()
     return saved || firstFormPath

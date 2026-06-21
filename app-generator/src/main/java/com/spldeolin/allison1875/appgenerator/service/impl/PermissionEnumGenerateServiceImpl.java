@@ -20,34 +20,34 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PermissionEnumGenerateServiceImpl implements PermissionEnumGenerateService {
 
+    private static final String ENUM_MARKER = "    // === 以下枚举项由 app-generator 生成，勿手动修改 ===\n    ;";
+
+    private static final String GROUP_MARKER = "        // === 由 app-generator 生成 ===\n        ;";
+
     @Override
     public void generatePermissionEnum(List<FormDef> allForms, Path backendOutputRoot, String namespace) {
         String namespacePath = namespace.replace('.', '/');
         Path targetFile = backendOutputRoot.resolve("src/main/java/" + namespacePath + "/enums/PermissionEnum.java");
 
-        String sourceCode = buildSourceCode(allForms, namespace);
-
         try {
-            Files.createDirectories(targetFile.getParent());
-            Files.writeString(targetFile, sourceCode, StandardCharsets.UTF_8);
+            String content = Files.readString(targetFile, StandardCharsets.UTF_8);
+            content = injectEnumEntries(content, allForms);
+            content = injectGroupEntries(content, allForms);
+            Files.writeString(targetFile, content, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
-        int extraPerms = allForms.stream().anyMatch(f -> "Role".equals(f.getName())) ? 2 : 0;
-        log.info("generated PermissionEnum with {} permission points for {} forms",
-                allForms.size() * 4 + extraPerms, allForms.size());
+        log.info("generated PermissionEnum with {} permission points for {} forms", allForms.size() * 4,
+                allForms.size());
     }
 
-    private String buildSourceCode(List<FormDef> allForms, String namespace) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package ").append(namespace).append(".enums;\n\n");
-        sb.append("import lombok.AllArgsConstructor;\n");
-        sb.append("import lombok.Getter;\n\n");
-        sb.append("@Getter\n");
-        sb.append("@AllArgsConstructor\n");
-        sb.append("public enum PermissionEnum {\n\n");
+    private String injectEnumEntries(String content, List<FormDef> allForms) {
+        if (allForms.isEmpty()) {
+            return content.replace(ENUM_MARKER, "    ;");
+        }
 
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < allForms.size(); i++) {
             FormDef form = allForms.get(i);
             String upperSnake = toUpperSnake(form.getName());
@@ -57,36 +57,28 @@ public class PermissionEnumGenerateServiceImpl implements PermissionEnumGenerate
             sb.append("    LIST_").append(upperSnake).append("(\"LIST_").append(upperSnake)
                     .append("\", \"查看").append(title).append("\", ").append(groupRef).append(", null),\n");
             sb.append("    CREATE_").append(upperSnake).append("(\"CREATE_").append(upperSnake)
-                    .append("\", \"创建").append(title).append("\", ").append(groupRef)
-                    .append(", LIST_").append(upperSnake).append("),\n");
+                    .append("\", \"创建").append(title).append("\", ").append(groupRef).append(", List.of(LIST_")
+                    .append(upperSnake).append(")),\n");
             sb.append("    UPDATE_").append(upperSnake).append("(\"UPDATE_").append(upperSnake)
-                    .append("\", \"编辑").append(title).append("\", ").append(groupRef)
-                    .append(", LIST_").append(upperSnake).append("),\n");
+                    .append("\", \"编辑").append(title).append("\", ").append(groupRef).append(", List.of(LIST_")
+                    .append(upperSnake).append(")),\n");
             sb.append("    DELETE_").append(upperSnake).append("(\"DELETE_").append(upperSnake)
-                    .append("\", \"删除").append(title).append("\", ").append(groupRef)
-                    .append(", LIST_").append(upperSnake).append("),\n");
+                    .append("\", \"删除").append(title).append("\", ").append(groupRef).append(", List.of(LIST_")
+                    .append(upperSnake).append(")),\n");
 
             if (i < allForms.size() - 1) {
                 sb.append("\n");
             }
         }
+        sb.append("    ;");
 
-        boolean hasRoleForm = allForms.stream().anyMatch(f -> "Role".equals(f.getName()));
-        if (hasRoleForm) {
-            sb.append("\n");
-            sb.append("    GRANT_PERMISSION(\"GRANT_PERMISSION\", \"授予权限\", Group.ROLE, LIST_ROLE),\n");
-            sb.append("    GRANT_ROLE(\"GRANT_ROLE\", \"授予角色\", Group.ROLE, LIST_ROLE),\n");
+        return content.replace(ENUM_MARKER, sb.toString());
+    }
+
+    private String injectGroupEntries(String content, List<FormDef> allForms) {
+        if (allForms.isEmpty()) {
+            return content.replace(GROUP_MARKER, "        ;");
         }
-
-        sb.append("    ;\n\n");
-        sb.append("    private final String code;\n");
-        sb.append("    private final String title;\n");
-        sb.append("    private final Group group;\n");
-        sb.append("    private final PermissionEnum baseOn;\n\n");
-
-        sb.append("    @Getter\n");
-        sb.append("    @AllArgsConstructor\n");
-        sb.append("    public enum Group {\n");
 
         String groupEntries = allForms.stream()
                 .map(form -> {
@@ -94,15 +86,8 @@ public class PermissionEnumGenerateServiceImpl implements PermissionEnumGenerate
                     return "        " + upperSnake + "(\"" + upperSnake + "\", \"" + form.getTitle() + "管理\")";
                 })
                 .collect(Collectors.joining(",\n"));
-        sb.append(groupEntries).append(",\n");
 
-        sb.append("        ;\n\n");
-        sb.append("        private final String code;\n");
-        sb.append("        private final String title;\n");
-        sb.append("    }\n\n");
-        sb.append("}\n");
-
-        return sb.toString();
+        return content.replace(GROUP_MARKER, groupEntries + ",\n        ;");
     }
 
     private String toUpperSnake(String upperCamelName) {

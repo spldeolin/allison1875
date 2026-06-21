@@ -54,7 +54,7 @@ public class RoleGrantServiceImpl implements RoleGrantService {
         Set<String> expandedCodes = new HashSet<>(req.getPermissionCodes());
         for (String code : req.getPermissionCodes()) {
             Arrays.stream(PermissionEnum.values()).filter(p -> p.getCode().equals(code) && p.getBaseOn() != null)
-                    .findFirst().ifPresent(p -> expandedCodes.add(p.getBaseOn().getCode()));
+                    .findFirst().ifPresent(p -> p.getBaseOn().forEach(base -> expandedCodes.add(base.getCode())));
         }
         req.setPermissionCodes(new ArrayList<>(expandedCodes));
 

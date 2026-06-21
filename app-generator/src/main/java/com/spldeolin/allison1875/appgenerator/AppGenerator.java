@@ -144,7 +144,6 @@ public class AppGenerator implements Allison1875Game {
         // Generate permission enum (fills the skeleton's empty PermissionEnum shell)
         List<FormDef> allForms = Lists.newArrayList(appDef.getMenus().stream()
                 .map(MenuDef::getForm).collect(Collectors.toList()));
-        allForms.addAll(parseBuiltinMenus().stream().map(MenuDef::getForm).collect(Collectors.toList()));
         permissionEnumGenerateService.generatePermissionEnum(allForms, output, appDef.getNamespace());
 
         // Extract FormDefs for form-generator (to be wired in Task 5)

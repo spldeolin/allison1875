@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
-import { NDataTable, NButton, NSpace, NPopconfirm } from 'naive-ui'
+import { NDataTable, NButton, NSpace, NPopconfirm, NTooltip } from 'naive-ui'
 import type { DataTableColumn, PaginationProps } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
 import { isVisible } from './protocol/field-policy'
-import { checkPermission } from '@/directives/usePermission'
+import { checkPermission, getPermissionTitle } from '@/directives/usePermission'
 
 const props = defineProps<{
   items: ItemDef[]
@@ -138,32 +138,65 @@ const columns = computed<DataTableColumn[]>(() => {
         && row[props.bizKey] === props.editingRowKey
       return h(NSpace, { wrap: false, size: 4 }, {
         default: () => [
-          ...(props.extraActions || []).filter(action => checkPermission(action.permission)).map(action =>
-            h(NButton, {
+          ...(props.extraActions || []).map(action => {
+            const hasPermission = checkPermission(action.permission)
+            const btn = h(NButton, {
               size: 'small',
               quaternary: true,
               type: (action.type || 'info') as any,
-              disabled: props.editingRowKey != null,
-              onClick: () => action.onClick(row)
+              disabled: !hasPermission || props.editingRowKey != null,
+              onClick: hasPermission ? () => action.onClick(row) : undefined
             }, { default: () => action.label })
-          ),
-          ...(checkPermission(props.permissions?.update) ? [h(NButton, {
-            size: 'small',
-            quaternary: true,
-            type: 'primary',
-            loading: isThisRowLoading,
-            disabled: props.editingRowKey != null && !isThisRowLoading,
-            onClick: () => emit('edit', row)
-          }, { default: () => '编辑' })] : []),
-          ...(checkPermission(props.permissions?.delete) ? [h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
-            trigger: () => h(NButton, {
+            if (!hasPermission) {
+              return h(NTooltip, null, {
+                trigger: () => btn,
+                default: () => `未被授予“${getPermissionTitle(action.permission)}”权限`
+              })
+            }
+            return btn
+          }),
+          (() => {
+            const hasUpdatePerm = checkPermission(props.permissions?.update)
+            const btn = h(NButton, {
               size: 'small',
               quaternary: true,
-              type: 'error',
-              disabled: props.editingRowKey != null
-            }, { default: () => '删除' }),
-            default: () => '确定要删除吗？'
-          })] : [])
+              type: 'primary',
+              loading: isThisRowLoading,
+              disabled: !hasUpdatePerm || (props.editingRowKey != null && !isThisRowLoading),
+              onClick: hasUpdatePerm ? () => emit('edit', row) : undefined
+            }, { default: () => '编辑' })
+            if (!hasUpdatePerm) {
+              return h(NTooltip, null, {
+                trigger: () => btn,
+                default: () => `未被授予“${getPermissionTitle(props.permissions?.update)}”权限`
+              })
+            }
+            return btn
+          })(),
+          (() => {
+            const hasDeletePerm = checkPermission(props.permissions?.delete)
+            if (!hasDeletePerm) {
+              const btn = h(NButton, {
+                size: 'small',
+                quaternary: true,
+                type: 'error',
+                disabled: true
+              }, { default: () => '删除' })
+              return h(NTooltip, null, {
+                trigger: () => btn,
+                default: () => `未被授予“${getPermissionTitle(props.permissions?.delete)}”权限`
+              })
+            }
+            return h(NPopconfirm, { onPositiveClick: () => emit('delete', row) }, {
+              trigger: () => h(NButton, {
+                size: 'small',
+                quaternary: true,
+                type: 'error',
+                disabled: props.editingRowKey != null
+              }, { default: () => '删除' }),
+              default: () => '确定要删除吗？'
+            })
+          })()
         ]
       })
     }

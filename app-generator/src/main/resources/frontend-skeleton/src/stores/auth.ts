@@ -6,6 +6,7 @@ import type { RequestResult } from '@/utils/request'
 const STORAGE_KEY_TOKEN = 'form_web_token'
 const STORAGE_KEY_USER = 'form_web_user'
 const STORAGE_KEY_PERMISSIONS = 'form_web_permissions'
+const STORAGE_KEY_PERMISSION_TITLES = 'form_web_permission_titles'
 const STORAGE_KEY_REDIRECT = 'form_web_redirect'
 
 export interface UserInfo {
@@ -19,6 +20,12 @@ interface CurrentUserResp {
   permissions: string[]
 }
 
+interface PermissionGroupResp {
+  groupCode: string
+  groupTitle: string
+  permissions: { code: string; title: string; baseOn: string[] | null }[]
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string>(localStorage.getItem(STORAGE_KEY_TOKEN) || '')
   const userInfo = ref<UserInfo | null>(
@@ -26,6 +33,9 @@ export const useAuthStore = defineStore('auth', () => {
   )
   const permissions = ref<string[]>(
     JSON.parse(localStorage.getItem(STORAGE_KEY_PERMISSIONS) || '[]')
+  )
+  const permissionTitles = ref<Record<string, string>>(
+    JSON.parse(localStorage.getItem(STORAGE_KEY_PERMISSION_TITLES) || '{}')
   )
 
   const isAuthenticated = computed(() => !!token.value)
@@ -48,6 +58,10 @@ export const useAuthStore = defineStore('auth', () => {
     return permissions.value.includes(perm)
   }
 
+  function getPermissionTitle(code: string): string {
+    return permissionTitles.value[code] || code
+  }
+
   async function fetchCurrentUser(): Promise<boolean> {
     try {
       const { data } = await request.post<RequestResult<CurrentUserResp>>('/api/v1/authc/getCurrentUser')
@@ -59,6 +73,22 @@ export const useAuthStore = defineStore('auth', () => {
       return true
     } catch {
       return false
+    }
+  }
+
+  async function fetchPermissionTitles(): Promise<void> {
+    try {
+      const { data } = await request.post<RequestResult<PermissionGroupResp[]>>('/api/v1/permission/listPermissions')
+      const map: Record<string, string> = {}
+      for (const group of data.data) {
+        for (const perm of group.permissions) {
+          map[perm.code] = perm.title
+        }
+      }
+      permissionTitles.value = map
+      localStorage.setItem(STORAGE_KEY_PERMISSION_TITLES, JSON.stringify(map))
+    } catch {
+      // silent
     }
   }
 
@@ -79,9 +109,11 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = ''
     userInfo.value = null
     permissions.value = []
+    permissionTitles.value = {}
     localStorage.removeItem(STORAGE_KEY_TOKEN)
     localStorage.removeItem(STORAGE_KEY_USER)
     localStorage.removeItem(STORAGE_KEY_PERMISSIONS)
+    localStorage.removeItem(STORAGE_KEY_PERMISSION_TITLES)
   }
 
   function logout() {
@@ -99,9 +131,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    token, userInfo, permissions, isAuthenticated,
-    setAuth, getToken, hasPermission, logout,
-    fetchCurrentUser, logoutApi, updateSelfPassword,
+    token, userInfo, permissions, permissionTitles, isAuthenticated,
+    setAuth, getToken, hasPermission, getPermissionTitle, logout,
+    fetchCurrentUser, fetchPermissionTitles, logoutApi, updateSelfPassword,
     saveRedirect, popRedirect
   }
 })

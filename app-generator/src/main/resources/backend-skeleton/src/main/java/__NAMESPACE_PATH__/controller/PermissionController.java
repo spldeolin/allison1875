@@ -30,7 +30,9 @@ public class PermissionController {
                                 PermissionResp resp = new PermissionResp();
                                 resp.setCode(p.getCode());
                                 resp.setTitle(p.getTitle());
-                                resp.setBaseOn(p.getBaseOn() != null ? p.getBaseOn().getCode() : null);
+                                resp.setBaseOn(
+                                        p.getBaseOn() != null ? p.getBaseOn().stream().map(PermissionEnum::getCode)
+                                                .collect(Collectors.toList()) : null);
                                 return resp;
                             })
                             .collect(Collectors.toList())

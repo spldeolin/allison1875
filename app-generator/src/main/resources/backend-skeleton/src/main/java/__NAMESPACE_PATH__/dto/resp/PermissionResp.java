@@ -1,5 +1,7 @@
 package __NAMESPACE__.dto.resp;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -14,6 +16,6 @@ public class PermissionResp {
 
     String title;
 
-    String baseOn;
+    List<String> baseOn;
 
 }
