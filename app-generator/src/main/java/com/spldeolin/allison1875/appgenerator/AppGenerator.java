@@ -162,6 +162,11 @@ public class AppGenerator implements Allison1875Game {
         mergedMenus.addAll(builtinMenus);
         log.info("merged {} builtin menus into frontend app.json", builtinMenus.size());
 
+        // Force builtin menus to sort after all user-defined menus
+        for (MenuDef builtinMenu : builtinMenus) {
+            builtinMenu.setOrder(100000 + (builtinMenu.getOrder() != null ? builtinMenu.getOrder() : 0));
+        }
+
         // Write app.json with merged menus
         try {
             // Inject permissions into each menu
