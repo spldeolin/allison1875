@@ -12,4 +12,6 @@ public interface UserRoleMapper {
 
     List<Long> queryRoleIdsByUserId(@Param("userId") Long userId);
 
+    List<UserRoleEntity> queryByUserIds(@Param("userIds") List<Long> userIds);
+
 }
