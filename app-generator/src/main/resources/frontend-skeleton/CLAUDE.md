@@ -47,11 +47,67 @@
 - 响应格式 `{ errorCode, data, errorMsg, traceId }`
 - 使用 `src/utils/request.ts` 发请求
 
+## 功能权限体系
+
+### 权限数据来源
+
+`app.json` 中每个 menu 包含 `permissions` 对象（由 app-generator 注入）：
+
+```json
+{
+    "list": "LIST_ORDER",
+    "create": "CREATE_ORDER",
+    "update": "UPDATE_ORDER",
+    "delete": "DELETE_ORDER"
+}
+```
+
+通过 router props 传入页面组件。
+
+### v-permission 指令
+
+模板中控制元素显隐：`<NButton v-permission="permissions?.create">`。值为空时元素始终可见，非空时检查 authStore 权限列表。
+
+### checkPermission 函数
+
+render 函数中使用（v-permission 无法在 `h()` 中使用）：
+
+```typescript
+import { checkPermission } from '@/directives/usePermission'
+...(checkPermission(props.permissions?.update) ? [h(NButton, ...)] : [])
+```
+
+### DataTable extraActions
+
+通过 `extraActions` prop 注入自定义行操作按钮，每个 action 可声明 `permission` 字段控制显隐。
+
+### 路由守卫与菜单过滤
+
+- `router/index.ts` beforeEach 检查 `permissions.list`，无权限时重定向
+- `DashboardLayout.vue` 基于 LIST 权限过滤侧边栏菜单项
+- `utils/request.ts` 拦截 403 响应返回 "没有操作权限"
+
+## 已有的页面覆盖文件
+
+| 文件             | 功能                        | 实现要点                                      |
+|----------------|---------------------------|-------------------------------------------|
+| `RolePage.vue` | 角色 CRUD + 授予权限弹框          | 独立 NCheckbox（非 NCheckboxGroup）+ baseOn 级联 |
+| `UserPage.vue` | 用户 CRUD + 授予角色弹框 + 已授予权限列 | 直接用 NDataTable + NTag/NPopover 自定义列       |
+
 ## 文件组织
 
 ```
-src/pages/
-├── {FormName}Page.vue         ← 页面覆盖
-├── TEMPLATE.vue.example       ← 起始模板（复制后重命名）
-└── components/                ← pages 内部复用的组件（可选）
+src/
+├── directives/
+│   ├── permission.ts          ← v-permission 指令
+│   └── usePermission.ts       ← checkPermission 函数
+├── pages/
+│   ├── {FormName}Page.vue     ← 页面覆盖
+│   ├── RolePage.vue           ← 内置：角色权限页
+│   ├── UserPage.vue           ← 内置：用户页
+│   ├── TEMPLATE.vue.example   ← 起始模板
+│   └── components/            ← pages 内部复用的组件（可选）
+├── stores/
+│   └── auth.ts                ← 认证状态 + hasPermission()
+└── ...
 ```

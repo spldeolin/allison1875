@@ -13,9 +13,11 @@
 1. 解析 `app.yml` → `AppDef`
 2. 确定输出目录（重名自动追加序号）
 3. 复制 `backend-skeleton`，替换占位符（`__NAMESPACE__`、`__APP_NAME__` 等）
-4. 调用 `form-generator`（`Allison1875.letsGo(ToolEnum.FORM_GENERATOR, ...)`）生成 CRUD 代码
-5. 复制 `frontend-skeleton`，合并 `builtin-form.yml` 内置菜单，写入 `app.json`
-6. 生成 `README.md`
+4. **生成权限枚举**（`permissionEnumGenerateService.generatePermissionEnum()`）— 填充骨架中的空壳 `PermissionEnum.java`
+5. 调用 `form-generator`（`Allison1875.letsGo(ToolEnum.FORM_GENERATOR, ...)`）生成 CRUD 代码
+6. 复制 `frontend-skeleton`，合并 `builtin-form.yml` 内置菜单，**注入 permissions 映射**，写入 `app.json`
+7. **覆盖 builtin 菜单 order 为 100000+**（确保系统菜单排在侧边栏最后）
+8. 生成 `README.md`
 
 ## Config 字段
 
@@ -74,7 +76,16 @@ menus: # MenuDef 列表
 
 ## 内置表单
 
-`frontend-skeleton/src/builtin-form.yml` 定义内置的 User 菜单（登录/用户管理），在生成前端时自动合并到 `app.json`。
+`frontend-skeleton/src/builtin-form.yml` 定义内置菜单，生成前端时自动合并到 `app.json`：
+
+- **User**（系统分组, order=1）— 用户 CRUD + 授予角色弹框
+- **Role**（系统分组, order=2）— 角色 CRUD + 授予权限弹框
+
+内置菜单 order 在合并时被覆盖为 `100000 + 原始 order`，确保排在用户定义菜单之后。
+
+## 功能权限体系
+
+生成的应用内置完整 RBAC：权限枚举生成 → 授权 API → 鉴权拦截。详见 `PERMISSION.md`。
 
 ## 关键约束
 
@@ -85,6 +96,7 @@ menus: # MenuDef 列表
 3. **骨架占位符**：所有骨架文件中的 `__XXX__` 占位符在 `replaceInAllFiles()` 中统一替换。新增占位符时需同时更新此方法和骨架文件
 4. **输出目录命名**：重名时追加 `-1`、`-2` 后缀，不覆盖已有输出
 5. **生成失败回滚**：`play()` 中 catch 后删除整个 `outputRoot`
+6. **权限枚举生成时序**：骨架拷贝 → 权限枚举生成 → form-generator 委托（详见 `PERMISSION.md`）
 
 ## IT 测试
 
@@ -94,3 +106,9 @@ IT 位于 `allison1875-cli` 模块（所有 tool 共用入口 `Entrypoint`），
 ## 完整 DSL 示例
 
 参考 `output/super-dsl-example/README.md` 中 DSL 章节。
+
+## 渐进式参考
+
+- `PERMISSION.md` — 功能权限体系完整参考（枚举生成、授权 API、鉴权机制、前后端基础设施）
+- `src/main/resources/backend-skeleton/CLAUDE.md` — 生成后后端项目的二次开发规则
+- `src/main/resources/frontend-skeleton/CLAUDE.md` — 生成后前端项目的二次开发规则

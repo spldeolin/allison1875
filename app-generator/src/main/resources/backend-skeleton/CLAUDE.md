@@ -10,9 +10,12 @@ Spring Boot 2.7 · MyBatis · Lombok · Java 8 · MySQL
 
 ```
 src/main/java/{namespace}/
+├── annotation/          ← 自定义注解（@WebApiAuth 等）
 ├── common/              ← 基础设施（详见下方）
 ├── config/              ← Spring 配置
 ├── controller/          ← REST 接口入口
+├── filter/              ← Servlet Filter（认证鉴权）
+├── property/            ← 配置属性类
 ├── service/             ← 业务接口（每个动作一个接口）
 │   └── impl/            ← 业务实现
 ├── dto/
@@ -21,12 +24,13 @@ src/main/java/{namespace}/
 ├── entity/              ← 数据库实体
 ├── mapper/              ← MyBatis Mapper 接口
 ├── design/              ← Design DSL（编译期查询设计，勿手动修改）
-├── enums/               ← 业务枚举
+├── enums/               ← 业务枚举（含功能权限的 PermissionEnum）
 ├── util/                ← 工具类
 ├── webmvc/              ← 全局异常处理
 ├── mybatis/             ← 自定义 TypeHandler
 └── trace/               ← 请求体日志
 src/main/resources/
+├── db/                  ← DDL
 ├── mapper/              ← MyBatis XML
 ├── application.yml
 └── logback-spring.xml
@@ -43,6 +47,57 @@ src/main/resources/
 | `BaseEnum<C>`      | 枚举基类，配合 EnumTypeHandlerEx 实现 DB↔枚举自动转换                                             |
 | `JsonUtils`        | Jackson 序列化/反序列化工具                                                                 |
 | `TimeUtils`        | LocalDateTime/LocalDate 格式化工具                                                      |
+
+## 功能权限体系（RBAC）
+
+本项目内置完整的 RBAC 功能权限系统。
+
+### 权限枚举（PermissionEnum）
+
+`enums/PermissionEnum.java` 由 app-generator 生成（非手动维护），包含：
+
+- 每个表单 4 个权限点：`LIST_X`, `CREATE_X`, `UPDATE_X`, `DELETE_X`
+- Role 表单额外的 `GRANT_PERMISSION`, `GRANT_ROLE`
+- 内部枚举 `Group`：每个表单对应一个 group
+- `baseOn` 字段：描述权限依赖关系（LIST 为基础权限，其余依赖 LIST）
+
+### 鉴权机制
+
+| 组件                   | 职责                                     |
+|----------------------|----------------------------------------|
+| `@WebApiAuth`        | 方法级注解，声明接口所需权限（多值为 OR 语义：拥有任一即通过）      |
+| `WebApiAuthRegistry` | 启动时扫描 Controller，建立 path→权限映射          |
+| `ApiAuthFilter`      | 认证（JWT token）+ 鉴权（查 Registry，对比用户权限列表） |
+
+鉴权流程：请求 → ApiAuthFilter 验证 token → 从 user_role + role_permission 聚合用户权限 → 查 WebApiAuthRegistry
+获取路径所需权限 → OR 匹配 → 通过/403。
+
+### 授权 API
+
+| 接口                                        | 用途                  |
+|-------------------------------------------|---------------------|
+| `POST /api/v1/role/grantPermissions`      | 全量覆盖式为角色授予权限        |
+| `POST /api/v1/role/listRolePermissions`   | 查询角色已有权限列表          |
+| `POST /api/v1/user/grantRoles`            | 全量覆盖式为用户授予角色        |
+| `POST /api/v1/user/listUserRoles`         | 查询用户已有角色列表          |
+| `POST /api/v1/permission/listPermissions` | 查询全部权限点（按 group 分组） |
+
+### 关联表
+
+- `role_permission`（role_id, permission_code）— 角色-权限多对多
+- `user_role`（user_id, role_id）— 用户-角色多对多
+
+### 系统初始化（PermissionSystemInitializer）
+
+启动时确保：admin 用户存在、3 个初始角色（系统管理员/业务员/观察员）绑定正确权限、admin 绑定系统管理员、新用户自动绑定观察员。系统分组通过硬编码
+`SYSTEM_GROUPS = Set.of("USER", "ROLE")` 识别。
+
+### 二次开发要点
+
+- 新增接口如需权限控制，在方法上添加 `@WebApiAuth(PermissionEnum.XXX)` 即可
+- save 类接口通常用 `@WebApiAuth({PermissionEnum.CREATE_X, PermissionEnum.UPDATE_X})`（OR 语义）
+- 无需手动维护 PermissionEnum — 由 app-generator 根据表单列表自动生成
+- 不要修改 `PermissionSystemInitializer` 中角色名称，前端页面有对应的 hardcoded 引用
 
 ## 已生成代码的模式
 
