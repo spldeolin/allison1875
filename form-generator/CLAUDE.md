@@ -49,12 +49,12 @@
 
 ### canInputOnInit / canInputOnEdit 组合语义
 
-| init  | edit  | ReqDTO 字段 |          校验位置           |      setter 位置       |
-|:-----:|:-----:|:---------:|:-----------------------:|:--------------------:|
-| true  | true  |     有     |        ReqDTO 注解        | common 节（if/else 之外） |
-| true  | false |     有     | if(toCreate) 内 if-throw |    if(toCreate) 内    |
-| false | true  |     有     |     else 内 if-throw     |        else 内        |
-| false | false |     无     |            —            |  if(toCreate) 内写默认值  |
+| init  | edit  | CreateReq 字段 | UpdateReq 字段 |       校验位置        |
+|:-----:|:-----:|:-----------:|:-----------:|:-----------------:|
+| true  | true  |      有      |      有      | 各自 ReqDTO 注解均带校验 |
+| true  | false |      有      |      无      |  CreateReq 注解带校验  |
+| false | true  |      无      |      有      |  UpdateReq 注解带校验  |
+| false | false |      无      |      无      |    Create 内写默认值    |
 
 ## 字段类型 (type)
 
