@@ -15,13 +15,11 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.util.Modules;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
-import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.util.JsonUtils;
@@ -59,24 +57,20 @@ public class Allison1875 {
         }
     }
 
-    public static void letsGo(ToolEnum tool, Config config, String domainName) {
-        // 解析domain
+    public static void prepareDomain(Config config, String domainName) {
         DomainConfig domainConfig = resolveDomain(config, domainName);
         log.info("targetDomain={}", JsonUtils.toJson(domainConfig));
-
-        // 解析domain中各层的sourceRoot
         resolveSourceRoots(domainConfig);
-
-        // 设置DomainContext
         DomainContext.set(domainConfig);
+    }
 
-        // 根据tool构造Allison1875Module
-        Allison1875Module allison1875Module = buildModule(tool, config);
+    public static void letsGo(ToolEnum tool, Config config, String domainName) {
+        prepareDomain(config, domainName);
 
-        // append built-in guice modules
+        Allison1875Module allison1875Module = buildSimpleModule(tool, config);
+
         List<Module> guiceModules = Lists.newArrayList(allison1875Module, new ValidationModule());
 
-        // create guice container
         Injector injector;
         try {
             injector = Guice.createInjector(guiceModules);
@@ -87,7 +81,6 @@ public class Allison1875 {
             throw e;
         }
 
-        // process main service
         try {
             injector.getInstance(allison1875Module.declareMainService()).play();
         } catch (Throwable e) {
@@ -129,26 +122,12 @@ public class Allison1875 {
         domainConfig.setServiceSourceRoot(Paths.get(domainConfig.getServiceModule(), "src/main/java"));
         domainConfig.setServiceImplSourceRoot(Paths.get(domainConfig.getServiceImplModule(), "src/main/java"));
         domainConfig.setPersistenceSourceRoot(Paths.get(domainConfig.getPersistenceModule(), "src/main/java"));
-        // 将mapperXmlDirs转换为基于持久层module的绝对路径
         Path persistenceModule = Paths.get(domainConfig.getPersistenceModule());
         domainConfig.setMapperXmlDirs(
                 domainConfig.getMapperXmlDirs().stream().map(dir -> persistenceModule.resolve(dir.toPath()).toFile())
                         .collect(Collectors.toList()));
     }
 
-    /**
-     * 根据tool构造对应的Allison1875Module实例
-     */
-    private static Allison1875Module buildModule(ToolEnum tool, Config config) {
-        if (tool.isComposite()) {
-            return buildCompositeModule(tool, config);
-        }
-        return buildSimpleModule(tool, config);
-    }
-
-    /**
-     * 构造简单的（非组合工具的）Allison1875Module
-     */
     private static Allison1875Module buildSimpleModule(ToolEnum tool, Config config) {
         String moduleClassName = tool.getModuleClassNameGetter().apply(config);
         log.info("allison1875Model={}", moduleClassName);
@@ -157,52 +136,6 @@ public class Allison1875 {
         } catch (Exception e) {
             throw new Allison1875Exception("构造Allison1875Module失败: " + moduleClassName, e);
         }
-    }
-
-    /**
-     * 组合工具特殊处理：合并多个子工具Module（目前仅form-generator）
-     */
-    private static Allison1875Module buildCompositeModule(ToolEnum tool, Config config) {
-        try {
-            Module persistenceModule = loadModule(config.getPersistenceGeneratorModule(), config);
-            Module handlerModule = loadModule(config.getHandlerTransformerModule(), config);
-            Module docModule = loadModule(config.getDocAnalyzerModule(), config);
-            Module queryModule = loadModule(config.getQueryTransformerModule(), config);
-
-            String mainModuleClassName = tool.getModuleClassNameGetter().apply(config);
-            Allison1875Module mainModule = (Allison1875Module) Class.forName(mainModuleClassName)
-                    .getConstructor(Config.class).newInstance(config);
-
-            // 子module依次override，最后FormGenerator覆盖全部
-            Module combined = Modules.override(persistenceModule).with(handlerModule);
-            combined = Modules.override(combined).with(docModule);
-            combined = Modules.override(combined).with(queryModule);
-            combined = Modules.override(combined).with(mainModule);
-
-            final Module finalCombined = combined;
-            return new Allison1875Module() {
-                @Override
-                public Class<? extends Allison1875Game> declareMainService() {
-                    return mainModule.declareMainService();
-                }
-
-                @Override
-                protected void configure() {
-                    install(finalCombined);
-                }
-            };
-        } catch (Exception e) {
-            throw new Allison1875Exception("构造组合工具Module失败: " + tool.getToolName(), e);
-        }
-    }
-
-    /**
-     * 通过反射加载并实例化指定module类（统一使用Config单参数构造器）
-     */
-    private static Module loadModule(String moduleClassName, Config config) throws Exception {
-        Class<?> moduleClass = Class.forName(moduleClassName);
-        log.info("load module: {}", moduleClassName);
-        return (Module) moduleClass.getConstructor(Config.class).newInstance(config);
     }
 
 }

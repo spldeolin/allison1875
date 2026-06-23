@@ -15,19 +15,19 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ToolEnum {
 
-    DOC_ANALYZER("doc-analyzer", Config::getDocAnalyzerModule, false),
+    DOC_ANALYZER("doc-analyzer", Config::getDocAnalyzerModule),
 
-    HANDLER_TRANSFORMER("handler-transformer", Config::getHandlerTransformerModule, false),
+    HANDLER_TRANSFORMER("handler-transformer", Config::getHandlerTransformerModule),
 
-    PERSISTENCE_GENERATOR("persistence-generator", Config::getPersistenceGeneratorModule, false),
+    PERSISTENCE_GENERATOR("persistence-generator", Config::getPersistenceGeneratorModule),
 
-    QUERY_TRANSFORMER("query-transformer", Config::getQueryTransformerModule, false),
+    QUERY_TRANSFORMER("query-transformer", Config::getQueryTransformerModule),
 
-    STAR_TRANSFORMER("star-transformer", Config::getStarTransformerModule, false),
+    STAR_TRANSFORMER("star-transformer", Config::getStarTransformerModule),
 
-    FORM_GENERATOR("form-generator", Config::getFormGeneratorModule, true),
+    FORM_GENERATOR("form-generator", Config::getFormGeneratorModule),
 
-    APP_GENERATOR("app-generator", Config::getAppGeneratorModule, false),
+    APP_GENERATOR("app-generator", Config::getAppGeneratorModule),
 
     ;
 
@@ -40,11 +40,6 @@ public enum ToolEnum {
      * 从Config获取该工具对应的Guice Module实现类全限定名
      */
     private final Function<Config, String> moduleClassNameGetter;
-
-    /**
-     * 是否为组合工具（需要合并多个子工具Module），目前仅 form-generator 为 true
-     */
-    private final boolean composite;
 
     /**
      * 根据工具名解析为枚举值
