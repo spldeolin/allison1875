@@ -87,6 +87,28 @@ menus: # MenuDef 列表
 
 生成的应用内置完整 RBAC：权限枚举生成 → 授权 API → 鉴权拦截。详见 `PERMISSION.md`。
 
+### Controller 权限注解映射
+
+`ControllerAuthAnnotateServiceImpl` 通过匹配 `@PostMapping` 参数为每个接口添加 `@WebApiAuth`：
+
+| @PostMapping 匹配 | 注解 |
+|------------------|------|
+| `"create..."` | `@WebApiAuth(PermissionEnum.CREATE_X)` |
+| `"update..."` | `@WebApiAuth(PermissionEnum.UPDATE_X)` |
+| `"list..."` | `@WebApiAuth(PermissionEnum.LIST_X)` |
+| `"get...Detail"` | `@WebApiAuth(PermissionEnum.LIST_X)` |
+| `"delete..."` | `@WebApiAuth(PermissionEnum.DELETE_X)` |
+
+### 前端骨架 CRUD 协议
+
+`frontend-skeleton/src/core/protocol/` 中定义了前后端交互约定：
+
+- `CrudAction`: `'list' | 'create' | 'update' | 'delete' | 'getDetail'`
+- `endpointOf(formName, action)`: 生成 `/api/v1/{lower}/{action}{FormName}` URL
+- `buildCreateRequest`: 仅传 `canInputOnInit !== false` 的字段（无 bizId）
+- `buildUpdateRequest`: 传 bizId + `canInputOnEdit !== false` 的字段
+- `handleSubmit`: 根据 `modalMode` 路由到 create 或 update 接口
+
 ## 关键约束
 
 1. **form-generator 委托**：`invokeFormGenerator()` 构造独立的 `Config` + `DomainConfig` 再调 `Allison1875.letsGo()`。变更

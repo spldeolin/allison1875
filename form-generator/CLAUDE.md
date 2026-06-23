@@ -56,6 +56,26 @@
 | false | true  |      无      |      有      |  UpdateReq 注解带校验  |
 | false | false |      无      |      无      |    Create 内写默认值    |
 
+## API 生成架构
+
+每个 FormDef 生成 4 类 API，由独立 Service 负责：
+
+| API | Service | 生成的 handler 名 | ReqDTO 含 bizId | 有 RespDTO |
+|-----|---------|----------------|:--------------:|:---------:|
+| 创建 | `CreateApiService` | `create{FormName}` | 否 | 是（含 bizId） |
+| 更新 | `UpdateApiService` | `update{FormName}` | 是 | 否（void） |
+| 列表 | `ListApiService` | `list{FormName}s` | — | 是 |
+| 详情 | `GetDetailApiService` | `get{FormName}Detail` | 是 | 是 |
+| 删除 | `DeleteApiService` | `delete{FormName}` | 是 | 否（void） |
+
+`MutationApiSupport` 封装 Create/Update 共用逻辑（setter 生成、唯一索引校验、multiSelect 关联重建、setUpdatedAt）。
+
+### 关键约束：唯一索引校验中的 isUpdate 参数
+
+`MutationApiSupport.generateCheckExistStatement(form, index, isUpdate)` 生成 Design chain 查询判重。
+- **Update 场景**：`.bizId.ne(req.getBizId())` 排除自身
+- **Create 场景**：跳过 `.ne(bizId)`，因为 CreateReq 中没有 bizId 字段
+
 ## 字段类型 (type)
 
 ### text
