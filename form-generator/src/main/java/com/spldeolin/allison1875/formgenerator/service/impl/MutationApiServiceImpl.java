@@ -20,10 +20,10 @@ import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
-import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
-import com.spldeolin.allison1875.formgenerator.service.MutationApiSupport;
+import com.spldeolin.allison1875.formgenerator.service.MutationApiService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class MutationApiSupportImpl implements MutationApiSupport {
+public class MutationApiServiceImpl implements MutationApiService {
 
     @Inject
     private Config config;

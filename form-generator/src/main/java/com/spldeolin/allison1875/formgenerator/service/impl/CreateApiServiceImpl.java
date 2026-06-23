@@ -21,7 +21,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
-import com.spldeolin.allison1875.formgenerator.service.MutationApiSupport;
+import com.spldeolin.allison1875.formgenerator.service.MutationApiService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,7 +38,7 @@ public class CreateApiServiceImpl implements CreateApiService {
     private Config config;
 
     @Inject
-    private MutationApiSupport mutationApiSupport;
+    private MutationApiService mutationApiSupport;
 
     @Override
     public InitializerDeclaration generateCreateInitDec(FormDef form) {

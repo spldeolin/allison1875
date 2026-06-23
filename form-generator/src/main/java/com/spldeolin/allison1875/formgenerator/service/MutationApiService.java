@@ -7,13 +7,13 @@ import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
-import com.spldeolin.allison1875.formgenerator.service.impl.MutationApiSupportImpl;
+import com.spldeolin.allison1875.formgenerator.service.impl.MutationApiServiceImpl;
 
 /**
  * @author Deolin 2026-06-23
  */
-@ImplementedBy(MutationApiSupportImpl.class)
-public interface MutationApiSupport {
+@ImplementedBy(MutationApiServiceImpl.class)
+public interface MutationApiService {
 
     void generateSetterToGetter(FormDef form, ItemDef item, BlockStmt body);
 
