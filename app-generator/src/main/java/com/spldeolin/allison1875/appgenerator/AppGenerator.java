@@ -17,24 +17,35 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.Lists;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.google.inject.util.Modules;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
 import com.spldeolin.allison1875.appgenerator.service.ControllerAuthAnnotateService;
 import com.spldeolin.allison1875.appgenerator.service.PermissionEnumGenerateService;
+import com.spldeolin.allison1875.appgenerator.service.impl.AppGeneratorCommonItemsExpansionServiceImpl;
+import com.spldeolin.allison1875.appgenerator.service.impl.AppGeneratorMutationExpansionServiceImpl;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.ast.AstForest;
 import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
-import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875Game;
+import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
+import com.spldeolin.allison1875.formgenerator.FormGenerator;
+import com.spldeolin.allison1875.formgenerator.FormGeneratorModule;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
+import com.spldeolin.allison1875.formgenerator.service.CommonItemsExpansionService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -301,13 +312,9 @@ public class AppGenerator implements Allison1875Game {
     }
 
     private void invokeFormGenerator(AppDef appDef, Path backendOutput, List<FormDef> forms) {
-        // Serialize forms to a temp YAML for form-generator to read
         Path tempDsl = writeTempFormsDsl(forms);
-
-        // backend project absolute path
         String absPath = backendOutput.toAbsolutePath().toString();
 
-        // Construct config for form-generator
         Config fgConfig = new Config();
         fgConfig.setDslPath(tempDsl.toFile());
         fgConfig.setAuthor(config.getAuthor());
@@ -318,7 +325,6 @@ public class AppGenerator implements Allison1875Game {
         fgConfig.setEnableOneService(true);
         fgConfig.setMarkdownDir(new File(absPath + "/api-docs"));
 
-        // Set code snippets for the generated backend
         Config.CodeSnippet cs = new Config.CodeSnippet();
         String ns = appDef.getNamespace();
         cs.setRequestResultQualifier(ns + ".common.RequestResult");
@@ -328,7 +334,6 @@ public class AppGenerator implements Allison1875Game {
         cs.setBizExceptionQualifier(ns + ".common.BizException");
         fgConfig.setCodeSnippet(cs);
 
-        // Construct DomainConfig pointing to the generated backend
         DomainConfig dc = new DomainConfig();
         dc.setName("default");
         dc.setControllerModule(absPath);
@@ -351,17 +356,29 @@ public class AppGenerator implements Allison1875Game {
         dc.setWholeDTOPackage(ns + ".dto");
         fgConfig.setDomains(Lists.newArrayList(dc));
 
-        // 调用form-generator前，为新项目（单模块项目）生成一个AstForest，并保存到上下文
         AstForest astForest = new DefaultAstForest(MavenUtils.buildClassLoader(new File(absPath), null),
                 new File(absPath));
         AstForestContext.set(astForest);
 
-        // 指定AstForest调用form-generator
+        Allison1875.prepareDomain(fgConfig, null);
+
+        Module fgModule = new FormGeneratorModule(fgConfig);
+        Module expansionOverride = new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(CommonItemsExpansionService.class)
+                        .toInstance(new AppGeneratorCommonItemsExpansionServiceImpl());
+                bind(MutationExpansionService.class)
+                        .toInstance(new AppGeneratorMutationExpansionServiceImpl(ns));
+            }
+        };
+        Module combined = Modules.override(fgModule).with(expansionOverride);
+
         log.info("invoking form-generator for {} forms...", forms.size());
-        Allison1875.letsGo(ToolEnum.FORM_GENERATOR, fgConfig, null);
+        Injector injector = Guice.createInjector(combined, new ValidationModule());
+        injector.getInstance(FormGenerator.class).play();
         log.info("form-generator completed");
 
-        // Cleanup temp file
         try {
             Files.deleteIfExists(tempDsl);
         } catch (IOException ignored) {
