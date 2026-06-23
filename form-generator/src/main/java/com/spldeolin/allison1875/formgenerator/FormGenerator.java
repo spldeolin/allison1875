@@ -31,7 +31,6 @@ import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
-import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
@@ -183,7 +182,7 @@ public class FormGenerator implements Allison1875Game {
             bizId.setIsNonVoid(true);
             bizId.setCanInputOnInit(false);
             bizId.setCanInputOnEdit(false);
-            bizId.setSpecialItemType(SpecialItemType.BIZ_ID);
+            bizId.setIsBuiltinField(true);
             bizId.setMaxLength(36);
             form.getItems().add(0, bizId);
             TimeItemDef createdAt = new TimeItemDef();
@@ -192,7 +191,7 @@ public class FormGenerator implements Allison1875Game {
             createdAt.setIsNonVoid(true);
             createdAt.setCanInputOnInit(false);
             createdAt.setCanInputOnEdit(false);
-            bizId.setSpecialItemType(SpecialItemType.CREATED_AT);
+            createdAt.setIsBuiltinField(true);
             form.getItems().add(createdAt);
             TimeItemDef updatedAt = new TimeItemDef();
             updatedAt.setName("updatedAt");
@@ -200,7 +199,7 @@ public class FormGenerator implements Allison1875Game {
             updatedAt.setIsNonVoid(true);
             updatedAt.setCanInputOnInit(false);
             updatedAt.setCanInputOnEdit(false);
-            bizId.setSpecialItemType(SpecialItemType.UPDATED_AT);
+            updatedAt.setIsBuiltinField(true);
             form.getItems().add(updatedAt);
             IndexDef index = new IndexDef();
             index.setItemNames(Lists.newArrayList(bizId.getName()));

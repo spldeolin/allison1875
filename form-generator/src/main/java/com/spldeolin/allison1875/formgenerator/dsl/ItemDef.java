@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.LowerCamel;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
-import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.NumberItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.OnOffItemDef;
@@ -71,10 +70,7 @@ public abstract class ItemDef {
      */
     public abstract ItemType getType();
 
-    /**
-     * 特殊字段类型，null代表非特殊字段
-     */
     @JsonIgnore
-    SpecialItemType specialItemType;
+    Boolean isBuiltinField;
 
 }

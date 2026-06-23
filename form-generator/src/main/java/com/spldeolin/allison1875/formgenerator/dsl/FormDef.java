@@ -1,6 +1,7 @@
 package com.spldeolin.allison1875.formgenerator.dsl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spldeolin.allison1875.common.config.Config;
@@ -86,7 +87,9 @@ public class FormDef {
      */
     @JsonIgnore
     public List<ItemDef> getNonAuditedItems() {
-        return items.subList(1, items.size() - 2);
+        return items.stream()
+                .filter(item -> !Boolean.TRUE.equals(item.getIsBuiltinField()))
+                .collect(Collectors.toList());
     }
 
 }
