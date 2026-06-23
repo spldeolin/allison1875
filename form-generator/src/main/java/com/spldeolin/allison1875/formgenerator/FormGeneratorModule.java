@@ -35,13 +35,11 @@ public class FormGeneratorModule extends Allison1875Module {
 
     @Override
     protected void configure() {
-        Module deps = Modules.combine(
-                loadModule(config.getPersistenceGeneratorModule(), config),
-                loadModule(config.getHandlerTransformerModule(), config),
-                loadModule(config.getDocAnalyzerModule(), config),
-                loadModule(config.getQueryTransformerModule(), config)
-        );
-        install(Modules.override(deps).with(new AbstractModule() {
+        Module combined = loadModule(config.getPersistenceGeneratorModule(), config);
+        combined = Modules.override(combined).with(loadModule(config.getHandlerTransformerModule(), config));
+        combined = Modules.override(combined).with(loadModule(config.getDocAnalyzerModule(), config));
+        combined = Modules.override(combined).with(loadModule(config.getQueryTransformerModule(), config));
+        install(Modules.override(combined).with(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ServiceLayerExpansionService.class)
