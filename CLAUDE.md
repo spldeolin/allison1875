@@ -143,6 +143,19 @@ public class XxxRetval {           // 出参: *Retval
 处理顺序：detect → analyze → generate → modify CU → `importExprService.extractQualifiedTypeToImport(cu)` →
 `CompilationUnitUtils.writeJava(cu)` → log REFORMAT。详细模板见 `common/CLAUDE.md`。
 
+## ExpansionService 模式
+
+接口用 `@ImplementedBy` 声明默认实现，通过 Guice 模块绑定覆盖。用于跨工具扩展而不引入硬依赖。
+
+**机制：** 工具 A（如 form-generator）定义 ExpansionService 接口 + 无操作默认实现。工具 B（如 app-generator）通过 `Allison1875.prepareDomain()` + 自行构建注射器 + `Modules.override()` 注入自定义实现。
+
+**`prepareDomain(Config, String)` 用法：** 调用此方法完成 domain 解析 + sourceRoot 解析 + DomainContext 设置后，调用方可自行构建注射器（跳过 `letsGo()` 的标准流程）。
+
+**现有实例：**
+- `ServiceLayerExpansionService` — handler-transformer 的 Service 层代码扩展点
+- `CommonItemsExpansionService` — form-generator 的公共字段注入扩展点
+- `MutationExpansionService` — form-generator 的 Create/Update/List 方法体扩展点
+
 ## 开发工作流
 
 1. **新 IT 用例**：必须继承对应的 `<Tool>ItBaseTest`，资源放 `allison1875-cli/src/test/resources/it/<tool>/<caseName>/`
