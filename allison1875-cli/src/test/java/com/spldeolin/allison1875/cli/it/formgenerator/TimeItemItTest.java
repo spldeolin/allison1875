@@ -60,26 +60,26 @@ public class TimeItemItTest extends FormGeneratorItBaseTest {
         assertTrue(entityContent.contains("LocalDateTime publishTime"),
                 "Entity should contain LocalDateTime publishTime field");
 
-        // === SaveReq DTO 验证 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveEventReq.java");
-        assertTrue(saveReqFile.exists(), "SaveEventReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveEventReq"), "Should contain class SaveEventReq");
+        // === CreateReq DTO 验证 ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateEventReq.java");
+        assertTrue(createReqFile.exists(), "CreateEventReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateEventReq"), "Should contain class CreateEventReq");
         // eventDate: format=date → LocalDate + @JsonFormat("yyyy-MM-dd")
-        assertTrue(saveReqContent.contains("LocalDate eventDate"),
-                "SaveReq should contain LocalDate eventDate (format=date)");
-        assertTrue(saveReqContent.contains("yyyy-MM-dd"),
+        assertTrue(createReqContent.contains("LocalDate eventDate"),
+                "CreateReq should contain LocalDate eventDate (format=date)");
+        assertTrue(createReqContent.contains("yyyy-MM-dd"),
                 "eventDate should have @JsonFormat(pattern=\"yyyy-MM-dd\")");
         // eventTime: format=time → LocalTime + @JsonFormat("HH:mm:ss")
-        assertTrue(saveReqContent.contains("LocalTime eventTime"),
-                "SaveReq should contain LocalTime eventTime (format=time)");
-        assertTrue(saveReqContent.contains("HH:mm:ss"),
+        assertTrue(createReqContent.contains("LocalTime eventTime"),
+                "CreateReq should contain LocalTime eventTime (format=time)");
+        assertTrue(createReqContent.contains("HH:mm:ss"),
                 "eventTime should have @JsonFormat(pattern=\"HH:mm:ss\")");
         // publishTime: format=dateTime → LocalDateTime + @JsonFormat("yyyy-MM-dd HH:mm:ss")
-        assertTrue(saveReqContent.contains("LocalDateTime publishTime"),
-                "SaveReq should contain LocalDateTime publishTime (format=dateTime)");
+        assertTrue(createReqContent.contains("LocalDateTime publishTime"),
+                "CreateReq should contain LocalDateTime publishTime (format=dateTime)");
         // eventDate 有 @NotNull (isNonVoid=true)
-        assertTrue(saveReqContent.contains("@NotNull") || saveReqContent.contains("@javax.validation.constraints.NotNull"),
+        assertTrue(createReqContent.contains("@NotNull") || createReqContent.contains("@javax.validation.constraints.NotNull"),
                 "nonVoid time fields should have @NotNull");
 
         // === ListReq DTO 验证 ===

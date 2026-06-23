@@ -41,11 +41,14 @@ public class EnableDocAnalyzerItTest extends FormGeneratorItBaseTest {
         String mdContent = Files.readString(mdFiles[0].toPath());
 
         // ============================================================
-        // === 文档内容验证：四个 API ===
+        // === 文档内容验证：五个 API ===
         // ============================================================
-        // Save API
-        assertTrue(mdContent.contains("saveNote") || mdContent.contains("save"),
-                "API doc should contain saveNote API");
+        // Create API
+        assertTrue(mdContent.contains("createNote") || mdContent.contains("create"),
+                "API doc should contain createNote API");
+        // Update API
+        assertTrue(mdContent.contains("updateNote") || mdContent.contains("update"),
+                "API doc should contain updateNote API");
         // List API
         assertTrue(mdContent.contains("listNotes") || mdContent.contains("list"),
                 "API doc should contain listNotes API");

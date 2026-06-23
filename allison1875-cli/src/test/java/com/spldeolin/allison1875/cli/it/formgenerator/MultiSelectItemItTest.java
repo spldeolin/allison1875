@@ -109,27 +109,22 @@ public class MultiSelectItemItTest extends FormGeneratorItBaseTest {
         assertTrue(associationMapperContent.contains("queryByStudentCode"),
                 "Association Mapper should contain queryByStudentCode method");
 
-        // === Save ServiceImpl 验证：先删后建 ===
-        File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveStudentServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveStudentServiceImpl should be generated");
-        String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
+        // === Create ServiceImpl 验证：先删后建 ===
+        File createServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/CreateStudentServiceImpl.java");
+        assertTrue(createServiceImplFile.exists(), "CreateStudentServiceImpl should be generated");
+        String createServiceImplContent = new String(Files.readAllBytes(createServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        // 「先删除」 — 删除旧的关联实体
-        assertTrue(saveServiceImplContent.contains("studentHobbiesMapper.deleteByStudentCode("),
-                "Save service should delete old association entities first");
-        assertTrue(saveServiceImplContent.contains("重建"),
-                "Save service should have comment about rebuilding association");
         // 「后创建」 — forEach 循环创建新的关联实体
-        assertTrue(saveServiceImplContent.contains("req.getHobbies()"),
-                "Save service should iterate over req.getHobbies()");
-        assertTrue(saveServiceImplContent.contains("new StudentHobbiesEntity()"),
-                "Save service should create new StudentHobbiesEntity instances");
-        assertTrue(saveServiceImplContent.contains("studentHobbiesMapper.insert(studentHobbies)"),
-                "Save service should insert new association entities");
+        assertTrue(createServiceImplContent.contains("req.getHobbies()"),
+                "Create service should iterate over req.getHobbies()");
+        assertTrue(createServiceImplContent.contains("new StudentHobbiesEntity()"),
+                "Create service should create new StudentHobbiesEntity instances");
+        assertTrue(createServiceImplContent.contains("studentHobbiesMapper.insert(studentHobbies)"),
+                "Create service should insert new association entities");
         // 主实体不应设置 hobbies 字段
-        assertFalse(saveServiceImplContent.contains("student.setHobbies"),
-                "Save service should NOT set hobbies on main entity");
+        assertFalse(createServiceImplContent.contains("student.setHobbies"),
+                "Create service should NOT set hobbies on main entity");
 
         // === Delete ServiceImpl 验证：级联删除 ===
         // 注意：Design Chain 已被 query-transformer 转换为 Mapper 调用
@@ -165,15 +160,15 @@ public class MultiSelectItemItTest extends FormGeneratorItBaseTest {
         assertTrue(getDetailServiceImplContent.contains("result.setHobbies(hobbies)"),
                 "GetDetail service should set hobbies on result");
 
-        // === DTO 验证：SaveReq 包含 List<Enum> ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveStudentReq.java");
-        assertTrue(saveReqFile.exists(), "SaveStudentReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("List<HobbiesEnum> hobbies"),
-                "SaveReq should contain List<HobbiesEnum> hobbies field");
+        // === DTO 验证：CreateReq 包含 List<Enum> ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateStudentReq.java");
+        assertTrue(createReqFile.exists(), "CreateStudentReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("List<HobbiesEnum> hobbies"),
+                "CreateReq should contain List<HobbiesEnum> hobbies field");
         assertTrue(
-                saveReqContent.contains("@NotEmpty")
-                        || saveReqContent.contains("@javax.validation.constraints.NotEmpty"),
+                createReqContent.contains("@NotEmpty")
+                        || createReqContent.contains("@javax.validation.constraints.NotEmpty"),
                 "nonVoid multiSelect field should have @NotEmpty");
 
         // === DTO 验证：GetDetailResp 包含 List<Enum> ===

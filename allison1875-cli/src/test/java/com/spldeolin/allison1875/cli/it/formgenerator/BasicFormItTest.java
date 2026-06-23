@@ -70,11 +70,17 @@ public class BasicFormItTest extends FormGeneratorItBaseTest {
         assertTrue(controllerContent.contains("@RequestMapping"), "Controller should have @RequestMapping");
 
         // === Service 验证 ===
-        File serviceFile = new File(basedir, "src/main/java/com/example/service/SaveBookService.java");
-        assertTrue(serviceFile.exists(), "SaveBookService interface should be generated");
-        String serviceContent = new String(Files.readAllBytes(serviceFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(serviceContent.contains("interface SaveBookService"), "Service should declare interface SaveBookService");
-        assertTrue(serviceContent.contains("saveBook"), "Service should contain saveBook method");
+        File createServiceFile = new File(basedir, "src/main/java/com/example/service/CreateBookService.java");
+        assertTrue(createServiceFile.exists(), "CreateBookService interface should be generated");
+        String createServiceContent = new String(Files.readAllBytes(createServiceFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createServiceContent.contains("interface CreateBookService"), "Service should declare interface CreateBookService");
+        assertTrue(createServiceContent.contains("createBook"), "Service should contain createBook method");
+
+        File updateServiceFile = new File(basedir, "src/main/java/com/example/service/UpdateBookService.java");
+        assertTrue(updateServiceFile.exists(), "UpdateBookService interface should be generated");
+        String updateServiceContent = new String(Files.readAllBytes(updateServiceFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(updateServiceContent.contains("interface UpdateBookService"), "Service should declare interface UpdateBookService");
+        assertTrue(updateServiceContent.contains("updateBook"), "Service should contain updateBook method");
 
         File listServiceFile = new File(basedir, "src/main/java/com/example/service/ListBooksService.java");
         assertTrue(listServiceFile.exists(), "ListBooksService interface should be generated");
@@ -86,13 +92,19 @@ public class BasicFormItTest extends FormGeneratorItBaseTest {
         assertTrue(deleteServiceFile.exists(), "DeleteBookService interface should be generated");
 
         // === ServiceImpl 验证 ===
-        File serviceImplFile = new File(basedir, "src/main/java/com/example/service/impl/SaveBookServiceImpl.java");
-        assertTrue(serviceImplFile.exists(), "SaveBookServiceImpl file should be generated");
-        String serviceImplContent = new String(Files.readAllBytes(serviceImplFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(serviceImplContent.contains("class SaveBookServiceImpl"), "ServiceImpl should declare class SaveBookServiceImpl");
-        assertTrue(serviceImplContent.contains("saveBook"), "ServiceImpl should implement saveBook");
-        assertTrue(serviceImplContent.contains("bookMapper.insert"), "ServiceImpl should call bookMapper.insert for create");
-        assertTrue(serviceImplContent.contains("bookMapper.updateById"), "ServiceImpl should call bookMapper.updateById for edit");
+        File createServiceImplFile = new File(basedir, "src/main/java/com/example/service/impl/CreateBookServiceImpl.java");
+        assertTrue(createServiceImplFile.exists(), "CreateBookServiceImpl file should be generated");
+        String createServiceImplContent = new String(Files.readAllBytes(createServiceImplFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createServiceImplContent.contains("class CreateBookServiceImpl"), "ServiceImpl should declare class CreateBookServiceImpl");
+        assertTrue(createServiceImplContent.contains("createBook"), "ServiceImpl should implement createBook");
+        assertTrue(createServiceImplContent.contains("bookMapper.insert"), "ServiceImpl should call bookMapper.insert for create");
+
+        File updateServiceImplFile = new File(basedir, "src/main/java/com/example/service/impl/UpdateBookServiceImpl.java");
+        assertTrue(updateServiceImplFile.exists(), "UpdateBookServiceImpl file should be generated");
+        String updateServiceImplContent = new String(Files.readAllBytes(updateServiceImplFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(updateServiceImplContent.contains("class UpdateBookServiceImpl"), "ServiceImpl should declare class UpdateBookServiceImpl");
+        assertTrue(updateServiceImplContent.contains("updateBook"), "ServiceImpl should implement updateBook");
+        assertTrue(updateServiceImplContent.contains("bookMapper.updateById"), "ServiceImpl should call bookMapper.updateById for update");
 
         File listServiceImplFile = new File(basedir, "src/main/java/com/example/service/impl/ListBooksServiceImpl.java");
         assertTrue(listServiceImplFile.exists(), "ListBooksServiceImpl file should be generated");
@@ -104,12 +116,20 @@ public class BasicFormItTest extends FormGeneratorItBaseTest {
         assertTrue(deleteServiceImplFile.exists(), "DeleteBookServiceImpl file should be generated");
 
         // === DTO 验证 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveBookReq.java");
-        assertTrue(saveReqFile.exists(), "SaveBookReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveBookReq"), "Should contain class SaveBookReq");
-        assertTrue(saveReqContent.contains("bookName"), "SaveReq should contain bookName field");
-        assertTrue(saveReqContent.contains("price"), "SaveReq should contain price field");
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateBookReq.java");
+        assertTrue(createReqFile.exists(), "CreateBookReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateBookReq"), "Should contain class CreateBookReq");
+        assertTrue(createReqContent.contains("bookName"), "CreateReq should contain bookName field");
+        assertTrue(createReqContent.contains("price"), "CreateReq should contain price field");
+
+        File updateReqFile = new File(basedir, "src/main/java/com/example/dto/req/UpdateBookReq.java");
+        assertTrue(updateReqFile.exists(), "UpdateBookReq DTO should be generated");
+        String updateReqContent = new String(Files.readAllBytes(updateReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(updateReqContent.contains("class UpdateBookReq"), "Should contain class UpdateBookReq");
+        assertTrue(updateReqContent.contains("bookCode"), "UpdateReq should contain bookCode field");
+        assertTrue(updateReqContent.contains("bookName"), "UpdateReq should contain bookName field");
+        assertTrue(updateReqContent.contains("price"), "UpdateReq should contain price field");
 
         File listReqFile = new File(basedir, "src/main/java/com/example/dto/req/ListBooksReq.java");
         assertTrue(listReqFile.exists(), "ListBooksReq DTO should be generated");
@@ -120,8 +140,8 @@ public class BasicFormItTest extends FormGeneratorItBaseTest {
         File deleteReqFile = new File(basedir, "src/main/java/com/example/dto/req/DeleteBookReq.java");
         assertTrue(deleteReqFile.exists(), "DeleteBookReq DTO should be generated");
 
-        File saveRespFile = new File(basedir, "src/main/java/com/example/dto/resp/SaveBookResp.java");
-        assertTrue(saveRespFile.exists(), "SaveBookResp DTO should be generated");
+        File createRespFile = new File(basedir, "src/main/java/com/example/dto/resp/CreateBookResp.java");
+        assertTrue(createRespFile.exists(), "CreateBookResp DTO should be generated");
 
         File listRespFile = new File(basedir, "src/main/java/com/example/dto/resp/ListBooksResp.java");
         assertTrue(listRespFile.exists(), "ListBooksResp DTO should be generated");

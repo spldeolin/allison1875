@@ -17,7 +17,7 @@ public interface MutationApiSupport {
 
     void generateSetterToGetter(FormDef form, ItemDef item, BlockStmt body);
 
-    List<Statement> generateCheckExistStatement(FormDef form, IndexDef index);
+    List<Statement> generateCheckExistStatement(FormDef form, IndexDef index, boolean isUpdate);
 
     boolean allCanInput(FormDef form, IndexDef index, boolean onInit);
 

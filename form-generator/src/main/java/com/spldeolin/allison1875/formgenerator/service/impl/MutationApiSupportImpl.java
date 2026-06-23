@@ -77,7 +77,7 @@ public class MutationApiSupportImpl implements MutationApiSupport {
     }
 
     @Override
-    public List<Statement> generateCheckExistStatement(FormDef form, IndexDef index) {
+    public List<Statement> generateCheckExistStatement(FormDef form, IndexDef index, boolean isUpdate) {
         // 构造标题：由 index.itemNames 对应的字段 title 拼接而成
         List<String> fieldTitles = index.getItemNames().stream()
                 .map(itemName -> form.getItems().stream().filter(item -> item.getName().equals(itemName)).findFirst()
@@ -86,13 +86,16 @@ public class MutationApiSupportImpl implements MutationApiSupport {
 
         // 构造 Design chain：
         //   {Entity}Design.select().where()
-        //     .ne(req.getBizId())          ← 排除自身（编辑场景），bizId 可能为 null 所以用 ne
+        //     .ne(req.getBizId())          ← 排除自身（仅编辑场景），bizId 可能为 null 所以用 ne
         //     .eq(field1, req.getField1()) ← 每个 index 字段
         //     .one();
         StringBuilder chain = new StringBuilder();
         chain.append(form.getName()).append("Design.select().where()");
-        chain.append(".").append(form.getBizIdName()).append(".ne(req.").append(form.getBizIdGetterName())
-                .append("())");
+        if (isUpdate) {
+            // Only exclude self when updating (create doesn't have bizId in req)
+            chain.append(".").append(form.getBizIdName()).append(".ne(req.").append(form.getBizIdGetterName())
+                    .append("())");
+        }
         Map<String, ItemDef> items = form.getItems().stream().collect(Collectors.toMap(ItemDef::getName, item -> item));
         for (String itemName : index.getItemNames()) {
             chain.append(convertItemsToSearchConditions(items.get(itemName)));

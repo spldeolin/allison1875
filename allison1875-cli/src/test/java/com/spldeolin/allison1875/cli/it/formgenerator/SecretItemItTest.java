@@ -48,28 +48,28 @@ public class SecretItemItTest extends FormGeneratorItBaseTest {
         assertTrue(entityContent.contains("String apiKeySecret"),
                 "Entity should contain String apiKeySecret field");
 
-        // === SaveReq DTO 验证：secret 字段应包含 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveApiKeyReq.java");
-        assertTrue(saveReqFile.exists(), "SaveApiKeyReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveApiKeyReq"), "Should contain class SaveApiKeyReq");
-        // secret 字段作为用户输入出现在 SaveReq
-        assertTrue(saveReqContent.contains("String apiKeySecret"),
-                "SaveReq should contain String apiKeySecret (user input)");
+        // === CreateReq DTO 验证：secret 字段应包含 ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateApiKeyReq.java");
+        assertTrue(createReqFile.exists(), "CreateApiKeyReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateApiKeyReq"), "Should contain class CreateApiKeyReq");
+        // secret 字段作为用户输入出现在 CreateReq
+        assertTrue(createReqContent.contains("String apiKeySecret"),
+                "CreateReq should contain String apiKeySecret (user input)");
         // isNonVoid=true → @NotEmpty
         assertTrue(
-                saveReqContent.contains("@NotEmpty")
-                        || saveReqContent.contains("@javax.validation.constraints.NotEmpty"),
+                createReqContent.contains("@NotEmpty")
+                        || createReqContent.contains("@javax.validation.constraints.NotEmpty"),
                 "nonVoid secret field should have @NotEmpty");
 
-        // === Save ServiceImpl 验证：secret 字段正常设置 ===
-        File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveApiKeyServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveApiKeyServiceImpl should be generated");
-        String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
+        // === Create ServiceImpl 验证：secret 字段正常设置 ===
+        File createServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/CreateApiKeyServiceImpl.java");
+        assertTrue(createServiceImplFile.exists(), "CreateApiKeyServiceImpl should be generated");
+        String createServiceImplContent = new String(Files.readAllBytes(createServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(saveServiceImplContent.contains("apiKey.setApiKeySecret(req.getApiKeySecret())"),
-                "Save service should set apiKeySecret from req");
+        assertTrue(createServiceImplContent.contains("apiKey.setApiKeySecret(req.getApiKeySecret())"),
+                "Create service should set apiKeySecret from req");
 
         // === GetDetailResp DTO 验证：secret 字段应不包含 ===
         File getDetailRespFile = new File(basedir,

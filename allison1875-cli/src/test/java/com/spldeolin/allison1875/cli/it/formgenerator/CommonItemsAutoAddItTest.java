@@ -78,67 +78,74 @@ public class CommonItemsAutoAddItTest extends FormGeneratorItBaseTest {
         assertTrue(entityContent.contains("stock"), "Entity should contain stock (user-defined)");
 
         // ============================================================
-        // === SaveReq DTO 验证：自动添加字段不应出现 ===
-        // === productCode canInputOn*=false → 不进入 SaveReq（但被显式追加为 bizId 字段）
-        // === createdAt   canInputOn*=false → 不进入 SaveReq
-        // === updatedAt   canInputOn*=false → 不进入 SaveReq
+        // === CreateReq DTO 验证：自动添加字段不应出现 ===
+        // === productCode canInputOn*=false → 不进入 CreateReq
+        // === createdAt   canInputOn*=false → 不进入 CreateReq
+        // === updatedAt   canInputOn*=false → 不进入 CreateReq
         // ============================================================
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveProductReq.java");
-        assertTrue(saveReqFile.exists(), "SaveProductReq DTO should be generated");
-        String saveReqContent = Files.readString(saveReqFile.toPath());
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateProductReq.java");
+        assertTrue(createReqFile.exists(), "CreateProductReq DTO should be generated");
+        String createReqContent = Files.readString(createReqFile.toPath());
 
         // 用户字段应出现
-        assertTrue(saveReqContent.contains("productName"), "SaveReq should contain productName (user-defined)");
-        assertTrue(saveReqContent.contains("stock"), "SaveReq should contain stock (user-defined)");
+        assertTrue(createReqContent.contains("productName"), "CreateReq should contain productName (user-defined)");
+        assertTrue(createReqContent.contains("stock"), "CreateReq should contain stock (user-defined)");
 
-        // productCode 作为业务 ID 出现在 SaveReq 中（编辑时需要用它查已有记录），
-        // 但不应有校验注解（@NotBlank/@NotNull）——它不是用户输入
-        assertTrue(saveReqContent.contains("productCode"),
-                "SaveReq should contain productCode as bizId for edit lookup");
-        // productCode 字段不应有 @NotBlank 或 @NotNull
-        assertFalse(
-                saveReqContent.contains("@NotBlank String productCode")
-                        || saveReqContent.contains("@NotNull String productCode"),
-                "productCode in SaveReq should NOT have @NotBlank/@NotNull (not user input)");
-        // createdAt/updatedAt 不应出现在 SaveReq 中
-        assertFalse(saveReqContent.contains("createdAt"),
-                "SaveReq should NOT contain createdAt (canInputOn*=false)");
-        assertFalse(saveReqContent.contains("updatedAt"),
-                "SaveReq should NOT contain updatedAt (canInputOn*=false)");
+        // productCode 不在 CreateReq 中（创建时由服务端生成）
+        assertFalse(createReqContent.contains("productCode"),
+                "CreateReq should NOT contain productCode (generated server-side)");
+        // createdAt/updatedAt 不应出现在 CreateReq 中
+        assertFalse(createReqContent.contains("createdAt"),
+                "CreateReq should NOT contain createdAt (canInputOn*=false)");
+        assertFalse(createReqContent.contains("updatedAt"),
+                "CreateReq should NOT contain updatedAt (canInputOn*=false)");
+
+        // UpdateReq should contain productCode as bizId for lookup
+        File updateReqFile = new File(basedir, "src/main/java/com/example/dto/req/UpdateProductReq.java");
+        assertTrue(updateReqFile.exists(), "UpdateProductReq DTO should be generated");
+        String updateReqContent = Files.readString(updateReqFile.toPath());
+        assertTrue(updateReqContent.contains("productCode"),
+                "UpdateReq should contain productCode as bizId for update lookup");
 
         // ============================================================
-        // === Save ServiceImpl 验证 ===
+        // === Create ServiceImpl 验证 ===
         // ============================================================
-        File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveProductServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveProductServiceImpl should be generated");
-        String saveContent = Files.readString(saveServiceImplFile.toPath());
+        File createServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/CreateProductServiceImpl.java");
+        assertTrue(createServiceImplFile.exists(), "CreateProductServiceImpl should be generated");
+        String createContent = Files.readString(createServiceImplFile.toPath());
 
-        // 创建分支 — productCode 应通过 shortUuid 生成（业务主键自动生成，非 TODO 模式）
-        assertTrue(saveContent.contains("product.setProductCode("),
-                "Save service toCreate branch should call product.setProductCode()");
-        // productCode 使用 shortUuid 生成（UUID.randomUUID()），出现在 toCreate 分支
-        assertTrue(saveContent.contains("UUID.randomUUID()"),
-                "Save service should use UUID.randomUUID() for shortUuid bizId generation");
+        // productCode 应通过 shortUuid 生成（业务主键自动生成）
+        assertTrue(createContent.contains("product.setProductCode("),
+                "Create service should call product.setProductCode()");
+        // productCode 使用 shortUuid 生成（UUID.randomUUID()）
+        assertTrue(createContent.contains("UUID.randomUUID()"),
+                "Create service should use UUID.randomUUID() for shortUuid bizId generation");
 
-        // 验证 setProductCode 在 setCreatedAt 前（创建分支内部）
-        int setCodeIndex = saveContent.indexOf("product.setProductCode(");
-        int setCreatedAtIndex = saveContent.indexOf("product.setCreatedAt(");
+        // 验证 setProductCode 在 setCreatedAt 前
+        int setCodeIndex = createContent.indexOf("product.setProductCode(");
+        int setCreatedAtIndex = createContent.indexOf("product.setCreatedAt(");
         assertTrue(setCodeIndex < setCreatedAtIndex,
-                "setProductCode should appear before setCreatedAt (inside toCreate branch)");
+                "setProductCode should appear before setCreatedAt");
 
-        // createdAt — 创建分支里出现
-        assertTrue(saveContent.contains("product.setCreatedAt("),
-                "Save service should set createdAt in toCreate branch");
-        // updatedAt — common 节出现（无论创建还是编辑，canInputOnEdit=false 但 SpecialItemType.UPDATED_AT 显式追加）
-        assertTrue(saveContent.contains("product.setUpdatedAt("),
-                "Save service should set updatedAt in common section");
+        // createdAt — 创建时设置
+        assertTrue(createContent.contains("product.setCreatedAt("),
+                "Create service should set createdAt");
+        // updatedAt — 创建时也设置
+        assertTrue(createContent.contains("product.setUpdatedAt("),
+                "Create service should set updatedAt");
 
-        // 确保 product.setCreatedAt 只在 toCreate 分支出现（canInputOnEdit=false）
-        int elseIndex = saveContent.indexOf("} else {");
-        String elseContent = saveContent.substring(elseIndex);
-        assertFalse(elseContent.contains("product.setCreatedAt("),
-                "createdAt should NOT be set in else/edit branch (canInputOnEdit=false)");
+        // === Update ServiceImpl 验证 ===
+        File updateServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/UpdateProductServiceImpl.java");
+        assertTrue(updateServiceImplFile.exists(), "UpdateProductServiceImpl should be generated");
+        String updateContent = Files.readString(updateServiceImplFile.toPath());
+        // createdAt should NOT be set in update
+        assertFalse(updateContent.contains("product.setCreatedAt("),
+                "createdAt should NOT be set in update service");
+        // updatedAt should be set in update
+        assertTrue(updateContent.contains("product.setUpdatedAt("),
+                "updatedAt should be set in update service");
 
         // ============================================================
         // === Mapper 验证：productCode 唯一索引 → queryByProductCode ===

@@ -90,34 +90,34 @@ public class SelectItemItTest extends FormGeneratorItBaseTest {
         assertTrue(entityContent.contains("String productCategory"),
                 "Entity should contain String productCategory field");
 
-        // === SaveReq DTO 验证 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveProductReq.java");
-        assertTrue(saveReqFile.exists(), "SaveProductReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveProductReq"), "Should contain class SaveProductReq");
+        // === CreateReq DTO 验证 ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateProductReq.java");
+        assertTrue(createReqFile.exists(), "CreateProductReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateProductReq"), "Should contain class CreateProductReq");
         // select 字段引用枚举类型
-        assertTrue(saveReqContent.contains("ProductStatusEnum productStatus"),
-                "SaveReq should contain ProductStatusEnum productStatus");
-        assertTrue(saveReqContent.contains("ProductCategoryEnum productCategory"),
-                "SaveReq should contain ProductCategoryEnum productCategory");
+        assertTrue(createReqContent.contains("ProductStatusEnum productStatus"),
+                "CreateReq should contain ProductStatusEnum productStatus");
+        assertTrue(createReqContent.contains("ProductCategoryEnum productCategory"),
+                "CreateReq should contain ProductCategoryEnum productCategory");
         // isNonVoid=true 附加 @NotNull
         assertTrue(
-                saveReqContent.contains("@NotNull") || saveReqContent.contains("@javax.validation.constraints.NotNull"),
+                createReqContent.contains("@NotNull") || createReqContent.contains("@javax.validation.constraints.NotNull"),
                 "nonVoid select field should have @NotNull");
 
-        // === Save ServiceImpl 验证：枚举 .getCode() 转换 ===
-        File saveServiceImplFile = new File(basedir, "src/main/java/com/example/service/impl/SaveProductServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveProductServiceImpl file should be generated");
-        String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
+        // === Create ServiceImpl 验证：枚举 .getCode() 转换 ===
+        File createServiceImplFile = new File(basedir, "src/main/java/com/example/service/impl/CreateProductServiceImpl.java");
+        assertTrue(createServiceImplFile.exists(), "CreateProductServiceImpl file should be generated");
+        String createServiceImplContent = new String(Files.readAllBytes(createServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
         // isNonVoid=true → 直接 .getCode()
-        assertTrue(saveServiceImplContent.contains("req.getProductStatus().getCode()"),
-                "Save service should call req.getProductStatus().getCode() for nonVoid select");
+        assertTrue(createServiceImplContent.contains("req.getProductStatus().getCode()"),
+                "Create service should call req.getProductStatus().getCode() for nonVoid select");
         // isNonVoid=false → null 安全转换（生成代码格式为 " != null ? ... : null"）
-        assertTrue(saveServiceImplContent.contains("req.getProductCategory() != null"),
-                "Save service should null-check productCategory before .getCode()");
-        assertTrue(saveServiceImplContent.contains("req.getProductCategory().getCode()"),
-                "Save service should call req.getProductCategory().getCode() when non-null");
+        assertTrue(createServiceImplContent.contains("req.getProductCategory() != null"),
+                "Create service should null-check productCategory before .getCode()");
+        assertTrue(createServiceImplContent.contains("req.getProductCategory().getCode()"),
+                "Create service should call req.getProductCategory().getCode() when non-null");
 
         // === GetDetailResp DTO 验证 ===
         File getDetailRespFile = new File(basedir, "src/main/java/com/example/dto/resp/GetProductDetailResp.java");

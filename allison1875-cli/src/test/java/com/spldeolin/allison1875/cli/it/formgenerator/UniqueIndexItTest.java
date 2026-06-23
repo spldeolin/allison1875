@@ -65,14 +65,14 @@ public class UniqueIndexItTest extends FormGeneratorItBaseTest {
         assertTrue(xmlContent.contains("email = #{email}"),
                 "queryByEmail XML should use 'email = #{email}' exact match");
 
-        // === Save ServiceImpl 验证：编辑分支使用 queryByUserCode ===
-        File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveUser2ServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveUser2ServiceImpl should be generated");
-        String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
+        // === Update ServiceImpl 验证：使用 queryByUser2Code ===
+        File updateServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/UpdateUser2ServiceImpl.java");
+        assertTrue(updateServiceImplFile.exists(), "UpdateUser2ServiceImpl should be generated");
+        String updateServiceImplContent = new String(Files.readAllBytes(updateServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(saveServiceImplContent.contains("user2Mapper.queryByUser2Code("),
-                "Save service edit branch should call userMapper.queryByUserCode");
+        assertTrue(updateServiceImplContent.contains("user2Mapper.queryByUser2Code("),
+                "Update service should call user2Mapper.queryByUser2Code");
 
         // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");

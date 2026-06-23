@@ -65,24 +65,24 @@ public class NumberItemItTest extends FormGeneratorItBaseTest {
         // sortOrder → Long
         assertTrue(entityContent.contains("Long sortOrder"), "Entity should contain Long sortOrder field");
 
-        // === SaveReq DTO 验证 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveProductReq.java");
-        assertTrue(saveReqFile.exists(), "SaveProductReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveProductReq"), "Should contain class SaveProductReq");
+        // === CreateReq DTO 验证 ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateProductReq.java");
+        assertTrue(createReqFile.exists(), "CreateProductReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateProductReq"), "Should contain class CreateProductReq");
         // price: BigDecimal, isNonVoid=true → @NotNull
-        assertTrue(saveReqContent.contains("BigDecimal price"),
-                "SaveReq should contain BigDecimal price field");
-        assertTrue(saveReqContent.contains("@NotNull") || saveReqContent.contains("@javax.validation.constraints.NotNull"),
+        assertTrue(createReqContent.contains("BigDecimal price"),
+                "CreateReq should contain BigDecimal price field");
+        assertTrue(createReqContent.contains("@NotNull") || createReqContent.contains("@javax.validation.constraints.NotNull"),
                 "price with isNonVoid=true should have @NotNull");
         // stock: Long, isNonVoid=true → @NotNull
-        assertTrue(saveReqContent.contains("Long stock"), "SaveReq should contain Long stock field");
+        assertTrue(createReqContent.contains("Long stock"), "CreateReq should contain Long stock field");
         // discount: BigDecimal, isNonVoid=false → no @NotNull on field itself (but check field exists)
-        assertTrue(saveReqContent.contains("BigDecimal discount"),
-                "SaveReq should contain BigDecimal discount field");
+        assertTrue(createReqContent.contains("BigDecimal discount"),
+                "CreateReq should contain BigDecimal discount field");
         // sortOrder: Long, isNonVoid=false
-        assertTrue(saveReqContent.contains("Long sortOrder"),
-                "SaveReq should contain Long sortOrder field");
+        assertTrue(createReqContent.contains("Long sortOrder"),
+                "CreateReq should contain Long sortOrder field");
 
         // === ListReq DTO 验证 ===
         File listReqFile = new File(basedir, "src/main/java/com/example/dto/req/ListProductsReq.java");

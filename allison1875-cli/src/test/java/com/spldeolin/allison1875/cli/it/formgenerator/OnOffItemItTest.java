@@ -45,28 +45,28 @@ public class OnOffItemItTest extends FormGeneratorItBaseTest {
         assertTrue(entityContent.contains("Boolean isEnabled"),
                 "Entity should contain Boolean isEnabled field");
 
-        // === SaveReq DTO 验证 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveFeatureReq.java");
-        assertTrue(saveReqFile.exists(), "SaveFeatureReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveFeatureReq"), "Should contain class SaveFeatureReq");
+        // === CreateReq DTO 验证 ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateFeatureReq.java");
+        assertTrue(createReqFile.exists(), "CreateFeatureReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateFeatureReq"), "Should contain class CreateFeatureReq");
         // onOff 字段类型为 Boolean
-        assertTrue(saveReqContent.contains("Boolean isEnabled"),
-                "SaveReq should contain Boolean isEnabled");
+        assertTrue(createReqContent.contains("Boolean isEnabled"),
+                "CreateReq should contain Boolean isEnabled");
         // isNonVoid=true → @NotNull
         assertTrue(
-                saveReqContent.contains("@NotNull")
-                        || saveReqContent.contains("@javax.validation.constraints.NotNull"),
+                createReqContent.contains("@NotNull")
+                        || createReqContent.contains("@javax.validation.constraints.NotNull"),
                 "nonVoid onOff field should have @NotNull");
 
-        // === Save ServiceImpl 验证 ===
-        File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveFeatureServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveFeatureServiceImpl should be generated");
-        String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
+        // === Create ServiceImpl 验证 ===
+        File createServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/CreateFeatureServiceImpl.java");
+        assertTrue(createServiceImplFile.exists(), "CreateFeatureServiceImpl should be generated");
+        String createServiceImplContent = new String(Files.readAllBytes(createServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(saveServiceImplContent.contains("feature.setIsEnabled(req.getIsEnabled())"),
-                "Save service should set isEnabled from req");
+        assertTrue(createServiceImplContent.contains("feature.setIsEnabled(req.getIsEnabled())"),
+                "Create service should set isEnabled from req");
 
         // === GetDetailResp DTO 验证 ===
         File getDetailRespFile = new File(basedir,

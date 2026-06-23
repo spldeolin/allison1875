@@ -117,7 +117,7 @@ public class CreateApiServiceImpl implements CreateApiService {
         if (form.getIndices() != null) {
             for (IndexDef index : form.getIndices()) {
                 if (Boolean.TRUE.equals(index.getIsUnique()) && mutationApiSupport.allCanInput(form, index, true)) {
-                    mutationApiSupport.generateCheckExistStatement(form, index).forEach(body::addStatement);
+                    mutationApiSupport.generateCheckExistStatement(form, index, false).forEach(body::addStatement);
                 }
             }
         }

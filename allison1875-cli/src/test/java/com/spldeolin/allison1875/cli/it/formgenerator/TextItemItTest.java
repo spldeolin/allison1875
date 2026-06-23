@@ -64,19 +64,19 @@ public class TextItemItTest extends FormGeneratorItBaseTest {
         assertTrue(entityContent.contains("noteContent"), "Entity should contain noteContent field");
         assertTrue(entityContent.contains("noteTag"), "Entity should contain noteTag field");
 
-        // === SaveReq DTO 验证 ===
-        File saveReqFile = new File(basedir, "src/main/java/com/example/dto/req/SaveNoteReq.java");
-        assertTrue(saveReqFile.exists(), "SaveNoteReq DTO should be generated");
-        String saveReqContent = new String(Files.readAllBytes(saveReqFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(saveReqContent.contains("class SaveNoteReq"), "Should contain class SaveNoteReq");
+        // === CreateReq DTO 验证 ===
+        File createReqFile = new File(basedir, "src/main/java/com/example/dto/req/CreateNoteReq.java");
+        assertTrue(createReqFile.exists(), "CreateNoteReq DTO should be generated");
+        String createReqContent = new String(Files.readAllBytes(createReqFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(createReqContent.contains("class CreateNoteReq"), "Should contain class CreateNoteReq");
         // noteTitle: isNonVoid=true → 应有 @NotBlank
-        assertTrue(saveReqContent.contains("noteTitle"), "SaveReq should contain noteTitle field");
-        assertTrue(saveReqContent.contains("@NotBlank") || saveReqContent.contains("@javax.validation.constraints.NotBlank"),
+        assertTrue(createReqContent.contains("noteTitle"), "CreateReq should contain noteTitle field");
+        assertTrue(createReqContent.contains("@NotBlank") || createReqContent.contains("@javax.validation.constraints.NotBlank"),
                 "noteTitle with isNonVoid=true should have @NotBlank");
         // noteContent: isNonVoid=false → 不应有 @NotBlank，但有 @Size
-        assertTrue(saveReqContent.contains("noteContent"), "SaveReq should contain noteContent field");
+        assertTrue(createReqContent.contains("noteContent"), "CreateReq should contain noteContent field");
         // @Size annotation exists
-        assertTrue(saveReqContent.contains("@Size") || saveReqContent.contains("@javax.validation.constraints.Size"),
+        assertTrue(createReqContent.contains("@Size") || createReqContent.contains("@javax.validation.constraints.Size"),
                 "Text fields should have @Size annotation");
 
         // === ListReq DTO 验证 ===

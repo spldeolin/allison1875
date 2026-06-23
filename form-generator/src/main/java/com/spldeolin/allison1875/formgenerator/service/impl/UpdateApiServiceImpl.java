@@ -67,9 +67,7 @@ public class UpdateApiServiceImpl implements UpdateApiService {
         }
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
 
-        // resp declaration: EMPTY (signals void method to handler-transformer)
-        ClassOrInterfaceDeclaration respCoid = new ClassOrInterfaceDeclaration().setName("resp");
-        bs.addStatement(new LocalClassDeclarationStmt(respCoid));
+        // No resp declaration — absence of resp signals void method to handler-transformer
         return new InitializerDeclaration(false, bs);
     }
 
@@ -106,7 +104,7 @@ public class UpdateApiServiceImpl implements UpdateApiService {
         if (form.getIndices() != null) {
             for (IndexDef index : form.getIndices()) {
                 if (Boolean.TRUE.equals(index.getIsUnique()) && mutationApiSupport.allCanInput(form, index, false)) {
-                    mutationApiSupport.generateCheckExistStatement(form, index).forEach(body::addStatement);
+                    mutationApiSupport.generateCheckExistStatement(form, index, true).forEach(body::addStatement);
                 }
             }
         }

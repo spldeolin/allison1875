@@ -73,14 +73,14 @@ public class CompositeIndexItTest extends FormGeneratorItBaseTest {
         assertTrue(xmlContent.contains("customer_id = #{customerId}"),
                 "queryByOrderNoCustomerId XML should match customer_id");
 
-        // === Save ServiceImpl 验证：编辑分支仍用 bizId 查询（不依赖联合索引） ===
-        File saveServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveOrderServiceImpl.java");
-        assertTrue(saveServiceImplFile.exists(), "SaveOrderServiceImpl should be generated");
-        String saveServiceImplContent = new String(Files.readAllBytes(saveServiceImplFile.toPath()),
+        // === Update ServiceImpl 验证：使用 bizId 查询（不依赖联合索引） ===
+        File updateServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/UpdateOrderServiceImpl.java");
+        assertTrue(updateServiceImplFile.exists(), "UpdateOrderServiceImpl should be generated");
+        String updateServiceImplContent = new String(Files.readAllBytes(updateServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(saveServiceImplContent.contains("orderMapper.queryByOrderCode("),
-                "Save service edit branch should use bizId query (not composite index)");
+        assertTrue(updateServiceImplContent.contains("orderMapper.queryByOrderCode("),
+                "Update service should use bizId query (not composite index)");
 
         // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");

@@ -127,8 +127,10 @@ public class MultiFormItTest extends FormGeneratorItBaseTest {
                 "AuthorController @RequestMapping should use '/api/v1/author'");
 
         // === Service 验证：Book ===
-        File saveBookServiceFile = new File(basedir, "src/main/java/com/example/service/SaveBookService.java");
-        assertTrue(saveBookServiceFile.exists(), "SaveBookService interface should be generated");
+        File createBookServiceFile = new File(basedir, "src/main/java/com/example/service/CreateBookService.java");
+        assertTrue(createBookServiceFile.exists(), "CreateBookService interface should be generated");
+        File updateBookServiceFile = new File(basedir, "src/main/java/com/example/service/UpdateBookService.java");
+        assertTrue(updateBookServiceFile.exists(), "UpdateBookService interface should be generated");
         File listBooksServiceFile = new File(basedir, "src/main/java/com/example/service/ListBooksService.java");
         assertTrue(listBooksServiceFile.exists(), "ListBooksService interface should be generated");
         File getBookDetailServiceFile = new File(basedir,
@@ -138,60 +140,64 @@ public class MultiFormItTest extends FormGeneratorItBaseTest {
         assertTrue(deleteBookServiceFile.exists(), "DeleteBookService interface should be generated");
 
         // === ServiceImpl 验证：Book ===
-        File saveBookServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveBookServiceImpl.java");
-        assertTrue(saveBookServiceImplFile.exists(), "SaveBookServiceImpl file should be generated");
-        String saveBookServiceImplContent = Files.readString(saveBookServiceImplFile.toPath());
-        assertTrue(saveBookServiceImplContent.contains("class SaveBookServiceImpl"),
-                "Should declare class SaveBookServiceImpl");
-        assertTrue(saveBookServiceImplContent.contains("bookMapper.insert"),
-                "SaveBookServiceImpl should call bookMapper.insert");
+        File createBookServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/CreateBookServiceImpl.java");
+        assertTrue(createBookServiceImplFile.exists(), "CreateBookServiceImpl file should be generated");
+        String createBookServiceImplContent = Files.readString(createBookServiceImplFile.toPath());
+        assertTrue(createBookServiceImplContent.contains("class CreateBookServiceImpl"),
+                "Should declare class CreateBookServiceImpl");
+        assertTrue(createBookServiceImplContent.contains("bookMapper.insert"),
+                "CreateBookServiceImpl should call bookMapper.insert");
         // 不引用 Author
-        assertFalse(saveBookServiceImplContent.contains("authorMapper"),
-                "SaveBookServiceImpl should NOT reference authorMapper");
-        assertFalse(saveBookServiceImplContent.contains("AuthorEntity"),
-                "SaveBookServiceImpl should NOT reference AuthorEntity");
+        assertFalse(createBookServiceImplContent.contains("authorMapper"),
+                "CreateBookServiceImpl should NOT reference authorMapper");
+        assertFalse(createBookServiceImplContent.contains("AuthorEntity"),
+                "CreateBookServiceImpl should NOT reference AuthorEntity");
 
         // === ServiceImpl 验证：Author ===
-        File saveAuthorServiceImplFile = new File(basedir,
-                "src/main/java/com/example/service/impl/SaveAuthorServiceImpl.java");
-        assertTrue(saveAuthorServiceImplFile.exists(), "SaveAuthorServiceImpl file should be generated");
-        String saveAuthorServiceImplContent = Files.readString(saveAuthorServiceImplFile.toPath());
-        assertTrue(saveAuthorServiceImplContent.contains("class SaveAuthorServiceImpl"),
-                "Should declare class SaveAuthorServiceImpl");
-        assertTrue(saveAuthorServiceImplContent.contains("authorMapper.insert"),
-                "SaveAuthorServiceImpl should call authorMapper.insert");
-        // Author Save 应该包含 nationality 枚举的 .getCode() 转换（枚举 → String 存入 Entity）
-        assertTrue(saveAuthorServiceImplContent.contains("req.getNationality().getCode()"),
-                "SaveAuthorServiceImpl should call req.getNationality().getCode()");
+        File createAuthorServiceImplFile = new File(basedir,
+                "src/main/java/com/example/service/impl/CreateAuthorServiceImpl.java");
+        assertTrue(createAuthorServiceImplFile.exists(), "CreateAuthorServiceImpl file should be generated");
+        String createAuthorServiceImplContent = Files.readString(createAuthorServiceImplFile.toPath());
+        assertTrue(createAuthorServiceImplContent.contains("class CreateAuthorServiceImpl"),
+                "Should declare class CreateAuthorServiceImpl");
+        assertTrue(createAuthorServiceImplContent.contains("authorMapper.insert"),
+                "CreateAuthorServiceImpl should call authorMapper.insert");
+        // Author Create 应该包含 nationality 枚举的 .getCode() 转换（枚举 → String 存入 Entity）
+        assertTrue(createAuthorServiceImplContent.contains("req.getNationality().getCode()"),
+                "CreateAuthorServiceImpl should call req.getNationality().getCode()");
 
         // === DTO 验证：Book ===
-        assertTrue(new File(basedir, "src/main/java/com/example/dto/req/SaveBookReq.java").exists(),
-                "SaveBookReq should be generated");
+        assertTrue(new File(basedir, "src/main/java/com/example/dto/req/CreateBookReq.java").exists(),
+                "CreateBookReq should be generated");
+        assertTrue(new File(basedir, "src/main/java/com/example/dto/req/UpdateBookReq.java").exists(),
+                "UpdateBookReq should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/req/ListBooksReq.java").exists(),
                 "ListBooksReq should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/req/GetBookDetailReq.java").exists(),
                 "GetBookDetailReq should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/req/DeleteBookReq.java").exists(),
                 "DeleteBookReq should be generated");
-        assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/SaveBookResp.java").exists(),
-                "SaveBookResp should be generated");
+        assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/CreateBookResp.java").exists(),
+                "CreateBookResp should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/ListBooksResp.java").exists(),
                 "ListBooksResp should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/GetBookDetailResp.java").exists(),
                 "GetBookDetailResp should be generated");
 
         // === DTO 验证：Author ===
-        assertTrue(new File(basedir, "src/main/java/com/example/dto/req/SaveAuthorReq.java").exists(),
-                "SaveAuthorReq should be generated");
+        assertTrue(new File(basedir, "src/main/java/com/example/dto/req/CreateAuthorReq.java").exists(),
+                "CreateAuthorReq should be generated");
+        assertTrue(new File(basedir, "src/main/java/com/example/dto/req/UpdateAuthorReq.java").exists(),
+                "UpdateAuthorReq should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/req/ListAuthorsReq.java").exists(),
                 "ListAuthorsReq should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/req/GetAuthorDetailReq.java").exists(),
                 "GetAuthorDetailReq should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/req/DeleteAuthorReq.java").exists(),
                 "DeleteAuthorReq should be generated");
-        assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/SaveAuthorResp.java").exists(),
-                "SaveAuthorResp should be generated");
+        assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/CreateAuthorResp.java").exists(),
+                "CreateAuthorResp should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/ListAuthorsResp.java").exists(),
                 "ListAuthorsResp should be generated");
         assertTrue(new File(basedir, "src/main/java/com/example/dto/resp/GetAuthorDetailResp.java").exists(),
