@@ -64,10 +64,12 @@ public class ControllerAuthAnnotateServiceImpl implements ControllerAuthAnnotate
             }
 
             // Insert @WebApiAuth before @PostMapping lines
-            if (line.contains("@PostMapping(\"save")) {
+            if (line.contains("@PostMapping(\"create")) {
                 String indent = extractIndent(line);
-                result.add(indent + "@WebApiAuth({PermissionEnum.CREATE_" + upperSnake + ", PermissionEnum.UPDATE_"
-                        + upperSnake + "})");
+                result.add(indent + "@WebApiAuth(PermissionEnum.CREATE_" + upperSnake + ")");
+            } else if (line.contains("@PostMapping(\"update")) {
+                String indent = extractIndent(line);
+                result.add(indent + "@WebApiAuth(PermissionEnum.UPDATE_" + upperSnake + ")");
             } else if (line.contains("@PostMapping(\"list")) {
                 String indent = extractIndent(line);
                 result.add(indent + "@WebApiAuth(PermissionEnum.LIST_" + upperSnake + ")");

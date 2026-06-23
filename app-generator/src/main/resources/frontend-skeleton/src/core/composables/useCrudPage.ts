@@ -4,7 +4,7 @@ import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
 import request from '@/utils/request'
 import { endpointOf } from '../protocol/endpoints'
-import { buildListRequest, buildSaveRequest } from '../protocol/request-builder'
+import { buildListRequest, buildCreateRequest, buildUpdateRequest } from '../protocol/request-builder'
 import { parseListRow, parseDetailDto } from '../protocol/response-parser'
 
 /**
@@ -140,11 +140,16 @@ export function useCrudPage(getSchema: () => FormDef) {
     const schema = getSchema()
     submitLoading.value = true
     try {
-      const reqBody = buildSaveRequest(schema.items, formData.value, modalMode.value)
-      if (modalMode.value === 'edit') {
-        reqBody[bizKey.value] = formData.value[bizKey.value]
+      let reqBody: Record<string, unknown>
+      let endpoint: string
+      if (modalMode.value === 'create') {
+        reqBody = buildCreateRequest(schema.items, formData.value)
+        endpoint = endpointOf(schema.name, 'create')
+      } else {
+        reqBody = buildUpdateRequest(schema.items, formData.value, bizKey.value)
+        endpoint = endpointOf(schema.name, 'update')
       }
-      await request.post(endpointOf(schema.name, 'save'), reqBody)
+      await request.post(endpoint, reqBody)
       message.success(modalMode.value === 'create' ? '创建成功' : '更新成功')
       modalVisible.value = false
       fetchData()

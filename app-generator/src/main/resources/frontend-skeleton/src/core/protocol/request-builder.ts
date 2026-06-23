@@ -77,19 +77,26 @@ function buildDateRange(
 }
 
 
-export function buildSaveRequest(
+export function buildCreateRequest(
   items: ItemDef[],
   formState: Record<string, unknown>,
-  mode: 'create' | 'edit'
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {}
   for (const item of items) {
-    // canInputOnInit/canInputOnEdit default to true when absent (backwards-compatible)
-    const canInput = mode === 'create'
-      ? (item.canInputOnInit !== false)
-      : (item.canInputOnEdit !== false)
-    // If user cannot input in this mode, do not transmit the field
-    if (!canInput) continue
+    if (item.canInputOnInit === false) continue
+    out[item.name] = formState[item.name] ?? null
+  }
+  return out
+}
+
+export function buildUpdateRequest(
+  items: ItemDef[],
+  formState: Record<string, unknown>,
+  bizKey: string,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { [bizKey]: formState[bizKey] }
+  for (const item of items) {
+    if (item.canInputOnEdit === false) continue
     out[item.name] = formState[item.name] ?? null
   }
   return out
