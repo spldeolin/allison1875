@@ -34,12 +34,13 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.SpecialItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
+import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.EnumService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
-import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
+import com.spldeolin.allison1875.formgenerator.service.UpdateApiService;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.querytransformer.QueryTransformer;
@@ -86,7 +87,10 @@ public class FormGenerator implements Allison1875Game {
     private ListApiService listApiService;
 
     @Inject
-    private SaveApiService saveApiService;
+    private CreateApiService createApiService;
+
+    @Inject
+    private UpdateApiService updateApiService;
 
     public void play() {
         List<FormDef> forms = deserializeDSL();
@@ -147,7 +151,8 @@ public class FormGenerator implements Allison1875Game {
                     config.getCodeSnippet().getControllerRequestMapping().replace("${formName}", form.getVarName())));
             coid.setPublic(true).setName(controllerName);
             cu.addType(coid);
-            coid.addMember(saveApiService.generateSaveInitDec(form));
+            coid.addMember(createApiService.generateCreateInitDec(form));
+            coid.addMember(updateApiService.generateUpdateInitDec(form));
             coid.addMember(listApiService.generateListInitDec(form));
             coid.addMember(getDetailApiService.generateGetDetailInitDec(form));
             coid.addMember(deleteApiService.generateDeleteInitDec(form));

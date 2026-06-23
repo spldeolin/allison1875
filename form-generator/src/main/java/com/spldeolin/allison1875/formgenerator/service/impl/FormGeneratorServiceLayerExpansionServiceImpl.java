@@ -1,8 +1,9 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
+import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.CREATE;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.DELETE;
-import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.SAVE;
+import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.UPDATE;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,10 +25,11 @@ import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
+import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
-import com.spldeolin.allison1875.formgenerator.service.SaveApiService;
+import com.spldeolin.allison1875.formgenerator.service.UpdateApiService;
 import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
@@ -56,14 +58,17 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
     private ListApiService listApiService;
 
     @Inject
-    private SaveApiService saveApiService;
+    private CreateApiService createApiService;
+
+    @Inject
+    private UpdateApiService updateApiService;
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
 
     @Override
     public List<AnnotationExpr> buildAnnotationsFormServiceImplMethod(InitDecAnalysisDTO initDecAnalysis) {
-        if (Lists.newArrayList(SAVE, DELETE).contains(ApiType.of(initDecAnalysis.getExpansion().get("type")))) {
+        if (Lists.newArrayList(CREATE, UPDATE, DELETE).contains(ApiType.of(initDecAnalysis.getExpansion().get("type")))) {
             return Lists.newArrayList(annotationExprService.springTransactional());
         }
         return Collections.emptyList();
@@ -79,8 +84,11 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
         // 生成业务实现代码
         BlockStmt body;
         switch (ApiType.of(initDecAnalysis.getExpansion().get("type"))) {
-            case SAVE:
-                body = saveApiService.generateMethodBody(form);
+            case CREATE:
+                body = createApiService.generateCreateMethodBody(form);
+                break;
+            case UPDATE:
+                body = updateApiService.generateUpdateMethodBody(form);
                 break;
             case LIST:
                 body = listApiService.generateMethodBody(form);

@@ -21,6 +21,7 @@ import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.property.AuthcProperties;
 import __NAMESPACE__.service.AuthcService;
 import __NAMESPACE__.util.SecretKeyUtils;
+import __NAMESPACE__.util.UuidUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -112,7 +113,7 @@ public class AuthcServiceImpl implements AuthcService {
         }
 
         // 生成新 token 并持久化
-        String token = SecretKeyUtils.generateUrlSafeKey(32);
+        String token = SecretKeyUtils.generateUrlSafeKey(32) + UuidUtils.generateShort();
         user.setCurrentToken(token);
         user.setLastLoginAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());

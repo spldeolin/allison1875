@@ -13,7 +13,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ApiType {
 
-    SAVE("save"),
+    CREATE("create"),
+
+    UPDATE("update"),
 
     LIST("list"),
 
