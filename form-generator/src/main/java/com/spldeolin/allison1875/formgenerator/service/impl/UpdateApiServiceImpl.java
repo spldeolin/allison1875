@@ -21,6 +21,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import com.spldeolin.allison1875.formgenerator.service.MutationApiService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import com.spldeolin.allison1875.formgenerator.service.UpdateApiService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,9 @@ public class UpdateApiServiceImpl implements UpdateApiService {
 
     @Inject
     private MutationApiService mutationApiSupport;
+
+    @Inject
+    private MutationExpansionService mutationExpansionService;
 
     @Override
     public InitializerDeclaration generateUpdateInitDec(FormDef form) {
@@ -111,6 +115,9 @@ public class UpdateApiServiceImpl implements UpdateApiService {
 
         // 5. Set updatedAt
         mutationApiSupport.generateSetUpdatedAt(form, body);
+
+        // 5.5. Expansion hook
+        mutationExpansionService.expandUpdateMethodBody(form, body);
 
         // 6. Update by ID
         body.addStatement(parseStatement("%sMapper.updateById(%s);", form.getVarName(), form.getVarName()));

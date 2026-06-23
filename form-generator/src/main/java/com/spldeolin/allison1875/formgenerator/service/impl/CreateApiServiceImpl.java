@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import com.spldeolin.allison1875.formgenerator.service.MutationApiService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,6 +40,9 @@ public class CreateApiServiceImpl implements CreateApiService {
 
     @Inject
     private MutationApiService mutationApiSupport;
+
+    @Inject
+    private MutationExpansionService mutationExpansionService;
 
     @Override
     public InitializerDeclaration generateCreateInitDec(FormDef form) {
@@ -112,6 +116,9 @@ public class CreateApiServiceImpl implements CreateApiService {
 
         // 5. Set createdAt
         body.addStatement(parseStatement("%s.setCreatedAt(LocalDateTime.now());", form.getVarName()));
+
+        // 5.5. Expansion hook
+        mutationExpansionService.expandCreateMethodBody(form, body);
 
         // 6. Unique index check: for indices where allCanInput(form, index, true) is true
         if (form.getIndices() != null) {

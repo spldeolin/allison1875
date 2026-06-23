@@ -33,6 +33,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,6 +54,9 @@ public class ListApiServiceImpl implements ListApiService {
 
     @Inject
     private TimeItemService timeItemService;
+
+    @Inject
+    private MutationExpansionService mutationExpansionService;
 
     @Override
     public InitializerDeclaration generateListInitDec(FormDef form) {
@@ -206,6 +210,7 @@ public class ListApiServiceImpl implements ListApiService {
             }
             generatorSetterToGetter(form, item, forEachBody);
         }
+        mutationExpansionService.expandListSetterStatements(form, forEachBody, form.getVarName());
         forEachBody.addStatement("dtos.add(dto);");
         forEachStmt.setBody(forEachBody);
         body.addStatement(forEachStmt);
