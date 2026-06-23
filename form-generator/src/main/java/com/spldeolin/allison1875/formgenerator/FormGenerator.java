@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.javaparser.ast.CompilationUnit;
@@ -28,11 +27,9 @@ import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
-import com.spldeolin.allison1875.formgenerator.dsl.IndexDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
-import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
-import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
+import com.spldeolin.allison1875.formgenerator.service.CommonItemsExpansionService;
 import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
@@ -91,6 +88,9 @@ public class FormGenerator implements Allison1875Game {
     @Inject
     private UpdateApiService updateApiService;
 
+    @Inject
+    private CommonItemsExpansionService commonItemsExpansionService;
+
     public void play() {
         List<FormDef> forms = deserializeDSL();
         if (CollectionUtils.isEmpty(forms)) {
@@ -99,7 +99,7 @@ public class FormGenerator implements Allison1875Game {
         }
 
         // 为每个Form增加业务主键、审计字段等
-        addCommonItems(forms);
+        commonItemsExpansionService.addCommonItems(forms);
 
         // 生成DDL
         String ddl = ddlService.generateDdl(forms);
@@ -172,43 +172,6 @@ public class FormGenerator implements Allison1875Game {
         // 调用doc-analyzer分析接口文档
         config.setMvcHandlerQualifierWildcards(controllerQualifiers);
         docAnalyzer.play();
-    }
-
-    private void addCommonItems(List<FormDef> forms) {
-        for (FormDef form : forms) {
-            TextItemDef bizId = new TextItemDef();
-            bizId.setName(StringUtils.uncapitalize(form.getName()) + "Code");
-            bizId.setTitle("业务主键");
-            bizId.setIsNonVoid(true);
-            bizId.setCanInputOnInit(false);
-            bizId.setCanInputOnEdit(false);
-            bizId.setIsBuiltinField(true);
-            bizId.setMaxLength(36);
-            form.getItems().add(0, bizId);
-            TimeItemDef createdAt = new TimeItemDef();
-            createdAt.setName("createdAt");
-            createdAt.setTitle("创建时间");
-            createdAt.setIsNonVoid(true);
-            createdAt.setCanInputOnInit(false);
-            createdAt.setCanInputOnEdit(false);
-            createdAt.setIsBuiltinField(true);
-            form.getItems().add(createdAt);
-            TimeItemDef updatedAt = new TimeItemDef();
-            updatedAt.setName("updatedAt");
-            updatedAt.setTitle("更新时间");
-            updatedAt.setIsNonVoid(true);
-            updatedAt.setCanInputOnInit(false);
-            updatedAt.setCanInputOnEdit(false);
-            updatedAt.setIsBuiltinField(true);
-            form.getItems().add(updatedAt);
-            IndexDef index = new IndexDef();
-            index.setItemNames(Lists.newArrayList(bizId.getName()));
-            index.setIsUnique(true);
-            if (form.getIndices() == null) {
-                form.setIndices(Lists.newArrayList());
-            }
-            form.getIndices().addFirst(index);
-        }
     }
 
     private boolean hasSelectItem(FormDef form) {
