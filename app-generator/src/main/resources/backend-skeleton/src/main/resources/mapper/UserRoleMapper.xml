@@ -8,10 +8,11 @@
         <result column="user_id" property="userId"/>
         <result column="role_id" property="roleId"/>
         <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
     </resultMap>
 
     <sql id="all">
-        id, user_id, role_id, created_at
+        id, user_id, role_id, created_at, created_by
     </sql>
 
     <insert id="insert" parameterType="__NAMESPACE__.entity.UserRoleEntity" useGeneratedKeys="true" keyProperty="id">
@@ -21,12 +22,14 @@
             <if test="userId!=null">user_id,</if>
             <if test="roleId!=null">role_id,</if>
             <if test="createdAt!=null">created_at,</if>
+            <if test="createdBy!=null">created_by,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="id!=null">#{id},</if>
             <if test="userId!=null">#{userId},</if>
             <if test="roleId!=null">#{roleId},</if>
             <if test="createdAt!=null">#{createdAt},</if>
+            <if test="createdBy!=null">#{createdBy},</if>
         </trim>
     </insert>
 
@@ -38,12 +41,14 @@
                 <if test="one.userId!=null">user_id,</if>
                 <if test="one.roleId!=null">role_id,</if>
                 <if test="one.createdAt!=null">created_at,</if>
+                <if test="one.createdBy!=null">created_by,</if>
             </trim>
             <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
                 <if test="one.id!=null">#{one.id},</if>
                 <if test="one.userId!=null">#{one.userId},</if>
                 <if test="one.roleId!=null">#{one.roleId},</if>
                 <if test="one.createdAt!=null">#{one.createdAt},</if>
+                <if test="one.createdBy!=null">#{one.createdBy},</if>
             </trim>
         </foreach>
         ;
@@ -56,7 +61,7 @@
         )
         VALUES
         <foreach collection="entities" item="one" separator=",">(
-            #{one.id}, #{one.userId}, #{one.roleId}, #{one.createdAt}
+            #{one.id}, #{one.userId}, #{one.roleId}, #{one.createdAt}, #{one.createdBy}
             )
         </foreach>
     </insert>
@@ -67,6 +72,7 @@
             <if test="userId!=null">user_id = #{userId},</if>
             <if test="roleId!=null">role_id = #{roleId},</if>
             <if test="createdAt!=null">created_at = #{createdAt},</if>
+            <if test="createdBy!=null">created_by = #{createdBy},</if>
         </set>
         <where>
             AND id = #{id}
@@ -147,7 +153,7 @@
     </select>
 
     <select id="queryByUserIds" resultMap="all">
-        SELECT id, user_id, role_id, created_at
+        SELECT id, user_id, role_id, created_at, created_by
         FROM user_role
         WHERE user_id IN (<foreach collection="userIds" item="one" separator=",">#{one}</foreach>)
     </select>

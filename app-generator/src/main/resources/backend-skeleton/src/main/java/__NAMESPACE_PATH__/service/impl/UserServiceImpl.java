@@ -33,7 +33,7 @@ import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.mapper.UserMapper;
 import __NAMESPACE__.mapper.UserRoleMapper;
 import __NAMESPACE__.service.UserService;
-import __NAMESPACE__.task.PermissionSystemInitializer;
+import __NAMESPACE__.task.UserPermissionInitializer;
 import __NAMESPACE__.util.UuidUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -105,7 +105,9 @@ public class UserServiceImpl implements UserService {
             dto.setNickName(user.getNickName());
             dto.setLastLoginAt(user.getLastLoginAt());
             dto.setCreatedAt(user.getCreatedAt());
+            dto.setCreatedBy(user.getCreatedBy());
             dto.setUpdatedAt(user.getUpdatedAt());
+            dto.setUpdatedBy(user.getUpdatedBy());
             dtos.add(dto);
         }
         // Enrich with granted roles and permissions
@@ -184,7 +186,7 @@ public class UserServiceImpl implements UserService {
         if (toCreate) {
             userMapper.insert(user);
             // Auto-assign default role (观察员) to new users
-            RoleEntity defaultRole = roleMapper.queryByRoleName(PermissionSystemInitializer.getDefaultRoleName());
+            RoleEntity defaultRole = roleMapper.queryByRoleName(UserPermissionInitializer.getDefaultRoleName());
             if (defaultRole != null) {
                 UserRoleEntity userRole = new UserRoleEntity();
                 userRole.setUserId(user.getId());

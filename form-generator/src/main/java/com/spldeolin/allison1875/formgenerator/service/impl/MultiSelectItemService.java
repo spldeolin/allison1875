@@ -22,6 +22,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.SelectItemDef;
+import com.spldeolin.allison1875.formgenerator.dsl.item.TextItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 
@@ -117,6 +118,17 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
         createdAt.setCanInputOnInit(false);
         createdAt.setCanInputOnEdit(false);
         items.add(createdAt);
+        if (hasCreatedBy(majorForm)) {
+            TextItemDef createdBy = new TextItemDef();
+            createdBy.setName("createdBy");
+            createdBy.setTitle("创建人");
+            createdBy.setIsNonVoid(true);
+            createdBy.setCanInputOnInit(false);
+            createdBy.setCanInputOnEdit(false);
+            createdBy.setIsBuiltinField(true);
+            createdBy.setMaxLength(32);
+            items.add(createdBy);
+        }
         form.setItems(items);
         List<IndexDef> indices = Lists.newArrayList();
         IndexDef index = new IndexDef();
@@ -129,6 +141,10 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
         indices.add(index);
         form.setIndices(indices);
         return form;
+    }
+
+    private boolean hasCreatedBy(FormDef form) {
+        return form.getItems().stream().anyMatch(item -> "createdBy".equals(item.getName()));
     }
 
 }

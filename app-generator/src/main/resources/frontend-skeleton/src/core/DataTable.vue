@@ -2,10 +2,13 @@
 import { computed, h } from 'vue'
 import { NDataTable, NButton, NSpace, NPopconfirm, NTooltip } from 'naive-ui'
 import type { DataTableColumn, PaginationProps } from 'naive-ui'
-import type { ItemDef } from '@/schema/types'
+import type { ItemDef, AppDef } from '@/schema/types'
+import appDef from '@/app.json'
 import FieldRenderer from './fields/FieldRenderer.vue'
 import { isVisible } from './protocol/field-policy'
 import { checkPermission, getPermissionTitle } from '@/directives/usePermission'
+
+const hasUserForm = (appDef as AppDef).menus.some(m => m.form.name === 'User')
 
 const props = defineProps<{
   items: ItemDef[]
@@ -117,6 +120,15 @@ const columns = computed<DataTableColumn[]>(() => {
       return renderTimeCell(row.createdAt)
     }
   })
+  if (hasUserForm) {
+    cols.push({
+      title: '创建人',
+      key: 'createdBy',
+      width: 100,
+      resizable: true,
+      ellipsis: { tooltip: true },
+    })
+  }
   cols.push({
     title: '更新时间',
     key: 'updatedAt',
@@ -126,6 +138,15 @@ const columns = computed<DataTableColumn[]>(() => {
       return renderTimeCell(row.updatedAt)
     }
   })
+  if (hasUserForm) {
+    cols.push({
+      title: '最近更新人',
+      key: 'updatedBy',
+      width: 100,
+      resizable: true,
+      ellipsis: { tooltip: true },
+    })
+  }
 
   cols.push({
     title: '操作',
@@ -224,6 +245,7 @@ const scrollX = computed(() => {
   if (visibleCount > 0) width += 150 // first visible column (fixed left)
   if (visibleCount > 1) width += (visibleCount - 1) * 120
   width += 300 // createdAt + updatedAt
+  if (hasUserForm) width += 200 // createdBy + updatedBy
   width += 120 + (props.extraActions?.length ?? 0) * 80 // actions
   return width
 })

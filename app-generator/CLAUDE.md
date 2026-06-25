@@ -83,6 +83,15 @@ menus: # MenuDef 列表
 
 内置菜单 order 在合并时被覆盖为 `100000 + 原始 order`，确保排在用户定义菜单之后。
 
+### 创建人/更新人字段联动
+
+当 `builtin-form.yml` 包含 **User** 表单时，自动为每个表单启用创建人/更新人追踪：
+
+- **后端**：`AppGenerator.invokeFormGenerator()` 检测到 User 表单后，override `CommonItemsExpansionService`（为每个表单追加 `createdBy`/`updatedBy` 字段）和 `MutationExpansionService`（在 Create/Update 方法中生成 `CurrentUser.getUsername()` 赋值）
+- **前端**：`DataTable.vue` 从 `app.json` 检测是否存在 `form.name === 'User'` 的菜单，有则显示"创建人"和"最近更新人"列
+
+不含 User 表单时，两端均退化为标准行为（无 createdBy/updatedBy）。
+
 ## 功能权限体系
 
 生成的应用内置完整 RBAC：权限枚举生成 → 授权 API → 鉴权拦截。详见 `PERMISSION.md`。

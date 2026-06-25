@@ -27,7 +27,7 @@ import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.mapper.UserMapper;
 import __NAMESPACE__.mapper.UserRoleMapper;
 import __NAMESPACE__.property.AuthcProperties;
-import __NAMESPACE__.task.WebApiAuthRegistry;
+import __NAMESPACE__.task.UserPermissionInitializer;
 import __NAMESPACE__.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +57,7 @@ public class ApiAuthFilter extends OncePerRequestFilter {
     private RolePermissionMapper rolePermissionMapper;
 
     @Resource
-    private WebApiAuthRegistry webApiAuthRegistry;
+    private UserPermissionInitializer userPermissionInitializer;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -121,7 +121,7 @@ public class ApiAuthFilter extends OncePerRequestFilter {
                 log.debug("认证成功, currentUser={} requestPath={}", currentUser, requestPath);
 
                 // ==================== 鉴权 ====================
-                PermissionEnum[] requiredPermissions = webApiAuthRegistry.getRequiredPermissions(requestPath);
+                PermissionEnum[] requiredPermissions = userPermissionInitializer.getRequiredPermissions(requestPath);
                 if (requiredPermissions != null && requiredPermissions.length > 0) {
                     boolean hasAny = false;
                     for (PermissionEnum required : requiredPermissions) {

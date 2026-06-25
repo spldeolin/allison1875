@@ -9,11 +9,13 @@
         <result column="role_name" property="roleName"/>
         <result column="description" property="description"/>
         <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
     <sql id="all">
-        id, role_code, role_name, description, created_at, updated_at
+        id, role_code, role_name, description, created_at, created_by, updated_at, updated_by
     </sql>
 
     <insert id="insert" parameterType="__NAMESPACE__.entity.RoleEntity" useGeneratedKeys="true" keyProperty="id">
@@ -24,7 +26,9 @@
             <if test="roleName!=null"> role_name, </if>
             <if test="description!=null"> description, </if>
             <if test="createdAt!=null"> created_at, </if>
+            <if test="createdBy!=null"> created_by, </if>
             <if test="updatedAt!=null"> updated_at, </if>
+            <if test="updatedBy!=null"> updated_by, </if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="id!=null"> #{id}, </if>
@@ -32,7 +36,9 @@
             <if test="roleName!=null"> #{roleName}, </if>
             <if test="description!=null"> #{description}, </if>
             <if test="createdAt!=null"> #{createdAt}, </if>
+            <if test="createdBy!=null"> #{createdBy}, </if>
             <if test="updatedAt!=null"> #{updatedAt}, </if>
+            <if test="updatedBy!=null"> #{updatedBy}, </if>
         </trim>
     </insert>
 
@@ -45,7 +51,9 @@
                 <if test="one.roleName!=null"> role_name, </if>
                 <if test="one.description!=null"> description, </if>
                 <if test="one.createdAt!=null"> created_at, </if>
+                <if test="one.createdBy!=null"> created_by, </if>
                 <if test="one.updatedAt!=null"> updated_at, </if>
+                <if test="one.updatedBy!=null"> updated_by, </if>
             </trim>
             <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
                 <if test="one.id!=null"> #{one.id}, </if>
@@ -53,7 +61,9 @@
                 <if test="one.roleName!=null"> #{one.roleName}, </if>
                 <if test="one.description!=null"> #{one.description}, </if>
                 <if test="one.createdAt!=null"> #{one.createdAt}, </if>
+                <if test="one.createdBy!=null"> #{one.createdBy}, </if>
                 <if test="one.updatedAt!=null"> #{one.updatedAt}, </if>
+                <if test="one.updatedBy!=null"> #{one.updatedBy}, </if>
             </trim>
         </foreach>;
     </insert>
@@ -63,7 +73,7 @@
             ( <include refid="all"/> )
         VALUES
             <foreach collection="entities" item="one" separator=",">(
-                #{one.id}, #{one.roleCode}, #{one.roleName}, #{one.description}, #{one.createdAt}, #{one.updatedAt}
+                #{one.id}, #{one.roleCode}, #{one.roleName}, #{one.description}, #{one.createdAt}, #{one.createdBy}, #{one.updatedAt}, #{one.updatedBy}
             )</foreach>
     </insert>
 
@@ -74,7 +84,9 @@
             <if test="roleName!=null"> role_name = #{roleName}, </if>
             <if test="description!=null"> description = #{description}, </if>
             <if test="createdAt!=null"> created_at = #{createdAt}, </if>
+            <if test="createdBy!=null"> created_by = #{createdBy}, </if>
             <if test="updatedAt!=null"> updated_at = #{updatedAt}, </if>
+            <if test="updatedBy!=null"> updated_by = #{updatedBy}, </if>
         </set>
         <where>
             AND id = #{id}
@@ -88,7 +100,9 @@
             role_name = #{roleName},
             description = #{description},
             created_at = #{createdAt},
-            updated_at = #{updatedAt}
+            created_by = #{createdBy},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         <where>
             AND id = #{id}
         </where>

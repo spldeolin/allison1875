@@ -46,4 +46,11 @@ public class UserRoleEntity {
      * <p>默认：CURRENT_TIMESTAMP
      */
     LocalDateTime createdAt;
+
+    /**
+     * 创建人
+     * <p>created_by
+     * <p>长度：32
+     */
+    String createdBy;
 }

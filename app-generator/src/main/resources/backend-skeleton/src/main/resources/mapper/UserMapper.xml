@@ -12,11 +12,13 @@
         <result column="last_login_at" property="lastLoginAt"/>
         <result column="current_token" property="currentToken"/>
         <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
     <sql id="all">
-        id, user_code, username, password, nick_name, last_login_at, current_token, created_at, updated_at
+        id, user_code, username, password, nick_name, last_login_at, current_token, created_at, created_by, updated_at, updated_by
     </sql>
 
     <insert id="insert" parameterType="__NAMESPACE__.entity.UserEntity" useGeneratedKeys="true" keyProperty="id">
@@ -30,7 +32,9 @@
             <if test="lastLoginAt!=null">last_login_at,</if>
             <if test="currentToken!=null">current_token,</if>
             <if test="createdAt!=null">created_at,</if>
+            <if test="createdBy!=null">created_by,</if>
             <if test="updatedAt!=null">updated_at,</if>
+            <if test="updatedBy!=null">updated_by,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="id!=null">#{id},</if>
@@ -41,7 +45,9 @@
             <if test="lastLoginAt!=null">#{lastLoginAt},</if>
             <if test="currentToken!=null">#{currentToken},</if>
             <if test="createdAt!=null">#{createdAt},</if>
+            <if test="createdBy!=null">#{createdBy},</if>
             <if test="updatedAt!=null">#{updatedAt},</if>
+            <if test="updatedBy!=null">#{updatedBy},</if>
         </trim>
     </insert>
 
@@ -57,7 +63,9 @@
                 <if test="one.lastLoginAt!=null">last_login_at,</if>
                 <if test="one.currentToken!=null">current_token,</if>
                 <if test="one.createdAt!=null">created_at,</if>
+                <if test="one.createdBy!=null">created_by,</if>
                 <if test="one.updatedAt!=null">updated_at,</if>
+                <if test="one.updatedBy!=null">updated_by,</if>
             </trim>
             <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
                 <if test="one.id!=null">#{one.id},</if>
@@ -68,7 +76,9 @@
                 <if test="one.lastLoginAt!=null">#{one.lastLoginAt},</if>
                 <if test="one.currentToken!=null">#{one.currentToken},</if>
                 <if test="one.createdAt!=null">#{one.createdAt},</if>
+                <if test="one.createdBy!=null">#{one.createdBy},</if>
                 <if test="one.updatedAt!=null">#{one.updatedAt},</if>
+                <if test="one.updatedBy!=null">#{one.updatedBy},</if>
             </trim>
         </foreach>
         ;
@@ -82,7 +92,7 @@
         VALUES
         <foreach collection="entities" item="one" separator=",">(
             #{one.id}, #{one.userCode}, #{one.username}, #{one.password}, #{one.nickName}, #{one.lastLoginAt},
-            #{one.currentToken}, #{one.createdAt}, #{one.updatedAt}
+            #{one.currentToken}, #{one.createdAt}, #{one.createdBy}, #{one.updatedAt}, #{one.updatedBy}
             )
         </foreach>
     </insert>
@@ -97,7 +107,9 @@
             <if test="lastLoginAt!=null">last_login_at = #{lastLoginAt},</if>
             <if test="currentToken!=null">current_token = #{currentToken},</if>
             <if test="createdAt!=null">created_at = #{createdAt},</if>
+            <if test="createdBy!=null">created_by = #{createdBy},</if>
             <if test="updatedAt!=null">updated_at = #{updatedAt},</if>
+            <if test="updatedBy!=null">updated_by = #{updatedBy},</if>
         </set>
         <where>
             AND id = #{id}
@@ -114,7 +126,9 @@
         last_login_at = #{lastLoginAt},
         current_token = #{currentToken},
         created_at = #{createdAt},
-        updated_at = #{updatedAt}
+        created_by = #{createdBy},
+        updated_at = #{updatedAt},
+        updated_by = #{updatedBy}
         <where>
             AND id = #{id}
         </where>

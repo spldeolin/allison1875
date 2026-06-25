@@ -1,7 +1,6 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import java.util.Collections;
-import java.util.List;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
@@ -12,18 +11,19 @@ import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 public class FormGeneratorMutationExpansionServiceImpl implements MutationExpansionService {
 
     @Override
-    public List<String> expandCreateMethodBody(FormDef form, BlockStmt body) {
-        return Collections.emptyList();
+    public void expandCreateMethodBody(FormDef form, BlockStmt body) {
     }
 
     @Override
-    public List<String> expandUpdateMethodBody(FormDef form, BlockStmt body) {
-        return Collections.emptyList();
+    public void expandUpdateMethodBody(FormDef form, BlockStmt body) {
     }
 
     @Override
-    public List<String> expandListSetterStatements(FormDef form, BlockStmt body, String entityVarName) {
-        return Collections.emptyList();
+    public void expandListReqFields(FormDef form, ClassOrInterfaceDeclaration reqCoid) {
+    }
+
+    @Override
+    public void expandListSetterStatements(FormDef form, BlockStmt body, String entityVarName) {
     }
 
 }

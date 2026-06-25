@@ -8,7 +8,9 @@ CREATE TABLE `user`
     `last_login_at` DATETIME COMMENT '最后登录时间',
     `current_token` VARCHAR(255) COMMENT '当前登录token',
     `created_at`    DATETIME     NOT NULL COMMENT '创建时间',
+    `created_by`    VARCHAR(32) COMMENT '创建人',
     `updated_at`    DATETIME     NOT NULL COMMENT '更新时间',
+    `updated_by`    VARCHAR(32) COMMENT '更新人',
     UNIQUE KEY `uk_user_code` (`user_code`),
     UNIQUE KEY `uk_username` (`username`),
     UNIQUE KEY `uk_current_token` (`current_token`),
@@ -22,7 +24,9 @@ CREATE TABLE `role`
     `role_name`   VARCHAR(32) NOT NULL COMMENT '角色名称',
     `description` VARCHAR(128) COMMENT '角色描述',
     `created_at`  DATETIME    NOT NULL COMMENT '创建时间',
+    `created_by`  VARCHAR(32) COMMENT '创建人',
     `updated_at`  DATETIME    NOT NULL COMMENT '更新时间',
+    `updated_by`  VARCHAR(32) COMMENT '更新人',
     UNIQUE KEY `uk_role_code` (`role_code`),
     UNIQUE KEY `uk_role_name` (`role_name`),
     PRIMARY KEY (`id`)
@@ -33,6 +37,7 @@ CREATE TABLE `role_permission` (
     `role_id`         BIGINT      NOT NULL COMMENT '角色ID',
     `permission_code` VARCHAR(64) NOT NULL COMMENT '权限编码',
     `created_at`      DATETIME    NOT NULL COMMENT '创建时间',
+    `created_by`      VARCHAR(32) COMMENT '创建人',
     UNIQUE KEY `uk_role_permission` (`role_id`, `permission_code`),
     PRIMARY KEY (`id`)
 ) COMMENT '角色-权限关联';
@@ -42,7 +47,7 @@ CREATE TABLE `user_role` (
     `user_id`    BIGINT   NOT NULL COMMENT '用户ID',
     `role_id`    BIGINT   NOT NULL COMMENT '角色ID',
     `created_at` DATETIME NOT NULL COMMENT '创建时间',
+    `created_by` VARCHAR(32) COMMENT '创建人',
     UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
     PRIMARY KEY (`id`)
 ) COMMENT '用户-角色关联';
-

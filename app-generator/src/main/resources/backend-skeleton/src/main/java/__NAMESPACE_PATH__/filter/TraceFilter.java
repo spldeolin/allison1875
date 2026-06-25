@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TraceFilter extends OncePerRequestFilter {
 
+    private static final String TRACE_HEADER = "x-trace-id";
+
     private static final int MAX_BODY_LENGTH = 2048;
 
     @Override
@@ -31,8 +34,13 @@ public class TraceFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
-        String traceId = UuidUtils.generateShort().substring(0, 8);
-        MDC.put("traceId", traceId);
+        String spanId = UuidUtils.generateShort().substring(0, 8);
+        String incomingTraceId = request.getHeader(TRACE_HEADER);
+        if (StringUtils.isNotBlank(incomingTraceId)) {
+            MDC.put("traceId", incomingTraceId + "," + spanId);
+        } else {
+            MDC.put("traceId", spanId);
+        }
         try {
             log.info("request arrived, api={}", request.getRequestURI());
             long start = System.currentTimeMillis();

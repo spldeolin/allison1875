@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -107,7 +108,7 @@ public class FormGenerator implements Allison1875Game {
         log.info("build ddl.sql, path={}", ddlSql.normalize());
         try {
             Files.createDirectories(ddlSql.getParent());
-            Files.writeString(ddlSql, ddl, StandardCharsets.UTF_8);
+            Files.writeString(ddlSql, ddl, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -133,10 +134,7 @@ public class FormGenerator implements Allison1875Game {
             cu.setPackageDeclaration(DomainContext.get().getControllerPackage());
             cu.addImport(DomainContext.get().getDesignPackage() + ".*");
             cu.addImport(DomainContext.get().getEntityPackage() + ".*");
-            if (hasSelectItem(form)) {
-                // 因没有选择字段而不生成枚举时，这个包可能是不存在的，会导致编译错误，也无需导入，所以此处基于是否有选择字段进行判断
-                cu.addImport(DomainContext.get().getEnumPackage() + ".*");
-            }
+            cu.addImport(DomainContext.get().getEnumPackage() + ".*");
             cu.addImport("java.util.*");
             cu.addImport("java.time.*");
             cu.addImport("java.math.*");
@@ -172,15 +170,6 @@ public class FormGenerator implements Allison1875Game {
         // 调用doc-analyzer分析接口文档
         config.setMvcHandlerQualifierWildcards(controllerQualifiers);
         docAnalyzer.play();
-    }
-
-    private boolean hasSelectItem(FormDef form) {
-        for (ItemDef item : form.getItems()) {
-            if (item.getType() == ItemType.SELECT || item.getType() == ItemType.MULTI_SELECT) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private List<FormDef> deserializeDSL() {

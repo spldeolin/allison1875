@@ -28,7 +28,7 @@ public final class RequestResult<T> {
         RequestResult<T> result = new RequestResult<>();
         result.setErrorCode(null);
         result.setData(data);
-        result.setTraceId(MDC.get("traceId"));
+        result.setTraceId(resolveTraceId());
         return result;
     }
 
@@ -40,8 +40,20 @@ public final class RequestResult<T> {
         RequestResult<Void> result = new RequestResult<>();
         result.setErrorCode(errorCode.getCode());
         result.setErrorMsg(errorMsg != null ? errorMsg : errorCode.getDefaultMsg());
-        result.setTraceId(MDC.get("traceId"));
+        result.setTraceId(resolveTraceId());
         return result;
+    }
+
+    private static String resolveTraceId() {
+        String mdcTraceId = MDC.get("traceId");
+        if (mdcTraceId == null) {
+            return null;
+        }
+        int commaIndex = mdcTraceId.indexOf(',');
+        if (commaIndex > 0) {
+            return mdcTraceId.substring(0, commaIndex);
+        }
+        return mdcTraceId;
     }
 
 }

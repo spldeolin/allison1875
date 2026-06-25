@@ -77,10 +77,24 @@ public class UserEntity {
     LocalDateTime createdAt;
 
     /**
+     * 创建人
+     * <p>created_by
+     * <p>长度：32
+     */
+    String createdBy;
+
+    /**
      * 更新时间
      * <p>updated_at
      * <p>不能为null
      */
     LocalDateTime updatedAt;
+
+    /**
+     * 更新人
+     * <p>updated_by
+     * <p>长度：32
+     */
+    String updatedBy;
 
 }

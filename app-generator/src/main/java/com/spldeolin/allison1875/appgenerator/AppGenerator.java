@@ -363,16 +363,23 @@ public class AppGenerator implements Allison1875Game {
         Allison1875.prepareDomain(fgConfig, null);
 
         Module fgModule = new FormGeneratorModule(fgConfig);
-        Module expansionOverride = new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(CommonItemsExpansionService.class)
-                        .toInstance(new AppGeneratorCommonItemsExpansionServiceImpl());
-                bind(MutationExpansionService.class)
-                        .toInstance(new AppGeneratorMutationExpansionServiceImpl(ns));
-            }
-        };
-        Module combined = Modules.override(fgModule).with(expansionOverride);
+        boolean hasUserForm = parseBuiltinMenus().stream()
+                .anyMatch(menu -> "User".equals(menu.getForm().getName()));
+        Module combined;
+        if (hasUserForm) {
+            Module expansionOverride = new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(CommonItemsExpansionService.class)
+                            .toInstance(new AppGeneratorCommonItemsExpansionServiceImpl());
+                    bind(MutationExpansionService.class)
+                            .toInstance(new AppGeneratorMutationExpansionServiceImpl(ns));
+                }
+            };
+            combined = Modules.override(fgModule).with(expansionOverride);
+        } else {
+            combined = fgModule;
+        }
 
         log.info("invoking form-generator for {} forms...", forms.size());
         Injector injector = Guice.createInjector(combined, new ValidationModule());

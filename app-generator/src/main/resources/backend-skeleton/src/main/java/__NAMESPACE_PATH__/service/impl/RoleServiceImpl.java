@@ -86,7 +86,9 @@ public class RoleServiceImpl implements RoleService {
             dto.setRoleName(role.getRoleName());
             dto.setDescription(role.getDescription());
             dto.setCreatedAt(role.getCreatedAt());
+            dto.setCreatedBy(role.getCreatedBy());
             dto.setUpdatedAt(role.getUpdatedAt());
+            dto.setUpdatedBy(role.getUpdatedBy());
             dtos.add(dto);
         }
         return PageResult.of(queryRoleTotal, dtos);

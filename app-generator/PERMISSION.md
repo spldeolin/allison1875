@@ -42,15 +42,14 @@ form-generator 生成的 Controller 方法自动添加 `@WebApiAuth` 注解：
 | `PermissionEnum`              | `enums/`      | 权限点枚举（由 app-generator 填充）     |
 | `PermissionController`        | `controller/` | 查询全部权限点（按 group 分组）           |
 | `@WebApiAuth`                 | `annotation/` | 方法级注解，声明所需权限                  |
-| `WebApiAuthRegistry`          | `common/`     | 启动时扫描 Controller 建立 path→权限映射 |
+| `UserPermissionInitializer`   | `task/`       | 启动引导 admin 用户和初始角色 + 扫描 Controller 建立 path→权限映射 |
 | `ApiAuthFilter`               | `filter/`     | 认证 + 鉴权                       |
-| `PermissionSystemInitializer` | `common/`     | 启动引导 admin 用户和初始角色            |
 | `role_permission` 表           | `db/ddl.sql`  | 角色-权限多对多                      |
 | `user_role` 表                 | `db/ddl.sql`  | 用户-角色多对多                      |
 
 ### 系统初始化
 
-`PermissionSystemInitializer` 启动时确保：
+`UserPermissionInitializer` 启动时确保：
 
 - admin 用户存在（密码从配置读取）
 - 3 个初始角色：系统管理员（全部权限）、业务员（非系统分组全部权限）、观察员（非系统分组 LIST 权限）
@@ -95,4 +94,4 @@ form-generator 生成的 Controller 方法自动添加 `@WebApiAuth` 注解：
 2. **字符串拼接而非 AST**：因为输出目录不是已有 Maven 项目
 3. **builtin 菜单 order 覆盖**：合并后设为 100000+，否则系统菜单可能出现在用户菜单之前
 4. **OR 语义**：`@WebApiAuth` 多值为 OR（拥有任一即通过），用于 save 接口
-5. **不要在 PermissionEnum.Group 上加字段区分系统分组**：用 PermissionSystemInitializer 硬编码常量
+5. **不要在 PermissionEnum.Group 上加字段区分系统分组**：用 UserPermissionInitializer 硬编码常量

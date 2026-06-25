@@ -36,8 +36,18 @@ public class ListRolesResp {
     LocalDateTime createdAt;
 
     /**
+     * 创建人
+     */
+    String createdBy;
+
+    /**
      * 更新时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     LocalDateTime updatedAt;
+
+    /**
+     * 最近更新人
+     */
+    String updatedBy;
 }

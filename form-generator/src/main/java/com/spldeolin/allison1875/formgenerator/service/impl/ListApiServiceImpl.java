@@ -126,6 +126,9 @@ public class ListApiServiceImpl implements ListApiService {
             }
         }
 
+        // 扩展字段
+        mutationExpansionService.expandListReqFields(form, reqCoid);
+
         // 创建时间
         itemField = parseFieldDeclaration("java.time.LocalDateTime createdAtStart;");
         JavadocUtils.setJavadoc(itemField, "按创建时间晚于该时间过滤，null代表无需过滤", null);
@@ -180,7 +183,13 @@ public class ListApiServiceImpl implements ListApiService {
 
         String designChain = form.getName() + "Design.select().where()";
         designChain += "." + form.getBizIdName() + ".in(req." + form.getBizIdGetterName() + "())";
-        for (ItemDef item : form.getItems().subList(1, form.getItems().size() - 1)) { // 跳过第一个业务主键和最后一个更新时间
+        for (ItemDef item : form.getItems()) {
+            if (item == form.getItems().get(0)) {
+                continue;
+            }
+            if ("updatedAt".equals(item.getName())) {
+                continue;
+            }
             designChain += convertItemsToSearchConditions(item);
         }
         designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序

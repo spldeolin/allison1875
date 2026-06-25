@@ -161,6 +161,26 @@ const columns = computed<DataTableColumn[]>(() => {
       },
     },
     {
+      title: '创建人',
+      key: 'createdBy',
+      width: 100,
+      ellipsis: { tooltip: true },
+    },
+    {
+      title: '更新时间',
+      key: 'updatedAt',
+      width: 150,
+      render(row: Record<string, any>) {
+        return renderTimeCell(row.updatedAt)
+      },
+    },
+    {
+      title: '最近更新人',
+      key: 'updatedBy',
+      width: 100,
+      ellipsis: { tooltip: true },
+    },
+    {
       title: '操作',
       key: '_actions',
       width: 200,

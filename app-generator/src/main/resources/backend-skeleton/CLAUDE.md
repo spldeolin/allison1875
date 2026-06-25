@@ -66,10 +66,10 @@ src/main/resources/
 | 组件                   | 职责                                     |
 |----------------------|----------------------------------------|
 | `@WebApiAuth`        | 方法级注解，声明接口所需权限（多值为 OR 语义：拥有任一即通过）      |
-| `WebApiAuthRegistry` | 启动时扫描 Controller，建立 path→权限映射          |
+| `UserPermissionInitializer` | 启动时引导 admin 用户和初始角色 + 扫描 Controller 建立 path→权限映射 |
 | `ApiAuthFilter`      | 认证（JWT token）+ 鉴权（查 Registry，对比用户权限列表） |
 
-鉴权流程：请求 → ApiAuthFilter 验证 token → 从 user_role + role_permission 聚合用户权限 → 查 WebApiAuthRegistry
+鉴权流程：请求 → ApiAuthFilter 验证 token → 从 user_role + role_permission 聚合用户权限 → 查 UserPermissionInitializer
 获取路径所需权限 → OR 匹配 → 通过/403。
 
 ### 授权 API
@@ -87,7 +87,7 @@ src/main/resources/
 - `role_permission`（role_id, permission_code）— 角色-权限多对多
 - `user_role`（user_id, role_id）— 用户-角色多对多
 
-### 系统初始化（PermissionSystemInitializer）
+### 系统初始化（UserPermissionInitializer）
 
 启动时确保：admin 用户存在、3 个初始角色（系统管理员/业务员/观察员）绑定正确权限、admin 绑定系统管理员、新用户自动绑定观察员。系统分组通过硬编码
 `SYSTEM_GROUPS = Set.of("USER", "ROLE")` 识别。
@@ -97,7 +97,7 @@ src/main/resources/
 - 新增接口如需权限控制，在方法上添加 `@WebApiAuth(PermissionEnum.XXX)` 即可
 - save 类接口通常用 `@WebApiAuth({PermissionEnum.CREATE_X, PermissionEnum.UPDATE_X})`（OR 语义）
 - 无需手动维护 PermissionEnum — 由 app-generator 根据表单列表自动生成
-- 不要修改 `PermissionSystemInitializer` 中角色名称，前端页面有对应的 hardcoded 引用
+- 不要修改 `UserPermissionInitializer` 中角色名称，前端页面有对应的 hardcoded 引用
 
 ## 已生成代码的模式
 
