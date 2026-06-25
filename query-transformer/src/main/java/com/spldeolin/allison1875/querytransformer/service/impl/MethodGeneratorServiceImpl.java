@@ -27,11 +27,14 @@ import com.spldeolin.allison1875.persistencegenerator.facade.dto.JavaTypeDTO;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
 import com.spldeolin.allison1875.querytransformer.dto.CompareableBinary;
+import com.spldeolin.allison1875.querytransformer.dto.ExpandParamRetval;
+import com.spldeolin.allison1875.querytransformer.dto.ExpandedFieldDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateReturnTypeRetval;
 import com.spldeolin.allison1875.querytransformer.dto.VariableProperty;
 import com.spldeolin.allison1875.querytransformer.enums.ComparisonOperatorEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
+import com.spldeolin.allison1875.querytransformer.service.MapperLayerExpansionService;
 import com.spldeolin.allison1875.querytransformer.service.MethodGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,13 +51,19 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
     @Inject
     private DataModelService dataModelGeneratorService;
 
+    @Inject
+    private MapperLayerExpansionService mapperLayerExpansionService;
+
     @Override
     public GenerateParamRetval generateParam(ChainAnalysisDTO chainAnalysis) {
         List<Parameter> params = Lists.newArrayList();
         boolean isParamDTO = false;
 
         Set<Binary> binaries = chainAnalysis.getBinariesAsArgs();
-        if (binaries.size() > 3 || (binaries.size() > 1 && chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE)) {
+        ExpandParamRetval expandParamRetval = mapperLayerExpansionService.expandParam(chainAnalysis);
+        List<ExpandedFieldDTO> expandedFields = expandParamRetval.getExpandedFields();
+        int totalFieldCount = binaries.size() + expandedFields.size();
+        if (totalFieldCount > 3 || (totalFieldCount > 1 && chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE)) {
             DataModelArg dataModelArg = new DataModelArg();
             dataModelArg.setSourceRoot(DomainContext.get().getPersistenceSourceRoot());
             dataModelArg.setPackageName(DomainContext.get().getParamDTOPackage());
@@ -79,6 +88,13 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                         .add(new FieldArg().setTypeQualifier("java.lang.Integer").setFieldName("offset"));
                 dataModelArg.getFieldArgs()
                         .add(new FieldArg().setTypeQualifier("java.lang.Integer").setFieldName("limit"));
+            }
+            for (ExpandedFieldDTO expandedField : expandedFields) {
+                FieldArg fieldArg = new FieldArg();
+                fieldArg.setDescription(expandedField.getDescription());
+                fieldArg.setTypeQualifier(expandedField.getTypeQualifier());
+                fieldArg.setFieldName(expandedField.getFieldName());
+                dataModelArg.getFieldArgs().add(fieldArg);
             }
             dataModelArg.setDataModelExistenceResolution(FileExistenceResolutionEnum.RENAME);
             DataModelGeneration paramDTOGeneration = dataModelGeneratorService.generateDataModel(dataModelArg);
@@ -108,12 +124,29 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
                 params.add(new Parameter().setType("Integer").setName("offset"));
                 params.add(new Parameter().setType("Integer").setName("limit"));
             }
+            for (ExpandedFieldDTO expandedField : expandedFields) {
+                Parameter param = new Parameter();
+                param.addAnnotation(parseAnnotation(
+                        String.format("@org.apache.ibatis.annotations.Param(\"%s\")", expandedField.getFieldName())));
+                param.setType(expandedField.getTypeQualifier());
+                param.setName(expandedField.getFieldName());
+                params.add(param);
+            }
         } else {
             GenerateParamRetval retval = new GenerateParamRetval();
             retval.setIsParamDTO(false);
+            retval.setExpandParamRetval(expandParamRetval);
             if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.PAGE) {
                 retval.getParameters().add(new Parameter().setType("Integer").setName("offset"));
                 retval.getParameters().add(new Parameter().setType("Integer").setName("limit"));
+            }
+            for (ExpandedFieldDTO expandedField : expandedFields) {
+                Parameter param = new Parameter();
+                param.addAnnotation(parseAnnotation(
+                        String.format("@org.apache.ibatis.annotations.Param(\"%s\")", expandedField.getFieldName())));
+                param.setType(expandedField.getTypeQualifier());
+                param.setName(expandedField.getFieldName());
+                retval.getParameters().add(param);
             }
             return retval;
         }
@@ -121,6 +154,7 @@ public class MethodGeneratorServiceImpl implements MethodGeneratorService {
         GenerateParamRetval result = new GenerateParamRetval();
         result.getParameters().addAll(params);
         result.setIsParamDTO(isParamDTO);
+        result.setExpandParamRetval(expandParamRetval);
         return result;
     }
 
