@@ -50,6 +50,7 @@ import com.spldeolin.allison1875.querytransformer.dto.XmlSourceFile;
 import com.spldeolin.allison1875.querytransformer.enums.ComparisonOperatorEnum;
 import com.spldeolin.allison1875.querytransformer.enums.OrderSequenceEnum;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
+import com.spldeolin.allison1875.querytransformer.service.MapperLayerExpansionService;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,6 +71,9 @@ public class MapperLayerServiceImpl implements MapperLayerService {
 
     @Inject
     private ImportExprService importExprService;
+
+    @Inject
+    private MapperLayerExpansionService mapperLayerExpansionService;
 
     @Override
     public void generateMethodToMapper(GenerateMethodToMapperArgs args) {
@@ -214,6 +218,14 @@ public class MapperLayerServiceImpl implements MapperLayerService {
                     // 删除最后一个语句中，最后的逗号
                     int last = xmlLines.size() - 1;
                     xmlLines.set(last, MoreStringUtils.replaceLast(xmlLines.get(last), ",", ""));
+                }
+                // expansion order by部分
+                List<String> expansionOrderByLines = mapperLayerExpansionService.expandOrderByLines(
+                        chainAnalysis, designMeta, join);
+                if (CollectionUtils.isNotEmpty(expansionOrderByLines)) {
+                    for (String line : expansionOrderByLines) {
+                        xmlLines.add(SINGLE_INDENT + line);
+                    }
                 }
                 // limit部分
                 if (chainAnalysis.getReturnStyle() == ReturnStyleEnum.ONE) {
