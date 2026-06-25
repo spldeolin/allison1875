@@ -10,8 +10,10 @@ import com.spldeolin.allison1875.common.guice.Allison1875Module;
 import com.spldeolin.allison1875.common.service.DataModelService;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceImpl;
 import com.spldeolin.allison1875.common.service.impl.DataModelServiceNoLombokImpl;
+import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorMapperLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorServiceLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.handlertransformer.service.ServiceLayerExpansionService;
+import com.spldeolin.allison1875.querytransformer.service.MapperLayerExpansionService;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +46,8 @@ public class FormGeneratorModule extends Allison1875Module {
             protected void configure() {
                 bind(ServiceLayerExpansionService.class)
                         .toInstance(new FormGeneratorServiceLayerExpansionServiceImpl());
+                bind(MapperLayerExpansionService.class)
+                        .toInstance(new FormGeneratorMapperLayerExpansionServiceImpl());
                 bind(Config.class).toInstance(config);
                 if (config.getIsDataModelWithoutLombok()) {
                     bind(DataModelService.class).toInstance(new DataModelServiceNoLombokImpl());

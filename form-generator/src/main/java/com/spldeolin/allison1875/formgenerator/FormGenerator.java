@@ -31,6 +31,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.service.CommonItemsExpansionService;
+import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorMapperLayerExpansionServiceImpl;
 import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.DdlService;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
@@ -41,6 +42,7 @@ import com.spldeolin.allison1875.formgenerator.service.UpdateApiService;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
 import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.querytransformer.QueryTransformer;
+import com.spldeolin.allison1875.querytransformer.service.MapperLayerExpansionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -91,6 +93,9 @@ public class FormGenerator implements Allison1875Game {
 
     @Inject
     private CommonItemsExpansionService commonItemsExpansionService;
+
+    @Inject
+    private MapperLayerExpansionService mapperLayerExpansionService;
 
     public void play() {
         List<FormDef> forms = deserializeDSL();
@@ -163,6 +168,20 @@ public class FormGenerator implements Allison1875Game {
         // 编译controllerModule
         log.info("call MavenProjectClassLoaderUtils.compile for controllerModule");
         MavenUtils.compile(new File(DomainContext.get().getControllerModule()), config.getJavaHome());
+
+        // 设置可排序字段
+        if (mapperLayerExpansionService instanceof FormGeneratorMapperLayerExpansionServiceImpl) {
+            List<ItemDef> allSortableItems = Lists.newArrayList();
+            for (FormDef form : forms) {
+                for (ItemDef item : form.getItems()) {
+                    if (item.getType() == ItemType.NUMBER || item.getType() == ItemType.ON_OFF
+                            || item.getType() == ItemType.TEXT || item.getType() == ItemType.TIME) {
+                        allSortableItems.add(item);
+                    }
+                }
+            }
+            ((FormGeneratorMapperLayerExpansionServiceImpl) mapperLayerExpansionService).setSortableItems(allSortableItems);
+        }
 
         // 调用query-transformer转换Design Chain
         queryTransformer.play();
