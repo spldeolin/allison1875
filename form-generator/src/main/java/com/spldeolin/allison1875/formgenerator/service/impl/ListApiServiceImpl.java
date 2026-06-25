@@ -151,15 +151,13 @@ public class ListApiServiceImpl implements ListApiService {
         reqCoid.addMember(pageSize);
         bs.addStatement(new LocalClassDeclarationStmt(reqCoid));
 
-        // 排序方式 TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
-//        itemField = StaticJavaParserUtils.parseFieldDeclaration(form.getName() + "SortItemEnum sortItem;")
-//                .asFieldDeclaration();
-//        JavadocUtils.setJavadoc(itemField, "排序字段，null代表更新时间", null);
-//        reqCoid.addMember(itemField);
-//        itemField = StaticJavaParserUtils.parseFieldDeclaration("Boolean isSortAsc;")
-//                .asFieldDeclaration();
-//        JavadocUtils.setJavadoc(itemField, "true代表正序，否则代表倒序", null);
-//        reqCoid.addMember(itemField);
+        // 排序方式
+        itemField = parseFieldDeclaration(form.getName() + "SortEnum sortBy;");
+        JavadocUtils.setJavadoc(itemField, "排序字段，null代表更新时间倒序", null);
+        reqCoid.addMember(itemField);
+        itemField = parseFieldDeclaration("Boolean isAsc;");
+        JavadocUtils.setJavadoc(itemField, "true代表正序，否则代表倒序", null);
+        reqCoid.addMember(itemField);
 
         // resp声明
         ClassOrInterfaceDeclaration respCoid = new ClassOrInterfaceDeclaration().setName("resp");
@@ -192,7 +190,6 @@ public class ListApiServiceImpl implements ListApiService {
             }
             designChain += convertItemsToSearchConditions(item);
         }
-        designChain += ".order().updatedAt.desc()"; // TODO query-transformer能力不支持，所以暂时固定为更新时间倒序
         designChain += ".page(req.getPageNum(),req.getPageSize());";
         body.addStatement(parseStatement(
                 "List<" + form.getEntityName(config) + "> " + English.plural(form.getVarName()) + " = " + designChain));
