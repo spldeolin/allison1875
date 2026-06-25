@@ -105,7 +105,7 @@ public class EnumServiceImpl implements EnumService {
 
             // 为表单生成字段枚举
             // 枚举名防重
-            String enumName = StringUtils.capitalize(form.getName()) + "SortItemEnum";
+            String enumName = StringUtils.capitalize(form.getName()) + "SortEnum";
             Path absulutePath = CodeGenerationUtils.fileInPackageAbsolutePath(DomainContext.get().getEnumSourceRoot(),
                     DomainContext.get().getEnumPackage(), enumName + ".java");
             // 暂不考虑重名，因为这次处理重名会导致与getJavaTypeInDTO方法的返回值对不上
@@ -122,14 +122,25 @@ public class EnumServiceImpl implements EnumService {
             ed.setPublic(true);
             ed.setName(enumName);
 
-            // 枚举项
+            // 枚举项（仅可排序类型）
             for (ItemDef item : form.getItems()) {
+                if (item.getType() != ItemType.NUMBER && item.getType() != ItemType.ON_OFF
+                        && item.getType() != ItemType.TEXT && item.getType() != ItemType.TIME) {
+                    continue;
+                }
                 EnumConstantDeclaration ecd = new EnumConstantDeclaration().setName(
                                 MoreStringUtils.camelToSnakeCase(item.getName()).toUpperCase())
                         .addArgument(new StringLiteralExpr(item.getName()))
                         .addArgument(new StringLiteralExpr("按“" + item.getTitle() + "”排序"));
                 ed.addEntry(ecd);
             }
+            // createdAt, updatedAt
+            ed.addEntry(new EnumConstantDeclaration().setName("CREATED_AT")
+                    .addArgument(new StringLiteralExpr("createdAt"))
+                    .addArgument(new StringLiteralExpr("按“创建时间”排序")));
+            ed.addEntry(new EnumConstantDeclaration().setName("UPDATED_AT")
+                    .addArgument(new StringLiteralExpr("updatedAt"))
+                    .addArgument(new StringLiteralExpr("按“更新时间”排序")));
 
             // 枚举其他成员
             ed.addMember(parseBodyDeclaration(
@@ -150,7 +161,7 @@ public class EnumServiceImpl implements EnumService {
             cu.setStorage(absulutePath);
             importExprService.extractQualifiedTypeToImport(cu);
             cu.addImport("java.util.Arrays");
-//            CompilationUnitUtils.writeJava(cu); TODO query-transformer能力不支持，所以暂时固定为更新时间倒序，不生成排序字段枚举
+            CompilationUnitUtils.writeJava(cu);
         }
     }
 
