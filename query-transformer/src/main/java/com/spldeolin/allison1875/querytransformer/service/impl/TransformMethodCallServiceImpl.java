@@ -9,6 +9,8 @@ import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.querytransformer.dto.Binary;
 import com.spldeolin.allison1875.querytransformer.dto.ChainAnalysisDTO;
+import com.spldeolin.allison1875.querytransformer.dto.ExpandParamRetval;
+import com.spldeolin.allison1875.querytransformer.dto.ExpandedFieldDTO;
 import com.spldeolin.allison1875.querytransformer.dto.GenerateParamRetval;
 import com.spldeolin.allison1875.querytransformer.enums.ReturnStyleEnum;
 import com.spldeolin.allison1875.querytransformer.service.TransformMethodCallService;
@@ -62,6 +64,13 @@ public class TransformMethodCallServiceImpl implements TransformMethodCallServic
                     paramDTOVarName + ".setOffset(" + chainAnalysis.getOffsetExpr() + ");"));
             result.add(parseStatement(
                     paramDTOVarName + ".setLimit(" + chainAnalysis.getLimitExpr() + ");"));
+        }
+        if (paramGeneration.getExpandParamRetval() != null) {
+            for (ExpandedFieldDTO expandedField : paramGeneration.getExpandParamRetval().getExpandedFields()) {
+                result.add(parseStatement(
+                        paramDTOVarName + ".set" + MoreStringUtils.toUpperCamel(expandedField.getFieldName()) + "("
+                                + expandedField.getSourceExpression() + ");"));
+            }
         }
         return result;
     }
