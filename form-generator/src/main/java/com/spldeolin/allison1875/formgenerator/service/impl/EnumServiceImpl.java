@@ -134,13 +134,6 @@ public class EnumServiceImpl implements EnumService {
                         .addArgument(new StringLiteralExpr("按“" + item.getTitle() + "”排序"));
                 ed.addEntry(ecd);
             }
-            // createdAt, updatedAt
-            ed.addEntry(new EnumConstantDeclaration().setName("CREATED_AT")
-                    .addArgument(new StringLiteralExpr("createdAt"))
-                    .addArgument(new StringLiteralExpr("按“创建时间”排序")));
-            ed.addEntry(new EnumConstantDeclaration().setName("UPDATED_AT")
-                    .addArgument(new StringLiteralExpr("updatedAt"))
-                    .addArgument(new StringLiteralExpr("按“更新时间”排序")));
 
             // 枚举其他成员
             ed.addMember(parseBodyDeclaration(
