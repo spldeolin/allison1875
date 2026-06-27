@@ -44,7 +44,7 @@ public class UserPermissionInitializer {
 
     private static final String ADMIN_USERNAME = "admin";
 
-    private static final Set<String> SYSTEM_GROUPS = new HashSet<>(Arrays.asList("USER", "ROLE"));
+    private static final Set<String> SYSTEM_GROUPS = new HashSet<>(Arrays.asList("USER", "ROLE", "AUDIT_LOG"));
 
     private static final InitRole SYSTEM_ADMIN = new InitRole("系统管理员", "拥有全部功能权限，不可删除");
 

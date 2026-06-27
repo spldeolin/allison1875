@@ -20,6 +20,8 @@ public enum PermissionEnum {
             Lists.newArrayList(LIST_ROLE)), DELETE_ROLE("DELETE_ROLE", "删除角色", Group.ROLE,
             Lists.newArrayList(LIST_ROLE)),
 
+    LIST_AUDIT_LOG("LIST_AUDIT_LOG", "查看审计日志", Group.AUDIT_LOG, null),
+
     GRANT_ROLE("GRANT_ROLE", "授予角色", Group.USER, Lists.newArrayList(LIST_USER, LIST_ROLE)), GRANT_PERMISSION(
             "GRANT_PERMISSION", "授予权限", Group.ROLE, Lists.newArrayList(LIST_ROLE)),
 
@@ -35,7 +37,7 @@ public enum PermissionEnum {
     @Getter
     @AllArgsConstructor
     public enum Group {
-        USER("USER", "用户管理"), ROLE("ROLE", "角色管理"),
+        USER("USER", "用户管理"), ROLE("ROLE", "角色管理"), AUDIT_LOG("AUDIT_LOG", "审计日志"),
         // === 由 app-generator 生成 ===
         ;
 
