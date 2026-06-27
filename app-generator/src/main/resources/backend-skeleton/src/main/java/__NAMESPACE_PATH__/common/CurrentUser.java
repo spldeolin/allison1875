@@ -42,6 +42,17 @@ public class CurrentUser {
     }
 
     /**
+     * 获取当前用户名或默认值
+     *
+     * @param defaultValue 当没有用户上下文时返回的默认值
+     * @return 当前用户名，如果未设置则返回defaultValue
+     */
+    public static String getUsernameOrDefault(String defaultValue) {
+        String username = getUsername();
+        return username != null ? username : defaultValue;
+    }
+
+    /**
      * 清除当前用户上下文
      * 应该在请求处理完成后调用，避免线程复用导致的数据污染
      */
