@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -15,9 +17,11 @@ import __NAMESPACE__.dto.req.GrantPermissionsReq;
 import __NAMESPACE__.dto.req.ListRolePermissionsReq;
 import __NAMESPACE__.entity.RoleEntity;
 import __NAMESPACE__.entity.RolePermissionEntity;
+import __NAMESPACE__.enums.AuditOperationTypeEnum;
 import __NAMESPACE__.enums.PermissionEnum;
 import __NAMESPACE__.mapper.RoleMapper;
 import __NAMESPACE__.mapper.RolePermissionMapper;
+import __NAMESPACE__.service.AuditLogFacade;
 import __NAMESPACE__.service.RoleGrantService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +38,9 @@ public class RoleGrantServiceImpl implements RoleGrantService {
     @Resource
     private RolePermissionMapper rolePermissionMapper;
 
+    @Resource
+    private AuditLogFacade auditLogFacade;
+
     @Transactional
     @Override
     public void grantPermissions(GrantPermissionsReq req) {
@@ -49,6 +56,9 @@ public class RoleGrantServiceImpl implements RoleGrantService {
                 throw new BizException("无效的权限编码: " + code);
             }
         }
+
+        // Capture original permissions before modification
+        List<String> originalPermissionCodes = rolePermissionMapper.queryPermissionCodesByRoleId(role.getId());
 
         // Ensure baseOn permissions are also granted
         Set<String> expandedCodes = new HashSet<>(req.getPermissionCodes());
@@ -68,6 +78,11 @@ public class RoleGrantServiceImpl implements RoleGrantService {
         }
 
         log.info("granted {} permissions to role {}", req.getPermissionCodes().size(), req.getRoleBizId());
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        auditContent.put("角色名称", role.getRoleName());
+        auditContent.put("原先权限列表", originalPermissionCodes);
+        auditContent.put("新的权限列表", req.getPermissionCodes());
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.GRANT_PERMISSION, auditContent);
     }
 
     @Override

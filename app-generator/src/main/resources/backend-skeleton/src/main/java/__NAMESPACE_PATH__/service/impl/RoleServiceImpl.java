@@ -2,7 +2,9 @@ package __NAMESPACE__.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,9 @@ import __NAMESPACE__.dto.resp.GetRoleDetailResp;
 import __NAMESPACE__.dto.resp.ListRolesResp;
 import __NAMESPACE__.dto.resp.PageResult;
 import __NAMESPACE__.entity.*;
+import __NAMESPACE__.enums.AuditOperationTypeEnum;
 import __NAMESPACE__.mapper.RoleMapper;
+import __NAMESPACE__.service.AuditLogFacade;
 import __NAMESPACE__.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +37,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Resource
     private RoleMapper roleMapper;
+
+    @Resource
+    private AuditLogFacade auditLogFacade;
 
     @Transactional
     @Override
@@ -50,6 +57,11 @@ public class RoleServiceImpl implements RoleService {
         role.setUpdatedAt(LocalDateTime.now());
         role.setUpdatedBy(CurrentUser.getUsername());
         roleMapper.insert(role);
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        auditContent.put("角色ID", role.getRoleCode());
+        auditContent.put("角色名称", req.getRoleName());
+        auditContent.put("角色描述", req.getDescription());
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.CREATE_ROLE, auditContent);
         return new CreateRoleResp().setRoleCode(role.getRoleCode());
     }
 
@@ -64,11 +76,20 @@ public class RoleServiceImpl implements RoleService {
         if (existRoleForRoleName != null) {
             throw new BizException("角色名称已存在");
         }
+        Map<String, Object> oldValues = new LinkedHashMap<>();
+        oldValues.put("角色ID", role.getRoleCode());
+        oldValues.put("角色名称", role.getRoleName());
+        oldValues.put("角色描述", role.getDescription());
+        Map<String, Object> newValues = new LinkedHashMap<>();
+        newValues.put("角色ID", role.getRoleCode());
+        newValues.put("角色名称", req.getRoleName());
+        newValues.put("角色描述", req.getDescription());
         role.setRoleName(req.getRoleName());
         role.setDescription(req.getDescription());
         role.setUpdatedAt(LocalDateTime.now());
         role.setUpdatedBy(CurrentUser.getUsername());
         roleMapper.updateById(role);
+        auditLogFacade.logUpdateSuccess(AuditOperationTypeEnum.UPDATE_ROLE, oldValues, newValues);
     }
 
     @Override
@@ -121,6 +142,17 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public void deleteRole(DeleteRoleReq req) {
+        List<RoleEntity> roles = roleMapper.queryByRoleCodes(req.getRoleCodes());
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        List<Map<String, String>> deletedRoles = new ArrayList<>();
+        for (RoleEntity role : roles) {
+            Map<String, String> roleInfo = new LinkedHashMap<>();
+            roleInfo.put("角色名称", role.getRoleName());
+            roleInfo.put("角色ID", role.getRoleCode());
+            deletedRoles.add(roleInfo);
+        }
+        auditContent.put("删除的角色", deletedRoles);
         int deleteRoleCount = roleMapper.deleteRole(req.getRoleCodes());
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.DELETE_ROLE, auditContent);
     }
 }

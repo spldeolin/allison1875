@@ -3,7 +3,9 @@ package __NAMESPACE__.service.impl;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.mindrot.jbcrypt.BCrypt;
@@ -15,10 +17,12 @@ import __NAMESPACE__.dto.req.LoginReq;
 import __NAMESPACE__.dto.resp.LoginResp;
 import __NAMESPACE__.dto.resp.UpdateSelfPasswordReq;
 import __NAMESPACE__.entity.UserEntity;
+import __NAMESPACE__.enums.AuditOperationTypeEnum;
 import __NAMESPACE__.mapper.UserMapper;
 import __NAMESPACE__.mapper.UserRoleMapper;
 import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.property.AuthcProperties;
+import __NAMESPACE__.service.AuditLogFacade;
 import __NAMESPACE__.service.AuthcService;
 import __NAMESPACE__.util.SecretKeyUtils;
 import __NAMESPACE__.util.UuidUtils;
@@ -43,18 +47,27 @@ public class AuthcServiceImpl implements AuthcService {
     @Resource
     private AuthcProperties authcProperties;
 
+    @Resource
+    private AuditLogFacade auditLogFacade;
+
     @Override
     public LoginResp login(LoginReq req) {
         // 根据用户名查询用户
         UserEntity user = userMapper.queryByUsername(req.getUsername());
         if (user == null) {
             log.info("登录失败：用户不存在, username={}", req.getUsername());
+            Map<String, Object> auditContent = new LinkedHashMap<>();
+            auditContent.put("登录类型", "用户名密码登录");
+            auditLogFacade.logFailure(AuditOperationTypeEnum.LOGIN, auditContent, "用户名或密码错误");
             throw new BizException("用户名或密码错误");
         }
 
         // BCrypt密码校验
         if (!BCrypt.checkpw(req.getPassword(), user.getPassword())) {
             log.info("登录失败：密码不正确, username={}", req.getUsername());
+            Map<String, Object> auditContent = new LinkedHashMap<>();
+            auditContent.put("登录类型", "用户名密码登录");
+            auditLogFacade.logFailure(AuditOperationTypeEnum.LOGIN, auditContent, "用户名或密码错误");
             throw new BizException("用户名或密码错误");
         }
 
@@ -65,6 +78,9 @@ public class AuthcServiceImpl implements AuthcService {
         List<String> permission = resolvePermissions(user.getId());
 
         log.info("用户登录成功, username={}", req.getUsername());
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        auditContent.put("登录类型", "用户名密码登录");
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.LOGIN, auditContent);
         return new LoginResp().setToken(token).setCurrentUser(
                 new CurrentUserDTO().setUsername(user.getUsername()).setNickName(user.getNickName())
                         .setPermissions(permission));
@@ -82,6 +98,9 @@ public class AuthcServiceImpl implements AuthcService {
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateByIdEvenNull(user);
         log.info("用户退出登录, username={}", username);
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        auditContent.put("登录类型", "用户名密码登录");
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.LOGOUT, auditContent);
     }
 
     @Override
@@ -101,6 +120,7 @@ public class AuthcServiceImpl implements AuthcService {
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateByIdEvenNull(user);
         log.info("用户修改自身密码, username={}", username);
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.CHANGE_PASSWORD, null);
     }
 
     private String issueToken(UserEntity user, String updatedBy) {

@@ -3,6 +3,7 @@ package __NAMESPACE__.service.impl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +31,12 @@ import __NAMESPACE__.entity.RoleEntity;
 import __NAMESPACE__.entity.RolePermissionEntity;
 import __NAMESPACE__.entity.UserEntity;
 import __NAMESPACE__.entity.UserRoleEntity;
+import __NAMESPACE__.enums.AuditOperationTypeEnum;
 import __NAMESPACE__.mapper.RoleMapper;
 import __NAMESPACE__.mapper.RolePermissionMapper;
 import __NAMESPACE__.mapper.UserMapper;
 import __NAMESPACE__.mapper.UserRoleMapper;
+import __NAMESPACE__.service.AuditLogFacade;
 import __NAMESPACE__.service.UserService;
 import __NAMESPACE__.task.UserPermissionInitializer;
 import __NAMESPACE__.util.UuidUtils;
@@ -58,33 +61,45 @@ public class UserServiceImpl implements UserService {
     @Resource
     private RolePermissionMapper rolePermissionMapper;
 
+    @Resource
+    private AuditLogFacade auditLogFacade;
+
     @Transactional
     @Override
     public CreateUserResp createUser(CreateUserReq req) {
-        UserEntity user = new UserEntity();
-        user.setUserCode(UuidUtils.generateShort());
-        user.setUsername(req.getUsername());
-        user.setPassword(BCrypt.hashpw(req.getPassword(), BCrypt.gensalt()));
-        user.setNickName(req.getNickName());
-        user.setCreatedAt(LocalDateTime.now());
-        user.setCreatedBy(CurrentUser.getUsername());
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(CurrentUser.getUsername());
-        UserEntity existUserForUsername = userMapper.queryUser(null, req.getUsername());
-        if (existUserForUsername != null) {
-            throw new BizException("用户名已存在");
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        auditContent.put("用户名", req.getUsername());
+        auditContent.put("用户昵称", req.getNickName());
+        try {
+            UserEntity user = new UserEntity();
+            user.setUserCode(UuidUtils.generateShort());
+            user.setUsername(req.getUsername());
+            user.setPassword(BCrypt.hashpw(req.getPassword(), BCrypt.gensalt()));
+            user.setNickName(req.getNickName());
+            user.setCreatedAt(LocalDateTime.now());
+            user.setCreatedBy(CurrentUser.getUsername());
+            user.setUpdatedAt(LocalDateTime.now());
+            user.setUpdatedBy(CurrentUser.getUsername());
+            UserEntity existUserForUsername = userMapper.queryUser(null, req.getUsername());
+            if (existUserForUsername != null) {
+                throw new BizException("用户名已存在");
+            }
+            userMapper.insert(user);
+            // Auto-assign default role (观察员) to new users
+            RoleEntity defaultRole = roleMapper.queryByRoleName(UserPermissionInitializer.getDefaultRoleName());
+            if (defaultRole != null) {
+                UserRoleEntity userRole = new UserRoleEntity();
+                userRole.setUserId(user.getId());
+                userRole.setRoleId(defaultRole.getId());
+                userRole.setCreatedAt(LocalDateTime.now());
+                userRoleMapper.insert(userRole);
+            }
+            auditLogFacade.logSuccess(AuditOperationTypeEnum.CREATE_USER, auditContent);
+            return new CreateUserResp().setUserCode(user.getUserCode());
+        } catch (BizException e) {
+            auditLogFacade.logFailure(AuditOperationTypeEnum.CREATE_USER, auditContent, e.getMessage());
+            throw e;
         }
-        userMapper.insert(user);
-        // Auto-assign default role (观察员) to new users
-        RoleEntity defaultRole = roleMapper.queryByRoleName(UserPermissionInitializer.getDefaultRoleName());
-        if (defaultRole != null) {
-            UserRoleEntity userRole = new UserRoleEntity();
-            userRole.setUserId(user.getId());
-            userRole.setRoleId(defaultRole.getId());
-            userRole.setCreatedAt(LocalDateTime.now());
-            userRoleMapper.insert(userRole);
-        }
-        return new CreateUserResp().setUserCode(user.getUserCode());
     }
 
     @Transactional
@@ -94,16 +109,36 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BizException("用户不存在或是已被删除");
         }
-        user.setNickName(req.getNickName());
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(CurrentUser.getUsername());
-        userMapper.updateById(user);
+        Map<String, Object> oldValues = new LinkedHashMap<>();
+        oldValues.put("用户名", user.getUsername());
+        oldValues.put("用户昵称", user.getNickName());
+        Map<String, Object> newValues = new LinkedHashMap<>();
+        newValues.put("用户名", user.getUsername());
+        newValues.put("用户昵称", req.getNickName());
+        try {
+            user.setNickName(req.getNickName());
+            user.setUpdatedAt(LocalDateTime.now());
+            user.setUpdatedBy(CurrentUser.getUsername());
+            userMapper.updateById(user);
+            auditLogFacade.logUpdateSuccess(AuditOperationTypeEnum.UPDATE_USER, oldValues, newValues);
+        } catch (BizException e) {
+            auditLogFacade.logUpdateFailure(AuditOperationTypeEnum.UPDATE_USER, oldValues, newValues, e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional
     @Override
     public void deleteUser(DeleteUserReq req) {
-        int deleteUserCount = userMapper.deleteUser(req.getUserCodes());
+        Map<String, Object> auditContent = new LinkedHashMap<>();
+        auditContent.put("用户Codes", req.getUserCodes());
+        try {
+            int deleteUserCount = userMapper.deleteUser(req.getUserCodes());
+            auditLogFacade.logSuccess(AuditOperationTypeEnum.DELETE_USER, auditContent);
+        } catch (BizException e) {
+            auditLogFacade.logFailure(AuditOperationTypeEnum.DELETE_USER, auditContent, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
