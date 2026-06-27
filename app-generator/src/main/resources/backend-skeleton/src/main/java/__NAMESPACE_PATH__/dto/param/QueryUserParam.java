@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
- * @author Deolin 2026-06-07
+ * @author Deolin 2026-06-27
  */
 @Data
 @Accessors(chain = true)
@@ -50,13 +50,21 @@ public class QueryUserParam {
     LocalDateTime createdAtEx;
 
     /**
-     *
      */
     Integer offset;
 
     /**
-     *
      */
     Integer limit;
+
+    /**
+     * 排序字段
+     */
+    String sortBy;
+
+    /**
+     * 是否正序
+     */
+    Boolean isAsc;
 
 }

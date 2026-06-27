@@ -9,17 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import __NAMESPACE__.annotation.WebApiAuth;
 import __NAMESPACE__.common.RequestResult;
+import __NAMESPACE__.dto.req.CreateUserReq;
 import __NAMESPACE__.dto.req.DeleteUserReq;
 import __NAMESPACE__.dto.req.GetUserDetailReq;
 import __NAMESPACE__.dto.req.GrantRolesReq;
 import __NAMESPACE__.dto.req.ListUserRolesReq;
 import __NAMESPACE__.dto.req.ListUsersReq;
-import __NAMESPACE__.dto.req.SaveUserReq;
+import __NAMESPACE__.dto.req.UpdateUserReq;
+import __NAMESPACE__.dto.resp.CreateUserResp;
 import __NAMESPACE__.dto.resp.GetUserDetailResp;
 import __NAMESPACE__.dto.resp.ListUsersResp;
 import __NAMESPACE__.dto.resp.PageResult;
 import __NAMESPACE__.dto.resp.RoleBriefResp;
-import __NAMESPACE__.dto.resp.SaveUserResp;
 import __NAMESPACE__.enums.PermissionEnum;
 import __NAMESPACE__.service.UserGrantService;
 import __NAMESPACE__.service.UserService;
@@ -42,10 +43,20 @@ public class UserController {
     /**
      * 创建用户
      */
-    @WebApiAuth({PermissionEnum.CREATE_USER, PermissionEnum.UPDATE_USER})
-    @PostMapping("saveUser")
-    public RequestResult<SaveUserResp> saveUser(@RequestBody @Valid SaveUserReq req) {
-        return RequestResult.success(userService.saveUser(req));
+    @WebApiAuth(PermissionEnum.CREATE_USER)
+    @PostMapping("createUser")
+    public RequestResult<CreateUserResp> createUser(@RequestBody @Valid CreateUserReq req) {
+        return RequestResult.success(userService.createUser(req));
+    }
+
+    /**
+     * 更新用户
+     */
+    @WebApiAuth(PermissionEnum.UPDATE_USER)
+    @PostMapping("updateUser")
+    public RequestResult<Void> updateUser(@RequestBody @Valid UpdateUserReq req) {
+        userService.updateUser(req);
+        return RequestResult.success();
     }
 
     /**

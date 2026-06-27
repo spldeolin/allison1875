@@ -8,15 +8,17 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import __NAMESPACE__.common.BizException;
+import __NAMESPACE__.common.CurrentUser;
 import __NAMESPACE__.dto.param.QueryRoleParam;
+import __NAMESPACE__.dto.req.CreateRoleReq;
 import __NAMESPACE__.dto.req.DeleteRoleReq;
 import __NAMESPACE__.dto.req.GetRoleDetailReq;
 import __NAMESPACE__.dto.req.ListRolesReq;
-import __NAMESPACE__.dto.req.SaveRoleReq;
+import __NAMESPACE__.dto.req.UpdateRoleReq;
+import __NAMESPACE__.dto.resp.CreateRoleResp;
 import __NAMESPACE__.dto.resp.GetRoleDetailResp;
 import __NAMESPACE__.dto.resp.ListRolesResp;
 import __NAMESPACE__.dto.resp.PageResult;
-import __NAMESPACE__.dto.resp.SaveRoleResp;
 import __NAMESPACE__.entity.*;
 import __NAMESPACE__.mapper.RoleMapper;
 import __NAMESPACE__.service.RoleService;
@@ -32,22 +34,31 @@ public class RoleServiceImpl implements RoleService {
     @Resource
     private RoleMapper roleMapper;
 
-    private final Long queryRoleTotal = 0L;
+    @Transactional
+    @Override
+    public CreateRoleResp createRole(CreateRoleReq req) {
+        RoleEntity role = new RoleEntity();
+        role.setRoleCode(UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
+        RoleEntity existRoleForRoleName = roleMapper.queryRole(null, req.getRoleName());
+        if (existRoleForRoleName != null) {
+            throw new BizException("角色名称已存在");
+        }
+        role.setRoleName(req.getRoleName());
+        role.setDescription(req.getDescription());
+        role.setCreatedAt(LocalDateTime.now());
+        role.setCreatedBy(CurrentUser.getUsername());
+        role.setUpdatedAt(LocalDateTime.now());
+        role.setUpdatedBy(CurrentUser.getUsername());
+        roleMapper.insert(role);
+        return new CreateRoleResp().setRoleCode(role.getRoleCode());
+    }
 
     @Transactional
     @Override
-    public SaveRoleResp saveRole(SaveRoleReq req) {
-        boolean toCreate = req.getRoleCode() == null;
-        RoleEntity role;
-        if (toCreate) {
-            role = new RoleEntity();
-            role.setRoleCode(UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
-            role.setCreatedAt(LocalDateTime.now());
-        } else {
-            role = roleMapper.queryByRoleCode(req.getRoleCode());
-            if (role == null) {
-                throw new BizException("角色不存在或是已被删除");
-            }
+    public void updateRole(UpdateRoleReq req) {
+        RoleEntity role = roleMapper.queryByRoleCode(req.getRoleCode());
+        if (role == null) {
+            throw new BizException("角色不存在或是已被删除");
         }
         RoleEntity existRoleForRoleName = roleMapper.queryRole(req.getRoleCode(), req.getRoleName());
         if (existRoleForRoleName != null) {
@@ -56,26 +67,24 @@ public class RoleServiceImpl implements RoleService {
         role.setRoleName(req.getRoleName());
         role.setDescription(req.getDescription());
         role.setUpdatedAt(LocalDateTime.now());
-        if (toCreate) {
-            roleMapper.insert(role);
-        } else {
-            roleMapper.updateById(role);
-        }
-        return new SaveRoleResp().setRoleCode(role.getRoleCode());
+        role.setUpdatedBy(CurrentUser.getUsername());
+        roleMapper.updateById(role);
     }
 
     @Override
     public PageResult<ListRolesResp> listRoles(ListRolesReq req) {
-    final QueryRoleParam queryRoleParam = new QueryRoleParam();
-    queryRoleParam.setRoleCode(req.getRoleCode());
-    queryRoleParam.setRoleName(req.getRoleName());
-    queryRoleParam.setDescription(req.getDescription());
-    queryRoleParam.setCreatedAt(req.getCreatedAtStart() == null ? null : req.getCreatedAtStart());
-    queryRoleParam.setCreatedAtEx(req.getCreatedAtEnd() == null ? null : req.getCreatedAtEnd());
-    queryRoleParam.setOffset((req.getPageNum() - 1) * req.getPageSize());
-    queryRoleParam.setLimit(req.getPageSize());
-    long queryRoleExTotal = roleMapper.countRole(queryRoleParam);
-    List<RoleEntity> roles = roleMapper.queryRoleEx(queryRoleParam);
+        final QueryRoleParam queryRoleParam = new QueryRoleParam();
+        queryRoleParam.setRoleCode(req.getRoleCode());
+        queryRoleParam.setRoleName(req.getRoleName());
+        queryRoleParam.setDescription(req.getDescription());
+        queryRoleParam.setCreatedAt(req.getCreatedAtStart() == null ? null : req.getCreatedAtStart());
+        queryRoleParam.setCreatedAtEx(req.getCreatedAtEnd() == null ? null : req.getCreatedAtEnd());
+        queryRoleParam.setOffset((req.getPageNum() - 1) * req.getPageSize());
+        queryRoleParam.setLimit(req.getPageSize());
+        queryRoleParam.setSortBy(req.getSortBy() != null ? req.getSortBy().getCode() : null);
+        queryRoleParam.setIsAsc(req.getIsAsc());
+        long queryRoleTotal = roleMapper.countRole(queryRoleParam);
+        List<RoleEntity> roles = roleMapper.queryRoleEx(queryRoleParam);
         if (roles.isEmpty()) {
             return PageResult.empty();
         }
@@ -96,12 +105,10 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public GetRoleDetailResp getRoleDetail(GetRoleDetailReq req) {
-        //查询角色
         RoleEntity role = roleMapper.queryByRoleCode(req.getRoleCode());
         if (role == null) {
             throw new RuntimeException("角色不存在或是已被删除");
         }
-        //构建返回值
         GetRoleDetailResp result = new GetRoleDetailResp();
         result.setRoleCode(role.getRoleCode());
         result.setRoleName(role.getRoleName());
@@ -114,6 +121,6 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public void deleteRole(DeleteRoleReq req) {
-    int deleteRoleCount = roleMapper.deleteRole(req.getRoleCodes());
+        int deleteRoleCount = roleMapper.deleteRole(req.getRoleCodes());
     }
 }

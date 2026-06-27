@@ -268,8 +268,28 @@
             AND created_at &lt;= #{createdAtEx}
         </if>
         </where>
-        ORDER BY
-            updated_at DESC
+        <choose>
+          <when test="sortBy != null">
+            ORDER BY
+            <choose>
+              <when test="sortBy == 'roleCode'">role_code</when>
+              <when test="sortBy == 'roleName'">role_name</when>
+              <when test="sortBy == 'description'">description</when>
+              <when test="sortBy == 'createdAt'">created_at</when>
+              <when test="sortBy == 'updatedAt'">updated_at</when>
+              <when test="sortBy == 'createdBy'">created_by</when>
+              <when test="sortBy == 'updatedBy'">updated_by</when>
+              <otherwise>id</otherwise>
+            </choose>
+            <choose>
+              <when test="isAsc != null and isAsc">ASC</when>
+              <otherwise>DESC</otherwise>
+            </choose>
+          </when>
+          <otherwise>
+            ORDER BY id DESC
+          </otherwise>
+        </choose>
         LIMIT #{offset}, #{limit}
     </select>
 

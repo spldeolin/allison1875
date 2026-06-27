@@ -9,16 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import __NAMESPACE__.annotation.WebApiAuth;
 import __NAMESPACE__.common.RequestResult;
+import __NAMESPACE__.dto.req.CreateRoleReq;
 import __NAMESPACE__.dto.req.DeleteRoleReq;
 import __NAMESPACE__.dto.req.GetRoleDetailReq;
 import __NAMESPACE__.dto.req.GrantPermissionsReq;
 import __NAMESPACE__.dto.req.ListRolePermissionsReq;
 import __NAMESPACE__.dto.req.ListRolesReq;
-import __NAMESPACE__.dto.req.SaveRoleReq;
+import __NAMESPACE__.dto.req.UpdateRoleReq;
+import __NAMESPACE__.dto.resp.CreateRoleResp;
 import __NAMESPACE__.dto.resp.GetRoleDetailResp;
 import __NAMESPACE__.dto.resp.ListRolesResp;
 import __NAMESPACE__.dto.resp.PageResult;
-import __NAMESPACE__.dto.resp.SaveRoleResp;
 import __NAMESPACE__.enums.PermissionEnum;
 import __NAMESPACE__.service.RoleGrantService;
 import __NAMESPACE__.service.RoleService;
@@ -41,10 +42,20 @@ public class RoleController {
     /**
      * 创建角色
      */
-    @WebApiAuth({PermissionEnum.CREATE_ROLE, PermissionEnum.UPDATE_ROLE})
-    @PostMapping("saveRole")
-    public RequestResult<SaveRoleResp> saveRole(@RequestBody @Valid SaveRoleReq req) {
-        return RequestResult.success(roleService.saveRole(req));
+    @WebApiAuth(PermissionEnum.CREATE_ROLE)
+    @PostMapping("createRole")
+    public RequestResult<CreateRoleResp> createRole(@RequestBody @Valid CreateRoleReq req) {
+        return RequestResult.success(roleService.createRole(req));
+    }
+
+    /**
+     * 更新角色
+     */
+    @WebApiAuth(PermissionEnum.UPDATE_ROLE)
+    @PostMapping("updateRole")
+    public RequestResult<Void> updateRole(@RequestBody @Valid UpdateRoleReq req) {
+        roleService.updateRole(req);
+        return RequestResult.success();
     }
 
     /**

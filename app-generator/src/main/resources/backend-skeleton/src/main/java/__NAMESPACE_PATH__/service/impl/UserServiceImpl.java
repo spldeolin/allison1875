@@ -14,16 +14,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import __NAMESPACE__.common.BizException;
+import __NAMESPACE__.common.CurrentUser;
 import __NAMESPACE__.dto.param.QueryUserParam;
+import __NAMESPACE__.dto.req.CreateUserReq;
 import __NAMESPACE__.dto.req.DeleteUserReq;
 import __NAMESPACE__.dto.req.GetUserDetailReq;
 import __NAMESPACE__.dto.req.ListUsersReq;
-import __NAMESPACE__.dto.req.SaveUserReq;
+import __NAMESPACE__.dto.req.UpdateUserReq;
+import __NAMESPACE__.dto.resp.CreateUserResp;
 import __NAMESPACE__.dto.resp.GetUserDetailResp;
 import __NAMESPACE__.dto.resp.ListUsersResp;
 import __NAMESPACE__.dto.resp.PageResult;
 import __NAMESPACE__.dto.resp.RoleBriefResp;
-import __NAMESPACE__.dto.resp.SaveUserResp;
 import __NAMESPACE__.entity.RoleEntity;
 import __NAMESPACE__.entity.RolePermissionEntity;
 import __NAMESPACE__.entity.UserEntity;
@@ -58,18 +60,58 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    public CreateUserResp createUser(CreateUserReq req) {
+        UserEntity user = new UserEntity();
+        user.setUserCode(UuidUtils.generateShort());
+        user.setUsername(req.getUsername());
+        user.setPassword(BCrypt.hashpw(req.getPassword(), BCrypt.gensalt()));
+        user.setNickName(req.getNickName());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedBy(CurrentUser.getUsername());
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(CurrentUser.getUsername());
+        UserEntity existUserForUsername = userMapper.queryUser(null, req.getUsername());
+        if (existUserForUsername != null) {
+            throw new BizException("用户名已存在");
+        }
+        userMapper.insert(user);
+        // Auto-assign default role (观察员) to new users
+        RoleEntity defaultRole = roleMapper.queryByRoleName(UserPermissionInitializer.getDefaultRoleName());
+        if (defaultRole != null) {
+            UserRoleEntity userRole = new UserRoleEntity();
+            userRole.setUserId(user.getId());
+            userRole.setRoleId(defaultRole.getId());
+            userRole.setCreatedAt(LocalDateTime.now());
+            userRoleMapper.insert(userRole);
+        }
+        return new CreateUserResp().setUserCode(user.getUserCode());
+    }
+
+    @Transactional
+    @Override
+    public void updateUser(UpdateUserReq req) {
+        UserEntity user = userMapper.queryByUserCode(req.getUserCode());
+        if (user == null) {
+            throw new BizException("用户不存在或是已被删除");
+        }
+        user.setNickName(req.getNickName());
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(CurrentUser.getUsername());
+        userMapper.updateById(user);
+    }
+
+    @Transactional
+    @Override
     public void deleteUser(DeleteUserReq req) {
         int deleteUserCount = userMapper.deleteUser(req.getUserCodes());
     }
 
     @Override
     public GetUserDetailResp getUserDetail(GetUserDetailReq req) {
-        //查询用户
         UserEntity user = userMapper.queryByUserCode(req.getUserCode());
         if (user == null) {
             throw new RuntimeException("用户不存在或是已被删除");
         }
-        //构建返回值
         GetUserDetailResp result = new GetUserDetailResp();
         result.setUserCode(user.getUserCode());
         result.setUsername(user.getUsername());
@@ -92,6 +134,8 @@ public class UserServiceImpl implements UserService {
         queryUserParam.setCreatedAtEx(req.getCreatedAtEnd() == null ? null : req.getCreatedAtEnd());
         queryUserParam.setOffset((req.getPageNum() - 1) * req.getPageSize());
         queryUserParam.setLimit(req.getPageSize());
+        queryUserParam.setSortBy(req.getSortBy() != null ? req.getSortBy().getCode() : null);
+        queryUserParam.setIsAsc(req.getIsAsc());
         long queryUserTotal = userMapper.countUser(queryUserParam);
         List<UserEntity> users = userMapper.queryUserEx(queryUserParam);
         if (users.isEmpty()) {
@@ -151,53 +195,6 @@ public class UserServiceImpl implements UserService {
             dto.setGrantedPermissions(new ArrayList<>(permSet));
         }
         return PageResult.of(queryUserTotal, dtos);
-    }
-
-    @Transactional
-    @Override
-    public SaveUserResp saveUser(SaveUserReq req) {
-        boolean toCreate = req.getUserCode() == null;
-        UserEntity user;
-        if (toCreate) {
-            user = new UserEntity();
-            user.setUserCode(UuidUtils.generateShort());
-            if (!StringUtils.hasText(req.getUsername())) {
-                throw new IllegalArgumentException("用户名不能为空");
-            }
-            user.setUsername(req.getUsername());
-            if (!StringUtils.hasText(req.getPassword())) {
-                throw new IllegalArgumentException("密码不能为空");
-            }
-            user.setPassword(BCrypt.hashpw(req.getPassword(), BCrypt.gensalt()));
-            user.setCreatedAt(LocalDateTime.now());
-            UserEntity existUserForUsername = userMapper.queryUser(req.getUserCode(),
-                    req.getUsername());
-            if (existUserForUsername != null) {
-                throw new BizException("用户名已存在");
-            }
-        } else {
-            user = userMapper.queryByUserCode(req.getUserCode());
-            if (user == null) {
-                throw new BizException("用户不存在或是已被删除");
-            }
-        }
-        user.setNickName(req.getNickName());
-        user.setUpdatedAt(LocalDateTime.now());
-        if (toCreate) {
-            userMapper.insert(user);
-            // Auto-assign default role (观察员) to new users
-            RoleEntity defaultRole = roleMapper.queryByRoleName(UserPermissionInitializer.getDefaultRoleName());
-            if (defaultRole != null) {
-                UserRoleEntity userRole = new UserRoleEntity();
-                userRole.setUserId(user.getId());
-                userRole.setRoleId(defaultRole.getId());
-                userRole.setCreatedAt(LocalDateTime.now());
-                userRoleMapper.insert(userRole);
-            }
-        } else {
-            userMapper.updateById(user);
-        }
-        return new SaveUserResp().setUserCode(user.getUserCode());
     }
 
 }
