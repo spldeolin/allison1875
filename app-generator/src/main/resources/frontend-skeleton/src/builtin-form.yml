@@ -79,3 +79,45 @@ menus:
       indices:
         - itemNames: [ roleName ]
           isUnique: true
+
+  - group: 系统
+    icon: 1
+    order: 3
+    form:
+      name: AuditLog
+      title: 审计日志
+      items:
+        - type: select
+          name: operationType
+          title: 操作类型
+          isNonVoid: true
+          canInputOnInit: false
+          canInputOnEdit: false
+          options:
+            - code: dummy1
+              title: 占位1
+            - code: dummy2
+              title: 占位2
+
+        - type: onOff
+          name: success
+          title: 是否成功
+          isNonVoid: true
+          canInputOnInit: false
+          canInputOnEdit: false
+
+        - type: text
+          name: content
+          title: 操作内容
+          isNonVoid: false
+          canInputOnInit: false
+          canInputOnEdit: false
+          isMultilineOrRich: true
+
+        - type: text
+          name: failReason
+          title: 失败原因
+          isNonVoid: false
+          canInputOnInit: false
+          canInputOnEdit: false
+          maxLength: 512
