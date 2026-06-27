@@ -363,8 +363,11 @@ public class AppGenerator implements Allison1875Game {
         Allison1875.prepareDomain(fgConfig, null);
 
         Module fgModule = new FormGeneratorModule(fgConfig);
-        boolean hasUserForm = parseBuiltinMenus().stream()
+        List<MenuDef> builtinMenusForFg = parseBuiltinMenus();
+        boolean hasUserForm = builtinMenusForFg.stream()
                 .anyMatch(menu -> "User".equals(menu.getForm().getName()));
+        boolean hasAuditLogForm = builtinMenusForFg.stream()
+                .anyMatch(menu -> "AuditLog".equals(menu.getForm().getName()));
         Module combined;
         if (hasUserForm) {
             Module expansionOverride = new AbstractModule() {
@@ -373,7 +376,7 @@ public class AppGenerator implements Allison1875Game {
                     bind(CommonItemsExpansionService.class)
                             .toInstance(new AppGeneratorCommonItemsExpansionServiceImpl());
                     bind(MutationExpansionService.class)
-                            .toInstance(new AppGeneratorMutationExpansionServiceImpl(ns));
+                            .toInstance(new AppGeneratorMutationExpansionServiceImpl(ns, hasAuditLogForm));
                 }
             };
             combined = Modules.override(fgModule).with(expansionOverride);
