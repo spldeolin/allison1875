@@ -16,6 +16,8 @@ public interface MutationExpansionService {
 
     void expandUpdateMethodBody(FormDef form, BlockStmt body);
 
+    void expandDeleteMethodBody(FormDef form, BlockStmt body);
+
     void expandListReqFields(FormDef form, ClassOrInterfaceDeclaration reqCoid);
 
     void expandListSetterStatements(FormDef form, BlockStmt body, String entityVarName);

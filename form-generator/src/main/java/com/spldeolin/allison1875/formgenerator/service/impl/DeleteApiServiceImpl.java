@@ -18,6 +18,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,6 +33,9 @@ public class DeleteApiServiceImpl implements DeleteApiService {
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
+
+    @Inject
+    private MutationExpansionService mutationExpansionService;
 
     @Override
     public InitializerDeclaration generateDeleteInitDec(FormDef form) {
@@ -64,6 +68,7 @@ public class DeleteApiServiceImpl implements DeleteApiService {
                             associationForm.getName(),
                             associationForm.getBizIdName(), associationForm.getBizIdGetterName()));
                 });
+        mutationExpansionService.expandDeleteMethodBody(form, body);
         return body;
     }
 

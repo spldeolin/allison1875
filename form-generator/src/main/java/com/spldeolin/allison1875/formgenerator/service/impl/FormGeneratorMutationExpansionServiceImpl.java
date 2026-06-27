@@ -19,6 +19,10 @@ public class FormGeneratorMutationExpansionServiceImpl implements MutationExpans
     }
 
     @Override
+    public void expandDeleteMethodBody(FormDef form, BlockStmt body) {
+    }
+
+    @Override
     public void expandListReqFields(FormDef form, ClassOrInterfaceDeclaration reqCoid) {
     }
 
