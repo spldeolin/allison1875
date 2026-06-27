@@ -46,6 +46,10 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
     }
 
     @Override
+    public void expandDeleteMethodBody(FormDef form, BlockStmt body) {
+    }
+
+    @Override
     public void expandListSetterStatements(FormDef form, BlockStmt body, String entityVarName) {
     }
 
