@@ -124,22 +124,22 @@ public class TimeItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listServiceImplFile.exists(), "ListEventsServiceImpl file should be generated");
         String listServiceImplContent = new String(Files.readAllBytes(listServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(listServiceImplContent.contains("eventMapper.countEvent("),
-                "List service should call eventMapper.countEvent");
-        assertTrue(listServiceImplContent.contains("eventMapper.queryEvent("),
-                "List service should call eventMapper.queryEvent");
+        assertTrue(listServiceImplContent.contains("eventMapper.countListEvents("),
+                "List service should call eventMapper.countListEvents");
+        assertTrue(listServiceImplContent.contains("eventMapper.listEvents("),
+                "List service should call eventMapper.listEvents");
         // Param 包含 time 字段的 Start/End setter（query-transformer 使用 xxx/xxxEx 命名）
-        assertTrue(listServiceImplContent.contains("queryEventParam.setEventDate("),
+        assertTrue(listServiceImplContent.contains("listEventsParam.setEventDate("),
                 "Param should set eventDate (Start) from req (time field)");
-        assertTrue(listServiceImplContent.contains("queryEventParam.setEventDateEx("),
+        assertTrue(listServiceImplContent.contains("listEventsParam.setEventDateEx("),
                 "Param should set eventDateEx (End) from req (time field)");
-        assertTrue(listServiceImplContent.contains("queryEventParam.setEventTime("),
+        assertTrue(listServiceImplContent.contains("listEventsParam.setEventTime("),
                 "Param should set eventTime (Start) from req (time field)");
-        assertTrue(listServiceImplContent.contains("queryEventParam.setEventTimeEx("),
+        assertTrue(listServiceImplContent.contains("listEventsParam.setEventTimeEx("),
                 "Param should set eventTimeEx (End) from req (time field)");
-        assertTrue(listServiceImplContent.contains("queryEventParam.setPublishTime("),
+        assertTrue(listServiceImplContent.contains("listEventsParam.setPublishTime("),
                 "Param should set publishTime (Start) from req (time field)");
-        assertTrue(listServiceImplContent.contains("queryEventParam.setPublishTimeEx("),
+        assertTrue(listServiceImplContent.contains("listEventsParam.setPublishTimeEx("),
                 "Param should set publishTimeEx (End) from req (time field)");
 
         // === 验证没有生成 api-docs 目录 ===

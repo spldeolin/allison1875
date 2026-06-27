@@ -107,11 +107,11 @@ public class TextItemItTest extends FormGeneratorItBaseTest {
         String listServiceImplContent = new String(Files.readAllBytes(listServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
         // query-transformer 将 Design Chain 转换为 Mapper 调用
-        assertTrue(listServiceImplContent.contains("noteMapper.countNote("),
-                "List service should call noteMapper.countNote for pagination");
-        assertTrue(listServiceImplContent.contains("noteMapper.queryNote("),
-                "List service should call noteMapper.queryNote for query");
-        // QueryNoteParam 中包含所有 text 字段的 setter
+        assertTrue(listServiceImplContent.contains("noteMapper.countListNotes("),
+                "List service should call noteMapper.countListNotes for pagination");
+        assertTrue(listServiceImplContent.contains("noteMapper.listNotes("),
+                "List service should call noteMapper.listNotes for query");
+        // ListNotesParam 中包含所有 text 字段的 setter
         assertTrue(listServiceImplContent.contains("setNoteTitle(req.getNoteTitle())"),
                 "Param should set noteTitle from req (text field)");
         assertTrue(listServiceImplContent.contains("setNoteContent(req.getNoteContent())"),

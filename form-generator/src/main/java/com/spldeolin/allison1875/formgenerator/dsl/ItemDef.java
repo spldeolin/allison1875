@@ -1,6 +1,6 @@
 package com.spldeolin.allison1875.formgenerator.dsl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.spldeolin.allison1875.formgenerator.dsl.constraint.LowerCamel;
@@ -70,7 +70,9 @@ public abstract class ItemDef {
      */
     public abstract ItemType getType();
 
-    @JsonIgnore
+    /**
+     * 内部标记，非DSL字段。由CommonItemsExpansionService设置，用于getNonAuditedItems()过滤。
+     */
     Boolean isBuiltinField;
 
 }

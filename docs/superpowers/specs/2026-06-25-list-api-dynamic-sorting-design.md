@@ -273,3 +273,59 @@ SQL: SELECT ... FROM t_order WHERE ... ORDER BY amount ASC LIMIT ?, ?
 3. Mapper XML 包含动态排序 `<choose>` 片段
 4. ParamDTO 包含 sortBy 和 isAsc 字段
 5. Service 层代码正确传递排序参数到 mapper 调用
+
+## 前端骨架变更（frontend-skeleton）
+
+### 13. request-builder.ts
+
+`buildListRequest` 中 sort 参数输出字段名改为与后端 ReqDTO 对齐：
+
+| 原字段名 | 新字段名 | 值 |
+|---------|---------|-----|
+| `sortField` | `sortBy` | `sort.field`（即 item.name，camelCase） |
+| `sortDirection` | `isAsc` | `sort.direction === 'asc'`（boolean） |
+
+当 `sort` 为 undefined 时两个字段都不传。
+
+### 14. useCrudPage.ts
+
+新增响应式状态与方法：
+
+```typescript
+const sortState = ref<SortInput | null>(null)
+
+function handleSortChange(sorter: { columnKey: string; order: 'ascend' | 'descend' | false } | null) {
+  // 更新 sortState，重置到第一页，重新查询
+}
+```
+
+- `fetchData` 调用 `buildListRequest` 时传入 `sortState.value ?? undefined`
+- schema 切换时重置 `sortState` 为 null
+
+### 15. DataTable.vue
+
+利用 NDataTable 原生 `sorter` + `@update:sorter` 能力：
+
+- **可排序判断**：item.type 为 `number`、`onOff`、`text`、`time` 的列 + `createdAt`、`updatedAt` 固定列 + hasUserForm 时的 `createdBy`、`updatedBy` 列
+- **不可排序**：`secret`、`select`、`multiSelect` 类型的列
+- 可排序列定义中添加 `sorter: true`，NDataTable 自动渲染排序指示器
+- 排序循环：无序 → ascend → descend → 无序（NDataTable 默认行为）
+- `@update:sorter` 触发 `handleSorterChange`，标准化后 emit `sortChange` 事件
+
+### 16. CrudPage.vue
+
+将 DataTable 的 `@sort-change` 事件连接到 `useCrudPage` 暴露的 `handleSortChange` 方法。
+
+### 前端数据流
+
+```
+用户点击列头 "金额 ↑"
+    ↓ NDataTable @update:sorter → { columnKey: 'amount', order: 'ascend' }
+DataTable.handleSorterChange → emit('sortChange', { columnKey: 'amount', order: 'ascend' })
+    ↓
+CrudPage @sort-change → useCrudPage.handleSortChange()
+    ↓ sortState = { field: 'amount', direction: 'asc' }, pagination.page = 1
+fetchData → buildListRequest(..., { field: 'amount', direction: 'asc' })
+    ↓
+请求体: { ..., sortBy: 'amount', isAsc: true, pageNum: 1 }
+```

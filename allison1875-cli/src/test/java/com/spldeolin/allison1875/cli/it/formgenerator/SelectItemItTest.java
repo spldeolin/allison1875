@@ -161,10 +161,10 @@ public class SelectItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listServiceImplFile.exists(), "ListProductsServiceImpl file should be generated");
         String listServiceImplContent = new String(Files.readAllBytes(listServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(listServiceImplContent.contains("productMapper.countProduct("),
-                "List service should call productMapper.countProduct");
-        assertTrue(listServiceImplContent.contains("productMapper.queryProduct("),
-                "List service should call productMapper.queryProduct");
+        assertTrue(listServiceImplContent.contains("productMapper.countListProducts("),
+                "List service should call productMapper.countListProducts");
+        assertTrue(listServiceImplContent.contains("productMapper.listProducts("),
+                "List service should call productMapper.listProducts");
 
         // === 验证没有生成 api-docs 目录 ===
         File apiDocsDir = new File(basedir, "api-docs");

@@ -7,6 +7,7 @@ import static com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType.UPDATE;
 
 import java.util.Collections;
 import java.util.List;
+import org.atteo.evo.inflector.English;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -142,7 +143,7 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
 
         // 加入分页total，避免在调用query-transformer前因total不存在而编译错误
                 field = parseFieldDeclaration(
-                        "private final Long query%sTotal = 0L;", form.getName());
+                        "private final Long %sTotal = 0L;", "list" + English.plural(form.getName()));
         retval.add(field);
 
         return retval;

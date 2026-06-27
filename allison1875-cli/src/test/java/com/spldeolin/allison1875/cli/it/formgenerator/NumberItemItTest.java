@@ -119,10 +119,10 @@ public class NumberItemItTest extends FormGeneratorItBaseTest {
         assertTrue(listServiceImplFile.exists(), "ListProductsServiceImpl file should be generated");
         String listServiceImplContent = new String(Files.readAllBytes(listServiceImplFile.toPath()),
                 StandardCharsets.UTF_8);
-        assertTrue(listServiceImplContent.contains("productMapper.countProduct("),
-                "List service should call productMapper.countProduct for pagination");
-        assertTrue(listServiceImplContent.contains("productMapper.queryProduct("),
-                "List service should call productMapper.queryProduct for query");
+        assertTrue(listServiceImplContent.contains("productMapper.countListProducts("),
+                "List service should call productMapper.countListProducts for pagination");
+        assertTrue(listServiceImplContent.contains("productMapper.listProducts("),
+                "List service should call productMapper.listProducts for query");
         // Param 包含 number 字段
         assertTrue(listServiceImplContent.contains("setPrice("),
                 "Param should set price from req (number field)");

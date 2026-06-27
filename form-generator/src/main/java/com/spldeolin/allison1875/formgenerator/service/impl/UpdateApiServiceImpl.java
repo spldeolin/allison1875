@@ -54,7 +54,7 @@ public class UpdateApiServiceImpl implements UpdateApiService {
         // req declaration: bizId field FIRST, then canInputOnEdit fields
         ClassOrInterfaceDeclaration reqCoid = new ClassOrInterfaceDeclaration().setName("req");
         FieldDeclaration bizIdField = parseFieldDeclaration(
-                "String " + StringUtils.uncapitalize(form.getName()) + "Code;");
+                "@javax.validation.constraints.NotNull String " + StringUtils.uncapitalize(form.getName()) + "Code;");
         JavadocUtils.setJavadoc(bizIdField, form.getTitle() + "的业务ID", null);
         reqCoid.addMember(bizIdField);
         for (ItemDef item : form.getItems()) {

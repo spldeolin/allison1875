@@ -32,8 +32,8 @@ export function buildListRequest(
   if (formState.createdAtStart != null) out.createdAtStart = formState.createdAtStart
   if (formState.createdAtEnd != null) out.createdAtEnd = formState.createdAtEnd
   if (sort) {
-    out.sortField = sort.field
-    out.sortDirection = sort.direction
+    out.sortBy = sort.field
+    out.isAsc = sort.direction === 'asc'
   }
   return out
 }

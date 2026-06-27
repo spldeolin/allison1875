@@ -28,6 +28,9 @@ public class FormGeneratorMapperLayerExpansionServiceImpl implements MapperLayer
     @Override
     public ExpandParamRetval expandParam(ChainAnalysisDTO chainAnalysis) {
         ExpandParamRetval retval = new ExpandParamRetval();
+        if (chainAnalysis.getMethodName() == null || !chainAnalysis.getMethodName().startsWith("list")) {
+            return retval;
+        }
         retval.getExpandedFields().add(new ExpandedFieldDTO()
                 .setTypeQualifier("java.lang.String")
                 .setFieldName("sortBy")
@@ -43,6 +46,9 @@ public class FormGeneratorMapperLayerExpansionServiceImpl implements MapperLayer
 
     @Override
     public List<String> expandOrderByLines(ChainAnalysisDTO chainAnalysis, DesignMetaDTO designMeta, boolean isJoin) {
+        if (chainAnalysis.getMethodName() == null || !chainAnalysis.getMethodName().startsWith("list")) {
+            return Collections.emptyList();
+        }
         Map<String, PropertyDTO> properties = designMeta.getProperties();
         List<String> lines = Lists.newArrayList();
         lines.add("<choose>");

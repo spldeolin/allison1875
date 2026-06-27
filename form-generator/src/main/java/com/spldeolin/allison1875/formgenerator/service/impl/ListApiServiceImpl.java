@@ -179,7 +179,7 @@ public class ListApiServiceImpl implements ListApiService {
     public BlockStmt generateMethodBody(FormDef form) {
         BlockStmt body = new BlockStmt();
 
-        String designChain = form.getName() + "Design.select().where()";
+        String designChain = form.getName() + "Design.select(\"list" + English.plural(form.getName()) + "\").where()";
         designChain += "." + form.getBizIdName() + ".in(req." + form.getBizIdGetterName() + "())";
         for (ItemDef item : form.getItems()) {
             if (item == form.getItems().get(0)) {
@@ -221,7 +221,8 @@ public class ListApiServiceImpl implements ListApiService {
         forEachStmt.setBody(forEachBody);
         body.addStatement(forEachStmt);
         body.addStatement(parseStatement(
-                "return " + "PageResult.of(${total}, ${dtos})".replace("${total}", "query" + form.getName() + "Total")
+                "return " + "PageResult.of(${total}, ${dtos})"
+                        .replace("${total}", "list" + English.plural(form.getName()) + "Total")
                         .replace("${dtos}", "dtos") + ";"));
         return body;
     }

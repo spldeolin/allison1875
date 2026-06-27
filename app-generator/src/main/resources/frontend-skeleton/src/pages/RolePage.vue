@@ -19,11 +19,11 @@ const message = useMessage()
 
 const {
   searchParams, tableData, tableLoading, pagination,
-  checkedRowKeys, editingRowKey, bizKey,
+  checkedRowKeys, editingRowKey, bizKey, currentSort,
   modalVisible, modalMode, formData, submitLoading,
   fetchData, handleSearch, handleReset,
   handleCreate, handleEdit, handleDelete, handleBatchDelete,
-  handleSubmit, handlePaginationUpdate,
+  handleSubmit, handlePaginationUpdate, handleSortChange,
 } = useCrudPage(() => props.schema)
 
 // ─── Grant Permissions Modal ─────────────────────────────────
@@ -182,6 +182,7 @@ async function handleGrantSubmit() {
         :pagination="pagination"
         :checked-row-keys="checkedRowKeys"
         :permissions="permissions"
+        :current-sort="currentSort"
         :extra-actions="[
           { label: '授予权限', type: 'info', permission: 'GRANT_PERMISSION', onClick: handleOpenGrantModal }
         ]"
@@ -189,6 +190,7 @@ async function handleGrantSubmit() {
         @delete="handleDelete"
         @update:pagination="handlePaginationUpdate"
         @update:checked-row-keys="checkedRowKeys = $event"
+        @sort-change="handleSortChange"
       />
     </div>
     <EditModal

@@ -13,11 +13,11 @@ const props = defineProps<{
 
 const {
   searchParams, tableData, tableLoading, pagination,
-  checkedRowKeys, editingRowKey, bizKey,
+  checkedRowKeys, editingRowKey, bizKey, currentSort,
   modalVisible, modalMode, formData, submitLoading,
   handleSearch, handleReset,
   handleCreate, handleEdit, handleDelete, handleBatchDelete,
-  handleSubmit, handlePaginationUpdate,
+  handleSubmit, handlePaginationUpdate, handleSortChange,
 } = useCrudPage(() => props.schema)
 </script>
 
@@ -72,10 +72,12 @@ const {
         :pagination="pagination"
         :checked-row-keys="checkedRowKeys"
         :permissions="permissions"
+        :current-sort="currentSort"
         @edit="handleEdit"
         @delete="handleDelete"
         @update:pagination="handlePaginationUpdate"
         @update:checked-row-keys="checkedRowKeys = $event"
+        @sort-change="handleSortChange"
       />
     </div>
     <EditModal

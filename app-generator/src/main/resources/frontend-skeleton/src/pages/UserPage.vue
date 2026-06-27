@@ -9,7 +9,7 @@ import {
   NTag, NPopover, NTooltip,
   useMessage
 } from 'naive-ui'
-import type { DataTableColumn } from 'naive-ui'
+import type { DataTableColumn, SortState } from 'naive-ui'
 import request from '@/utils/request'
 import { checkPermission, getPermissionTitle } from '@/directives/usePermission'
 
@@ -21,14 +21,24 @@ const message = useMessage()
 
 const {
   searchParams, tableData, tableLoading, pagination,
-  checkedRowKeys, editingRowKey, bizKey,
+  checkedRowKeys, editingRowKey, bizKey, currentSort,
   modalVisible, modalMode, formData, submitLoading,
   fetchData, handleSearch, handleReset,
   handleCreate, handleEdit, handleDelete, handleBatchDelete,
-  handleSubmit, handlePaginationUpdate,
+  handleSubmit, handlePaginationUpdate, handleSortChange,
 } = useCrudPage(() => props.schema)
 
 // ─── Permission Groups (for popover display) ───────────────
+
+function handleSorterChange(sorter: SortState | SortState[] | null) {
+  const s = Array.isArray(sorter) ? sorter[0] : sorter
+  if (!s || s.order === false) {
+    handleSortChange(null)
+  } else {
+    handleSortChange({ columnKey: s.columnKey as string, order: s.order })
+  }
+}
+
 interface PermissionItem {
   code: string
   title: string
@@ -66,6 +76,13 @@ function getGroupedPermissions(codes: string[]): { groupTitle: string; items: st
 // ─── Table Columns ────────────────────────────────────────
 const MAX_VISIBLE_TAGS = 3
 
+function sortOrderFor(key: string): 'ascend' | 'descend' | false {
+  if (currentSort.value && currentSort.value.columnKey === key) {
+    return currentSort.value.order
+  }
+  return false
+}
+
 function renderTimeCell(val: unknown) {
   if (val === null || val === undefined || val === '') {
     return h('span', { style: 'color: #cbd5e1' }, '-')
@@ -96,12 +113,16 @@ const columns = computed<DataTableColumn[]>(() => {
       key: 'username',
       width: 150,
       fixed: 'left',
+      sorter: true,
+      sortOrder: sortOrderFor('username'),
       ellipsis: { tooltip: true },
     },
     {
       title: '用户昵称',
       key: 'nickName',
       width: 120,
+      sorter: true,
+      sortOrder: sortOrderFor('nickName'),
       ellipsis: { tooltip: true },
     },
     {
@@ -148,6 +169,8 @@ const columns = computed<DataTableColumn[]>(() => {
       title: '最后登录时间',
       key: 'lastLoginAt',
       width: 150,
+      sorter: true,
+      sortOrder: sortOrderFor('lastLoginAt'),
       render(row: Record<string, any>) {
         return renderTimeCell(row.lastLoginAt)
       },
@@ -156,6 +179,8 @@ const columns = computed<DataTableColumn[]>(() => {
       title: '创建时间',
       key: 'createdAt',
       width: 150,
+      sorter: true,
+      sortOrder: sortOrderFor('createdAt'),
       render(row: Record<string, any>) {
         return renderTimeCell(row.createdAt)
       },
@@ -164,12 +189,16 @@ const columns = computed<DataTableColumn[]>(() => {
       title: '创建人',
       key: 'createdBy',
       width: 100,
+      sorter: true,
+      sortOrder: sortOrderFor('createdBy'),
       ellipsis: { tooltip: true },
     },
     {
       title: '更新时间',
       key: 'updatedAt',
       width: 150,
+      sorter: true,
+      sortOrder: sortOrderFor('updatedAt'),
       render(row: Record<string, any>) {
         return renderTimeCell(row.updatedAt)
       },
@@ -178,6 +207,8 @@ const columns = computed<DataTableColumn[]>(() => {
       title: '最近更新人',
       key: 'updatedBy',
       width: 100,
+      sorter: true,
+      sortOrder: sortOrderFor('updatedBy'),
       ellipsis: { tooltip: true },
     },
     {
@@ -341,9 +372,11 @@ async function handleGrantSubmit() {
         :checked-row-keys="checkedRowKeys"
         :row-key="(row: Record<string, any>) => row[bizKey]"
         :scroll-x="1100"
+        remote
         @update:page="(page: number) => handlePaginationUpdate({ ...pagination, page })"
         @update:page-size="(size: number) => handlePaginationUpdate({ ...pagination, pageSize: size, page: 1 })"
         @update:checked-row-keys="checkedRowKeys = $event"
+        @update:sorter="handleSorterChange"
       />
     </div>
     <EditModal
@@ -449,5 +482,45 @@ async function handleGrantSubmit() {
   white-space: nowrap;
   max-width: 360px;
   cursor: default;
+}
+
+:deep(.n-data-table-sorter) {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 18px;
+  width: 14px;
+}
+
+:deep(.n-data-table-sorter .n-base-icon) {
+  display: none !important;
+}
+
+:deep(.n-data-table-sorter::before),
+:deep(.n-data-table-sorter::after) {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+:deep(.n-data-table-sorter::before) {
+  border-bottom: 5px solid #c0c4cc;
+}
+
+:deep(.n-data-table-sorter::after) {
+  border-top: 5px solid #c0c4cc;
+}
+
+:deep(.n-data-table-sorter.n-data-table-sorter--asc::before) {
+  border-bottom-color: var(--n-th-icon-color-active, #18a058);
+}
+
+:deep(.n-data-table-sorter.n-data-table-sorter--desc::after) {
+  border-top-color: var(--n-th-icon-color-active, #18a058);
 }
 </style>

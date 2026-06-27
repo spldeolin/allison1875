@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
 import { NDataTable, NButton, NSpace, NPopconfirm, NTooltip } from 'naive-ui'
-import type { DataTableColumn, PaginationProps } from 'naive-ui'
+import type { DataTableColumn, PaginationProps, SortState } from 'naive-ui'
 import type { ItemDef, AppDef } from '@/schema/types'
 import appDef from '@/app.json'
 import FieldRenderer from './fields/FieldRenderer.vue'
@@ -25,6 +25,8 @@ const props = defineProps<{
   checkedRowKeys?: (string | number)[]
   /** Permission codes for the current form */
   permissions?: { list: string; create: string; update: string; delete: string }
+  /** Current sort state for controlled sort columns */
+  currentSort?: { columnKey: string; order: 'ascend' | 'descend' } | null
   /** Extra action buttons to render in the actions column */
   extraActions?: Array<{
     label: string
@@ -39,11 +41,21 @@ const emit = defineEmits<{
   delete: [row: Record<string, any>]
   'update:pagination': [pagination: PaginationProps]
   'update:checkedRowKeys': [keys: (string | number)[]]
+  sortChange: [sorter: { columnKey: string; order: 'ascend' | 'descend' | false } | null]
 }>()
 
 const visibleItems = computed(() =>
   props.items.filter(item => isVisible(item, 'table'))
 )
+
+const sortableTypes = new Set(['number', 'onOff', 'text', 'time'])
+
+function sortOrderFor(key: string): 'ascend' | 'descend' | false {
+  if (props.currentSort && props.currentSort.columnKey === key) {
+    return props.currentSort.order
+  }
+  return false
+}
 
 /**
  * Render a datetime string ("yyyy-MM-dd HH:mm:ss") as two equal-weight lines.
@@ -91,10 +103,13 @@ const columns = computed<DataTableColumn[]>(() => {
   }
 
   cols.push(...visibleItems.value.map((item, index) => {
+    const isSortable = sortableTypes.has(item.type)
     const isMultiline = item.type === 'text' && (item as any).isMultilineOrRich
     return {
     title: item.title,
     key: item.name,
+    sorter: isSortable ? true : undefined,
+    sortOrder: isSortable ? sortOrderFor(item.name) : undefined,
     ellipsis: isMultiline
       ? { tooltip: { contentStyle: 'max-width: 360px; max-height: 240px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word' } as const }
       : { tooltip: true },
@@ -115,6 +130,8 @@ const columns = computed<DataTableColumn[]>(() => {
     title: '创建时间',
     key: 'createdAt',
     width: 150,
+    sorter: true,
+    sortOrder: sortOrderFor('createdAt'),
     resizable: true,
     render(row: Record<string, any>) {
       return renderTimeCell(row.createdAt)
@@ -125,6 +142,8 @@ const columns = computed<DataTableColumn[]>(() => {
       title: '创建人',
       key: 'createdBy',
       width: 100,
+      sorter: true,
+      sortOrder: sortOrderFor('createdBy'),
       resizable: true,
       ellipsis: { tooltip: true },
     })
@@ -133,6 +152,8 @@ const columns = computed<DataTableColumn[]>(() => {
     title: '更新时间',
     key: 'updatedAt',
     width: 150,
+    sorter: true,
+    sortOrder: sortOrderFor('updatedAt'),
     resizable: true,
     render(row: Record<string, any>) {
       return renderTimeCell(row.updatedAt)
@@ -143,6 +164,8 @@ const columns = computed<DataTableColumn[]>(() => {
       title: '最近更新人',
       key: 'updatedBy',
       width: 100,
+      sorter: true,
+      sortOrder: sortOrderFor('updatedBy'),
       resizable: true,
       ellipsis: { tooltip: true },
     })
@@ -238,6 +261,15 @@ function handleCheckedRowKeysChange(keys: (string | number)[]) {
   emit('update:checkedRowKeys', keys)
 }
 
+function handleSorterChange(sorter: SortState | SortState[] | null) {
+  const s = Array.isArray(sorter) ? sorter[0] : sorter
+  if (!s || s.order === false) {
+    emit('sortChange', null)
+  } else {
+    emit('sortChange', { columnKey: s.columnKey as string, order: s.order })
+  }
+}
+
 const scrollX = computed(() => {
   let width = 50 // selection column
   if (props.bizKey) width += bizKeyColWidth.value
@@ -287,6 +319,7 @@ function rowProps(row: Record<string, any>) {
     @update:page="handlePageChange"
     @update:page-size="handlePageSizeChange"
     @update:checked-row-keys="handleCheckedRowKeysChange"
+    @update:sorter="handleSorterChange"
   />
 </template>
 
@@ -301,5 +334,45 @@ function rowProps(row: Record<string, any>) {
 
 :deep(.n-data-table-tr--checked > .n-data-table-td) {
   background-color: transparent !important;
+}
+
+:deep(.n-data-table-sorter) {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 18px;
+  width: 14px;
+}
+
+:deep(.n-data-table-sorter .n-base-icon) {
+  display: none !important;
+}
+
+:deep(.n-data-table-sorter::before),
+:deep(.n-data-table-sorter::after) {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+:deep(.n-data-table-sorter::before) {
+  border-bottom: 5px solid #c0c4cc;
+}
+
+:deep(.n-data-table-sorter::after) {
+  border-top: 5px solid #c0c4cc;
+}
+
+:deep(.n-data-table-sorter.n-data-table-sorter--asc::before) {
+  border-bottom-color: var(--n-th-icon-color-active, #18a058);
+}
+
+:deep(.n-data-table-sorter.n-data-table-sorter--desc::after) {
+  border-top-color: var(--n-th-icon-color-active, #18a058);
 }
 </style>

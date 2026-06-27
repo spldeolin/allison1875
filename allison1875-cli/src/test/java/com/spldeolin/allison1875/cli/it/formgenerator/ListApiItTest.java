@@ -128,19 +128,19 @@ public class ListApiItTest extends FormGeneratorItBaseTest {
 
         // Design Chain 已被 query-transformer 转换为 Mapper 调用
         // 计数查询
-        assertTrue(listImplContent.contains("itemMapper.countItem("),
-                "List service should call itemMapper.countItem for pagination count");
+        assertTrue(listImplContent.contains("itemMapper.countListItems("),
+                "List service should call itemMapper.countListItems for pagination count");
         // 数据查询
-        assertTrue(listImplContent.contains("itemMapper.queryItem("),
-                "List service should call itemMapper.queryItem for data query");
+        assertTrue(listImplContent.contains("itemMapper.listItems("),
+                "List service should call itemMapper.listItems for data query");
 
         // constructPageResult / constructEmptyPageResult
         assertTrue(listImplContent.contains("PageResult.of("),
                 "List service should construct PageResult for non-empty results");
 
         // Param DTO 构建
-        assertTrue(listImplContent.contains("QueryItemParam"),
-                "List service should use QueryItemParam");
+        assertTrue(listImplContent.contains("ListItemsParam"),
+                "List service should use ListItemsParam");
 
         // 分页逻辑：使用 req.getPageNum() 和 req.getPageSize()
         assertTrue(listImplContent.contains("getPageNum()"),
@@ -158,16 +158,16 @@ public class ListApiItTest extends FormGeneratorItBaseTest {
         File mapperFile = new File(basedir, "src/main/java/com/example/mapper/ItemMapper.java");
         assertTrue(mapperFile.exists(), "ItemMapper interface should be generated");
         String mapperContent = Files.readString(mapperFile.toPath());
-        assertTrue(mapperContent.contains("countItem"), "Mapper should contain countItem method");
-        assertTrue(mapperContent.contains("queryItem"), "Mapper should contain queryItem method");
+        assertTrue(mapperContent.contains("countListItems"), "Mapper should contain countListItems method");
+        assertTrue(mapperContent.contains("listItems"), "Mapper should contain listItems method");
 
         // ============================================================
         // === Param DTO 验证 ===
         // ============================================================
-        File paramFile = new File(basedir, "src/main/java/com/example/dto/param/QueryItemParam.java");
-        assertTrue(paramFile.exists(), "QueryItemParam should be generated");
+        File paramFile = new File(basedir, "src/main/java/com/example/dto/param/ListItemsParam.java");
+        assertTrue(paramFile.exists(), "ListItemsParam should be generated");
         String paramContent = Files.readString(paramFile.toPath());
-        assertTrue(paramContent.contains("class QueryItemParam"), "Should declare class QueryItemParam");
+        assertTrue(paramContent.contains("class ListItemsParam"), "Should declare class ListItemsParam");
 
         // ============================================================
         // === Mapper XML 验证 ===
@@ -175,8 +175,8 @@ public class ListApiItTest extends FormGeneratorItBaseTest {
         File xmlFile = new File(basedir, "src/main/resources/mapper/ItemMapper.xml");
         assertTrue(xmlFile.exists(), "ItemMapper XML should be generated");
         String xmlContent = Files.readString(xmlFile.toPath());
-        assertTrue(xmlContent.contains("countItem"), "Mapper XML should contain countItem statement");
-        assertTrue(xmlContent.contains("queryItem"), "Mapper XML should contain queryItem statement");
+        assertTrue(xmlContent.contains("countListItems"), "Mapper XML should contain countListItems statement");
+        assertTrue(xmlContent.contains("listItems"), "Mapper XML should contain listItems statement");
 
         // ============================================================
         // === 验证没有生成 api-docs 目录 ===

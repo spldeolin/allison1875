@@ -5,6 +5,7 @@ import type { FormDef } from '@/schema/types'
 import request from '@/utils/request'
 import { endpointOf } from '../protocol/endpoints'
 import { buildListRequest, buildCreateRequest, buildUpdateRequest } from '../protocol/request-builder'
+import type { SortInput } from '../protocol/request-builder'
 import { parseListRow, parseDetailDto } from '../protocol/response-parser'
 
 /**
@@ -23,6 +24,7 @@ export function useCrudPage(getSchema: () => FormDef) {
   const tableData = ref<Record<string, unknown>[]>([])
   const tableLoading = ref(false)
   const editingRowKey = ref<unknown>(null)
+  const editBizKeyValue = ref<unknown>(null)
   const pagination = reactive<PaginationProps>({
     page: 1,
     pageSize: 10,
@@ -33,6 +35,14 @@ export function useCrudPage(getSchema: () => FormDef) {
 
   const checkedRowKeys = ref<(string | number)[]>([])
 
+  const sortState = ref<SortInput | null>(null)
+  const currentSort = computed(() => {
+    if (!sortState.value) return null
+    return {
+      columnKey: sortState.value.field,
+      order: (sortState.value.direction === 'asc' ? 'ascend' : 'descend') as 'ascend' | 'descend',
+    }
+  })
   const modalVisible = ref(false)
   const modalMode = ref<'create' | 'edit'>('create')
   const formData = ref<Record<string, unknown>>({})
@@ -47,6 +57,7 @@ export function useCrudPage(getSchema: () => FormDef) {
         schema.items,
         searchParams.value,
         { pageNum: pagination.page!, pageSize: pagination.pageSize! },
+        sortState.value ?? undefined,
       )
       const res = await request.post(endpointOf(schema.name, 'list'), reqBody)
       const pageResult = res.data.data as { total: number; list: Record<string, unknown>[] }
@@ -90,6 +101,7 @@ export function useCrudPage(getSchema: () => FormDef) {
   async function handleEdit(row: Record<string, unknown>) {
     const schema = getSchema()
     editingRowKey.value = row[bizKey.value]
+    editBizKeyValue.value = row[bizKey.value]
     try {
       const res = await request.post(
         endpointOf(schema.name, 'getDetail'),
@@ -147,6 +159,7 @@ export function useCrudPage(getSchema: () => FormDef) {
         endpoint = endpointOf(schema.name, 'create')
       } else {
         reqBody = buildUpdateRequest(schema.items, formData.value, bizKey.value)
+        reqBody[bizKey.value] = editBizKeyValue.value
         endpoint = endpointOf(schema.name, 'update')
       }
       await request.post(endpoint, reqBody)
@@ -160,11 +173,25 @@ export function useCrudPage(getSchema: () => FormDef) {
     }
   }
 
+  function handleSortChange(sorter: { columnKey: string; order: 'ascend' | 'descend' | false } | null) {
+    if (!sorter || sorter.order === false) {
+      sortState.value = null
+    } else {
+      sortState.value = {
+        field: sorter.columnKey,
+        direction: sorter.order === 'ascend' ? 'asc' : 'desc',
+      }
+    }
+    pagination.page = 1
+    fetchData()
+  }
+
   onMounted(fetchData)
   // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据
   watch(() => getSchema().name, () => {
     pagination.page = 1
     searchParams.value = {}
+    sortState.value = null
     fetchData()
   })
 
@@ -177,6 +204,7 @@ export function useCrudPage(getSchema: () => FormDef) {
     editingRowKey,
     pagination,
     checkedRowKeys,
+    currentSort,
     modalVisible,
     modalMode,
     formData,
@@ -185,6 +213,7 @@ export function useCrudPage(getSchema: () => FormDef) {
     handleSearch,
     handleReset,
     handlePaginationUpdate,
+    handleSortChange,
     handleCreate,
     handleEdit,
     handleDelete,
