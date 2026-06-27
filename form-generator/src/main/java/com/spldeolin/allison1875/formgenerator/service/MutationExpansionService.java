@@ -1,6 +1,9 @@
 package com.spldeolin.allison1875.formgenerator.service;
 
+import java.util.Collections;
+import java.util.List;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -21,5 +24,12 @@ public interface MutationExpansionService {
     void expandListReqFields(FormDef form, ClassOrInterfaceDeclaration reqCoid);
 
     void expandListSetterStatements(FormDef form, BlockStmt body, String entityVarName);
+
+    default void postProcessMethodBody(FormDef form, BlockStmt body, String apiType) {
+    }
+
+    default List<FieldDeclaration> expandServiceImplFields(FormDef form) {
+        return Collections.emptyList();
+    }
 
 }

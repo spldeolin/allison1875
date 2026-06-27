@@ -125,6 +125,9 @@ public class UpdateApiServiceImpl implements UpdateApiService {
         // 7. MultiSelect association
         mutationApiSupport.generateMultiSelectAssociation(form, body);
 
+        // 8. Post-process hook (audit log wrapping, etc.)
+        mutationExpansionService.postProcessMethodBody(form, body, "update");
+
         // No return statement (void method)
         return body;
     }

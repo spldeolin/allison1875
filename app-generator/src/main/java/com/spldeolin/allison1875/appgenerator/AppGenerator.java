@@ -26,6 +26,7 @@ import com.google.inject.Singleton;
 import com.google.inject.util.Modules;
 import com.spldeolin.allison1875.appgenerator.dsl.AppDef;
 import com.spldeolin.allison1875.appgenerator.dsl.MenuDef;
+import com.spldeolin.allison1875.appgenerator.service.AuditOperationTypeEnumGenerateService;
 import com.spldeolin.allison1875.appgenerator.service.ControllerAuthAnnotateService;
 import com.spldeolin.allison1875.appgenerator.service.PermissionEnumGenerateService;
 import com.spldeolin.allison1875.appgenerator.service.impl.AppGeneratorCommonItemsExpansionServiceImpl;
@@ -60,6 +61,9 @@ public class AppGenerator implements Allison1875Game {
 
     @Inject
     private PermissionEnumGenerateService permissionEnumGenerateService;
+
+    @Inject
+    private AuditOperationTypeEnumGenerateService auditOperationTypeEnumGenerateService;
 
     @Inject
     private ControllerAuthAnnotateService controllerAuthAnnotateService;
@@ -156,6 +160,14 @@ public class AppGenerator implements Allison1875Game {
         List<FormDef> allForms = Lists.newArrayList(appDef.getMenus().stream()
                 .map(MenuDef::getForm).collect(Collectors.toList()));
         permissionEnumGenerateService.generatePermissionEnum(allForms, output, appDef.getNamespace());
+
+        // Generate audit operation type enum if AuditLog builtin form is present
+        boolean hasAuditLogForm = parseBuiltinMenus().stream()
+                .anyMatch(menu -> "AuditLog".equals(menu.getForm().getName()));
+        if (hasAuditLogForm) {
+            auditOperationTypeEnumGenerateService.generateAuditOperationTypeEnum(allForms, output,
+                    appDef.getNamespace());
+        }
 
         // Extract FormDefs for form-generator (to be wired in Task 5)
         List<FormDef> forms = appDef.getMenus().stream().map(MenuDef::getForm).collect(Collectors.toList());

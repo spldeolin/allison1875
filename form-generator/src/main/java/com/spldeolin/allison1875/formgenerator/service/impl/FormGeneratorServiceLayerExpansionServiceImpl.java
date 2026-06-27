@@ -30,6 +30,7 @@ import com.spldeolin.allison1875.formgenerator.service.CreateApiService;
 import com.spldeolin.allison1875.formgenerator.service.DeleteApiService;
 import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import com.spldeolin.allison1875.formgenerator.service.UpdateApiService;
 import com.spldeolin.allison1875.handlertransformer.dto.BuildServiceImplMethodBodyRetval;
 import com.spldeolin.allison1875.handlertransformer.dto.InitDecAnalysisDTO;
@@ -66,6 +67,9 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
+
+    @Inject
+    private MutationExpansionService mutationExpansionService;
 
     @Override
     public List<AnnotationExpr> buildAnnotationsFormServiceImplMethod(InitDecAnalysisDTO initDecAnalysis) {
@@ -145,6 +149,9 @@ public class FormGeneratorServiceLayerExpansionServiceImpl implements ServiceLay
                 field = parseFieldDeclaration(
                         "private final Long %sTotal = 0L;", "list" + English.plural(form.getName()));
         retval.add(field);
+
+        // 扩展点：额外的ServiceImpl字段（如auditLogFacade）
+        retval.addAll(mutationExpansionService.expandServiceImplFields(form));
 
         return retval;
     }

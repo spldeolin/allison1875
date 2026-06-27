@@ -142,6 +142,9 @@ public class CreateApiServiceImpl implements CreateApiService {
         body.addStatement(parseStatement("return new Create%sResp().%s(%s.%s());", form.getName(),
                 form.getBizIdSetterName(), form.getVarName(), form.getBizIdGetterName()));
 
+        // 11. Post-process hook (audit log wrapping, etc.)
+        mutationExpansionService.postProcessMethodBody(form, body, "create");
+
         return body;
     }
 

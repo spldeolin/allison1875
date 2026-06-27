@@ -3,10 +3,21 @@ package com.spldeolin.allison1875.appgenerator.service.impl;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseFieldDeclaration;
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.CatchClause;
+import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.TryStmt;
+import com.github.javaparser.StaticJavaParser;
+import com.google.common.collect.Lists;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
@@ -35,8 +46,6 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
         body.addStatement(parseStatement("%s.setUpdatedBy(%s.getUsername());", form.getVarName(), currentUserFqn));
 
         if (auditLogEnabled && !"AuditLog".equals(form.getName())) {
-            String enumFqn = namespace + ".enums.AuditOperationTypeEnum";
-            String upperSnake = MoreStringUtils.camelToSnakeCase(form.getName()).toUpperCase();
             body.addStatement(parseStatement(
                     "java.util.Map<String, Object> auditContent = new java.util.LinkedHashMap<>();"));
             body.addStatement(parseStatement("auditContent.put(\"%sCode\", %s.%s());",
@@ -50,8 +59,6 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
                             item.getTitle(), StringUtils.capitalize(item.getName())));
                 }
             }
-            body.addStatement(parseStatement(
-                    "%s auditOperationType = %s.CREATE_%s;", enumFqn, enumFqn, upperSnake));
         }
     }
 
@@ -61,8 +68,6 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
         body.addStatement(parseStatement("%s.setUpdatedBy(%s.getUsername());", form.getVarName(), currentUserFqn));
 
         if (auditLogEnabled && !"AuditLog".equals(form.getName())) {
-            String enumFqn = namespace + ".enums.AuditOperationTypeEnum";
-            String upperSnake = MoreStringUtils.camelToSnakeCase(form.getName()).toUpperCase();
             body.addStatement(parseStatement(
                     "java.util.Map<String, Object> oldValues = new java.util.LinkedHashMap<>();"));
             body.addStatement(parseStatement(
@@ -78,8 +83,6 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
                             item.getTitle(), StringUtils.capitalize(item.getName())));
                 }
             }
-            body.addStatement(parseStatement(
-                    "%s auditOperationType = %s.UPDATE_%s;", enumFqn, enumFqn, upperSnake));
         }
     }
 
@@ -87,7 +90,6 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
     public void expandDeleteMethodBody(FormDef form, BlockStmt body) {
         if (auditLogEnabled && !"AuditLog".equals(form.getName())) {
             String enumFqn = namespace + ".enums.AuditOperationTypeEnum";
-            String facadeFqn = namespace + ".service.AuditLogFacade";
             String upperSnake = MoreStringUtils.camelToSnakeCase(form.getName()).toUpperCase();
             body.addStatement(parseStatement(
                     "java.util.Map<String, Object> auditContent = new java.util.LinkedHashMap<>();"));
@@ -111,6 +113,118 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
 
     @Override
     public void expandListSetterStatements(FormDef form, BlockStmt body, String entityVarName) {
+    }
+
+    @Override
+    public void postProcessMethodBody(FormDef form, BlockStmt body, String apiType) {
+        if (!auditLogEnabled || "AuditLog".equals(form.getName())) {
+            return;
+        }
+
+        String enumFqn = namespace + ".enums.AuditOperationTypeEnum";
+        String upperSnake = MoreStringUtils.camelToSnakeCase(form.getName()).toUpperCase();
+        String bizExceptionFqn = namespace + ".common.BizException";
+
+        if ("create".equals(apiType)) {
+            postProcessCreateBody(body, enumFqn, upperSnake, bizExceptionFqn);
+        } else if ("update".equals(apiType)) {
+            postProcessUpdateBody(body, enumFqn, upperSnake, bizExceptionFqn);
+        }
+    }
+
+    @Override
+    public List<FieldDeclaration> expandServiceImplFields(FormDef form) {
+        if (!auditLogEnabled || "AuditLog".equals(form.getName())) {
+            return Collections.emptyList();
+        }
+        String facadeType = namespace + ".service.AuditLogFacade";
+        FieldDeclaration field = parseFieldDeclaration("private %s auditLogFacade;", facadeType);
+        field.addAnnotation(new MarkerAnnotationExpr("javax.annotation.Resource"));
+        return Lists.newArrayList(field);
+    }
+
+    private void postProcessCreateBody(BlockStmt body, String enumFqn, String upperSnake, String bizExceptionFqn) {
+        // Find the index of the auditContent map declaration
+        int auditStartIdx = findStatementIndex(body, "auditContent");
+        if (auditStartIdx < 0) {
+            return;
+        }
+
+        // Extract statements from auditStartIdx to end
+        List<Statement> auditedStatements = new ArrayList<>(
+                body.getStatements().subList(auditStartIdx, body.getStatements().size()));
+        // Remove them from body
+        while (body.getStatements().size() > auditStartIdx) {
+            body.getStatements().removeLast();
+        }
+
+        // Build try block: audited statements + logSuccess before return
+        BlockStmt tryBlock = new BlockStmt();
+        Statement returnStmt = auditedStatements.remove(auditedStatements.size() - 1);
+        auditedStatements.forEach(tryBlock::addStatement);
+        tryBlock.addStatement(parseStatement("auditLogFacade.logSuccess(%s.CREATE_%s, auditContent);",
+                enumFqn, upperSnake));
+        tryBlock.addStatement(returnStmt);
+
+        // Build catch block
+        BlockStmt catchBlock = new BlockStmt();
+        catchBlock.addStatement(parseStatement(
+                "auditLogFacade.logFailure(%s.CREATE_%s, auditContent, e.getMessage());", enumFqn, upperSnake));
+        catchBlock.addStatement(parseStatement("throw e;"));
+
+        // Build try-catch statement
+        TryStmt tryStmt = new TryStmt();
+        tryStmt.setTryBlock(tryBlock);
+        CatchClause catchClause = new CatchClause(
+                new Parameter(StaticJavaParser.parseType(bizExceptionFqn), "e"), catchBlock);
+        tryStmt.setCatchClauses(new NodeList<>(catchClause));
+        body.addStatement(tryStmt);
+    }
+
+    private void postProcessUpdateBody(BlockStmt body, String enumFqn, String upperSnake, String bizExceptionFqn) {
+        // Find the index of the oldValues map declaration
+        int auditStartIdx = findStatementIndex(body, "oldValues");
+        if (auditStartIdx < 0) {
+            return;
+        }
+
+        // Extract statements from auditStartIdx to end
+        List<Statement> auditedStatements = new ArrayList<>(
+                body.getStatements().subList(auditStartIdx, body.getStatements().size()));
+        // Remove them from body
+        while (body.getStatements().size() > auditStartIdx) {
+            body.getStatements().removeLast();
+        }
+
+        // Build try block: audited statements + logUpdateSuccess
+        BlockStmt tryBlock = new BlockStmt();
+        auditedStatements.forEach(tryBlock::addStatement);
+        tryBlock.addStatement(parseStatement(
+                "auditLogFacade.logUpdateSuccess(%s.UPDATE_%s, oldValues, newValues);", enumFqn, upperSnake));
+
+        // Build catch block
+        BlockStmt catchBlock = new BlockStmt();
+        catchBlock.addStatement(parseStatement(
+                "auditLogFacade.logUpdateFailure(%s.UPDATE_%s, oldValues, newValues, e.getMessage());",
+                enumFqn, upperSnake));
+        catchBlock.addStatement(parseStatement("throw e;"));
+
+        // Build try-catch statement
+        TryStmt tryStmt = new TryStmt();
+        tryStmt.setTryBlock(tryBlock);
+        CatchClause catchClause = new CatchClause(
+                new Parameter(StaticJavaParser.parseType(bizExceptionFqn), "e"), catchBlock);
+        tryStmt.setCatchClauses(new NodeList<>(catchClause));
+        body.addStatement(tryStmt);
+    }
+
+    private int findStatementIndex(BlockStmt body, String marker) {
+        for (int i = 0; i < body.getStatements().size(); i++) {
+            if (body.getStatement(i).toString().contains(marker)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }
