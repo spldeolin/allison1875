@@ -186,9 +186,65 @@ public class XxxRetval {           // 出参: *Retval
 
 ## 提交约定
 
-- Conventional Commits 格式：`feat:`, `fix:`, `refactor:`, `test:`, `build:`, `docs:`, `chore:`
-- 提交信息使用英文
+### 基本原则
+
+- 每个 commit 只包含**一件事**；如果当前未提交内容涉及多件事，必须拆分为多个 commit
+- 提交信息使用全英文
 - 不提交绝对路径、IDE 配置、.DS_Store
+
+### 格式
+
+```
+<type>: <subject>
+
+1. First functional change
+2. Second functional change
+3. ...
+```
+
+- 标题（第一行）：`<type>: <subject>`，不超过 50 字符
+- 标题与正文之间空一行
+- 正文条目描述**功能层面**的变化，无需详细到技术实现
+- 正文条目使用数字 + 点作为序号（`1.` `2.` `3.`）
+- 如变更内容简单到一句标题即可概括，正文可省略
+
+### 类型
+
+| 类型         | 含义            |
+|------------|---------------|
+| `feat`     | 新功能           |
+| `fix`      | Bug 修复        |
+| `refactor` | 重构（不改变外部行为）   |
+| `perf`     | 性能优化          |
+| `test`     | 测试相关          |
+| `build`    | 构建/依赖变更       |
+| `docs`     | 文档变更          |
+| `chore`    | 杂项（不影响源码或测试）  |
+
+### Breaking Change
+
+不兼容变更在类型后加 `!`：
+
+```
+feat!: redesign form DSL schema
+
+1. Replace flat field list with nested group structure
+2. Remove deprecated shorthand syntax
+```
+
+### 示例
+
+```
+feat: support dynamic sorting in list API
+
+1. Add sortBy and isAsc fields to list request DTO
+2. Generate sort enum from sortable items in DSL
+3. Remove hardcoded order clause from mapper layer
+```
+
+```
+fix: prevent duplicate enum entries in sort generation
+```
 
 ## Skills
 
