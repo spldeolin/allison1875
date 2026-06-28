@@ -7,7 +7,7 @@ Java AST 源码分析与转换工具集，以 CLI fat jar (`allison1875-cli`) �
 
 ## 技术栈
 
-Java 21 · Maven 多模块 · 版本 `13.0-SNAPSHOT`
+Java 21 · Maven 多模块 · 版本 `14.0-SNAPSHOT`
 DI: Google Guice 5.1.0（非 Spring）· 校验: jakarta.validation + Hibernate Validator（非 javax）
 AST: JavaParser 3.28.1 · 日志: SLF4J + Logback · 测试: JUnit 5 + JaCoCo
 
