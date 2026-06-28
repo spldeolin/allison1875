@@ -94,11 +94,6 @@ public class CreateApiServiceImpl implements CreateApiService {
                 continue;
             }
             if (Boolean.TRUE.equals(item.getCanInputOnInit())) {
-                // If isNonVoid, add validation statement
-                if (Boolean.TRUE.equals(item.getIsNonVoid())) {
-                    body.addStatement(itemService.getValidationStatement(item));
-                }
-                // Call generateSetterToGetter
                 mutationApiSupport.generateSetterToGetter(form, item, body);
             }
         }

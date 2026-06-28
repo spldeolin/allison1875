@@ -95,16 +95,17 @@ public class UpdateApiServiceImpl implements UpdateApiService {
                 continue;
             }
             if (Boolean.TRUE.equals(item.getCanInputOnEdit())) {
-                // isNonVoid validation
-                if (Boolean.TRUE.equals(item.getIsNonVoid())) {
-                    body.addStatement(itemService.getValidationStatement(item));
-                }
-                // setter
                 mutationApiSupport.generateSetterToGetter(form, item, body);
             }
         }
 
-        // 4. Unique index check: only for indices where all fields canInputOnEdit
+        // 4. Set updatedAt
+        mutationApiSupport.generateSetUpdatedAt(form, body);
+
+        // 5. Expansion hook
+        mutationExpansionService.expandUpdateMethodBody(form, body);
+
+        // 6. Unique index check: only for indices where all fields canInputOnEdit
         if (form.getIndices() != null) {
             for (IndexDef index : form.getIndices()) {
                 if (Boolean.TRUE.equals(index.getIsUnique()) && mutationApiSupport.allCanInput(form, index, false)) {
@@ -113,16 +114,10 @@ public class UpdateApiServiceImpl implements UpdateApiService {
             }
         }
 
-        // 5. Set updatedAt
-        mutationApiSupport.generateSetUpdatedAt(form, body);
-
-        // 5.5. Expansion hook
-        mutationExpansionService.expandUpdateMethodBody(form, body);
-
-        // 6. Update by ID
+        // 7. Update by ID
         body.addStatement(parseStatement("%sMapper.updateById(%s);", form.getVarName(), form.getVarName()));
 
-        // 7. MultiSelect association
+        // 8. MultiSelect association
         mutationApiSupport.generateMultiSelectAssociation(form, body);
 
         // 8. Post-process hook (audit log wrapping, etc.)
