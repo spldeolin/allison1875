@@ -93,6 +93,7 @@ import { checkPermission } from '@/directives/usePermission'
 |----------------|---------------------------|-------------------------------------------|
 | `RolePage.vue` | 角色 CRUD + 授予权限弹框          | 独立 NCheckbox（非 NCheckboxGroup）+ baseOn 级联 |
 | `UserPage.vue` | 用户 CRUD + 授予角色弹框 + 已授予权限列 | 直接用 NDataTable + NTag/NPopover 自定义列       |
+| `AuditLogPage.vue` | 审计日志只读列表 | 自定义排序列 + operationType 映射 + content tooltip，不使用 DataTable 组件 |
 
 ## 文件组织
 

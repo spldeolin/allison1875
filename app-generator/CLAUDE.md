@@ -14,10 +14,11 @@
 2. 确定输出目录（重名自动追加序号）
 3. 复制 `backend-skeleton`，替换占位符（`__NAMESPACE__`、`__APP_NAME__` 等）
 4. **生成权限枚举**（`permissionEnumGenerateService.generatePermissionEnum()`）— 填充骨架中的空壳 `PermissionEnum.java`
-5. 调用 `form-generator`（`Allison1875.letsGo(ToolEnum.FORM_GENERATOR, ...)`）生成 CRUD 代码
-6. 复制 `frontend-skeleton`，合并 `builtin-form.yml` 内置菜单，**注入 permissions 映射**，写入 `app.json`
-7. **覆盖 builtin 菜单 order 为 100000+**（确保系统菜单排在侧边栏最后）
-8. 生成 `README.md`
+5. **生成审计操作类型枚举**（`auditOperationTypeEnumGenerateService.generate()`）— 为每个非 AuditLog 表单追加 CREATE/UPDATE/DELETE 枚举项
+6. 调用 `form-generator`（`Allison1875.letsGo(ToolEnum.FORM_GENERATOR, ...)`）生成 CRUD 代码
+7. 复制 `frontend-skeleton`，合并 `builtin-form.yml` 内置菜单，**注入 permissions 映射**，写入 `app.json`
+8. **覆盖 builtin 菜单 order 为 100000+**（确保系统菜单排在侧边栏最后）
+9. 生成 `README.md`
 
 ## Config 字段
 
@@ -80,6 +81,7 @@ menus: # MenuDef 列表
 
 - **User**（系统分组, order=1）— 用户 CRUD + 授予角色弹框
 - **Role**（系统分组, order=2）— 角色 CRUD + 授予权限弹框
+- **AuditLog**（系统分组, order=3）— 审计日志只读列表（无 create/update/delete）
 
 内置菜单 order 在合并时被覆盖为 `100000 + 原始 order`，确保排在用户定义菜单之后。
 
@@ -91,6 +93,24 @@ menus: # MenuDef 列表
 - **前端**：`DataTable.vue` 从 `app.json` 检测是否存在 `form.name === 'User'` 的菜单，有则显示"创建人"和"最近更新人"列
 
 不含 User 表单时，两端均退化为标准行为（无 createdBy/updatedBy）。
+
+### 审计日志联动
+
+当 `builtin-form.yml` 包含 **AuditLog** 表单时，自动为所有非 AuditLog 表单的 create/update/delete 注入审计日志代码：
+
+**后端生成：**
+- `AuditOperationTypeEnumGenerateService` 为每个用户表单追加 `CREATE_X`/`UPDATE_X`/`DELETE_X` 枚举项到骨架中的 `AuditOperationTypeEnum`（内置项含 LOGIN/LOGOUT/CHANGE_PASSWORD/GRANT_* 等）
+- `AppGeneratorMutationExpansionServiceImpl` 通过 MutationExpansionService 的 `postProcessCreateMethodBody`/`postProcessUpdateMethodBody`/`expandDeleteMethodBody` 注入 try-catch 审计日志调用
+
+**注入代码模式：**
+- Create/Delete：构建 `auditContent` Map（key=item.title, value=字段值，排除 secret 类型），try 块内 `auditLogFacade.logSuccess()`，catch 块 `auditLogFacade.logFailure()`
+- Update：构建 `oldValues`/`newValues` Map，try 块内 `auditLogFacade.logUpdateSuccess()`，catch 块 `auditLogFacade.logUpdateFailure()`
+
+**AuditLogFacade 骨架：**
+- 独立事务（`Propagation.REQUIRES_NEW`），业务回滚不影响审计写入
+- `logFailure`/`logUpdateFailure` 仅记录 failReason，不记录 content（失败时数据可能不完整）
+
+**前端**：`AuditLogPage.vue` 为只读列表页，无创建/编辑/删除操作。
 
 ## 功能权限体系
 
@@ -127,7 +147,7 @@ menus: # MenuDef 列表
 3. **骨架占位符**：所有骨架文件中的 `__XXX__` 占位符在 `replaceInAllFiles()` 中统一替换。新增占位符时需同时更新此方法和骨架文件
 4. **输出目录命名**：重名时追加 `-1`、`-2` 后缀，不覆盖已有输出
 5. **生成失败回滚**：`play()` 中 catch 后删除整个 `outputRoot`
-6. **权限枚举生成时序**：骨架拷贝 → 权限枚举生成 → form-generator 委托（详见 `PERMISSION.md`）
+6. **枚举生成时序**：骨架拷贝 → 权限枚举生成 → 审计操作类型枚举生成 → form-generator 委托（详见 `PERMISSION.md`）
 
 ## IT 测试
 

@@ -17,3 +17,18 @@ Query-Transformer 对 Design chain DSL 存在**编译时类型 vs 转换时类�
 
 **关键规则：** 若希望 transformer 推导非 Entity 返回类型（单属性 → `List<String>`，多属性 → `List<Record>`），DSL 语句**必须不赋值
 **。赋值会强制保留编译时类型 `List<TXxxEntity>`。
+
+## MapperLayerExpansionService
+
+动态排序等跨工具功能的扩展点，遵循 ExpansionService 模式。
+
+**接口方法：**
+- `expandParam(ChainAnalysisDTO)` → `ExpandParamRetval`：向 Mapper ParamDTO 追加字段（如 sortBy、isAsc）。返回的 `expandedFields.size()` 参与 isParamDTO 阈值判断
+- `expandOrderByLines(ChainAnalysisDTO, DesignMetaDTO, boolean isJoin)` → `List<String>`：生成额外 ORDER BY XML 行（如动态 `<choose>` 排序片段）
+
+**集成点：**
+- `MethodGeneratorServiceImpl.generateParam()` — 调用 `expandParam`，将字段加入 ParamDTO 或独立 `@Param`
+- `MapperLayerServiceImpl.generateMethodToMapperXml()` — 调用 `expandOrderByLines`，追加到 XML
+- chain replacer — 为 expandedField 生成 `param.setXxx(sourceExpression)` 赋值语句
+
+**默认实现** `DefaultMapperLayerExpansionServiceImpl` 为空操作。form-generator 通过 `FormGeneratorMapperLayerExpansionServiceImpl` 覆盖实现动态排序。

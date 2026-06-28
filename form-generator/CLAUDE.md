@@ -33,8 +33,12 @@
 | items   | List\<ItemDef\>  | 是  | 字段定义列表（不含审计字段）      |
 | indices | List\<IndexDef\> | 否  | 索引定义                |
 
-**隐含行为**：`FormGenerator.addCommonItems()` 自动在 items 头部插入 `bizId`，尾部追加 `createdAt`、`updatedAt`，
-均设为 `canInputOnInit=false, canInputOnEdit=false`。`items.get(0)` 即 bizId。
+**隐含行为**：`CommonItemsExpansionService.addCommonItems()` 自动在 items 头部插入 `bizId`，尾部追加 `createdAt`、`updatedAt`，
+均设为 `canInputOnInit=false, canInputOnEdit=false, isBuiltinField=true`。`items.get(0)` 即 bizId。
+
+### isBuiltinField
+
+`ItemDef.isBuiltinField`（默认 false）标记由 `CommonItemsExpansionService` 自动追加的字段。`FormDef.getNonAuditedItems()` 通过 `!isBuiltinField` 过滤返回用户定义字段，用于审计日志等场景。
 
 ## ItemDef 公共字段
 
@@ -209,3 +213,34 @@
     - itemNames: [ studentName ]
       isUnique: false
 ```
+
+## MutationExpansionService 钩子调用顺序
+
+**Create 方法体生成顺序：**
+1. 校验字段（唯一索引检查）
+2. entity setter（canInputOnInit 字段）
+3. `mutationApiSupport.generateSetCreatedAt()`
+4. `mutationExpansionService.expandCreateMethodBody(form, body)` — 扩展点
+5. mapper.insert
+6. multiSelect 关联
+7. `mutationExpansionService.postProcessCreateMethodBody(form, body)` — 后处理（审计日志包装等）
+
+**Update 方法体生成顺序：**
+1. entity setter（canInputOnEdit 字段）
+2. `mutationApiSupport.generateSetUpdatedAt()`
+3. `mutationExpansionService.expandUpdateMethodBody(form, body)` — 扩展点
+4. 唯一索引检查
+5. mapper.updateById
+6. multiSelect 关联
+7. `mutationExpansionService.postProcessUpdateMethodBody(form, body)` — 后处理
+
+**Delete 方法体：** `mutationExpansionService.expandDeleteMethodBody(form, body)` 在核心删除逻辑之后调用。
+
+## 动态排序（Sort Enum）
+
+每个 FormDef 生成 `{FormName}SortEnum`，枚举项来源：
+- 所有 type 为 `number`、`onOff`、`text`、`time` 的 item
+- 内置的 `createdAt`、`updatedAt`
+- 有 User 表单时额外追加 `createdBy`、`updatedBy`
+
+List ReqDTO 包含 `sortBy`（枚举类型，nullable）和 `isAsc`（Boolean，nullable），通过 `FormGeneratorMapperLayerExpansionServiceImpl` 在 Mapper XML 中生成动态 `<choose>` ORDER BY 片段。未指定时默认 `ORDER BY id DESC`。

@@ -154,7 +154,8 @@ public class XxxRetval {           // 出参: *Retval
 **现有实例：**
 - `ServiceLayerExpansionService` — handler-transformer 的 Service 层代码扩展点
 - `CommonItemsExpansionService` — form-generator 的公共字段注入扩展点
-- `MutationExpansionService` — form-generator 的 Create/Update/List 方法体扩展点
+- `MutationExpansionService` — form-generator 的 Create/Update/Delete 方法体扩展点
+- `MapperLayerExpansionService` — query-transformer 的 Mapper 参数与 ORDER BY 扩展点
 
 ## 开发工作流
 
