@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="__NAMESPACE__.mapper.AuditLogMapper">
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
+
+    <resultMap id="all" type="__NAMESPACE__.entity.AuditLogEntity">
+        <id column="id" property="id"/>
+        <result column="audit_log_code" property="auditLogCode"/>
+        <result column="operation_type" property="operationType"/>
+        <result column="success" property="success"/>
+        <result column="content" property="content"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+    </resultMap>
+
+    <sql id="all">
+        id, audit_log_code, operation_type, success, content, fail_reason, created_at, created_by
+    </sql>
+
+    <insert id="insert" parameterType="__NAMESPACE__.entity.AuditLogEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO audit_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id!=null"> id, </if>
+            <if test="auditLogCode!=null"> audit_log_code, </if>
+            <if test="operationType!=null"> operation_type, </if>
+            <if test="success!=null"> success, </if>
+            <if test="content!=null"> content, </if>
+            <if test="failReason!=null"> fail_reason, </if>
+            <if test="createdAt!=null"> created_at, </if>
+            <if test="createdBy!=null"> created_by, </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id!=null"> #{id}, </if>
+            <if test="auditLogCode!=null"> #{auditLogCode}, </if>
+            <if test="operationType!=null"> #{operationType}, </if>
+            <if test="success!=null"> #{success}, </if>
+            <if test="content!=null"> #{content}, </if>
+            <if test="failReason!=null"> #{failReason}, </if>
+            <if test="createdAt!=null"> #{createdAt}, </if>
+            <if test="createdBy!=null"> #{createdBy}, </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert">
+        <foreach collection="entities" item="one" separator=";">
+            INSERT INTO audit_log
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null"> id, </if>
+                <if test="one.auditLogCode!=null"> audit_log_code, </if>
+                <if test="one.operationType!=null"> operation_type, </if>
+                <if test="one.success!=null"> success, </if>
+                <if test="one.content!=null"> content, </if>
+                <if test="one.failReason!=null"> fail_reason, </if>
+                <if test="one.createdAt!=null"> created_at, </if>
+                <if test="one.createdBy!=null"> created_by, </if>
+            </trim>
+            <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null"> #{one.id}, </if>
+                <if test="one.auditLogCode!=null"> #{one.auditLogCode}, </if>
+                <if test="one.operationType!=null"> #{one.operationType}, </if>
+                <if test="one.success!=null"> #{one.success}, </if>
+                <if test="one.content!=null"> #{one.content}, </if>
+                <if test="one.failReason!=null"> #{one.failReason}, </if>
+                <if test="one.createdAt!=null"> #{one.createdAt}, </if>
+                <if test="one.createdBy!=null"> #{one.createdBy}, </if>
+            </trim>
+        </foreach>;
+    </insert>
+
+    <insert id="batchInsertEvenNull">
+        INSERT INTO audit_log
+            ( <include refid="all"/> )
+        VALUES
+            <foreach collection="entities" item="one" separator=",">(
+                #{one.id}, #{one.auditLogCode}, #{one.operationType}, #{one.success}, #{one.content}, #{one.failReason},
+                #{one.createdAt}, #{one.createdBy}
+            )</foreach>
+    </insert>
+
+    <update id="updateById" parameterType="__NAMESPACE__.entity.AuditLogEntity">
+        UPDATE audit_log
+        <set>
+            <if test="auditLogCode!=null"> audit_log_code = #{auditLogCode}, </if>
+            <if test="operationType!=null"> operation_type = #{operationType}, </if>
+            <if test="success!=null"> success = #{success}, </if>
+            <if test="content!=null"> content = #{content}, </if>
+            <if test="failReason!=null"> fail_reason = #{failReason}, </if>
+            <if test="createdAt!=null"> created_at = #{createdAt}, </if>
+            <if test="createdBy!=null"> created_by = #{createdBy}, </if>
+        </set>
+        <where>
+            AND id = #{id}
+        </where>
+        </update>
+
+    <update id="updateByIdEvenNull" parameterType="__NAMESPACE__.entity.AuditLogEntity">
+        UPDATE audit_log
+        SET
+            audit_log_code = #{auditLogCode},
+            operation_type = #{operationType},
+            success = #{success},
+            content = #{content},
+            fail_reason = #{failReason},
+            created_at = #{createdAt},
+            created_by = #{createdBy}
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM audit_log
+        <where>
+            AND id = #{id}
+        </where>
+    </delete>
+
+    <select id="queryById" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+            AND id = #{id}
+        </where>
+    </select>
+
+    <select id="queryByIds" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByIdsEachId" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByAuditLogCode" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+            AND audit_log_code = #{auditLogCode}
+        </where>
+    </select>
+
+    <delete id="deleteByAuditLogCode">
+        DELETE FROM audit_log
+        <where>
+            AND audit_log_code = #{auditLogCode}
+        </where>
+    </delete>
+
+    <select id="queryByAuditLogCodes" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+            AND audit_log_code IN (<foreach collection="auditLogCodes" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByAuditLogCodesEachAuditLogCode" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+            AND audit_log_code IN (<foreach collection="auditLogCodes" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+
+    <select id='countListAuditLogs' parameterType='__NAMESPACE__.dto.param.ListAuditLogsParam' resultType='long'>
+        SELECT COUNT(*)
+        FROM audit_log
+        <where>
+        <if test="auditLogCode != null">
+            <if test="auditLogCode.size() > 0">
+                AND audit_log_code IN (<foreach collection='auditLogCode' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="auditLogCode.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="operationType != null">
+            <if test="operationType.size() > 0">
+                AND operation_type IN (<foreach collection='operationType' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="operationType.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="success != null">
+            <if test="success.size() > 0">
+                AND success IN (<foreach collection='success' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="success.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="content != null and content != ''">
+            AND content LIKE CONCAT('%', #{content}, '%')
+        </if>
+        <if test="failReason != null and failReason != ''">
+            AND fail_reason LIKE CONCAT('%', #{failReason}, '%')
+        </if>
+        <if test="createdAt != null">
+            AND created_at >= #{createdAt}
+        </if>
+        <if test="createdAtEx != null">
+            AND created_at &lt;= #{createdAtEx}
+        </if>
+        <if test="createdBy != null and createdBy != ''">
+            AND created_by LIKE CONCAT('%', #{createdBy}, '%')
+        </if>
+        </where>
+    </select>
+    <select id='listAuditLogs' parameterType='__NAMESPACE__.dto.param.ListAuditLogsParam' resultMap='all'>
+        SELECT <include refid="all"/>
+        FROM audit_log
+        <where>
+        <if test="auditLogCode != null">
+            <if test="auditLogCode.size() > 0">
+                AND audit_log_code IN (<foreach collection='auditLogCode' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="auditLogCode.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="operationType != null">
+            <if test="operationType.size() > 0">
+                AND operation_type IN (<foreach collection='operationType' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="operationType.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="success != null">
+            <if test="success.size() > 0">
+                AND success IN (<foreach collection='success' item='one' separator=','>#{one}</foreach>)
+            </if>
+            <if test="success.size() == 0">
+                AND 1 != 1
+            </if>
+        </if>
+        <if test="content != null and content != ''">
+            AND content LIKE CONCAT('%', #{content}, '%')
+        </if>
+        <if test="failReason != null and failReason != ''">
+            AND fail_reason LIKE CONCAT('%', #{failReason}, '%')
+        </if>
+        <if test="createdAt != null">
+            AND created_at >= #{createdAt}
+        </if>
+        <if test="createdAtEx != null">
+            AND created_at &lt;= #{createdAtEx}
+        </if>
+        <if test="createdBy != null and createdBy != ''">
+            AND created_by LIKE CONCAT('%', #{createdBy}, '%')
+        </if>
+        </where>
+        <choose>
+          <when test="sortBy != null">
+            ORDER BY
+            <choose>
+              <when test="sortBy == 'auditLogCode'">audit_log_code</when>
+              <when test="sortBy == 'success'">success</when>
+              <when test="sortBy == 'content'">content</when>
+              <when test="sortBy == 'failReason'">fail_reason</when>
+              <when test="sortBy == 'createdAt'">created_at</when>
+              <when test="sortBy == 'createdBy'">created_by</when>
+              <otherwise>id</otherwise>
+            </choose>
+            <choose>
+              <when test="isAsc != null and isAsc">ASC</when>
+              <otherwise>DESC</otherwise>
+            </choose>
+          </when>
+          <otherwise>
+            ORDER BY id DESC
+          </otherwise>
+        </choose>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+</mapper>
