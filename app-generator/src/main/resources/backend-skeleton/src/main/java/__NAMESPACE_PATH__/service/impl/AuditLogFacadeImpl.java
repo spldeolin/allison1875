@@ -35,8 +35,8 @@ public class AuditLogFacadeImpl implements AuditLogFacade {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public void logFailure(AuditOperationTypeEnum operationType, Map<String, Object> content, String failReason) {
-        insertAuditLog(operationType, false, serializeContent(content), failReason);
+    public void logFailure(AuditOperationTypeEnum operationType, String failReason) {
+        insertAuditLog(operationType, false, null, failReason);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -48,9 +48,8 @@ public class AuditLogFacadeImpl implements AuditLogFacade {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public void logUpdateFailure(AuditOperationTypeEnum operationType,
-            Map<String, Object> oldValues, Map<String, Object> newValues, String failReason) {
-        insertAuditLog(operationType, false, diffAndSerialize(oldValues, newValues), failReason);
+    public void logUpdateFailure(AuditOperationTypeEnum operationType, String failReason) {
+        insertAuditLog(operationType, false, null, failReason);
     }
 
     private void insertAuditLog(AuditOperationTypeEnum operationType, boolean success,

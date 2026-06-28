@@ -121,14 +121,13 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
             return;
         }
 
-        String enumFqn = namespace + ".enums.AuditOperationTypeEnum";
         String upperSnake = MoreStringUtils.camelToSnakeCase(form.getName()).toUpperCase();
         String bizExceptionFqn = namespace + ".common.BizException";
 
         if ("create".equals(apiType)) {
-            postProcessCreateBody(body, enumFqn, upperSnake, bizExceptionFqn);
+            postProcessCreateBody(body, upperSnake, bizExceptionFqn);
         } else if ("update".equals(apiType)) {
-            postProcessUpdateBody(body, enumFqn, upperSnake, bizExceptionFqn);
+            postProcessUpdateBody(body,  upperSnake, bizExceptionFqn);
         }
     }
 
@@ -143,7 +142,7 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
         return Lists.newArrayList(field);
     }
 
-    private void postProcessCreateBody(BlockStmt body, String enumFqn, String upperSnake, String bizExceptionFqn) {
+    private void postProcessCreateBody(BlockStmt body, String upperSnake, String bizExceptionFqn) {
         // Find the index of the auditContent map declaration
         int auditStartIdx = findStatementIndex(body, "auditContent");
         if (auditStartIdx < 0) {
@@ -162,14 +161,14 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
         BlockStmt tryBlock = new BlockStmt();
         Statement returnStmt = auditedStatements.remove(auditedStatements.size() - 1);
         auditedStatements.forEach(tryBlock::addStatement);
-        tryBlock.addStatement(parseStatement("auditLogFacade.logSuccess(%s.CREATE_%s, auditContent);",
-                enumFqn, upperSnake));
+        tryBlock.addStatement(parseStatement("auditLogFacade.logSuccess(AuditOperationTypeEnum.CREATE_%s, auditContent);",
+                 upperSnake));
         tryBlock.addStatement(returnStmt);
 
         // Build catch block
         BlockStmt catchBlock = new BlockStmt();
         catchBlock.addStatement(parseStatement(
-                "auditLogFacade.logFailure(%s.CREATE_%s, auditContent, e.getMessage());", enumFqn, upperSnake));
+                "auditLogFacade.logFailure(AuditOperationTypeEnum.CREATE_%s, e.getMessage());", upperSnake));
         catchBlock.addStatement(parseStatement("throw e;"));
 
         // Build try-catch statement
@@ -181,7 +180,7 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
         body.addStatement(tryStmt);
     }
 
-    private void postProcessUpdateBody(BlockStmt body, String enumFqn, String upperSnake, String bizExceptionFqn) {
+    private void postProcessUpdateBody(BlockStmt body, String upperSnake, String bizExceptionFqn) {
         // Find the index of the oldValues map declaration
         int auditStartIdx = findStatementIndex(body, "oldValues");
         if (auditStartIdx < 0) {
@@ -200,13 +199,13 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
         BlockStmt tryBlock = new BlockStmt();
         auditedStatements.forEach(tryBlock::addStatement);
         tryBlock.addStatement(parseStatement(
-                "auditLogFacade.logUpdateSuccess(%s.UPDATE_%s, oldValues, newValues);", enumFqn, upperSnake));
+                "auditLogFacade.logUpdateSuccess(AuditOperationTypeEnum.UPDATE_%s, oldValues, newValues);", upperSnake));
 
         // Build catch block
         BlockStmt catchBlock = new BlockStmt();
         catchBlock.addStatement(parseStatement(
-                "auditLogFacade.logUpdateFailure(%s.UPDATE_%s, oldValues, newValues, e.getMessage());",
-                enumFqn, upperSnake));
+                "auditLogFacade.logUpdateFailure(AuditOperationTypeEnum.UPDATE_%s, e.getMessage());",
+                upperSnake));
         catchBlock.addStatement(parseStatement("throw e;"));
 
         // Build try-catch statement

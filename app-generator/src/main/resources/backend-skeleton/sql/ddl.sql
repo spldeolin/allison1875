@@ -51,3 +51,17 @@ CREATE TABLE `user_role` (
     UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
     PRIMARY KEY (`id`)
 ) COMMENT '用户-角色关联';
+
+CREATE TABLE `audit_log`
+(
+    `id`             BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `audit_log_code` VARCHAR(36) NOT NULL COMMENT '业务主键',
+    `operation_type` VARCHAR(64) NOT NULL COMMENT '操作类型',
+    `success`        TINYINT(1)  NOT NULL COMMENT '是否成功',
+    `content`        LONGTEXT COMMENT '操作内容',
+    `fail_reason`    VARCHAR(512) COMMENT '失败原因',
+    `created_at`     DATETIME    NOT NULL COMMENT '创建时间',
+    `created_by`     VARCHAR(32) NOT NULL COMMENT '创建人'
+    UNIQUE KEY `uk_audit_log_code` (`audit_log_code`),
+    PRIMARY KEY (`id`)
+) COMMENT '审计日志';

@@ -27,7 +27,7 @@ public enum AuditOperationTypeEnum {
     UPDATE_ROLE("updateRole", "编辑角色"),
     DELETE_ROLE("deleteRole", "删除角色"),
 
-    // === 以下枚举项由 app-generator 生成,勿手动修改 ===
+    // === 以下枚举项由 app-generator 生成，勿手动修改 ===
     ;
 
     @JsonValue

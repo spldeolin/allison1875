@@ -10,12 +10,11 @@ public interface AuditLogFacade {
 
     void logSuccess(AuditOperationTypeEnum operationType, Map<String, Object> content);
 
-    void logFailure(AuditOperationTypeEnum operationType, Map<String, Object> content, String failReason);
+    void logFailure(AuditOperationTypeEnum operationType, String failReason);
 
     void logUpdateSuccess(AuditOperationTypeEnum operationType,
             Map<String, Object> oldValues, Map<String, Object> newValues);
 
-    void logUpdateFailure(AuditOperationTypeEnum operationType,
-            Map<String, Object> oldValues, Map<String, Object> newValues, String failReason);
+    void logUpdateFailure(AuditOperationTypeEnum operationType, String failReason);
 
 }

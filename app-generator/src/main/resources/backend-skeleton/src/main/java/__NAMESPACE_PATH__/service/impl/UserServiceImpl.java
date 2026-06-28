@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
             auditLogFacade.logSuccess(AuditOperationTypeEnum.CREATE_USER, auditContent);
             return new CreateUserResp().setUserCode(user.getUserCode());
         } catch (BizException e) {
-            auditLogFacade.logFailure(AuditOperationTypeEnum.CREATE_USER, auditContent, e.getMessage());
+            auditLogFacade.logFailure(AuditOperationTypeEnum.CREATE_USER, e.getMessage());
             throw e;
         }
     }
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
             userMapper.updateById(user);
             auditLogFacade.logUpdateSuccess(AuditOperationTypeEnum.UPDATE_USER, oldValues, newValues);
         } catch (BizException e) {
-            auditLogFacade.logUpdateFailure(AuditOperationTypeEnum.UPDATE_USER, oldValues, newValues, e.getMessage());
+            auditLogFacade.logUpdateFailure(AuditOperationTypeEnum.UPDATE_USER, e.getMessage());
             throw e;
         }
     }
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
             int deleteUserCount = userMapper.deleteUser(req.getUserCodes());
             auditLogFacade.logSuccess(AuditOperationTypeEnum.DELETE_USER, auditContent);
         } catch (BizException e) {
-            auditLogFacade.logFailure(AuditOperationTypeEnum.DELETE_USER, auditContent, e.getMessage());
+            auditLogFacade.logFailure(AuditOperationTypeEnum.DELETE_USER, e.getMessage());
             throw e;
         }
     }
