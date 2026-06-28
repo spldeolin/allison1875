@@ -45,7 +45,7 @@ mvn install -f allison1875/pom.xml
 <dependency>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-support</artifactId>
-    <version>13.0</version>
+    <version>14.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -53,7 +53,7 @@ mvn install -f allison1875/pom.xml
 <plugin>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-maven-plugin</artifactId>
-    <version>13.0</version>
+    <version>14.0-SNAPSHOT</version>
     <configuration>
         <common>
             <basePackage>com.your.base.package</basePackage>
