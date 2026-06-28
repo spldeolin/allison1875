@@ -25,7 +25,7 @@ from lightweight Java DSL or database schema.
 
 **Module Map (11 modules):**
 ```
-allison1875/                            (parent POM, version 13.0-SNAPSHOT)
+allison1875/                            (parent POM, version 13.0)
 ├── common/                             Core: AST forest, config, DI, utilities, base services
 ├── allison1875-support/                Runtime dependency for target projects (@L, @P annotations)
 ├── allison1875-maven-plugin/           Maven Mojo entry points (one Mojo per tool)

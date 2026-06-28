@@ -18,7 +18,7 @@ description: Add allison1875-maven-plugin and allison1875-support to a modern Sp
 <dependency>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-support</artifactId>
-    <version>13.0-SNAPSHOT</version>
+    <version>13.0</version>
 </dependency>
 ```
 
@@ -33,7 +33,7 @@ description: Add allison1875-maven-plugin and allison1875-support to a modern Sp
 <plugin>
     <groupId>com.spldeolin.allison1875</groupId>
     <artifactId>allison1875-maven-plugin</artifactId>
-    <version>13.0-SNAPSHOT</version>
+    <version>13.0</version>
 </plugin>
 ```
 
