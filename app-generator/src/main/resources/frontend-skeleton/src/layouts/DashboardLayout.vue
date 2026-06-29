@@ -129,7 +129,7 @@ async function handleChangePassword() {
   <NLayout has-sider class="dashboard-layout">
     <NLayoutSider
       bordered
-      :width="240"
+      :width="210"
       :native-scrollbar="false"
       class="dashboard-sidebar"
     >
@@ -324,6 +324,7 @@ async function handleChangePassword() {
   height: 32px;
   line-height: 32px;
   border-radius: 6px;
+  flex-shrink: 0;
   opacity: 0;
   transition: opacity 0.15s ease, background-color 0.15s ease;
 }
