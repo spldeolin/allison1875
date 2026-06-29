@@ -56,14 +56,14 @@ public class AuthcServiceImpl implements AuthcService {
         UserEntity user = userMapper.queryByUsername(req.getUsername());
         if (user == null) {
             log.info("登录失败：用户不存在, username={}", req.getUsername());
-            auditLogFacade.logFailure(AuditOperationTypeEnum.LOGIN, "用户名或密码错误");
+            auditLogFacade.logFailure(AuditOperationTypeEnum.LOGIN, "用户名或密码错误", req.getUsername());
             throw new BizException("用户名或密码错误");
         }
 
         // BCrypt密码校验
         if (!BCrypt.checkpw(req.getPassword(), user.getPassword())) {
             log.info("登录失败：密码不正确, username={}", req.getUsername());
-            auditLogFacade.logFailure(AuditOperationTypeEnum.LOGIN, "用户名或密码错误");
+            auditLogFacade.logFailure(AuditOperationTypeEnum.LOGIN, "用户名或密码错误", req.getUsername());
             throw new BizException("用户名或密码错误");
         }
 
@@ -76,7 +76,7 @@ public class AuthcServiceImpl implements AuthcService {
         log.info("用户登录成功, username={}", req.getUsername());
         Map<String, Object> auditContent = new LinkedHashMap<>();
         auditContent.put("登录类型", "用户名密码登录");
-        auditLogFacade.logSuccess(AuditOperationTypeEnum.LOGIN, auditContent);
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.LOGIN, auditContent, user.getUsername());
         return new LoginResp().setToken(token).setCurrentUser(
                 new CurrentUserDTO().setUsername(user.getUsername()).setNickName(user.getNickName())
                         .setPermissions(permission));
@@ -96,7 +96,7 @@ public class AuthcServiceImpl implements AuthcService {
         log.info("用户退出登录, username={}", username);
         Map<String, Object> auditContent = new LinkedHashMap<>();
         auditContent.put("登录类型", "用户名密码登录");
-        auditLogFacade.logSuccess(AuditOperationTypeEnum.LOGOUT, auditContent);
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.LOGOUT, auditContent, username);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class AuthcServiceImpl implements AuthcService {
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateByIdEvenNull(user);
         log.info("用户修改自身密码, username={}", username);
-        auditLogFacade.logSuccess(AuditOperationTypeEnum.CHANGE_PASSWORD, null);
+        auditLogFacade.logSuccess(AuditOperationTypeEnum.CHANGE_PASSWORD, null, username);
     }
 
     private String issueToken(UserEntity user, String updatedBy) {

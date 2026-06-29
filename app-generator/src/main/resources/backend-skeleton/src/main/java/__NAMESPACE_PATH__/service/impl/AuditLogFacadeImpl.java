@@ -30,30 +30,43 @@ public class AuditLogFacadeImpl implements AuditLogFacade {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void logSuccess(AuditOperationTypeEnum operationType, Map<String, Object> content) {
-        insertAuditLog(operationType, true, serializeContent(content), null);
+        insertAuditLog(operationType, true, serializeContent(content), null, CurrentUser.getUsernameOrDefault("system"));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void logFailure(AuditOperationTypeEnum operationType, String failReason) {
-        insertAuditLog(operationType, false, null, failReason);
+        insertAuditLog(operationType, false, null, failReason, CurrentUser.getUsernameOrDefault("system"));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void logUpdateSuccess(AuditOperationTypeEnum operationType,
             Map<String, Object> oldValues, Map<String, Object> newValues) {
-        insertAuditLog(operationType, true, diffAndSerialize(oldValues, newValues), null);
+        insertAuditLog(operationType, true, diffAndSerialize(oldValues, newValues), null,
+                CurrentUser.getUsernameOrDefault("system"));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void logUpdateFailure(AuditOperationTypeEnum operationType, String failReason) {
-        insertAuditLog(operationType, false, null, failReason);
+        insertAuditLog(operationType, false, null, failReason, CurrentUser.getUsernameOrDefault("system"));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void logSuccess(AuditOperationTypeEnum operationType, Map<String, Object> content, String operator) {
+        insertAuditLog(operationType, true, serializeContent(content), null, operator);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void logFailure(AuditOperationTypeEnum operationType, String failReason, String operator) {
+        insertAuditLog(operationType, false, null, failReason, operator);
     }
 
     private void insertAuditLog(AuditOperationTypeEnum operationType, boolean success,
-            String content, String failReason) {
+            String content, String failReason, String operator) {
         AuditLogEntity entity = new AuditLogEntity();
         entity.setAuditLogCode(UuidUtils.generateShort());
         entity.setOperationType(operationType.getCode());
@@ -61,7 +74,7 @@ public class AuditLogFacadeImpl implements AuditLogFacade {
         entity.setContent(content);
         entity.setFailReason(failReason);
         entity.setCreatedAt(LocalDateTime.now());
-        entity.setCreatedBy(CurrentUser.getUsernameOrDefault("system"));
+        entity.setCreatedBy(operator);
         auditLogMapper.insert(entity);
     }
 

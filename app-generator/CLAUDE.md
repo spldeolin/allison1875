@@ -109,6 +109,7 @@ menus: # MenuDef 列表
 **AuditLogFacade 骨架：**
 - 独立事务（`Propagation.REQUIRES_NEW`），业务回滚不影响审计写入
 - `logFailure`/`logUpdateFailure` 仅记录 failReason，不记录 content（失败时数据可能不完整）
+- 操作人默认取 `CurrentUser.getUsernameOrDefault("system")`；登录/退出登录/修改密码场景登录态可能不可用，使用带 `operator` 入参的重载（`logSuccess(type, content, operator)` / `logFailure(type, failReason, operator)`）显式传入登录期间用户名
 
 **前端**：`AuditLogPage.vue` 为只读列表页，无创建/编辑/删除操作。
 
