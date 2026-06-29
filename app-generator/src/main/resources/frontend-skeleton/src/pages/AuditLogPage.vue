@@ -297,4 +297,48 @@ const scrollX = computed(() => 140 + 130 + 90 + 240 + 180 + 100 + 150 + 40)
   color: #1e293b;
   margin: 0;
 }
+
+:deep(.n-data-table-th) {
+  white-space: nowrap !important;
+}
+
+:deep(.n-data-table-sorter) {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 18px;
+  width: 14px;
+}
+
+:deep(.n-data-table-sorter .n-base-icon) {
+  display: none !important;
+}
+
+:deep(.n-data-table-sorter::before),
+:deep(.n-data-table-sorter::after) {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+:deep(.n-data-table-sorter::before) {
+  border-bottom: 5px solid #c0c4cc;
+}
+
+:deep(.n-data-table-sorter::after) {
+  border-top: 5px solid #c0c4cc;
+}
+
+:deep(.n-data-table-sorter.n-data-table-sorter--asc::before) {
+  border-bottom-color: var(--n-th-icon-color-active, #18a058);
+}
+
+:deep(.n-data-table-sorter.n-data-table-sorter--desc::after) {
+  border-top-color: var(--n-th-icon-color-active, #18a058);
+}
 </style>
