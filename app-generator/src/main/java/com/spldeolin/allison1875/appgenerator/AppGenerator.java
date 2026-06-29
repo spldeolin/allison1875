@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,6 +38,7 @@ import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.ast.DefaultAstForest;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
+import com.spldeolin.allison1875.common.enums.FlushToEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
@@ -326,47 +328,70 @@ public class AppGenerator implements Allison1875Game {
     private void invokeFormGenerator(AppDef appDef, Path backendOutput, List<FormDef> forms) {
         Path tempDsl = writeTempFormsDsl(forms);
         String absPath = backendOutput.toAbsolutePath().toString();
-
-        Config fgConfig = new Config();
-        fgConfig.setDslPath(tempDsl.toFile());
-        fgConfig.setAuthor(config.getAuthor());
-        fgConfig.setJdbcUrl(null);
-        fgConfig.setEnableGenerateDesign(true);
-        fgConfig.setIsEntityEndWithEntity(true);
-        fgConfig.setEnableJavaxMoveToJakarta(false);
-        fgConfig.setEnableOneService(true);
-        fgConfig.setMarkdownDir(new File(absPath + "/api-docs"));
-
-        Config.CodeSnippet cs = new Config.CodeSnippet();
         String ns = appDef.getNamespace();
-        cs.setRequestResultQualifier(ns + ".common.RequestResult");
-        cs.setRequestResultTypeDeclaration("RequestResult<${dataType}>");
-        cs.setRequestResultSuccessNoData("RequestResult.success()");
-        cs.setRequestResultSuccessWithData("RequestResult.success(${data})");
-        cs.setBizExceptionQualifier(ns + ".common.BizException");
-        fgConfig.setCodeSnippet(cs);
 
-        DomainConfig dc = new DomainConfig();
-        dc.setName("default");
-        dc.setControllerModule(absPath);
-        dc.setControllerPackage(ns + ".controller");
-        dc.setDtoModule(absPath);
-        dc.setReqDTOPackage(ns + ".dto.req");
-        dc.setRespDTOPackage(ns + ".dto.resp");
-        dc.setEnumModule(absPath);
-        dc.setEnumPackage(ns + ".enums");
-        dc.setServiceModule(absPath);
-        dc.setServicePackage(ns + ".service");
-        dc.setServiceImplModule(absPath);
-        dc.setServiceImplPackage(ns + ".service.impl");
-        dc.setPersistenceModule(absPath);
-        dc.setMapperPackage(ns + ".mapper");
-        dc.setEntityPackage(ns + ".entity");
-        dc.setDesignPackage(ns + ".design");
-        dc.setParamDTOPackage(ns + ".dto.param");
-        dc.setRecordDTOPackage(ns + ".dto.record");
-        dc.setWholeDTOPackage(ns + ".dto");
-        fgConfig.setDomains(Lists.newArrayList(dc));
+        Config.CodeSnippet cs = Config.CodeSnippet.builder()
+                .requestResultQualifier(ns + ".common.RequestResult")
+                .requestResultTypeDeclaration("RequestResult<${dataType}>")
+                .requestResultSuccessNoData("RequestResult.success()")
+                .requestResultSuccessWithData("RequestResult.success(${data})")
+                .bizExceptionQualifier(ns + ".common.BizException")
+                .controllerRequestMapping("/api/v1/${formName}")
+                .shortUuidGeneration("UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()")
+                .collectionEmptyCheck("${list} == null || ${list}.isEmpty()")
+                .build();
+
+        DomainConfig dc = DomainConfig.builder()
+                .name("default")
+                .controllerModule(absPath)
+                .controllerPackage(ns + ".controller")
+                .dtoModule(absPath)
+                .reqDTOPackage(ns + ".dto.req")
+                .respDTOPackage(ns + ".dto.resp")
+                .enumModule(absPath)
+                .enumPackage(ns + ".enums")
+                .serviceModule(absPath)
+                .servicePackage(ns + ".service")
+                .serviceImplModule(absPath)
+                .serviceImplPackage(ns + ".service.impl")
+                .persistenceModule(absPath)
+                .mapperPackage(ns + ".mapper")
+                .entityPackage(ns + ".entity")
+                .designPackage(ns + ".design")
+                .paramDTOPackage(ns + ".dto.param")
+                .recordDTOPackage(ns + ".dto.record")
+                .wholeDTOPackage(ns + ".dto")
+                .mapperXmlDirs(List.of(new File("src/main/resources/mapper")))
+                .build();
+
+        Config fgConfig = Config.builder()
+                .dslPath(tempDsl.toFile())
+                .author(config.getAuthor())
+                .enableGenerateDesign(true)
+                .isEntityEndWithEntity(true)
+                .enableJavaxMoveToJakarta(false)
+                .enableOneService(true)
+                .markdownDir(new File(absPath + "/api-docs"))
+                .codeSnippet(cs)
+                .domains(Lists.newArrayList(dc))
+                .isDataModelWithoutLombok(false)
+                .enableNoModifyAnnounce(true)
+                .tables(new ArrayList<>())
+                .dependencyDirsOrJavaFilePath(new ArrayList<>())
+                .globalUrlPrefix("")
+                .flushTo(List.of(FlushToEnum.MARKDOWN))
+                .singleEndpointPerMarkdown(false)
+                .getEnumCodeMethodName("getCode")
+                .getEnumTitleMethodName("getTitle")
+                .wholeDTONamePostfix("WholeDTO")
+                .docAnalyzerModule("com.spldeolin.allison1875.docanalyzer.DocAnalyzerModule")
+                .handlerTransformerModule("com.spldeolin.allison1875.handlertransformer.HandlerTransformerModule")
+                .persistenceGeneratorModule("com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule")
+                .queryTransformerModule("com.spldeolin.allison1875.querytransformer.QueryTransformerModule")
+                .starTransformerModule("com.spldeolin.allison1875.startransformer.StarTransformerModule")
+                .formGeneratorModule("com.spldeolin.allison1875.formgenerator.FormGeneratorModule")
+                .appGeneratorModule("com.spldeolin.allison1875.appgenerator.AppGeneratorModule")
+                .build();
 
         AstForest astForest = new DefaultAstForest(MavenUtils.buildClassLoader(new File(absPath), null),
                 new File(absPath));

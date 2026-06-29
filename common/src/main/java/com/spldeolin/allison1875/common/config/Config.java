@@ -1,333 +1,399 @@
 package com.spldeolin.allison1875.common.config;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import com.google.common.collect.Lists;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
+import com.spldeolin.allison1875.common.exception.Allison1875Exception;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 /**
- * Allison1875 统一配置类，整合所有模块的配置项。
+ * Allison1875 unified configuration (immutable).
  *
  * @author Deolin 2026-03-12
  */
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@ConfigValid
+@Value
+@Jacksonized
+@Builder(toBuilder = true)
 public class Config {
 
-    // ==================== 公共配置 ====================
+    // ==================== Common ====================
 
-    /**
-     * 业务领域配置列表，描述各领域的代码位置
-     */
-    @NotEmpty
-    @Valid
-    List<DomainConfig> domains = Lists.newArrayList();
+    List<DomainConfig> domains;
 
-    /**
-     * 为生成的代码指定作者
-     */
-    @NotEmpty
-    String author = "Allison 1875";
+    String author;
 
-    /**
-     * 生成的DataModel是否使用Lombok
-     */
-    @NotNull
-    Boolean isDataModelWithoutLombok = false;
+    Boolean isDataModelWithoutLombok;
 
-    /**
-     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
-     */
-    @NotNull
-    Boolean enableNoModifyAnnounce = true;
+    Boolean enableNoModifyAnnounce;
 
-    /**
-     * 将javax命名空间移动到jakarta，兼容Spring Boot 3+的项目
-     */
-    @NotNull
-    Boolean enableJavaxMoveToJakarta = false;
+    Boolean enableJavaxMoveToJakarta;
 
-    /**
-     * 执行mvn命令时使用的JDK安装目录路径，为null时使用系统默认的JDK
-     *
-     * <p>配置后，在执行mvn子进程时会通过{@code JAVA_HOME}环境变量指定该JDK路径，
-     * 例如配置为{@code /Users/xxx/.jenv/versions/1.8}
-     */
     String javaHome;
 
-    // ==================== Guice Module 配置 ====================
+    // ==================== Guice Module ====================
 
-    /** doc-analyzer 功能所使用的 Guice Module 实现类全限定名 */
-    String docAnalyzerModule = "com.spldeolin.allison1875.docanalyzer.DocAnalyzerModule";
+    String docAnalyzerModule;
 
-    /** handler-transformer 功能所使用的 Guice Module 实现类全限定名 */
-    String handlerTransformerModule = "com.spldeolin.allison1875.handlertransformer.HandlerTransformerModule";
+    String handlerTransformerModule;
 
-    /** persistence-generator 功能所使用的 Guice Module 实现类全限定名 */
-    String persistenceGeneratorModule = "com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule";
+    String persistenceGeneratorModule;
 
-    /** query-transformer 功能所使用的 Guice Module 实现类全限定名 */
-    String queryTransformerModule = "com.spldeolin.allison1875.querytransformer.QueryTransformerModule";
+    String queryTransformerModule;
 
-    /** star-transformer 功能所使用的 Guice Module 实现类全限定名 */
-    String starTransformerModule = "com.spldeolin.allison1875.startransformer.StarTransformerModule";
+    String starTransformerModule;
 
-    /** form-generator 功能所使用的 Guice Module 实现类全限定名 */
-    String formGeneratorModule = "com.spldeolin.allison1875.formgenerator.FormGeneratorModule";
+    String formGeneratorModule;
 
-    /** app-generator 功能所使用的 Guice Module 实现类全限定名 */
-    String appGeneratorModule = "com.spldeolin.allison1875.appgenerator.AppGeneratorModule";
+    String appGeneratorModule;
 
-    // ==================== handler-transformer 配置 ====================
+    // ==================== handler-transformer ====================
 
-    /**
-     * 启用「一个Controller均调用同一个Service」的模式（handler-transformer 使用）
-     */
-    @NotNull
-    Boolean enableOneService = false;
+    Boolean enableOneService;
 
-    // ==================== persistence-generator 配置 ====================
+    // ==================== persistence-generator ====================
 
-    /**
-     * 数据库连接
-     */
     String jdbcUrl;
 
-    /**
-     * 数据库用户名
-     */
     String userName;
 
-    /**
-     * 数据库密码
-     */
     String password;
 
-    /**
-     * 指定schema
-     */
     String schema;
 
-    /**
-     * 使用指定的DDL，在In-memory H2中构建表结构
-     */
     String ddl;
 
-    /**
-     * 指定table，非必填，未填写时代表schema下所有的table
-     */
-    List<String> tables = Lists.newArrayList();
+    List<String> tables;
 
-    /**
-     * 是否为[query-transformer]生成Design类
-     */
-    @NotNull
-    Boolean enableGenerateDesign = true;
+    Boolean enableGenerateDesign;
 
-    /**
-     * 生成出的Entity类是否以Entity作为类名的结尾
-     */
-    @NotNull
-    Boolean isEntityEndWithEntity = true;
+    Boolean isEntityEndWithEntity;
 
-    /**
-     * 如果有逻辑删除，怎么样算作"数据被删"，非必填，只支持等式SQL
-     */
     String deletedSql;
 
-    /**
-     * 如果有逻辑删除，怎么样算作"数据未被删"，非必填，只支持等式SQL
-     */
     String notDeletedSql;
 
-    // ==================== star-transformer 配置 ====================
+    // ==================== star-transformer ====================
 
-    /**
-     * Whole DTO的后缀
-     */
-    @NotNull
-    String wholeDTONamePostfix = "WholeDTO";
+    String wholeDTONamePostfix;
 
-    // ==================== doc-analyzer 配置 ====================
+    // ==================== doc-analyzer ====================
 
-    /**
-     * 目标项目handler方法签名所依赖的外部项目的目录或者具体Java文件的相对路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    @NotNull
-    List<File> dependencyDirsOrJavaFilePath = Lists.newArrayList();
+    List<File> dependencyDirsOrJavaFilePath;
 
-    /**
-     * 全局URL前缀
-     */
-    @NotNull
-    String globalUrlPrefix = "";
+    String globalUrlPrefix;
 
-    /**
-     * 文档保存到...
-     */
-    @NotEmpty(message = "must be 'MARKDOWN', 'YAPI', 'SHOWDOC' or 'DSL'")
-    List<FlushToEnum> flushTo = Lists.newArrayList(FlushToEnum.MARKDOWN);
+    List<FlushToEnum> flushTo;
 
-    /**
-     * 文档输出到YApi时，YApi请求URL
-     */
     String yapiUrl;
 
-    /**
-     * 文档输出到YApi时，YApi项目的TOKEN
-     */
     String yapiToken;
 
-    /**
-     * 文档输出到markdown时，Markdown文件的目录的路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    File markdownDir = new File("api-docs");
+    File markdownDir;
 
-    /**
-     * 文档输出到Showdoc时，文档的基础目录名（ShowDoc提供的开放API不支持删除，设置基础目录名便于手动一次性删除后重新同步）
-     */
-    String showdocBaseCatName = "doc-analyzer";
+    String showdocBaseCatName;
 
-    /**
-     * 文档输出到Showdoc时，ShowDoc开放API的URL
-     */
     String showdocUrl;
 
-    /**
-     * 文档输出到Showdoc时，ShowDoc开放API的api_key
-     */
     String showdocApiKey;
 
-    /**
-     * 文档输出到Showdoc时，ShowDoc开放API的api_token
-     */
     String showdocApiToken;
 
-    /**
-     * 文档输出到dsl时，dsl文件的目录的路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    File dslDir = new File("api-dsls");
+    File dslDir;
 
-    /**
-     * 文档输出到markdown或ShowDoc时，每个Endpoint是否输出到单个markdown文件
-     */
-    Boolean singleEndpointPerMarkdown = false;
+    Boolean singleEndpointPerMarkdown;
 
-    /**
-     * 多个方法全限定名，只有能够匹配这些的MVC Handler方法才会被分析并输出文档，支持*和?通配符的
-     */
     List<String> mvcHandlerQualifierWildcards;
 
-    /**
-     * 获取枚举Code的方法名
-     */
-    @NotNull
-    String getEnumCodeMethodName = "getCode";
+    String getEnumCodeMethodName;
+
+    String getEnumTitleMethodName;
+
+    // ==================== app-generator ====================
+
+    File appDslPath;
+
+    File appGeneratorOutputDir;
+
+    // ==================== form-generator ====================
+
+    File dslPath;
+
+    CodeSnippet codeSnippet;
 
     /**
-     * 获取枚举Title的方法名
+     * Deserialize from a YAML file, apply defaults, validate, and return an immutable Config.
      */
-    @NotNull
-    String getEnumTitleMethodName = "getTitle";
+    public static Config fromYaml(File yamlFile) {
+        ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+        yamlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        Config raw;
+        try {
+            raw = yamlMapper.readValue(yamlFile, Config.class);
+        } catch (IOException e) {
+            throw new Allison1875Exception("Failed to read config from " + yamlFile.getAbsolutePath(), e);
+        }
+        Config config = applyDefaults(raw);
+        validate(config);
+        return config;
+    }
 
-    // ==================== app-generator 配置 ====================
+    private static Config applyDefaults(Config raw) {
+        ConfigBuilder b = raw.toBuilder();
+        if (raw.author == null) {
+            b.author("Allison 1875");
+        }
+        if (raw.isDataModelWithoutLombok == null) {
+            b.isDataModelWithoutLombok(false);
+        }
+        if (raw.enableNoModifyAnnounce == null) {
+            b.enableNoModifyAnnounce(true);
+        }
+        if (raw.enableJavaxMoveToJakarta == null) {
+            b.enableJavaxMoveToJakarta(false);
+        }
+        if (raw.docAnalyzerModule == null) {
+            b.docAnalyzerModule("com.spldeolin.allison1875.docanalyzer.DocAnalyzerModule");
+        }
+        if (raw.handlerTransformerModule == null) {
+            b.handlerTransformerModule("com.spldeolin.allison1875.handlertransformer.HandlerTransformerModule");
+        }
+        if (raw.persistenceGeneratorModule == null) {
+            b.persistenceGeneratorModule(
+                    "com.spldeolin.allison1875.persistencegenerator.PersistenceGeneratorModule");
+        }
+        if (raw.queryTransformerModule == null) {
+            b.queryTransformerModule("com.spldeolin.allison1875.querytransformer.QueryTransformerModule");
+        }
+        if (raw.starTransformerModule == null) {
+            b.starTransformerModule("com.spldeolin.allison1875.startransformer.StarTransformerModule");
+        }
+        if (raw.formGeneratorModule == null) {
+            b.formGeneratorModule("com.spldeolin.allison1875.formgenerator.FormGeneratorModule");
+        }
+        if (raw.appGeneratorModule == null) {
+            b.appGeneratorModule("com.spldeolin.allison1875.appgenerator.AppGeneratorModule");
+        }
+        if (raw.enableOneService == null) {
+            b.enableOneService(false);
+        }
+        if (raw.tables == null) {
+            b.tables(new ArrayList<>());
+        }
+        if (raw.enableGenerateDesign == null) {
+            b.enableGenerateDesign(true);
+        }
+        if (raw.isEntityEndWithEntity == null) {
+            b.isEntityEndWithEntity(true);
+        }
+        if (raw.wholeDTONamePostfix == null) {
+            b.wholeDTONamePostfix("WholeDTO");
+        }
+        if (raw.dependencyDirsOrJavaFilePath == null) {
+            b.dependencyDirsOrJavaFilePath(new ArrayList<>());
+        }
+        if (raw.globalUrlPrefix == null) {
+            b.globalUrlPrefix("");
+        }
+        if (raw.flushTo == null) {
+            b.flushTo(List.of(FlushToEnum.MARKDOWN));
+        }
+        if (raw.markdownDir == null) {
+            b.markdownDir(new File("api-docs"));
+        }
+        if (raw.showdocBaseCatName == null) {
+            b.showdocBaseCatName("doc-analyzer");
+        }
+        if (raw.dslDir == null) {
+            b.dslDir(new File("api-dsls"));
+        }
+        if (raw.singleEndpointPerMarkdown == null) {
+            b.singleEndpointPerMarkdown(false);
+        }
+        if (raw.getEnumCodeMethodName == null) {
+            b.getEnumCodeMethodName("getCode");
+        }
+        if (raw.getEnumTitleMethodName == null) {
+            b.getEnumTitleMethodName("getTitle");
+        }
+        if (raw.appDslPath == null) {
+            b.appDslPath(new File("./app.yml"));
+        }
+        if (raw.appGeneratorOutputDir == null) {
+            b.appGeneratorOutputDir(new File("./output"));
+        }
+        if (raw.dslPath == null) {
+            b.dslPath(new File("./forms.yml"));
+        }
+        if (raw.codeSnippet == null) {
+            b.codeSnippet(CodeSnippet.applyDefaults(CodeSnippet.builder().build()));
+        } else {
+            b.codeSnippet(CodeSnippet.applyDefaults(raw.codeSnippet));
+        }
+        // domains default to empty list
+        if (raw.domains == null) {
+            b.domains(new ArrayList<>());
+        } else {
+            List<DomainConfig> defaultedDomains = new ArrayList<>();
+            for (DomainConfig dc : raw.domains) {
+                defaultedDomains.add(DomainConfig.applyDefaults(dc));
+            }
+            b.domains(defaultedDomains);
+        }
+        return b.build();
+    }
+
+    private static void validate(Config config) {
+        List<String> errors = new ArrayList<>();
+
+        // domains must not be empty
+        if (config.domains == null || config.domains.isEmpty()) {
+            errors.add("domains must not be empty");
+        }
+
+        // persistence-generator: jdbc requires userName, password, schema
+        if (config.jdbcUrl != null || config.ddl != null) {
+            if (config.jdbcUrl != null && !config.jdbcUrl.isEmpty()) {
+                if (config.userName == null || config.userName.isEmpty()) {
+                    errors.add("userName must not be empty when jdbcUrl is not empty");
+                }
+                if (config.password == null || config.password.isEmpty()) {
+                    errors.add("password must not be empty when jdbcUrl is not empty");
+                }
+                if (config.schema == null || config.schema.isEmpty()) {
+                    errors.add("schema must not be empty when jdbcUrl is not empty");
+                }
+            }
+        }
+
+        // doc-analyzer: flushTo conditional validation
+        if (config.flushTo != null) {
+            if (config.flushTo.contains(FlushToEnum.YAPI)) {
+                if (config.yapiUrl == null) {
+                    errors.add("yapiUrl must not be null when flushTo contains 'YAPI'");
+                }
+                if (config.yapiToken == null) {
+                    errors.add("yapiToken must not be null when flushTo contains 'YAPI'");
+                }
+            }
+            if (config.flushTo.contains(FlushToEnum.MARKDOWN)) {
+                if (config.markdownDir == null) {
+                    errors.add("markdownDir must not be null when flushTo contains 'MARKDOWN'");
+                }
+            }
+            if (config.flushTo.contains(FlushToEnum.DSL)) {
+                if (config.dslDir == null) {
+                    errors.add("dslDir must not be null when flushTo contains 'DSL'");
+                }
+            }
+            if (config.flushTo.contains(FlushToEnum.SHOWDOC)) {
+                if (config.showdocUrl == null) {
+                    errors.add("showdocUrl must not be null when flushTo contains 'SHOWDOC'");
+                }
+                if (config.showdocApiKey == null) {
+                    errors.add("showdocApiKey must not be null when flushTo contains 'SHOWDOC'");
+                }
+                if (config.showdocApiToken == null) {
+                    errors.add("showdocApiToken must not be null when flushTo contains 'SHOWDOC'");
+                }
+            }
+        }
+
+        // codeSnippet: requestResult* four fields all-or-nothing
+        if (config.codeSnippet != null) {
+            CodeSnippet cs = config.codeSnippet;
+            boolean hasQualifier = cs.getRequestResultQualifier() != null
+                    && !cs.getRequestResultQualifier().isEmpty();
+            boolean hasTypeDecl = cs.getRequestResultTypeDeclaration() != null
+                    && !cs.getRequestResultTypeDeclaration().isEmpty();
+            boolean hasSuccessNoData = cs.getRequestResultSuccessNoData() != null
+                    && !cs.getRequestResultSuccessNoData().isEmpty();
+            boolean hasSuccessWithData = cs.getRequestResultSuccessWithData() != null
+                    && !cs.getRequestResultSuccessWithData().isEmpty();
+            boolean anyPresent = hasQualifier || hasTypeDecl || hasSuccessNoData || hasSuccessWithData;
+            boolean allPresent = hasQualifier && hasTypeDecl && hasSuccessNoData && hasSuccessWithData;
+            if (anyPresent && !allPresent) {
+                if (!hasQualifier) {
+                    errors.add("codeSnippet.requestResultQualifier must not be empty when any other "
+                            + "requestResult field is specified");
+                }
+                if (!hasTypeDecl) {
+                    errors.add("codeSnippet.requestResultTypeDeclaration must not be empty when any other "
+                            + "requestResult field is specified");
+                }
+                if (!hasSuccessNoData) {
+                    errors.add("codeSnippet.requestResultSuccessNoData must not be empty when any other "
+                            + "requestResult field is specified");
+                }
+                if (!hasSuccessWithData) {
+                    errors.add("codeSnippet.requestResultSuccessWithData must not be empty when any other "
+                            + "requestResult field is specified");
+                }
+            }
+        }
+
+        // cascade validate each DomainConfig
+        if (config.domains != null) {
+            for (int i = 0; i < config.domains.size(); i++) {
+                DomainConfig dc = config.domains.get(i);
+                String prefix = "domains[" + i + "].";
+                DomainConfig.validate(dc, prefix, errors);
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new Allison1875Exception("Config validation failed:\n- " + String.join("\n- ", errors));
+        }
+    }
 
     /**
-     * App DSL 文件路径
+     * Code snippet configuration (immutable).
+     *
+     * @author Deolin 2026-03-12
      */
-    @NotNull
-    File appDslPath = new File("./app.yml");
-
-    /**
-     * app-generator 输出目录
-     */
-    @NotNull
-    File appGeneratorOutputDir = new File("./output");
-
-    // ==================== form-generator 配置 ====================
-
-    /**
-     * DSL.yml文件的相对路径（相对于pom所在basedir的相对路径 或 绝对路径 皆可）
-     */
-    @NotNull
-    File dslPath = new File("./forms.yml");
-
-    /**
-     * 代码模板配置
-     */
-    @NotNull
-    @Valid
-    CodeSnippet codeSnippet = new CodeSnippet();
-
-    /**
-     * 代码片段
-     */
-    @Data
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Value
+    @Jacksonized
+    @Builder(toBuilder = true)
     public static class CodeSnippet {
 
-        /**
-         * Spring MVC 请求方法统一返回类的全限定名。
-         * <p>
-         * 例如：com.company.project.common.RequestResult
-         */
         String requestResultQualifier;
 
-        /**
-         * Spring MVC 请求方法统一返回类型声明的代码片段，其中 ${dataType} 为业务返回数据类型的固定占位符
-         * <p>
-         * 例如：RequestResult&lt;${dataType}&gt;
-         */
         String requestResultTypeDeclaration;
 
-        /**
-         * 构造统一返回对象（无业务数据，成功场景）的代码片段
-         * <p>
-         * 例如：RequestResult.success()
-         */
         String requestResultSuccessNoData;
 
-        /**
-         * 构造统一返回对象（有业务数据，成功场景）的代码片段，其中 ${data} 为业务返回数据对象的固定占位符
-         * <p>
-         * 例如：RequestResult.success(${data})
-         */
         String requestResultSuccessWithData;
 
-        /**
-         * Controller类@RequestMapping路径的代码片段（占位符${formName}代表form-generator的表单名称）
-         */
-        @NotEmpty
-        String controllerRequestMapping = "/api/v1/${formName}";
+        String controllerRequestMapping;
 
-        /**
-         * 生成短UUID的代码片段
-         */
-        @NotEmpty
-        String shortUuidGeneration = "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()";
+        String shortUuidGeneration;
 
-        /**
-         * 判断列表是否为empty的代码片段（占位符${list}代表列表）
-         */
-        @NotEmpty
-        String collectionEmptyCheck = "${list} == null || ${list}.isEmpty()";
+        String collectionEmptyCheck;
 
-        /**
-         * 业务逻辑异常的全限定名
-         * <p>
-         * form-generator 生成的 SaveApiService 等会在唯一键冲突或记录不存在时抛出该异常。
-         * <p>
-         * 例如：com.example.common.BizException
-         */
-        @NotEmpty
-        String bizExceptionQualifier = "java.lang.RuntimeException";
+        String bizExceptionQualifier;
+
+        static CodeSnippet applyDefaults(CodeSnippet raw) {
+            CodeSnippetBuilder b = raw.toBuilder();
+            if (raw.controllerRequestMapping == null) {
+                b.controllerRequestMapping("/api/v1/${formName}");
+            }
+            if (raw.shortUuidGeneration == null) {
+                b.shortUuidGeneration("UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()");
+            }
+            if (raw.collectionEmptyCheck == null) {
+                b.collectionEmptyCheck("${list} == null || ${list}.isEmpty()");
+            }
+            if (raw.bizExceptionQualifier == null) {
+                b.bizExceptionQualifier("java.lang.RuntimeException");
+            }
+            return b.build();
+        }
 
     }
 

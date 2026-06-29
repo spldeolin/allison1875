@@ -1,0 +1,22 @@
+flushTo:
+  - YAPI
+domains:
+  - name: "default"
+    controllerModule: "/tmp/proj"
+    controllerPackage: "com.example.controller"
+    dtoModule: "/tmp/proj"
+    reqDTOPackage: "com.example.dto.req"
+    respDTOPackage: "com.example.dto.resp"
+    enumModule: "/tmp/proj"
+    enumPackage: "com.example.enums"
+    serviceModule: "/tmp/proj"
+    servicePackage: "com.example.service"
+    serviceImplModule: "/tmp/proj"
+    serviceImplPackage: "com.example.service.impl"
+    persistenceModule: "/tmp/proj"
+    mapperPackage: "com.example.mapper"
+    entityPackage: "com.example.entity"
+    designPackage: "com.example.design"
+    paramDTOPackage: "com.example.dto.param"
+    recordDTOPackage: "com.example.dto.record"
+    wholeDTOPackage: "com.example.dto"

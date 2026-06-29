@@ -15,18 +15,22 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.google.common.collect.Lists;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainContext;
+import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Game;
+import com.spldeolin.allison1875.common.guice.Allison1875Module;
+import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import com.spldeolin.allison1875.docanalyzer.DocAnalyzer;
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
@@ -40,7 +44,6 @@ import com.spldeolin.allison1875.formgenerator.service.GetDetailApiService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
 import com.spldeolin.allison1875.formgenerator.service.UpdateApiService;
 import com.spldeolin.allison1875.handlertransformer.HandlerTransformer;
-import com.spldeolin.allison1875.persistencegenerator.PersistenceGenerator;
 import com.spldeolin.allison1875.querytransformer.QueryTransformer;
 import com.spldeolin.allison1875.querytransformer.service.MapperLayerExpansionService;
 import lombok.extern.slf4j.Slf4j;
@@ -56,13 +59,7 @@ public class FormGenerator implements Allison1875Game {
     private Config config;
 
     @Inject
-    private PersistenceGenerator persistenceGenerator;
-
-    @Inject
     private HandlerTransformer handlerTransformer;
-
-    @Inject
-    private DocAnalyzer docAnalyzer;
 
     @Inject
     private QueryTransformer queryTransformer;
@@ -119,10 +116,14 @@ public class FormGenerator implements Allison1875Game {
         }
 
         // 生成持久层
-        config.setJdbcUrl(null);
-        config.setDdl(ddl);
-        config.setEnableGenerateDesign(true);
-        persistenceGenerator.play();
+        Config pgConfig = config.toBuilder()
+                .jdbcUrl(null)
+                .ddl(ddl)
+                .enableGenerateDesign(true)
+                .build();
+        Allison1875Module pgModule = loadModule(config.getPersistenceGeneratorModule(), pgConfig);
+        Injector pgInjector = Guice.createInjector(pgModule, new ValidationModule());
+        pgInjector.getInstance(pgModule.declareMainService()).play();
 
         // 生成枚举
         enumService.generateEnums(forms);
@@ -187,8 +188,12 @@ public class FormGenerator implements Allison1875Game {
         queryTransformer.play();
 
         // 调用doc-analyzer分析接口文档
-        config.setMvcHandlerQualifierWildcards(controllerQualifiers);
-        docAnalyzer.play();
+        Config daConfig = config.toBuilder()
+                .mvcHandlerQualifierWildcards(controllerQualifiers)
+                .build();
+        Allison1875Module daModule = loadModule(config.getDocAnalyzerModule(), daConfig);
+        Injector daInjector = Guice.createInjector(daModule, new ValidationModule());
+        daInjector.getInstance(daModule.declareMainService()).play();
     }
 
     private List<FormDef> deserializeDSL() {
@@ -198,6 +203,15 @@ public class FormGenerator implements Allison1875Game {
                     });
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private static Allison1875Module loadModule(String moduleClassName, Config config) {
+        try {
+            return (Allison1875Module) Class.forName(moduleClassName)
+                    .getConstructor(Config.class).newInstance(config);
+        } catch (Exception e) {
+            throw new Allison1875Exception("加载模块失败: " + moduleClassName, e);
         }
     }
 

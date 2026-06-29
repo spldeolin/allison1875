@@ -31,12 +31,6 @@
             <groupId>com.spldeolin.allison1875</groupId>
             <artifactId>query-transformer</artifactId>
         </dependency>
-
-        <!-- jackson yaml -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

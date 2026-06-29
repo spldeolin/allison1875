@@ -1,0 +1,37 @@
+author: "Test Author"
+isDataModelWithoutLombok: true
+enableNoModifyAnnounce: false
+enableJavaxMoveToJakarta: true
+enableOneService: true
+jdbcUrl: "jdbc:mysql://localhost:3306/test"
+userName: "root"
+password: "123456"
+schema: "test_db"
+enableGenerateDesign: false
+isEntityEndWithEntity: false
+wholeDTONamePostfix: "DTO"
+globalUrlPrefix: "/api"
+getEnumCodeMethodName: "getValue"
+getEnumTitleMethodName: "getLabel"
+domains:
+  - name: "order"
+    controllerModule: "/tmp/order"
+    controllerPackage: "com.example.controller"
+    dtoModule: "/tmp/order"
+    reqDTOPackage: "com.example.dto.req"
+    respDTOPackage: "com.example.dto.resp"
+    enumModule: "/tmp/order"
+    enumPackage: "com.example.enums"
+    serviceModule: "/tmp/order"
+    servicePackage: "com.example.service"
+    serviceImplModule: "/tmp/order"
+    serviceImplPackage: "com.example.service.impl"
+    persistenceModule: "/tmp/order"
+    mapperPackage: "com.example.mapper"
+    entityPackage: "com.example.entity"
+    designPackage: "com.example.design"
+    paramDTOPackage: "com.example.dto.param"
+    recordDTOPackage: "com.example.dto.record"
+    wholeDTOPackage: "com.example.dto"
+    mapperXmlDirs:
+      - "src/main/resources/mapper"

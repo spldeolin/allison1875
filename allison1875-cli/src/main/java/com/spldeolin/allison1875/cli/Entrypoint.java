@@ -1,11 +1,6 @@
 package com.spldeolin.allison1875.cli;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import com.spldeolin.allison1875.common.Allison1875;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
@@ -30,7 +25,7 @@ public class Entrypoint {
         log.info("toolName={} domainName={} configFile={}", cliArgs.tool, cliArgs.domainName, cliArgs.configFile);
 
         // 读取.allison1875配置文件并反序列化
-        Config config = loadConfig(cliArgs.configFile);
+        Config config = Config.fromYaml(new File(cliArgs.configFile));
         log.info("config={}", JsonUtils.toJson(config));
 
         // 执行allison1875
@@ -64,22 +59,6 @@ public class Entrypoint {
         cliArgs.domainName = domainName;
         cliArgs.configFile = configFilePath;
         return cliArgs;
-    }
-
-    /**
-     * 读取.allison1875配置文件并反序列化为Config
-     */
-    private static Config loadConfig(String configFilePath) {
-        File configFile = new File(configFilePath);
-        if (!configFile.exists()) {
-            throw new Allison1875Exception("配置文件不存在: " + configFile.getAbsolutePath());
-        }
-        Yaml yaml = new Yaml(new Constructor(Config.class, new LoaderOptions()));
-        try (FileInputStream fis = new FileInputStream(configFile)) {
-            return yaml.load(fis);
-        } catch (IOException e) {
-            throw new Allison1875Exception("读取配置文件失败: " + configFile.getAbsolutePath(), e);
-        }
     }
 
     /**

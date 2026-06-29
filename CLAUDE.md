@@ -113,7 +113,7 @@ public class XxxRetval {           // 出参: *Retval
 ### Lombok 用法
 
 - DTO: `@Data`, `@Accessors(chain = true)`, `@FieldDefaults(level = AccessLevel.PRIVATE)`
-- Config: `@Data`, `@FieldDefaults(level = AccessLevel.PRIVATE)`
+- Config: `@Value`, `@Jacksonized`, `@Builder(toBuilder = true)`
 - Enum: `@Getter`, `@AllArgsConstructor`
 - Service impl / main class: `@Slf4j`
 - Module: `@Slf4j`, `@ToString`

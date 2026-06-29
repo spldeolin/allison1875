@@ -60,7 +60,7 @@ public class Allison1875 {
     public static void prepareDomain(Config config, String domainName) {
         DomainConfig domainConfig = resolveDomain(config, domainName);
         log.info("targetDomain={}", JsonUtils.toJson(domainConfig));
-        resolveSourceRoots(domainConfig);
+        domainConfig = resolveSourceRoots(domainConfig);
         DomainContext.set(domainConfig);
     }
 
@@ -115,17 +115,19 @@ public class Allison1875 {
      * 解析 DomainConfig 中各 *Module 字段到对应的 *SourceRoot 路径，
      * 同时将 mapperXmlDirs 转换为基于 persistenceModule 的绝对路径。
      */
-    private static void resolveSourceRoots(DomainConfig domainConfig) {
-        domainConfig.setControllerSourceRoot(Paths.get(domainConfig.getControllerModule(), "src/main/java"));
-        domainConfig.setDtoSourceRoot(Paths.get(domainConfig.getDtoModule(), "src/main/java"));
-        domainConfig.setEnumSourceRoot(Paths.get(domainConfig.getEnumModule(), "src/main/java"));
-        domainConfig.setServiceSourceRoot(Paths.get(domainConfig.getServiceModule(), "src/main/java"));
-        domainConfig.setServiceImplSourceRoot(Paths.get(domainConfig.getServiceImplModule(), "src/main/java"));
-        domainConfig.setPersistenceSourceRoot(Paths.get(domainConfig.getPersistenceModule(), "src/main/java"));
+    private static DomainConfig resolveSourceRoots(DomainConfig domainConfig) {
         Path persistenceModule = Paths.get(domainConfig.getPersistenceModule());
-        domainConfig.setMapperXmlDirs(
-                domainConfig.getMapperXmlDirs().stream().map(dir -> persistenceModule.resolve(dir.toPath()).toFile())
-                        .collect(Collectors.toList()));
+        return domainConfig.toBuilder()
+                .controllerSourceRoot(Paths.get(domainConfig.getControllerModule(), "src/main/java"))
+                .dtoSourceRoot(Paths.get(domainConfig.getDtoModule(), "src/main/java"))
+                .enumSourceRoot(Paths.get(domainConfig.getEnumModule(), "src/main/java"))
+                .serviceSourceRoot(Paths.get(domainConfig.getServiceModule(), "src/main/java"))
+                .serviceImplSourceRoot(Paths.get(domainConfig.getServiceImplModule(), "src/main/java"))
+                .persistenceSourceRoot(Paths.get(domainConfig.getPersistenceModule(), "src/main/java"))
+                .mapperXmlDirs(domainConfig.getMapperXmlDirs().stream()
+                        .map(dir -> persistenceModule.resolve(dir.toPath()).toFile())
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     private static Allison1875Module buildSimpleModule(ToolEnum tool, Config config) {

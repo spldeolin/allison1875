@@ -82,11 +82,14 @@ public class Xxx implements Allison1875Game {
 }
 ```
 
-## Config Validation
+## Config 构造
 
-- `Config` 使用 `@ConfigValid`（自定义注解，由 `ConfigValidator` 校验）+ `jakarta.validation.constraints.*`
+- `Config` 和 `DomainConfig` 使用 `@Value` + `@Jacksonized` + `@Builder(toBuilder = true)`，反序列化后不可变
+- `Config.fromYaml(File)` 是唯一的构造入口：反序列化 → 应用默认值 → 校验
+- 运行时需要覆盖配置时使用 `config.toBuilder().field(newValue).build()` 派生副本
+- 不再使用 `@ConfigValid` 注解和 `ConfigValidator` 类
+- `ValidSingletonListener` 仍服务于其它 Guice bean 的校验
 - `ValidationModule` 安装 `ValidSingletonListener`（创建时校验）和 `ValidMethodArgsInterceptor`（方法参数校验）
-- `DomainConfig` 通过 `@Valid` 级联从 `Config.domains` 触发校验
 
 ## File Snapshot & Rollback
 
