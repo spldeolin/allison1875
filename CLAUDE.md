@@ -138,6 +138,16 @@ public class XxxRetval {           // 出参: *Retval
 - 通过 `@Inject` 字段注入，Module 必须有单参数 `Config` 构造函数（反射实例化）
 - 详细代码模板见 `common/CLAUDE.md`
 
+## Config 不可变模式
+
+`Config` 和 `DomainConfig` 反序列化后不可变（`@Value` + `@Jacksonized` + `@Builder(toBuilder=true)`）。
+
+- **构造**：`Config.fromYaml(File)` — 唯一入口，内部完成反序列化 → 默认值 → 校验
+- **读取**：通过 `@Inject private Config config` 注入后只读访问
+- **覆盖**：`config.toBuilder().field(newValue).build()` 派生副本 + 构建新 Injector
+
+详细的校验规则、默认值速查表、覆盖模式代码模板见 `common/CLAUDE.md`。
+
 ## AST 处理管道
 
 处理顺序：detect → analyze → generate → modify CU → `importExprService.extractQualifiedTypeToImport(cu)` →
@@ -166,8 +176,8 @@ public class XxxRetval {           // 出参: *Retval
 
 ### 新增 Tool 模块的 Wiring 步骤
 
-1. 在 `Config` 中新增字段（如 `xxxModule = "com.spldeolin.allison1875.xxx.XxxModule"`）
-2. 在 `ToolEnum` 中新增条目：`XXX("xxx", Config::getXxxModule, false)`
+1. 在 `Config` 中新增字段（如 `String xxxModule`），在 `applyDefaults()` 中设置默认全限定名
+2. 在 `ToolEnum` 中新增条目：`XXX("xxx", Config::getXxxModule)`
 3. 在 `allison1875-cli/pom.xml` 的 `<dependencies>` 中添加新模块
 4. （可选）在 `allison1875-cli/src/test/java/.../it/xxx/` 下新增 `XxxItBaseTest`
 
