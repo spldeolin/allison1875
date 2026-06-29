@@ -87,8 +87,7 @@ public class Xxx implements Allison1875Game {
 - `Config` 和 `DomainConfig` 使用 `@Value` + `@Jacksonized` + `@Builder(toBuilder = true)`，反序列化后不可变
 - `Config.fromYaml(File)` 是唯一的构造入口：反序列化 → 应用默认值 → 校验
 - 运行时需要覆盖配置时使用 `config.toBuilder().field(newValue).build()` 派生副本
-- `ValidSingletonListener` 仍服务于其它 Guice bean 的校验
-- `ValidationModule` 安装 `ValidSingletonListener`（创建时校验）和 `ValidMethodArgsInterceptor`（方法参数校验）
+- `DataModelArg`、`FieldArg`、`GenerateMvcHandlerArgs` 等 DTO 通过 `validate()` 方法在使用方内部进行编程式校验
 
 ### Config 覆盖模式（toBuilder + 新 Injector）
 
@@ -105,7 +104,7 @@ Config pgConfig = config.toBuilder()
 // 通过反射构建子 tool 的 Module 并创建独立 Injector
 Allison1875Module pgModule = (Allison1875Module) Class.forName(config.getPersistenceGeneratorModule())
         .getConstructor(Config.class).newInstance(pgConfig);
-Injector pgInjector = Guice.createInjector(pgModule, new ValidationModule());
+Injector pgInjector = Guice.createInjector(pgModule);
 pgInjector.getInstance(pgModule.declareMainService()).play();
 ```
 

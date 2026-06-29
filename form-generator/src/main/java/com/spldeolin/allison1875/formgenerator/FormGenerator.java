@@ -24,7 +24,6 @@ import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Game;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
-import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.service.AnnotationExprService;
 import com.spldeolin.allison1875.common.util.CollectionUtils;
 import com.spldeolin.allison1875.common.util.CompilationUnitUtils;
@@ -124,7 +123,7 @@ public class FormGenerator implements Allison1875Game {
                 .enableGenerateDesign(true)
                 .build();
         Allison1875Module pgModule = loadModule(config.getPersistenceGeneratorModule(), pgConfig);
-        Injector pgInjector = Guice.createInjector(pgModule, new ValidationModule());
+        Injector pgInjector = Guice.createInjector(pgModule);
         pgInjector.getInstance(pgModule.declareMainService()).play();
 
         // 生成枚举
@@ -194,7 +193,7 @@ public class FormGenerator implements Allison1875Game {
                 .mvcHandlerQualifierWildcards(controllerQualifiers)
                 .build();
         Allison1875Module daModule = loadModule(config.getDocAnalyzerModule(), daConfig);
-        Injector daInjector = Guice.createInjector(daModule, new ValidationModule());
+        Injector daInjector = Guice.createInjector(daModule);
         daInjector.getInstance(daModule.declareMainService()).play();
     }
 

@@ -21,7 +21,6 @@ import com.spldeolin.allison1875.common.config.DomainContext;
 import com.spldeolin.allison1875.common.enums.ToolEnum;
 import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import com.spldeolin.allison1875.common.guice.Allison1875Module;
-import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,7 +68,7 @@ public class Allison1875 {
 
         Allison1875Module allison1875Module = buildSimpleModule(tool, config);
 
-        List<Module> guiceModules = Lists.newArrayList(allison1875Module, new ValidationModule());
+        List<Module> guiceModules = Lists.newArrayList(allison1875Module);
 
         Injector injector;
         try {

@@ -45,6 +45,7 @@ public class DataModelServiceNoLombokImpl implements DataModelService {
 
     @Override
     public DataModelGeneration generateDataModel(DataModelArg arg) {
+        arg.validate();
         String packageName = arg.getPackageName().trim();
         String className = arg.getClassName().trim();
         String description = MoreObjects.firstNonNull(arg.getDescription(), "").trim();

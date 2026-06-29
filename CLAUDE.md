@@ -8,7 +8,7 @@ Java AST 源码分析与转换工具集，以 CLI fat jar (`allison1875-cli`) �
 ## 技术栈
 
 Java 21 · Maven 多模块 · 版本 `14.0-SNAPSHOT`
-DI: Google Guice 5.1.0（非 Spring）· 校验: jakarta.validation + Hibernate Validator（非 javax）
+DI: Google Guice 5.1.0（非 Spring）· 校验: 编程式 validate() 方法
 AST: JavaParser 3.28.1 · 日志: SLF4J + Logback · 测试: JUnit 5 + JaCoCo
 
 ## 模块地图
@@ -45,7 +45,7 @@ mvn test -pl allison1875-cli -am -Dtest=BasicMarkdownItTest
 
 ### 绝对禁止
 
-1. 工具自身源码中使用 `javax.validation` — 必须用 `jakarta.validation`
+1. 工具自身源码中使用 `javax.validation` 或 `jakarta.validation` 注解 — DTO 校验通过编程式 `validate()` 方法实现
 2. 假设工具运行在 Spring 上 — 它用 Google Guice
 3. 未理解完整 Guice + DomainContext 生命周期就修改 `Allison1875.java`、`Allison1875Module.java`、`Entrypoint.java`
 4. 跳过 `importExprService.extractQualifiedTypeToImport(cu)` 直接调 `CompilationUnitUtils.writeJava(cu)`

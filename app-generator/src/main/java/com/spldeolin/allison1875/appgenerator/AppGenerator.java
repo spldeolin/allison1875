@@ -40,7 +40,6 @@ import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.config.DomainConfig;
 import com.spldeolin.allison1875.common.enums.FlushToEnum;
 import com.spldeolin.allison1875.common.guice.Allison1875Game;
-import com.spldeolin.allison1875.common.guice.ValidationModule;
 import com.spldeolin.allison1875.common.util.FileSnapshotUtils;
 import com.spldeolin.allison1875.common.util.MavenUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
@@ -436,7 +435,7 @@ public class AppGenerator implements Allison1875Game {
         }
 
         log.info("invoking form-generator for {} forms...", forms.size());
-        Injector injector = Guice.createInjector(combined, new ValidationModule());
+        Injector injector = Guice.createInjector(combined);
         injector.getInstance(FormGenerator.class).play();
         log.info("form-generator completed");
 

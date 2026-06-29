@@ -23,6 +23,7 @@ import com.github.javaparser.javadoc.JavadocBlockTag.Type;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.spldeolin.allison1875.common.ast.AstForestContext;
 import com.spldeolin.allison1875.common.config.Config;
 import com.spldeolin.allison1875.common.dto.GenerateMvcHandlerArgs;
 import com.spldeolin.allison1875.common.dto.GenerateMvcHandlerRetval;
@@ -31,9 +32,6 @@ import com.spldeolin.allison1875.common.service.AntiDuplicationService;
 import com.spldeolin.allison1875.common.service.MvcHandlerGeneratorService;
 import com.spldeolin.allison1875.common.util.JavadocUtils;
 import com.spldeolin.allison1875.common.util.MoreStringUtils;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,6 +52,7 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
 
     @Override
     public GenerateMvcHandlerRetval generateMvcHandler(GenerateMvcHandlerArgs args) {
+        args.validate();
         MethodDeclaration mvcHandler = new MethodDeclaration();
 
         if (StringUtils.isNotEmpty(args.getDescription())) {
@@ -133,9 +132,12 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
                 });
                 // @RequestParam.required
                 fdOpt.ifPresent(fd -> {
-                    if (isNoneAnnotated(fd, NotNull.class, NotEmpty.class,
-                            org.hibernate.validator.constraints.NotEmpty.class, NotBlank.class,
-                            org.hibernate.validator.constraints.NotBlank.class)) {
+                    if (isNoneAnnotated(fd,
+                            "jakarta.validation.constraints.NotNull",
+                            "jakarta.validation.constraints.NotEmpty",
+                            "org.hibernate.validator.constraints.NotEmpty",
+                            "jakarta.validation.constraints.NotBlank",
+                            "org.hibernate.validator.constraints.NotBlank")) {
                         anno.addPair("required", new BooleanLiteralExpr(false));
                     }
                 });
@@ -197,10 +199,18 @@ public class MvcHandlerGeneratorServiceImpl implements MvcHandlerGeneratorServic
         return new GenerateMvcHandlerRetval().setMvcHandler(mvcHandler);
     }
 
-    private boolean isNoneAnnotated(NodeWithAnnotations<?> node, Class<? extends Annotation>... classes) {
-        for (Class<? extends Annotation> clazz : classes) {
-            if (node.getAnnotationByName(clazz.getSimpleName()).isPresent()) {
-                return false;
+    @SuppressWarnings("unchecked")
+    private boolean isNoneAnnotated(NodeWithAnnotations<?> node, String... classNames) {
+        ClassLoader classLoader = AstForestContext.get().getClassLoader();
+        for (String className : classNames) {
+            try {
+                Class<? extends Annotation> clazz =
+                        (Class<? extends Annotation>) classLoader.loadClass(className);
+                if (node.getAnnotationByName(clazz.getSimpleName()).isPresent()) {
+                    return false;
+                }
+            } catch (ClassNotFoundException e) {
+                // annotation not on target classpath, skip
             }
         }
         return true;

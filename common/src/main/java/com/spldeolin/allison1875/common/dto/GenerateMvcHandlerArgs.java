@@ -1,9 +1,11 @@
 package com.spldeolin.allison1875.common.dto;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import jakarta.validation.constraints.NotEmpty;
+import com.google.common.collect.Lists;
+import com.spldeolin.allison1875.common.exception.Allison1875Exception;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -17,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenerateMvcHandlerArgs {
 
-    @NotEmpty
     String mvcHandlerUrl;
 
     String description;
@@ -26,10 +27,8 @@ public class GenerateMvcHandlerArgs {
 
     String respBodyDTOType;
 
-    @NotEmpty
     String injectedServiceVarName;
 
-    @NotEmpty
     String serviceMethodName;
 
     ClassOrInterfaceDeclaration mvcController;
@@ -37,5 +36,21 @@ public class GenerateMvcHandlerArgs {
     Boolean isHttpGet;
 
     List<VariableDeclarator> reqParams;
+
+    public void validate() {
+        List<String> invalids = Lists.newArrayList();
+        if (StringUtils.isEmpty(mvcHandlerUrl)) {
+            invalids.add("GenerateMvcHandlerArgs.mvcHandlerUrl must not be empty");
+        }
+        if (StringUtils.isEmpty(injectedServiceVarName)) {
+            invalids.add("GenerateMvcHandlerArgs.injectedServiceVarName must not be empty");
+        }
+        if (StringUtils.isEmpty(serviceMethodName)) {
+            invalids.add("GenerateMvcHandlerArgs.serviceMethodName must not be empty");
+        }
+        if (!invalids.isEmpty()) {
+            throw new Allison1875Exception(String.join(", ", invalids));
+        }
+    }
 
 }
