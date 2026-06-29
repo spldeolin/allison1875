@@ -23,108 +23,224 @@ import lombok.extern.jackson.Jacksonized;
 @Builder(toBuilder = true)
 public class Config {
 
-    // ==================== Common ====================
-
+    /**
+     * 业务领域配置列表，描述各领域的代码位置
+     */
     List<DomainConfig> domains;
 
+    /**
+     * 为生成的代码指定作者
+     */
     String author;
 
+    /**
+     * 生成的DataModel是否使用Lombok
+     */
     Boolean isDataModelWithoutLombok;
 
+    /**
+     * 是否在该生成的地方生成 Any modifications may be overwritten by future code generations. 声明
+     */
     Boolean enableNoModifyAnnounce;
 
+    /**
+     * 将javax命名空间移动到jakarta，兼容Spring Boot 3+的项目
+     */
     Boolean enableJavaxMoveToJakarta;
 
+    /**
+     * 执行mvn命令时使用的JDK安装目录路径，为null时使用系统默认的JDK
+     */
     String javaHome;
 
-    // ==================== Guice Module ====================
-
+    /**
+     * doc-analyzer 功能所使用的 Guice Module 实现类全限定名
+     */
     String docAnalyzerModule;
 
+    /**
+     * handler-transformer 功能所使用的 Guice Module 实现类全限定名
+     */
     String handlerTransformerModule;
 
+    /**
+     * persistence-generator 功能所使用的 Guice Module 实现类全限定名
+     */
     String persistenceGeneratorModule;
 
+    /**
+     * query-transformer 功能所使用的 Guice Module 实现类全限定名
+     */
     String queryTransformerModule;
 
+    /**
+     * star-transformer 功能所使用的 Guice Module 实现类全限定名
+     */
     String starTransformerModule;
 
+    /**
+     * form-generator 功能所使用的 Guice Module 实现类全限定名
+     */
     String formGeneratorModule;
 
+    /**
+     * app-generator 功能所使用的 Guice Module 实现类全限定名
+     */
     String appGeneratorModule;
 
-    // ==================== handler-transformer ====================
-
+    /**
+     * 启用「一个Controller均调用同一个Service」的模式（handler-transformer 使用）
+     */
     Boolean enableOneService;
 
-    // ==================== persistence-generator ====================
-
+    /**
+     * 数据库连接URL
+     */
     String jdbcUrl;
 
+    /**
+     * 数据库用户名
+     */
     String userName;
 
+    /**
+     * 数据库密码
+     */
     String password;
 
+    /**
+     * 指定数据库schema
+     */
     String schema;
 
+    /**
+     * 使用指定的DDL，在In-memory H2中构建表结构
+     */
     String ddl;
 
+    /**
+     * 指定table，非必填，未填写时代表schema下所有的table
+     */
     List<String> tables;
 
+    /**
+     * 是否为query-transformer生成Design类
+     */
     Boolean enableGenerateDesign;
 
+    /**
+     * 生成出的Entity类是否以Entity作为类名的结尾
+     */
     Boolean isEntityEndWithEntity;
 
+    /**
+     * 如果有逻辑删除，怎么样算作"数据被删"，非必填，只支持等式SQL
+     */
     String deletedSql;
 
+    /**
+     * 如果有逻辑删除，怎么样算作"数据未被删"，非必填，只支持等式SQL
+     */
     String notDeletedSql;
 
-    // ==================== star-transformer ====================
-
+    /**
+     * Whole DTO的后缀
+     */
     String wholeDTONamePostfix;
 
-    // ==================== doc-analyzer ====================
-
+    /**
+     * 目标项目handler方法签名所依赖的外部项目的目录或者具体Java文件的路径
+     */
     List<File> dependencyDirsOrJavaFilePath;
 
+    /**
+     * 全局URL前缀
+     */
     String globalUrlPrefix;
 
+    /**
+     * 文档保存到的目标列表
+     */
     List<FlushToEnum> flushTo;
 
+    /**
+     * 文档输出到YApi时，YApi请求URL
+     */
     String yapiUrl;
 
+    /**
+     * 文档输出到YApi时，YApi项目的TOKEN
+     */
     String yapiToken;
 
+    /**
+     * 文档输出到markdown时，Markdown文件的目录路径
+     */
     File markdownDir;
 
+    /**
+     * 文档输出到Showdoc时，文档的基础目录名
+     */
     String showdocBaseCatName;
 
+    /**
+     * 文档输出到Showdoc时，ShowDoc开放API的URL
+     */
     String showdocUrl;
 
+    /**
+     * 文档输出到Showdoc时，ShowDoc开放API的api_key
+     */
     String showdocApiKey;
 
+    /**
+     * 文档输出到Showdoc时，ShowDoc开放API的api_token
+     */
     String showdocApiToken;
 
+    /**
+     * 文档输出到dsl时，dsl文件的目录路径
+     */
     File dslDir;
 
+    /**
+     * 文档输出到markdown或ShowDoc时，每个Endpoint是否输出到单个markdown文件
+     */
     Boolean singleEndpointPerMarkdown;
 
+    /**
+     * 多个方法全限定名，只有能够匹配这些的MVC Handler方法才会被分析并输出文档，支持通配符
+     */
     List<String> mvcHandlerQualifierWildcards;
 
+    /**
+     * 获取枚举Code的方法名
+     */
     String getEnumCodeMethodName;
 
+    /**
+     * 获取枚举Title的方法名
+     */
     String getEnumTitleMethodName;
 
-    // ==================== app-generator ====================
-
+    /**
+     * App DSL 文件路径
+     */
     File appDslPath;
 
+    /**
+     * app-generator 输出目录
+     */
     File appGeneratorOutputDir;
 
-    // ==================== form-generator ====================
-
+    /**
+     * form-generator DSL文件路径
+     */
     File dslPath;
 
+    /**
+     * 代码模板配置
+     */
     CodeSnippet codeSnippet;
 
     /**
@@ -362,20 +478,44 @@ public class Config {
     @Builder(toBuilder = true)
     public static class CodeSnippet {
 
+        /**
+         * Spring MVC 请求方法统一返回类的全限定名
+         */
         String requestResultQualifier;
 
+        /**
+         * Spring MVC 请求方法统一返回类型声明的代码片段，其中 ${dataType} 为业务返回数据类型的占位符
+         */
         String requestResultTypeDeclaration;
 
+        /**
+         * 构造统一返回对象（无业务数据，成功场景）的代码片段
+         */
         String requestResultSuccessNoData;
 
+        /**
+         * 构造统一返回对象（有业务数据，成功场景）的代码片段，其中 ${data} 为业务返回数据对象的占位符
+         */
         String requestResultSuccessWithData;
 
+        /**
+         * Controller类@RequestMapping路径的代码片段，占位符${formName}代表表单名称
+         */
         String controllerRequestMapping;
 
+        /**
+         * 生成短UUID的代码片段
+         */
         String shortUuidGeneration;
 
+        /**
+         * 判断列表是否为empty的代码片段，占位符${list}代表列表
+         */
         String collectionEmptyCheck;
 
+        /**
+         * 业务逻辑异常的全限定名
+         */
         String bizExceptionQualifier;
 
         static CodeSnippet applyDefaults(CodeSnippet raw) {

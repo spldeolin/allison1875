@@ -20,75 +20,149 @@ import lombok.extern.jackson.Jacksonized;
 @Builder(toBuilder = true)
 public class DomainConfig {
 
-    // ==================== YAML config fields ====================
-
+    /**
+     * 业务领域名称（如 user、order），用于 -Ddomain 参数匹配
+     */
     String name;
 
+    /**
+     * Controller类所在Maven模块的绝对路径
+     */
     String controllerModule;
 
+    /**
+     * 控制器所在包的包名
+     */
     String controllerPackage;
 
+    /**
+     * reqDTO和respDTO类所在Maven模块的绝对路径
+     */
     String dtoModule;
 
+    /**
+     * 控制层@RequestBody类型所在包的包名
+     */
     String reqDTOPackage;
 
+    /**
+     * 控制层@ResponseBody业务数据部分类型所在包的包名
+     */
     String respDTOPackage;
 
+    /**
+     * 枚举类所在Maven模块的绝对路径
+     */
     String enumModule;
 
+    /**
+     * 枚举所在包的包名
+     */
     String enumPackage;
 
+    /**
+     * Service接口所在Maven模块的绝对路径
+     */
     String serviceModule;
 
+    /**
+     * 业务层Service接口所在包的包名
+     */
     String servicePackage;
 
+    /**
+     * ServiceImpl类所在Maven模块的绝对路径
+     */
     String serviceImplModule;
 
+    /**
+     * 业务层ServiceImpl类所在包的包名
+     */
     String serviceImplPackage;
 
+    /**
+     * 持久层代码所在Maven模块的绝对路径
+     */
     String persistenceModule;
 
+    /**
+     * 持久层mapper接口所在包的包名
+     */
     String mapperPackage;
 
+    /**
+     * 持久层Entity类所在包的包名
+     */
     String entityPackage;
 
+    /**
+     * Design类所在包的包名
+     */
     String designPackage;
 
+    /**
+     * 持久层Mapper方法签名中Param类所在包的包名
+     */
     String paramDTOPackage;
 
+    /**
+     * 持久层Mapper方法签名中Record类所在包的包名
+     */
     String recordDTOPackage;
 
+    /**
+     * mapper.xml所在目录（相对于持久层module的basedir的相对路径 或 绝对路径 皆可）
+     */
     List<File> mapperXmlDirs;
 
+    /**
+     * WholeDTO类所在包的包名
+     */
     String wholeDTOPackage;
 
-    // ==================== Runtime-resolved source root paths (not from YAML) ====================
-
+    /**
+     * Controller层的SourceRoot绝对路径（运行时解析，不在yml中配置）
+     */
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     Path controllerSourceRoot;
 
+    /**
+     * DTO层的SourceRoot绝对路径（运行时解析，不在yml中配置）
+     */
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     Path dtoSourceRoot;
 
+    /**
+     * 枚举层的SourceRoot绝对路径（运行时解析，不在yml中配置）
+     */
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     Path enumSourceRoot;
 
+    /**
+     * Service接口的SourceRoot绝对路径（运行时解析，不在yml中配置）
+     */
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     Path serviceSourceRoot;
 
+    /**
+     * ServiceImpl的SourceRoot绝对路径（运行时解析，不在yml中配置）
+     */
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     Path serviceImplSourceRoot;
 
+    /**
+     * 持久层的SourceRoot绝对路径（运行时解析，不在yml中配置）
+     */
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
