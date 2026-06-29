@@ -1,0 +1,35 @@
+- name: Order
+  title: 订单
+  desc: 订单管理
+  items:
+    - type: text
+      name: orderNo
+      title: 订单号
+      isNonVoid: true
+      maxLength: 32
+    - type: number
+      name: amount
+      title: 金额
+      isNonVoid: true
+      canBeDecimal: true
+    - type: select
+      name: status
+      title: 状态
+      isNonVoid: true
+      options:
+        - code: pending
+          title: 待处理
+        - code: completed
+          title: 已完成
+    - type: time
+      name: orderDate
+      title: 下单日期
+      isNonVoid: true
+      format: dateTime
+    - type: onOff
+      name: isPaid
+      title: 是否已支付
+      isNonVoid: true
+  indices:
+    - itemNames: [ orderNo ]
+      isUnique: true

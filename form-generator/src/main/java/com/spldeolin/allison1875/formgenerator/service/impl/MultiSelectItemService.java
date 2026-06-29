@@ -97,50 +97,56 @@ public class MultiSelectItemService implements ItemService<MultiSelectItemDef> {
     }
 
     public FormDef toAssociationForm(FormDef majorForm, MultiSelectItemDef item) {
-        FormDef form = new FormDef();
-        form.setName(majorForm.getName() + StringUtils.capitalize(item.getName()));
-        form.setTitle(majorForm.getTitle() + "的" + item.getTitle());
-        form.setDesc(null);
         List<ItemDef> items = Lists.newArrayList();
         items.add(majorForm.getItems().get(0)); // 主表单的业务主键
-        SelectItemDef code = new SelectItemDef();
-        code.setName(item.getName());
-        code.setTitle(item.getTitle());
-        code.setIsNonVoid(item.getIsNonVoid());
-        code.setCanInputOnInit(false); // 非主表单，init和edit没有意义
-        code.setCanInputOnEdit(false);
-        code.setOptions(item.getOptions());
+
+        SelectItemDef code = SelectItemDef.builder()
+                .name(item.getName())
+                .title(item.getTitle())
+                .isNonVoid(item.getIsNonVoid())
+                .canInputOnInit(false)
+                .canInputOnEdit(false)
+                .options(item.getOptions())
+                .build();
         items.add(code);
-        TimeItemDef createdAt = new TimeItemDef();
-        createdAt.setName("createdAt");
-        createdAt.setTitle("创建时间");
-        createdAt.setIsNonVoid(true);
-        createdAt.setCanInputOnInit(false);
-        createdAt.setCanInputOnEdit(false);
+
+        TimeItemDef createdAt = TimeItemDef.builder()
+                .name("createdAt")
+                .title("创建时间")
+                .isNonVoid(true)
+                .canInputOnInit(false)
+                .canInputOnEdit(false)
+                .build();
         items.add(createdAt);
+
         if (hasCreatedBy(majorForm)) {
-            TextItemDef createdBy = new TextItemDef();
-            createdBy.setName("createdBy");
-            createdBy.setTitle("创建人");
-            createdBy.setIsNonVoid(true);
-            createdBy.setCanInputOnInit(false);
-            createdBy.setCanInputOnEdit(false);
-            createdBy.setIsBuiltinField(true);
-            createdBy.setMaxLength(32);
+            TextItemDef createdBy = TextItemDef.builder()
+                    .name("createdBy")
+                    .title("创建人")
+                    .isNonVoid(true)
+                    .canInputOnInit(false)
+                    .canInputOnEdit(false)
+                    .isBuiltinField(true)
+                    .maxLength(32)
+                    .build();
             items.add(createdBy);
         }
-        form.setItems(items);
-        List<IndexDef> indices = Lists.newArrayList();
-        IndexDef index = new IndexDef();
-        index.setItemNames(Lists.newArrayList(majorForm.getItems().get(0).getName(), item.getName()));
-        index.setIsUnique(true);
-        indices.add(index);
-        index = new IndexDef();
-        index.setItemNames(Lists.newArrayList(item.getName(), majorForm.getItems().get(0).getName()));
-        index.setIsUnique(true);
-        indices.add(index);
-        form.setIndices(indices);
-        return form;
+
+        IndexDef index1 = IndexDef.builder()
+                .itemNames(Lists.newArrayList(majorForm.getItems().get(0).getName(), item.getName()))
+                .isUnique(true)
+                .build();
+        IndexDef index2 = IndexDef.builder()
+                .itemNames(Lists.newArrayList(item.getName(), majorForm.getItems().get(0).getName()))
+                .isUnique(true)
+                .build();
+
+        return FormDef.builder()
+                .name(majorForm.getName() + StringUtils.capitalize(item.getName()))
+                .title(majorForm.getTitle() + "的" + item.getTitle())
+                .items(items)
+                .indices(Lists.newArrayList(index1, index2))
+                .build();
     }
 
     private boolean hasCreatedBy(FormDef form) {

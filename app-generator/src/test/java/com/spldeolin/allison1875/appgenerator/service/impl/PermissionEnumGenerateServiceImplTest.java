@@ -31,9 +31,7 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_singleForm_generates4PermissionPoints() throws IOException {
         setupSkeletonTemplate("com.example");
 
-        FormDef form = new FormDef();
-        form.setName("Order");
-        form.setTitle("订单");
+        FormDef form = FormDef.builder().name("Order").title("订单").build();
 
         service.generatePermissionEnum(Collections.singletonList(form), tempDir, "com.example");
 
@@ -54,13 +52,8 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_multipleFormsIncludingBuiltinUser() throws IOException {
         setupSkeletonTemplate("com.example");
 
-        FormDef orderForm = new FormDef();
-        orderForm.setName("Order");
-        orderForm.setTitle("订单");
-
-        FormDef userForm = new FormDef();
-        userForm.setName("User");
-        userForm.setTitle("用户");
+        FormDef orderForm = FormDef.builder().name("Order").title("订单").build();
+        FormDef userForm = FormDef.builder().name("User").title("用户").build();
 
         List<FormDef> forms = Arrays.asList(orderForm, userForm);
         service.generatePermissionEnum(forms, tempDir, "com.example");
@@ -89,9 +82,7 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_multiWordFormName_convertsToUpperSnake() throws IOException {
         setupSkeletonTemplate("com.example");
 
-        FormDef form = new FormDef();
-        form.setName("UserProfile");
-        form.setTitle("用户信息");
+        FormDef form = FormDef.builder().name("UserProfile").title("用户信息").build();
 
         service.generatePermissionEnum(Collections.singletonList(form), tempDir, "com.example");
 
@@ -110,9 +101,7 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_verifyBaseOnReferences() throws IOException {
         setupSkeletonTemplate("com.example");
 
-        FormDef form = new FormDef();
-        form.setName("Product");
-        form.setTitle("商品");
+        FormDef form = FormDef.builder().name("Product").title("商品").build();
 
         service.generatePermissionEnum(Collections.singletonList(form), tempDir, "com.example");
 
@@ -132,9 +121,7 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_verifyPackageDeclaration() throws IOException {
         setupSkeletonTemplate("com.myapp.demo");
 
-        FormDef form = new FormDef();
-        form.setName("Order");
-        form.setTitle("订单");
+        FormDef form = FormDef.builder().name("Order").title("订单").build();
 
         service.generatePermissionEnum(Collections.singletonList(form), tempDir, "com.myapp.demo");
 
@@ -149,9 +136,7 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_builtinGrantEntriesRemainAfterInjection() throws IOException {
         setupSkeletonTemplate("com.example");
 
-        FormDef orderForm = new FormDef();
-        orderForm.setName("Order");
-        orderForm.setTitle("订单");
+        FormDef orderForm = FormDef.builder().name("Order").title("订单").build();
 
         service.generatePermissionEnum(Collections.singletonList(orderForm), tempDir, "com.example");
 
@@ -168,9 +153,7 @@ class PermissionEnumGenerateServiceImplTest {
     void generatePermissionEnum_markersReplacedCleanly() throws IOException {
         setupSkeletonTemplate("com.example");
 
-        FormDef orderForm = new FormDef();
-        orderForm.setName("Order");
-        orderForm.setTitle("订单");
+        FormDef orderForm = FormDef.builder().name("Order").title("订单").build();
 
         service.generatePermissionEnum(Collections.singletonList(orderForm), tempDir, "com.example");
 

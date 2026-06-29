@@ -2,39 +2,39 @@ package com.spldeolin.allison1875.formgenerator.dsl.item;
 
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @author Deolin 2026-02-11
  */
+@Getter
+@SuperBuilder(toBuilder = true)
+@Jacksonized
 @EqualsAndHashCode(callSuper = true)
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString(callSuper = true)
 public class TextItemDef extends ItemDef {
 
     /**
      * 字段类型，用于在反序列时区别ItemDef的具体类型
      */
-    final ItemType type = ItemType.TEXT;
+    @Builder.Default
+    ItemType type = ItemType.TEXT;
 
     /**
      * 是否是多行文本或富文本
      */
-    @NotNull
+    @Builder.Default
     Boolean isMultilineOrRich = false;
 
     /**
      * 非多行文本或富文本时的最大长度
      */
-    @NotNull
-    @Max(65535)
+    @Builder.Default
     Integer maxLength = 255;
 
     /**

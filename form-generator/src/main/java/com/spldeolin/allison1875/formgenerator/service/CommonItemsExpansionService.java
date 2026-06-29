@@ -11,6 +11,6 @@ import com.spldeolin.allison1875.formgenerator.service.impl.FormGeneratorCommonI
 @ImplementedBy(FormGeneratorCommonItemsExpansionServiceImpl.class)
 public interface CommonItemsExpansionService {
 
-    void addCommonItems(List<FormDef> forms);
+    List<FormDef> addCommonItems(List<FormDef> forms);
 
 }

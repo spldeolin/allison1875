@@ -3,33 +3,33 @@ package com.spldeolin.allison1875.formgenerator.dsl.item;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
-import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @author Deolin 2026-02-11
  */
+@Getter
+@SuperBuilder(toBuilder = true)
+@Jacksonized
 @EqualsAndHashCode(callSuper = true)
-@Data
-@Accessors(chain = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString(callSuper = true)
 public class TimeItemDef extends ItemDef {
 
     /**
      * 字段类型，用于在反序列时区别ItemDef的具体类型
      */
-    final ItemType type = ItemType.TIME;
+    @Builder.Default
+    ItemType type = ItemType.TIME;
 
     /**
      * 时间格式
      */
-    @NotNull
+    @Builder.Default
     TimeFormat format = TimeFormat.DATE_TIME;
 
 }

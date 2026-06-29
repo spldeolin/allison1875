@@ -2,24 +2,27 @@ package com.spldeolin.allison1875.formgenerator.dsl.item;
 
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @author Deolin 2026-02-11
  */
+@Getter
+@SuperBuilder(toBuilder = true)
+@Jacksonized
 @EqualsAndHashCode(callSuper = true)
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString(callSuper = true)
 public class OnOffItemDef extends ItemDef {
 
     /**
      * 字段类型，用于在反序列时区别ItemDef的具体类型
      */
-    final ItemType type = ItemType.ON_OFF;
+    @Builder.Default
+    ItemType type = ItemType.ON_OFF;
 
 }

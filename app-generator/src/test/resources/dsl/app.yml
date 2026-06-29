@@ -1,0 +1,27 @@
+namespace: com.example.demo
+name: my-app
+title: 示例应用
+menus:
+  - group: 业务管理
+    icon: "1"
+    order: 1
+    form:
+      name: Order
+      title: 订单
+      items:
+        - type: text
+          name: orderNo
+          title: 订单号
+          isNonVoid: true
+          maxLength: 32
+  - group: 业务管理
+    icon: "2"
+    order: 2
+    form:
+      name: Product
+      title: 商品
+      items:
+        - type: text
+          name: productName
+          title: 商品名称
+          isNonVoid: true

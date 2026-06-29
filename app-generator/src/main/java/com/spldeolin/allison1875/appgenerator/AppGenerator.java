@@ -74,6 +74,7 @@ public class AppGenerator implements Allison1875Game {
     public void play() {
         // 1. Parse app.yml
         AppDef appDef = parseAppDef();
+        appDef.validate();
         log.info("parsed AppDef: name={}, title={}, menus={}", appDef.getName(), appDef.getTitle(),
                 appDef.getMenus().size());
 
@@ -194,25 +195,38 @@ public class AppGenerator implements Allison1875Game {
         log.info("merged {} builtin menus into frontend app.json", builtinMenus.size());
 
         // Force builtin menus to sort after all user-defined menus
-        for (MenuDef builtinMenu : builtinMenus) {
-            builtinMenu.setOrder(100000 + (builtinMenu.getOrder() != null ? builtinMenu.getOrder() : 0));
+        for (int i = 0; i < mergedMenus.size(); i++) {
+            MenuDef menu = mergedMenus.get(i);
+            if (builtinMenus.contains(menu)) {
+                mergedMenus.set(i, menu.toBuilder()
+                        .order(100000 + (menu.getOrder() != null ? menu.getOrder() : 0))
+                        .build());
+            }
         }
 
         // Write app.json with merged menus
         try {
             // Inject permissions into each menu
-            for (MenuDef menu : mergedMenus) {
+            for (int i = 0; i < mergedMenus.size(); i++) {
+                MenuDef menu = mergedMenus.get(i);
                 String upperSnake = MoreStringUtils.camelToSnakeCase(menu.getForm().getName()).toUpperCase();
-                menu.setPermissions(new MenuDef.Permissions()
-                        .setList("LIST_" + upperSnake)
-                        .setCreate("CREATE_" + upperSnake)
-                        .setUpdate("UPDATE_" + upperSnake)
-                        .setDelete("DELETE_" + upperSnake));
+                mergedMenus.set(i, menu.toBuilder()
+                        .permissions(MenuDef.Permissions.builder()
+                                .list("LIST_" + upperSnake)
+                                .create("CREATE_" + upperSnake)
+                                .update("UPDATE_" + upperSnake)
+                                .delete("DELETE_" + upperSnake)
+                                .build())
+                        .build());
             }
 
             ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-            AppDef frontendAppDef = new AppDef().setNamespace(appDef.getNamespace()).setName(appDef.getName())
-                    .setTitle(appDef.getTitle()).setMenus(mergedMenus);
+            AppDef frontendAppDef = AppDef.builder()
+                    .namespace(appDef.getNamespace())
+                    .name(appDef.getName())
+                    .title(appDef.getTitle())
+                    .menus(mergedMenus)
+                    .build();
             String appJson = mapper.writeValueAsString(frontendAppDef);
             Files.writeString(output.resolve("src/app.json"), appJson, StandardCharsets.UTF_8);
         } catch (IOException e) {

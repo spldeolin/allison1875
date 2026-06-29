@@ -1,0 +1,7 @@
+- name: Simple
+  title: 简单表单
+  items:
+    - type: text
+      name: fieldName
+      title: 字段
+      isNonVoid: true

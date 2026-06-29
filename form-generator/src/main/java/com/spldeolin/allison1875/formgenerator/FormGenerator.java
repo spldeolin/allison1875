@@ -101,8 +101,10 @@ public class FormGenerator implements Allison1875Game {
             return;
         }
 
+        FormDef.validate(forms);
+
         // 为每个Form增加业务主键、审计字段等
-        commonItemsExpansionService.addCommonItems(forms);
+        forms = commonItemsExpansionService.addCommonItems(forms);
 
         // 生成DDL
         String ddl = ddlService.generateDdl(forms);

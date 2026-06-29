@@ -1,5 +1,6 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
@@ -15,44 +16,59 @@ import com.spldeolin.allison1875.formgenerator.service.CommonItemsExpansionServi
 public class FormGeneratorCommonItemsExpansionServiceImpl implements CommonItemsExpansionService {
 
     @Override
-    public void addCommonItems(List<FormDef> forms) {
+    public List<FormDef> addCommonItems(List<FormDef> forms) {
+        List<FormDef> result = new ArrayList<>();
         for (FormDef form : forms) {
-            TextItemDef bizId = new TextItemDef();
-            bizId.setName(StringUtils.uncapitalize(form.getName()) + "Code");
-            bizId.setTitle("业务主键");
-            bizId.setIsNonVoid(true);
-            bizId.setCanInputOnInit(false);
-            bizId.setCanInputOnEdit(false);
-            bizId.setIsBuiltinField(true);
-            bizId.setMaxLength(36);
-            form.getItems().add(0, bizId);
+            TextItemDef bizId = TextItemDef.builder()
+                    .name(StringUtils.uncapitalize(form.getName()) + "Code")
+                    .title("业务主键")
+                    .isNonVoid(true)
+                    .canInputOnInit(false)
+                    .canInputOnEdit(false)
+                    .isBuiltinField(true)
+                    .maxLength(36)
+                    .build();
 
-            TimeItemDef createdAt = new TimeItemDef();
-            createdAt.setName("createdAt");
-            createdAt.setTitle("创建时间");
-            createdAt.setIsNonVoid(true);
-            createdAt.setCanInputOnInit(false);
-            createdAt.setCanInputOnEdit(false);
-            createdAt.setIsBuiltinField(true);
-            form.getItems().add(createdAt);
+            TimeItemDef createdAt = TimeItemDef.builder()
+                    .name("createdAt")
+                    .title("创建时间")
+                    .isNonVoid(true)
+                    .canInputOnInit(false)
+                    .canInputOnEdit(false)
+                    .isBuiltinField(true)
+                    .build();
 
-            TimeItemDef updatedAt = new TimeItemDef();
-            updatedAt.setName("updatedAt");
-            updatedAt.setTitle("更新时间");
-            updatedAt.setIsNonVoid(true);
-            updatedAt.setCanInputOnInit(false);
-            updatedAt.setCanInputOnEdit(false);
-            updatedAt.setIsBuiltinField(true);
-            form.getItems().add(updatedAt);
+            TimeItemDef updatedAt = TimeItemDef.builder()
+                    .name("updatedAt")
+                    .title("更新时间")
+                    .isNonVoid(true)
+                    .canInputOnInit(false)
+                    .canInputOnEdit(false)
+                    .isBuiltinField(true)
+                    .build();
 
-            IndexDef index = new IndexDef();
-            index.setItemNames(Lists.newArrayList(bizId.getName()));
-            index.setIsUnique(true);
-            if (form.getIndices() == null) {
-                form.setIndices(Lists.newArrayList());
+            List<com.spldeolin.allison1875.formgenerator.dsl.ItemDef> items = new ArrayList<>();
+            items.add(bizId);
+            if (form.getItems() != null) {
+                items.addAll(form.getItems());
             }
-            form.getIndices().addFirst(index);
+            items.add(createdAt);
+            items.add(updatedAt);
+
+            IndexDef bizIdIndex = IndexDef.builder()
+                    .itemNames(Lists.newArrayList(bizId.getName()))
+                    .isUnique(true)
+                    .build();
+
+            List<IndexDef> indices = new ArrayList<>();
+            indices.add(bizIdIndex);
+            if (form.getIndices() != null) {
+                indices.addAll(form.getIndices());
+            }
+
+            result.add(form.toBuilder().items(items).indices(indices).build());
         }
+        return result;
     }
 
 }

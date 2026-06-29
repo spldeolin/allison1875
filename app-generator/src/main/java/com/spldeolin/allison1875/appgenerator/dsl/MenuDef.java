@@ -1,19 +1,16 @@
 package com.spldeolin.allison1875.appgenerator.dsl;
 
 import com.spldeolin.allison1875.formgenerator.dsl.FormDef;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @author Deolin 2026-05-24
  */
-@Data
-@Accessors(chain = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Value
+@Builder(toBuilder = true)
+@Jacksonized
 public class MenuDef {
 
     String group;
@@ -25,15 +22,13 @@ public class MenuDef {
     /**
      * 关联的表单
      */
-    @NotNull
-    @Valid
     FormDef form;
 
     Permissions permissions;
 
-    @Data
-    @Accessors(chain = true)
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Value
+    @Builder(toBuilder = true)
+    @Jacksonized
     public static class Permissions {
 
         String list;

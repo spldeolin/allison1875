@@ -1,19 +1,16 @@
 package com.spldeolin.allison1875.formgenerator.dsl;
 
 import java.util.regex.Pattern;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @author Deolin 2026-02-11
  */
-@Data
-@Accessors(chain = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Value
+@Builder(toBuilder = true)
+@Jacksonized
 public class OptionDef {
 
     private static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("(?<=[a-z])(?=[A-Z])");
@@ -27,14 +24,11 @@ public class OptionDef {
     /**
      * 可选项唯一标示
      */
-    @NotEmpty
-    @Size(max = 64)
     String code;
 
     /**
      * 可选项标题
      */
-    @NotEmpty
     String title;
 
     /**
