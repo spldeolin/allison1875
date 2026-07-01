@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="__NAMESPACE__.mapper.FileRecordMapper">
+    <!-- [START] Any modifications may be overwritten by future code generations. -->
+
+    <resultMap id="all" type="__NAMESPACE__.entity.FileRecordEntity">
+        <id column="id" property="id"/>
+        <result column="file_key" property="fileKey"/>
+        <result column="origin_file_name" property="originFileName"/>
+        <result column="content_type" property="contentType"/>
+        <result column="file_size" property="fileSize"/>
+        <result column="category" property="category"/>
+        <result column="bucket" property="bucket"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+    </resultMap>
+
+    <sql id="all">
+        id, file_key, origin_file_name, content_type, file_size, category, bucket, created_at, created_by
+    </sql>
+
+    <insert id="insert" parameterType="__NAMESPACE__.entity.FileRecordEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO file_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id!=null"> id, </if>
+            <if test="fileKey!=null"> file_key, </if>
+            <if test="originFileName!=null"> origin_file_name, </if>
+            <if test="contentType!=null"> content_type, </if>
+            <if test="fileSize!=null"> file_size, </if>
+            <if test="category!=null"> category, </if>
+            <if test="bucket!=null"> bucket, </if>
+            <if test="createdAt!=null"> created_at, </if>
+            <if test="createdBy!=null"> created_by, </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id!=null"> #{id}, </if>
+            <if test="fileKey!=null"> #{fileKey}, </if>
+            <if test="originFileName!=null"> #{originFileName}, </if>
+            <if test="contentType!=null"> #{contentType}, </if>
+            <if test="fileSize!=null"> #{fileSize}, </if>
+            <if test="category!=null"> #{category}, </if>
+            <if test="bucket!=null"> #{bucket}, </if>
+            <if test="createdAt!=null"> #{createdAt}, </if>
+            <if test="createdBy!=null"> #{createdBy}, </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert">
+        <foreach collection="entities" item="one" separator=";">
+            INSERT INTO file_record
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null"> id, </if>
+                <if test="one.fileKey!=null"> file_key, </if>
+                <if test="one.originFileName!=null"> origin_file_name, </if>
+                <if test="one.contentType!=null"> content_type, </if>
+                <if test="one.fileSize!=null"> file_size, </if>
+                <if test="one.category!=null"> category, </if>
+                <if test="one.bucket!=null"> bucket, </if>
+                <if test="one.createdAt!=null"> created_at, </if>
+                <if test="one.createdBy!=null"> created_by, </if>
+            </trim>
+            <trim prefix="VALUE (" suffix=")" suffixOverrides=",">
+                <if test="one.id!=null"> #{one.id}, </if>
+                <if test="one.fileKey!=null"> #{one.fileKey}, </if>
+                <if test="one.originFileName!=null"> #{one.originFileName}, </if>
+                <if test="one.contentType!=null"> #{one.contentType}, </if>
+                <if test="one.fileSize!=null"> #{one.fileSize}, </if>
+                <if test="one.category!=null"> #{one.category}, </if>
+                <if test="one.bucket!=null"> #{one.bucket}, </if>
+                <if test="one.createdAt!=null"> #{one.createdAt}, </if>
+                <if test="one.createdBy!=null"> #{one.createdBy}, </if>
+            </trim>
+        </foreach>;
+    </insert>
+
+    <insert id="batchInsertEvenNull">
+        INSERT INTO file_record
+            ( <include refid="all"/> )
+        VALUES
+            <foreach collection="entities" item="one" separator=",">(
+                #{one.id}, #{one.fileKey}, #{one.originFileName}, #{one.contentType}, #{one.fileSize}, #{one.category},
+                #{one.bucket}, #{one.createdAt}, #{one.createdBy}
+            )</foreach>
+    </insert>
+
+    <update id="updateById" parameterType="__NAMESPACE__.entity.FileRecordEntity">
+        UPDATE file_record
+        <set>
+            <if test="fileKey!=null"> file_key = #{fileKey}, </if>
+            <if test="originFileName!=null"> origin_file_name = #{originFileName}, </if>
+            <if test="contentType!=null"> content_type = #{contentType}, </if>
+            <if test="fileSize!=null"> file_size = #{fileSize}, </if>
+            <if test="category!=null"> category = #{category}, </if>
+            <if test="bucket!=null"> bucket = #{bucket}, </if>
+            <if test="createdAt!=null"> created_at = #{createdAt}, </if>
+            <if test="createdBy!=null"> created_by = #{createdBy}, </if>
+        </set>
+        <where>
+            AND id = #{id}
+        </where>
+        </update>
+
+    <update id="updateByIdEvenNull" parameterType="__NAMESPACE__.entity.FileRecordEntity">
+        UPDATE file_record
+        SET
+            file_key = #{fileKey},
+            origin_file_name = #{originFileName},
+            content_type = #{contentType},
+            file_size = #{fileSize},
+            category = #{category},
+            bucket = #{bucket},
+            created_at = #{createdAt},
+            created_by = #{createdBy}
+        <where>
+            AND id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM file_record
+        <where>
+            AND id = #{id}
+        </where>
+    </delete>
+
+    <select id="queryById" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM file_record
+        <where>
+            AND id = #{id}
+        </where>
+    </select>
+
+    <select id="queryByIds" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM file_record
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByIdsEachId" parameterType="Long" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM file_record
+        <where>
+            AND id IN (<foreach collection="ids" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByFileKey" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM file_record
+        <where>
+            AND file_key = #{fileKey}
+        </where>
+    </select>
+
+    <delete id="deleteByFileKey">
+        DELETE FROM file_record
+        <where>
+            AND file_key = #{fileKey}
+        </where>
+    </delete>
+
+    <select id="queryByFileKeys" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM file_record
+        <where>
+            AND file_key IN (<foreach collection="fileKeys" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <select id="queryByFileKeysEachFileKey" parameterType="String" resultMap="all">
+        SELECT <include refid="all"/>
+        FROM file_record
+        <where>
+            AND file_key IN (<foreach collection="fileKeys" item="one" separator=",">#{one}</foreach>)
+        </where>
+    </select>
+
+    <!-- [END] Any modifications may be overwritten by future code generations. -->
+</mapper>

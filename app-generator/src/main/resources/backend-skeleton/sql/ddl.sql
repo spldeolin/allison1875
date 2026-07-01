@@ -65,3 +65,18 @@ CREATE TABLE `audit_log`
     UNIQUE KEY `uk_audit_log_code` (`audit_log_code`),
     PRIMARY KEY (`id`)
 ) COMMENT '审计日志';
+
+CREATE TABLE `file_record`
+(
+    `id`               BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `file_key`         VARCHAR(255) NOT NULL COMMENT '文件Key（uuid+扩展名），业务唯一键，业务表引用此值',
+    `origin_file_name` VARCHAR(255) NOT NULL COMMENT '上传时的原始文件名',
+    `content_type`     VARCHAR(128) NOT NULL COMMENT 'MIME类型，下载/预览时回填Content-Type',
+    `file_size`        BIGINT       NOT NULL COMMENT '文件大小（字节）',
+    `category`         VARCHAR(32)  NOT NULL COMMENT '上传时的文件类别（image/document/general等）',
+    `bucket`           VARCHAR(64) COMMENT '存储桶名称，本地存储时为空',
+    `created_at`       DATETIME     NOT NULL COMMENT '创建时间',
+    `created_by`       VARCHAR(32) COMMENT '创建人',
+    UNIQUE KEY `uk_file_key` (`file_key`),
+    PRIMARY KEY (`id`)
+) COMMENT '文件记录';
