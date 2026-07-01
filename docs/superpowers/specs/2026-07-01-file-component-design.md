@@ -61,7 +61,7 @@ CREATE TABLE `file_record`
 <dependency>
     <groupId>software.amazon.awssdk</groupId>
     <artifactId>s3</artifactId>
-    <version>2.25.70</version>
+    <version>2.46.17</version>
 </dependency>
 ```
 
@@ -93,13 +93,13 @@ __APP_NAME__:
 新增可选字段（遵循 wiring 步骤：字段声明 + `applyDefaults()`）：
 
 | 字段 | 默认值（applyDefaults） |
-|------|------------------------|
-| `s3Endpoint` | 空串 |
-| `s3Region` | 空串 |
-| `s3Bucket` | 空串 |
-| `s3AccessKey` | 空串 |
-| `s3SecretKey` | 空串 |
-| `fileDownloadTokenSecret` | 未指定时用 `SecretKeyUtils.generateUrlSafeKey(64)` 生成 |
+|------|--------------------|
+| `s3Endpoint` | 空串                 |
+| `s3Region` | 空串                 |
+| `s3Bucket` | 空串                 |
+| `s3AccessKey` | 空串                 |
+| `s3SecretKey` | 空串                 |
+| `fileDownloadTokenSecret` | 不能为空               |
 
 `s3Bucket` 为空 → 视为「未配置 S3」→ 后端降级本地存储。
 
@@ -144,8 +144,8 @@ __APP_NAME__:
 @RestController
 @RequestMapping("/api/v1/file")
 public class FileController {
-    @PostMapping("upload")
-    public RequestResult<UploadFileResp> upload(
+    @PostMapping("uploadFile")
+    public RequestResult<UploadFileResp> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("category") String category) { ... }
 }
@@ -325,6 +325,5 @@ split 还原为 FileValue。
 ## 不做（YAGNI）
 
 - 不引入 Apache Tika（魔数嗅探）
-- 不做多 bucket（file_record 不含 storage_bucket 列）
 - 不做令牌主动吊销（无状态签名，等过期）
 - 不做每字段独立上传接口（方案 2 已排除）
