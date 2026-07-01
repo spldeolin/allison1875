@@ -1,0 +1,108 @@
+<h2>文件组件 — 视觉效果预览</h2>
+<p class="subtitle">这是当前骨架中 <code>FileField.vue</code> 在 naive-ui 表单里的真实呈现。三种状态：编辑(空)、编辑(已上传)、预览弹框。</p>
+
+<style>
+  .fc-demo { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #333639; }
+  .fc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 8px; }
+  .fc-panel { background:#fff; border:1px solid #efeff5; border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .fc-panel h4 { margin:0 0 14px; font-size:13px; font-weight:600; color:#909399; text-transform:uppercase; letter-spacing:.04em; }
+  .fc-form-label { font-size:14px; color:#333639; margin-bottom:8px; font-weight:500; }
+  .fc-form-label .req { color:#d03050; margin-left:2px; }
+
+  /* drag-drop zone (NUploadDragger) */
+  .fc-dragger { border:1px dashed #d9d9d9; border-radius:8px; background:#fafafc; padding:22px 16px; text-align:center; cursor:pointer; transition:.2s; }
+  .fc-dragger:hover { border-color:#36ad6a; background:#f6fcf8; }
+  .fc-dragger .ico { font-size:30px; color:#c9ccd1; line-height:1; }
+  .fc-dragger .t1 { font-size:13px; color:#333639; margin-top:6px; }
+  .fc-dragger .t2 { font-size:12px; color:#909399; margin-top:3px; }
+
+  /* uploaded file card */
+  .fc-card { display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid #e0e0e6; border-radius:8px; background:rgba(0,0,0,.02); }
+  .fc-card .fico { color:#2080f0; font-size:20px; flex-shrink:0; }
+  .fc-card .fname { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; }
+  .fc-card .acts { display:flex; gap:10px; flex-shrink:0; }
+  .fc-card .act { font-size:13px; cursor:pointer; display:flex; align-items:center; gap:3px; }
+  .fc-card .act.preview { color:#2080f0; }
+  .fc-card .act.remove { color:#909399; }
+
+  /* display mode (table cell) */
+  .fc-cell { display:flex; align-items:center; gap:5px; font-size:13px; color:#606266; }
+  .fc-cell .fico { color:#909399; }
+  .fc-cell .eye { color:#2080f0; cursor:pointer; }
+
+  /* preview modal */
+  .fc-modal { border:1px solid # efeff5; border-radius:10px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,.1); }
+  .fc-modal-head { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid #efeff5; font-size:15px; font-weight:600; }
+  .fc-modal-head .x { color:#909399; cursor:pointer; font-size:16px; }
+  .fc-modal-body { padding:18px; background:#f7f7fa; min-height:180px; display:flex; align-items:center; justify-content:center; }
+  .fc-img { width:100%; height:200px; background:linear-gradient(135deg,#a8c0ff,#3f2b96); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; opacity:.9; }
+  .fc-pdf { width:100%; height:200px; background:#fff; border:1px solid #e0e0e6; border-radius:6px; padding:14px; }
+  .fc-pdf .line { height:8px; background:#ececf0; border-radius:3px; margin-bottom:9px; }
+  .fc-pdf .line.s { width:55%; }
+  .fc-modal-foot { padding:12px 18px; border-top:1px solid #efeff5; display:flex; justify-content:flex-end; }
+  .fc-btn { font-size:13px; padding:6px 14px; border:1px solid #e0e0e6; border-radius:6px; background:#fff; cursor:pointer; display:inline-flex; gap:5px; align-items:center; }
+  .fc-note { font-size:12px; color:#909399; margin-top:10px; line-height:1.6; }
+  .fc-flow { background:#f6fcf8; border:1px solid #d5f0e0; border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.9; margin-top:24px; }
+  .fc-flow b { color:#18a058; }
+  .fc-flow code { background:#fff; padding:1px 6px; border-radius:4px; border:1px solid #e0e0e6; font-size:12px; }
+</style>
+
+<div class="fc-demo">
+  <div class="fc-grid">
+
+    <!-- empty edit state -->
+    <div class="fc-panel">
+      <h4>① 编辑模式 · 未上传</h4>
+      <div class="fc-form-label">附件 <span class="req">*</span></div>
+      <div class="fc-dragger">
+        <div class="ico">☁︎⬆</div>
+        <div class="t1">点击或拖拽文件到此处上传</div>
+        <div class="t2">支持 .png、.jpg、.jpeg、.pdf，最大 10MB</div>
+      </div>
+    </div>
+
+    <!-- uploaded edit state -->
+    <div class="fc-panel">
+      <h4>② 编辑模式 · 已上传</h4>
+      <div class="fc-form-label">附件 <span class="req">*</span></div>
+      <div class="fc-card">
+        <span class="fico">📄</span>
+        <span class="fname">季度财务报表.pdf</span>
+        <span class="acts">
+          <span class="act preview">👁 预览</span>
+          <span class="act remove">✕ 移除</span>
+        </span>
+      </div>
+      <div class="fc-note">表单 state 持有 <code>{ fileKey, originFileName }</code>；提交时拆成 <code>attachmentFileKey</code> + <code>attachmentOriginFileName</code> 两列。</div>
+    </div>
+
+    <!-- display mode -->
+    <div class="fc-panel">
+      <h4>③ 列表 / 详情展示</h4>
+      <div class="fc-cell">
+        <span class="fico">📄</span>
+        <span>季度财务报表.pdf</span>
+        <span class="eye">👁</span>
+      </div>
+      <div class="fc-note">表格单元格内只显示文件名 + 预览入口，不可编辑。无文件时显示空。</div>
+    </div>
+
+    <!-- preview modal -->
+    <div class="fc-panel">
+      <h4>④ 预览弹框（图片 / PDF）</h4>
+      <div class="fc-modal">
+        <div class="fc-modal-head"><span>产品海报.png</span><span class="x">✕</span></div>
+        <div class="fc-modal-body">
+          <div class="fc-img">图片内联预览（NImage）</div>
+        </div>
+        <div class="fc-modal-foot"><span class="fc-btn">⬇ 下载</span></div>
+      </div>
+      <div class="fc-note">图片用 NImage 内联；PDF 用 iframe 内联；其它格式只提供下载按钮。</div>
+    </div>
+
+  </div>
+
+  <div class="fc-flow">
+    <b>上传两步走：</b>选文件 → <b>①</b> POST multipart 到 <code>/api/v1/file/upload</code>，后端存 S3、返回 <code>{ fileKey, originFileName }</code>（fileKey = uuid + 扩展名）→ <b>②</b> 表单提交时带上这两个值。当前组件这一步是 <b>mock</b>（本地 blob + 假 uuid），所以你现在看到的预览是真实可用的，只是没真连后端。
+  </div>
+</div>
