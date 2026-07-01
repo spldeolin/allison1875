@@ -25,6 +25,7 @@ DSL 中可声明 `file` 类型字段，生成的前后端一体应用即具备�
 | 5 | 文件类别 accept | **DSL 枚举**（image/document/archive/audio/video/general），general 为安全扩展名兜底 |
 | 6 | S3 未配置时 | **降级为本地存储** |
 | 7 | 下载令牌 | **无状态 HMAC-SHA256 签名令牌**（多节点无共享存储） |
+| 8 | 业务表 file 列 | **合并单列** `fileKey/originFileName`（首个 `/` 分隔）；file_record 表仍保留独立两列 |
 
 ## 数据层：file_record 表（已生成持久层）
 
@@ -205,7 +206,28 @@ application.yml 现有 `anonymousApiPaths` 追加 `,/api/v1/file/downloadFile`�
 
 ## 第四部分：form-generator 新增 file itemType
 
-核心特殊性：**一个 DSL item → 两个 DB 列 + 两个 DTO 字段**（首个打破「一 item 一列」的类型）。
+### 合并列设计（一 item = 一列 = 一字段）
+
+**关键简化**：业务表的 file 字段不拆两列，而是**合并为一个 VARCHAR 列**，值为
+`fileKey/originFileName`（用**首个 `/`** 分隔）。
+
+- fileKey = uuid + 扩展名，不含 `/`；文件名各 OS 均禁用 `/` 作路径分隔符。故首个 `/`
+  拆分**永远无歧义**。
+- 因此 `file` 类型对 form-generator 而言退化成「就是一个 VARCHAR 列 + 一个 String DTO
+  字段」，**不打破「一 item 一列」假设**，无需任何双列/双字段特殊分支。
+- 列长度 **VARCHAR(512)**（uuid+ext ~40 + `/` + 文件名最多 255，留余量）。
+- 前端 `FileValue {fileKey, originFileName}` 提交时 join 成 `fileKey + '/' + originFileName`；
+  取回时按首个 `/` split。
+
+**为何 file_record 表不合并**：file_record（骨架固定表，持久层已生成）需按 fileKey
+**等值精确查询**（下载接口），保留显式 `file_key` 列 + `uk_file_key` 唯一索引 + `= ?`
+查询是最优解——避免 LIKE 的 `_` 通配符转义问题、保留唯一约束、语义清晰。合并只用于
+**业务表**，file_record **保持不变**。
+
+**权衡备注（文件名搜索）**：现设计中 file 字段不可搜索。若将来需按文件名搜索业务实体，
+应在 file_record 表（有独立 `origin_file_name` 列）上做，再 join fileKey 回业务表，
+而非直接搜业务表的合并列（originFileName 在合并列后缀，只能前导通配符 `%..%` 全表扫）。
+注：文件名模糊搜索本身天生 non-sargable，合并与否都是全表扫描，合并未额外损失此能力。
 
 ### DSL
 
@@ -226,21 +248,21 @@ application.yml 现有 `anonymousApiPaths` 追加 `,/api/v1/file/downloadFile`�
 | 2 | `dsl/ItemDef.java` | `@JsonSubTypes` 加 `FileItemDef` |
 | 3 | `dsl/item/FileItemDef.java`（新建） | 字段 `category`（默认 general）、`maxFileSize`（可空）；`validate()` 校验 category 合法 |
 | 4 | `service/impl/PrimaryItemServiceImpl.java` | 注入 + `case FILE` 委托 |
-| 5 | `service/impl/FileItemService.java`（新建） | `ItemService<FileItemDef>`，不可过滤/不可排序；单字段接口方法返回兜底值 |
-| 6 | `DdlServiceImpl` | `FILE` 分支生成两列：`{name}_origin_file_name`、`{name}_file_key` VARCHAR(255)，isNonVoid → NOT NULL，注释 `{title}原始文件名`/`{title}文件Key` |
-| 7 | `CreateApiServiceImpl` / `UpdateApiServiceImpl` | Req DTO 生成两字段 `{name}FileKey`、`{name}OriginFileName`（String），isNonVoid → `@NotBlank` |
-| 8 | `GetDetailApiServiceImpl` | Resp DTO 两字段 + 两条 setter |
-| 9 | `ListApiServiceImpl` | 过滤：跳过；列表 Resp：生成两字段 |
-| 10 | `MutationApiSupport`（setter 生成） | Create/Update 方法体生成两条 setter |
+| 5 | `service/impl/FileItemService.java`（新建） | `ItemService<FileItemDef>`：`getDbColumnType` 返回 `VARCHAR(512)`、`getJavaTypeInDTO` 返回 `String`；不可过滤/不可排序 |
 
-- **Entity 字段**：persistence-generator 读 DDL 自动生成两个 String 字段，form-generator 无需干预
+**关键**：因合并为单列单字段，file 走**标准单字段路径**，`DdlServiceImpl` /
+`CreateApiServiceImpl` / `UpdateApiServiceImpl` / `GetDetailApiServiceImpl` /
+`ListApiServiceImpl` / `MutationApiSupport` **无需 FILE 特殊分支**——只要 `FileItemService`
+的单字段接口方法返回正确值即可。仅需确保：list 过滤跳过 file（不可搜索）、SortEnum 不含 file。
+
+- **Entity 字段**：persistence-generator 读 DDL 自动生成一个 String 字段（VARCHAR(512)），form-generator 无需干预
 - **排序枚举**：file 不进 SortEnum
-- **各 API service 用 `FILE` 分支绕过单字段接口方法**（不硬塞进 getJavaTypeInDTO 等）
+- **列名/字段名**：DB 列 `{name}`（snake_case）、DTO/Entity 字段 `{name}`，值为 `fileKey/originFileName`
 
 ### app-generator 审计日志联动
 
 `AppGeneratorMutationExpansionServiceImpl` 构建 `auditContent` Map 时，file 字段值取
-`originFileName`（可读），不取 fileKey。实现时需确认其现有遍历逻辑对 file 类型的处理。
+`originFileName`（合并列首个 `/` 之后的部分，可读），不取 fileKey。实现时需确认其现有遍历逻辑对 file 类型的处理。
 
 ## 第五部分：前端文件组件（frontend-skeleton）
 
@@ -275,11 +297,13 @@ application.yml 现有 `anonymousApiPaths` 追加 `,/api/v1/file/downloadFile`�
 ### 上传两步走
 
 选文件 → 前端校验 accept + maxFileSize → `uploadFile` 得 `{fileKey, originFileName}`
-存入 FileValue → 表单提交时 `request-builder` 拆成 `{name}FileKey` + `{name}OriginFileName` 两列。
+存入 FileValue → 表单提交时 `request-builder` 将 FileValue **join 成单个字符串**
+`fileKey + '/' + originFileName` 写入 `{name}` 字段；取回（detail/list）时按**首个 `/`**
+split 还原为 FileValue。
 
 ### 接线
 
-- `request-builder.ts`：file 字段拆分为两列（而非序列化 FileValue 对象）
+- `request-builder.ts`：file 字段 join/split 单列（`fileKey + '/' + originFileName` ↔ 首个 `/` 拆分），而非拆两列
 - `field-policy.ts`：file 类型标记不可搜索
 - `FieldRenderer.vue`：注册 `file` → `FileField.vue`
 
@@ -294,7 +318,7 @@ application.yml 现有 `anonymousApiPaths` 追加 `,/api/v1/file/downloadFile`�
 ## 文档维护
 
 按根 CLAUDE.md「维护 CLAUDE.md」规则，本特性完成后需同步更新：
-- `form-generator/CLAUDE.md` — 新增 `file` 字段类型（DSL 字段 category/maxFileSize、双列生成）
+- `form-generator/CLAUDE.md` — 新增 `file` 字段类型（DSL 字段 category/maxFileSize、合并单列 `fileKey/originFileName`）
 - `app-generator/backend-skeleton/CLAUDE.md` — 文件上传/下载/存储设施
 - `skills/integrate-allison1875/SKILL.md` — Config 新增 5 个 S3 字段 + downloadTokenSecret
 
