@@ -392,6 +392,9 @@ public class Config {
         if (raw.s3SecretKey == null) {
             b.s3SecretKey("");
         }
+        if (raw.fileDownloadTokenSecret == null) {
+            b.fileDownloadTokenSecret("");
+        }
         if (raw.codeSnippet == null) {
             b.codeSnippet(CodeSnippet.applyDefaults(CodeSnippet.builder().build()));
         } else {
@@ -416,11 +419,6 @@ public class Config {
         // domains must not be empty
         if (config.domains == null || config.domains.isEmpty()) {
             errors.add("domains must not be empty");
-        }
-
-        // fileDownloadTokenSecret must not be empty
-        if (config.fileDownloadTokenSecret == null || config.fileDownloadTokenSecret.isEmpty()) {
-            errors.add("fileDownloadTokenSecret must not be empty");
         }
 
         // persistence-generator: jdbc requires userName, password, schema
