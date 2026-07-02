@@ -1,10 +1,12 @@
 package __NAMESPACE__.service.impl;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ import __NAMESPACE__.enums.FileCategoryEnum;
 import __NAMESPACE__.mapper.FileRecordMapper;
 import __NAMESPACE__.property.FileProperties;
 import __NAMESPACE__.service.FileService;
-import __NAMESPACE__.storage.FileStorage;
+import __NAMESPACE__.service.FileStorage;
 import __NAMESPACE__.util.DownloadTokenUtils;
 import __NAMESPACE__.util.UuidUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +59,8 @@ public class FileServiceImpl implements FileService {
         if (contentType == null || contentType.isEmpty()) {
             contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
-        try {
-            fileStorage.store(file.getBytes(), fileKey);
+        try (InputStream in = file.getInputStream()) {
+            fileStorage.store(in, file.getSize(), fileKey);
         } catch (Exception e) {
             log.error("文件上传失败 fileKey={}", fileKey, e);
             throw new BizException(ErrorCode.INTERNAL_ERROR, "文件上传失败");
@@ -94,23 +96,21 @@ public class FileServiceImpl implements FileService {
         if (entity == null) {
             throw new BizException(ErrorCode.BAD_REQUEST, "文件不存在");
         }
-        byte[] bytes;
-        try {
-            bytes = fileStorage.load(fileKey);
-        } catch (Exception e) {
-            log.error("文件读取失败 fileKey={}", fileKey, e);
-            throw new BizException(ErrorCode.INTERNAL_ERROR, "文件下载失败");
-        }
         response.setContentType(entity.getContentType());
         try {
             String filename = URLEncoder.encode(entity.getOriginFileName(), "UTF-8").replace("+", "%20");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename*=UTF-8''" + filename);
-            response.setContentLength(bytes.length);
-            OutputStream out = response.getOutputStream();
-            out.write(bytes);
+        } catch (Exception e) {
+            throw new BizException(ErrorCode.INTERNAL_ERROR, "文件下载失败");
+        }
+        // 流式写出：不预设 Content-Length，由 Servlet 容器按 chunked 传输，避免大文件全量驻留内存。
+        // 注意：一旦开始写出，响应即提交，若中途读取失败将无法再转为 JSON 错误响应。
+        try (InputStream in = fileStorage.load(fileKey);
+                OutputStream out = response.getOutputStream()) {
+            IOUtils.copy(in, out);
             out.flush();
         } catch (Exception e) {
-            log.error("文件写出失败 fileKey={}", fileKey, e);
+            log.error("文件下载流出错 fileKey={}", fileKey, e);
             throw new BizException(ErrorCode.INTERNAL_ERROR, "文件下载失败");
         }
     }

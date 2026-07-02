@@ -1,6 +1,7 @@
 package __NAMESPACE__.storage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +10,7 @@ import javax.annotation.Resource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 import __NAMESPACE__.property.S3Properties;
+import __NAMESPACE__.service.FileStorage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -34,18 +36,18 @@ public class LocalFileStorage implements FileStorage {
     }
 
     @Override
-    public void store(byte[] bytes, String fileKey) {
+    public void store(InputStream in, long size, String fileKey) {
         try {
-            Files.write(root.resolve(fileKey), bytes);
+            Files.copy(in, root.resolve(fileKey));
         } catch (IOException e) {
             throw new RuntimeException("Store file to local failed, fileKey=" + fileKey, e);
         }
     }
 
     @Override
-    public byte[] load(String fileKey) {
+    public InputStream load(String fileKey) {
         try {
-            return Files.readAllBytes(root.resolve(fileKey));
+            return Files.newInputStream(root.resolve(fileKey));
         } catch (IOException e) {
             throw new RuntimeException("Load file from local failed, fileKey=" + fileKey, e);
         }
@@ -57,3 +59,4 @@ public class LocalFileStorage implements FileStorage {
     }
 
 }
+

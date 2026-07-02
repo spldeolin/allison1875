@@ -1,5 +1,6 @@
 package __NAMESPACE__.storage;
 
+import java.io.InputStream;
 import javax.annotation.Resource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import __NAMESPACE__.property.S3Properties;
+import __NAMESPACE__.service.FileStorage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,25 +31,22 @@ public class S3FileStorage implements FileStorage {
     private S3Properties s3Properties;
 
     @Override
-    public void store(byte[] bytes, String fileKey) {
+    public void store(InputStream in, long size, String fileKey) {
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(s3Properties.getBucket())
                 .key(fileKey)
                 .build();
-        s3Client.putObject(request, RequestBody.fromBytes(bytes));
+        s3Client.putObject(request, RequestBody.fromInputStream(in, size));
     }
 
     @Override
-    public byte[] load(String fileKey) {
+    public InputStream load(String fileKey) {
         GetObjectRequest request = GetObjectRequest.builder()
                 .bucket(s3Properties.getBucket())
                 .key(fileKey)
                 .build();
-        try (ResponseInputStream<GetObjectResponse> response = s3Client.getObject(request)) {
-            return response.readAllBytes();
-        } catch (Exception e) {
-            throw new RuntimeException("Load file from S3 failed, fileKey=" + fileKey, e);
-        }
+        // ResponseInputStream 由调用方在 try-with-resources 中关闭
+        return s3Client.getObject(request);
     }
 
     @Override

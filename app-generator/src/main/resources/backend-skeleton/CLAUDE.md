@@ -105,14 +105,18 @@ src/main/resources/
 
 ### 存储抽象
 
+`FileStorage`（`service` 包，门面接口）定义流式存储契约，上传/下载代码仅依赖此接口，与具体后端解耦。`store`/`load` 均为流式语义（`InputStream`），避免大文件全量驻留内存。
+
 | 类                  | 用途                                                                          |
 |--------------------|-------------------------------------------------------------------------------|
-| `FileStorage`      | 存储接口：`store(bytes, fileKey)` / `byte[] load(fileKey)` / `getBucket()`。上传/下载仅依赖此接口 |
-| `S3FileStorage`    | S3 实现，`__APP_NAME__.s3.bucket` 非空时激活（AWS SDK v2）                         |
-| `LocalFileStorage` | 本地存储兜底，bucket 为空时激活，存到 `s3.localDir`                                    |
+| `FileStorage`      | `service` 包门面接口：`store(InputStream, long size, fileKey)` / `InputStream load(fileKey)` / `getBucket()` |
+| `S3FileStorage`    | `storage` 包 S3 实现，`__APP_NAME__.s3.bucket` 非空时激活（AWS SDK v2）              |
+| `LocalFileStorage` | `storage` 包本地存储兜底，bucket 为空时激活，存到 `s3.localDir`                          |
 | `S3Config`         | `S3Client` Bean，仅 bucket 非空时构建，支持 endpoint override 与 path-style access |
 | `S3Properties`     | `__APP_NAME__.s3.*` 配置（endpoint/region/bucket/accessKey/secretKey/pathStyleAccess/localDir） |
 | `FileProperties`   | `__APP_NAME__.file.*` 配置（downloadTokenSecret/downloadTokenTtlSeconds）        |
+
+流式约定：`load` 返回的 `InputStream` 由调用方在 try-with-resources 中关闭；下载时不预设 `Content-Length`，由 Servlet 容器按 chunked 传输。
 
 S3 未配置（bucket 空）时自动降级为本地存储，业务代码无感知。
 
