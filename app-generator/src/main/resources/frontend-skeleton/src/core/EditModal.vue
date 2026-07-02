@@ -49,6 +49,15 @@ const rules = computed<FormRules>(() => {
     if (item.isNonVoid && isEditable(item, editMode.value)) {
       // onOff is a boolean — false is a valid non-void value, no required rule needed
       if (item.type === 'onOff') continue
+      // file holds a FileValue object, not a string — validate non-void without a string type
+      if (item.type === 'file') {
+        r[item.name] = [{
+          required: true,
+          message: `请上传${item.title}`,
+          trigger: ['blur', 'change']
+        }]
+        continue
+      }
       const isNumber = item.type === 'number'
       r[item.name] = [{
         required: true,
