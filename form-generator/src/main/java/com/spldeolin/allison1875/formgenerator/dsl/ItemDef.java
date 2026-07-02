@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
+import com.spldeolin.allison1875.formgenerator.dsl.item.FileItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.NumberItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.OnOffItemDef;
@@ -35,7 +36,8 @@ import lombok.experimental.SuperBuilder;
         @JsonSubTypes.Type(value = SelectItemDef.class, name = "select"),
         @JsonSubTypes.Type(value = MultiSelectItemDef.class, name = "multiSelect"),
         @JsonSubTypes.Type(value = TextItemDef.class, name = "text"),
-        @JsonSubTypes.Type(value = TimeItemDef.class, name = "time")})
+        @JsonSubTypes.Type(value = TimeItemDef.class, name = "time"),
+        @JsonSubTypes.Type(value = FileItemDef.class, name = "file")})
 public abstract class ItemDef {
 
     /**
