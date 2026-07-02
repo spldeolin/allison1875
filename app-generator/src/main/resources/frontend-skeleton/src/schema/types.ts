@@ -64,6 +64,24 @@ export interface SecretItemDef extends ItemDefBase {
   type: 'secret'
 }
 
+/**
+ * 文件类字段。业务表合并为单列 VARCHAR(512)，值为 "fileKey/originFileName"。
+ * 表单 state 中此字段持有 FileValue 对象，提交时 join、取回时按首个 '/' split。
+ */
+export interface FileItemDef extends ItemDefBase {
+  type: 'file'
+  /** 文件类别，对应后端 FileCategoryEnum，默认 general */
+  category?: string
+  /** 前端 UX 校验用的最大文件大小（MB），留空不限制 */
+  maxFileSize?: number
+}
+
+/** 文件字段在表单 state 中的值 */
+export interface FileValue {
+  fileKey: string
+  originFileName: string
+}
+
 export type ItemDef =
   | TextItemDef
   | NumberItemDef
@@ -72,6 +90,7 @@ export type ItemDef =
   | TimeItemDef
   | OnOffItemDef
   | SecretItemDef
+  | FileItemDef
 
 export interface FormDef {
   name: string
