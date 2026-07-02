@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: __APP_NAME__
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
   datasource:
     url: __DATASOURCE_URL__/__DATASOURCE_SCHEMA__?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: __DATASOURCE_USERNAME__
@@ -24,7 +28,18 @@ mybatis:
 
 __APP_NAME__:
   authc:
-    anonymousApiPaths: /api/v1/authc/login
+    anonymousApiPaths: /api/v1/authc/login,/api/v1/file/downloadFile
     loginExpireTime: 172800000 # millis of 2 days
     disableMultiDeviceLogin: false
     adminPassword: admin
+  s3:
+    endpoint: __S3_ENDPOINT__
+    region: __S3_REGION__
+    bucket: __S3_BUCKET__
+    accessKey: __S3_ACCESS_KEY__
+    secretKey: __S3_SECRET_KEY__
+    pathStyleAccess: true
+    localDir: ./file-storage
+  file:
+    downloadTokenSecret: __FILE_DOWNLOAD_TOKEN_SECRET__
+    downloadTokenTtlSeconds: 300
