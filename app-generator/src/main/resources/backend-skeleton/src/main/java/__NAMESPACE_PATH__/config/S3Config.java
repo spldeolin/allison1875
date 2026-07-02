@@ -2,7 +2,7 @@ package __NAMESPACE__.config;
 
 import java.net.URI;
 import javax.annotation.Resource;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2026-07-02
  */
 @Configuration
-@ConditionalOnProperty(name = "__APP_NAME__.s3.bucket")
+@ConditionalOnExpression("!'${__APP_NAME__.s3.bucket:}'.isEmpty()")
 @Slf4j
 public class S3Config {
 

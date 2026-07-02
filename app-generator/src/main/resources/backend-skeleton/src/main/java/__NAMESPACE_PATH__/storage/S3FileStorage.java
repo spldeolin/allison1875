@@ -2,7 +2,7 @@ package __NAMESPACE__.storage;
 
 import java.io.InputStream;
 import javax.annotation.Resource;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Deolin 2026-07-02
  */
 @Component
-@ConditionalOnProperty(name = "__APP_NAME__.s3.bucket")
+@ConditionalOnExpression("!'${__APP_NAME__.s3.bucket:}'.isEmpty()")
 @Slf4j
 public class S3FileStorage implements FileStorage {
 
