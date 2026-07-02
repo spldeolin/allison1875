@@ -9,6 +9,7 @@ import MultiSelectField from './MultiSelectField.vue'
 import TimeField from './TimeField.vue'
 import OnOffField from './OnOffField.vue'
 import SecretField from './SecretField.vue'
+import FileField from './FileField.vue'
 
 const props = defineProps<{
   item: ItemDef
@@ -27,7 +28,8 @@ const componentMap: Record<string, Component> = {
   multiSelect: MultiSelectField,
   time: TimeField,
   onOff: OnOffField,
-  secret: SecretField
+  secret: SecretField,
+  file: FileField
 }
 
 const currentComponent = computed(() => componentMap[props.item.type])
