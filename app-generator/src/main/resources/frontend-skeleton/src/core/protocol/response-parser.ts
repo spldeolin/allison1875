@@ -27,6 +27,14 @@ const itemTypeParseRules: Record<ItemDef['type'], ParseRule> = {
   },
   // secret: completely absent from backend responses (Gap3). This rule is a no-op placeholder.
   secret:      (_item, raw) => raw,
+  // file: backend business column is the merged "fileKey/originFileName" string;
+  // split on the first '/' to restore the FileValue object held in form state.
+  file:        (_item, raw) => {
+    if (typeof raw !== 'string' || raw === '') return null
+    const bar = raw.indexOf('/')
+    if (bar < 0) return null
+    return { fileKey: raw.substring(0, bar), originFileName: raw.substring(bar + 1) }
+  },
 }
 
 function parseRow(

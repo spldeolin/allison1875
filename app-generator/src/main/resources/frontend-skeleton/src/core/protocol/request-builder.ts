@@ -2,7 +2,22 @@
 // Translates frontend form state into backend request DTOs.
 // All field name and suffix rules sourced from contract.md.
 
-import type { ItemDef } from '@/schema/types'
+import type { ItemDef, FileValue } from '@/schema/types'
+
+/**
+ * Serialize a field's form-state value into the backend request representation.
+ * file fields hold a FileValue object in form state; the backend business column
+ * is the merged single string "fileKey/originFileName" (first '/' splits).
+ */
+function serializeFieldValue(item: ItemDef, v: unknown): unknown {
+  if (item.type === 'file') {
+    if (!v) return null
+    if (typeof v === 'string') return v
+    const fv = v as FileValue
+    return fv.fileKey + '/' + fv.originFileName
+  }
+  return v ?? null
+}
 
 export interface PaginationInput {
   pageNum: number    // contract.md §3: backend uses pageNum
@@ -84,7 +99,7 @@ export function buildCreateRequest(
   const out: Record<string, unknown> = {}
   for (const item of items) {
     if (item.canInputOnInit === false) continue
-    out[item.name] = formState[item.name] ?? null
+    out[item.name] = serializeFieldValue(item, formState[item.name])
   }
   return out
 }
@@ -97,7 +112,7 @@ export function buildUpdateRequest(
   const out: Record<string, unknown> = { [bizKey]: formState[bizKey] }
   for (const item of items) {
     if (item.canInputOnEdit === false) continue
-    out[item.name] = formState[item.name] ?? null
+    out[item.name] = serializeFieldValue(item, formState[item.name])
   }
   return out
 }
