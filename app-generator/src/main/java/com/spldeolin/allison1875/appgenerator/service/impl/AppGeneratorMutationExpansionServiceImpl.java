@@ -55,8 +55,9 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
                     continue;
                 }
                 if (Boolean.TRUE.equals(item.getCanInputOnInit())) {
-                    body.addStatement(parseStatement("auditContent.put(\"%s\", req.get%s());",
-                            item.getTitle(), StringUtils.capitalize(item.getName())));
+                    String getter = "req.get" + StringUtils.capitalize(item.getName()) + "()";
+                    body.addStatement(parseStatement("auditContent.put(\"%s\", %s);",
+                            item.getTitle(), auditValueExpr(item, getter)));
                 }
             }
         }
@@ -77,10 +78,12 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
                     continue;
                 }
                 if (Boolean.TRUE.equals(item.getCanInputOnEdit())) {
-                    body.addStatement(parseStatement("oldValues.put(\"%s\", %s.get%s());",
-                            item.getTitle(), form.getVarName(), StringUtils.capitalize(item.getName())));
-                    body.addStatement(parseStatement("newValues.put(\"%s\", req.get%s());",
-                            item.getTitle(), StringUtils.capitalize(item.getName())));
+                    String oldGetter = form.getVarName() + ".get" + StringUtils.capitalize(item.getName()) + "()";
+                    String newGetter = "req.get" + StringUtils.capitalize(item.getName()) + "()";
+                    body.addStatement(parseStatement("oldValues.put(\"%s\", %s);",
+                            item.getTitle(), auditValueExpr(item, oldGetter)));
+                    body.addStatement(parseStatement("newValues.put(\"%s\", %s);",
+                            item.getTitle(), auditValueExpr(item, newGetter)));
                 }
             }
         }
@@ -224,6 +227,18 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
             }
         }
         return -1;
+    }
+
+    /**
+     * 构建审计日志中某字段的取值表达式。
+     * file 类型字段在业务表中合并为单列 "fileKey/originFileName"，审计时只取可读的 originFileName
+     * （首个 '/' 之后的部分），而非 fileKey。
+     */
+    private static String auditValueExpr(ItemDef item, String getterExpr) {
+        if (item.getType() == ItemType.FILE) {
+            return getterExpr + " == null ? null : " + getterExpr + ".substring(" + getterExpr + ".indexOf('/') + 1)";
+        }
+        return getterExpr;
     }
 
 }
