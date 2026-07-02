@@ -35,3 +35,4 @@ domains:
     wholeDTOPackage: "com.example.dto"
     mapperXmlDirs:
       - "src/main/resources/mapper"
+fileDownloadTokenSecret: test-download-token-secret

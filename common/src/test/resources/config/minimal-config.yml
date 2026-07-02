@@ -18,3 +18,4 @@ domains:
     paramDTOPackage: "com.example.dto.param"
     recordDTOPackage: "com.example.dto.record"
     wholeDTOPackage: "com.example.dto"
+fileDownloadTokenSecret: test-download-token-secret
