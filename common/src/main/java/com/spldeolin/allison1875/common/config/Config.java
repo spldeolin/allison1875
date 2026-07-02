@@ -418,6 +418,11 @@ public class Config {
             errors.add("domains must not be empty");
         }
 
+        // fileDownloadTokenSecret must not be empty
+        if (config.fileDownloadTokenSecret == null || config.fileDownloadTokenSecret.isEmpty()) {
+            errors.add("fileDownloadTokenSecret must not be empty");
+        }
+
         // persistence-generator: jdbc requires userName, password, schema
         if (config.jdbcUrl != null || config.ddl != null) {
             if (config.jdbcUrl != null && !config.jdbcUrl.isEmpty()) {
