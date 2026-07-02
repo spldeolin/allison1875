@@ -114,6 +114,36 @@ public class Config {
     String schema;
 
     /**
+     * S3对象存储端点，留空时使用SDK默认。bucket留空则整体降级为本地存储
+     */
+    String s3Endpoint;
+
+    /**
+     * S3对象存储区域
+     */
+    String s3Region;
+
+    /**
+     * S3对象存储桶名，留空则降级为本地存储
+     */
+    String s3Bucket;
+
+    /**
+     * S3对象存储访问密钥
+     */
+    String s3AccessKey;
+
+    /**
+     * S3对象存储私钥
+     */
+    String s3SecretKey;
+
+    /**
+     * 文件下载令牌签名密钥，不可为空
+     */
+    String fileDownloadTokenSecret;
+
+    /**
      * 使用指定的DDL，在In-memory H2中构建表结构
      */
     String ddl;
@@ -346,6 +376,21 @@ public class Config {
         }
         if (raw.dslPath == null) {
             b.dslPath(new File("./forms.yml"));
+        }
+        if (raw.s3Endpoint == null) {
+            b.s3Endpoint("");
+        }
+        if (raw.s3Region == null) {
+            b.s3Region("");
+        }
+        if (raw.s3Bucket == null) {
+            b.s3Bucket("");
+        }
+        if (raw.s3AccessKey == null) {
+            b.s3AccessKey("");
+        }
+        if (raw.s3SecretKey == null) {
+            b.s3SecretKey("");
         }
         if (raw.codeSnippet == null) {
             b.codeSnippet(CodeSnippet.applyDefaults(CodeSnippet.builder().build()));
