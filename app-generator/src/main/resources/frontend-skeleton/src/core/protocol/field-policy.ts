@@ -14,6 +14,7 @@ const FILTER_PATTERNS_BY_TYPE: Record<ItemDef['type'], FilterPattern[]> = {
   multiSelect: ['in'],
   onOff:       ['in'],
   secret:      [],  // secret fields are not searchable
+  file:        [],  // file fields are not searchable
 }
 
 export function getFilterPatternsByItemType(type: ItemDef['type']): FilterPattern[] {
