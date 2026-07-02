@@ -146,6 +146,12 @@ public class AppGenerator implements Allison1875Game {
         replaceInAllFiles(output, "__DATASOURCE_SCHEMA__", config.getSchema());
         replaceInAllFiles(output, "__DATASOURCE_USERNAME__", config.getUserName());
         replaceInAllFiles(output, "__DATASOURCE_PASSWORD__", config.getPassword());
+        replaceInAllFiles(output, "__S3_ENDPOINT__", config.getS3Endpoint());
+        replaceInAllFiles(output, "__S3_REGION__", config.getS3Region());
+        replaceInAllFiles(output, "__S3_BUCKET__", config.getS3Bucket());
+        replaceInAllFiles(output, "__S3_ACCESS_KEY__", config.getS3AccessKey());
+        replaceInAllFiles(output, "__S3_SECRET_KEY__", config.getS3SecretKey());
+        replaceInAllFiles(output, "__FILE_DOWNLOAD_TOKEN_SECRET__", config.getFileDownloadTokenSecret());
 
         // Rename __NAMESPACE_PATH__ directory to actual namespace path
         Path placeholderDir = output.resolve("src/main/java/__NAMESPACE_PATH__");
