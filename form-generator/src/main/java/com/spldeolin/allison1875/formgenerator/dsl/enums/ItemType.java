@@ -48,6 +48,11 @@ public enum ItemType {
      */
     TIME("time"),
 
+    /**
+     * 文件类字段定义，业务表合并为单列 VARCHAR(512)，值为 fileKey/originFileName
+     */
+    FILE("file"),
+
     ;
 
     @JsonValue
