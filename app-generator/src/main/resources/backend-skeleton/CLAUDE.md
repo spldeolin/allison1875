@@ -99,6 +99,56 @@ src/main/resources/
 - 无需手动维护 PermissionEnum — 由 app-generator 根据表单列表自动生成
 - 不要修改 `UserPermissionInitializer` 中角色名称，前端页面有对应的 hardcoded 引用
 
+## 文件上传/下载设施
+
+骨架内置通用文件上传/下载，供动态表单的 file 字段使用。
+
+### 存储抽象
+
+| 类                  | 用途                                                                          |
+|--------------------|-------------------------------------------------------------------------------|
+| `FileStorage`      | 存储接口：`store(bytes, fileKey)` / `byte[] load(fileKey)` / `getBucket()`。上传/下载仅依赖此接口 |
+| `S3FileStorage`    | S3 实现，`__APP_NAME__.s3.bucket` 非空时激活（AWS SDK v2）                         |
+| `LocalFileStorage` | 本地存储兜底，bucket 为空时激活，存到 `s3.localDir`                                    |
+| `S3Config`         | `S3Client` Bean，仅 bucket 非空时构建，支持 endpoint override 与 path-style access |
+| `S3Properties`     | `__APP_NAME__.s3.*` 配置（endpoint/region/bucket/accessKey/secretKey/pathStyleAccess/localDir） |
+| `FileProperties`   | `__APP_NAME__.file.*` 配置（downloadTokenSecret/downloadTokenTtlSeconds）        |
+
+S3 未配置（bucket 空）时自动降级为本地存储，业务代码无感知。
+
+### 文件类别
+
+`FileCategoryEnum`（实现 `BaseEnum<String>`）：
+
+| code | 扩展名白名单 |
+|------|------------|
+| image / document / archive / audio / video | 各自扩展名白名单 |
+| general | 反向黑名单（除 exe/bat/cmd/sh/js/jar/msi/com/scr/vbs/dll/app 外都放行） |
+
+`isExtensionAllowed(ext)` 用于上传校验。不引入 Apache Tika，contentType 取 `MultipartFile.getContentType()`，兜底 `application/octet-stream`。
+
+### 接口
+
+| 接口 | 方法 | 鉴权 | 说明 |
+|------|------|------|------|
+| `/api/v1/file/uploadFile` | POST multipart | 需 token | 通用上传，参数 `file` + `category`，返回 `{ fileKey, originFileName }` |
+| `/api/v1/file/temporarilyDownloadFile` | POST | 需 token | 传 `fileKey`，签发有时效的下载令牌 `{ token }` |
+| `/api/v1/file/downloadFile?token=` | GET | **匿名**（已加入 `anonymousApiPaths`） | 流式返回文件，`Content-Disposition: inline` 供内联预览 |
+
+下载接口匿名是因为浏览器原生 GET（`<img src>`/`<iframe src>`）无法带 Authorization 头。
+
+### 无状态下载令牌
+
+`DownloadTokenUtils`（HMAC-SHA256）：`token = base64url(payload) + "." + base64url(hmac)`，`payload = fileKey + "|" + expireAt`。无状态、多节点无共享存储，代价是签发后无法主动吊销（等过期）。密钥来自 `__APP_NAME__.file.downloadTokenSecret`，DSL 未指定时 app-generator 生成随机密钥。
+
+### file_record 表
+
+上传即落库的完整登记表（`FileRecordEntity`/`FileRecordMapper` 已生成）：`id/fileKey(UK)/originFileName/contentType/fileSize/category/bucket/createdAt/createdBy`。下载接口按 `fileKey` 等值精确查询。表不可变（无 updated_at/updated_by）。
+
+### 占位符
+
+app-generator 生成时替换：`__S3_ENDPOINT__`、`__S3_REGION__`、`__S3_BUCKET__`、`__S3_ACCESS_KEY__`、`__S3_SECRET_KEY__`、`__FILE_DOWNLOAD_TOKEN_SECRET__`。
+
 ## 已生成代码的模式
 
 每个表单生成 4 个接口，遵循统一模式：

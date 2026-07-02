@@ -114,6 +114,17 @@ appGeneratorOutputDir: ./output # 可选，默认 "./output"
 # ==================== form-generator ====================
 dslPath: ./forms.yml            # 可选，默认 "./forms.yml"
 
+# ==================== app-generator 文件组件（可选）====================
+# 仅当使用 app-generator 且生成的应用需要文件上传/下载时配置。
+# s3Bucket 留空 → 生成产物降级为本地存储（存到 ./file-storage）。
+# fileDownloadTokenSecret 留空 → app-generator 生成期自动生成随机 HMAC 密钥。
+s3Endpoint: null                # 可选，S3 端点（兼容 MinIO），留空用 SDK 默认
+s3Region: null                  # 可选，S3 区域
+s3Bucket: null                  # 可选，S3 桶名；留空则降级本地存储
+s3AccessKey: null               # 可选，S3 访问密钥
+s3SecretKey: null               # 可选，S3 私钥
+fileDownloadTokenSecret: null   # 可选，文件下载令牌签名密钥；留空则生成期随机生成
+
 # ==================== codeSnippet：代码片段模板 ====================
 codeSnippet:
   # requestResult 四件套：要么全不配（不使用统一返回类），要么四个全配。

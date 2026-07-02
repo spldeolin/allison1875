@@ -124,6 +124,19 @@
 
 无额外字段。列表/搜索时脱敏，详情时明文，编辑时只能重置不能修改。
 
+### file
+
+| 字段          | 类型      | 默认值     | 说明                                              |
+|-------------|---------|---------|---------------------------------------------------|
+| category    | String  | general | 文件类别，对应后端 FileCategoryEnum（image/document/archive/audio/video/general） |
+| maxFileSize | Integer | null    | 前端 UX 校验用的最大文件大小（MB），留空不限制                         |
+
+**合并单列设计**：业务表的 file 字段是单个 VARCHAR(512) 列，值为 `fileKey/originFileName`（首个 `/` 分隔）。因此 file 对 form-generator 退化为「一个 VARCHAR 列 + 一个 String DTO 字段」，走标准单字段路径，Ddl/Create/Update/GetDetail/List 均无特殊分支。
+
+- **不可过滤**（`getFilterPatterns` 返回 null）、**不可排序**（不在 SortEnum 的 number/onOff/text/time 允许清单内）
+- **审计日志**：`AppGeneratorMutationExpansionServiceImpl` 对 file 字段取 `originFileName`（合并列首个 `/` 之后的部分），不取 fileKey
+- **file_record 表**（骨架固定表，持久层已生成）保留独立 `file_key`/`origin_file_name` 两列，不合并——下载接口按 fileKey 等值精确查询
+
 ## OptionDef
 
 | 字段    | 类型     | 必填 | 说明                          |
