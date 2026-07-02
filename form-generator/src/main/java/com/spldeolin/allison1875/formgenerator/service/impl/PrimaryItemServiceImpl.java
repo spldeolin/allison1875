@@ -23,6 +23,9 @@ public class PrimaryItemServiceImpl implements ItemService<ItemDef> {
     private MultiSelectItemService multiSelectItemService;
 
     @Inject
+    private FileItemService fileItemService;
+
+    @Inject
     private NumberItemService numberItemService;
 
     @Inject
@@ -107,6 +110,8 @@ public class PrimaryItemServiceImpl implements ItemService<ItemDef> {
                 return (ItemService<I>) textItemService;
             case TIME:
                 return (ItemService<I>) timeItemService;
+            case FILE:
+                return (ItemService<I>) fileItemService;
         }
         throw new IllegalStateException("unsupported item type");
     }
