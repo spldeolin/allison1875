@@ -80,6 +80,7 @@ public class ListApiServiceImpl implements ListApiService {
         for (ItemDef item : form.getNonAuditedItems()) {
             switch (item.getType()) {
                 case SECRET:
+                case FILE:
                     continue;
                 case NUMBER:
                 case ON_OFF:
@@ -231,6 +232,7 @@ public class ListApiServiceImpl implements ListApiService {
         switch (item.getType()) {
             case SECRET:
             case MULTI_SELECT:
+            case FILE:
                 return "";
             case NUMBER:
             case ON_OFF:

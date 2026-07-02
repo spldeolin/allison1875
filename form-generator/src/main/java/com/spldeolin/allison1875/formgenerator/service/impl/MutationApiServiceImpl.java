@@ -165,6 +165,7 @@ public class MutationApiServiceImpl implements MutationApiService {
             case NUMBER:
             case ON_OFF:
             case TEXT:
+            case FILE:
                 return "." + item.getName() + ".eq(req.get" + StringUtils.capitalize(item.getName()) + "())";
             case TIME:
                 TimeItemDef timeItem = (TimeItemDef) item;
