@@ -151,7 +151,13 @@ public class AppGenerator implements Allison1875Game {
         replaceInAllFiles(output, "__S3_BUCKET__", config.getS3Bucket());
         replaceInAllFiles(output, "__S3_ACCESS_KEY__", config.getS3AccessKey());
         replaceInAllFiles(output, "__S3_SECRET_KEY__", config.getS3SecretKey());
-        replaceInAllFiles(output, "__FILE_DOWNLOAD_TOKEN_SECRET__", config.getFileDownloadTokenSecret());
+        // fileDownloadTokenSecret: generate a random URL-safe secret when not specified, so the
+        // generated backend always has a non-empty HMAC key (multi-node share the same generated artifact)
+        String downloadTokenSecret = config.getFileDownloadTokenSecret();
+        if (downloadTokenSecret == null || downloadTokenSecret.isEmpty()) {
+            downloadTokenSecret = generateDownloadTokenSecret();
+        }
+        replaceInAllFiles(output, "__FILE_DOWNLOAD_TOKEN_SECRET__", downloadTokenSecret);
 
         // Rename __NAMESPACE_PATH__ directory to actual namespace path
         Path placeholderDir = output.resolve("src/main/java/__NAMESPACE_PATH__");
@@ -310,6 +316,16 @@ public class AppGenerator implements Allison1875Game {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    /**
+     * 生成URL安全的随机下载令牌密钥（48字节熵，Base64url编码，约64字符）。
+     * 用于 fileDownloadTokenSecret 未在 DSL 中指定时兜底，确保生成产物始终有非空 HMAC 密钥。
+     */
+    private static String generateDownloadTokenSecret() {
+        byte[] bytes = new byte[48];
+        new java.security.SecureRandom().nextBytes(bytes);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     private void replaceInAllFiles(Path dir, String placeholder, String replacement) {
