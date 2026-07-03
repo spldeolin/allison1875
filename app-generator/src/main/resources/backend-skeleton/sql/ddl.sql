@@ -80,3 +80,4 @@ CREATE TABLE `file_record`
     UNIQUE KEY `uk_file_key` (`file_key`),
     PRIMARY KEY (`id`)
 ) COMMENT '文件记录';
+

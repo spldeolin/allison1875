@@ -1,9 +1,6 @@
 package __NAMESPACE__.storage;
 
 import java.io.InputStream;
-import javax.annotation.Resource;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -15,20 +12,21 @@ import __NAMESPACE__.service.FileStorage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * S3对象存储实现，bucket非空时激活
+ * S3对象存储实现，由 {@link __NAMESPACE__.config.FileStorageConfig} 在 bucket 非空时装配。
  *
  * @author Deolin 2026-07-02
  */
-@Component
-@ConditionalOnExpression("!'${__APP_NAME__.s3.bucket:}'.isEmpty()")
 @Slf4j
 public class S3FileStorage implements FileStorage {
 
-    @Resource
-    private S3Client s3Client;
+    private final S3Client s3Client;
 
-    @Resource
-    private S3Properties s3Properties;
+    private final S3Properties s3Properties;
+
+    public S3FileStorage(S3Client s3Client, S3Properties s3Properties) {
+        this.s3Client = s3Client;
+        this.s3Properties = s3Properties;
+    }
 
     @Override
     public void store(InputStream in, long size, String fileKey) {

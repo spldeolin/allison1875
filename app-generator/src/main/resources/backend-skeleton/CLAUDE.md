@@ -110,9 +110,9 @@ src/main/resources/
 | 类                  | 用途                                                                          |
 |--------------------|-------------------------------------------------------------------------------|
 | `FileStorage`      | `service` 包门面接口：`store(InputStream, long size, fileKey)` / `InputStream load(fileKey)` / `getBucket()` |
-| `S3FileStorage`    | `storage` 包 S3 实现，`__APP_NAME__.s3.bucket` 非空时激活（AWS SDK v2）              |
-| `LocalFileStorage` | `storage` 包本地存储兜底，bucket 为空时激活，存到 `s3.localDir`                          |
-| `S3Config`         | `S3Client` Bean，仅 bucket 非空时构建，支持 endpoint override 与 path-style access |
+| `S3FileStorage`    | `storage` 包 S3 实现，由 `FileStorageConfig` 在 `S3Client` Bean 存在（bucket 非空）时装配（AWS SDK v2）   |
+| `LocalFileStorage` | `storage` 包本地存储兜底，bucket 为空时装配，存到 `s3.localDir`                          |
+| `FileStorageConfig` | `config` 包装配类：`fileStorage()` 方法依据 `s3Properties.bucket` 选择后端，非空时构建 S3Client 并返回 `S3FileStorage`，否则降级返回 `LocalFileStorage` |
 | `S3Properties`     | `__APP_NAME__.s3.*` 配置（endpoint/region/bucket/accessKey/secretKey/pathStyleAccess/localDir） |
 | `FileProperties`   | `__APP_NAME__.file.*` 配置（downloadTokenSecret/downloadTokenTtlSeconds）        |
 

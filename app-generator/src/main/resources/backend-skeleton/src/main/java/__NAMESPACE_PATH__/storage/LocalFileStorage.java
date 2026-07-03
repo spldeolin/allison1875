@@ -5,33 +5,27 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 import __NAMESPACE__.property.S3Properties;
 import __NAMESPACE__.service.FileStorage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 本地文件存储实现，bucket为空时作为兜底
+ * 本地文件存储实现，由 {@link __NAMESPACE__.config.FileStorageConfig} 在 bucket 为空时作为兜底装配。
  *
  * @author Deolin 2026-07-02
  */
-@Component
-@ConditionalOnMissingBean(FileStorage.class)
 @Slf4j
 public class LocalFileStorage implements FileStorage {
 
-    @Resource
-    private S3Properties s3Properties;
+    private final Path root;
 
-    private Path root;
-
-    @PostConstruct
-    public void init() throws IOException {
-        root = Paths.get(s3Properties.getLocalDir());
-        Files.createDirectories(root);
+    public LocalFileStorage(S3Properties s3Properties) {
+        this.root = Paths.get(s3Properties.getLocalDir());
+        try {
+            Files.createDirectories(root);
+        } catch (IOException e) {
+            throw new RuntimeException("Create local storage dir failed, root=" + root.toAbsolutePath(), e);
+        }
         log.info("LocalFileStorage initialized, root={}", root.toAbsolutePath());
     }
 
@@ -59,4 +53,3 @@ public class LocalFileStorage implements FileStorage {
     }
 
 }
-
