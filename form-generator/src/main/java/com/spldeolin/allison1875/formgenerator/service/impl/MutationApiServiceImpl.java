@@ -25,6 +25,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
 import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.MutationApiService;
+import com.spldeolin.allison1875.formgenerator.service.MutationExpansionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,6 +40,9 @@ public class MutationApiServiceImpl implements MutationApiService {
 
     @Inject
     private MultiSelectItemService multiSelectItemService;
+
+    @Inject
+    private MutationExpansionService mutationExpansionService;
 
     @Override
     public void generateSetterToGetter(FormDef form, ItemDef item, BlockStmt body) {
@@ -144,6 +148,7 @@ public class MutationApiServiceImpl implements MutationApiService {
                         StringUtils.capitalize(item.getName()), item.getName()));
                 forEachBody.addStatement(
                         parseStatement("%s.setCreatedAt(LocalDateTime.now());", associationForm.getVarName()));
+                mutationExpansionService.expandMultiSelectAssociationBody(form, item, associationForm, forEachBody);
                 forEachBody.addStatement(parseStatement("%sMapper.insert(%s);", associationForm.getVarName(),
                         associationForm.getVarName()));
                 forEachStmt.setBody(forEachBody);

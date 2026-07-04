@@ -104,6 +104,20 @@ public class AppGeneratorMutationExpansionServiceImpl implements MutationExpansi
     }
 
     @Override
+    public void expandMultiSelectAssociationBody(FormDef majorForm, ItemDef multiSelectItem,
+            FormDef associationForm, BlockStmt forEachBody) {
+        // 关联表仅在主表单含 createdBy 时才会带 createdBy 字段（见 MultiSelectItemService.toAssociationForm）
+        boolean hasCreatedBy = associationForm.getItems().stream()
+                .anyMatch(i -> "createdBy".equals(i.getName()));
+        if (!hasCreatedBy) {
+            return;
+        }
+        String currentUserFqn = namespace + ".common.CurrentUser";
+        forEachBody.addStatement(parseStatement("%s.setCreatedBy(%s.getUsername());",
+                associationForm.getVarName(), currentUserFqn));
+    }
+
+    @Override
     public void expandListReqFields(FormDef form, ClassOrInterfaceDeclaration reqCoid) {
         FieldDeclaration createdByField = parseFieldDeclaration("String createdBy;");
         JavadocUtils.setJavadoc(createdByField, "创建人", null);
