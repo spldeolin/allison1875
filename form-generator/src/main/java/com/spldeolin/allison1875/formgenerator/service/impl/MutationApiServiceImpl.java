@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -129,7 +130,6 @@ public class MutationApiServiceImpl implements MutationApiService {
                         StringUtils.capitalize(associationForm.getBizIdName()), form.getVarName(),
                         associationForm.getBizIdGetterName());
                 stmt.setLineComment(String.format("重建与%s的关联（先删除，后创建）", item.getTitle()));
-                body.addStatement(stmt);
                 ForEachStmt forEachStmt = new ForEachStmt();
                 forEachStmt.setVariable(parseVariableDeclarationExpr(
                         String.format("%s %s", MoreStringUtils.toUpperCamel(item.getName()) + "Enum", item.getName())));
@@ -147,7 +147,20 @@ public class MutationApiServiceImpl implements MutationApiService {
                 forEachBody.addStatement(parseStatement("%sMapper.insert(%s);", associationForm.getVarName(),
                         associationForm.getVarName()));
                 forEachStmt.setBody(forEachBody);
-                body.addStatement(forEachStmt);
+                if (Boolean.TRUE.equals(item.getIsNonVoid())) {
+                    body.addStatement(stmt);
+                    body.addStatement(forEachStmt);
+                } else {
+                    // 非必填时，前端可能不传该多选字段，需判空避免对 null 集合迭代导致 NPE
+                    BlockStmt ifBody = new BlockStmt();
+                    ifBody.addStatement(stmt);
+                    ifBody.addStatement(forEachStmt);
+                    IfStmt ifStmt = new IfStmt();
+                    ifStmt.setCondition(parseExpression(String.format("req.get%s() != null",
+                            StringUtils.capitalize(item.getName()))));
+                    ifStmt.setThenStmt(ifBody);
+                    body.addStatement(ifStmt);
+                }
             }
         }
     }
