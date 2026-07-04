@@ -30,6 +30,7 @@ import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ApiType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.ItemType;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.TimeFormat;
+import com.spldeolin.allison1875.formgenerator.dsl.item.MultiSelectItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.item.TimeItemDef;
 import com.spldeolin.allison1875.formgenerator.service.ItemService;
 import com.spldeolin.allison1875.formgenerator.service.ListApiService;
@@ -57,6 +58,9 @@ public class ListApiServiceImpl implements ListApiService {
 
     @Inject
     private MutationExpansionService mutationExpansionService;
+
+    @Inject
+    private MultiSelectItemService multiSelectItemService;
 
     @Override
     public InitializerDeclaration generateListInitDec(FormDef form) {
@@ -198,6 +202,27 @@ public class ListApiServiceImpl implements ListApiService {
         body.addStatement(parseStatement("if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
                 "PageResult.empty()"));
 
+        // 为每个多选字段抽取业务主键列表、批量查询关联表并按业务主键分组，供下方 forEach 中回填
+        for (ItemDef item : form.getNonAuditedItems()) {
+            if (item.getType() != MULTI_SELECT) {
+                continue;
+            }
+            MultiSelectItemDef multiSelectItem = (MultiSelectItemDef) item;
+            FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
+            String bizIdName = form.getBizIdName();
+            String bizIdGetter = form.getBizIdGetterName();
+            String bizIdsVar = English.plural(bizIdName);
+            String groupVar = associationForm.getVarName() + "GroupBy" + StringUtils.capitalize(bizIdName);
+            // 抽取当前页所有表单记录的业务主键列表
+            body.addStatement(parseStatement("List<String> %s = %s.stream().map(%s::%s).collect(Collectors.toList());",
+                    bizIdsVar, English.plural(form.getVarName()), form.getEntityName(config), bizIdGetter));
+            // 按业务主键列表批量查询关联表实体，并按业务主键分组
+            body.addStatement(parseStatement(
+                    "Map<String, List<%s>> %s = %sDesign.select().where().%s.in(%s).list().stream().collect(Collectors.groupingBy(%s::%s));",
+                    associationForm.getEntityName(config), groupVar, associationForm.getName(), bizIdName, bizIdsVar,
+                    associationForm.getEntityName(config), bizIdGetter));
+        }
+
         body.addStatement(
                 parseStatement("List<List" + English.plural(form.getName()) + "Resp> dtos = new ArrayList<>();"));
         ForEachStmt forEachStmt = new ForEachStmt();
@@ -212,7 +237,17 @@ public class ListApiServiceImpl implements ListApiService {
                 continue;
             }
             if (item.getType() == MULTI_SELECT) {
-                // TODO
+                MultiSelectItemDef multiSelectItem = (MultiSelectItemDef) item;
+                FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
+                String enumName = StringUtils.capitalize(item.getName()) + "Enum";
+                String groupVar = associationForm.getVarName() + "GroupBy" + StringUtils.capitalize(
+                        form.getBizIdName());
+                // 取当前表单记录对应的关联记录组，回填多选枚举列表；无关联记录时用空列表兜底
+                forEachBody.addStatement(parseStatement(
+                        "dto.set%s(%s.getOrDefault(%s.%s(), Collections.emptyList()).stream().map(%s::get%s).map(%s::of).collect(Collectors.toList()));",
+                        StringUtils.capitalize(item.getName()), groupVar, form.getVarName(),
+                        form.getBizIdGetterName(), associationForm.getEntityName(config),
+                        StringUtils.capitalize(item.getName()), enumName));
                 continue;
             }
             generatorSetterToGetter(form, item, forEachBody);
