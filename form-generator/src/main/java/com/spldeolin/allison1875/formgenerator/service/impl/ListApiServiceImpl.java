@@ -202,25 +202,28 @@ public class ListApiServiceImpl implements ListApiService {
         body.addStatement(parseStatement("if (%s.isEmpty()) { return %s; }", English.plural(form.getVarName()),
                 "PageResult.empty()"));
 
-        // 为每个多选字段抽取业务主键列表、批量查询关联表并按业务主键分组，供下方 forEach 中回填
-        for (ItemDef item : form.getNonAuditedItems()) {
-            if (item.getType() != MULTI_SELECT) {
-                continue;
-            }
-            MultiSelectItemDef multiSelectItem = (MultiSelectItemDef) item;
-            FormDef associationForm = multiSelectItemService.toAssociationForm(form, multiSelectItem);
-            String bizIdName = form.getBizIdName();
-            String bizIdGetter = form.getBizIdGetterName();
-            String bizIdsVar = English.plural(bizIdName);
-            String groupVar = associationForm.getVarName() + "GroupBy" + StringUtils.capitalize(bizIdName);
-            // 抽取当前页所有表单记录的业务主键列表
+        // 为每个多选字段批量查询关联表并按业务主键分组，供下方 forEach 中回填
+        boolean hasMultiSelect = form.getNonAuditedItems().stream().anyMatch(item -> item.getType() == MULTI_SELECT);
+        if (hasMultiSelect) {
+            // 抽取当前页所有表单记录的业务主键列表，多个多选字段共用，只抽取一次
+            String bizIdsVar = English.plural(form.getBizIdName());
             body.addStatement(parseStatement("List<String> %s = %s.stream().map(%s::%s).collect(Collectors.toList());",
-                    bizIdsVar, English.plural(form.getVarName()), form.getEntityName(config), bizIdGetter));
-            // 按业务主键列表批量查询关联表实体，并按业务主键分组
-            body.addStatement(parseStatement(
-                    "Map<String, List<%s>> %s = %sDesign.select().where().%s.in(%s).list().stream().collect(Collectors.groupingBy(%s::%s));",
-                    associationForm.getEntityName(config), groupVar, associationForm.getName(), bizIdName, bizIdsVar,
-                    associationForm.getEntityName(config), bizIdGetter));
+                    bizIdsVar, English.plural(form.getVarName()), form.getEntityName(config),
+                    form.getBizIdGetterName()));
+            for (ItemDef item : form.getNonAuditedItems()) {
+                if (item.getType() != MULTI_SELECT) {
+                    continue;
+                }
+                FormDef associationForm = multiSelectItemService.toAssociationForm(form, (MultiSelectItemDef) item);
+                String groupVar = associationForm.getVarName() + "GroupBy" + StringUtils.capitalize(
+                        form.getBizIdName());
+                // 按业务主键列表批量查询关联表实体，并按业务主键分组
+                body.addStatement(parseStatement(
+                        "Map<String, List<%s>> %s = %sDesign.select().where().%s.in(%s).list().stream().collect(Collectors.groupingBy(%s::%s));",
+                        associationForm.getEntityName(config), groupVar, associationForm.getName(),
+                        form.getBizIdName(), bizIdsVar, associationForm.getEntityName(config),
+                        form.getBizIdGetterName()));
+            }
         }
 
         body.addStatement(
