@@ -58,12 +58,24 @@ import { ref, watch } from 'vue'
 const editing = ref(false)
 // 进入 editing 后用户输入的本地值。未进入时无意义。
 const draft = ref<string>('')
+// 标记当前 emit 由本组件自身触发。props.value 与父级 v-model 双向绑定，
+// 自身 emit 会经父级回流为新的 props.value 触发 watch；此时不应重置 editing。
+let internal = false
 ```
 
-`value` prop reference change (modal open / external reset) re-seeds:
+`value` prop reference change re-seeds state — but only for **external** changes
+(modal open / true external reset). Self-emitted values (`startEdit`/`cancelEdit`/
+`onInput`) round-trip back through the parent `v-model` as a new `props.value`
+and would otherwise flip `editing` back to false on the first keystroke. The
+`internal` flag distinguishes the two: each handler sets `internal = true`
+before emitting; the watch consumes it and skips the reset.
 
 ```ts
 watch(() => props.value, () => {
+  if (internal) {
+    internal = false
+    return
+  }
   editing.value = false
   draft.value = ''
 })
@@ -79,17 +91,20 @@ stable, and independent of password-mask rendering quirks.
 function startEdit() {
   editing.value = true
   draft.value = ''
+  internal = true
   emit('update:value', null) // 进入态但尚未输入，语义仍为「不修改」
 }
 
 function cancelEdit() {
   editing.value = false
   draft.value = ''
+  internal = true
   emit('update:value', null) // 回到未修改
 }
 
 function onInput(v: string | null) {
   draft.value = v ?? ''
+  internal = true
   emit('update:value', v ?? '') // 真实新值，或 ''（显式清空，仅非必填）
 }
 ```
@@ -174,7 +189,11 @@ Icons: `CreateOutline` and `CloseOutline` from `@vicons/ionicons5`
   `""` when cleared). `cancelEdit` reverts to the default state and re-emits
   `null`.
 - Modal reopen / external `value` prop change: `watch` resets `editing=false`,
-  `draft=''`, so the field always opens in the unmodified default state.
+  `draft=''`, so the field always opens in the unmodified default state. The
+  `internal` flag guards against self-emitted values (from `startEdit`/
+  `cancelEdit`/`onInput`) that round-trip back through the parent `v-model` as
+  a new `props.value` — without the guard, the first keystroke would flip
+  `editing` back to false and revert the field to dots.
 
 ### Edge case — entered edit mode but typed nothing
 
