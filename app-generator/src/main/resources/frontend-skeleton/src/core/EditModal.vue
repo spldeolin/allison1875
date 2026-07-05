@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, nextTick } from 'vue'
 import { NModal, NCard, NForm, NFormItem, NButton, NSpace, type FormInst, type FormRules } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
@@ -21,6 +21,19 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref<FormInst | null>(null)
+
+const itemRefs = new Map<string, HTMLElement>()
+
+function setItemRef(name: string) {
+  return (el: Element | { $el?: HTMLElement } | null) => {
+    if (el) {
+      const dom = (el as { $el?: HTMLElement }).$el ?? (el as HTMLElement)
+      itemRefs.set(name, dom as HTMLElement)
+    } else {
+      itemRefs.delete(name)
+    }
+  }
+}
 
 // Local reactive model for NForm — mutated in place so NFormItem sees updates
 // immediately when it re-validates (avoids prop round-trip timing issue)
@@ -82,10 +95,36 @@ function updateField(name: string, value: any) {
 async function handleSubmit() {
   try {
     await formRef.value?.validate()
-  } catch {
+  } catch (errors) {
+    await nextTick()
+    focusFirstError(errors)
     return
   }
   emit('submit')
+}
+
+function focusFirstError(errors: unknown) {
+  const errObj = (errors && typeof errors === 'object' ? errors : {}) as Record<string, unknown>
+  for (const item of visibleItems.value) {
+    if (!isEditable(item, editMode.value)) continue
+    if (!errObj[item.name]) continue
+    const dom = itemRefs.get(item.name)
+    if (!dom) continue
+    const focusable = dom.querySelector('input, [tabindex]:not([tabindex="-1"])') as HTMLElement | null
+    focusable?.focus()
+    return
+  }
+  // 兜底：未匹配到结构化 errors 时，按 DOM 错误类定位
+  for (const item of visibleItems.value) {
+    if (!isEditable(item, editMode.value)) continue
+    const dom = itemRefs.get(item.name)
+    if (!dom) continue
+    if (dom.classList.contains('n-form-item--error') || dom.querySelector('.n-form-item--error')) {
+      const focusable = dom.querySelector('input, [tabindex]:not([tabindex="-1"])') as HTMLElement | null
+      focusable?.focus()
+      return
+    }
+  }
 }
 
 function handleClose() {
@@ -101,6 +140,7 @@ function handleClose() {
           <NFormItem
             v-for="item in visibleItems"
             :key="item.name"
+            :ref="setItemRef(item.name)"
             :label="item.title"
             :path="isEditable(item, editMode) ? item.name : undefined"
             :required="item.isNonVoid && isEditable(item, editMode) && !isSecretExemptFromRequired(item, editMode)"
