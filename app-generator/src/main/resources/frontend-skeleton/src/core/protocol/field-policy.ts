@@ -74,3 +74,11 @@ export function isEditable(item: ItemDef, mode: 'edit-create' | 'edit-update'): 
   if (mode === 'edit-create') return canInputOnInit
   return canInputOnEdit
 }
+
+/**
+ * 编辑已有记录时，secret 字段允许"不修改"（提交 null 保留原值），因此不参与必填校验。
+ * 作为 rules 生成与 :required 红星的单一判定来源，避免两处内联表达式漂移。
+ */
+export function isSecretExemptFromRequired(item: ItemDef, mode: 'edit-create' | 'edit-update'): boolean {
+  return item.type === 'secret' && mode === 'edit-update'
+}

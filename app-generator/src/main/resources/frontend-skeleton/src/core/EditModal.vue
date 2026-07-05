@@ -3,7 +3,7 @@ import { computed, ref, reactive, watch } from 'vue'
 import { NModal, NCard, NForm, NFormItem, NButton, NSpace, type FormInst, type FormRules } from 'naive-ui'
 import type { ItemDef } from '@/schema/types'
 import FieldRenderer from './fields/FieldRenderer.vue'
-import { isVisible, isEditable } from './protocol/field-policy'
+import { isVisible, isEditable, isSecretExemptFromRequired } from './protocol/field-policy'
 
 const props = defineProps<{
   visible: boolean
@@ -46,7 +46,7 @@ const rules = computed<FormRules>(() => {
   const r: FormRules = {}
   for (const item of visibleItems.value) {
     // 编辑已有记录时，secret 允许"不修改"（提交 null），因此不生成必填规则
-    if (item.type === 'secret' && editMode.value === 'edit-update') continue
+    if (isSecretExemptFromRequired(item, editMode.value)) continue
     // Only add validation rules for editable fields
     if (item.isNonVoid && isEditable(item, editMode.value)) {
       // onOff is a boolean — false is a valid non-void value, no required rule needed
@@ -103,7 +103,7 @@ function handleClose() {
             :key="item.name"
             :label="item.title"
             :path="isEditable(item, editMode) ? item.name : undefined"
-            :required="item.isNonVoid && isEditable(item, editMode) && !(item.type === 'secret' && editMode === 'edit-update')"
+            :required="item.isNonVoid && isEditable(item, editMode) && !isSecretExemptFromRequired(item, editMode)"
           >
             <FieldRenderer
               :item="item"
