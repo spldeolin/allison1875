@@ -25,9 +25,17 @@ const isEditUpdate = computed(() => props.mode === 'edit' && props.editMode === 
 const editing = ref(false)
 // 进入 editing 后用户输入的本地值。未进入时无意义。
 const draft = ref<string>('')
+// 标记当前 emit 由本组件自身触发。props.value 与父级 v-model 双向绑定，
+// 自身 emit 会经父级回流为新的 props.value 触发 watch；此时不应重置 editing，
+// 仅弹框重新打开 / 外部真正重置时才重置。
+let internal = false
 
-// 弹框打开 / 外部重置时回到默认未修改态。
+// 弹框打开 / 外部重置时回到默认未修改态。自身 emit 引起的回流被 internal 跳过。
 watch(() => props.value, () => {
+  if (internal) {
+    internal = false
+    return
+  }
   editing.value = false
   draft.value = ''
 })
@@ -37,6 +45,7 @@ watch(() => props.value, () => {
 function startEdit() {
   editing.value = true
   draft.value = ''
+  internal = true
   emit('update:value', null)
 }
 
@@ -44,12 +53,14 @@ function startEdit() {
 function cancelEdit() {
   editing.value = false
   draft.value = ''
+  internal = true
   emit('update:value', null)
 }
 
 // 输入态下用户键入或清空。真实新值 → emit 新值；clearable 清空 → emit ''。
 function onInput(v: string | null) {
   draft.value = v ?? ''
+  internal = true
   emit('update:value', v ?? '')
 }
 </script>
