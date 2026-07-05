@@ -269,5 +269,6 @@ fix: prevent duplicate enum entries in sort generation
 - `form-generator/CLAUDE.md` — forms.yml DSL 完整语法参考
 - `query-transformer/CLAUDE.md` — Design chain DSL 赋值规则（编译时 vs 转换时类型）
 - `app-generator/CLAUDE.md` — app.yml DSL 参考、处理流程、骨架资源与 form-generator 委托；内含功能权限体系等子文档索引
+  - `app-generator/src/main/resources/frontend-skeleton/CLAUDE.md` — 前端骨架二次开发规则；内含 `core/` 组件协议（secret 字段编辑交互等）
 - `allison1875-cli/CLAUDE.md` — IT 测试开发规范与模式
 - `skills/integrate-allison1875/SKILL.md` — 接入配置指南（Config 字段参考、校验规则、推理方法论）

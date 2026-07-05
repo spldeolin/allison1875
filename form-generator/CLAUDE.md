@@ -126,6 +126,17 @@
 EditReqDTO 不带 `@NotEmpty`；提交 `null`=不修改（保留原值）、`""`=清空（isNonVoid=false 存空串，
 isNonVoid=true 抛业务异常）、非空串=覆盖。canInputOnEdit=false 时编辑弹框隐藏该字段。
 
+后端生成规则（`UpdateApiServiceImpl`）：
+
+- **EditReqDTO**：secret 字段跳过 `@NotEmpty`（`null` 是合法的"不修改"信号）。create 仍带 `@NotEmpty`。
+- **Update 方法体**：secret 且 `canInputOnEdit=true` 的字段，setter 外层包裹 null-skip 条件块（而非无条件 `entity.setX(req.getX())`）。
+  - `isNonVoid=true`：`if (req.getX() != null) { if (req.getX().isEmpty()) throw new BizException("{title}不能为空"); entity.setX(req.getX()); }`
+  - `isNonVoid=false`：`if (req.getX() != null) { entity.setX(req.getX()); }`
+  - 空判用 JDK `String.isEmpty()`；异常类型取 `config.getCodeSnippet().getBizExceptionQualifier()`，文案 `{title}不能为空`。
+- **死代码**：`ItemService.getValidationStatement()` 已删除（save 拆 create/update 后无调用者）；null-skip 块由 `UpdateApiServiceImpl` 内联生成，不复用该方法。
+
+前端承载这套三态协议的交互见 `app-generator/src/main/resources/frontend-skeleton/CLAUDE.md` 的「Secret 字段编辑交互」。
+
 ### file
 
 | 字段          | 类型      | 默认值     | 说明                                              |

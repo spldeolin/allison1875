@@ -47,6 +47,41 @@
 - 响应格式 `{ errorCode, data, errorMsg, traceId }`
 - 使用 `src/utils/request.ts` 发请求
 
+## Secret 字段编辑交互
+
+`secret` 字段（密码/密钥）出于安全，detail 接口**不返回明文**——编辑弹框打开时该字段绑定值为 `null`。前后端约定三态提交协议（`null`/`""`/非空串），前端在 edit-update 下用「edit icon 进入编辑」的交互承载这套语义。涉及 `core/` 下多个文件，二次开发时若覆盖 SecretField 需保留以下协议。
+
+### 提交语义（edit-update，`canInputOnEdit=true`）
+
+| formData 值 | 含义 | 后端行为 |
+|---|---|---|
+| `null` | 未修改 | 跳过 setter（保留数据库原值） |
+| `""` | 清空 | `isNonVoid=false` 存空串；`isNonVoid=true` 抛业务异常 |
+| 非空串 | 覆盖 | setter 存新值 |
+
+`canInputOnEdit=false` 的 secret 在 edit-update 下被 `protocol/field-policy.ts` 隐藏，不进入 SecretField 编辑分支。create 下 secret 仍必填、仍带 `@NotEmpty`。
+
+### 涉及的 core/ 文件
+
+- `protocol/field-policy.ts` — edit-update 下隐藏 `canInputOnEdit=false` 的 secret。
+- `EditModal.vue` — edit-update 下 secret 不生成 required 规则（避免拦截 `null` 提交）；向 FieldRenderer 透传 `editMode`。
+- `fields/FieldRenderer.vue` — 仅对 `item.type === 'secret'` 透传 `editMode`（其他字段不接收，避免 Vue 属性警告）。
+- `fields/SecretField.vue` — 根据 `editMode` 区分 create / edit-update 渲染。
+
+### SecretField edit-update 交互模型
+
+默认**不可输入**：readonly NInput 显示 `••••••`（6 个可见圆点字符，非 password 掩码）+ suffix 的 edit icon（`@vicons/ionicons5` 的 `CreateOutline`）。点击 edit icon 进入可输入 password input，suffix 换成 close icon（`CloseOutline`）；输入新值 → 覆盖，clearable ✕（仅 `isNonVoid=false`）→ 清空为 `""`，点 close icon → 回到未修改态。
+
+关键实现约束：
+
+- **`internal` flag 守卫 `watch(() => props.value)`**。`props.value` 经父级 `v-model` 双向绑定，本组件 `emit` 会回流为新的 `props.value` 触发 watch。若不区分，首次输入即被 watch 重置 `editing=false`、字段退回黑点态。每个 handler（`startEdit`/`cancelEdit`/`onInput`）emit 前置 `internal=true`，watch 消费后跳过重置；仅外部重置（弹框重开等）才真正重置。
+- **已知局限**：连续编辑两条 secret 值恰好相同的记录时 `props.value` 引用未变，watch 不触发、状态不重置。这是 watch-on-value 方案的固有限制，非缺陷；若需更强保证可改为按 modal-open 信号重置。
+- 默认态黑点是字面量 `'••••••'`，不用 password 掩码或不可见 sentinel——避免 readonly password input 的浏览器怪异行为。
+
+### 不改动的协议层
+
+`protocol/request-builder.ts` 的 `buildUpdateRequest` 用 `v ?? null` 原样传三态，无需为 secret 特判。`response-parser.ts` 对 secret 是 no-op passthrough，detail 无该键时 `formData[name]` 为 `undefined`，模板 `?? null` 归一为 `null`。
+
 ## 功能权限体系
 
 ### 权限数据来源
