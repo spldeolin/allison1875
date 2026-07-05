@@ -19,11 +19,38 @@ const emit = defineEmits<{
 // 编辑已有记录时的特殊态：详情接口不返回明文，允许"不修改即保留"。
 const isEditUpdate = computed(() => props.mode === 'edit' && props.editMode === 'edit-update')
 
-// 仅非必填 secret 显示清空按钮（必填 secret 清空必被后端拒绝）。
-const showClearButton = computed(() => isEditUpdate.value && props.item.isNonVoid === false)
+// edit-update 下是否已进入可输入态。
+// false: readonly + 黑点 + edit icon（默认，= 未修改）。
+// true:  可输入 password input + close icon。
+const editing = ref(false)
+// 进入 editing 后用户输入的本地值。未进入时无意义。
+const draft = ref<string>('')
 
-function onClear() {
-  emit('update:value', '')
+// 弹框打开 / 外部重置时回到默认未修改态。
+watch(() => props.value, () => {
+  editing.value = false
+  draft.value = ''
+})
+
+// 点击 edit icon：进入可输入态。draft 起始为空（露出 placeholder），
+// 语义仍为「不修改」（emit null）。
+function startEdit() {
+  editing.value = true
+  draft.value = ''
+  emit('update:value', null)
+}
+
+// 点击 close icon：退出可输入态，回到未修改（emit null）。
+function cancelEdit() {
+  editing.value = false
+  draft.value = ''
+  emit('update:value', null)
+}
+
+// 输入态下用户键入或清空。真实新值 → emit 新值；clearable 清空 → emit ''。
+function onInput(v: string | null) {
+  draft.value = v ?? ''
+  emit('update:value', v ?? '')
 }
 </script>
 
