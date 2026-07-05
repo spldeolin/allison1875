@@ -50,6 +50,8 @@ export function isVisible(item: ItemDef, mode: FieldMode): boolean {
       return canInputOnInit
 
     case 'edit-update':
+      // secret 字段编辑不可修改时直接隐藏（不做只读展示，且详情接口本就不返回明文）
+      if (item.type === 'secret' && !canInputOnEdit) return false
       // canInputOnEdit=false: field is read-only in edit mode — still show as display-only
       // (frontend shows it but doesn't submit it; backend ignores the field if sent)
       // canInputOnInit=false AND canInputOnEdit=false: completely backend-managed, hide
