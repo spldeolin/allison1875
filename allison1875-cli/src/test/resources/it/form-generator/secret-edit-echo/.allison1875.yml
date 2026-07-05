@@ -1,0 +1,34 @@
+# form-generator edit-pattern-donot integration test config
+domains:
+  - name: secret-edit-echo
+    controllerModule: "."
+    controllerPackage: com.example.controller
+    dtoModule: "."
+    reqDTOPackage: com.example.dto.req
+    respDTOPackage: com.example.dto.resp
+    enumModule: "."
+    enumPackage: com.example.enums
+    serviceModule: "."
+    servicePackage: com.example.service
+    serviceImplModule: "."
+    serviceImplPackage: com.example.service.impl
+    persistenceModule: "."
+    mapperPackage: com.example.mapper
+    entityPackage: com.example.entity
+    designPackage: com.example.design
+    paramDTOPackage: com.example.dto.param
+    recordDTOPackage: com.example.dto.record
+    wholeDTOPackage: com.example.dto
+    mapperXmlDirs:
+      - src/main/resources/mapper
+author: test-author
+enableNoModifyAnnounce: false
+enableJavaxMoveToJakarta: false
+isDataModelWithoutLombok: false
+enableGenerateDesign: true
+isEntityEndWithEntity: true
+dslPath: forms.yml
+codeSnippet:
+  controllerRequestMapping: "/api/v1/${formName}"
+  shortUuidGeneration: "UUID.randomUUID().toString().replaceAll(\"-\", \"\").toLowerCase()"
+  collectionEmptyCheck: "${list} == null || ${list}.isEmpty()"

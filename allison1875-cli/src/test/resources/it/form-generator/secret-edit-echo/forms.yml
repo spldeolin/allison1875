@@ -1,0 +1,18 @@
+- name: Credential
+  title: 凭据
+  desc: 凭据管理
+  items:
+    - type: text
+      name: credName
+      title: 凭据名称
+      isNonVoid: true
+      maxLength: 100
+    - type: secret
+      name: apiKey
+      title: API密钥
+      isNonVoid: true
+    - type: secret
+      name: backupToken
+      title: 备用令牌
+      isNonVoid: false
+  indices: []
