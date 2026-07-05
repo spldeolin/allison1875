@@ -122,7 +122,9 @@
 
 ### secret
 
-无额外字段。列表/搜索时脱敏，详情时明文，编辑时只能重置不能修改。
+无额外字段。列表/搜索时不返回、详情接口不返回明文（安全）。编辑（canInputOnEdit=true）时采用可选覆盖协议：
+EditReqDTO 不带 `@NotEmpty`；提交 `null`=不修改（保留原值）、`""`=清空（isNonVoid=false 存空串，
+isNonVoid=true 抛业务异常）、非空串=覆盖。canInputOnEdit=false 时编辑弹框隐藏该字段。
 
 ### file
 
