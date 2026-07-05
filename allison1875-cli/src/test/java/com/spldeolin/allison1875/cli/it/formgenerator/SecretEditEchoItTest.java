@@ -59,6 +59,9 @@ public class SecretEditEchoItTest extends FormGeneratorItBaseTest {
                 "backupToken (isNonVoid=false) should NOT reject empty string");
         assertTrue(update.contains("credential.setBackupToken(req.getBackupToken())"),
                 "backupToken should be set inside guard");
+        // 普通 text 字段行为不变：无条件 setter（对照，确保未误伤非 secret 字段）
+        assertTrue(update.contains("credential.setCredName(req.getCredName())"),
+                "non-secret text field should keep unconditional setter");
 
         // GetDetail 仍排除 secret（安全要求，回显根因）
         File detailRespFile = new File(basedir,
