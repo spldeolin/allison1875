@@ -63,8 +63,10 @@ public class UpdateApiServiceImpl implements UpdateApiService {
                 FieldDeclaration itemField = parseFieldDeclaration(
                         itemService.getJavaTypeInDTO(item) + " " + item.getName() + ";");
                 JavadocUtils.setJavadoc(itemField, item.getTitle(), null);
-                // 所有 canInputOnEdit 字段直接添加校验注解到 ReqDTO 字段
-                itemService.getJavaValidAnnotations(item).forEach(itemField::addAnnotation);
+                // secret 字段编辑时 null 代表"不修改"，因此不加 @NotEmpty；其余字段照常
+                if (item.getType() != ItemType.SECRET) {
+                    itemService.getJavaValidAnnotations(item).forEach(itemField::addAnnotation);
+                }
                 itemService.getJavaJsonFormatAnnoatation(item).ifPresent(itemField::addAnnotation);
                 reqCoid.addMember(itemField);
             }
