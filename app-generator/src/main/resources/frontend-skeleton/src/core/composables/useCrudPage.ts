@@ -1,4 +1,4 @@
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useMessage } from 'naive-ui'
 import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
@@ -7,6 +7,8 @@ import { endpointOf } from '../protocol/endpoints'
 import { buildListRequest, buildCreateRequest, buildUpdateRequest } from '../protocol/request-builder'
 import type { SortInput } from '../protocol/request-builder'
 import { parseListRow, parseDetailDto } from '../protocol/response-parser'
+import { useRoute, useRouter } from 'vue-router'
+import { serializeSearchToQuery, parseQueryToSearch } from '../protocol/query-sync'
 
 /**
  * @param getSchema - 传入 getter（如 `() => props.schema`），确保路由切换时能读取到最新的 schema
@@ -186,12 +188,61 @@ export function useCrudPage(getSchema: () => FormDef) {
     fetchData()
   }
 
-  onMounted(fetchData)
-  // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据
+  const route = useRoute()
+  const router = useRouter()
+  let syncing = false
+
+  function applyQueryToSearch() {
+    const parsed = parseQueryToSearch(getSchema().items, route.query as Record<string, unknown>)
+    if (Object.keys(parsed).length === 0) return false
+    syncing = true
+    searchParams.value = parsed
+    pagination.page = 1
+    void nextTick(() => { syncing = false })
+    return true
+  }
+
+  function writeSearchToQuery() {
+    if (syncing) return
+    const next = serializeSearchToQuery(getSchema().items, searchParams.value)
+    const cur = route.query
+    const sameKeys = Object.keys(next).length === Object.keys(cur).length
+      && Object.entries(next).every(([k, v]) => cur[k] === v)
+    if (sameKeys) return
+    syncing = true
+    router.replace({ query: next }).catch(() => { /* ignore NavigationDuplicated */ })
+    void nextTick(() => { syncing = false })
+  }
+
+  // 输入 → URL（debounce 300ms）
+  let writeTimer: ReturnType<typeof setTimeout> | null = null
+  watch(searchParams, () => {
+    if (syncing) return
+    if (writeTimer) clearTimeout(writeTimer)
+    writeTimer = setTimeout(writeSearchToQuery, 300)
+  }, { deep: true })
+
+  // URL → 输入（前进/后退/分享链接）
+  watch(() => route.query, () => {
+    if (syncing) return
+    if (applyQueryToSearch()) {
+      fetchData()
+    }
+  })
+
+  // 初始化：优先从 URL query 回填，再 fetchData
+  onMounted(() => {
+    applyQueryToSearch()
+    fetchData()
+  })
+  // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据 + 清 URL query
   watch(() => getSchema().name, () => {
     pagination.page = 1
     searchParams.value = {}
     sortState.value = null
+    syncing = true
+    router.replace({ query: {} }).catch(() => { /* ignore */ })
+    void nextTick(() => { syncing = false })
     fetchData()
   })
 
