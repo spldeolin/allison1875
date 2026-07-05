@@ -97,7 +97,11 @@ public class UpdateApiServiceImpl implements UpdateApiService {
                 continue;
             }
             if (Boolean.TRUE.equals(item.getCanInputOnEdit())) {
-                mutationApiSupport.generateSetterToGetter(form, item, body);
+                if (item.getType() == ItemType.SECRET) {
+                    generateSecretNullSkipSetter(form, item, body);
+                } else {
+                    mutationApiSupport.generateSetterToGetter(form, item, body);
+                }
             }
         }
 
@@ -127,6 +131,25 @@ public class UpdateApiServiceImpl implements UpdateApiService {
 
         // No return statement (void method)
         return body;
+    }
+
+    /**
+     * secret 字段编辑语义：null=不修改(跳过 setter)；""=清空；非空串=覆盖。
+     * isNonVoid=true 时在覆盖分支前拒绝空串。
+     */
+    private void generateSecretNullSkipSetter(FormDef form, ItemDef item, BlockStmt body) {
+        String getter = String.format("req.get%s()", StringUtils.capitalize(item.getName()));
+        String setter = String.format("%s.set%s(%s)", form.getVarName(),
+                StringUtils.capitalize(item.getName()), getter);
+        if (Boolean.TRUE.equals(item.getIsNonVoid())) {
+            body.addStatement(parseStatement(String.format(
+                    "if (%s != null) { if (%s.isEmpty()) { throw new %s(\"%s不能为空\"); } %s; }",
+                    getter, getter, config.getCodeSnippet().getBizExceptionQualifier(),
+                    item.getTitle(), setter)));
+        } else {
+            body.addStatement(parseStatement(String.format(
+                    "if (%s != null) { %s; }", getter, setter)));
+        }
     }
 
 }
