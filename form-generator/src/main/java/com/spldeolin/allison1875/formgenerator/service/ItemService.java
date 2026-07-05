@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.formgenerator.service;
 import java.util.List;
 import java.util.Optional;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.ImplementedBy;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
 import com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern;
@@ -57,14 +56,5 @@ public interface ItemService<I extends ItemDef> {
     Optional<AnnotationExpr> getJavaJsonFormatAnnoatation(I itemDef);
 
     String getTodoValue(I itemDef);
-
-    /**
-     * 生成"如果字段为空则抛出异常"的校验语句，用于条件分支内的延迟校验。
-     * 示例：if (req.getXxx() == null) { throw new IllegalArgumentException("xxx不能为空"); }
-     *
-     * 仅在 isNonVoid==true 且字段处于 (canInputOnInit=true,canInputOnEdit=false) 或
-     * (canInputOnInit=false,canInputOnEdit=true) 组合时调用。
-     */
-    Statement getValidationStatement(I itemDef);
 
 }

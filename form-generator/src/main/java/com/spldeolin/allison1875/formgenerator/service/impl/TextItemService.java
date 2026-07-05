@@ -1,14 +1,11 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.LIKE;
 
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -76,13 +73,6 @@ public class TextItemService implements ItemService<TextItemDef> {
     @Override
     public String getTodoValue(TextItemDef itemDef) {
         return "\"\"";
-    }
-
-    @Override
-    public Statement getValidationStatement(TextItemDef itemDef) {
-        return parseStatement(
-                "if (!StringUtils.hasText(req.get%s())) { throw new IllegalArgumentException(\"%s不能为空\"); }",
-                StringUtils.capitalize(itemDef.getName()), itemDef.getTitle());
     }
 
 }

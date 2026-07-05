@@ -1,16 +1,13 @@
 package com.spldeolin.allison1875.formgenerator.service.impl;
 
 import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseAnnotation;
-import static com.spldeolin.allison1875.common.util.StaticJavaParserUtils.parseStatement;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.DATE_RANGE;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.DATE_TIME_RANGE;
 import static com.spldeolin.allison1875.formgenerator.dsl.enums.FilterPattern.IN;
 
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -79,13 +76,6 @@ public class TimeItemService implements ItemService<TimeItemDef> {
     @Override
     public String getTodoValue(TimeItemDef itemDef) {
         return "LocalDateTime.now()";
-    }
-
-    @Override
-    public Statement getValidationStatement(TimeItemDef itemDef) {
-        return parseStatement(
-                "if (req.get%s() == null) { throw new IllegalArgumentException(\"%s不能为空\"); }",
-                StringUtils.capitalize(itemDef.getName()), itemDef.getTitle());
     }
 
 }

@@ -3,7 +3,6 @@ package com.spldeolin.allison1875.formgenerator.service.impl;
 import java.util.List;
 import java.util.Optional;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.spldeolin.allison1875.formgenerator.dsl.ItemDef;
@@ -86,11 +85,6 @@ public class PrimaryItemServiceImpl implements ItemService<ItemDef> {
     @Override
     public String getTodoValue(ItemDef itemDef) {
         return delegate(itemDef).getTodoValue(itemDef);
-    }
-
-    @Override
-    public Statement getValidationStatement(ItemDef itemDef) {
-        return delegate(itemDef).getValidationStatement(itemDef);
     }
 
     @SuppressWarnings("unchecked")
