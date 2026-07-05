@@ -83,10 +83,19 @@ if (req.getApiKey() != null) {
   仅在其外层包裹 null-skip 与（必要时）非空校验。secret 是 `String` 类型，
   `generateSetterToGetter` 对其无特殊转换分支，可直接复用。
 
-> 注：`SecretItemService.getValidationStatement()` 当前已存在但在生成流程中
-> 无任何调用者。本设计不依赖它；null-skip 块由 UpdateApiServiceImpl 内联生成，
-> 以便精确控制 null 跳过与非空校验的嵌套结构。是否顺带清理该死方法留待实现时判断，
-> 不在本设计范围内强制。
+### 2b. 清理死代码 `getValidationStatement`
+
+`ItemService.getValidationStatement()` 是 save 接口拆分为 create/update 后的遗留
+死代码，生成流程中无任何调用者（仅 `PrimaryItemServiceImpl` 的 delegate 自引用）。
+本设计不复用它——null-skip 块由 `UpdateApiServiceImpl` 内联生成，以便精确控制
+null 跳过与非空校验的嵌套结构。顺带彻底删除：
+
+- 接口声明：`service/ItemService.java`（1 处）
+- 全部实现（10 个）：`PrimaryItemServiceImpl`（含 delegate）、`SelectItemService`、
+  `MultiSelectItemService`、`TextItemService`、`NumberItemService`、`TimeItemService`、
+  `OnOffItemService`、`SecretItemService`、`FileItemService`
+- 删除后清理各实现中因此不再使用的 import（如 `SecretItemService` 的
+  `parseStatement` 静态导入、`StringUtils`、`Statement` 等——逐个实现核实）。
 
 ### 不改动的后端点
 
@@ -177,6 +186,9 @@ handleEdit → getDetail（不含 secret）
 
 后端（form-generator）：
 - `src/main/java/.../service/impl/UpdateApiServiceImpl.java`（改 2 处）
+- `src/main/java/.../service/ItemService.java`（删 `getValidationStatement` 声明）
+- `src/main/java/.../service/impl/{Primary,Select,MultiSelect,Text,Number,Time,OnOff,Secret,File}ItemService*.java`
+  （删 `getValidationStatement` 实现 + 清理相关 import）
 
 前端（app-generator/frontend-skeleton）：
 - `src/main/resources/frontend-skeleton/src/core/protocol/field-policy.ts`
