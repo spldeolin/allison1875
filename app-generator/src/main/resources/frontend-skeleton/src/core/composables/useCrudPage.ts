@@ -194,7 +194,8 @@ export function useCrudPage(getSchema: () => FormDef) {
 
   function applyQueryToSearch() {
     const parsed = parseQueryToSearch(getSchema().items, route.query as Record<string, unknown>)
-    if (Object.keys(parsed).length === 0) return false
+    const hasValue = Object.values(parsed).some(v => v != null && !(Array.isArray(v) && v.length === 0))
+    if (!hasValue) return false
     syncing = true
     searchParams.value = parsed
     pagination.page = 1
