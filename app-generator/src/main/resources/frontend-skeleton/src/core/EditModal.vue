@@ -107,6 +107,7 @@ function handleClose() {
               :item="item"
               :mode="isEditable(item, editMode) ? 'edit' : 'display'"
               :value="localModel[item.name] ?? null"
+              :readonly="!isEditable(item, editMode)"
               @update:value="isEditable(item, editMode) ? updateField(item.name, $event) : undefined"
             />
           </NFormItem>

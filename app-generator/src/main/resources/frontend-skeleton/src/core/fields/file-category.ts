@@ -74,9 +74,51 @@ export function hintOf(category: string | undefined, maxFileSize?: number): stri
 
 export function isPreviewableImage(fileName: string | undefined | null): boolean {
   const ext = extractExt(fileName)
-  return !!ext && ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)
+  return !!ext && EXTENSIONS.image.includes(ext)
 }
 
 export function isPreviewablePdf(fileName: string | undefined | null): boolean {
   return extractExt(fileName) === 'pdf'
+}
+
+/** Text-like extensions the browser can render inline in an <iframe>. */
+const TEXT_EXTENSIONS = ['txt', 'csv', 'md', 'log', 'json', 'xml', 'yaml', 'yml']
+
+/**
+ * How a file should be previewed, decided by its extension (spec: judge by
+ * originFileName, no response-header probing). Drives the preview modal's body.
+ */
+export type PreviewKind = 'image' | 'pdf' | 'text' | 'audio' | 'video' | 'other'
+
+export function previewKindOf(fileName: string | undefined | null): PreviewKind {
+  const ext = extractExt(fileName)
+  if (!ext) return 'other'
+  if (EXTENSIONS.image.includes(ext)) return 'image'
+  if (ext === 'pdf') return 'pdf'
+  if (TEXT_EXTENSIONS.includes(ext)) return 'text'
+  if (EXTENSIONS.audio.includes(ext)) return 'audio'
+  if (EXTENSIONS.video.includes(ext)) return 'video'
+  return 'other'
+}
+
+/**
+ * Normalized category key, always one of the six FileCategoryEnum codes.
+ * Used to pick a category icon in the component.
+ */
+export type CategoryKey = 'image' | 'document' | 'archive' | 'audio' | 'video' | 'general'
+
+export function categoryKeyOf(category: string | undefined): CategoryKey {
+  const cat = (category || 'general') as CategoryKey
+  return cat in CATEGORY_TITLES ? cat : 'general'
+}
+
+export function categoryTitleOf(category: string | undefined): string {
+  return CATEGORY_TITLES[categoryKeyOf(category)]
+}
+
+/** Concise accepted-formats summary for the dragger hint (general → 常见格式). */
+export function acceptSummaryOf(category: string | undefined): string {
+  const cat = categoryKeyOf(category)
+  if (cat === 'general') return '常见文件格式'
+  return (EXTENSIONS[cat] || []).join(' / ')
 }

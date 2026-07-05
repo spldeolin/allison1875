@@ -1,24 +1,49 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, h, onBeforeUnmount } from 'vue'
 import {
+  NUpload,
   NUploadDragger,
-  NButton,
   NIcon,
   NModal,
   NImage,
   NSpin,
+  NButton,
+  NText,
   useMessage,
+  type UploadFileInfo,
   type UploadCustomRequestOptions,
 } from 'naive-ui'
-import { DocumentTextOutline, EyeOutline, TrashOutline, CloudUploadOutline } from '@vicons/ionicons5'
+import {
+  ImageOutline,
+  DocumentTextOutline,
+  ArchiveOutline,
+  MusicalNotesOutline,
+  VideocamOutline,
+  DocumentOutline,
+  CloudUploadOutline,
+  DownloadOutline,
+  EyeOutline,
+} from '@vicons/ionicons5'
+import type { Component } from 'vue'
 import type { FileItemDef, FileValue } from '@/schema/types'
-import { acceptOf, hintOf, isExtensionAllowed, isPreviewableImage, isPreviewablePdf } from './file-category'
+import {
+  acceptOf,
+  acceptSummaryOf,
+  categoryKeyOf,
+  categoryTitleOf,
+  isExtensionAllowed,
+  previewKindOf,
+  type CategoryKey,
+  type PreviewKind,
+} from './file-category'
 import { uploadFile, fetchDownloadToken, downloadUrlOf } from '@/core/protocol/file-api'
 
 const props = defineProps<{
   item: FileItemDef
   mode: 'search' | 'edit' | 'display'
   value: FileValue | string | null
+  /** Read-only field inside an edit modal (mode is 'display' but shown richly, not editable). */
+  readonly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -27,175 +52,350 @@ const emit = defineEmits<{
 
 const message = useMessage()
 
+const categoryKey = computed<CategoryKey>(() => categoryKeyOf(props.item.category))
 const accept = computed(() => acceptOf(props.item.category))
-const hint = computed(() => hintOf(props.item.category, props.item.maxFileSize))
+const isImageCategory = computed(() => categoryKey.value === 'image')
 
-// Normalize incoming value (string from merged column, or FileValue object) to FileValue
+// Per-category icon for the empty dragger and the (non-image) file-list rows.
+const CATEGORY_ICONS: Record<CategoryKey, Component> = {
+  image: ImageOutline,
+  document: DocumentTextOutline,
+  archive: ArchiveOutline,
+  audio: MusicalNotesOutline,
+  video: VideocamOutline,
+  general: DocumentOutline,
+}
+const categoryIcon = computed(() => CATEGORY_ICONS[categoryKey.value])
+
+// Normalize the incoming value (merged "fileKey/originFileName" string, or FileValue) to FileValue.
 const fileValue = computed<FileValue | null>(() => {
   const v = props.value
   if (!v) return null
   if (typeof v === 'string') {
-    const bar = v.indexOf('/')
-    if (bar < 0) return null
-    return { fileKey: v.substring(0, bar), originFileName: v.substring(bar + 1) }
+    const slash = v.indexOf('/')
+    if (slash < 0) return null
+    return { fileKey: v.substring(0, slash), originFileName: v.substring(slash + 1) }
   }
   return v
 })
 
-const previewVisible = ref(false)
-const previewLoading = ref(false)
-const previewToken = ref('')
-const isImage = computed(() => isPreviewableImage(fileValue.value?.originFileName))
-const isPdf = computed(() => isPreviewablePdf(fileValue.value?.originFileName))
-const downloadUrl = computed(() => (previewToken.value ? downloadUrlOf(previewToken.value) : ''))
+// ----- naive-ui controlled file list (its native rendering is our source of display truth) -----
+const fileList = ref<UploadFileInfo[]>([])
 
-async function handleUpload({ file }: UploadCustomRequestOptions) {
+function toFileList(fv: FileValue | null): UploadFileInfo[] {
+  if (!fv) return []
+  return [{ id: fv.fileKey, name: fv.originFileName, status: 'finished' as const }]
+}
+
+watch(fileValue, (fv) => { fileList.value = toFileList(fv) }, { immediate: true })
+
+// Object URLs created for fresh-upload thumbnails; revoked on unmount to avoid leaks.
+const objectUrls: string[] = []
+onBeforeUnmount(() => objectUrls.forEach((u) => URL.revokeObjectURL(u)))
+
+// Resolve an image thumbnail: fresh uploads use the local blob; loaded records fetch a signed token.
+async function createThumbnailUrl(file: File | null, fileInfo: UploadFileInfo): Promise<string> {
+  if (file) {
+    const url = URL.createObjectURL(file)
+    objectUrls.push(url)
+    return url
+  }
+  try {
+    const token = await fetchDownloadToken(fileInfo.id)
+    return downloadUrlOf(token)
+  } catch {
+    return ''
+  }
+}
+
+// ----- upload (two-step): validate accept + size, then POST, then emit FileValue -----
+async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOptions) {
   const raw = file.file
-  if (!raw) return
+  if (!raw) {
+    onError()
+    return
+  }
   if (!isExtensionAllowed(props.item.category, raw.name)) {
     message.error('文件扩展名不被允许')
+    onError()
     return
   }
   if (props.item.maxFileSize && raw.size > props.item.maxFileSize * 1024 * 1024) {
     message.error(`文件大小超过 ${props.item.maxFileSize}MB`)
+    onError()
     return
   }
   try {
     const result = await uploadFile(raw, props.item.category || 'general')
     emit('update:value', result)
+    onFinish()
     message.success('上传成功')
   } catch {
     message.error('上传失败')
+    onError()
   }
 }
 
-function removeFile() {
+function handleRemove(): boolean {
   emit('update:value', null)
+  return true
 }
 
+// ----- preview modal (naive-ui has no inline media player, so an adaptive modal is used) -----
+const previewVisible = ref(false)
+const previewLoading = ref(false)
+const previewToken = ref('')
+const previewName = computed(() => fileValue.value?.originFileName ?? '')
+const previewKind = computed<PreviewKind>(() => previewKindOf(previewName.value))
+const previewUrl = computed(() => (previewToken.value ? downloadUrlOf(previewToken.value) : ''))
+
+// Whether the current file can be previewed inline. Non-previewable rows expose no
+// preview affordance and ignore preview clicks (download stays available).
+const isPreviewable = computed(() => !!fileValue.value && previewKindOf(fileValue.value.originFileName) !== 'other')
+
+// Modal sizing per kind: images hug their content (capped), documents/video get wide, media stays compact.
+const previewModalStyle = computed(() => {
+  switch (previewKind.value) {
+    case 'image':
+      return { width: 'fit-content', maxWidth: 'min(90vw, 640px)' }
+    case 'audio':
+      return { width: '460px', maxWidth: '92vw' }
+    default:
+      return { width: '820px', maxWidth: '92vw' }
+  }
+})
+
 async function openPreview() {
-  if (!fileValue.value) return
+  if (!fileValue.value || !isPreviewable.value) return
   previewVisible.value = true
   previewLoading.value = true
+  previewToken.value = ''
   try {
     previewToken.value = await fetchDownloadToken(fileValue.value.fileKey)
   } catch {
-    message.error('获取下载令牌失败')
+    message.error('获取预览令牌失败')
     previewVisible.value = false
   } finally {
     previewLoading.value = false
   }
 }
+
+// naive-ui's own download would use file.url (null here); suppress it and download via a signed token.
+async function handleDownload(): Promise<boolean> {
+  if (!fileValue.value) return false
+  try {
+    const token = await fetchDownloadToken(fileValue.value.fileKey)
+    const a = document.createElement('a')
+    a.href = downloadUrlOf(token)
+    a.download = fileValue.value.originFileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  } catch {
+    message.error('下载失败')
+  }
+  return false
+}
+
+const listType = computed(() => (isImageCategory.value ? 'image' : 'text'))
+const renderCategoryIcon = () => h(NIcon, null, { default: () => h(categoryIcon.value) })
 </script>
 
 <template>
-  <!-- display mode (table / detail / read-only edit) -->
-  <span v-if="mode === 'display'" class="file-field-display">
+  <!-- Compact display (table cell): icon + filename + preview eye, read-only -->
+  <span v-if="mode === 'display' && !readonly" class="file-display">
     <template v-if="fileValue">
-      <NIcon size="16" class="file-icon"><DocumentTextOutline /></NIcon>
-      <span class="file-name" :title="fileValue.originFileName">{{ fileValue.originFileName }}</span>
-      <NButton text @click="openPreview">
+      <NIcon size="16" class="file-display__icon"><component :is="categoryIcon" /></NIcon>
+      <span class="file-display__name" :title="fileValue.originFileName">{{ fileValue.originFileName }}</span>
+      <NButton v-if="isPreviewable" text type="primary" @click="openPreview">
         <template #icon><NIcon><EyeOutline /></NIcon></template>
       </NButton>
     </template>
-    <span v-else>-</span>
+    <span v-else class="file-display__empty">-</span>
   </span>
 
-  <!-- edit mode -->
-  <div v-else class="file-field-edit">
-    <!-- not uploaded yet -->
-    <NUploadDragger
-      v-if="!fileValue"
-      :accept="accept"
-      :show-file-list="false"
-      :custom-request="handleUpload"
-    >
-      <div class="upload-area">
-        <NIcon size="28" class="upload-icon"><CloudUploadOutline /></NIcon>
-        <div class="upload-title">点击或拖拽文件到此上传</div>
-        <div class="upload-hint">{{ hint }}</div>
-      </div>
-    </NUploadDragger>
-
-    <!-- uploaded -->
-    <div v-else class="file-card">
-      <NIcon size="20" class="file-icon"><DocumentTextOutline /></NIcon>
-      <span class="file-name" :title="fileValue.originFileName">{{ fileValue.originFileName }}</span>
-      <NButton text @click="openPreview">
-        <template #icon><NIcon><EyeOutline /></NIcon></template>
-      </NButton>
-      <NButton text @click="removeFile">
-        <template #icon><NIcon><TrashOutline /></NIcon></template>
-      </NButton>
-    </div>
+  <!-- Read-only inside an edit modal: native (disabled) upload keeps preview/download, hides remove -->
+  <div v-else-if="readonly" class="file-readonly">
+    <NUpload
+      v-if="fileValue"
+      :file-list="fileList"
+      :list-type="listType"
+      :render-icon="renderCategoryIcon"
+      :create-thumbnail-url="createThumbnailUrl"
+      :show-remove-button="false"
+      :show-download-button="true"
+      :show-preview-button="isPreviewable"
+      disabled
+      @preview="openPreview"
+      @download="handleDownload"
+    />
+    <NText v-else depth="3">未上传文件</NText>
   </div>
 
-  <!-- preview modal -->
-  <NModal v-model:show="previewVisible" preset="card" :title="fileValue?.originFileName" style="width: 720px">
-    <div v-if="previewLoading" class="preview-loading">
+  <!-- Editable: native dragger (empty) → native file card with preview/download/clear (uploaded) -->
+  <NUpload
+    v-else
+    v-model:file-list="fileList"
+    :accept="accept"
+    :max="1"
+    :list-type="listType"
+    :render-icon="renderCategoryIcon"
+    :create-thumbnail-url="createThumbnailUrl"
+    :custom-request="handleUpload"
+    :show-download-button="true"
+    :show-preview-button="isPreviewable"
+    @preview="openPreview"
+    @download="handleDownload"
+    @remove="handleRemove"
+  >
+    <NUploadDragger>
+      <div class="file-dragger">
+        <NIcon :size="34" :depth="3" class="file-dragger__icon"><CloudUploadOutline /></NIcon>
+        <div class="file-dragger__title">点击或拖拽文件到此处上传</div>
+        <div class="file-dragger__hint">
+          <span class="file-dragger__category">
+            <NIcon size="13"><component :is="categoryIcon" /></NIcon>
+            {{ categoryTitleOf(props.item.category) }}
+          </span>
+          <span class="file-dragger__accept">{{ acceptSummaryOf(props.item.category) }}</span>
+          <span v-if="props.item.maxFileSize" class="file-dragger__size">
+            单文件 ≤ {{ props.item.maxFileSize }}MB
+          </span>
+        </div>
+      </div>
+    </NUploadDragger>
+  </NUpload>
+
+  <!-- Adaptive preview modal: image / pdf / text / audio / video / download-only -->
+  <NModal
+    v-model:show="previewVisible"
+    preset="card"
+    :title="previewName"
+    class="file-preview-modal"
+    :style="previewModalStyle"
+    :bordered="false"
+  >
+    <div v-if="previewLoading" class="file-preview__loading">
       <NSpin />
     </div>
-    <div v-else-if="previewToken" class="preview-content">
-      <NImage v-if="isImage" :src="downloadUrl" object-fit="contain" style="max-width: 100%" />
-      <iframe v-else-if="isPdf" :src="downloadUrl" class="preview-iframe" />
-      <div v-else class="preview-fallback">
-        <NButton tag="a" :href="downloadUrl" target="_blank">下载</NButton>
+    <div v-else-if="previewUrl" class="file-preview__body">
+      <NImage
+        v-if="previewKind === 'image'"
+        :src="previewUrl"
+        object-fit="contain"
+        class="file-preview__image"
+      />
+      <iframe
+        v-else-if="previewKind === 'pdf' || previewKind === 'text'"
+        :src="previewUrl"
+        class="file-preview__iframe"
+      />
+      <audio v-else-if="previewKind === 'audio'" :src="previewUrl" controls class="file-preview__audio" />
+      <video v-else-if="previewKind === 'video'" :src="previewUrl" controls class="file-preview__video" />
+      <div v-else class="file-preview__fallback">
+        <NIcon :size="40" :depth="3"><DocumentOutline /></NIcon>
+        <NText depth="3">该文件类型不支持在线预览</NText>
+        <NButton tag="a" :href="previewUrl" target="_blank" type="primary">
+          <template #icon><NIcon><DownloadOutline /></NIcon></template>
+          下载查看
+        </NButton>
       </div>
     </div>
   </NModal>
 </template>
 
 <style scoped>
-.file-field-display {
+/* Compact table-cell display */
+.file-display {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
-.file-field-edit .file-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border: 1px solid var(--n-border-color, #e0e0e6);
-  border-radius: 4px;
-}
-.file-icon {
-  color: var(--n-icon-color, #909399);
+.file-display__icon {
+  color: var(--n-text-color-3, #909399);
   flex-shrink: 0;
 }
-.file-name {
-  max-width: 200px;
+.file-display__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.upload-area {
-  padding: 16px;
-  text-align: center;
+.file-display__empty {
+  color: #cbd5e1;
 }
-.upload-icon {
-  color: #909399;
+
+/* Read-only inside modal */
+.file-readonly {
+  width: 100%;
 }
-.upload-title {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #303133;
+
+/* Empty dragger — compact footprint, still roomy enough for the type/size hints */
+.file-dragger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
 }
-.upload-hint {
-  margin-top: 4px;
+.file-dragger__icon {
+  line-height: 1;
+}
+.file-dragger__title {
+  font-size: 13px;
+  color: var(--n-text-color-2, #333639);
+}
+.file-dragger__hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px 10px;
   font-size: 12px;
-  color: #909399;
+  color: var(--n-text-color-3, #909399);
 }
-.preview-loading,
-.preview-fallback {
+.file-dragger__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.file-dragger__accept {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Preview modal (width comes from the per-kind inline style binding) */
+.file-preview__loading,
+.file-preview__fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 220px;
+}
+.file-preview__body {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 200px;
 }
-.preview-iframe {
+.file-preview__image {
+  max-width: 100%;
+  max-height: 70vh;
+}
+.file-preview__iframe {
   width: 100%;
-  height: 70vh;
+  height: 72vh;
   border: none;
+}
+.file-preview__audio {
+  width: 100%;
+  margin: 40px 0;
+}
+.file-preview__video {
+  max-width: 100%;
+  max-height: 72vh;
 }
 </style>
