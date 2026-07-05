@@ -59,19 +59,30 @@ function onInput(v: string | null) {
     <span>***</span>
   </template>
   <template v-else-if="mode === 'edit' && isEditUpdate">
-    <NSpace align="center" :wrap="false" style="width: 100%">
-      <NInput
-        type="password"
-        :value="value"
-        show-password-on="click"
-        placeholder="••••••"
-        style="flex: 1"
-        @update:value="emit('update:value', $event)"
-      />
-      <NButton v-if="showClearButton" quaternary size="small" @click="onClear">
-        清空
-      </NButton>
-    </NSpace>
+    <NInput
+      :type="editing ? 'password' : 'text'"
+      :value="editing ? draft : '••••••'"
+      :readonly="!editing"
+      :clearable="editing && item.isNonVoid === false"
+      :show-password-on="editing && draft ? 'click' : undefined"
+      :placeholder="editing ? '请输入' : ''"
+      @update:value="onInput"
+    >
+      <template #suffix>
+        <NIcon
+          v-if="!editing"
+          class="secret-edit-trigger"
+          :component="CreateOutline"
+          @click="startEdit"
+        />
+        <NIcon
+          v-else
+          class="secret-edit-cancel"
+          :component="CloseOutline"
+          @click="cancelEdit"
+        />
+      </template>
+    </NInput>
   </template>
   <template v-else-if="mode === 'edit'">
     <NInput
