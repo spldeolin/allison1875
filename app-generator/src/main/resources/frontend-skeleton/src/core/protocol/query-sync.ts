@@ -8,8 +8,10 @@ type Query = Record<string, string>
 
 /**
  * Serialize search form state into a flat URL query object.
- * - text/number/select → string (omitted when null/empty/blank)
+ * - text/select → string (omitted when null/empty/blank)
+ * - number → string (omitted when null/empty/blank/NaN)
  * - multiSelect → comma-joined (omitted when empty)
+ * - onOff → 'true'/'false' (omitted when null)
  * - time → split into {name}Start / {name}End (omitted when missing)
  * - createdAtStart/createdAtEnd range → kept as-is when both present
  */
@@ -26,10 +28,14 @@ export function serializeSearchToQuery(
         if (v != null && v !== '') out[item.name] = String(v)
         break
       case 'number':
-        if (v != null && v !== '') out[item.name] = String(v)
+        // NaN guard: don't write the literal "NaN" into the URL
+        if (v != null && v !== '' && !Number.isNaN(v as number)) out[item.name] = String(v)
         break
       case 'multiSelect':
         if (Array.isArray(v) && v.length > 0) out[item.name] = v.join(',')
+        break
+      case 'onOff':
+        if (v != null) out[item.name] = String(v)
         break
       case 'time': {
         if (Array.isArray(v) && v.length === 2) {
@@ -70,20 +76,27 @@ export function parseQueryToSearch(
       case 'text':
       case 'select': {
         const raw = query[item.name]
-        if (raw != null) out[item.name] = raw !== '' ? String(raw) : null
+        out[item.name] = raw != null && raw !== '' ? String(raw) : null
         break
       }
       case 'number': {
         const raw = query[item.name]
-        if (raw != null) {
+        if (raw != null && raw !== '') {
           const n = Number(raw)
           out[item.name] = Number.isNaN(n) ? null : n
+        } else {
+          out[item.name] = null
         }
         break
       }
       case 'multiSelect': {
         const raw = query[item.name]
-        if (raw != null) out[item.name] = raw !== '' ? String(raw).split(',') : null
+        out[item.name] = raw != null && raw !== '' ? String(raw).split(',') : null
+        break
+      }
+      case 'onOff': {
+        const raw = query[item.name]
+        out[item.name] = raw === 'true' ? true : raw === 'false' ? false : null
         break
       }
       case 'time': {
@@ -91,6 +104,8 @@ export function parseQueryToSearch(
         const end = query[`${item.name}End`]
         if ((start != null && start !== '') || (end != null && end !== '')) {
           out[item.name] = [start != null && start !== '' ? String(start) : '', end != null && end !== '' ? String(end) : '']
+        } else {
+          out[item.name] = null
         }
         break
       }

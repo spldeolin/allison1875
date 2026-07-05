@@ -17,22 +17,27 @@ function multiSelectItem(name: string): ItemDef {
 function timeItem(name: string): ItemDef {
   return { name, title: name, type: 'time', isNonVoid: true, format: 'dateTime' } as unknown as ItemDef
 }
+function onOffItem(name: string): ItemDef {
+  return { name, title: name, type: 'onOff', isNonVoid: true } as unknown as ItemDef
+}
 
 const items: ItemDef[] = [
   textItem('name'),
   numberItem('age'),
   selectItem('status'),
   multiSelectItem('tags'),
+  onOffItem('enabled'),
   timeItem('createdAt'),
 ]
 
 describe('serializeSearchToQuery', () => {
-  it('serializes text/number/select/multiSelect/time', () => {
+  it('serializes text/number/select/multiSelect/onOff/time', () => {
     const formState = {
       name: 'foo',
       age: 30,
       status: 'ACTIVE',
       tags: ['a', 'b'],
+      enabled: true,
       createdAt: ['2026-07-05 00:00:00', '2026-07-05 23:59:59'],
     }
     expect(serializeSearchToQuery(items, formState)).toEqual({
@@ -40,14 +45,20 @@ describe('serializeSearchToQuery', () => {
       age: '30',
       status: 'ACTIVE',
       tags: 'a,b',
+      enabled: 'true',
       createdAtStart: '2026-07-05 00:00:00',
       createdAtEnd: '2026-07-05 23:59:59',
     })
   })
 
   it('omits null/empty/blank values', () => {
-    const formState = { name: '', age: null, status: undefined, tags: [], createdAt: null }
+    const formState = { name: '', age: null, status: undefined, tags: [], enabled: null, createdAt: null }
     expect(serializeSearchToQuery(items, formState)).toEqual({})
+  })
+
+  it('serializes onOff false as "false" and parses it back', () => {
+    expect(serializeSearchToQuery(items, { enabled: false })).toEqual({ enabled: 'false' })
+    expect(parseQueryToSearch(items, { enabled: 'false' }).enabled).toBe(false)
   })
 
   it('serializes createdAtStart/createdAtEnd range', () => {
@@ -68,12 +79,13 @@ describe('serializeSearchToQuery', () => {
 })
 
 describe('parseQueryToSearch', () => {
-  it('parses text/number/select/multiSelect/time', () => {
+  it('parses text/number/select/multiSelect/onOff/time', () => {
     const query = {
       name: 'foo',
       age: '30',
       status: 'ACTIVE',
       tags: 'a,b',
+      enabled: 'true',
       createdAtStart: '2026-07-05 00:00:00',
       createdAtEnd: '2026-07-05 23:59:59',
     }
@@ -83,6 +95,7 @@ describe('parseQueryToSearch', () => {
       age: 30,
       status: 'ACTIVE',
       tags: ['a', 'b'],
+      enabled: true,
       createdAt: ['2026-07-05 00:00:00', '2026-07-05 23:59:59'],
       createdAtStart: '2026-07-05 00:00:00',
       createdAtEnd: '2026-07-05 23:59:59',
@@ -94,21 +107,44 @@ describe('parseQueryToSearch', () => {
     expect(typeof result._createdAtRange[1]).toBe('number')
   })
 
-  it('returns empty object for empty query', () => {
-    expect(parseQueryToSearch(items, {})).toEqual({})
-  })
-
-  it('treats NaN number as null', () => {
-    expect(parseQueryToSearch(items, { age: 'abc' })).toEqual({ age: null })
-  })
-
-  it('parses partial time range as tuple with empty slot', () => {
-    expect(parseQueryToSearch(items, { createdAtStart: '2026-07-05 00:00:00' })).toEqual({
-      createdAt: ['2026-07-05 00:00:00', ''],
+  it('returns null for each searchable field on empty query', () => {
+    expect(parseQueryToSearch(items, {})).toEqual({
+      name: null,
+      age: null,
+      status: null,
+      tags: null,
+      enabled: null,
+      createdAt: null,
     })
   })
 
+  it('treats NaN number as null', () => {
+    const result = parseQueryToSearch(items, { age: 'abc' })
+    expect(result.age).toBe(null)
+  })
+
+  it('parses partial time range as tuple with empty slot', () => {
+    const result = parseQueryToSearch(items, { createdAtStart: '2026-07-05 00:00:00' })
+    expect(result.createdAt).toEqual(['2026-07-05 00:00:00', ''])
+  })
+
   it('ignores query keys not in schema', () => {
-    expect(parseQueryToSearch(items, { unknownField: 'x' })).toEqual({})
+    const result = parseQueryToSearch(items, { unknownField: 'x' })
+    expect(result.unknownField).toBeUndefined()
+    expect(result.name).toBe(null)
+  })
+
+  it('serialize and parse are inverses for representative state', () => {
+    const formState = {
+      name: 'foo',
+      age: 30,
+      status: 'ACTIVE',
+      tags: ['a', 'b'],
+      enabled: true,
+      createdAt: ['2026-07-05 00:00:00', '2026-07-05 23:59:59'],
+    }
+    const query = serializeSearchToQuery(items, formState)
+    const parsed = parseQueryToSearch(items, query)
+    expect(parsed).toMatchObject(formState)
   })
 })
