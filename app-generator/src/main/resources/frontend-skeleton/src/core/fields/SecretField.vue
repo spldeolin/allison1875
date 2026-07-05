@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { NInput, NButton, NSpace } from 'naive-ui'
+import { computed, ref, watch } from 'vue'
+import { NInput, NIcon } from 'naive-ui'
+import { CreateOutline, CloseOutline } from '@vicons/ionicons5'
 import type { SecretItemDef } from '@/schema/types'
 
 const props = defineProps<{
