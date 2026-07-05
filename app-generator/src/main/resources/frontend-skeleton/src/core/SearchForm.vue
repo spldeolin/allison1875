@@ -74,12 +74,17 @@ function handleReset() {
     <div ref="scrollRef" class="search-form-scroll" :class="{ 'is-expanded': expanded }">
       <NForm inline label-placement="left" style="flex-wrap: wrap; gap: 0 16px;">
         <NFormItem v-for="item in searchableItems" :key="item.name" :label="item.title">
-          <FieldRenderer
-            :item="item"
-            mode="search"
-            :value="modelValue[item.name] ?? null"
-            @update:value="updateField(item.name, $event)"
-          />
+          <div
+            :class="{ 'search-enter-wrap': ['text', 'number', 'time'].includes(item.type) }"
+            @keyup.enter="['text', 'number', 'time'].includes(item.type) ? emit('search') : undefined"
+          >
+            <FieldRenderer
+              :item="item"
+              mode="search"
+              :value="modelValue[item.name] ?? null"
+              @update:value="updateField(item.name, $event)"
+            />
+          </div>
         </NFormItem>
         <NFormItem label="创建时间">
           <NDatePicker
@@ -128,5 +133,9 @@ function handleReset() {
   gap: 12px;
   border-top: 1px solid #f1f5f9;
   padding-top: 12px;
+}
+
+.search-enter-wrap {
+  display: contents;
 }
 </style>
