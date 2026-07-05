@@ -17,6 +17,8 @@ const props = defineProps<{
   value: any
   /** In an edit modal, a visible-but-not-editable field is read-only (file field renders a distinct style). */
   readonly?: boolean
+  /** 弹框场景（create/update），仅 secret 字段消费以区分渲染。 */
+  editMode?: 'edit-create' | 'edit-update'
 }>()
 
 const emit = defineEmits<{
@@ -38,7 +40,11 @@ const currentComponent = computed(() => componentMap[props.item.type])
 
 // Only FileField consumes `readonly`; binding it to other (fragment-root) field
 // components would trigger Vue's extraneous-attribute warning.
-const extraProps = computed(() => (props.item.type === 'file' ? { readonly: props.readonly } : {}))
+const extraProps = computed(() => {
+  if (props.item.type === 'file') return { readonly: props.readonly }
+  if (props.item.type === 'secret') return { editMode: props.editMode }
+  return {}
+})
 </script>
 
 <template>
