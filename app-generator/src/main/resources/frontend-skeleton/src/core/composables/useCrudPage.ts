@@ -1,4 +1,4 @@
-import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useMessage } from 'naive-ui'
 import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
@@ -211,7 +211,12 @@ export function useCrudPage(getSchema: () => FormDef) {
       && Object.entries(next).every(([k, v]) => cur[k] === v)
     if (sameKeys) return
     syncing = true
-    router.replace({ query: next }).catch(() => { /* ignore NavigationDuplicated */ })
+    router.replace({ query: next }).catch((err: unknown) => {
+      const name = (err as { name?: string } | null)?.name
+      if (name !== 'NavigationDuplicated' && name !== 'NavigationFailure') {
+        console.warn('[useCrudPage] router.replace failed', err)
+      }
+    })
     void nextTick(() => { syncing = false })
   }
 
@@ -222,6 +227,29 @@ export function useCrudPage(getSchema: () => FormDef) {
     if (writeTimer) clearTimeout(writeTimer)
     writeTimer = setTimeout(writeSearchToQuery, 300)
   }, { deep: true })
+
+  onBeforeUnmount(() => {
+    if (writeTimer) {
+      clearTimeout(writeTimer)
+      writeTimer = null
+    }
+  })
+
+  // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据 + 清 URL query
+  watch(() => getSchema().name, () => {
+    pagination.page = 1
+    searchParams.value = {}
+    sortState.value = null
+    syncing = true
+    router.replace({ query: {} }).catch((err: unknown) => {
+      const name = (err as { name?: string } | null)?.name
+      if (name !== 'NavigationDuplicated' && name !== 'NavigationFailure') {
+        console.warn('[useCrudPage] router.replace failed', err)
+      }
+    })
+    void nextTick(() => { syncing = false })
+    fetchData()
+  })
 
   // URL → 输入（前进/后退/分享链接）
   watch(() => route.query, () => {
@@ -234,16 +262,6 @@ export function useCrudPage(getSchema: () => FormDef) {
   // 初始化：优先从 URL query 回填，再 fetchData
   onMounted(() => {
     applyQueryToSearch()
-    fetchData()
-  })
-  // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据 + 清 URL query
-  watch(() => getSchema().name, () => {
-    pagination.page = 1
-    searchParams.value = {}
-    sortState.value = null
-    syncing = true
-    router.replace({ query: {} }).catch(() => { /* ignore */ })
-    void nextTick(() => { syncing = false })
     fetchData()
   })
 
