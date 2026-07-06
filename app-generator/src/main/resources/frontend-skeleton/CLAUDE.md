@@ -82,6 +82,29 @@
 
 `protocol/request-builder.ts` 的 `buildUpdateRequest` 用 `v ?? null` 原样传三态，无需为 secret 特判。`response-parser.ts` 对 secret 是 no-op passthrough，detail 无该键时 `formData[name]` 为 `undefined`，模板 `?? null` 归一为 `null`。
 
+## 筛选与校验交互约定
+
+### 校验失败聚焦
+
+`EditModal.handleSubmit` 在 `NForm.validate()` reject 时，按 `visibleItems` 顺序找到第一个出错的可编辑字段，通过 DOM 查询其内部 `input` / `[tabindex]` 元素并 `.focus()`。Naive UI 的 `validate()` reject 值是 `ValidateError[][]`，`focusFirstError` 展平后按 `.field`（等于 `:path`，即 `item.name`）匹配；带 `.n-form-item-feedback--error` 类的 DOM 兜底。覆盖 EditModal 时若改提交逻辑需保留此行为。
+
+### 回车查询
+
+`SearchForm` 对 `text`/`number`/`time` 类型的 search 字段绑定 `@keyup.enter` 触发 search 事件；`select`/`multiSelect` 不绑定（避免与下拉选中冲突）。新增 search 字段类型时需评估是否纳入回车。
+
+### URL query 双向同步
+
+`useCrudPage` 双向同步 `searchParams` 与 `route.query`（hash 模式下 query 在 `#` 之后）：
+
+- 输入 → URL：debounce 300ms，`router.replace` 不污染浏览器历史
+- URL → 输入：前进/后退/分享链接变化时回填 `searchParams` 并自动 `fetchData`
+- 初始化：`onMounted` 从 `route.query` 回填后查询
+- 路由切换：清空 `searchParams` 并 `router.replace({ query: {} })`
+
+key 命名：字段名直用（`?name=foo&status=ACTIVE`），时间用 `{name}Start`/`{name}End` 与 `createdAtStart`/`createdAtEnd`，`multiSelect` 逗号分隔，`onOff` 用 `true`/`false`。序列化逻辑在 `protocol/query-sync.ts`（纯函数，已单测）。
+
+**覆盖页若不使用 `useCrudPage` 则不获得此能力**，需自行实现。
+
 ## 功能权限体系
 
 ### 权限数据来源
