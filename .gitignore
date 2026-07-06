@@ -39,3 +39,6 @@ build/
 .DS_Store
 
 output/
+
+### Backend Skeleton (Maven) ###
+app-generator/src/main/resources/backend-skeleton/target/

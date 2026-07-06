@@ -1,0 +1,22 @@
+target/
+*.class
+*.jar
+*.war
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.classpath
+.project
+.settings/
+.springBeans
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
