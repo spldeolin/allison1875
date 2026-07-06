@@ -23,15 +23,16 @@ import {
   CloudUploadOutline,
   DownloadOutline,
   EyeOutline,
+  CloseOutline,
 } from '@vicons/ionicons5'
 import type { Component } from 'vue'
 import type { FileItemDef, FileValue } from '@/schema/types'
 import {
   acceptOf,
-  acceptSummaryOf,
   categoryKeyOf,
-  categoryTitleOf,
+  filledHintOf,
   isExtensionAllowed,
+  isPreviewableImage,
   previewKindOf,
   type CategoryKey,
   type PreviewKind,
@@ -78,6 +79,17 @@ const fileValue = computed<FileValue | null>(() => {
   }
   return v
 })
+
+// 填充态图片缩略图 URL（新上传走 blob，已落库走下载令牌）。
+// :show-file-list=false 关闭了 naive-ui 原生缩略图渲染，图片类需自渲染。
+const thumbUrl = ref('')
+watch(fileValue, async (fv) => {
+  if (!fv || !isImageCategory.value) {
+    thumbUrl.value = ''
+    return
+  }
+  thumbUrl.value = await createThumbnailUrl(null, { id: fv.fileKey } as UploadFileInfo)
+}, { immediate: true })
 
 // ----- naive-ui controlled file list (its native rendering is our source of display truth) -----
 const fileList = ref<UploadFileInfo[]>([])
@@ -128,6 +140,9 @@ async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOpti
   try {
     const result = await uploadFile(raw, props.item.category || 'general')
     emit('update:value', result)
+    // :show-file-list=false 下 naive-ui 仍会追加临时 uploading 条目；
+    // 显式重置为最终值，避免 fileList 残留脏数据。
+    fileList.value = toFileList(result)
     onFinish()
     message.success('上传成功')
   } catch {
@@ -139,6 +154,11 @@ async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOpti
 function handleRemove(): boolean {
   emit('update:value', null)
   return true
+}
+
+// 填充态按钮位于 NUploadDragger 内部，点击必须阻止冒泡，否则触发文件选择对话框。
+function stopProp(e: Event) {
+  e.stopPropagation()
 }
 
 // ----- preview modal (naive-ui has no inline media player, so an adaptive modal is used) -----
@@ -214,30 +234,37 @@ const renderCategoryIcon = () => h(NIcon, null, { default: () => h(categoryIcon.
     <span v-else class="file-display__empty">-</span>
   </span>
 
-  <!-- Read-only inside an edit modal: native (disabled) upload keeps preview/download, hides remove -->
+  <!-- Read-only inside an edit modal: self-rendered row (no clear button), preview/download kept -->
   <div v-else-if="readonly" class="file-readonly">
-    <NUpload
-      v-if="fileValue"
-      :file-list="fileList"
-      :list-type="listType"
-      :render-icon="renderCategoryIcon"
-      :create-thumbnail-url="createThumbnailUrl"
-      :show-remove-button="false"
-      :show-download-button="true"
-      :show-preview-button="isPreviewable"
-      disabled
-      @preview="openPreview"
-      @download="handleDownload"
-    />
+    <div v-if="fileValue" class="file-row file-row--readonly">
+      <NImage
+        v-if="isImageCategory && thumbUrl"
+        :src="thumbUrl"
+        object-fit="cover"
+        class="file-row__thumb"
+        :preview-disabled="true"
+      />
+      <NIcon v-else size="20" class="file-row__icon"><component :is="categoryIcon" /></NIcon>
+      <span class="file-row__name" :title="fileValue.originFileName">{{ fileValue.originFileName }}</span>
+      <span class="file-row__hint">{{ filledHintOf(props.item.category, props.item.maxFileSize) }}</span>
+      <div class="file-row__actions">
+        <NButton v-if="isPreviewable" text type="primary" @click="openPreview">
+          <template #icon><NIcon><EyeOutline /></NIcon></template>
+        </NButton>
+        <NButton text type="primary" @click="handleDownload">
+          <template #icon><NIcon><DownloadOutline /></NIcon></template>
+        </NButton>
+      </div>
+    </div>
     <NText v-else depth="3">未上传文件</NText>
   </div>
 
-  <!-- Editable: native dragger (empty) → native file card with preview/download/clear (uploaded) -->
+  <!-- Editable: single state-adaptive dragger — empty prompt OR filled file row, both are the drop/click target -->
   <NUpload
     v-else
     v-model:file-list="fileList"
     :accept="accept"
-    :max="1"
+    :show-file-list="false"
     :list-type="listType"
     :render-icon="renderCategoryIcon"
     :create-thumbnail-url="createThumbnailUrl"
@@ -248,21 +275,42 @@ const renderCategoryIcon = () => h(NIcon, null, { default: () => h(categoryIcon.
     @download="handleDownload"
     @remove="handleRemove"
   >
-    <NUploadDragger>
-      <div class="file-dragger">
-        <NIcon :size="34" :depth="3" class="file-dragger__icon"><CloudUploadOutline /></NIcon>
-        <div class="file-dragger__title">点击或拖拽文件到此处上传</div>
-        <div class="file-dragger__hint">
-          <span class="file-dragger__category">
-            <NIcon size="13"><component :is="categoryIcon" /></NIcon>
-            {{ categoryTitleOf(props.item.category) }}
-          </span>
-          <span class="file-dragger__accept">{{ acceptSummaryOf(props.item.category) }}</span>
-          <span v-if="props.item.maxFileSize" class="file-dragger__size">
-            单文件 ≤ {{ props.item.maxFileSize }}MB
-          </span>
+    <NUploadDragger class="file-dragger" :class="{ 'file-dragger--filled': fileValue }">
+      <!-- 空态：紧凑上传提示 -->
+      <template v-if="!fileValue">
+        <div class="file-dragger__empty">
+          <NIcon :size="22" :depth="3" class="file-dragger__icon"><CloudUploadOutline /></NIcon>
+          <span class="file-dragger__title">点击或拖拽上传</span>
+          <span class="file-dragger__hint">{{ filledHintOf(props.item.category, props.item.maxFileSize) }}</span>
         </div>
-      </div>
+      </template>
+      <!-- 填充态：文件条目即拖拽区 -->
+      <template v-else>
+        <div class="file-row">
+          <NImage
+            v-if="isImageCategory && thumbUrl"
+            :src="thumbUrl"
+            object-fit="cover"
+            class="file-row__thumb"
+            :preview-disabled="true"
+            @click="stopProp"
+          />
+          <NIcon v-else size="20" class="file-row__icon"><component :is="categoryIcon" /></NIcon>
+          <span class="file-row__name" :title="fileValue.originFileName">{{ fileValue.originFileName }}</span>
+          <span class="file-row__hint">{{ filledHintOf(props.item.category, props.item.maxFileSize) }}</span>
+          <div class="file-row__actions" @click="stopProp">
+            <NButton v-if="isPreviewable" text type="primary" @click="openPreview">
+              <template #icon><NIcon><EyeOutline /></NIcon></template>
+            </NButton>
+            <NButton text type="primary" @click="handleDownload">
+              <template #icon><NIcon><DownloadOutline /></NIcon></template>
+            </NButton>
+            <NButton text @click="handleRemove">
+              <template #icon><NIcon><CloseOutline /></NIcon></template>
+            </NButton>
+          </div>
+        </div>
+      </template>
     </NUploadDragger>
   </NUpload>
 
@@ -330,41 +378,77 @@ const renderCategoryIcon = () => h(NIcon, null, { default: () => h(categoryIcon.
   width: 100%;
 }
 
-/* Empty dragger — compact footprint, still roomy enough for the type/size hints */
+/* 状态自适应 dragger —— 空态与填充态等高 */
 .file-dragger {
+  padding: 6px 12px;
+}
+.file-dragger--filled {
+  padding: 4px 10px;
+}
+.file-dragger__empty {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 8px 12px;
+  gap: 8px;
+  min-height: 44px;
 }
 .file-dragger__icon {
+  flex-shrink: 0;
   line-height: 1;
 }
 .file-dragger__title {
   font-size: 13px;
   color: var(--n-text-color-2, #333639);
+  white-space: nowrap;
 }
 .file-dragger__hint {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 2px 10px;
   font-size: 12px;
   color: var(--n-text-color-3, #909399);
+  white-space: nowrap;
 }
-.file-dragger__category {
-  display: inline-flex;
+
+/* 填充态文件行 —— 即拖拽区 */
+.file-row {
+  display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 8px;
+  min-height: 44px;
+  width: 100%;
 }
-.file-dragger__accept {
-  max-width: 260px;
+.file-row--readonly {
+  cursor: default;
+}
+.file-row__thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.file-row__icon {
+  color: var(--n-text-color-3, #909399);
+  flex-shrink: 0;
+}
+.file-row__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 13px;
+  color: var(--n-text-color-2, #333639);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.file-row__hint {
+  font-size: 12px;
+  color: var(--n-text-color-3, #909399);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.file-row__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 /* Preview modal (width comes from the per-kind inline style binding) */
