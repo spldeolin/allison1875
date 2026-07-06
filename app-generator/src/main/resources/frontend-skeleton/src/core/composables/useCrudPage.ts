@@ -1,4 +1,4 @@
-import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useMessage } from 'naive-ui'
 import type { PaginationProps } from 'naive-ui'
 import type { FormDef } from '@/schema/types'
@@ -74,12 +74,14 @@ export function useCrudPage(getSchema: () => FormDef) {
 
   function handleSearch() {
     pagination.page = 1
+    writeSearchToQuery()
     fetchData()
   }
 
   function handleReset() {
     searchParams.value = {}
     pagination.page = 1
+    writeSearchToQuery()
     fetchData()
   }
 
@@ -219,21 +221,6 @@ export function useCrudPage(getSchema: () => FormDef) {
     })
     void nextTick(() => { syncing = false })
   }
-
-  // 输入 → URL（debounce 300ms）
-  let writeTimer: ReturnType<typeof setTimeout> | null = null
-  watch(searchParams, () => {
-    if (syncing) return
-    if (writeTimer) clearTimeout(writeTimer)
-    writeTimer = setTimeout(writeSearchToQuery, 300)
-  }, { deep: true })
-
-  onBeforeUnmount(() => {
-    if (writeTimer) {
-      clearTimeout(writeTimer)
-      writeTimer = null
-    }
-  })
 
   // 当 schema 切换时（Vue Router 复用组件实例），重新加载数据 + 清 URL query
   watch(() => getSchema().name, () => {

@@ -92,16 +92,17 @@
 
 `SearchForm` 对 `text`/`number`/`time` 类型的 search 字段绑定 `@keyup.enter` 触发 search 事件；`select`/`multiSelect` 不绑定（避免与下拉选中冲突）。新增 search 字段类型时需评估是否纳入回车。
 
-### URL query 双向同步
+### URL query 同步
 
-`useCrudPage` 双向同步 `searchParams` 与 `route.query`（hash 模式下 query 在 `#` 之后）：
+`useCrudPage` 在**点击查询/回车/重置时**把 `searchParams` 同步到 `route.query`（hash 模式下 query 在 `#` 之后）；输入过程中不写 URL、不请求 list，避免逐字请求：
 
-- 输入 → URL：debounce 300ms，`router.replace` 不污染浏览器历史
-- URL → 输入：前进/后退/分享链接变化时回填 `searchParams` 并自动 `fetchData`
+- 查询/回车 → `handleSearch`：`writeSearchToQuery()` 写 URL + `fetchData()`
+- 重置 → `handleReset`：清 `searchParams` + `writeSearchToQuery()` 清 URL + `fetchData()`
+- URL → 输入（前进/后退/分享链接进入页面）：回填 `searchParams` 并自动 `fetchData`
 - 初始化：`onMounted` 从 `route.query` 回填后查询
 - 路由切换：清空 `searchParams` 并 `router.replace({ query: {} })`
 
-key 命名：字段名直用（`?name=foo&status=ACTIVE`），时间用 `{name}Start`/`{name}End` 与 `createdAtStart`/`createdAtEnd`，`multiSelect` 逗号分隔，`onOff` 用 `true`/`false`。序列化逻辑在 `protocol/query-sync.ts`（纯函数，已单测）。
+`writeSearchToQuery` 用 `router.replace`（不污染浏览器历史），`syncing` flag 防止 URL 写入触发回填回路。key 命名：字段名直用（`?name=foo&status=ACTIVE`），时间用 `{name}Start`/`{name}End` 与 `createdAtStart`/`createdAtEnd`，`multiSelect` 逗号分隔，`onOff` 用 `true`/`false`。序列化逻辑在 `protocol/query-sync.ts`（纯函数，已单测）。
 
 **覆盖页若不使用 `useCrudPage` 则不获得此能力**，需自行实现。
 
