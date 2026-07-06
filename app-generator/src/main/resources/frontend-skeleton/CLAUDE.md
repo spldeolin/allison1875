@@ -104,6 +104,13 @@
 
 `writeSearchToQuery` 用 `router.replace`（不污染浏览器历史），`syncing` flag 防止 URL 写入触发回填回路。key 命名：字段名直用（`?name=foo&status=ACTIVE`），时间用 `{name}Start`/`{name}End` 与 `createdAtStart`/`createdAtEnd`，`multiSelect` 逗号分隔，`onOff` 用 `true`/`false`。序列化逻辑在 `protocol/query-sync.ts`（纯函数，已单测）。
 
+### 实现陷阱（勿重蹈）
+
+- **输入不得触发 list 请求**。`searchParams` 上**禁止**挂会写 URL 或调 `fetchData` 的 watch——输入→URL→回填 watch→`fetchData` 会形成"逐字请求"回路。URL 同步只在 `handleSearch`/`handleReset` 内显式调 `writeSearchToQuery()`；URL→输入 watch 仅作单向回填（前进/后退/分享链接进入页面）。
+- **`syncing` flag 用 `nextTick` 重置有时序漏洞**：`router.replace` 触发的 `route.query` watch 可能在 `nextTick` 重置 `syncing` 之后才异步执行，绕过守护。靠 `writeSearchToQuery` 的 `sameKeys` 短路（URL 已与 `searchParams` 一致则不 replace）兜底，改回路逻辑时务必保留。
+- **Naive UI `NForm.validate()` reject 值是 `ValidateError[][]`**（二维数组），不是按字段 path 索引的对象。取错误字段需展平后读 `.field`（等于 `:path`，即 `item.name`）。错误反馈 DOM 类是 `.n-form-item-feedback--error`（非 `.n-form-item--error`）。
+- **`parseQueryToSearch` 对每个可搜索字段都写 key**（缺失返回 `null`），匹配 `SearchForm.handleReset` 的"空字段即 null"不变量；`serialize`/`parse` 互逆。`onOff` 是可搜索字段（`field-policy` 的 `FilterPatterns` 非空），URL 同步必须覆盖。
+
 **覆盖页若不使用 `useCrudPage` 则不获得此能力**，需自行实现。
 
 ## 功能权限体系
