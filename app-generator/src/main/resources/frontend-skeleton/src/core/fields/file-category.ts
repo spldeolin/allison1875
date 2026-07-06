@@ -122,3 +122,15 @@ export function acceptSummaryOf(category: string | undefined): string {
   if (cat === 'general') return '常见文件格式'
   return (EXTENSIONS[cat] || []).join(' / ')
 }
+
+/**
+ * Compact dragger second-line hint text: category title only or "category · ≤ NMB".
+ * Shared by empty and filled state (spec: remove format details, keep only category and size limit).
+ */
+export function filledHintOf(category: string | undefined, maxFileSize?: number): string {
+  const title = categoryTitleOf(category)
+  if (maxFileSize) {
+    return `${title} · ≤ ${maxFileSize}MB`
+  }
+  return title
+}
