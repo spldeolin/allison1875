@@ -104,22 +104,33 @@ async function handleSubmit() {
 }
 
 function focusFirstError(errors: unknown) {
-  const errObj = (errors && typeof errors === 'object' ? errors : {}) as Record<string, unknown>
+  // Naive UI validate() rejects with ValidateError[][] (2D array); flatten to a set of field names.
+  const erroredFields = new Set<string>()
+  if (Array.isArray(errors)) {
+    for (const group of errors) {
+      if (!Array.isArray(group)) continue
+      for (const e of group) {
+        const field = (e as { field?: string } | null)?.field
+        if (field) erroredFields.add(field)
+      }
+    }
+  }
+  // Primary: match by structured error field names
   for (const item of visibleItems.value) {
     if (!isEditable(item, editMode.value)) continue
-    if (!errObj[item.name]) continue
+    if (!erroredFields.has(item.name)) continue
     const dom = itemRefs.get(item.name)
     if (!dom) continue
     const focusable = dom.querySelector('input, [tabindex]:not([tabindex="-1"])') as HTMLElement | null
     focusable?.focus()
     return
   }
-  // 兜底：未匹配到结构化 errors 时，按 DOM 错误类定位
+  // 兜底：未匹配到结构化 errors 时，按 Naive UI 错误反馈类定位
   for (const item of visibleItems.value) {
     if (!isEditable(item, editMode.value)) continue
     const dom = itemRefs.get(item.name)
     if (!dom) continue
-    if (dom.classList.contains('n-form-item--error') || dom.querySelector('.n-form-item--error')) {
+    if (dom.querySelector('.n-form-item-feedback--error')) {
       const focusable = dom.querySelector('input, [tabindex]:not([tabindex="-1"])') as HTMLElement | null
       focusable?.focus()
       return
