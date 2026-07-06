@@ -32,7 +32,6 @@ import {
   categoryKeyOf,
   filledHintOf,
   isExtensionAllowed,
-  isPreviewableImage,
   previewKindOf,
   type CategoryKey,
   type PreviewKind,
@@ -80,15 +79,22 @@ const fileValue = computed<FileValue | null>(() => {
   return v
 })
 
-// 填充态图片缩略图 URL（新上传走 blob，已落库走下载令牌）。
+// 填充态图片类缩略图 URL（新上传走 blob，已落库走下载令牌）。
 // :show-file-list=false 关闭了 naive-ui 原生缩略图渲染，图片类需自渲染。
+// 序号守卫：快速连续变更时，丢弃过期异步结果，避免旧令牌 URL 覆盖新值。
 const thumbUrl = ref('')
+let thumbSeq = 0
 watch(fileValue, async (fv) => {
   if (!fv || !isImageCategory.value) {
+    thumbSeq++
     thumbUrl.value = ''
     return
   }
-  thumbUrl.value = await createThumbnailUrl(null, { id: fv.fileKey } as UploadFileInfo)
+  const seq = ++thumbSeq
+  const url = await createThumbnailUrl(null, { id: fv.fileKey } as UploadFileInfo)
+  if (seq === thumbSeq) {
+    thumbUrl.value = url
+  }
 }, { immediate: true })
 
 // ----- naive-ui controlled file list (its native rendering is our source of display truth) -----
