@@ -70,13 +70,14 @@
 
 ### SecretField edit-update 交互模型
 
-默认**不可输入**：readonly NInput 显示 `••••••`（6 个可见圆点字符，非 password 掩码）+ suffix 的 edit icon（`@vicons/ionicons5` 的 `CreateOutline`）。点击 edit icon 进入可输入 password input，suffix 换成 close icon（`CloseOutline`）；输入新值 → 覆盖，clearable ✕（仅 `isNonVoid=false`）→ 清空为 `""`，点 close icon → 回到未修改态。
+默认**不可输入**：readonly NInput 显示黑点 placeholder + suffix 的 edit icon（`@vicons/ionicons5` 的 `CreateOutline`）。点击 edit icon 进入可输入 password input，suffix 换成 close icon（`CloseOutline`）；输入新值 → 覆盖，clearable ✕（仅 `isNonVoid=false`）→ 清空为 `""`，点 close icon → 回到未修改态。未编辑态有灰底 + 虚线边框 + `not-allowed` 光标样式（`.secret-readonly-input` scoped 规则）与编辑态区分。
 
-关键实现约束：
+**两个图标的提交语义区分**（核心协议）：
 
-- **`internal` flag 守卫 `watch(() => props.value)`**。`props.value` 经父级 `v-model` 双向绑定，本组件 `emit` 会回流为新的 `props.value` 触发 watch。若不区分，首次输入即被 watch 重置 `editing=false`、字段退回黑点态。每个 handler（`startEdit`/`cancelEdit`/`onInput`）emit 前置 `internal=true`，watch 消费后跳过重置；仅外部重置（弹框重开等）才真正重置。
-- **已知局限**：连续编辑两条 secret 值恰好相同的记录时 `props.value` 引用未变，watch 不触发、状态不重置。这是 watch-on-value 方案的固有限制，非缺陷；若需更强保证可改为按 modal-open 信号重置。
-- 默认态黑点是字面量 `'••••••'`，不用 password 掩码或不可见 sentinel——避免 readonly password input 的浏览器怪异行为。
+- **edit icon**（进入编辑）= 表达「要改」意图。进入即 emit `""`，空 draft 提交即清空（`""`）。
+- **close icon**（放弃编辑）= emit `null`，语义为「不修改」（保留数据库原值）。
+
+即：用户只要点过 edit icon 并保存，即便不输入任何内容也会清空该字段；若想保留原值，应点 close icon（或不点 edit icon）退出编辑态。
 
 ### 不改动的协议层
 

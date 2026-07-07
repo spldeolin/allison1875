@@ -40,13 +40,14 @@ watch(() => props.value, () => {
   draft.value = ''
 })
 
-// 点击 edit icon：进入可输入态。draft 起始为空（露出 placeholder），
-// 语义仍为「不修改」（emit null）。
+// 点击 edit icon：进入可输入态。draft 起始为空（露出 placeholder）。
+// 进入编辑态即表达「要改」的意图，空 draft = 清空（emit ''），
+// 区别于 close icon 的「放弃编辑、不修改」（emit null）。
 function startEdit() {
   editing.value = true
   draft.value = ''
   internal = true
-  emit('update:value', null)
+  emit('update:value', '')
 }
 
 // 点击 close icon：退出可输入态，回到未修改（emit null）。
@@ -71,12 +72,13 @@ function onInput(v: string | null) {
   </template>
   <template v-else-if="mode === 'edit' && isEditUpdate">
     <NInput
+      :class="!editing ? 'secret-readonly-input' : undefined"
       :type="editing ? 'password' : 'text'"
-      :value="editing ? draft : '••••••'"
+      :value="editing ? draft : ''"
       :readonly="!editing"
       :clearable="editing && item.isNonVoid === false"
       :show-password-on="editing && draft ? 'click' : undefined"
-      :placeholder="editing ? '请输入' : ''"
+      :placeholder="editing ? '请输入' : '••••••'"
       @update:value="onInput"
     >
       <template #suffix>
@@ -106,3 +108,32 @@ function onInput(v: string | null) {
     />
   </template>
 </template>
+
+<style scoped>
+/* edit-update 默认态：未进入编辑的 readonly 输入框，强化「不可编辑」视觉。
+   关键区分点：未编辑态不显示圆点（易与编辑态 password 掩码混淆），
+   改用 placeholder「未修改…」+ 灰底 + 虚线边框 + not-allowed 光标，
+   与进入编辑后的活跃 password 输入框拉开明显差距。
+   naive-ui 把传入的 class 与 n-input--readonly 落在同一根元素上，
+   故用「同元素」选择器 .secret-readonly-input.n-input--readonly 命中。 */
+.secret-readonly-input:deep(.n-input.n-input--readonly) {
+  background: #f5f7fa;
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+}
+.secret-readonly-input:deep(.n-input.n-input--readonly:hover) {
+  border-color: #94a3b8;
+}
+.secret-readonly-input:deep(.n-input.n-input--readonly .n-input__input-el),
+.secret-readonly-input:deep(.n-input.n-input--readonly .n-input__textarea-el) {
+  cursor: not-allowed;
+}
+.secret-readonly-input:deep(.n-input.n-input--readonly .n-input__placeholder) {
+  color: #94a3b8;
+  font-style: italic;
+}
+/* edit icon 保持与其他输入框图标一致的普通色，不加蓝色/放大等强调 */
+.secret-readonly-input :deep(.secret-edit-trigger) {
+  cursor: pointer;
+}
+</style>
