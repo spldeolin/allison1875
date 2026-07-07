@@ -82,6 +82,39 @@
 
 `protocol/request-builder.ts` 的 `buildUpdateRequest` 用 `v ?? null` 原样传三态，无需为 secret 特判。`response-parser.ts` 对 secret 是 no-op passthrough，detail 无该键时 `formData[name]` 为 `undefined`，模板 `?? null` 归一为 `null`。
 
+## File 字段（文件上传）交互约定
+
+`src/core/fields/FileField.vue` 是文件字段的渲染组件，三态：`mode === 'display'`（表格单元格，紧凑 inline）、`readonly`（编辑弹框内只读，自渲染文件行）、editable（create/update 弹框的拖拽上传区）。值模型：业务表合并为单列 VARCHAR(512)，值 `"fileKey/originFileName"`；表单 state 中持 `FileValue` 对象（`fileKey` + `originFileName`），提交时 join、取回时按首个 `/` split。
+
+### naive-ui NUpload 行为陷阱（勿重蹈）
+
+editable 态用 `NUpload` + `NUploadDragger` 承载上传机制。改造为「状态自适应单一拖拽区」时踩过的坑：
+
+- **`:max="1"` 会阻断再上传**。naive-ui 的 `maxReachedRef` 在 `fileList.length >= max` 时为 true，**禁用** input 点击与拖拽放入。要实现「上传后仍可拖拽/点击覆盖替换」，**不要用 `:max`**；改为 `:show-file-list="false"` 隐藏原生列表，让 dragger 内容按 `fileValue` 空与非空自适应渲染（空态紧凑提示 / 填充态文件行即拖拽区）。新上传 `emit` 单个 `FileValue`，`watch(fileValue)` 自然替换旧条目。
+- **`:show-file-list="false"` 下 naive-ui 仍向 `fileList` 追加临时 `uploading` 条目**（只是不可见）。为避免脏数据残留，`handleUpload` 的 `onFinish` 内**显式重置** `fileList.value = toFileList(result)`，不依赖 props 回流时序。`watch(fileValue)` 仍保留以处理外部值变化（弹框重开、清除）。
+- **dragger 内部按钮的点击会冒泡触发文件选择对话框**。预览（👁）/下载（⬇）/清除（✕）按钮置于 `NUploadDragger` 内部时，必须 `event.stopPropagation()`（包一层 `@click="stopProp"` 在 actions 容器上，`NImage` 缩略图也单独绑）。清除按钮调 `handleRemove()`（`emit('update:value', null)`），不触发文件选择。文件名/hint 文本**不** stopProp——它们是 dragger 死区，点击应触发覆盖上传。
+- **`:show-file-list="false"` 失去原生缩略图渲染**。图片类（`categoryKey === 'image'`）需自渲染：用 `createThumbnailUrl(file, fileInfo)` 解析 URL（新上传走 blob，已落库走下载令牌），以 `<NImage :preview-disabled="true">` 显示。`:preview-disabled` 是 naive-ui NImage 的合法 prop（`previewDisabled: Boolean`），kebab-case 写作 `:preview-disabled="true"`。
+
+### 缩略图 watch 的异步竞态
+
+`thumbUrl` 由 `watch(fileValue, async ...)` 异步解析（已落库记录走 `fetchDownloadToken` 网络请求）。快速连续变更时，先发的请求可能后解析、用旧 `fileKey` 的令牌 URL 覆盖新值。**必须用序号守卫**：组件 setup 作用域 `let thumbSeq = 0`，clear 分支与 fetch 分支都 `++thumbSeq`，fetch 解析后仅当 `seq === thumbSeq` 才赋值。无守卫会偶发缩略图闪烁/错位。
+
+### 值的双源模型
+
+- `fileValue`（computed，从 `props.value` 派生）是**显示真值**。
+- `fileList`（ref，naive-ui 内部账本）仅因 `NUpload` 的 `v-model:file-list` 需要，`:show-file-list="false"` 后不可见。`watch(fileValue)` 把 `fileValue` 同步到 `fileList`（`toFileList()` 造单元素数组）。
+- 改值走 `emit('update:value', …)`，**不要直接改 `fileList`**（除非 `handleUpload` 的 `onFinish` 显式重置那条路径）。
+
+### readonly 分支无 NUpload
+
+`readonly` 态**不**用 `NUpload` 包裹（disabled NUpload 视觉割裂），直接自渲染 `.file-row.file-row--readonly`（无 ✕，有预览/下载）。此时 `thumbUrl` watch 仍工作——`createThumbnailUrl(null, { id: fileKey })` 在 `fetchDownloadToken` 分支不依赖 NUpload 上下文，可独立解析。`isImageCategory`、`thumbUrl` 均为组件级 ref/computed，readonly 态可访问。
+
+### 涉及的 core/ 文件
+
+- `fields/FileField.vue` — 三态渲染、状态自适应 dragger、缩略图 watch、预览 modal。
+- `fields/file-category.ts` — `FileCategoryEnum` 前端镜像：`acceptOf`/`isExtensionAllowed`（accept 过滤）、`previewKindOf`（预览类型分支）、`categoryKeyOf`/`categoryTitleOf`（类别图标/标题）、`filledHintOf(category, maxFileSize?)`（紧凑 hint 文本「类别 · ≤ NMB」）、`isPreviewableImage`。
+- `protocol/file-api.ts` — `uploadFile` / `fetchDownloadToken` / `downloadUrlOf`。
+
 ## 筛选与校验交互约定
 
 ### 校验失败聚焦
